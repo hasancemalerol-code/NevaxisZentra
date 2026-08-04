@@ -8,12 +8,14 @@ public static class PermissionPolicies
     public const string SystemDiagnosticsRead = "Permission:" + InfrastructurePermissionKeys.SystemDiagnosticsRead;
     public const string TenantContextRead = "Permission:" + InfrastructurePermissionKeys.TenantContextRead;
     public const string AuthorizationDiagnosticsRead = "Permission:" + InfrastructurePermissionKeys.AuthorizationDiagnosticsRead;
+    public const string SystemAuditRead = "Permission:" + InfrastructurePermissionKeys.SystemAuditRead;
 
     public static void AddInfrastructurePolicies(AuthorizationOptions options)
     {
         Add(options, SystemDiagnosticsRead, InfrastructurePermissionKeys.SystemDiagnosticsRead);
         Add(options, TenantContextRead, InfrastructurePermissionKeys.TenantContextRead);
         Add(options, AuthorizationDiagnosticsRead, InfrastructurePermissionKeys.AuthorizationDiagnosticsRead);
+        Add(options, SystemAuditRead, InfrastructurePermissionKeys.SystemAuditRead);
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();

@@ -59,6 +59,24 @@ try
         return 0;
     }
 
+    if (operation == "audit-trail-verify")
+    {
+        await AuditTrailVerifier.VerifyAsync();
+        return 0;
+    }
+
+    if (operation == "audit-trail-bootstrap")
+    {
+        await AuditTrailVerifier.BootstrapAsync();
+        return 0;
+    }
+
+    if (operation == "audit-trail-cleanup")
+    {
+        await AuditTrailVerifier.CleanupFixturesAsync();
+        return 0;
+    }
+
     await using var connection = new NpgsqlConnection(
         PostgreSqlConnectionFactory.BuildConnectionString(options));
     await connection.OpenAsync();

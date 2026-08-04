@@ -1,6 +1,6 @@
 # Persistence Foundation
 
-This project contains only PostgreSQL/EF Core foundations. `CrevaFactOSDbContext` maps the tenant registry, identity subjects, active-membership bindings, tenant permission authorization, and the explicitly infrastructure-only tenant isolation probe; it contains no product entities.
+This project contains only PostgreSQL/EF Core foundations. `CrevaFactOSDbContext` maps the tenant registry, identity subjects, active-membership bindings, tenant permission authorization, immutable audit evidence, and the explicitly infrastructure-only tenant isolation probe; it contains no product entities.
 
 Persistence is disabled by default. When enabled, configuration is validated before the API starts. Migrations are held in `CrevaFactOS.Persistence.Migrations`, use the default `public` schema, and deliberately retain EF Core's standard `__EFMigrationsHistory` table. Applications never apply migrations automatically.
 
@@ -29,3 +29,9 @@ The ordinary API role is `crevafactos_runtime`: non-superuser, non-owner, and ex
 `PermissionDefinition` is a global stable-key catalog, but the runtime can only evaluate one exact key through the narrow `has_tenant_permission` function. `TenantRole`, `TenantRolePermissionAssignment`, and `TenantMembershipRole` are tenant-scoped and protected by EF query filters plus forced PostgreSQL RLS. Composite tenant foreign keys reject cross-tenant assignments at the database boundary.
 
 `IAuthorizationContext` is scoped and becomes available only after both identity and membership-derived tenant context exist. `IPermissionEvaluator` grants only when every identity, tenant, membership, role, assignment, and permission status is active and the key exactly matches. There is no cross-request cache, role-name authorization, wildcard, inheritance, global administrator, or direct membership permission.
+
+## Audit boundary
+
+`IAuditWriter` validates the fixed infrastructure taxonomy, obtains the scoped identity/tenant/membership and correlation context, sanitizes bounded metadata, and calls the narrow append function. It returns a safe success or failure code and never recursively audits its own failure. Security-sensitive deny paths may attempt best-effort audit without exposing details; future state-changing operations may require durable audit before completion, but that transaction policy is not implemented here.
+
+Runtime audit rows cannot be updated, deleted, truncated, or inserted directly. Tenant reads use forced RLS and a fixed recent-record limit. Migration/administration authority can temporarily disable the mutation trigger only for explicit local fixture cleanup or future controlled maintenance; no runtime maintenance path exists. Retention and archival are intentionally deferred.

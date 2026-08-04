@@ -99,6 +99,8 @@ pnpm db:authentication-membership:verify
 pnpm auth:verify
 pnpm db:permission-authorization:verify
 pnpm authorization:verify
+pnpm db:audit-trail:verify
+pnpm audit:verify
 ```
 
 `db:verify` opens a real Npgsql connection and executes `SELECT 1`. `db:migrations:script` writes an idempotent script under the ignored `artifacts/database` directory. `db:migrations:rollback` is explicitly destructive and moves the application database to migration zero; it does not delete the database or Docker volume.
@@ -142,6 +144,18 @@ Roles belong to one tenant. Composite foreign keys enforce that membership-role 
 `GET /internal/tenant-context` requires `tenant.context.read`. Development-only `GET /internal/authorization-context` and `GET /internal/permission-check/{permissionKey}` require `authorization.diagnostics.read`. They return only current internal identifiers and the requested boolean result. Health endpoints explicitly remain anonymous. Development endpoints are not mapped in Production.
 
 `pnpm db:permission-authorization:verify` creates temporary tenant A/B roles and assignments, checks exact grants and all inactive/cross-tenant cases through the restricted runtime role, verifies composite-FK rejection and RLS/pool isolation, and cleans up. `pnpm authorization:verify` performs the corresponding real Development API checks. Product modules will introduce their own explicit permission definitions later; FOUND-06 adds none.
+
+## Immutable audit trail
+
+FOUND-07 records infrastructure security and operational evidence; it is not the AI Decision Ledger. Audit answers who performed or attempted an action, in which tenant and membership context, under which permission and correlation chain, and with what outcome. It stores no model prompts, completions, reasoning, confidence, recommendations, or decision provenance.
+
+`audit_records` is append-only for the runtime role. Runtime code has RLS-constrained `SELECT` plus `EXECUTE` on the exact typed `append_tenant_audit_record` function, with no direct INSERT, UPDATE, DELETE, or TRUNCATE grant. A mutation-rejection trigger provides an additional update/delete guard. Tenant-neutral `System` records are rejected by the ordinary tenant writer and reserved for a future explicit system boundary.
+
+The stable FOUND-07 event taxonomy is limited to authentication, tenant access, authorization, audit-write failure, and infrastructure-configuration rejection. Metadata must be a shallow JSON object of at most 20 keys and 4 KiB; strings, key names, and arrays are bounded. Password, token, secret, authorization, cookie, connection-string, and API-key values are replaced with `[REDACTED]`. Raw headers, bodies, credentials, and exception stacks are prohibited.
+
+`X-CrevaFactOS-Correlation-Id` accepts only a non-empty canonical UUID; invalid or missing input produces a new request-scoped UUID returned in the response header. `GET /internal/audit/recent` exists only in Development, returns at most 25 tenant-scoped records without metadata, and requires `system.audit.read`. Retention, archival, partitioning, export, product events, and durable product-transaction audit policy are deferred.
+
+`pnpm db:audit-trail:verify` proves append, actor evidence, metadata limits, tenant A/B RLS, pooled isolation, cross-tenant rejection, and runtime update/delete/truncate rejection against PostgreSQL. `pnpm audit:verify` exercises the real permission-protected diagnostic endpoint and correlation propagation, then removes all temporary fixtures.
 
 ## Port Conflicts
 

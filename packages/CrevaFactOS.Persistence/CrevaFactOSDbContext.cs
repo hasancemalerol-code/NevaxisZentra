@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.Audit;
 
 namespace CrevaFactOS.Persistence;
 
@@ -35,6 +36,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TenantRolePermissionAssignment> TenantRolePermissions => Set<TenantRolePermissionAssignment>();
 
     public DbSet<TenantMembershipRole> TenantMembershipRoles => Set<TenantMembershipRole>();
+
+    public DbSet<AuditRecord> AuditRecords => Set<AuditRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -229,6 +232,60 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.HasQueryFilter(item => tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && item.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<AuditRecord>(entity =>
+        {
+            entity.ToTable("audit_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.Id).HasColumnName("id");
+            entity.Property(record => record.TenantId).HasColumnName("tenant_id");
+            entity.Property(record => record.IdentitySubjectId).HasColumnName("identity_subject_id");
+            entity.Property(record => record.TenantMembershipId).HasColumnName("tenant_membership_id");
+            entity.Property(record => record.EventType).HasColumnName("event_type").HasMaxLength(150);
+            entity.Property(record => record.Action).HasColumnName("action").HasMaxLength(100);
+            entity.Property(record => record.ResourceType).HasColumnName("resource_type").HasMaxLength(100);
+            entity.Property(record => record.ResourceId).HasColumnName("resource_id").HasMaxLength(200);
+            entity.Property(record => record.Outcome).HasColumnName("outcome").HasConversion<string>().HasMaxLength(20);
+            entity.Property(record => record.PermissionKey).HasColumnName("permission_key").HasMaxLength(150);
+            entity.Property(record => record.CorrelationId).HasColumnName("correlation_id");
+            entity.Property(record => record.CausationId).HasColumnName("causation_id");
+            entity.Property(record => record.RequestId).HasColumnName("request_id").HasMaxLength(100);
+            entity.Property(record => record.Source).HasColumnName("source").HasConversion<string>().HasMaxLength(20);
+            entity.Property(record => record.OccurredAtUtc).HasColumnName("occurred_at_utc");
+            entity.Property(record => record.RecordedAtUtc).HasColumnName("recorded_at_utc");
+            entity.Property(record => record.MetadataJson).HasColumnName("metadata_json").HasColumnType("jsonb");
+            entity.Property(record => record.FailureCode).HasColumnName("failure_code").HasMaxLength(100);
+            entity.HasIndex(record => new { record.TenantId, record.OccurredAtUtc });
+            entity.HasIndex(record => new { record.TenantId, record.EventType });
+            entity.HasIndex(record => new { record.TenantId, record.IdentitySubjectId });
+            entity.HasIndex(record => record.CorrelationId);
+            entity.HasIndex(record => new { record.ResourceType, record.ResourceId });
+            entity.HasOne<Tenant>().WithMany().HasForeignKey(record => record.TenantId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<IdentitySubject>().WithMany().HasForeignKey(record => record.IdentitySubjectId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<TenantMembership>().WithMany().HasForeignKey(record => record.TenantMembershipId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("ck_audit_records_outcome", "outcome IN ('Success', 'Failure', 'Denied')");
+                table.HasCheckConstraint("ck_audit_records_source", "source IN ('Api', 'Worker', 'EdgeAgent', 'System')");
+                table.HasCheckConstraint("ck_audit_records_event_type", "event_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
+                table.HasCheckConstraint("ck_audit_records_action", "action ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+                table.HasCheckConstraint(
+                    "ck_audit_records_event_taxonomy",
+                    "event_type IN ('authentication.succeeded', 'authentication.failed', 'tenant.access.granted', 'tenant.access.denied', 'authorization.granted', 'authorization.denied', 'audit.write.failed', 'infrastructure.configuration.rejected')");
+                table.HasCheckConstraint(
+                    "ck_audit_records_action_taxonomy",
+                    "action IN ('authenticate', 'access.tenant', 'authorize', 'write.audit', 'validate.configuration')");
+                table.HasCheckConstraint("ck_audit_records_resource_type", "resource_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+                table.HasCheckConstraint("ck_audit_records_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+                table.HasCheckConstraint("ck_audit_records_metadata", "jsonb_typeof(metadata_json) = 'object' AND octet_length(metadata_json::text) <= 4096");
+                table.HasCheckConstraint(
+                    "ck_audit_records_actor_boundary",
+                    "(tenant_id IS NOT NULL AND identity_subject_id IS NOT NULL AND tenant_membership_id IS NOT NULL) OR (tenant_id IS NULL AND identity_subject_id IS NULL AND tenant_membership_id IS NULL AND permission_key IS NULL AND source = 'System')");
+            });
+            entity.HasQueryFilter(record => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && record.TenantId == tenantContextAccessor.Current!.TenantId);
         });
     }
 

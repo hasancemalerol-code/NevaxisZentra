@@ -61,7 +61,7 @@ When an earlier architectural document can be read as authorizing a classic ERP 
 
 ## Repository Status
 
-The repository contains foundations through FOUND-06: executable applications, local infrastructure, PostgreSQL persistence, tenant RLS, external-identity-compatible authentication, active tenant membership, and deny-by-default tenant permission authorization. Persistence and authentication remain disabled by default. Messaging behavior, audit, AI agents, integrations, and product capabilities are intentionally not implemented yet.
+The repository contains foundations through FOUND-07: executable applications, local infrastructure, PostgreSQL persistence, tenant RLS, external-identity-compatible authentication, active tenant membership, deny-by-default tenant permission authorization, and immutable tenant audit evidence. Persistence and authentication remain disabled by default. The AI Decision Ledger, messaging behavior, AI agents, integrations, and product capabilities are intentionally not implemented yet.
 
 ## Development Prerequisites
 
@@ -129,3 +129,5 @@ FOUND-04 adds only the tenant registry, an infrastructure isolation probe, scope
 FOUND-05 makes that header a selector only: authenticated external issuer/subject identity plus active membership is required before tenant context exists. Membership grants tenant entry, not permission; permissions begin in FOUND-06.
 
 FOUND-06 adds exact, case-sensitive infrastructure permission keys, tenant-owned roles, and active membership-role assignments. No wildcard, global role, platform administrator, role inheritance, direct membership permission, or product permission exists. See the infrastructure guide for `pnpm db:permission-authorization:verify` and `pnpm authorization:verify`.
+
+FOUND-07 adds bounded, append-only infrastructure audit evidence with request correlation, actor identifiers, forced tenant RLS, and a permission-protected Development read boundary. It stores no tokens, request bodies, exception stacks, prompts, completions, reasoning traces, product events, or AI Decision Ledger data.

@@ -9,6 +9,8 @@ using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
+using CrevaFactOS.Api.Audit;
+using CrevaFactOS.Persistence.Audit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,7 @@ builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuth
 var app = builder.Build();
 
 app.UseRouting();
+app.UseMiddleware<CorrelationContextMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<IdentityResolutionMiddleware>();
 app.UseMiddleware<TenantResolutionMiddleware>();
@@ -89,6 +92,12 @@ if (app.Environment.IsDevelopment())
             granted = result.Granted,
         };
     }).RequireAuthorization(PermissionPolicies.AuthorizationDiagnosticsRead);
+
+    app.MapGet("/internal/audit/recent", async (
+        IAuditReader auditReader,
+        CancellationToken cancellationToken) =>
+        await auditReader.ReadRecentAsync(25, cancellationToken))
+        .RequireAuthorization(PermissionPolicies.SystemAuditRead);
 }
 
 app.Run();

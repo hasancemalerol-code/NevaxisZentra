@@ -5,6 +5,7 @@ using Npgsql;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.Audit;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -54,6 +55,7 @@ public sealed class PersistenceInfrastructureTests
 
         Assert.Equal(
             [
+                typeof(AuditRecord),
                 typeof(IdentitySubject),
                 typeof(PermissionDefinition),
                 typeof(Tenant),
@@ -72,11 +74,12 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(4, migrations.Length);
+        Assert.Equal(5, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
         Assert.EndsWith("_AddPermissionAuthorizationFoundation", migrations[3], StringComparison.Ordinal);
+        Assert.EndsWith("_AddImmutableAuditTrailFoundation", migrations[4], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);
