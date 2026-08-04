@@ -22,6 +22,190 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiDecisions.AiDecisionRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AlternativesJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("alternatives_json");
+
+                    b.Property<Guid>("AuditRecordId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("audit_record_id");
+
+                    b.Property<string>("CapabilityKey")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("capability_key");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<decimal?>("ConfidenceScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("confidence_score");
+
+                    b.Property<string>("ConfigurationFingerprint")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("configuration_fingerprint");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DecisionType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("decision_type");
+
+                    b.Property<DateTimeOffset?>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("FailureCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_code");
+
+                    b.Property<bool>("HumanReviewRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("human_review_required");
+
+                    b.Property<Guid?>("IdentitySubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("identity_subject_id");
+
+                    b.Property<string>("InputEvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("input_evidence_json");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("model_name");
+
+                    b.Property<string>("ModelProvider")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("model_provider");
+
+                    b.Property<string>("ModelVersion")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("model_version");
+
+                    b.Property<string>("PolicySnapshotJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("policy_snapshot_json");
+
+                    b.Property<string>("RecommendationCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("recommendation_code");
+
+                    b.Property<string>("RecommendationSummary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("recommendation_summary");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at_utc");
+
+                    b.Property<string>("RiskLevel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("risk_level");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SupersedesDecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supersedes_decision_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid?>("TenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_membership_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuditRecordId");
+
+                    b.HasIndex("CorrelationId");
+
+                    b.HasIndex("IdentitySubjectId");
+
+                    b.HasIndex("SupersedesDecisionId");
+
+                    b.HasIndex("TenantMembershipId");
+
+                    b.HasIndex("TenantId", "CapabilityKey");
+
+                    b.HasIndex("TenantId", "CreatedAtUtc");
+
+                    b.HasIndex("TenantId", "DecisionType");
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.ToTable("ai_decision_records", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ai_decision_records_actor", "(identity_subject_id IS NULL AND tenant_membership_id IS NULL) OR (identity_subject_id IS NOT NULL AND tenant_membership_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_alternatives", "alternatives_json IS NULL OR (jsonb_typeof(alternatives_json) = 'array' AND jsonb_array_length(alternatives_json) <= 10 AND octet_length(alternatives_json::text) <= 8192)");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_capability_key", "capability_key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_confidence", "confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_decision_type", "decision_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_evidence", "jsonb_typeof(input_evidence_json) = 'array' AND jsonb_array_length(input_evidence_json) BETWEEN 1 AND 20 AND octet_length(input_evidence_json::text) <= 16384");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_expiry", "expires_at_utc IS NULL OR expires_at_utc > created_at_utc");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_human_review", "(risk_level NOT IN ('High', 'Critical') OR human_review_required) AND (status <> 'ReviewRequired' OR human_review_required)");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_policy", "policy_snapshot_json IS NULL OR (jsonb_typeof(policy_snapshot_json) = 'object' AND octet_length(policy_snapshot_json::text) <= 4096)");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_recommendation_code", "recommendation_code ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_risk", "risk_level IN ('Low', 'Medium', 'High', 'Critical')");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_status", "status IN ('Proposed', 'ReviewRequired', 'Accepted', 'Rejected', 'Expired', 'Superseded', 'Failed')");
+
+                            t.HasCheckConstraint("ck_ai_decision_records_supersedes", "supersedes_decision_id IS NULL OR supersedes_decision_id <> id");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Audit.AuditRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -132,13 +316,13 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         {
                             t.HasCheckConstraint("ck_audit_records_action", "action ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
 
-                            t.HasCheckConstraint("ck_audit_records_action_taxonomy", "action IN ('authenticate', 'access.tenant', 'authorize', 'write.audit', 'validate.configuration')");
+                            t.HasCheckConstraint("ck_audit_records_action_taxonomy", "action IN ('authenticate', 'access.tenant', 'authorize', 'write.audit', 'validate.configuration', 'ai.decision.append')");
 
                             t.HasCheckConstraint("ck_audit_records_actor_boundary", "(tenant_id IS NOT NULL AND identity_subject_id IS NOT NULL AND tenant_membership_id IS NOT NULL) OR (tenant_id IS NULL AND identity_subject_id IS NULL AND tenant_membership_id IS NULL AND permission_key IS NULL AND source = 'System')");
 
                             t.HasCheckConstraint("ck_audit_records_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
 
-                            t.HasCheckConstraint("ck_audit_records_event_taxonomy", "event_type IN ('authentication.succeeded', 'authentication.failed', 'tenant.access.granted', 'tenant.access.denied', 'authorization.granted', 'authorization.denied', 'audit.write.failed', 'infrastructure.configuration.rejected')");
+                            t.HasCheckConstraint("ck_audit_records_event_taxonomy", "event_type IN ('authentication.succeeded', 'authentication.failed', 'tenant.access.granted', 'tenant.access.denied', 'authorization.granted', 'authorization.denied', 'audit.write.failed', 'infrastructure.configuration.rejected', 'ai.decision.recorded')");
 
                             t.HasCheckConstraint("ck_audit_records_event_type", "event_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
 
@@ -188,7 +372,7 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.ToTable("permission_definitions", null, t =>
                         {
-                            t.HasCheckConstraint("ck_permission_definitions_key", "key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
+                            t.HasCheckConstraint("ck_permission_definitions_key", "key ~ '^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$'");
 
                             t.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
                         });
@@ -387,6 +571,149 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AggregateId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<string>("AggregateType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTimeOffset>("AvailableAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("available_at_utc");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset?>("FailedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failed_at_utc");
+
+                    b.Property<string>("FailureCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_code");
+
+                    b.Property<string>("HeadersJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("headers_json");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<DateTimeOffset?>("LastAttemptAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_attempt_at_utc");
+
+                    b.Property<Guid?>("LockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lock_id");
+
+                    b.Property<DateTimeOffset?>("LockedUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_until_utc");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("message_type");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<DateTimeOffset?>("ProcessedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at_utc");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at_utc");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("schema_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CorrelationId");
+
+                    b.HasIndex("LockedUntilUtc");
+
+                    b.HasIndex("MessageType", "SchemaVersion");
+
+                    b.HasIndex("Status", "AvailableAtUtc");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "OccurredAtUtc");
+
+                    b.ToTable("outbox_messages", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_outbox_messages_aggregate", "(aggregate_type IS NULL) = (aggregate_id IS NULL)");
+
+                            t.HasCheckConstraint("ck_outbox_messages_attempts", "attempt_count >= 0");
+
+                            t.HasCheckConstraint("ck_outbox_messages_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+
+                            t.HasCheckConstraint("ck_outbox_messages_headers", "jsonb_typeof(headers_json) = 'object' AND octet_length(headers_json::text) <= 2048");
+
+                            t.HasCheckConstraint("ck_outbox_messages_idempotency", "idempotency_key <> ''");
+
+                            t.HasCheckConstraint("ck_outbox_messages_payload", "jsonb_typeof(payload_json) = 'object' AND octet_length(payload_json::text) <= 4096");
+
+                            t.HasCheckConstraint("ck_outbox_messages_processing", "(status = 'Pending' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NULL AND failed_at_utc IS NULL) OR (status = 'Processing' AND lock_id IS NOT NULL AND locked_until_utc IS NOT NULL AND last_attempt_at_utc IS NOT NULL AND processed_at_utc IS NULL AND failed_at_utc IS NULL) OR (status = 'Processed' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NOT NULL AND failed_at_utc IS NULL) OR (status = 'Failed' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NULL AND failed_at_utc IS NOT NULL AND failure_code IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_outbox_messages_schema", "schema_version = 1");
+
+                            t.HasCheckConstraint("ck_outbox_messages_status", "status IN ('Pending', 'Processing', 'Processed', 'Failed')");
+
+                            t.HasCheckConstraint("ck_outbox_messages_timestamps", "available_at_utc >= occurred_at_utc AND recorded_at_utc >= occurred_at_utc");
+
+                            t.HasCheckConstraint("ck_outbox_messages_type", "message_type IN ('infrastructure.audit.recorded', 'infrastructure.ai-decision.recorded', 'infrastructure.outbox.probe')");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -449,6 +776,36 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("tenant_isolation_probes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiDecisions.AiDecisionRecord", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Audit.AuditRecord", null)
+                        .WithMany()
+                        .HasForeignKey("AuditRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Identity.IdentitySubject", null)
+                        .WithMany()
+                        .HasForeignKey("IdentitySubjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.AiDecisions.AiDecisionRecord", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesDecisionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Identity.TenantMembership", null)
+                        .WithMany()
+                        .HasForeignKey("TenantMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Audit.AuditRecord", b =>
@@ -523,6 +880,15 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Outbox.OutboxMessage", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

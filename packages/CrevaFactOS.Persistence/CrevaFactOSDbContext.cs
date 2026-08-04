@@ -3,6 +3,8 @@ using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.AiDecisions;
+using CrevaFactOS.Persistence.Outbox;
 
 namespace CrevaFactOS.Persistence;
 
@@ -38,6 +40,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TenantMembershipRole> TenantMembershipRoles => Set<TenantMembershipRole>();
 
     public DbSet<AuditRecord> AuditRecords => Set<AuditRecord>();
+
+    public DbSet<AiDecisionRecord> AiDecisionRecords => Set<AiDecisionRecord>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -161,7 +167,7 @@ public sealed class CrevaFactOSDbContext : DbContext
                 table.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
                 table.HasCheckConstraint(
                     "ck_permission_definitions_key",
-                    "key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
+                    "key ~ '^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$'");
             });
         });
 
@@ -272,10 +278,10 @@ public sealed class CrevaFactOSDbContext : DbContext
                 table.HasCheckConstraint("ck_audit_records_action", "action ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
                 table.HasCheckConstraint(
                     "ck_audit_records_event_taxonomy",
-                    "event_type IN ('authentication.succeeded', 'authentication.failed', 'tenant.access.granted', 'tenant.access.denied', 'authorization.granted', 'authorization.denied', 'audit.write.failed', 'infrastructure.configuration.rejected')");
+                    "event_type IN ('authentication.succeeded', 'authentication.failed', 'tenant.access.granted', 'tenant.access.denied', 'authorization.granted', 'authorization.denied', 'audit.write.failed', 'infrastructure.configuration.rejected', 'ai.decision.recorded')");
                 table.HasCheckConstraint(
                     "ck_audit_records_action_taxonomy",
-                    "action IN ('authenticate', 'access.tenant', 'authorize', 'write.audit', 'validate.configuration')");
+                    "action IN ('authenticate', 'access.tenant', 'authorize', 'write.audit', 'validate.configuration', 'ai.decision.append')");
                 table.HasCheckConstraint("ck_audit_records_resource_type", "resource_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
                 table.HasCheckConstraint("ck_audit_records_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
                 table.HasCheckConstraint("ck_audit_records_metadata", "jsonb_typeof(metadata_json) = 'object' AND octet_length(metadata_json::text) <= 4096");
@@ -286,6 +292,123 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.HasQueryFilter(record => tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && record.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<AiDecisionRecord>(entity =>
+        {
+            entity.ToTable("ai_decision_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.Id).HasColumnName("id");
+            entity.Property(record => record.TenantId).HasColumnName("tenant_id");
+            entity.Property(record => record.IdentitySubjectId).HasColumnName("identity_subject_id");
+            entity.Property(record => record.TenantMembershipId).HasColumnName("tenant_membership_id");
+            entity.Property(record => record.DecisionType).HasColumnName("decision_type").HasMaxLength(150);
+            entity.Property(record => record.CapabilityKey).HasColumnName("capability_key").HasMaxLength(150);
+            entity.Property(record => record.ModelProvider).HasColumnName("model_provider").HasMaxLength(100);
+            entity.Property(record => record.ModelName).HasColumnName("model_name").HasMaxLength(150);
+            entity.Property(record => record.ModelVersion).HasColumnName("model_version").HasMaxLength(100);
+            entity.Property(record => record.ConfigurationFingerprint).HasColumnName("configuration_fingerprint").HasMaxLength(128);
+            entity.Property(record => record.RecommendationCode).HasColumnName("recommendation_code").HasMaxLength(100);
+            entity.Property(record => record.RecommendationSummary).HasColumnName("recommendation_summary").HasMaxLength(500);
+            entity.Property(record => record.ConfidenceScore).HasColumnName("confidence_score").HasPrecision(5, 4);
+            entity.Property(record => record.RiskLevel).HasColumnName("risk_level").HasConversion<string>().HasMaxLength(20);
+            entity.Property(record => record.HumanReviewRequired).HasColumnName("human_review_required");
+            entity.Property(record => record.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(30);
+            entity.Property(record => record.CorrelationId).HasColumnName("correlation_id");
+            entity.Property(record => record.CausationId).HasColumnName("causation_id");
+            entity.Property(record => record.AuditRecordId).HasColumnName("audit_record_id");
+            entity.Property(record => record.InputEvidenceJson).HasColumnName("input_evidence_json").HasColumnType("jsonb");
+            entity.Property(record => record.AlternativesJson).HasColumnName("alternatives_json").HasColumnType("jsonb");
+            entity.Property(record => record.PolicySnapshotJson).HasColumnName("policy_snapshot_json").HasColumnType("jsonb");
+            entity.Property(record => record.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.Property(record => record.RecordedAtUtc).HasColumnName("recorded_at_utc");
+            entity.Property(record => record.ExpiresAtUtc).HasColumnName("expires_at_utc");
+            entity.Property(record => record.SupersedesDecisionId).HasColumnName("supersedes_decision_id");
+            entity.Property(record => record.FailureCode).HasColumnName("failure_code").HasMaxLength(100);
+            entity.HasIndex(record => new { record.TenantId, record.CreatedAtUtc });
+            entity.HasIndex(record => new { record.TenantId, record.DecisionType });
+            entity.HasIndex(record => new { record.TenantId, record.CapabilityKey });
+            entity.HasIndex(record => new { record.TenantId, record.Status });
+            entity.HasIndex(record => record.CorrelationId);
+            entity.HasIndex(record => record.AuditRecordId);
+            entity.HasIndex(record => record.SupersedesDecisionId);
+            entity.HasOne<Tenant>().WithMany().HasForeignKey(record => record.TenantId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<IdentitySubject>().WithMany().HasForeignKey(record => record.IdentitySubjectId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<TenantMembership>().WithMany().HasForeignKey(record => record.TenantMembershipId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<AuditRecord>().WithMany().HasForeignKey(record => record.AuditRecordId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<AiDecisionRecord>().WithMany().HasForeignKey(record => record.SupersedesDecisionId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("ck_ai_decision_records_decision_type", "decision_type ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+                table.HasCheckConstraint("ck_ai_decision_records_capability_key", "capability_key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+                table.HasCheckConstraint("ck_ai_decision_records_recommendation_code", "recommendation_code ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$'");
+                table.HasCheckConstraint("ck_ai_decision_records_confidence", "confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)");
+                table.HasCheckConstraint("ck_ai_decision_records_risk", "risk_level IN ('Low', 'Medium', 'High', 'Critical')");
+                table.HasCheckConstraint("ck_ai_decision_records_status", "status IN ('Proposed', 'ReviewRequired', 'Accepted', 'Rejected', 'Expired', 'Superseded', 'Failed')");
+                table.HasCheckConstraint("ck_ai_decision_records_human_review", "(risk_level NOT IN ('High', 'Critical') OR human_review_required) AND (status <> 'ReviewRequired' OR human_review_required)");
+                table.HasCheckConstraint("ck_ai_decision_records_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+                table.HasCheckConstraint("ck_ai_decision_records_evidence", "jsonb_typeof(input_evidence_json) = 'array' AND jsonb_array_length(input_evidence_json) BETWEEN 1 AND 20 AND octet_length(input_evidence_json::text) <= 16384");
+                table.HasCheckConstraint("ck_ai_decision_records_alternatives", "alternatives_json IS NULL OR (jsonb_typeof(alternatives_json) = 'array' AND jsonb_array_length(alternatives_json) <= 10 AND octet_length(alternatives_json::text) <= 8192)");
+                table.HasCheckConstraint("ck_ai_decision_records_policy", "policy_snapshot_json IS NULL OR (jsonb_typeof(policy_snapshot_json) = 'object' AND octet_length(policy_snapshot_json::text) <= 4096)");
+                table.HasCheckConstraint("ck_ai_decision_records_expiry", "expires_at_utc IS NULL OR expires_at_utc > created_at_utc");
+                table.HasCheckConstraint("ck_ai_decision_records_supersedes", "supersedes_decision_id IS NULL OR supersedes_decision_id <> id");
+                table.HasCheckConstraint("ck_ai_decision_records_actor", "(identity_subject_id IS NULL AND tenant_membership_id IS NULL) OR (identity_subject_id IS NOT NULL AND tenant_membership_id IS NOT NULL)");
+            });
+            entity.HasQueryFilter(record => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && record.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<OutboxMessage>(entity =>
+        {
+            entity.ToTable("outbox_messages");
+            entity.HasKey(message => message.Id);
+            entity.Property(message => message.Id).HasColumnName("id");
+            entity.Property(message => message.TenantId).HasColumnName("tenant_id");
+            entity.Property(message => message.MessageType).HasColumnName("message_type").HasMaxLength(150);
+            entity.Property(message => message.SchemaVersion).HasColumnName("schema_version");
+            entity.Property(message => message.AggregateType).HasColumnName("aggregate_type").HasMaxLength(100);
+            entity.Property(message => message.AggregateId).HasColumnName("aggregate_id").HasMaxLength(200);
+            entity.Property(message => message.CorrelationId).HasColumnName("correlation_id");
+            entity.Property(message => message.CausationId).HasColumnName("causation_id");
+            entity.Property(message => message.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(200);
+            entity.Property(message => message.PayloadJson).HasColumnName("payload_json").HasColumnType("jsonb");
+            entity.Property(message => message.HeadersJson).HasColumnName("headers_json").HasColumnType("jsonb");
+            entity.Property(message => message.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(message => message.OccurredAtUtc).HasColumnName("occurred_at_utc");
+            entity.Property(message => message.RecordedAtUtc).HasColumnName("recorded_at_utc");
+            entity.Property(message => message.AvailableAtUtc).HasColumnName("available_at_utc");
+            entity.Property(message => message.AttemptCount).HasColumnName("attempt_count");
+            entity.Property(message => message.LastAttemptAtUtc).HasColumnName("last_attempt_at_utc");
+            entity.Property(message => message.ProcessedAtUtc).HasColumnName("processed_at_utc");
+            entity.Property(message => message.FailedAtUtc).HasColumnName("failed_at_utc");
+            entity.Property(message => message.FailureCode).HasColumnName("failure_code").HasMaxLength(100);
+            entity.Property(message => message.LockId).HasColumnName("lock_id");
+            entity.Property(message => message.LockedUntilUtc).HasColumnName("locked_until_utc");
+            entity.HasIndex(message => new { message.TenantId, message.IdempotencyKey }).IsUnique();
+            entity.HasIndex(message => new { message.Status, message.AvailableAtUtc });
+            entity.HasIndex(message => message.LockedUntilUtc);
+            entity.HasIndex(message => new { message.TenantId, message.OccurredAtUtc });
+            entity.HasIndex(message => message.CorrelationId);
+            entity.HasIndex(message => new { message.MessageType, message.SchemaVersion });
+            entity.HasOne<Tenant>().WithMany().HasForeignKey(message => message.TenantId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("ck_outbox_messages_type", "message_type IN ('infrastructure.audit.recorded', 'infrastructure.ai-decision.recorded', 'infrastructure.outbox.probe')");
+                table.HasCheckConstraint("ck_outbox_messages_schema", "schema_version = 1");
+                table.HasCheckConstraint("ck_outbox_messages_idempotency", "idempotency_key <> ''");
+                table.HasCheckConstraint("ck_outbox_messages_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+                table.HasCheckConstraint("ck_outbox_messages_status", "status IN ('Pending', 'Processing', 'Processed', 'Failed')");
+                table.HasCheckConstraint("ck_outbox_messages_attempts", "attempt_count >= 0");
+                table.HasCheckConstraint("ck_outbox_messages_aggregate", "(aggregate_type IS NULL) = (aggregate_id IS NULL)");
+                table.HasCheckConstraint("ck_outbox_messages_timestamps", "available_at_utc >= occurred_at_utc AND recorded_at_utc >= occurred_at_utc");
+                table.HasCheckConstraint("ck_outbox_messages_payload", "jsonb_typeof(payload_json) = 'object' AND octet_length(payload_json::text) <= 4096");
+                table.HasCheckConstraint("ck_outbox_messages_headers", "jsonb_typeof(headers_json) = 'object' AND octet_length(headers_json::text) <= 2048");
+                table.HasCheckConstraint("ck_outbox_messages_processing", "(status = 'Pending' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NULL AND failed_at_utc IS NULL) OR (status = 'Processing' AND lock_id IS NOT NULL AND locked_until_utc IS NOT NULL AND last_attempt_at_utc IS NOT NULL AND processed_at_utc IS NULL AND failed_at_utc IS NULL) OR (status = 'Processed' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NOT NULL AND failed_at_utc IS NULL) OR (status = 'Failed' AND lock_id IS NULL AND locked_until_utc IS NULL AND processed_at_utc IS NULL AND failed_at_utc IS NOT NULL AND failure_code IS NOT NULL)");
+            });
+            entity.HasQueryFilter(message => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && message.TenantId == tenantContextAccessor.Current!.TenantId);
         });
     }
 

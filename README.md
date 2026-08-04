@@ -131,3 +131,7 @@ FOUND-05 makes that header a selector only: authenticated external issuer/subjec
 FOUND-06 adds exact, case-sensitive infrastructure permission keys, tenant-owned roles, and active membership-role assignments. No wildcard, global role, platform administrator, role inheritance, direct membership permission, or product permission exists. See the infrastructure guide for `pnpm db:permission-authorization:verify` and `pnpm authorization:verify`.
 
 FOUND-07 adds bounded, append-only infrastructure audit evidence with request correlation, actor identifiers, forced tenant RLS, and a permission-protected Development read boundary. It stores no tokens, request bodies, exception stacks, prompts, completions, reasoning traces, product events, or AI Decision Ledger data.
+
+FOUND-08 adds the separate append-only AI Decision Ledger foundation for bounded recommendation evidence and safe provenance. See [AI Decision Ledger Foundation](docs/architecture/ai-decision-ledger-foundation.md) for its allowed-data contract, prohibited model internals, risk and review semantics, audit linkage, permissions, and deferred capabilities.
+
+FOUND-09 adds a tenant-scoped transactional outbox storage contract without message publishing. See [Transactional Outbox Foundation](docs/architecture/transactional-outbox-foundation.md) for transaction participation, idempotency, immutable envelopes, processing leases, RLS, sensitive-data rules, and explicitly deferred RabbitMQ behavior.

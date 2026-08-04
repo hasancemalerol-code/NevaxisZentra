@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using CrevaFactOS.Api.Audit;
 using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.AiDecisions;
+using CrevaFactOS.Persistence.Outbox;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +100,45 @@ if (app.Environment.IsDevelopment())
         CancellationToken cancellationToken) =>
         await auditReader.ReadRecentAsync(25, cancellationToken))
         .RequireAuthorization(PermissionPolicies.SystemAuditRead);
+
+    app.MapPost("/internal/ai-decisions", async (
+        AiDecisionWriteRequest request,
+        IAiDecisionLedgerWriter writer,
+        CancellationToken cancellationToken) =>
+    {
+        var result = await writer.WriteAsync(request, cancellationToken);
+        return result.Succeeded
+            ? Results.Created($"/internal/ai-decisions/{result.DecisionRecordId}", result)
+            : Results.BadRequest(new { failureCode = result.FailureCode });
+    }).RequireAuthorization(PermissionPolicies.SystemAiDecisionWrite);
+
+    app.MapGet("/internal/ai-decisions/recent", async (
+        IAiDecisionLedgerReader reader,
+        CancellationToken cancellationToken) =>
+        await reader.ReadRecentAsync(25, cancellationToken))
+        .RequireAuthorization(PermissionPolicies.SystemAiDecisionRead);
+
+    app.MapPost("/internal/outbox", async (
+        OutboxProbeRequest request,
+        IOutboxDiagnosticService outbox,
+        CancellationToken cancellationToken) =>
+    {
+        var result = await outbox.AppendProbeAsync(request, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return Results.BadRequest(new { failureCode = result.FailureCode });
+        }
+
+        return result.Duplicate
+            ? Results.Ok(result)
+            : Results.Created($"/internal/outbox/{result.MessageId}", result);
+    }).RequireAuthorization(PermissionPolicies.SystemOutboxWrite);
+
+    app.MapGet("/internal/outbox/recent", async (
+        IOutboxReader reader,
+        CancellationToken cancellationToken) =>
+        await reader.ReadRecentAsync(25, cancellationToken))
+        .RequireAuthorization(PermissionPolicies.SystemOutboxRead);
 }
 
 app.Run();

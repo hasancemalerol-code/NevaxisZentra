@@ -9,6 +9,10 @@ public static class PermissionPolicies
     public const string TenantContextRead = "Permission:" + InfrastructurePermissionKeys.TenantContextRead;
     public const string AuthorizationDiagnosticsRead = "Permission:" + InfrastructurePermissionKeys.AuthorizationDiagnosticsRead;
     public const string SystemAuditRead = "Permission:" + InfrastructurePermissionKeys.SystemAuditRead;
+    public const string SystemAiDecisionWrite = "Permission:" + InfrastructurePermissionKeys.SystemAiDecisionWrite;
+    public const string SystemAiDecisionRead = "Permission:" + InfrastructurePermissionKeys.SystemAiDecisionRead;
+    public const string SystemOutboxWrite = "Permission:" + InfrastructurePermissionKeys.SystemOutboxWrite;
+    public const string SystemOutboxRead = "Permission:" + InfrastructurePermissionKeys.SystemOutboxRead;
 
     public static void AddInfrastructurePolicies(AuthorizationOptions options)
     {
@@ -16,6 +20,10 @@ public static class PermissionPolicies
         Add(options, TenantContextRead, InfrastructurePermissionKeys.TenantContextRead);
         Add(options, AuthorizationDiagnosticsRead, InfrastructurePermissionKeys.AuthorizationDiagnosticsRead);
         Add(options, SystemAuditRead, InfrastructurePermissionKeys.SystemAuditRead);
+        Add(options, SystemAiDecisionWrite, InfrastructurePermissionKeys.SystemAiDecisionWrite);
+        Add(options, SystemAiDecisionRead, InfrastructurePermissionKeys.SystemAiDecisionRead);
+        Add(options, SystemOutboxWrite, InfrastructurePermissionKeys.SystemOutboxWrite);
+        Add(options, SystemOutboxRead, InfrastructurePermissionKeys.SystemOutboxRead);
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();

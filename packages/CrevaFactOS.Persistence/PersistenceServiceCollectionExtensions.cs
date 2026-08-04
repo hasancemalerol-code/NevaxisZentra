@@ -6,6 +6,8 @@ using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.AiDecisions;
+using CrevaFactOS.Persistence.Outbox;
 
 namespace CrevaFactOS.Persistence;
 
@@ -34,6 +36,11 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<CorrelationContext>();
         services.AddScoped<IAuditWriter, UnavailableAuditWriter>();
         services.AddScoped<IAuditReader, UnavailableAuditReader>();
+        services.AddScoped<IAiDecisionLedgerWriter, UnavailableAiDecisionLedgerWriter>();
+        services.AddScoped<IAiDecisionLedgerReader, UnavailableAiDecisionLedgerReader>();
+        services.AddScoped<IOutboxWriter, UnavailableOutboxWriter>();
+        services.AddScoped<IOutboxReader, UnavailableOutboxReader>();
+        services.AddScoped<IOutboxDiagnosticService, UnavailableOutboxDiagnosticService>();
 
         var options = configuration
             .GetSection(PersistenceOptions.SectionName)
@@ -70,6 +77,11 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IPermissionEvaluator, PostgreSqlPermissionEvaluator>();
         services.AddScoped<IAuditWriter, PostgreSqlAuditWriter>();
         services.AddScoped<IAuditReader, PostgreSqlAuditReader>();
+        services.AddScoped<IAiDecisionLedgerWriter, PostgreSqlAiDecisionLedgerWriter>();
+        services.AddScoped<IAiDecisionLedgerReader, PostgreSqlAiDecisionLedgerReader>();
+        services.AddScoped<IOutboxWriter, PostgreSqlOutboxWriter>();
+        services.AddScoped<IOutboxReader, PostgreSqlOutboxReader>();
+        services.AddScoped<IOutboxDiagnosticService, PostgreSqlOutboxDiagnosticService>();
 
         if (options.HealthChecksEnabled)
         {

@@ -6,6 +6,8 @@ using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.AiDecisions;
+using CrevaFactOS.Persistence.Outbox;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -55,8 +57,10 @@ public sealed class PersistenceInfrastructureTests
 
         Assert.Equal(
             [
+                typeof(AiDecisionRecord),
                 typeof(AuditRecord),
                 typeof(IdentitySubject),
+                typeof(OutboxMessage),
                 typeof(PermissionDefinition),
                 typeof(Tenant),
                 typeof(TenantIsolationProbe),
@@ -74,12 +78,14 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(5, migrations.Length);
+        Assert.Equal(7, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
         Assert.EndsWith("_AddPermissionAuthorizationFoundation", migrations[3], StringComparison.Ordinal);
         Assert.EndsWith("_AddImmutableAuditTrailFoundation", migrations[4], StringComparison.Ordinal);
+        Assert.EndsWith("_AddAiDecisionLedgerFoundation", migrations[5], StringComparison.Ordinal);
+        Assert.EndsWith("_AddTransactionalOutboxFoundation", migrations[6], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);
