@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using CrevaFactOS.Persistence.Tenancy;
 
 namespace CrevaFactOS.Persistence;
 
@@ -18,6 +19,9 @@ public static class PersistenceServiceCollectionExtensions
         services.AddOptions<PersistenceOptions>()
             .Bind(configuration.GetSection(PersistenceOptions.SectionName))
             .ValidateOnStart();
+        services.AddScoped<TenantContextAccessor>();
+        services.AddScoped<ITenantContextAccessor>(serviceProvider =>
+            serviceProvider.GetRequiredService<TenantContextAccessor>());
 
         var options = configuration
             .GetSection(PersistenceOptions.SectionName)
@@ -47,6 +51,8 @@ public static class PersistenceServiceCollectionExtensions
                     npgsqlOptions.MigrationsHistoryTable(CrevaFactOSDbContext.MigrationHistoryTableName);
                     npgsqlOptions.CommandTimeout(options.CommandTimeoutSeconds);
                 }));
+        services.AddScoped<TenantDatabaseSession>();
+        services.AddScoped<ITenantResolver, PostgreSqlTenantResolver>();
 
         if (options.HealthChecksEnabled)
         {

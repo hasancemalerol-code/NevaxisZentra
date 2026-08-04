@@ -20,7 +20,7 @@ public sealed class CrevaFactOSDesignTimeDbContextFactory
             SslMode = GetEnvironmentValue("SSL_MODE", "Disable"),
             ConnectionTimeoutSeconds = GetEnvironmentInt32("CONNECTION_TIMEOUT_SECONDS", 15),
             CommandTimeoutSeconds = GetEnvironmentInt32("COMMAND_TIMEOUT_SECONDS", 30),
-            Pooling = GetEnvironmentBoolean("POOLING", true),
+            Pooling = false,
         };
 
         var builder = new DbContextOptionsBuilder<CrevaFactOSDbContext>();
@@ -37,17 +37,12 @@ public sealed class CrevaFactOSDesignTimeDbContextFactory
     }
 
     private static string GetEnvironmentValue(string suffix, string fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}") ?? fallback;
+        Environment.GetEnvironmentVariable($"CREVAFACTOS__MIGRATIONS__{suffix}") ?? fallback;
 
     private static int GetEnvironmentInt32(string suffix, int fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__MIGRATIONS__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
     }
 
-    private static bool GetEnvironmentBoolean(string suffix, bool fallback)
-    {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}");
-        return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
-    }
 }

@@ -94,6 +94,7 @@ pnpm db:migrations:add -- DescriptivePascalCaseName
 pnpm db:migrations:apply
 pnpm db:migrations:script
 pnpm db:migrations:rollback
+pnpm db:tenant-isolation:verify
 ```
 
 `db:verify` opens a real Npgsql connection and executes `SELECT 1`. `db:migrations:script` writes an idempotent script under the ignored `artifacts/database` directory. `db:migrations:rollback` is explicitly destructive and moves the application database to migration zero; it does not delete the database or Docker volume.
@@ -101,6 +102,18 @@ pnpm db:migrations:rollback
 Migrations never run during API startup. The empty `InitialInfrastructureBaseline` migration creates no business tables, custom schemas, extensions, triggers, functions, roles, or seed data. Applying it creates only EF Core's standard `public.__EFMigrationsHistory` metadata table. The default history table and schema are retained deliberately to avoid inventing a product schema before domain boundaries exist.
 
 Never commit `infrastructure/.env`, passwords, or connection strings. Diagnostics expose only non-secret endpoint metadata; they omit usernames, passwords, and full connection strings.
+
+## Tenant context contract
+
+FOUND-04 accepts `X-CrevaFactOS-Tenant` as a temporary infrastructure-validation input. It may contain a tenant UUID or stable tenant key. The value is never trusted directly: the restricted runtime connection calls `resolve_active_tenant(text)`, which returns only an exact active match. Unknown and inactive tenants are rejected without revealing registry details. This header is not an authentication or authorization mechanism and must eventually be replaced by context derived from a trusted authenticated membership as required by ADR-007.
+
+`/health/live` and `/health/ready` are tenant-neutral when no tenant header is supplied. In Development only, `GET /internal/tenant-context` reports whether a validated context exists and its tenant UUID; it provides no tenant listing or mutation behavior.
+
+The API runtime uses `CREVAFACTOS__PERSISTENCE__*`. Explicit EF commands use the separate `CREVAFACTOS__MIGRATIONS__*` settings. The migration role requires narrowly controlled DDL and role-management authority because `AddTenantIsolationFoundation` creates the non-login `crevafactos_runtime` role. Local verification enables login with the development-only runtime password outside the production migration. Production credential provisioning belongs to deployment secret management.
+
+PostgreSQL isolation uses transaction-local `crevafactos.tenant_id`, `current_tenant_id()`, RLS, and `FORCE ROW LEVEL SECURITY`. Missing context produces zero visible rows and rejects writes. `pnpm db:tenant-isolation:verify` creates deterministic temporary tenant A/B fixtures outside migrations, tests reads and all write directions through the non-superuser runtime role, proves pooled physical-connection reuse does not retain context, and removes the fixture rows afterward.
+
+Authentication, memberships, roles/permissions, platform administration, and user authorization are intentionally not implemented in FOUND-04.
 
 ## Port Conflicts
 

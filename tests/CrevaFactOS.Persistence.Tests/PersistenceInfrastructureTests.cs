@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
+using CrevaFactOS.Persistence.Tenancy;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -40,34 +41,113 @@ public sealed class PersistenceInfrastructureTests
     }
 
     [Fact]
-    public void DbContextConstructsWithNoProductEntityMappings()
+    public void DbContextContainsOnlyTenantIsolationInfrastructureMappings()
     {
         using var context = CreateContext();
 
-        Assert.Empty(context.Model.GetEntityTypes());
+        var mappedTypes = context.Model.GetEntityTypes()
+            .Select(entityType => entityType.ClrType)
+            .OrderBy(type => type.Name, StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal([typeof(Tenant), typeof(TenantIsolationProbe)], mappedTypes);
     }
 
     [Fact]
-    public void MigrationAssemblyContainsOnlyBaselineMigration()
+    public void MigrationAssemblyContainsOnlyFoundationMigrations()
     {
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Single(migrations);
+        Assert.Equal(2, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
+        Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);
     }
 
-    private static CrevaFactOSDbContext CreateContext()
+    [Fact]
+    public void TenantIdentifierCannotBeMutated()
+    {
+        var tenantA = Guid.NewGuid();
+        var accessor = new TenantContextAccessor();
+        accessor.Set(new TenantContext(tenantA, "tenant-a"));
+        using var context = CreateContext(accessor);
+        var probe = new TenantIsolationProbe
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantA,
+            ProbeValue = "probe",
+        };
+        context.Attach(probe);
+        probe.TenantId = Guid.NewGuid();
+        context.Entry(probe).Property(item => item.TenantId).IsModified = true;
+
+        var exception = Assert.Throws<InvalidOperationException>(() => context.PrepareTenantScopedChanges());
+
+        Assert.Contains("cannot be changed", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CrossTenantAttachmentIsRejected()
+    {
+        var accessor = new TenantContextAccessor();
+        accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a"));
+        using var context = CreateContext(accessor);
+        context.Add(new TenantIsolationProbe
+        {
+            Id = Guid.NewGuid(),
+            TenantId = Guid.NewGuid(),
+            ProbeValue = "probe",
+        });
+
+        var exception = Assert.Throws<InvalidOperationException>(() => context.PrepareTenantScopedChanges());
+
+        Assert.Contains("another tenant", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MissingTenantContextRejectsTenantScopedSave()
+    {
+        using var context = CreateContext(new TenantContextAccessor());
+        context.Add(new TenantIsolationProbe
+        {
+            Id = Guid.NewGuid(),
+            ProbeValue = "probe",
+        });
+
+        Assert.Throws<InvalidOperationException>(() => context.PrepareTenantScopedChanges());
+    }
+
+    [Fact]
+    public void AddedRecordReceivesCurrentTenantIdentifier()
+    {
+        var tenantId = Guid.NewGuid();
+        var accessor = new TenantContextAccessor();
+        accessor.Set(new TenantContext(tenantId, "tenant-a"));
+        using var context = CreateContext(accessor);
+        var probe = new TenantIsolationProbe
+        {
+            Id = Guid.NewGuid(),
+            ProbeValue = "probe",
+        };
+        context.Add(probe);
+
+        var preparedTenantId = context.PrepareTenantScopedChanges();
+
+        Assert.Equal(tenantId, preparedTenantId);
+        Assert.Equal(tenantId, probe.TenantId);
+    }
+
+    private static CrevaFactOSDbContext CreateContext(ITenantContextAccessor? tenantContextAccessor = null)
     {
         var options = new DbContextOptionsBuilder<CrevaFactOSDbContext>()
             .UseNpgsql(
                 PostgreSqlConnectionFactory.BuildConnectionString(CreateOptions()),
                 npgsql => npgsql.MigrationsAssembly(CrevaFactOSDbContext.MigrationsAssemblyName))
             .Options;
-        return new CrevaFactOSDbContext(options);
+        return new CrevaFactOSDbContext(options, tenantContextAccessor);
     }
 
     private static PersistenceOptions CreateOptions() => new()

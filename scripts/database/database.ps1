@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet('config', 'verify', 'state', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
+    [ValidateSet('config', 'verify', 'state', 'tenant-isolation-verify', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
     [string]$Operation,
 
     [Parameter(Position = 1)]
@@ -94,12 +94,37 @@ Set-PersistenceValue 'ENABLED' 'CREVAFACTOS_PERSISTENCE_ENABLED' 'true'
 Set-PersistenceValue 'HOST' 'CREVAFACTOS_POSTGRES_HOST' '127.0.0.1'
 Set-PersistenceValue 'PORT' 'CREVAFACTOS_POSTGRES_PORT' '5432'
 Set-PersistenceValue 'DATABASE' 'CREVAFACTOS_POSTGRES_DATABASE' 'crevafactos_local'
-Set-PersistenceValue 'USERNAME' 'CREVAFACTOS_POSTGRES_USERNAME' 'crevafactos'
-Set-PersistenceValue 'PASSWORD' 'CREVAFACTOS_POSTGRES_PASSWORD' 'local_dev_only_change_me'
+Set-PersistenceValue 'USERNAME' 'CREVAFACTOS_PERSISTENCE_USERNAME' 'crevafactos_runtime'
+Set-PersistenceValue 'PASSWORD' 'CREVAFACTOS_PERSISTENCE_PASSWORD' 'local_runtime_only_change_me'
 Set-PersistenceValue 'SSL_MODE' 'CREVAFACTOS_PERSISTENCE_SSL_MODE' 'Disable'
 Set-PersistenceValue 'CONNECTION_TIMEOUT_SECONDS' 'CREVAFACTOS_PERSISTENCE_CONNECTION_TIMEOUT_SECONDS' '15'
 Set-PersistenceValue 'COMMAND_TIMEOUT_SECONDS' 'CREVAFACTOS_PERSISTENCE_COMMAND_TIMEOUT_SECONDS' '30'
 Set-PersistenceValue 'POOLING' 'CREVAFACTOS_PERSISTENCE_POOLING' 'true'
+
+function Set-MigrationValue {
+    param([string]$Suffix, [string]$LegacyName, [string]$DefaultValue)
+
+    $name = "CREVAFACTOS__MIGRATIONS__$Suffix"
+    if ([Environment]::GetEnvironmentVariable($name, 'Process')) {
+        return
+    }
+
+    $value = [Environment]::GetEnvironmentVariable($LegacyName, 'Process')
+    if (-not $value) {
+        $value = $DefaultValue
+    }
+
+    [Environment]::SetEnvironmentVariable($name, $value, 'Process')
+}
+
+Set-MigrationValue 'HOST' 'CREVAFACTOS_POSTGRES_HOST' '127.0.0.1'
+Set-MigrationValue 'PORT' 'CREVAFACTOS_POSTGRES_PORT' '5432'
+Set-MigrationValue 'DATABASE' 'CREVAFACTOS_POSTGRES_DATABASE' 'crevafactos_local'
+Set-MigrationValue 'USERNAME' 'CREVAFACTOS_POSTGRES_USERNAME' 'crevafactos'
+Set-MigrationValue 'PASSWORD' 'CREVAFACTOS_POSTGRES_PASSWORD' 'local_dev_only_change_me'
+Set-MigrationValue 'SSL_MODE' 'CREVAFACTOS_MIGRATIONS_SSL_MODE' 'Disable'
+Set-MigrationValue 'CONNECTION_TIMEOUT_SECONDS' 'CREVAFACTOS_MIGRATIONS_CONNECTION_TIMEOUT_SECONDS' '15'
+Set-MigrationValue 'COMMAND_TIMEOUT_SECONDS' 'CREVAFACTOS_MIGRATIONS_COMMAND_TIMEOUT_SECONDS' '30'
 
 $script:dotnetPath = Get-DotNetPath
 $efPrefix = @('tool', 'run', 'dotnet-ef', '--')
@@ -122,6 +147,10 @@ try {
         'state' {
             Assert-PostgreSqlContainerHealthy
             Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'state')
+        }
+        'tenant-isolation-verify' {
+            Assert-PostgreSqlContainerHealthy
+            Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'tenant-isolation-verify')
         }
         'migrations-list' {
             Invoke-DotNet ($efPrefix + @('migrations', 'list') + $efOptions)

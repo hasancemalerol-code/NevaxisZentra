@@ -1,9 +1,12 @@
 using CrevaFactOS.Persistence;
+using CrevaFactOS.DatabaseTool;
 using Npgsql;
 using System.Net.Sockets;
 
 var operation = args.FirstOrDefault()?.ToLowerInvariant() ?? "verify";
-var options = LoadOptions();
+var options = operation == "state"
+    ? DatabaseConfiguration.LoadMigrations()
+    : DatabaseConfiguration.LoadRuntime();
 
 if (args.Contains("--configuration-only", StringComparer.OrdinalIgnoreCase))
 {
@@ -14,6 +17,12 @@ if (args.Contains("--configuration-only", StringComparer.OrdinalIgnoreCase))
 
 try
 {
+    if (operation == "tenant-isolation-verify")
+    {
+        await TenantIsolationVerifier.VerifyAsync();
+        return 0;
+    }
+
     await using var connection = new NpgsqlConnection(
         PostgreSqlConnectionFactory.BuildConnectionString(options));
     await connection.OpenAsync();
@@ -68,7 +77,7 @@ try
         return 0;
     }
 
-    Console.Error.WriteLine("Unknown operation. Expected 'verify' or 'state'.");
+    Console.Error.WriteLine("Unknown operation. Expected 'verify', 'state', or 'tenant-isolation-verify'.");
     return 2;
 }
 catch (PostgresException exception) when (exception.SqlState == PostgresErrorCodes.InvalidPassword)
@@ -81,6 +90,11 @@ catch (PostgresException exception) when (exception.SqlState == PostgresErrorCod
     Console.Error.WriteLine("PostgreSQL database is missing. Check the configured database name.");
     return 4;
 }
+catch (PostgresException exception)
+{
+    Console.Error.WriteLine($"PostgreSQL query failed with SQLSTATE {exception.SqlState}. No credentials were logged.");
+    return 5;
+}
 catch (NpgsqlException exception) when (exception.InnerException is SocketException or TimeoutException)
 {
     Console.Error.WriteLine("PostgreSQL network connection failed. Check the host, port, and container health.");
@@ -90,33 +104,4 @@ catch (Exception exception)
 {
     Console.Error.WriteLine($"PostgreSQL query failed ({exception.GetType().Name}). No credentials were logged.");
     return 5;
-}
-
-static PersistenceOptions LoadOptions() => new()
-{
-    Enabled = true,
-    Host = GetValue("HOST", "127.0.0.1"),
-    Port = GetInt32("PORT", 5432),
-    Database = GetValue("DATABASE", "crevafactos_local"),
-    Username = GetValue("USERNAME", "crevafactos"),
-    Password = GetValue("PASSWORD", "local_dev_only_change_me"),
-    SslMode = GetValue("SSL_MODE", "Disable"),
-    ConnectionTimeoutSeconds = GetInt32("CONNECTION_TIMEOUT_SECONDS", 15),
-    CommandTimeoutSeconds = GetInt32("COMMAND_TIMEOUT_SECONDS", 30),
-    Pooling = GetBoolean("POOLING", true),
-};
-
-static string GetValue(string suffix, string fallback) =>
-    Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}") ?? fallback;
-
-static int GetInt32(string suffix, int fallback)
-{
-    var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}");
-    return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
-}
-
-static bool GetBoolean(string suffix, bool fallback)
-{
-    var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}");
-    return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
 }

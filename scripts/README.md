@@ -79,3 +79,5 @@ Repository scripts cannot bypass migrations, permissions, authoritative approval
 ## Database Lifecycle
 
 `scripts/database/database.ps1` provides the explicit FOUND-03 configuration, connectivity, migration, SQL generation, rollback, and state commands exposed through root `pnpm db:*` scripts. It never starts Docker, runs from application startup, prints secrets, or deletes the PostgreSQL volume.
+
+FOUND-04 adds `tenant-isolation-verify`. It uses separate migration and runtime credentials, creates temporary deterministic isolation fixtures outside migrations, verifies real RLS and pooled-connection behavior, and removes fixture rows. It does not create product data or expose a privileged application bypass.

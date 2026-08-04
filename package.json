@@ -24,6 +24,7 @@
     "db:config": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 config",
     "db:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 verify",
     "db:state": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 state",
+    "db:tenant-isolation:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 tenant-isolation-verify",
     "db:migrations:list": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-list",
     "db:migrations:add": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-add",
     "db:migrations:apply": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-apply",

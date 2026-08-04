@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using CrevaFactOS.Configuration;
 using CrevaFactOS.Persistence;
+using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Api.Tenancy;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,8 @@ builder.Services.AddCrevaFactOSPersistence(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.MapHealthChecks(
     "/health/live",
     new HealthCheckOptions
@@ -20,6 +24,15 @@ app.MapHealthChecks(
         Predicate = static _ => false,
     });
 app.MapHealthChecks("/health/ready");
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/internal/tenant-context", (ITenantContextAccessor tenantContext) => new
+    {
+        hasTenantContext = tenantContext.IsAvailable,
+        tenantId = tenantContext.Current?.TenantId,
+    });
+}
 
 app.Run();
 
