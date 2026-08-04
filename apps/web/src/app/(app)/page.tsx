@@ -1,64 +1,75 @@
-import { Activity, Clock3, ListChecks, RefreshCw, ShieldAlert, Sparkles } from "lucide-react";
+import { Suspense } from "react";
+import {
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 
-import { Badge, StatusBadge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, KpiCard } from "@/components/ui/card";
-import { PageContent, PageHeader, Section } from "@/components/ui/page";
-import { EmptyState, Skeleton } from "@/components/ui/states";
-import { getWebApplicationConfig } from "@/config";
+import {
+  PageContent,
+  PageHeader,
+  Section,
+} from "@/components/ui/page";
+import { calculateAiTaskKpis } from "@/features/ai-task-center/application/ai-task-query";
+import { AiTaskKpiLinks } from "@/features/ai-task-center/components/ai-task-kpi-links";
+import { AiTaskKpiLoading } from "@/features/ai-task-center/components/ai-task-kpi-loading";
+import { AiTaskWorkspace } from "@/features/ai-task-center/components/ai-task-workspace";
+import { AiTaskWorkspaceLoading } from "@/features/ai-task-center/components/ai-task-workspace-loading";
+import { AI_TASK_PREVIEW_DATA } from "@/features/ai-task-center/data/ai-task-preview-data";
+
+const PREVIEW_NOW_ISO =
+  "2026-08-05T01:08:00+03:00";
+
+const PREVIEW_NOW = new Date(
+  PREVIEW_NOW_ISO,
+);
 
 export default function HomePage() {
-  const config = getWebApplicationConfig();
+  const kpis = calculateAiTaskKpis(
+    AI_TASK_PREVIEW_DATA,
+    PREVIEW_NOW,
+  );
 
   return (
     <PageContent>
       <PageHeader
-        eyebrow="AI Görev Merkezi"
-        title="Operasyon çalışma alanı"
-        description={`${config.applicationName} için masaüstü uygulama kabuğu ve temel tasarım sistemi. Bu ekrandaki değerler yalnızca yerleşim önizlemesidir.`}
-        preview
         actions={
-          <Button variant="secondary" leadingIcon={<RefreshCw />} disabled title="Gerçek veri bağlantısı UI-02 ve sonraki paketlere ertelendi">
+          <Button
+            disabled
+            leadingIcon={<RefreshCw />}
+            title="Gerçek veri bağlantısı sonraki entegrasyon paketlerinde uygulanacaktır."
+            variant="secondary"
+          >
             Veriyi yenile
           </Button>
         }
+        description="Üretim, kalite, bakım, malzeme, ticari zekâ ve ERP entegrasyonlarından oluşan AI önerilerini tek merkezden inceleyin."
+        eyebrow="AI Görev Merkezi"
+        preview
+        title="Operasyon karar merkezi"
       />
 
-      <div className="kpi-grid" aria-label="KPI kartı bileşen önizlemeleri">
-        <KpiCard label="Açık görev" value="—" detail="Gerçek görev verisi bağlı değil" icon={<ListChecks />} tone="information" preview />
-        <KpiCard label="İnceleme bekleyen" value="—" detail="Onay iş akışı eklenmedi" icon={<Clock3 />} tone="warning" preview />
-        <KpiCard label="Kritik risk" value="—" detail="Operasyon verisi bağlı değil" icon={<ShieldAlert />} tone="neutral" preview />
-        <KpiCard label="Sistem görünümü" value="Hazır" detail="Yalnızca UI kabuğu" icon={<Activity />} tone="success" preview />
-      </div>
+      <Suspense fallback={<AiTaskKpiLoading />}>
+        <AiTaskKpiLinks kpis={kpis} />
+      </Suspense>
 
-      <div className="preview-grid">
-        <Section
-          title="Görev çalışma alanı"
-          description="AI Task Center içeriği ve gerçek görev iş akışları sonraki ürün paketlerine ertelenmiştir."
-          action={<Badge tone="ai"><Sparkles aria-hidden="true" /> AI alanı</Badge>}
-        >
-          <EmptyState
-            title="Önizleme için görev bulunmuyor"
-            description="Bu boş durum, gerçek veri olmadığında kullanılacak erişilebilir sunumu gösterir."
-            action={<Button variant="secondary" size="small" disabled>Görev oluşturma daha sonra</Button>}
+      <Section
+        action={
+          <Badge tone="ai">
+            <Sparkles aria-hidden="true" />
+            Human-in-the-Loop
+          </Badge>
+        }
+        description="Görevleri arayın, filtreleyin ve risk, öncelik ve gecikme durumlarına göre inceleyin."
+        title="AI görev çalışma alanı"
+      >
+        <Suspense fallback={<AiTaskWorkspaceLoading />}>
+          <AiTaskWorkspace
+            nowIso={PREVIEW_NOW_ISO}
+            tasks={AI_TASK_PREVIEW_DATA}
           />
-        </Section>
-
-        <Section title="Sistem durumu" description="Durum ve rozet bileşenlerinin temsili görünümü.">
-          <Card className="status-list-card">
-            <div className="status-row"><span>Web uygulama kabuğu</span><StatusBadge status="normal" label="Hazır" /></div>
-            <div className="status-row"><span>Operasyonel veri</span><StatusBadge status="offline" label="Bağlı değil" /></div>
-            <div className="status-row"><span>Dashboard uygulaması</span><StatusBadge status="analysis" label="UI-02" /></div>
-          </Card>
-        </Section>
-      </div>
-
-      <Section title="Yükleme durumu" description="Kart ve içerik alanları için düşük hareketli iskelet önizlemesi.">
-        <Card className="skeleton-card" aria-label="Yükleme bileşeni önizlemesi">
-          <Skeleton className="skeleton-heading" />
-          <Skeleton className="skeleton-line" />
-          <Skeleton className="skeleton-line skeleton-line-short" />
-        </Card>
+        </Suspense>
       </Section>
     </PageContent>
   );
