@@ -41,6 +41,24 @@ try
         return 0;
     }
 
+    if (operation == "permission-authorization-verify")
+    {
+        await PermissionAuthorizationVerifier.VerifyAsync();
+        return 0;
+    }
+
+    if (operation == "permission-authorization-bootstrap")
+    {
+        await PermissionAuthorizationVerifier.BootstrapAsync();
+        return 0;
+    }
+
+    if (operation == "permission-authorization-cleanup")
+    {
+        await PermissionAuthorizationVerifier.CleanupFixturesAsync();
+        return 0;
+    }
+
     await using var connection = new NpgsqlConnection(
         PostgreSqlConnectionFactory.BuildConnectionString(options));
     await connection.OpenAsync();

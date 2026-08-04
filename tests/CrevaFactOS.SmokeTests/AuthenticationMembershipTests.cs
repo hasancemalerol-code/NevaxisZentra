@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using CrevaFactOS.Api.Authentication;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Persistence.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -18,6 +19,7 @@ public sealed class AuthenticationMembershipTests
 {
     private static readonly Guid IdentityId = Guid.Parse("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     private static readonly Guid TenantAId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1");
+    private static readonly Guid MembershipId = Guid.Parse("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
 
     [Theory]
     [InlineData("tenant-a")]
@@ -125,15 +127,7 @@ public sealed class AuthenticationMembershipTests
         }
 
         using var anonymousResponse = await client.GetAsync("/internal/tenant-context");
-        var body = await anonymousResponse.Content.ReadFromJsonAsync<TenantContextResponse>();
-
-        Assert.Equal(HttpStatusCode.OK, anonymousResponse.StatusCode);
-        Assert.NotNull(body);
-        Assert.False(body.Authenticated);
-        Assert.False(body.IdentityResolved);
-        Assert.False(body.TenantContextAvailable);
-        Assert.Null(body.IdentitySubjectId);
-        Assert.Null(body.TenantId);
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymousResponse.StatusCode);
     }
 
     [Fact]
@@ -169,8 +163,10 @@ public sealed class AuthenticationMembershipTests
                             _ => { });
                     services.RemoveAll<IIdentitySubjectResolver>();
                     services.RemoveAll<ITenantMembershipResolver>();
+                    services.RemoveAll<IPermissionEvaluator>();
                     services.AddScoped<IIdentitySubjectResolver, StubIdentityResolver>();
                     services.AddScoped<ITenantMembershipResolver, StubMembershipResolver>();
+                    services.AddScoped<IPermissionEvaluator, StubPermissionEvaluator>();
                 });
             });
 
@@ -208,10 +204,27 @@ public sealed class AuthenticationMembershipTests
             TenantContext? context = identitySubjectId == IdentityId
                 && (tenantIdentifier == "tenant-a"
                     || tenantIdentifier == TenantAId.ToString())
-                ? new TenantContext(TenantAId, "tenant-a")
+                ? new TenantContext(TenantAId, "tenant-a", MembershipId)
                 : null;
             return Task.FromResult(context);
         }
+    }
+
+    private sealed class StubPermissionEvaluator : IPermissionEvaluator
+    {
+        public Task<PermissionCheckResult> EvaluateAsync(
+            Guid identitySubjectId,
+            Guid tenantId,
+            Guid membershipId,
+            string permissionKey,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(
+                identitySubjectId == IdentityId
+                && tenantId == TenantAId
+                && membershipId == MembershipId
+                && permissionKey == InfrastructurePermissionKeys.TenantContextRead
+                    ? PermissionCheckResult.Grant()
+                    : PermissionCheckResult.Deny("Not assigned."));
     }
 
     private sealed record TenantContextResponse(
@@ -219,7 +232,8 @@ public sealed class AuthenticationMembershipTests
         bool IdentityResolved,
         bool TenantContextAvailable,
         Guid? IdentitySubjectId,
-        Guid? TenantId);
+        Guid? TenantId,
+        Guid? MembershipId);
 
     private sealed class StubHostEnvironment(string environmentName) : IHostEnvironment
     {

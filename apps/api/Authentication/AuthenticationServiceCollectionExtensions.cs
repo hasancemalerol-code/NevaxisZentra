@@ -27,7 +27,14 @@ public static class AuthenticationServiceCollectionExtensions
         switch (options.Mode)
         {
             case AuthenticationMode.Disabled:
-                services.AddAuthentication();
+                services.AddAuthentication(authenticationOptions =>
+                    {
+                        authenticationOptions.DefaultAuthenticateScheme = DisabledAuthenticationHandler.SchemeName;
+                        authenticationOptions.DefaultChallengeScheme = DisabledAuthenticationHandler.SchemeName;
+                    })
+                    .AddScheme<AuthenticationSchemeOptions, DisabledAuthenticationHandler>(
+                        DisabledAuthenticationHandler.SchemeName,
+                        _ => { });
                 break;
 
             case AuthenticationMode.Development:

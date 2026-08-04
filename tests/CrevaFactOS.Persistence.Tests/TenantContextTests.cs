@@ -12,7 +12,7 @@ public sealed class TenantContextTests
         var tenantId = Guid.NewGuid();
         var accessor = new TenantContextAccessor();
 
-        accessor.Set(new TenantContext(tenantId, "tenant-key"));
+        accessor.Set(new TenantContext(tenantId, "tenant-key", Guid.NewGuid()));
 
         Assert.True(accessor.IsAvailable);
         Assert.Equal(tenantId, accessor.RequireTenantId());
@@ -32,10 +32,10 @@ public sealed class TenantContextTests
     public void TenantContextCannotBeReplacedWithinScope()
     {
         var accessor = new TenantContextAccessor();
-        accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a"));
+        accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a", Guid.NewGuid()));
 
         Assert.Throws<InvalidOperationException>(() =>
-            accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-b")));
+            accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-b", Guid.NewGuid())));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public sealed class TenantContextTests
 
         using var firstScope = provider.CreateScope();
         var firstAccessor = firstScope.ServiceProvider.GetRequiredService<TenantContextAccessor>();
-        firstAccessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a"));
+        firstAccessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a", Guid.NewGuid()));
 
         using var secondScope = provider.CreateScope();
         var secondAccessor = secondScope.ServiceProvider.GetRequiredService<TenantContextAccessor>();

@@ -22,6 +22,160 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.PermissionDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("permission_definitions", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_permission_definitions_key", "key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
+
+                            t.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantMembershipRole", b =>
+                {
+                    b.Property<Guid>("TenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_membership_id");
+
+                    b.Property<Guid>("TenantRoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_role_id");
+
+                    b.Property<DateTimeOffset>("AssignedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("assigned_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("TenantMembershipId", "TenantRoleId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantRoleId");
+
+                    b.HasIndex("TenantId", "TenantMembershipId");
+
+                    b.HasIndex("TenantId", "TenantRoleId");
+
+                    b.ToTable("tenant_membership_roles", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenant_membership_roles_status", "status IN ('Active', 'Inactive')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Id")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Key")
+                        .IsUnique();
+
+                    b.ToTable("tenant_roles", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenant_roles_status", "status IN ('Active', 'Inactive')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantRolePermissionAssignment", b =>
+                {
+                    b.Property<Guid>("TenantRoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_role_id");
+
+                    b.Property<Guid>("PermissionDefinitionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("permission_definition_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("TenantRoleId", "PermissionDefinitionId");
+
+                    b.HasIndex("PermissionDefinitionId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "TenantRoleId");
+
+                    b.ToTable("tenant_role_permissions", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Identity.IdentitySubject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -90,6 +244,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IdentitySubjectId");
+
+                    b.HasIndex("TenantId", "Id")
+                        .IsUnique();
 
                     b.HasIndex("TenantId", "IdentitySubjectId")
                         .IsUnique();
@@ -162,6 +319,48 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("tenant_isolation_probes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantMembershipRole", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Identity.TenantMembership", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "TenantMembershipId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Authorization.TenantRole", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "TenantRoleId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantRole", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Authorization.TenantRolePermissionAssignment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Authorization.PermissionDefinition", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Authorization.TenantRole", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "TenantRoleId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Identity.TenantMembership", b =>

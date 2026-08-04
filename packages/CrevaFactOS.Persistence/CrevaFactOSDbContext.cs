@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.Authorization;
 
 namespace CrevaFactOS.Persistence;
 
@@ -26,6 +27,14 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<IdentitySubject> IdentitySubjects => Set<IdentitySubject>();
 
     public DbSet<TenantMembership> TenantMemberships => Set<TenantMembership>();
+
+    public DbSet<PermissionDefinition> PermissionDefinitions => Set<PermissionDefinition>();
+
+    public DbSet<TenantRole> TenantRoles => Set<TenantRole>();
+
+    public DbSet<TenantRolePermissionAssignment> TenantRolePermissions => Set<TenantRolePermissionAssignment>();
+
+    public DbSet<TenantMembershipRole> TenantMembershipRoles => Set<TenantMembershipRole>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,6 +123,8 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.Property(membership => membership.CreatedAtUtc).HasColumnName("created_at_utc");
             entity.HasIndex(membership => new { membership.TenantId, membership.IdentitySubjectId })
                 .IsUnique();
+            entity.HasIndex(membership => new { membership.TenantId, membership.Id })
+                .IsUnique();
             entity.HasIndex(membership => membership.IdentitySubjectId);
             entity.HasOne<Tenant>()
                 .WithMany()
@@ -130,6 +141,94 @@ public sealed class CrevaFactOSDbContext : DbContext
                 tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && membership.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<PermissionDefinition>(entity =>
+        {
+            entity.ToTable("permission_definitions");
+            entity.HasKey(permission => permission.Id);
+            entity.Property(permission => permission.Id).HasColumnName("id");
+            entity.Property(permission => permission.Key).HasColumnName("key").HasMaxLength(150);
+            entity.Property(permission => permission.Description).HasColumnName("description").HasMaxLength(300);
+            entity.Property(permission => permission.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(permission => permission.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.HasIndex(permission => permission.Key).IsUnique();
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
+                table.HasCheckConstraint(
+                    "ck_permission_definitions_key",
+                    "key ~ '^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$'");
+            });
+        });
+
+        modelBuilder.Entity<TenantRole>(entity =>
+        {
+            entity.ToTable("tenant_roles");
+            entity.HasKey(role => role.Id);
+            entity.Property(role => role.Id).HasColumnName("id");
+            entity.Property(role => role.TenantId).HasColumnName("tenant_id");
+            entity.Property(role => role.Key).HasColumnName("key").HasMaxLength(100);
+            entity.Property(role => role.DisplayName).HasColumnName("display_name").HasMaxLength(200);
+            entity.Property(role => role.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(role => role.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.HasIndex(role => new { role.TenantId, role.Key }).IsUnique();
+            entity.HasIndex(role => new { role.TenantId, role.Id }).IsUnique();
+            entity.HasOne<Tenant>().WithMany().HasForeignKey(role => role.TenantId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_tenant_roles_status",
+                "status IN ('Active', 'Inactive')"));
+            entity.HasQueryFilter(role => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && role.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<TenantRolePermissionAssignment>(entity =>
+        {
+            entity.ToTable("tenant_role_permissions");
+            entity.HasKey(item => new { item.TenantRoleId, item.PermissionDefinitionId });
+            entity.Property(item => item.TenantId).HasColumnName("tenant_id");
+            entity.Property(item => item.TenantRoleId).HasColumnName("tenant_role_id");
+            entity.Property(item => item.PermissionDefinitionId).HasColumnName("permission_definition_id");
+            entity.HasIndex(item => item.TenantId);
+            entity.HasIndex(item => item.PermissionDefinitionId);
+            entity.HasOne<TenantRole>().WithMany()
+                .HasForeignKey(item => new { item.TenantId, item.TenantRoleId })
+                .HasPrincipalKey(role => new { role.TenantId, role.Id })
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PermissionDefinition>().WithMany()
+                .HasForeignKey(item => item.PermissionDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasQueryFilter(item => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && item.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<TenantMembershipRole>(entity =>
+        {
+            entity.ToTable("tenant_membership_roles");
+            entity.HasKey(item => new { item.TenantMembershipId, item.TenantRoleId });
+            entity.Property(item => item.TenantId).HasColumnName("tenant_id");
+            entity.Property(item => item.TenantMembershipId).HasColumnName("tenant_membership_id");
+            entity.Property(item => item.TenantRoleId).HasColumnName("tenant_role_id");
+            entity.Property(item => item.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(item => item.AssignedAtUtc).HasColumnName("assigned_at_utc");
+            entity.HasIndex(item => item.TenantId);
+            entity.HasIndex(item => item.TenantRoleId);
+            entity.HasOne<TenantMembership>().WithMany()
+                .HasForeignKey(item => new { item.TenantId, item.TenantMembershipId })
+                .HasPrincipalKey(membership => new { membership.TenantId, membership.Id })
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<TenantRole>().WithMany()
+                .HasForeignKey(item => new { item.TenantId, item.TenantRoleId })
+                .HasPrincipalKey(role => new { role.TenantId, role.Id })
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_tenant_membership_roles_status",
+                "status IN ('Active', 'Inactive')"));
+            entity.HasQueryFilter(item => tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && item.TenantId == tenantContextAccessor.Current!.TenantId);
         });
     }
 

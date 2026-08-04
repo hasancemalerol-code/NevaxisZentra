@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.Authorization;
 
 namespace CrevaFactOS.Persistence;
 
@@ -27,6 +28,8 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<CurrentIdentityAccessor>();
         services.AddScoped<ICurrentIdentityAccessor>(serviceProvider =>
             serviceProvider.GetRequiredService<CurrentIdentityAccessor>());
+        services.AddScoped<IAuthorizationContext, CurrentAuthorizationContext>();
+        services.AddScoped<IPermissionEvaluator, DenyAllPermissionEvaluator>();
 
         var options = configuration
             .GetSection(PersistenceOptions.SectionName)
@@ -60,6 +63,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<TenantDatabaseSession>();
         services.AddScoped<IIdentitySubjectResolver, PostgreSqlIdentitySubjectResolver>();
         services.AddScoped<ITenantMembershipResolver, PostgreSqlTenantMembershipResolver>();
+        services.AddScoped<IPermissionEvaluator, PostgreSqlPermissionEvaluator>();
 
         if (options.HealthChecksEnabled)
         {

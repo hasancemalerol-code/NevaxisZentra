@@ -97,6 +97,8 @@ pnpm db:migrations:rollback
 pnpm db:tenant-isolation:verify
 pnpm db:authentication-membership:verify
 pnpm auth:verify
+pnpm db:permission-authorization:verify
+pnpm authorization:verify
 ```
 
 `db:verify` opens a real Npgsql connection and executes `SELECT 1`. `db:migrations:script` writes an idempotent script under the ignored `artifacts/database` directory. `db:migrations:rollback` is explicitly destructive and moves the application database to migration zero; it does not delete the database or Docker volume.
@@ -111,7 +113,7 @@ FOUND-05 keeps `X-CrevaFactOS-Tenant` only as a selector. It may contain a tenan
 
 `/health/live` and `/health/ready` remain anonymous and tenant-neutral. In Development only, `GET /internal/tenant-context` reports authentication state, identity-resolution state, tenant-context state, and the resolved internal UUIDs. It exposes no claims, tokens, issuer secrets, memberships, lists, or mutation behavior.
 
-Middleware order is explicit: routing, authentication, identity resolution, tenant selection and membership validation, tenant-context establishment, then endpoint execution.
+Middleware order is explicit: routing, authentication, identity resolution, tenant selection and membership validation, tenant-context establishment, permission authorization, then endpoint execution.
 
 ### Authentication modes
 
@@ -129,7 +131,17 @@ PostgreSQL isolation uses transaction-local `crevafactos.tenant_id`, `current_te
 
 `pnpm auth:verify` additionally starts the API in a hidden Development process, uses the isolated development authentication headers, exercises the real PostgreSQL resolvers over HTTP, compares normalized denial responses, then stops the API and removes fixtures in a `finally` boundary. Its logs are written only under the ignored `artifacts/authentication` directory.
 
-Membership means only that an authenticated subject may enter a tenant. It grants no action permission. Roles and permissions are intentionally deferred to FOUND-06.
+Membership means only that an authenticated subject may enter a tenant. It grants no action permission.
+
+## Permission authorization
+
+FOUND-06 adds deny-by-default authorization. Every protected diagnostic action declares one stable infrastructure permission key. The only seeded definitions are `system.diagnostics.read`, `tenant.context.read`, and `authorization.diagnostics.read`; no tenant role or assignment is seeded. Permission keys use lowercase dot-separated segments and exact, case-sensitive equality. Prefixes, `*`, wildcard matching, inheritance, implicit ownership, global roles, and platform-administrator bypasses do not exist.
+
+Roles belong to one tenant. Composite foreign keys enforce that membership-role and role-permission assignments use the same tenant, while PostgreSQL RLS with `FORCE ROW LEVEL SECURITY` prevents runtime enumeration across tenants. The runtime evaluates one key through `has_tenant_permission(uuid, uuid, uuid, text)`, which revalidates active identity, tenant, membership, role, assignment, and permission definition. The runtime cannot enumerate `permission_definitions`.
+
+`GET /internal/tenant-context` requires `tenant.context.read`. Development-only `GET /internal/authorization-context` and `GET /internal/permission-check/{permissionKey}` require `authorization.diagnostics.read`. They return only current internal identifiers and the requested boolean result. Health endpoints explicitly remain anonymous. Development endpoints are not mapped in Production.
+
+`pnpm db:permission-authorization:verify` creates temporary tenant A/B roles and assignments, checks exact grants and all inactive/cross-tenant cases through the restricted runtime role, verifies composite-FK rejection and RLS/pool isolation, and cleans up. `pnpm authorization:verify` performs the corresponding real Development API checks. Product modules will introduce their own explicit permission definitions later; FOUND-06 adds none.
 
 ## Port Conflicts
 

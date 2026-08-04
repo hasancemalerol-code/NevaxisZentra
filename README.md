@@ -61,7 +61,7 @@ When an earlier architectural document can be read as authorizing a classic ERP 
 
 ## Repository Status
 
-The repository contains foundations through FOUND-05: executable applications, local infrastructure, PostgreSQL persistence, tenant RLS, external-identity-compatible authentication, and active tenant membership. Persistence and authentication remain disabled by default. Permissions, messaging behavior, audit, AI agents, integrations, and product capabilities are intentionally not implemented yet.
+The repository contains foundations through FOUND-06: executable applications, local infrastructure, PostgreSQL persistence, tenant RLS, external-identity-compatible authentication, active tenant membership, and deny-by-default tenant permission authorization. Persistence and authentication remain disabled by default. Messaging behavior, audit, AI agents, integrations, and product capabilities are intentionally not implemented yet.
 
 ## Development Prerequisites
 
@@ -127,3 +127,5 @@ The initial migration creates no business schema. When explicitly applied, only 
 FOUND-04 adds only the tenant registry, an infrastructure isolation probe, scoped tenant context, and PostgreSQL RLS enforcement. See the infrastructure guide for the temporary validated header contract and `pnpm db:tenant-isolation:verify`.
 
 FOUND-05 makes that header a selector only: authenticated external issuer/subject identity plus active membership is required before tenant context exists. Membership grants tenant entry, not permission; permissions begin in FOUND-06.
+
+FOUND-06 adds exact, case-sensitive infrastructure permission keys, tenant-owned roles, and active membership-role assignments. No wildcard, global role, platform administrator, role inheritance, direct membership permission, or product permission exists. See the infrastructure guide for `pnpm db:permission-authorization:verify` and `pnpm authorization:verify`.

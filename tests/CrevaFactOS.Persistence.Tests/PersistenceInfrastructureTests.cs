@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.Authorization;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -52,7 +53,16 @@ public sealed class PersistenceInfrastructureTests
             .ToArray();
 
         Assert.Equal(
-            [typeof(IdentitySubject), typeof(Tenant), typeof(TenantIsolationProbe), typeof(TenantMembership)],
+            [
+                typeof(IdentitySubject),
+                typeof(PermissionDefinition),
+                typeof(Tenant),
+                typeof(TenantIsolationProbe),
+                typeof(TenantMembership),
+                typeof(TenantMembershipRole),
+                typeof(TenantRole),
+                typeof(TenantRolePermissionAssignment),
+            ],
             mappedTypes);
     }
 
@@ -62,10 +72,11 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(3, migrations.Length);
+        Assert.Equal(4, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
+        Assert.EndsWith("_AddPermissionAuthorizationFoundation", migrations[3], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);
@@ -76,7 +87,7 @@ public sealed class PersistenceInfrastructureTests
     {
         var tenantA = Guid.NewGuid();
         var accessor = new TenantContextAccessor();
-        accessor.Set(new TenantContext(tenantA, "tenant-a"));
+        accessor.Set(new TenantContext(tenantA, "tenant-a", Guid.NewGuid()));
         using var context = CreateContext(accessor);
         var probe = new TenantIsolationProbe
         {
@@ -97,7 +108,7 @@ public sealed class PersistenceInfrastructureTests
     public void CrossTenantAttachmentIsRejected()
     {
         var accessor = new TenantContextAccessor();
-        accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a"));
+        accessor.Set(new TenantContext(Guid.NewGuid(), "tenant-a", Guid.NewGuid()));
         using var context = CreateContext(accessor);
         context.Add(new TenantIsolationProbe
         {
@@ -129,7 +140,7 @@ public sealed class PersistenceInfrastructureTests
     {
         var tenantId = Guid.NewGuid();
         var accessor = new TenantContextAccessor();
-        accessor.Set(new TenantContext(tenantId, "tenant-a"));
+        accessor.Set(new TenantContext(tenantId, "tenant-a", Guid.NewGuid()));
         using var context = CreateContext(accessor);
         var probe = new TenantIsolationProbe
         {

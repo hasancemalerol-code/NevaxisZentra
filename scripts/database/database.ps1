@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet('config', 'verify', 'state', 'tenant-isolation-verify', 'authentication-membership-verify', 'authentication-membership-bootstrap', 'authentication-membership-cleanup', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
+    [ValidateSet('config', 'verify', 'state', 'tenant-isolation-verify', 'authentication-membership-verify', 'authentication-membership-bootstrap', 'authentication-membership-cleanup', 'permission-authorization-verify', 'permission-authorization-bootstrap', 'permission-authorization-cleanup', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
     [string]$Operation,
 
     [Parameter(Position = 1)]
@@ -163,6 +163,18 @@ try {
         'authentication-membership-cleanup' {
             Assert-PostgreSqlContainerHealthy
             Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'authentication-membership-cleanup')
+        }
+        'permission-authorization-verify' {
+            Assert-PostgreSqlContainerHealthy
+            Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'permission-authorization-verify')
+        }
+        'permission-authorization-bootstrap' {
+            Assert-PostgreSqlContainerHealthy
+            Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'permission-authorization-bootstrap')
+        }
+        'permission-authorization-cleanup' {
+            Assert-PostgreSqlContainerHealthy
+            Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'permission-authorization-cleanup')
         }
         'migrations-list' {
             Invoke-DotNet ($efPrefix + @('migrations', 'list') + $efOptions)

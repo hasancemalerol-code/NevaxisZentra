@@ -85,3 +85,5 @@ FOUND-04 adds `tenant-isolation-verify`. It uses separate migration and runtime 
 FOUND-05 adds `authentication-membership-verify`. It performs explicit development-only fixture bootstrap, verifies active external identity mapping and tenant membership through the restricted runtime role, confirms pre-tenant tables cannot be enumerated, and removes fixtures in a `finally` boundary. It stores no password and creates no default account.
 
 `scripts/authentication/verify-local-authentication.ps1` performs the matching end-to-end Development API check. It starts a hidden temporary API process, verifies authenticated membership selection and normalized failures, and always attempts process shutdown and fixture cleanup.
+
+FOUND-06 adds `permission-authorization-verify` and `scripts/authorization/verify-local-authorization.ps1`. They create only temporary local tenant roles and assignments, verify exact permission grants, inactive and unassigned denials, database-enforced cross-tenant rejection, RLS and pooled/request isolation, then remove the fixtures. They create no default administrator, production role, product permission, or management endpoint.

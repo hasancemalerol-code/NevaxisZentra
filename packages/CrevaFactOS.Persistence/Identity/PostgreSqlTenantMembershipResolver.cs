@@ -19,7 +19,7 @@ internal sealed class PostgreSqlTenantMembershipResolver(IOptions<PersistenceOpt
         await connection.OpenAsync(cancellationToken);
         await using var command = new NpgsqlCommand(
             """
-            SELECT tenant_id, tenant_key
+            SELECT tenant_id, tenant_key, membership_id
             FROM resolve_active_tenant_membership(@identity_subject_id, @tenant_identifier)
             """,
             connection);
@@ -28,7 +28,7 @@ internal sealed class PostgreSqlTenantMembershipResolver(IOptions<PersistenceOpt
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
         return await reader.ReadAsync(cancellationToken)
-            ? new TenantContext(reader.GetGuid(0), reader.GetString(1))
+            ? new TenantContext(reader.GetGuid(0), reader.GetString(1), reader.GetGuid(2))
             : null;
     }
 }

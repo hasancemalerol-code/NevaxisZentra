@@ -5,6 +5,10 @@ using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Api.Tenancy;
 using CrevaFactOS.Api.Authentication;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Api.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +21,9 @@ builder.Services.AddCrevaFactOSPersistence(builder.Configuration);
 builder.Services.AddCrevaFactOSAuthentication(
     builder.Configuration,
     builder.Environment);
+builder.Services.AddAuthorization(PermissionPolicies.AddInfrastructurePolicies);
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 var app = builder.Build();
 
@@ -24,14 +31,15 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseMiddleware<IdentityResolutionMiddleware>();
 app.UseMiddleware<TenantResolutionMiddleware>();
+app.UseAuthorization();
 
 app.MapHealthChecks(
     "/health/live",
     new HealthCheckOptions
     {
         Predicate = static _ => false,
-    });
-app.MapHealthChecks("/health/ready");
+    }).AllowAnonymous();
+app.MapHealthChecks("/health/ready").AllowAnonymous();
 
 if (app.Environment.IsDevelopment())
 {
@@ -45,7 +53,42 @@ if (app.Environment.IsDevelopment())
         tenantContextAvailable = tenantContext.IsAvailable,
         identitySubjectId = currentIdentity.Current?.IdentitySubjectId,
         tenantId = tenantContext.Current?.TenantId,
-    });
+        membershipId = tenantContext.Current?.MembershipId,
+    }).RequireAuthorization(PermissionPolicies.TenantContextRead);
+
+    app.MapGet("/internal/authorization-context", (
+        HttpContext httpContext,
+        IAuthorizationContext authorizationContext) => new
+    {
+        authenticated = httpContext.User.Identity?.IsAuthenticated == true,
+        identitySubjectId = authorizationContext.Current?.IdentitySubjectId,
+        tenantId = authorizationContext.Current?.TenantId,
+        membershipId = authorizationContext.Current?.MembershipId,
+    }).RequireAuthorization(PermissionPolicies.AuthorizationDiagnosticsRead);
+
+    app.MapGet("/internal/permission-check/{permissionKey}", async (
+        string permissionKey,
+        IAuthorizationContext authorizationContext,
+        IPermissionEvaluator evaluator,
+        CancellationToken cancellationToken) =>
+    {
+        var current = authorizationContext.Current!;
+        var result = await evaluator.EvaluateAsync(
+            current.IdentitySubjectId,
+            current.TenantId,
+            current.MembershipId,
+            permissionKey,
+            cancellationToken);
+        return new
+        {
+            authenticated = true,
+            identitySubjectId = current.IdentitySubjectId,
+            tenantId = current.TenantId,
+            membershipId = current.MembershipId,
+            requestedPermissionKey = permissionKey,
+            granted = result.Granted,
+        };
+    }).RequireAuthorization(PermissionPolicies.AuthorizationDiagnosticsRead);
 }
 
 app.Run();

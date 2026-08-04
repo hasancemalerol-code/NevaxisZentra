@@ -1,6 +1,6 @@
 # Persistence Foundation
 
-This project contains only PostgreSQL/EF Core foundations. `CrevaFactOSDbContext` maps the tenant registry, identity subjects, active-membership bindings, and the explicitly infrastructure-only tenant isolation probe; it contains no product entities.
+This project contains only PostgreSQL/EF Core foundations. `CrevaFactOSDbContext` maps the tenant registry, identity subjects, active-membership bindings, tenant permission authorization, and the explicitly infrastructure-only tenant isolation probe; it contains no product entities.
 
 Persistence is disabled by default. When enabled, configuration is validated before the API starts. Migrations are held in `CrevaFactOS.Persistence.Migrations`, use the default `public` schema, and deliberately retain EF Core's standard `__EFMigrationsHistory` table. Applications never apply migrations automatically.
 
@@ -23,3 +23,9 @@ The ordinary API role is `crevafactos_runtime`: non-superuser, non-owner, and ex
 `tenant_memberships` grants entry to one tenant but grants no role or permission. `resolve_active_tenant_membership(uuid, text)` revalidates active identity, tenant, and membership before returning the minimum tenant context. Direct membership reads remain protected by tenant RLS and `FORCE ROW LEVEL SECURITY`.
 
 `CurrentIdentityAccessor` and `TenantContextAccessor` are independent scoped services. Establishing authenticated identity never establishes tenant context by itself.
+
+## Permission boundary
+
+`PermissionDefinition` is a global stable-key catalog, but the runtime can only evaluate one exact key through the narrow `has_tenant_permission` function. `TenantRole`, `TenantRolePermissionAssignment`, and `TenantMembershipRole` are tenant-scoped and protected by EF query filters plus forced PostgreSQL RLS. Composite tenant foreign keys reject cross-tenant assignments at the database boundary.
+
+`IAuthorizationContext` is scoped and becomes available only after both identity and membership-derived tenant context exist. `IPermissionEvaluator` grants only when every identity, tenant, membership, role, assignment, and permission status is active and the key exactly matches. There is no cross-request cache, role-name authorization, wildcard, inheritance, global administrator, or direct membership permission.

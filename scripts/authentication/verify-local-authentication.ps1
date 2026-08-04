@@ -64,10 +64,10 @@ function Assert-Status {
 }
 
 function New-IdentityHeaders {
-    param([string]$Subject, [string]$Tenant)
+    param([string]$Subject, [string]$Tenant, [string]$Issuer = 'https://identity.local.test')
 
     return @{
-        'X-CrevaFactOS-Dev-Issuer' = 'https://identity.local.test'
+        'X-CrevaFactOS-Dev-Issuer' = $Issuer
         'X-CrevaFactOS-Dev-Subject' = $Subject
         'X-CrevaFactOS-Tenant' = $Tenant
     }
@@ -90,6 +90,10 @@ try {
     & powershell -NoProfile -ExecutionPolicy Bypass -File $databaseScript authentication-membership-bootstrap
     if ($LASTEXITCODE -ne 0) {
         throw 'Authentication fixture bootstrap failed.'
+    }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $databaseScript permission-authorization-bootstrap
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Permission fixture bootstrap failed.'
     }
 
     New-Item -ItemType Directory -Path $artifactDirectory -Force | Out-Null
@@ -123,8 +127,8 @@ try {
         throw 'Development API did not become healthy before the timeout.'
     }
 
-    $activeByKey = Invoke-TestRequest -Headers (New-IdentityHeaders 'active-member' 'auth-a')
-    $activeById = Invoke-TestRequest -Headers (New-IdentityHeaders 'active-member' 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1')
+    $activeByKey = Invoke-TestRequest -Headers (New-IdentityHeaders 'tenant-a-member' 'authorization-a' 'https://authorization.local.test')
+    $activeById = Invoke-TestRequest -Headers (New-IdentityHeaders 'tenant-a-member' 'a6000000-0000-4000-8000-000000000001' 'https://authorization.local.test')
     Assert-Status $activeByKey 200 'Active membership by key'
     Assert-Status $activeById 200 'Active membership by UUID'
 
@@ -161,5 +165,9 @@ finally {
     & powershell -NoProfile -ExecutionPolicy Bypass -File $databaseScript authentication-membership-cleanup
     if ($LASTEXITCODE -ne 0) {
         Write-Warning 'Authentication fixture cleanup failed.'
+    }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $databaseScript permission-authorization-cleanup
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning 'Permission fixture cleanup failed.'
     }
 }
