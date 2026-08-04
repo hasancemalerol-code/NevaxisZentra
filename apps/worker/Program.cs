@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using CrevaFactOS.Configuration;
 
 namespace CrevaFactOS.Worker;
 
@@ -18,6 +19,7 @@ public static class WorkerApplication
         builder.Configuration["Application:Name"] ??= "CrevaFactOS Worker";
 
         ValidateConfiguration(builder.Configuration);
+        builder.Services.AddInfrastructureOptions(builder.Configuration);
         builder.Services.AddHostedService<StartupReporter>();
 
         return builder.Build();

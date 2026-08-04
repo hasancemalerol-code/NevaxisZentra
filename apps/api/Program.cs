@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using CrevaFactOS.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,7 @@ builder.Configuration["Application:Name"] ??= "CrevaFactOS API";
 ValidateConfiguration(builder.Configuration);
 
 builder.Services.AddHealthChecks();
+builder.Services.AddInfrastructureOptions(builder.Configuration);
 
 var app = builder.Build();
 

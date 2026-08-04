@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using CrevaFactOS.Configuration;
 
 namespace CrevaFactOS.EdgeAgent;
 
@@ -18,6 +19,7 @@ public static class EdgeAgentApplication
         builder.Configuration["Application:Name"] ??= "CrevaFactOS Edge Agent";
 
         ValidateConfiguration(builder.Configuration);
+        builder.Services.AddInfrastructureOptions(builder.Configuration);
         builder.Services.AddHostedService<StartupReporter>();
 
         return builder.Build();

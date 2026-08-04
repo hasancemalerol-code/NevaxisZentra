@@ -72,3 +72,6 @@ Scripts must be non-interactive by default where used in CI, validate destructiv
 
 Repository scripts cannot bypass migrations, permissions, authoritative approvals, audit, connector idempotency, or Edge safety controls.
 
+## Local Infrastructure Verification
+
+`scripts/infrastructure/verify-local-infrastructure.ps1` checks only Docker availability, PostgreSQL and RabbitMQ container health, and RabbitMQ management API reachability. It does not create schemas, queues, users, vhosts, policies, or application connections.

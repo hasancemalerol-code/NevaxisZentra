@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\apps\api\CrevaFactOS.Api.csproj" />
     <ProjectReference Include="..\..\apps\worker\CrevaFactOS.Worker.csproj" />
     <ProjectReference Include="..\..\apps\edge-agent\CrevaFactOS.EdgeAgent.csproj" />
+    <ProjectReference Include="..\..\packages\CrevaFactOS.Configuration\CrevaFactOS.Configuration.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

@@ -1,0 +1,53 @@
+name: crevafactos-local
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CREVAFACTOS_POSTGRES_DATABASE:-crevafactos_local}
+      POSTGRES_USER: ${CREVAFACTOS_POSTGRES_USERNAME:-crevafactos}
+      POSTGRES_PASSWORD: ${CREVAFACTOS_POSTGRES_PASSWORD:-local_dev_only_change_me}
+    ports:
+      - "${CREVAFACTOS_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - local-infrastructure
+
+  rabbitmq:
+    image: rabbitmq:4.1.4-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${CREVAFACTOS_RABBITMQ_USERNAME:-crevafactos}
+      RABBITMQ_DEFAULT_PASS: ${CREVAFACTOS_RABBITMQ_PASSWORD:-local_dev_only_change_me}
+    ports:
+      - "${CREVAFACTOS_RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${CREVAFACTOS_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - local-infrastructure
+
+volumes:
+  postgres-data:
+    name: crevafactos-local-postgres-data
+  rabbitmq-data:
+    name: crevafactos-local-rabbitmq-data
+
+networks:
+  local-infrastructure:
+    name: crevafactos-local-network
+    driver: bridge

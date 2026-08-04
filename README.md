@@ -104,3 +104,15 @@ pnpm dev:edge-agent
 The Web application defaults to `http://localhost:3000` and exposes `GET /health`. The API launch profile uses `http://localhost:5000` and exposes `GET /health/live` and `GET /health/ready`.
 
 Worker and Edge Agent only validate configuration, start their generic hosts, and emit structured startup logs. They contain no product jobs or machine connectivity.
+
+## Local Infrastructure
+
+PostgreSQL and RabbitMQ local development dependencies are documented in [infrastructure/README.md](infrastructure/README.md).
+
+```text
+pnpm infra:start
+pnpm infra:verify
+pnpm infra:stop
+```
+
+No database schema, queue, connector, or product integration is created by the local infrastructure baseline.

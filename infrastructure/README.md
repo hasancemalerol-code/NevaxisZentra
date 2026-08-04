@@ -1,278 +1,91 @@
-# CrevaFactOS Infrastructure
+# CrevaFactOS Local Development Infrastructure
 
+FOUND-02 provides only the local PostgreSQL and RabbitMQ development dependencies. It does not create database schemas, migrations, queues, exchanges, policies, connectors, or product behavior.
 
+## Prerequisites
 
-Bu klasör, CrevaFactOS platformunun yerel geliştirme, gözlemlenebilirlik, dağıtım ve altyapı tanımlarını içerir.
+- Docker Desktop with Docker Compose
+- PowerShell 7 or Windows PowerShell 5.1
+- pnpm configured according to the root repository prerequisites
 
+Docker Desktop must be running before lifecycle or verification commands are used.
 
+## Environment Setup
 
-## Klasörler
+The Compose file has safe local defaults. To customize ports or credentials:
 
-
-
-### `docker`
-
-
-
-Yerel geliştirme ve container yapılandırmalarını içerir.
-
-
-
-Başlangıç kapsamı:
-
-
-
-- Web image
-
-- API image
-
-- Worker image
-
-- AI Orchestrator image
-
-- Edge Agent geliştirme image'ı
-
-- PostgreSQL
-
-- Redis
-
-- RabbitMQ
-
-- MinIO
-
-- Docker Compose yardımcı dosyaları
-
-
-
-### `database`
-
-
-
-Veritabanı altyapısı ve operasyonel yardımcı dosyaları içerir.
-
-
-
-Kapsam:
-
-
-
-- Yerel başlangıç scriptleri
-
-- Geliştirme seed hazırlıkları
-
-- Yedekleme ve geri yükleme yardımcıları
-
-- Migration operasyon notları
-
-- Veritabanı sağlık kontrolü
-
-- PostgreSQL extension tanımları
-
-
-
-Ana schema değişiklikleri uygulama migration'ları üzerinden yapılmalıdır.
-
-
-
-### `monitoring`
-
-
-
-Sistem gözlemleme altyapısını içerir.
-
-
-
-Kapsam:
-
-
-
-- Log toplama
-
-- Metrik tanımları
-
-- Dashboard hazırlıkları
-
-- Alarm kuralları
-
-- API sağlık durumu
-
-- Worker sağlık durumu
-
-- RabbitMQ kuyrukları
-
-- PostgreSQL bağlantıları
-
-- Redis sağlık durumu
-
-- Edge Agent bağlantıları
-
-- Makine telemetrisi
-
-- AI görev metrikleri
-
-
-
-### `deployment`
-
-
-
-Staging ve production dağıtım tanımlarını içerir.
-
-
-
-İlerleyen aşamalarda:
-
-
-
-- Container deployment
-
-- Ortam yapılandırmaları
-
-- Secret referansları
-
-- Reverse proxy
-
-- TLS
-
-- Ölçekleme
-
-- Rollback
-
-- Health probe
-
-- Backup politikaları
-
-- Felaket kurtarma
-
-
-
-tanımları burada tutulabilir.
-
-
-
-## Ortamlar
-
-
-
-CrevaFactOS en az aşağıdaki ortamları destekleyecektir:
-
-
-
-- Local
-
-- Test
-
-- Staging
-
-- Production
-
-
-
-Her ortam ayrı:
-
-
-
-- PostgreSQL veritabanı
-
-- Redis instance veya namespace
-
-- RabbitMQ virtual host
-
-- Object storage bucket
-
-- Secret
-
-- Log seviyesi
-
-- AI sağlayıcı yapılandırması
-
-- Entegrasyon credential'ları
-
-
-
-kullanmalıdır.
-
-
-
-## Yerel Geliştirme Servisleri
-
-
-
-Başlangıç servisleri:
-
-
-
-| Servis | Port |
-
-| --- | ---: |
-
-| Web | 3000 |
-
-| API | 5000 |
-
-| PostgreSQL | 5432 |
-
-| Redis | 6379 |
-
-| RabbitMQ | 5672 |
-
-| RabbitMQ Yönetim | 15672 |
-
-| MinIO API | 9000 |
-
-| MinIO Panel | 9001 |
-
-
-
-Portlar yalnızca development varsayımlarıdır ve merkezi yapılandırma üzerinden değiştirilebilir olmalıdır.
-
-
-
-## Temel Kurallar
-
-
-
-- Production secret'ları repository içinde tutulmamalıdır.
-
-- Gerçek credential değerleri yalnızca güvenli secret yönetim sistemlerinde saklanmalıdır.
-
-- Repository içinde yalnızca `.env.example` bulunmalıdır.
-
-- Local geliştirme verileri production verisi içermemelidir.
-
-- Production schema değişiklikleri migration üzerinden yapılmalıdır.
-
-- Container image'ları tekrar üretilebilir olmalıdır.
-
-- Health check bulunmayan servis production'a alınmamalıdır.
-
-- Backup yalnızca alınmamalı, geri yükleme testi de yapılmalıdır.
-
-- Ortamlar arasında credential paylaşılmamalıdır.
-
-- Altyapı değişiklikleri kod incelemesine tabi olmalıdır.
-
-
-
-## Health Check Standardı
-
-
-
-### Liveness
-
-
-
-Uygulama sürecinin çalışıp çalışmadığını kontrol eder.
-
-
-
-```text
-
-/health/live
-
+```powershell
+Copy-Item infrastructure/.env.example infrastructure/.env
 ```
 
-Readiness checks use `/health/ready` and verify only dependencies required to accept work. Health responses must not disclose credentials, network topology, tenant data, or connector secrets.
+`infrastructure/.env` is ignored by Git. Values in `.env.example` are development-only examples and must never be reused for staging or production.
 
-Infrastructure is introduced incrementally by approved packages. ERP connectivity is read-only-first, RabbitMQ delivery is paired with the transactional outbox, and Edge deployment cannot weaken factory-local safety controls.
+## Lifecycle Commands
 
+Run from the repository root:
+
+```powershell
+pnpm infra:config
+pnpm infra:start
+pnpm infra:status
+pnpm infra:verify
+pnpm infra:logs
+pnpm infra:stop
+```
+
+`infra:stop` stops containers without deleting their named volumes.
+
+The following command is intentionally destructive and must be invoked explicitly:
+
+```powershell
+pnpm infra:reset
+```
+
+It removes the local containers, network, and both named data volumes. It is never part of normal shutdown.
+
+## Local Endpoints
+
+| Service | Host | Default port | Local identity |
+| --- | --- | ---: | --- |
+| PostgreSQL | `localhost` | `5432` | Database `crevafactos_local`, user `crevafactos` |
+| RabbitMQ AMQP | `localhost` | `5672` | User `crevafactos` |
+| RabbitMQ Management | `http://localhost:15672` | `15672` | User `crevafactos` |
+
+The example password is `local_dev_only_change_me`. It is intentionally non-secret and suitable only for an isolated developer workstation.
+
+## Health Verification
+
+`pnpm infra:verify` waits up to 120 seconds for:
+
+- PostgreSQL container health via `pg_isready`
+- RabbitMQ container health via `rabbitmq-diagnostics ping`
+- RabbitMQ management API health at `/api/health/checks/local-alarms`
+
+The verifier fails clearly if Docker Desktop is unavailable, a service is absent or unhealthy, credentials do not match, or the management endpoint cannot be reached.
+
+Application `/health/live` and `/health/ready` endpoints remain independent of these development services because no application uses PostgreSQL or RabbitMQ yet.
+
+## Application Configuration Binding
+
+`CrevaFactOS.Configuration` provides typed PostgreSQL and RabbitMQ endpoint options. It binds the `Infrastructure` configuration section and the documented `CREVAFACTOS_*` environment variables.
+
+API, Worker, and Edge Agent currently register these options as optional. They neither require credentials nor open connections. A future package must explicitly declare a dependency before startup validation is activated.
+
+## Port Conflicts
+
+If `5432`, `5672`, or `15672` is already in use:
+
+1. Copy `.env.example` to `.env`.
+2. Change the corresponding host-side port.
+3. Run `pnpm infra:config` to inspect the resolved configuration.
+4. Restart with `pnpm infra:start`.
+
+Container ports remain unchanged; only workstation ports are overridden.
+
+## Current Boundary
+
+- PostgreSQL is empty except for its standard initialization metadata.
+- RabbitMQ uses only the minimal default local user and `/` virtual host created by the official image.
+- No business tables, migrations, queues, exchanges, users, additional vhosts, or policies are created.
+- No application database or RabbitMQ client package is installed.
+- These services are development dependencies, not CrevaFactOS product modules.

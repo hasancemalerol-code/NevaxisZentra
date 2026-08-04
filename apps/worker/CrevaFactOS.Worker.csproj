@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\..\packages\CrevaFactOS.Configuration\CrevaFactOS.Configuration.csproj" />
   </ItemGroup>
 </Project>
