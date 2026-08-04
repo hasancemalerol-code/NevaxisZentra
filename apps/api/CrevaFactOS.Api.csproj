@@ -5,5 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\packages\CrevaFactOS.Configuration\CrevaFactOS.Configuration.csproj" />
+    <ProjectReference Include="..\..\packages\CrevaFactOS.Persistence\CrevaFactOS.Persistence.csproj" />
   </ItemGroup>
 </Project>

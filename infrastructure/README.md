@@ -47,11 +47,13 @@ It removes the local containers, network, and both named data volumes. It is nev
 
 | Service | Host | Default port | Local identity |
 | --- | --- | ---: | --- |
-| PostgreSQL | `localhost` | `5432` | Database `crevafactos_local`, user `crevafactos` |
+| PostgreSQL | `127.0.0.1` | `5432` | Database `crevafactos_local`, user `crevafactos` |
 | RabbitMQ AMQP | `localhost` | `5672` | User `crevafactos` |
 | RabbitMQ Management | `http://localhost:15672` | `15672` | User `crevafactos` |
 
 The example password is `local_dev_only_change_me`. It is intentionally non-secret and suitable only for an isolated developer workstation.
+
+The PostgreSQL development default uses explicit IPv4 (`127.0.0.1`) so a local IPv6/WSL `localhost` relay cannot redirect the application to a different PostgreSQL instance.
 
 ## Health Verification
 
@@ -63,13 +65,42 @@ The example password is `local_dev_only_change_me`. It is intentionally non-secr
 
 The verifier fails clearly if Docker Desktop is unavailable, a service is absent or unhealthy, credentials do not match, or the management endpoint cannot be reached.
 
-Application `/health/live` and `/health/ready` endpoints remain independent of these development services because no application uses PostgreSQL or RabbitMQ yet.
+Application `/health/live` never depends on PostgreSQL. `/health/ready` remains independent by default; PostgreSQL is included only when both `CREVAFACTOS__PERSISTENCE__ENABLED` and `CREVAFACTOS__PERSISTENCE__HEALTH_CHECKS_ENABLED` are `true`.
 
 ## Application Configuration Binding
 
 `CrevaFactOS.Configuration` provides typed PostgreSQL and RabbitMQ endpoint options. It binds the `Infrastructure` configuration section and the documented `CREVAFACTOS_*` environment variables.
 
-API, Worker, and Edge Agent currently register these options as optional. They neither require credentials nor open connections. A future package must explicitly declare a dependency before startup validation is activated.
+API, Worker, and Edge Agent retain the FOUND-02 infrastructure endpoint options. FOUND-03 additionally gives only the API an optional persistence registration. Worker and Edge Agent do not reference persistence.
+
+## Persistence and Migrations
+
+The API persistence layer is disabled by default. Local commands read `infrastructure/.env` when present, fall back to the documented workstation defaults, and allow process-level `CREVAFACTOS__PERSISTENCE__*` variables to override those values. Copy `.env.example` before changing ports or credentials.
+
+Restore the pinned EF tool once after cloning:
+
+```powershell
+dotnet tool restore
+```
+
+Run database operations explicitly from the repository root:
+
+```powershell
+pnpm db:config
+pnpm db:verify
+pnpm db:state
+pnpm db:migrations:list
+pnpm db:migrations:add -- DescriptivePascalCaseName
+pnpm db:migrations:apply
+pnpm db:migrations:script
+pnpm db:migrations:rollback
+```
+
+`db:verify` opens a real Npgsql connection and executes `SELECT 1`. `db:migrations:script` writes an idempotent script under the ignored `artifacts/database` directory. `db:migrations:rollback` is explicitly destructive and moves the application database to migration zero; it does not delete the database or Docker volume.
+
+Migrations never run during API startup. The empty `InitialInfrastructureBaseline` migration creates no business tables, custom schemas, extensions, triggers, functions, roles, or seed data. Applying it creates only EF Core's standard `public.__EFMigrationsHistory` metadata table. The default history table and schema are retained deliberately to avoid inventing a product schema before domain boundaries exist.
+
+Never commit `infrastructure/.env`, passwords, or connection strings. Diagnostics expose only non-secret endpoint metadata; they omit usernames, passwords, and full connection strings.
 
 ## Port Conflicts
 
@@ -84,8 +115,8 @@ Container ports remain unchanged; only workstation ports are overridden.
 
 ## Current Boundary
 
-- PostgreSQL is empty except for its standard initialization metadata.
+- Before FOUND-03 migration application, PostgreSQL is empty except for its standard initialization metadata. After application, only `public.__EFMigrationsHistory` is added.
 - RabbitMQ uses only the minimal default local user and `/` virtual host created by the official image.
-- No business tables, migrations, queues, exchanges, users, additional vhosts, or policies are created.
-- No application database or RabbitMQ client package is installed.
+- No business tables or business migrations, queues, exchanges, users, additional vhosts, or policies are created.
+- EF Core/Npgsql are isolated to the persistence baseline and connectivity tool. No application RabbitMQ client package is installed.
 - These services are development dependencies, not CrevaFactOS product modules.

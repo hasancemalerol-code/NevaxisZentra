@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using CrevaFactOS.Configuration;
+using CrevaFactOS.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ ValidateConfiguration(builder.Configuration);
 
 builder.Services.AddHealthChecks();
 builder.Services.AddInfrastructureOptions(builder.Configuration);
+builder.Services.AddCrevaFactOSPersistence(builder.Configuration);
 
 var app = builder.Build();
 

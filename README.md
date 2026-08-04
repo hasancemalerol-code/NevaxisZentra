@@ -61,7 +61,7 @@ When an earlier architectural document can be read as authorizing a classic ERP 
 
 ## Repository Status
 
-The repository contains the FOUND-01 executable skeleton. Product capabilities, infrastructure, persistence, messaging, authorization, AI agents, and integrations are intentionally not implemented yet.
+The repository contains the FOUND-01 executable skeleton, FOUND-02 local infrastructure, and the FOUND-03 PostgreSQL persistence/migration baseline. Persistence is disabled by default and contains no product entities or business schema. Messaging behavior, authorization, AI agents, integrations, and product capabilities are intentionally not implemented yet.
 
 ## Development Prerequisites
 
@@ -74,6 +74,7 @@ The repository contains the FOUND-01 executable skeleton. Product capabilities, 
 ```text
 pnpm install
 dotnet restore CrevaFactOS.sln
+dotnet tool restore
 ```
 
 ## Build and Validate
@@ -116,3 +117,9 @@ pnpm infra:stop
 ```
 
 No database schema, queue, connector, or product integration is created by the local infrastructure baseline.
+
+## Persistence Baseline
+
+FOUND-03 adds an empty EF Core context and a separate migration assembly. It never runs migrations automatically. See [infrastructure/README.md](infrastructure/README.md) for configuration, connectivity verification, migration lifecycle commands, rollback behavior, and secret-handling rules.
+
+The initial migration creates no business schema. When explicitly applied, only EF Core's `public.__EFMigrationsHistory` metadata table exists.

@@ -75,3 +75,7 @@ Repository scripts cannot bypass migrations, permissions, authoritative approval
 ## Local Infrastructure Verification
 
 `scripts/infrastructure/verify-local-infrastructure.ps1` checks only Docker availability, PostgreSQL and RabbitMQ container health, and RabbitMQ management API reachability. It does not create schemas, queues, users, vhosts, policies, or application connections.
+
+## Database Lifecycle
+
+`scripts/database/database.ps1` provides the explicit FOUND-03 configuration, connectivity, migration, SQL generation, rollback, and state commands exposed through root `pnpm db:*` scripts. It never starts Docker, runs from application startup, prints secrets, or deletes the PostgreSQL volume.
