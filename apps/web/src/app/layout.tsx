@@ -8,13 +8,13 @@ import "./styles.css";
 const config = getWebApplicationConfig();
 
 export const metadata: Metadata = {
-  title: config.applicationName,
-  description: "CrevaFactOS executable web foundation.",
+  title: `${config.applicationName} — Factory Operations`,
+  description: "CrevaFactOS desktop-first factory operations workspace.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <body>{children}</body>
     </html>
   );

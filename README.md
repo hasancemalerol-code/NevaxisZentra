@@ -106,6 +106,8 @@ The Web application defaults to `http://localhost:3000` and exposes `GET /health
 
 Worker and Edge Agent only validate configuration, start their generic hosts, and emit structured startup logs. They contain no product jobs or machine connectivity.
 
+UI-01 adds the desktop-first Web application shell and foundational design system without implementing the locked dashboard or product workflows. See [apps/web/README.md](apps/web/README.md) for the shell structure, locked navigation, tokens, responsive behavior, accessibility contract, and deferred UI scope.
+
 ## Local Infrastructure
 
 PostgreSQL and RabbitMQ local development dependencies are documented in [infrastructure/README.md](infrastructure/README.md).
