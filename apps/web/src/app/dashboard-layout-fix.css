@@ -1,0 +1,1103 @@
+/*
+ * CrevaFactOS dashboard layout overrides.
+ * Loaded after styles.css, globals.css and dashboard.css.
+ */
+
+.dashboard-page {
+  display: flex !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 28px !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+
+/* Header */
+
+.dashboard-page .dashboard-header {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 190px !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 32px !important;
+  padding: 28px 32px !important;
+}
+
+.dashboard-page .dashboard-header__main {
+  display: flex !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
+  gap: 22px !important;
+}
+
+.dashboard-page .dashboard-header__eyebrow {
+  display: flex !important;
+  width: auto !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.dashboard-page .dashboard-header__preview-badge,
+.dashboard-page .dashboard-header__context {
+  display: inline-flex !important;
+  width: auto !important;
+  min-height: 32px !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 11px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 999px !important;
+  background: rgb(255 255 255 / 86%) !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-page .dashboard-header__preview-badge {
+  border-color: rgb(35 86 168 / 20%) !important;
+  background: var(--dashboard-primary-soft) !important;
+  color: var(--dashboard-primary) !important;
+}
+
+.dashboard-page .dashboard-header__preview-indicator {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: var(--dashboard-primary) !important;
+  box-shadow: 0 0 0 4px rgb(35 86 168 / 10%) !important;
+}
+
+.dashboard-page .dashboard-header__copy {
+  min-width: 0 !important;
+}
+
+.dashboard-page .dashboard-header__title {
+  width: auto !important;
+  margin: 0 !important;
+  font-size: clamp(2rem, 3vw, 2.8rem) !important;
+  font-weight: 820 !important;
+  letter-spacing: -0.05em !important;
+  line-height: 1.04 !important;
+}
+
+.dashboard-page .dashboard-header__subtitle {
+  display: block !important;
+  width: auto !important;
+  max-width: 760px !important;
+  margin: 14px 0 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.94rem !important;
+  line-height: 1.65 !important;
+}
+
+.dashboard-page .dashboard-header__actions {
+  display: flex !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding-top: 4px !important;
+}
+
+.dashboard-page .dashboard-header__updated {
+  display: inline-flex !important;
+  width: auto !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.75rem !important;
+  font-weight: 650 !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-page .dashboard-header__review-button {
+  display: inline-flex !important;
+  min-height: 40px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: var(--dashboard-text-muted) !important;
+  font: inherit !important;
+  font-size: 0.73rem !important;
+  font-weight: 700 !important;
+  cursor: not-allowed !important;
+  opacity: 0.78 !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-page .dashboard-header__button-label {
+  padding: 4px 6px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+  color: var(--dashboard-neutral) !important;
+  font-size: 0.58rem !important;
+}
+
+/* KPI metrics */
+
+.dashboard-page .dashboard-metrics {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+}
+
+.dashboard-page
+  .dashboard-metrics
+  > .dashboard-section-heading--compact {
+  display: flex !important;
+  width: 100% !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 24px !important;
+  padding: 20px 24px 17px !important;
+}
+
+.dashboard-page
+  .dashboard-metrics
+  .dashboard-section-heading__description {
+  display: block !important;
+  width: auto !important;
+  max-width: 420px !important;
+  margin: 0 !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.7rem !important;
+  line-height: 1.5 !important;
+  text-align: right !important;
+}
+
+.dashboard-page .dashboard-metrics__grid {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+}
+
+.dashboard-page
+  .dashboard-metrics__grid
+  > .dashboard-metric-card {
+  display: flex !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 190px !important;
+  padding: 18px !important;
+  flex-direction: column !important;
+  border: 0 !important;
+  border-right: 1px solid var(--dashboard-border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.dashboard-page
+  .dashboard-metrics__grid
+  > .dashboard-metric-card:last-child {
+  border-right: 0 !important;
+}
+
+.dashboard-page .dashboard-metric-card__top {
+  display: flex !important;
+  width: 100% !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.dashboard-page .dashboard-metric-card__content {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 18px !important;
+}
+
+.dashboard-page .dashboard-metric-card__label,
+.dashboard-page .dashboard-metric-card__value,
+.dashboard-page .dashboard-metric-card__supporting {
+  display: block !important;
+  width: auto !important;
+  max-width: none !important;
+  white-space: normal !important;
+  writing-mode: horizontal-tb !important;
+  word-break: normal !important;
+}
+
+.dashboard-page .dashboard-metric-card__value {
+  margin: 11px 0 0 !important;
+  font-size: 1.65rem !important;
+}
+
+.dashboard-page .dashboard-metric-card__supporting {
+  margin: 10px 0 0 !important;
+  line-height: 1.5 !important;
+}
+
+.dashboard-page .dashboard-metric-card__footer {
+  display: block !important;
+  width: 100% !important;
+  margin-top: auto !important;
+  padding-top: 12px !important;
+}
+
+/* Main layout */
+
+.dashboard-page .dashboard-layout {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns:
+    minmax(0, 1.72fr)
+    minmax(380px, 0.72fr) !important;
+  align-items: start !important;
+  gap: 20px !important;
+}
+
+.dashboard-page .dashboard-layout__primary,
+.dashboard-page .dashboard-layout__secondary {
+  display: flex !important;
+  width: auto !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+
+/* Daily operations */
+
+.dashboard-page .daily-operations__metrics {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  padding: 20px 24px 22px !important;
+}
+
+.dashboard-page .daily-operation-metric {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 190px !important;
+  padding: 16px !important;
+  flex-direction: column !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 14px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.dashboard-page .daily-operation-metric__header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.dashboard-page .daily-operation-metric__icon {
+  display: grid !important;
+  width: 34px !important;
+  height: 34px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: var(--dashboard-primary-soft) !important;
+  color: var(--dashboard-primary) !important;
+}
+
+.dashboard-page .daily-operation-metric__tone {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.64rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .daily-operation-metric--success .daily-operation-metric__tone {
+  color: var(--dashboard-positive) !important;
+}
+
+.dashboard-page .daily-operation-metric--warning .daily-operation-metric__tone {
+  color: var(--dashboard-warning) !important;
+}
+
+.dashboard-page .daily-operation-metric--danger .daily-operation-metric__tone {
+  color: var(--dashboard-danger) !important;
+}
+
+.dashboard-page .daily-operation-metric__label {
+  margin: 16px 0 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .daily-operation-metric__value {
+  margin: 10px 0 0 !important;
+  color: var(--dashboard-text) !important;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.dashboard-page .daily-operation-metric__supporting {
+  margin: 9px 0 0 !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.67rem !important;
+  line-height: 1.5 !important;
+}
+
+.dashboard-page .daily-operation-metric__progress {
+  margin-top: auto !important;
+  padding-top: 16px !important;
+}
+
+.dashboard-page .daily-operation-metric__progress-header,
+.dashboard-page .shift-summary-card__progress-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin-bottom: 7px !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.62rem !important;
+}
+
+.dashboard-page .daily-operation-metric__progress-track,
+.dashboard-page .shift-summary-card__progress-track {
+  overflow: hidden !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+}
+
+.dashboard-page .daily-operation-metric__progress-value,
+.dashboard-page .shift-summary-card__progress-value {
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: var(--dashboard-primary) !important;
+}
+
+.dashboard-page .daily-operations__shifts {
+  padding: 20px 24px 24px !important;
+  border-top: 1px solid var(--dashboard-border) !important;
+}
+
+.dashboard-page .daily-operations__subheading {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+.dashboard-page .daily-operations__subheading-title {
+  margin: 0 !important;
+  font-size: 0.84rem !important;
+  font-weight: 750 !important;
+}
+
+.dashboard-page .daily-operations__subheading-description {
+  margin: 5px 0 0 !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.67rem !important;
+  line-height: 1.45 !important;
+}
+
+.dashboard-page .daily-operations__shift-count {
+  flex: 0 0 auto !important;
+  padding: 6px 9px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+  color: var(--dashboard-neutral) !important;
+  font-size: 0.63rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .daily-operations__shift-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+.dashboard-page .shift-summary-card {
+  min-width: 0 !important;
+  padding: 15px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 13px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.dashboard-page .shift-summary-card__header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.dashboard-page .shift-summary-card__title {
+  margin: 0 !important;
+  font-size: 0.75rem !important;
+  font-weight: 750 !important;
+}
+
+.dashboard-page .shift-summary-card__time {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin: 5px 0 0 !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.62rem !important;
+}
+
+.dashboard-page .shift-summary-card__status {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 7px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+  color: var(--dashboard-neutral) !important;
+  font-size: 0.58rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .shift-summary-card__status--healthy {
+  background: var(--dashboard-positive-soft) !important;
+  color: var(--dashboard-positive) !important;
+}
+
+.dashboard-page .shift-summary-card__status--attention,
+.dashboard-page .shift-summary-card__status--pending {
+  background: var(--dashboard-warning-soft) !important;
+  color: var(--dashboard-warning) !important;
+}
+
+.dashboard-page .shift-summary-card__status--critical,
+.dashboard-page .shift-summary-card__status--offline {
+  background: var(--dashboard-danger-soft) !important;
+  color: var(--dashboard-danger) !important;
+}
+
+.dashboard-page .shift-summary-card__status-indicator {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+}
+
+.dashboard-page .shift-summary-card__numbers {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 9px !important;
+  margin-top: 14px !important;
+}
+
+.dashboard-page .shift-summary-card__number {
+  padding: 9px !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+}
+
+.dashboard-page .shift-summary-card__number-label {
+  display: block !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.57rem !important;
+}
+
+.dashboard-page .shift-summary-card__number strong {
+  display: block !important;
+  margin-top: 4px !important;
+  font-size: 0.69rem !important;
+}
+
+.dashboard-page .shift-summary-card__progress {
+  margin-top: 13px !important;
+}
+
+/* Critical risks */
+
+.dashboard-page .critical-risks__summary {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 16px 18px 0 !important;
+}
+
+.dashboard-page .critical-risks__summary-item {
+  min-width: 0 !important;
+  padding: 11px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 10px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.dashboard-page .critical-risks__summary-label {
+  display: block !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.58rem !important;
+  line-height: 1.3 !important;
+}
+
+.dashboard-page .critical-risks__summary-item strong {
+  display: block !important;
+  margin-top: 6px !important;
+  color: var(--dashboard-text) !important;
+  font-size: 1rem !important;
+}
+
+.dashboard-page .critical-risks__list {
+  display: grid !important;
+  gap: 10px !important;
+  padding: 16px 18px 18px !important;
+}
+
+.dashboard-page .critical-risk-card {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  gap: 11px !important;
+  padding: 14px !important;
+}
+
+.dashboard-page .critical-risk-card__icon {
+  display: grid !important;
+  width: 34px !important;
+  height: 34px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: var(--dashboard-danger-soft) !important;
+  color: var(--dashboard-danger) !important;
+}
+
+.dashboard-page .critical-risk-card__body {
+  min-width: 0 !important;
+}
+
+.dashboard-page .critical-risk-card__details {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  margin: 12px 0 0 !important;
+}
+
+.dashboard-page .critical-risk-card__detail {
+  padding: 9px !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+}
+
+.dashboard-page .critical-risk-card__detail dt {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.57rem !important;
+}
+
+.dashboard-page .critical-risk-card__detail dd {
+  margin: 4px 0 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.63rem !important;
+  font-weight: 650 !important;
+}
+
+.dashboard-page .critical-risk-card__review {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+/* AI tasks */
+
+.dashboard-page .ai-task-center__notice {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 9px !important;
+  padding: 12px 20px !important;
+  border-bottom: 1px solid var(--dashboard-border) !important;
+  background: var(--dashboard-warning-soft) !important;
+  color: var(--dashboard-warning) !important;
+  font-size: 0.66rem !important;
+  line-height: 1.5 !important;
+}
+
+.dashboard-page .ai-task-center__notice p {
+  margin: 0 !important;
+}
+
+.dashboard-page .ai-task-center__list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  padding: 20px 24px 24px !important;
+}
+
+.dashboard-page .ai-task-card {
+  display: flex !important;
+  min-width: 0 !important;
+  padding: 16px !important;
+  flex-direction: column !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 14px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.dashboard-page .ai-task-card__top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.dashboard-page .ai-task-card__identity {
+  display: flex !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.dashboard-page .ai-task-card__source {
+  margin: 0 !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.58rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .ai-task-card__title {
+  margin: 4px 0 0 !important;
+  font-size: 0.76rem !important;
+  font-weight: 750 !important;
+}
+
+.dashboard-page .ai-task-card__risk {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 7px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+  color: var(--dashboard-neutral) !important;
+  font-size: 0.58rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .ai-task-card__risk--critical,
+.dashboard-page .ai-task-card__risk--high {
+  background: var(--dashboard-danger-soft) !important;
+  color: var(--dashboard-danger) !important;
+}
+
+.dashboard-page .ai-task-card__risk--medium {
+  background: var(--dashboard-warning-soft) !important;
+  color: var(--dashboard-warning) !important;
+}
+
+.dashboard-page .ai-task-card__risk--low {
+  background: var(--dashboard-positive-soft) !important;
+  color: var(--dashboard-positive) !important;
+}
+
+.dashboard-page .ai-task-card__risk-indicator {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+}
+
+.dashboard-page .ai-task-card__description {
+  margin: 13px 0 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 0.67rem !important;
+  line-height: 1.55 !important;
+}
+
+.dashboard-page .ai-task-card__details {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 14px !important;
+}
+
+.dashboard-page .ai-task-card__detail {
+  padding: 9px !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+}
+
+.dashboard-page .ai-task-card__detail-label {
+  display: block !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.56rem !important;
+}
+
+.dashboard-page .ai-task-card__detail strong {
+  display: block !important;
+  margin-top: 4px !important;
+  font-size: 0.64rem !important;
+}
+
+.dashboard-page .ai-task-card__confidence {
+  margin-top: 14px !important;
+}
+
+.dashboard-page .ai-task-card__confidence-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 7px !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.6rem !important;
+}
+
+.dashboard-page .ai-task-card__confidence-track {
+  overflow: hidden !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: var(--dashboard-neutral-soft) !important;
+}
+
+.dashboard-page .ai-task-card__confidence-value {
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: var(--dashboard-primary) !important;
+}
+
+.dashboard-page .ai-task-card__footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin-top: auto !important;
+  padding-top: 15px !important;
+}
+
+.dashboard-page .ai-task-card__review {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 0.61rem !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-page .ai-task-card__action {
+  display: inline-flex !important;
+  min-height: 30px !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: var(--dashboard-text-muted) !important;
+  font: inherit !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  cursor: not-allowed !important;
+}
+
+/* General horizontal rendering guard */
+
+.dashboard-page section,
+.dashboard-page article,
+.dashboard-page header,
+.dashboard-page aside,
+.dashboard-page footer,
+.dashboard-page div,
+.dashboard-page p,
+.dashboard-page span,
+.dashboard-page strong {
+  writing-mode: horizontal-tb !important;
+}
+
+/* Responsive */
+
+@media (max-width: 1500px) {
+  .dashboard-page .dashboard-metrics__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-page
+    .dashboard-metrics__grid
+    > .dashboard-metric-card:nth-child(3n) {
+    border-right: 0 !important;
+  }
+
+  .dashboard-page
+    .dashboard-metrics__grid
+    > .dashboard-metric-card:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--dashboard-border) !important;
+  }
+
+  .dashboard-page .dashboard-layout {
+    grid-template-columns:
+      minmax(0, 1.58fr)
+      minmax(360px, 0.75fr) !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .dashboard-page {
+    padding: 20px !important;
+  }
+
+  .dashboard-page .dashboard-header {
+    flex-direction: column !important;
+  }
+
+  .dashboard-page .dashboard-header__actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .dashboard-page .dashboard-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-page .dashboard-layout__secondary {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-page .daily-operations__metrics,
+  .dashboard-page .ai-task-center__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-page .daily-operations__shift-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-page .dashboard-layout__secondary {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-page {
+    padding: 14px !important;
+  }
+
+  .dashboard-page .dashboard-header {
+    min-height: 0 !important;
+    padding: 22px 18px !important;
+  }
+
+  .dashboard-page .dashboard-header__actions,
+  .dashboard-page
+    .dashboard-metrics
+    > .dashboard-section-heading--compact {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .dashboard-page
+    .dashboard-metrics
+    .dashboard-section-heading__description {
+    max-width: none !important;
+    text-align: left !important;
+  }
+
+  .dashboard-page .dashboard-metrics__grid,
+  .dashboard-page .daily-operations__metrics,
+  .dashboard-page .ai-task-center__list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-page
+    .dashboard-metrics__grid
+    > .dashboard-metric-card {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--dashboard-border) !important;
+  }
+
+  .dashboard-page
+    .dashboard-metrics__grid
+    > .dashboard-metric-card:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .dashboard-page .critical-risks__summary,
+  .dashboard-page .ai-task-card__details {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* DASHBOARD APP SHELL FIX START */
+
+html:has(.command-center),
+body:has(.command-center) {
+  min-width: 0;
+  min-height: 100%;
+  background: #f5f7fb;
+}
+
+body:has(.command-center) {
+  overflow-x: hidden;
+}
+
+/*
+ * Dashboard'u taşıyan uygulama kabuklarının eski maksimum genişlik
+ * ve içerik daraltma kurallarını yalnızca bu sayfada etkisizleştirir.
+ */
+
+body:has(.command-center)
+  :is(
+    .app-shell,
+    .app-layout,
+    .dashboard-layout,
+    .application-shell,
+    .main-layout
+  ) {
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+body:has(.command-center)
+  :is(
+    .app-shell__main,
+    .app-shell__content,
+    .app-layout__main,
+    .app-layout__content,
+    .dashboard-layout__main,
+    .dashboard-layout__content,
+    .application-shell__main,
+    .main-layout__content,
+    .main-content,
+    .page-content
+  ) {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+body:has(.command-center)
+  :is(
+    .app-shell__main,
+    .app-layout__main,
+    .dashboard-layout__main,
+    .application-shell__main,
+    .main-layout__content
+  ) {
+  overflow-x: hidden;
+}
+
+body:has(.command-center) .command-center {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: calc(100dvh - 64px);
+}
+
+/*
+ * Grid ve flex çocuklarında varsayılan min-width:auto davranışının
+ * dashboard'u yatay olarak büyütmesini engeller.
+ */
+
+body:has(.command-center) .command-center *,
+body:has(.command-center) .command-center *::before,
+body:has(.command-center) .command-center *::after {
+  box-sizing: border-box;
+}
+
+body:has(.command-center)
+  :is(
+    .command-center__metrics,
+    .command-center__decision-grid,
+    .command-center__operations-grid,
+    .command-center__support-grid,
+    .command-center__health-strip
+  ) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+body:has(.command-center)
+  :is(
+    .command-center__decision-grid,
+    .command-center__operations-grid,
+    .command-center__support-grid
+  )
+  > * {
+  min-width: 0;
+}
+
+/*
+ * Sidebar sabit veya sticky olduğunda ana içerik kendi kullanılabilir
+ * alanı içinde kalır. Sidebar genişliğine müdahale edilmez.
+ */
+
+body:has(.command-center)
+  :is(
+    .app-shell__sidebar,
+    .app-layout__sidebar,
+    .dashboard-layout__sidebar,
+    .sidebar
+  ) {
+  flex-shrink: 0;
+}
+
+body:has(.command-center)
+  :is(
+    .app-shell__body,
+    .app-layout__body,
+    .dashboard-layout__body,
+    .layout-body
+  ) {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+body:has(.command-center)
+  :is(
+    .app-shell__body,
+    .app-layout__body,
+    .dashboard-layout__body,
+    .layout-body
+  )
+  > :not(
+    .app-shell__sidebar,
+    .app-layout__sidebar,
+    .dashboard-layout__sidebar,
+    .sidebar
+  ) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/*
+ * Küçük ekranlarda dashboard doğal belge akışında uzar.
+ */
+
+@media (max-width: 900px) {
+  body:has(.command-center) {
+    overflow-x: hidden;
+  }
+
+  body:has(.command-center) .command-center {
+    min-height: auto;
+  }
+
+  body:has(.command-center)
+    :is(
+      .app-shell__main,
+      .app-layout__main,
+      .dashboard-layout__main,
+      .application-shell__main,
+      .main-layout__content
+    ) {
+    overflow: visible;
+  }
+}
+
+/* DASHBOARD APP SHELL FIX END */

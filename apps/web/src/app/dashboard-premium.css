@@ -1,0 +1,2351 @@
+/*
+ * CrevaFactOS Dashboard Premium Layer
+ *
+ * Bu dosya dashboard için son ve kontrollü görsel katmandır.
+ * Mevcut command-center.css kurallarını aşamalı olarak konsolide etmek
+ * amacıyla kullanılacaktır.
+ */
+
+:root {
+  --dashboard-bg: #f3f6fa;
+  --dashboard-panel: #ffffff;
+  --dashboard-panel-soft: #f7f9fc;
+  --dashboard-panel-muted: #eef3f8;
+
+  --dashboard-border: #d7e1ed;
+  --dashboard-border-strong: #c6d4e4;
+
+  --dashboard-text: #10213d;
+  --dashboard-text-soft: #4f6078;
+  --dashboard-text-muted: #738198;
+  --dashboard-text-faint: #8d99aa;
+
+  --dashboard-primary: #1769e0;
+  --dashboard-primary-soft: #eaf2ff;
+
+  --dashboard-success: #079765;
+  --dashboard-success-soft: #e7f8f1;
+
+  --dashboard-warning: #d97706;
+  --dashboard-warning-soft: #fff3df;
+
+  --dashboard-danger: #dc3545;
+  --dashboard-danger-soft: #ffecef;
+
+  --dashboard-purple: #7c3aed;
+  --dashboard-purple-soft: #f2ebff;
+
+  --dashboard-radius-panel: 12px;
+  --dashboard-radius-card: 10px;
+  --dashboard-radius-control: 8px;
+
+  --dashboard-shadow-panel:
+    0 1px 2px rgb(15 23 42 / 4%),
+    0 8px 24px rgb(15 23 42 / 4%);
+
+  --dashboard-shadow-hover:
+    0 2px 4px rgb(15 23 42 / 5%),
+    0 12px 30px rgb(15 23 42 / 7%);
+
+  --dashboard-gap-xs: 6px;
+  --dashboard-gap-sm: 8px;
+  --dashboard-gap-md: 12px;
+  --dashboard-gap-lg: 16px;
+
+  --dashboard-text-xs: 10px;
+  --dashboard-text-sm: 11px;
+  --dashboard-text-md: 12px;
+  --dashboard-text-lg: 14px;
+  --dashboard-text-xl: 18px;
+  --dashboard-text-2xl: 24px;
+  --dashboard-text-3xl: 30px;
+}
+
+/*
+ * Ana dashboard yüzeyi
+ */
+
+body:has(.command-center) {
+  background: var(--dashboard-bg);
+}
+
+.command-center {
+  color: var(--dashboard-text);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+/*
+ * Ortak panel yüzeyi
+ */
+
+.command-center .dashboard-panel {
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-panel) !important;
+  background: var(--dashboard-panel) !important;
+  box-shadow: var(--dashboard-shadow-panel) !important;
+}
+
+@media (hover: hover) {
+  .command-center .dashboard-panel:hover {
+    border-color: var(--dashboard-border-strong) !important;
+    box-shadow: var(--dashboard-shadow-hover) !important;
+  }
+}
+
+/*
+ * Ortak panel başlığı
+ */
+
+.command-center .dashboard-section-heading {
+  min-height: 60px !important;
+  max-height: 60px !important;
+  flex: 0 0 60px !important;
+  padding: 11px 14px !important;
+  border-bottom: 1px solid var(--dashboard-border) !important;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fbfcfe 100%
+    ) !important;
+}
+
+.command-center .dashboard-section-heading__eyebrow {
+  margin-bottom: 3px !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: var(--dashboard-text-xs) !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.055em !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase;
+}
+
+.command-center .dashboard-section-heading__title {
+  color: var(--dashboard-text) !important;
+  font-size: var(--dashboard-text-lg) !important;
+  font-weight: 820 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+}
+
+.command-center .dashboard-section-heading__meta {
+  gap: 6px !important;
+  padding: 7px 9px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-control) !important;
+  background: var(--dashboard-panel-soft) !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: var(--dashboard-text-sm) !important;
+  font-weight: 700 !important;
+}
+
+/*
+ * Ana sayfa başlığı
+ */
+
+.command-center__titlebar {
+  min-height: 86px !important;
+  padding: 16px 18px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-panel) !important;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f8fbff 100%
+    ) !important;
+  box-shadow: var(--dashboard-shadow-panel) !important;
+}
+
+.command-center__eyebrow {
+  margin-bottom: 4px !important;
+  color: var(--dashboard-primary) !important;
+  font-size: var(--dashboard-text-xs) !important;
+  font-weight: 820 !important;
+  letter-spacing: 0.075em !important;
+}
+
+.command-center__titlebar h1 {
+  color: var(--dashboard-text) !important;
+  font-size: var(--dashboard-text-2xl) !important;
+  font-weight: 860 !important;
+  letter-spacing: -0.045em !important;
+  line-height: 1.1 !important;
+}
+
+.command-center__description {
+  margin-top: 7px !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: var(--dashboard-text-md) !important;
+  line-height: 1.45 !important;
+}
+
+.command-center__titlebar-status {
+  min-width: 210px !important;
+  padding: 10px 12px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-card) !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.command-center__titlebar-status strong {
+  color: var(--dashboard-text) !important;
+  font-size: var(--dashboard-text-md) !important;
+}
+
+.command-center__titlebar-status span {
+  color: var(--dashboard-text-muted) !important;
+  font-size: var(--dashboard-text-sm) !important;
+}
+
+/*
+ * Bölüm aralıkları
+ */
+
+.command-center__metrics,
+.command-center__quick-actions-strip,
+.command-center__decision-grid,
+.command-center__operations-grid,
+.command-center__support-grid {
+  margin-bottom: 14px !important;
+}
+
+.command-center__decision-grid,
+.command-center__operations-grid,
+.command-center__support-grid {
+  gap: 12px !important;
+}
+
+/*
+ * Genel okunabilirlik tabanı
+ */
+
+.command-center article h3 {
+  color: var(--dashboard-text) !important;
+  font-size: 13px !important;
+  font-weight: 780 !important;
+  line-height: 1.3 !important;
+}
+
+.command-center article p {
+  color: var(--dashboard-text-soft) !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.command-center article small,
+.command-center article span {
+  line-height: 1.35 !important;
+}
+
+.command-center table th {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 760 !important;
+  letter-spacing: 0.025em !important;
+}
+
+.command-center table td {
+  color: var(--dashboard-text-soft) !important;
+  font-size: 11px !important;
+}
+
+.command-center table td strong {
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+}
+
+/*
+ * Alt bilgi
+ */
+
+.command-center__footer {
+  min-height: 34px !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+}
+
+/*
+ * Erişilebilir odak durumu
+ */
+
+.command-center button:focus-visible,
+.command-center a:focus-visible {
+  outline: 3px solid rgb(23 105 224 / 24%) !important;
+  outline-offset: 2px !important;
+}
+
+/*
+ * Responsive temel
+ */
+
+@media (max-width: 1380px) {
+  .command-center .dashboard-section-heading {
+    min-height: 58px !important;
+    max-height: 58px !important;
+    flex-basis: 58px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .command-center__titlebar {
+    min-height: auto !important;
+    padding: 14px !important;
+  }
+
+  .command-center__titlebar h1 {
+    font-size: 21px !important;
+  }
+
+  .command-center__titlebar-status {
+    min-width: 0 !important;
+    width: 100%;
+  }
+}
+
+/* PREMIUM KPI AND QUICK ACTIONS START */
+
+/*
+ * KPI şeridi
+ */
+
+.command-center__metrics > :first-child {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.command-center__metrics > :first-child > * {
+  position: relative !important;
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 144px !important;
+  max-height: none !important;
+  padding: 16px !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-panel) !important;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f9fbfe 100%
+    ) !important;
+  box-shadow: var(--dashboard-shadow-panel) !important;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease !important;
+}
+
+.command-center__metrics > :first-child > *::after {
+  position: absolute;
+  right: -24px;
+  bottom: -30px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgb(23 105 224 / 7%) 0%,
+      transparent 70%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .command-center__metrics > :first-child > *:hover {
+    border-color: var(--dashboard-border-strong) !important;
+    box-shadow: var(--dashboard-shadow-hover) !important;
+    transform: translateY(-2px);
+  }
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__icon,
+    .dashboard-metric-card__icon,
+    .locked-dashboard-metric__icon,
+    .locked-metric-card__icon,
+    .metric-card__icon
+  ) {
+  display: grid !important;
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 auto !important;
+  place-items: center !important;
+  border-radius: 11px !important;
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__icon,
+    .dashboard-metric-card__icon,
+    .locked-dashboard-metric__icon,
+    .locked-metric-card__icon,
+    .metric-card__icon
+  )
+  svg {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__label,
+    .dashboard-metric-card__label,
+    .locked-dashboard-metric__label,
+    .locked-metric-card__label,
+    .metric-card__label
+  ) {
+  color: var(--dashboard-text-soft) !important;
+  font-size: 12px !important;
+  font-weight: 720 !important;
+  line-height: 1.3 !important;
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__value,
+    .dashboard-metric-card__value,
+    .locked-dashboard-metric__value,
+    .locked-metric-card__value,
+    .metric-card__value
+  ) {
+  color: var(--dashboard-text) !important;
+  font-size: 30px !important;
+  font-weight: 860 !important;
+  letter-spacing: -0.05em !important;
+  line-height: 1 !important;
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__trend,
+    .dashboard-metric__detail,
+    .dashboard-metric-card__trend,
+    .dashboard-metric-card__detail,
+    .locked-dashboard-metric__trend,
+    .locked-dashboard-metric__detail,
+    .locked-metric-card__trend,
+    .locked-metric-card__detail,
+    .metric-card__trend,
+    .metric-card__detail
+  ) {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+.command-center__metrics
+  :is(
+    .dashboard-metric__chart,
+    .dashboard-metric-card__chart,
+    .locked-dashboard-metric__chart,
+    .locked-metric-card__chart,
+    .metric-card__chart,
+    .sparkline
+  ) {
+  min-height: 38px !important;
+  max-height: 38px !important;
+  margin-top: auto !important;
+  padding-top: 8px !important;
+}
+
+/*
+ * Hızlı işlemler tam genişlik şeridi
+ */
+
+.command-center__quick-actions-strip {
+  min-width: 0;
+}
+
+.command-center__quick-actions-strip
+  > .dashboard-panel--quick-actions {
+  display: flex !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.command-center__quick-actions-strip
+  .dashboard-section-heading {
+  min-height: 58px !important;
+  max-height: 58px !important;
+  flex-basis: 58px !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-actions {
+  display: grid !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+  grid-template-rows: 1fr !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  overflow: visible !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action {
+  position: relative !important;
+  display: grid !important;
+  min-width: 0 !important;
+  min-height: 82px !important;
+  height: auto !important;
+  grid-template-columns: 40px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: var(--dashboard-radius-card) !important;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      var(--dashboard-panel-soft) 100%
+    ) !important;
+  box-shadow: none !important;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action::after {
+  position: absolute;
+  right: -18px;
+  bottom: -22px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgb(23 105 224 / 4%);
+  content: "";
+  pointer-events: none;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action
+  > span:first-child {
+  display: grid !important;
+  width: 40px !important;
+  height: 40px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action
+  > span:first-child
+  svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action
+  > span:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action
+  strong {
+  overflow: hidden !important;
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__quick-actions-strip
+  .locked-quick-action
+  small {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+@media (hover: hover) {
+  .command-center__quick-actions-strip
+    .locked-quick-action:hover {
+    border-color: var(--dashboard-border-strong) !important;
+    background: #ffffff !important;
+    box-shadow:
+      0 8px 18px rgb(15 23 42 / 6%) !important;
+    transform: translateY(-2px);
+  }
+}
+
+/*
+ * Responsive KPI ve hızlı işlemler
+ */
+
+@media (max-width: 1700px) {
+  .command-center__metrics > :first-child {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(82px, auto)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center__metrics > :first-child,
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .command-center__metrics > :first-child,
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* PREMIUM KPI AND QUICK ACTIONS END */
+
+/* PREMIUM DECISION CENTER START */
+
+/*
+ * Karar merkezi ana grid
+ */
+
+.command-center__decision-grid {
+  display: grid !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+
+.command-center__decision-grid > * {
+  min-width: 0 !important;
+  min-height: 410px !important;
+  height: 410px !important;
+}
+
+/*
+ * Dört karar panelinin ortak yapısı
+ */
+
+.command-center__decision-grid
+  :is(
+    .dashboard-panel--ai-task-center,
+    .dashboard-panel--daily-operations,
+    .dashboard-panel--critical-risks,
+    .dashboard-panel--plan-confidence
+  ) {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 410px !important;
+  height: 410px !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.command-center__decision-grid
+  :is(
+    .dashboard-panel--ai-task-center,
+    .dashboard-panel--daily-operations,
+    .dashboard-panel--critical-risks,
+    .dashboard-panel--plan-confidence
+  )
+  > .dashboard-section-heading {
+  min-height: 60px !important;
+  max-height: 60px !important;
+  flex: 0 0 60px !important;
+}
+
+/*
+ * Panel içeriklerinin ortak okunabilirlik tabanı
+ */
+
+.command-center__decision-grid article {
+  min-width: 0 !important;
+}
+
+.command-center__decision-grid article h3 {
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+  text-overflow: ellipsis !important;
+}
+
+.command-center__decision-grid article p {
+  margin: 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 10.5px !important;
+  line-height: 1.42 !important;
+}
+
+.command-center__decision-grid button {
+  min-height: 30px !important;
+  padding: 6px 10px !important;
+  border-radius: 7px !important;
+  font-size: 10px !important;
+  font-weight: 760 !important;
+}
+
+/*
+ * AI Görev Merkezi
+ */
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  padding: 0 14px !important;
+  overflow: hidden !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  article {
+  display: grid !important;
+  min-height: 0 !important;
+  grid-template-columns:
+    36px minmax(0, 1fr) 62px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 0 !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  article:last-child {
+  border-bottom: 0 !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  article
+  > div:nth-child(2) {
+  display: grid !important;
+  min-width: 0 !important;
+  align-content: center !important;
+  gap: 5px !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  justify-items: end !important;
+  gap: 7px !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--ai-task-center
+  footer {
+  min-height: 36px !important;
+  max-height: 36px !important;
+  flex: 0 0 36px !important;
+  padding: 8px 14px !important;
+  border-top:
+    1px solid var(--dashboard-border) !important;
+  background: var(--dashboard-panel-soft) !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+}
+
+/*
+ * Günlük Operasyon Özeti
+ */
+
+.command-center__decision-grid
+  .dashboard-panel--daily-operations
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  align-content: start !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  overflow: hidden !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--daily-operations
+  article {
+  min-height: 58px !important;
+  padding: 10px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 9px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--daily-operations
+  article strong {
+  color: var(--dashboard-text) !important;
+  font-size: 16px !important;
+  font-weight: 840 !important;
+  line-height: 1.1 !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--daily-operations
+  article span {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+}
+
+/*
+ * Kritik Riskler
+ */
+
+.command-center__decision-grid
+  .dashboard-panel--critical-risks
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  padding: 0 14px !important;
+  overflow: hidden !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--critical-risks
+  article {
+  display: grid !important;
+  min-height: 0 !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 0 !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--critical-risks
+  article:last-child {
+  border-bottom: 0 !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--critical-risks
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+/*
+ * Plan Güvenilirliği
+ */
+
+.command-center__decision-grid
+  .dashboard-panel--plan-confidence
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  grid-template-rows: auto 1fr !important;
+  align-content: start !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--plan-confidence
+  svg {
+  max-width: 100% !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--plan-confidence
+  article {
+  min-height: 54px !important;
+  padding: 9px 10px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 9px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--plan-confidence
+  article strong {
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+}
+
+.command-center__decision-grid
+  .dashboard-panel--plan-confidence
+  article span {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+}
+
+/*
+ * Etiketler
+ */
+
+.command-center__decision-grid
+  :is(
+    [class*="badge"],
+    [class*="status"],
+    [class*="priority"]
+  ) {
+  min-height: 22px !important;
+  padding: 4px 7px !important;
+  border-radius: 999px !important;
+  font-size: 9px !important;
+  font-weight: 780 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/*
+ * Responsive karar merkezi
+ */
+
+@media (max-width: 1700px) {
+  .command-center__decision-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__decision-grid > *,
+  .command-center__decision-grid
+    :is(
+      .dashboard-panel--ai-task-center,
+      .dashboard-panel--daily-operations,
+      .dashboard-panel--critical-risks,
+      .dashboard-panel--plan-confidence
+    ) {
+    min-height: 400px !important;
+    height: 400px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center__decision-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__decision-grid > *,
+  .command-center__decision-grid
+    :is(
+      .dashboard-panel--ai-task-center,
+      .dashboard-panel--daily-operations,
+      .dashboard-panel--critical-risks,
+      .dashboard-panel--plan-confidence
+    ) {
+    height: auto !important;
+    min-height: 390px !important;
+  }
+}
+
+/* PREMIUM DECISION CENTER END */
+
+/* PREMIUM OPERATIONS CENTER START */
+
+/*
+ * Operasyon merkezi ana grid
+ */
+
+.command-center__operations-grid {
+  display: grid !important;
+  min-width: 0 !important;
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(0, 1.7fr)
+    minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+
+.command-center__operations-grid > * {
+  min-width: 0 !important;
+  min-height: 560px !important;
+  height: 560px !important;
+}
+
+.command-center__operations-grid
+  :is(
+    .dashboard-panel--machine-status,
+    .dashboard-panel--production-orders,
+    .dashboard-panel--live-alarms
+  ) {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 560px !important;
+  height: 560px !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.command-center__operations-grid
+  :is(
+    .dashboard-panel--machine-status,
+    .dashboard-panel--production-orders,
+    .dashboard-panel--live-alarms
+  )
+  > .dashboard-section-heading {
+  min-height: 60px !important;
+  max-height: 60px !important;
+  flex: 0 0 60px !important;
+}
+
+/*
+ * Makine Durumu
+ */
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+  align-content: start !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  overflow: auto !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article {
+  display: grid !important;
+  min-width: 0 !important;
+  min-height: 104px !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 10px !important;
+  padding: 11px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 10px !important;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      var(--dashboard-panel-soft) 100%
+    ) !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 38px !important;
+  height: 38px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article h3 {
+  overflow: hidden !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article p {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--machine-status
+  article
+  :is(
+    [class*="badge"],
+    [class*="status"]
+  ) {
+  width: fit-content !important;
+  min-height: 21px !important;
+  padding: 4px 7px !important;
+  border-radius: 999px !important;
+  font-size: 9px !important;
+  font-weight: 780 !important;
+}
+
+/*
+ * Aktif Üretim Emirleri
+ */
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  > div:nth-of-type(2) {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 !important;
+  overflow: auto !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  table {
+  width: 100% !important;
+  min-width: 720px !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  thead {
+  position: sticky !important;
+  z-index: 2 !important;
+  top: 0 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  th {
+  height: 42px !important;
+  padding: 10px 12px !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+  background: #f8fafc !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 780 !important;
+  letter-spacing: 0.035em !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  td {
+  height: 62px !important;
+  padding: 10px 12px !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+  background: #ffffff !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 10.5px !important;
+  vertical-align: middle !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+@media (hover: hover) {
+  .command-center__operations-grid
+    .dashboard-panel--production-orders
+    tbody tr:hover
+    td {
+    background: #f8fbff !important;
+  }
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  td strong {
+  display: block !important;
+  overflow: hidden !important;
+  max-width: 180px !important;
+  color: var(--dashboard-text) !important;
+  font-size: 11.5px !important;
+  font-weight: 780 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  td span {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 9.5px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  :is(
+    [class*="progress"],
+    progress
+  ) {
+  overflow: hidden !important;
+  height: 7px !important;
+  border-radius: 999px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--production-orders
+  :is(
+    [class*="badge"],
+    [class*="status"]
+  ) {
+  min-height: 22px !important;
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  font-size: 9px !important;
+  font-weight: 780 !important;
+  white-space: nowrap !important;
+}
+
+/*
+ * Canlı Alarmlar
+ */
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  align-content: start !important;
+  gap: 0 !important;
+  padding: 0 14px !important;
+  overflow: auto !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article {
+  display: grid !important;
+  min-width: 0 !important;
+  min-height: 86px !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px 0 !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article:last-child {
+  border-bottom: 0 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 34px !important;
+  height: 34px !important;
+  place-items: center !important;
+  border-radius: 9px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article h3 {
+  overflow: hidden !important;
+  font-size: 11.5px !important;
+  font-weight: 790 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article p {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  article time {
+  color: var(--dashboard-text-faint) !important;
+  font-size: 9px !important;
+  font-weight: 680 !important;
+}
+
+.command-center__operations-grid
+  .dashboard-panel--live-alarms
+  footer {
+  min-height: 36px !important;
+  max-height: 36px !important;
+  flex: 0 0 36px !important;
+  padding: 8px 14px !important;
+  border-top:
+    1px solid var(--dashboard-border) !important;
+  background: var(--dashboard-panel-soft) !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 10px !important;
+}
+
+/*
+ * Ortak panel içi kaydırma görünümü
+ */
+
+.command-center__operations-grid
+  :is(
+    .dashboard-panel--machine-status,
+    .dashboard-panel--production-orders,
+    .dashboard-panel--live-alarms
+  )
+  * {
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--dashboard-border-strong)
+    transparent;
+}
+
+.command-center__operations-grid
+  :is(
+    .dashboard-panel--machine-status,
+    .dashboard-panel--production-orders,
+    .dashboard-panel--live-alarms
+  )
+  *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.command-center__operations-grid
+  :is(
+    .dashboard-panel--machine-status,
+    .dashboard-panel--production-orders,
+    .dashboard-panel--live-alarms
+  )
+  *::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--dashboard-border-strong);
+}
+
+/*
+ * Responsive operasyon merkezi
+ */
+
+@media (max-width: 1700px) {
+  .command-center__operations-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--production-orders {
+    grid-column: 1 / -1 !important;
+  }
+
+  .command-center__operations-grid > *,
+  .command-center__operations-grid
+    :is(
+      .dashboard-panel--machine-status,
+      .dashboard-panel--production-orders,
+      .dashboard-panel--live-alarms
+    ) {
+    min-height: 520px !important;
+    height: 520px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center__operations-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--production-orders {
+    grid-column: auto !important;
+  }
+
+  .command-center__operations-grid > *,
+  .command-center__operations-grid
+    :is(
+      .dashboard-panel--machine-status,
+      .dashboard-panel--production-orders,
+      .dashboard-panel--live-alarms
+    ) {
+    height: auto !important;
+    min-height: 460px !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--machine-status
+    > div:nth-of-type(2) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* PREMIUM OPERATIONS CENTER END */
+
+/* PREMIUM SUPPORT AND HEALTH START */
+
+/*
+ * Destek operasyonları grid
+ */
+
+.command-center__support-grid {
+  display: grid !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+
+.command-center__support-grid > * {
+  min-width: 0 !important;
+  min-height: 370px !important;
+  height: 370px !important;
+}
+
+.command-center__support-grid
+  :is(
+    .dashboard-panel--material-risks,
+    .dashboard-panel--mold-status,
+    .dashboard-panel--maintenance-status
+  ) {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 370px !important;
+  height: 370px !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.command-center__support-grid
+  :is(
+    .dashboard-panel--material-risks,
+    .dashboard-panel--mold-status,
+    .dashboard-panel--maintenance-status
+  )
+  > .dashboard-section-heading {
+  min-height: 60px !important;
+  max-height: 60px !important;
+  flex: 0 0 60px !important;
+}
+
+/*
+ * Destek paneli ortak içerik yapısı
+ */
+
+.command-center__support-grid
+  :is(
+    .dashboard-panel--material-risks,
+    .dashboard-panel--mold-status,
+    .dashboard-panel--maintenance-status
+  )
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  align-content: start !important;
+  gap: 0 !important;
+  padding: 0 14px !important;
+  overflow: auto !important;
+}
+
+.command-center__support-grid article {
+  min-width: 0 !important;
+}
+
+.command-center__support-grid
+  :is(
+    .dashboard-panel--material-risks,
+    .dashboard-panel--mold-status,
+    .dashboard-panel--maintenance-status
+  )
+  article {
+  display: grid !important;
+  min-height: 82px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px 0 !important;
+  border-bottom:
+    1px solid var(--dashboard-border) !important;
+}
+
+.command-center__support-grid
+  :is(
+    .dashboard-panel--material-risks,
+    .dashboard-panel--mold-status,
+    .dashboard-panel--maintenance-status
+  )
+  article:last-child {
+  border-bottom: 0 !important;
+}
+
+.command-center__support-grid article h3 {
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+  font-weight: 790 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__support-grid article p {
+  margin: 0 !important;
+  color: var(--dashboard-text-soft) !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+
+.command-center__support-grid article span,
+.command-center__support-grid article small {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 9.5px !important;
+  line-height: 1.35 !important;
+}
+
+/*
+ * Malzeme Riskleri
+ */
+
+.command-center__support-grid
+  .dashboard-panel--material-risks
+  article {
+  grid-template-columns: 36px minmax(0, 1fr) auto !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--material-risks
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 36px !important;
+  height: 36px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--material-risks
+  article
+  > div:nth-child(2) {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--material-risks
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 64px !important;
+  justify-items: end !important;
+  gap: 5px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--material-risks
+  article strong {
+  color: var(--dashboard-text) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+/*
+ * Kalıp Durumu
+ */
+
+.command-center__support-grid
+  .dashboard-panel--mold-status
+  article {
+  grid-template-columns: 36px minmax(0, 1fr) auto !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--mold-status
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 36px !important;
+  height: 36px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--mold-status
+  article
+  > div:nth-child(2) {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 5px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--mold-status
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 70px !important;
+  justify-items: end !important;
+  gap: 5px !important;
+}
+
+/*
+ * Bakım ve Arıza
+ */
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  > div:nth-of-type(2) {
+  grid-template-rows: auto 1fr !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  > div:nth-of-type(2)
+  > div:first-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  > div:nth-of-type(2)
+  > div:first-child
+  > div {
+  min-width: 0 !important;
+  min-height: 64px !important;
+  padding: 9px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 9px !important;
+  background: var(--dashboard-panel-soft) !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  > div:nth-of-type(2)
+  > div:first-child
+  strong {
+  display: block !important;
+  color: var(--dashboard-text) !important;
+  font-size: 17px !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  > div:nth-of-type(2)
+  > div:first-child
+  span {
+  color: var(--dashboard-text-muted) !important;
+  font-size: 9.5px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  article {
+  grid-template-columns: 32px minmax(0, 1fr) auto !important;
+  min-height: 68px !important;
+  padding: 9px 0 !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 32px !important;
+  height: 32px !important;
+  place-items: center !important;
+  border-radius: 9px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  article
+  > div:nth-child(2) {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+}
+
+.command-center__support-grid
+  .dashboard-panel--maintenance-status
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 68px !important;
+  justify-items: end !important;
+  gap: 4px !important;
+}
+
+/*
+ * Ortak destek etiketleri
+ */
+
+.command-center__support-grid
+  :is(
+    [class*="badge"],
+    [class*="status"],
+    [class*="priority"]
+  ) {
+  width: fit-content !important;
+  min-height: 22px !important;
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  font-size: 9px !important;
+  font-weight: 780 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/*
+ * Sistem Sağlığı şeridi
+ */
+
+.command-center__health-strip {
+  margin-bottom: 14px !important;
+}
+
+.command-center__health-strip
+  > .dashboard-panel--system-health {
+  display: flex !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  > .dashboard-section-heading {
+  min-height: 58px !important;
+  max-height: 58px !important;
+  flex: 0 0 58px !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  > div:nth-of-type(2) {
+  display: grid !important;
+  min-width: 0 !important;
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  padding: 12px !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article {
+  display: grid !important;
+  min-width: 0 !important;
+  min-height: 84px !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px !important;
+  border: 1px solid var(--dashboard-border) !important;
+  border-radius: 10px !important;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      var(--dashboard-panel-soft) 100%
+    ) !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article
+  > div:first-child {
+  display: grid !important;
+  width: 38px !important;
+  height: 38px !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article
+  > div:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article h3 {
+  overflow: hidden !important;
+  color: var(--dashboard-text) !important;
+  font-size: 11px !important;
+  font-weight: 790 !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article p {
+  overflow: hidden !important;
+  color: var(--dashboard-text-muted) !important;
+  font-size: 9.5px !important;
+  line-height: 1.35 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-center__health-strip
+  .dashboard-panel--system-health
+  article strong {
+  color: var(--dashboard-text) !important;
+  font-size: 11px !important;
+  font-weight: 780 !important;
+}
+
+/*
+ * Panel içi scrollbar
+ */
+
+.command-center__support-grid *,
+.command-center__health-strip * {
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--dashboard-border-strong)
+    transparent;
+}
+
+.command-center__support-grid *::-webkit-scrollbar,
+.command-center__health-strip *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.command-center__support-grid *::-webkit-scrollbar-thumb,
+.command-center__health-strip *::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--dashboard-border-strong);
+}
+
+/*
+ * Responsive destek ve sağlık alanları
+ */
+
+@media (max-width: 1700px) {
+  .command-center__support-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__support-grid
+    .dashboard-panel--maintenance-status {
+    grid-column: 1 / -1 !important;
+  }
+
+  .command-center__health-strip
+    .dashboard-panel--system-health
+    > div:nth-of-type(2) {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center__support-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__support-grid
+    .dashboard-panel--maintenance-status {
+    grid-column: auto !important;
+  }
+
+  .command-center__support-grid > *,
+  .command-center__support-grid
+    :is(
+      .dashboard-panel--material-risks,
+      .dashboard-panel--mold-status,
+      .dashboard-panel--maintenance-status
+    ) {
+    height: auto !important;
+    min-height: 340px !important;
+  }
+
+  .command-center__health-strip
+    .dashboard-panel--system-health
+    > div:nth-of-type(2) {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .command-center__health-strip
+    .dashboard-panel--system-health
+    > div:nth-of-type(2) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* PREMIUM SUPPORT AND HEALTH END */
+
+/* PREMIUM FINAL RESPONSIVE POLISH START */
+
+/*
+ * Ana sayfa ölçüleri
+ */
+
+.command-center {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  padding: 14px 16px 20px !important;
+}
+
+.command-center > * {
+  min-width: 0 !important;
+}
+
+.command-center__titlebar,
+.command-center__metrics,
+.command-center__quick-actions-strip,
+.command-center__decision-grid,
+.command-center__operations-grid,
+.command-center__support-grid,
+.command-center__health-strip {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/*
+ * Dikey ritim
+ */
+
+.command-center__titlebar {
+  margin-bottom: 14px !important;
+}
+
+.command-center__metrics,
+.command-center__quick-actions-strip,
+.command-center__decision-grid,
+.command-center__operations-grid,
+.command-center__support-grid,
+.command-center__health-strip {
+  margin-top: 0 !important;
+  margin-bottom: 14px !important;
+}
+
+.command-center__footer {
+  margin-top: 4px !important;
+}
+
+/*
+ * Panel taşmalarını engelle
+ */
+
+.command-center .dashboard-panel,
+.command-center article,
+.command-center table,
+.command-center button,
+.command-center a,
+.command-center div,
+.command-center span {
+  min-width: 0;
+}
+
+.command-center img,
+.command-center svg {
+  max-width: 100%;
+}
+
+.command-center button,
+.command-center a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * Daha dengeli panel başlıkları
+ */
+
+.command-center .dashboard-section-heading {
+  gap: 10px !important;
+}
+
+.command-center .dashboard-section-heading > div {
+  min-width: 0 !important;
+}
+
+.command-center .dashboard-section-heading__title,
+.command-center .dashboard-section-heading__eyebrow {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/*
+ * Genel içerik kontrastı
+ */
+
+.command-center article p,
+.command-center table td,
+.command-center small {
+  color: var(--dashboard-text-soft) !important;
+}
+
+.command-center article small,
+.command-center table td span {
+  color: var(--dashboard-text-muted) !important;
+}
+
+.command-center button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.58 !important;
+}
+
+/*
+ * İnce etkileşim cilası
+ */
+
+.command-center .dashboard-panel,
+.command-center article,
+.command-center button,
+.command-center a {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 160ms ease !important;
+}
+
+@media (hover: hover) {
+  .command-center button:not(:disabled):hover,
+  .command-center a:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/*
+ * 1920 px ve üzeri
+ */
+
+@media (min-width: 1900px) {
+  .command-center {
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+  }
+
+  .command-center__metrics > :first-child {
+    gap: 14px !important;
+  }
+
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    gap: 12px !important;
+  }
+
+  .command-center__decision-grid,
+  .command-center__operations-grid,
+  .command-center__support-grid {
+    gap: 14px !important;
+  }
+}
+
+/*
+ * 1536–1899 px
+ */
+
+@media (min-width: 1536px) and (max-width: 1899px) {
+  .command-center {
+    padding: 14px 14px 18px !important;
+  }
+
+  .command-center__metrics > :first-child {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__decision-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__operations-grid {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr) !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--production-orders {
+    grid-column: 1 / -1 !important;
+  }
+
+  .command-center__support-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/*
+ * 1366–1535 px
+ */
+
+@media (min-width: 1200px) and (max-width: 1535px) {
+  .command-center {
+    padding: 12px 12px 18px !important;
+  }
+
+  .command-center__titlebar {
+    min-height: 82px !important;
+    padding: 14px 16px !important;
+  }
+
+  .command-center__titlebar h1 {
+    font-size: 22px !important;
+  }
+
+  .command-center__metrics > :first-child {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .command-center__metrics > :first-child > * {
+    min-height: 132px !important;
+    padding: 14px !important;
+  }
+
+  .command-center__quick-actions-strip
+    .locked-quick-actions {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .command-center__decision-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__operations-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--production-orders {
+    grid-column: auto !important;
+  }
+
+  .command-center__support-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__support-grid
+    .dashboard-panel--maintenance-status {
+    grid-column: 1 / -1 !important;
+  }
+
+  .command-center__health-strip
+    .dashboard-panel--system-health
+    > div:nth-of-type(2) {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/*
+ * Tablet ve dar ekran
+ */
+
+@media (max-width: 1199px) {
+  .command-center {
+    padding: 12px !important;
+  }
+
+  .command-center__titlebar {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .command-center__titlebar-status {
+    width: 100% !important;
+  }
+
+  .command-center__metrics > :first-child,
+  .command-center__quick-actions-strip
+    .locked-quick-actions,
+  .command-center__decision-grid,
+  .command-center__support-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .command-center__operations-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__operations-grid
+    .dashboard-panel--production-orders,
+  .command-center__support-grid
+    .dashboard-panel--maintenance-status {
+    grid-column: auto !important;
+  }
+}
+
+/*
+ * Mobil
+ */
+
+@media (max-width: 700px) {
+  .command-center {
+    padding: 10px !important;
+  }
+
+  .command-center__metrics > :first-child,
+  .command-center__quick-actions-strip
+    .locked-quick-actions,
+  .command-center__decision-grid,
+  .command-center__support-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__health-strip
+    .dashboard-panel--system-health
+    > div:nth-of-type(2) {
+    grid-template-columns: 1fr !important;
+  }
+
+  .command-center__metrics > :first-child > *,
+  .command-center__quick-actions-strip
+    .locked-quick-action {
+    min-height: 96px !important;
+  }
+
+  .command-center__footer {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+}
+
+/*
+ * Windows %125 ölçek ve kısa ekranlar
+ */
+
+@media (max-height: 820px) and (min-width: 1200px) {
+  .command-center__titlebar {
+    min-height: 76px !important;
+  }
+
+  .command-center__decision-grid > *,
+  .command-center__decision-grid
+    :is(
+      .dashboard-panel--ai-task-center,
+      .dashboard-panel--daily-operations,
+      .dashboard-panel--critical-risks,
+      .dashboard-panel--plan-confidence
+    ) {
+    min-height: 390px !important;
+    height: 390px !important;
+  }
+
+  .command-center__operations-grid > *,
+  .command-center__operations-grid
+    :is(
+      .dashboard-panel--machine-status,
+      .dashboard-panel--production-orders,
+      .dashboard-panel--live-alarms
+    ) {
+    min-height: 520px !important;
+    height: 520px !important;
+  }
+}
+
+/*
+ * Hareket azaltma tercihi
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .command-center *,
+  .command-center *::before,
+  .command-center *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* PREMIUM FINAL RESPONSIVE POLISH END */
