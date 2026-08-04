@@ -61,7 +61,7 @@ When an earlier architectural document can be read as authorizing a classic ERP 
 
 ## Repository Status
 
-The repository contains the FOUND-01 executable skeleton, FOUND-02 local infrastructure, FOUND-03 PostgreSQL persistence baseline, and FOUND-04 tenant-context/RLS foundation. Persistence remains disabled by default and contains no product entities or business schema. Authentication, permissions, messaging behavior, audit, AI agents, integrations, and product capabilities are intentionally not implemented yet.
+The repository contains foundations through FOUND-05: executable applications, local infrastructure, PostgreSQL persistence, tenant RLS, external-identity-compatible authentication, and active tenant membership. Persistence and authentication remain disabled by default. Permissions, messaging behavior, audit, AI agents, integrations, and product capabilities are intentionally not implemented yet.
 
 ## Development Prerequisites
 
@@ -125,3 +125,5 @@ FOUND-03 adds an empty EF Core context and a separate migration assembly. It nev
 The initial migration creates no business schema. When explicitly applied, only EF Core's `public.__EFMigrationsHistory` metadata table exists.
 
 FOUND-04 adds only the tenant registry, an infrastructure isolation probe, scoped tenant context, and PostgreSQL RLS enforcement. See the infrastructure guide for the temporary validated header contract and `pnpm db:tenant-isolation:verify`.
+
+FOUND-05 makes that header a selector only: authenticated external issuer/subject identity plus active membership is required before tenant context exists. Membership grants tenant entry, not permission; permissions begin in FOUND-06.

@@ -22,6 +22,84 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Identity.IdentitySubject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("ExternalIssuer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("external_issuer");
+
+                    b.Property<string>("ExternalSubject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("external_subject");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalIssuer", "ExternalSubject")
+                        .IsUnique();
+
+                    b.ToTable("identity_subjects", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_identity_subjects_status", "status IN ('Active', 'Inactive')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Identity.TenantMembership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("IdentitySubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("identity_subject_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdentitySubjectId");
+
+                    b.HasIndex("TenantId", "IdentitySubjectId")
+                        .IsUnique();
+
+                    b.ToTable("tenant_memberships", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenant_memberships_status", "status IN ('Active', 'Inactive')");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,6 +162,21 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("tenant_isolation_probes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Identity.TenantMembership", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Identity.IdentitySubject", null)
+                        .WithMany()
+                        .HasForeignKey("IdentitySubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.TenantIsolationProbe", b =>

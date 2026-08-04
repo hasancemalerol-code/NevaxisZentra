@@ -4,6 +4,7 @@
     <AssemblyName>CrevaFactOS.Api</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
     <ProjectReference Include="..\..\packages\CrevaFactOS.Configuration\CrevaFactOS.Configuration.csproj" />
     <ProjectReference Include="..\..\packages\CrevaFactOS.Persistence\CrevaFactOS.Persistence.csproj" />
   </ItemGroup>

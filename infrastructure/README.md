@@ -95,6 +95,8 @@ pnpm db:migrations:apply
 pnpm db:migrations:script
 pnpm db:migrations:rollback
 pnpm db:tenant-isolation:verify
+pnpm db:authentication-membership:verify
+pnpm auth:verify
 ```
 
 `db:verify` opens a real Npgsql connection and executes `SELECT 1`. `db:migrations:script` writes an idempotent script under the ignored `artifacts/database` directory. `db:migrations:rollback` is explicitly destructive and moves the application database to migration zero; it does not delete the database or Docker volume.
@@ -103,17 +105,31 @@ Migrations never run during API startup. The empty `InitialInfrastructureBaselin
 
 Never commit `infrastructure/.env`, passwords, or connection strings. Diagnostics expose only non-secret endpoint metadata; they omit usernames, passwords, and full connection strings.
 
-## Tenant context contract
+## Authentication and tenant selection
 
-FOUND-04 accepts `X-CrevaFactOS-Tenant` as a temporary infrastructure-validation input. It may contain a tenant UUID or stable tenant key. The value is never trusted directly: the restricted runtime connection calls `resolve_active_tenant(text)`, which returns only an exact active match. Unknown and inactive tenants are rejected without revealing registry details. This header is not an authentication or authorization mechanism and must eventually be replaced by context derived from a trusted authenticated membership as required by ADR-007.
+FOUND-05 keeps `X-CrevaFactOS-Tenant` only as a selector. It may contain a tenant UUID or stable tenant key, but it cannot establish context for an anonymous caller. The API first authenticates issuer/subject claims, resolves an exact active `identity_subjects` row, and then calls `resolve_active_tenant_membership(uuid, text)`. Tenant context is created only when identity, tenant, and membership are all active. Every tenant or membership mismatch uses the same response to prevent enumeration.
 
-`/health/live` and `/health/ready` are tenant-neutral when no tenant header is supplied. In Development only, `GET /internal/tenant-context` reports whether a validated context exists and its tenant UUID; it provides no tenant listing or mutation behavior.
+`/health/live` and `/health/ready` remain anonymous and tenant-neutral. In Development only, `GET /internal/tenant-context` reports authentication state, identity-resolution state, tenant-context state, and the resolved internal UUIDs. It exposes no claims, tokens, issuer secrets, memberships, lists, or mutation behavior.
+
+Middleware order is explicit: routing, authentication, identity resolution, tenant selection and membership validation, tenant-context establishment, then endpoint execution.
+
+### Authentication modes
+
+- `Disabled` is the repository default while no identity provider is configured.
+- `Development` uses the isolated `CrevaFactOS.Development` handler. Deterministic requests provide `X-CrevaFactOS-Dev-Issuer` and `X-CrevaFactOS-Dev-Subject`; both are identity assertions for local fixtures, not passwords or tokens. Registration throws if this mode is selected outside the `Development` environment.
+- `JwtBearer` uses ASP.NET Core JWT bearer authentication with configured `Authority`, `Audience`, HTTPS metadata, issuer, audience, lifetime, and signature validation. CrevaFactOS does not issue tokens.
+
+Production must use externally issued bearer tokens and must never enable development headers. No login, registration, password, MFA, or token-issuance endpoint exists.
 
 The API runtime uses `CREVAFACTOS__PERSISTENCE__*`. Explicit EF commands use the separate `CREVAFACTOS__MIGRATIONS__*` settings. The migration role requires narrowly controlled DDL and role-management authority because `AddTenantIsolationFoundation` creates the non-login `crevafactos_runtime` role. Local verification enables login with the development-only runtime password outside the production migration. Production credential provisioning belongs to deployment secret management.
 
 PostgreSQL isolation uses transaction-local `crevafactos.tenant_id`, `current_tenant_id()`, RLS, and `FORCE ROW LEVEL SECURITY`. Missing context produces zero visible rows and rejects writes. `pnpm db:tenant-isolation:verify` creates deterministic temporary tenant A/B fixtures outside migrations, tests reads and all write directions through the non-superuser runtime role, proves pooled physical-connection reuse does not retain context, and removes the fixture rows afterward.
 
-Authentication, memberships, roles/permissions, platform administration, and user authorization are intentionally not implemented in FOUND-04.
+`pnpm db:authentication-membership:verify` is opt-in local bootstrap/verification tooling. It creates deterministic temporary identities, tenants, and memberships through migration credentials, verifies exact identity and active-membership resolution plus membership RLS through the restricted runtime role, and removes all fixtures. Production migrations contain no seed account or credential.
+
+`pnpm auth:verify` additionally starts the API in a hidden Development process, uses the isolated development authentication headers, exercises the real PostgreSQL resolvers over HTTP, compares normalized denial responses, then stops the API and removes fixtures in a `finally` boundary. Its logs are written only under the ignored `artifacts/authentication` directory.
+
+Membership means only that an authenticated subject may enter a tenant. It grants no action permission. Roles and permissions are intentionally deferred to FOUND-06.
 
 ## Port Conflicts
 

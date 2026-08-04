@@ -20,13 +20,12 @@ internal static class TenantIsolationVerifier
             PostgreSqlConnectionFactory.BuildConnectionString(migrationOptions));
         await administrativeConnection.OpenAsync();
 
-        await ProvisionRuntimeLoginAsync(administrativeConnection, runtimeOptions.Password);
+        await LocalRuntimeRoleProvisioner.ProvisionAsync(administrativeConnection, runtimeOptions.Password);
         await SeedAsync(administrativeConnection);
 
         try
         {
             await AssertRuntimeRoleIsRestrictedAsync(administrativeConnection);
-            await AssertTenantResolutionAsync(runtimeOptions);
             await AssertRowLevelIsolationAsync(runtimeOptions);
             await AssertPooledConnectionDoesNotLeakAsync(runtimeOptions);
         }
@@ -38,41 +37,6 @@ internal static class TenantIsolationVerifier
         Console.WriteLine("Tenant A / tenant B PostgreSQL RLS isolation verified.");
         Console.WriteLine("Missing tenant context failed closed for reads and writes.");
         Console.WriteLine("Pooled connection reuse did not leak transaction-scoped tenant context.");
-    }
-
-    private static async Task ProvisionRuntimeLoginAsync(
-        NpgsqlConnection connection,
-        string runtimePassword)
-    {
-        await using (var setPassword = new NpgsqlCommand(
-            "SELECT set_config('crevafactos.local_runtime_password', @runtime_password, false)",
-            connection))
-        {
-            setPassword.Parameters.AddWithValue("runtime_password", runtimePassword);
-            await setPassword.ExecuteScalarAsync();
-        }
-
-        try
-        {
-            const string alterRoleSql = """
-                DO $runtime_role$
-                BEGIN
-                    EXECUTE format(
-                        'ALTER ROLE crevafactos_runtime LOGIN PASSWORD %L',
-                        current_setting('crevafactos.local_runtime_password'));
-                END
-                $runtime_role$;
-                """;
-            await using var alterRole = new NpgsqlCommand(alterRoleSql, connection);
-            await alterRole.ExecuteNonQueryAsync();
-        }
-        finally
-        {
-            await using var clearPassword = new NpgsqlCommand(
-                "SELECT set_config('crevafactos.local_runtime_password', '', false)",
-                connection);
-            await clearPassword.ExecuteScalarAsync();
-        }
     }
 
     private static async Task SeedAsync(NpgsqlConnection connection)
@@ -129,33 +93,6 @@ internal static class TenantIsolationVerifier
             && !reader.GetBoolean(3)
             && !reader.GetBoolean(4),
             "The runtime role has an elevated PostgreSQL privilege.");
-    }
-
-    private static async Task AssertTenantResolutionAsync(PersistenceOptions options)
-    {
-        await using var connection = await OpenRuntimeConnectionAsync(options);
-        Require(
-            await ResolveTenantAsync(connection, TenantAId.ToString()) == TenantAId,
-            "Active tenant resolution by UUID failed.");
-        Require(
-            await ResolveTenantAsync(connection, "isolation-b") == TenantBId,
-            "Active tenant resolution by key failed.");
-        Require(
-            await ResolveTenantAsync(connection, "isolation-inactive") is null,
-            "Inactive tenant resolution did not fail closed.");
-        Require(
-            await ResolveTenantAsync(connection, "isolation-unknown") is null,
-            "Unknown tenant resolution did not fail closed.");
-    }
-
-    private static async Task<Guid?> ResolveTenantAsync(NpgsqlConnection connection, string identifier)
-    {
-        await using var command = new NpgsqlCommand(
-            "SELECT tenant_id FROM resolve_active_tenant(@tenant_identifier)",
-            connection);
-        command.Parameters.AddWithValue("tenant_identifier", identifier);
-        var result = await command.ExecuteScalarAsync();
-        return result is Guid tenantId ? tenantId : null;
     }
 
     private static async Task AssertRowLevelIsolationAsync(PersistenceOptions options)

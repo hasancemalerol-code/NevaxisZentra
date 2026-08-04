@@ -1,4 +1,5 @@
 using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Persistence.Identity;
 
 namespace CrevaFactOS.Api.Tenancy;
 
@@ -16,7 +17,8 @@ public sealed class TenantResolutionMiddleware(
 
     public async Task InvokeAsync(
         HttpContext httpContext,
-        TenantContextAccessor tenantContextAccessor)
+        TenantContextAccessor tenantContextAccessor,
+        ICurrentIdentityAccessor currentIdentityAccessor)
     {
         if (!httpContext.Request.Headers.TryGetValue(HeaderName, out var values))
         {
@@ -35,7 +37,16 @@ public sealed class TenantResolutionMiddleware(
             return;
         }
 
-        var resolver = httpContext.RequestServices.GetService<ITenantResolver>();
+        if (!currentIdentityAccessor.IsResolved)
+        {
+            await WriteProblemAsync(
+                httpContext,
+                StatusCodes.Status401Unauthorized,
+                "Authentication is required for tenant selection.");
+            return;
+        }
+
+        var resolver = httpContext.RequestServices.GetService<ITenantMembershipResolver>();
         if (resolver is null)
         {
             await WriteProblemAsync(
@@ -48,7 +59,8 @@ public sealed class TenantResolutionMiddleware(
         TenantContext? context;
         try
         {
-            context = await resolver.ResolveActiveTenantAsync(
+            context = await resolver.ResolveActiveMembershipAsync(
+                currentIdentityAccessor.RequireIdentitySubjectId(),
                 values[0]!,
                 httpContext.RequestAborted);
         }
@@ -66,8 +78,8 @@ public sealed class TenantResolutionMiddleware(
         {
             await WriteProblemAsync(
                 httpContext,
-                StatusCodes.Status404NotFound,
-                "No active tenant matches the supplied context.");
+                StatusCodes.Status403Forbidden,
+                "Tenant access denied.");
             return;
         }
 

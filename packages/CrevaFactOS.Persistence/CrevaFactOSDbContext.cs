@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Persistence.Identity;
 
 namespace CrevaFactOS.Persistence;
 
@@ -21,6 +22,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
 
     public DbSet<TenantIsolationProbe> TenantIsolationProbes => Set<TenantIsolationProbe>();
+
+    public DbSet<IdentitySubject> IdentitySubjects => Set<IdentitySubject>();
+
+    public DbSet<TenantMembership> TenantMemberships => Set<TenantMembership>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +75,61 @@ public sealed class CrevaFactOSDbContext : DbContext
                 tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && probe.TenantId == tenantContextAccessor.Current!.TenantId);
+        });
+
+        modelBuilder.Entity<IdentitySubject>(entity =>
+        {
+            entity.ToTable("identity_subjects");
+            entity.HasKey(identity => identity.Id);
+            entity.Property(identity => identity.Id).HasColumnName("id");
+            entity.Property(identity => identity.ExternalIssuer)
+                .HasColumnName("external_issuer")
+                .HasMaxLength(200);
+            entity.Property(identity => identity.ExternalSubject)
+                .HasColumnName("external_subject")
+                .HasMaxLength(200);
+            entity.Property(identity => identity.Status)
+                .HasColumnName("status")
+                .HasConversion<string>()
+                .HasMaxLength(20);
+            entity.Property(identity => identity.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.HasIndex(identity => new { identity.ExternalIssuer, identity.ExternalSubject })
+                .IsUnique();
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_identity_subjects_status",
+                "status IN ('Active', 'Inactive')"));
+        });
+
+        modelBuilder.Entity<TenantMembership>(entity =>
+        {
+            entity.ToTable("tenant_memberships");
+            entity.HasKey(membership => membership.Id);
+            entity.Property(membership => membership.Id).HasColumnName("id");
+            entity.Property(membership => membership.TenantId).HasColumnName("tenant_id");
+            entity.Property(membership => membership.IdentitySubjectId).HasColumnName("identity_subject_id");
+            entity.Property(membership => membership.Status)
+                .HasColumnName("status")
+                .HasConversion<string>()
+                .HasMaxLength(20);
+            entity.Property(membership => membership.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.HasIndex(membership => new { membership.TenantId, membership.IdentitySubjectId })
+                .IsUnique();
+            entity.HasIndex(membership => membership.IdentitySubjectId);
+            entity.HasOne<Tenant>()
+                .WithMany()
+                .HasForeignKey(membership => membership.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<IdentitySubject>()
+                .WithMany()
+                .HasForeignKey(membership => membership.IdentitySubjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_tenant_memberships_status",
+                "status IN ('Active', 'Inactive')"));
+            entity.HasQueryFilter(membership =>
+                tenantContextAccessor != null
+                && tenantContextAccessor.IsAvailable
+                && membership.TenantId == tenantContextAccessor.Current!.TenantId);
         });
     }
 

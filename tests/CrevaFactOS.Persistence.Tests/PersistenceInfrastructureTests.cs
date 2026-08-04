@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
 using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Persistence.Identity;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -50,7 +51,9 @@ public sealed class PersistenceInfrastructureTests
             .OrderBy(type => type.Name, StringComparer.Ordinal)
             .ToArray();
 
-        Assert.Equal([typeof(Tenant), typeof(TenantIsolationProbe)], mappedTypes);
+        Assert.Equal(
+            [typeof(IdentitySubject), typeof(Tenant), typeof(TenantIsolationProbe), typeof(TenantMembership)],
+            mappedTypes);
     }
 
     [Fact]
@@ -59,9 +62,10 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(2, migrations.Length);
+        Assert.Equal(3, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
+        Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);

@@ -3,6 +3,8 @@ using CrevaFactOS.Configuration;
 using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Api.Tenancy;
+using CrevaFactOS.Api.Authentication;
+using CrevaFactOS.Persistence.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +14,15 @@ ValidateConfiguration(builder.Configuration);
 builder.Services.AddHealthChecks();
 builder.Services.AddInfrastructureOptions(builder.Configuration);
 builder.Services.AddCrevaFactOSPersistence(builder.Configuration);
+builder.Services.AddCrevaFactOSAuthentication(
+    builder.Configuration,
+    builder.Environment);
 
 var app = builder.Build();
 
+app.UseRouting();
+app.UseAuthentication();
+app.UseMiddleware<IdentityResolutionMiddleware>();
 app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.MapHealthChecks(
@@ -27,9 +35,15 @@ app.MapHealthChecks("/health/ready");
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/internal/tenant-context", (ITenantContextAccessor tenantContext) => new
+    app.MapGet("/internal/tenant-context", (
+        HttpContext httpContext,
+        ICurrentIdentityAccessor currentIdentity,
+        ITenantContextAccessor tenantContext) => new
     {
-        hasTenantContext = tenantContext.IsAvailable,
+        authenticated = httpContext.User.Identity?.IsAuthenticated == true,
+        identityResolved = currentIdentity.IsResolved,
+        tenantContextAvailable = tenantContext.IsAvailable,
+        identitySubjectId = currentIdentity.Current?.IdentitySubjectId,
         tenantId = tenantContext.Current?.TenantId,
     });
 }

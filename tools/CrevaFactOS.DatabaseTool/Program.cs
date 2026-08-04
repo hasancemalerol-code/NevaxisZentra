@@ -23,6 +23,24 @@ try
         return 0;
     }
 
+    if (operation == "authentication-membership-verify")
+    {
+        await AuthenticationMembershipVerifier.VerifyAsync();
+        return 0;
+    }
+
+    if (operation == "authentication-membership-bootstrap")
+    {
+        await AuthenticationMembershipVerifier.BootstrapAsync();
+        return 0;
+    }
+
+    if (operation == "authentication-membership-cleanup")
+    {
+        await AuthenticationMembershipVerifier.CleanupFixturesAsync();
+        return 0;
+    }
+
     await using var connection = new NpgsqlConnection(
         PostgreSqlConnectionFactory.BuildConnectionString(options));
     await connection.OpenAsync();
@@ -77,7 +95,7 @@ try
         return 0;
     }
 
-    Console.Error.WriteLine("Unknown operation. Expected 'verify', 'state', or 'tenant-isolation-verify'.");
+    Console.Error.WriteLine("Unknown database-tool operation.");
     return 2;
 }
 catch (PostgresException exception) when (exception.SqlState == PostgresErrorCodes.InvalidPassword)
