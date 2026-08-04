@@ -1,8 +1,14 @@
 import Link from "next/link";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 
 import { IconButton } from "@/components/ui/button";
-import { primaryNavigation, isNavigationItemActive } from "@/lib/navigation/primary-navigation";
+import {
+  isNavigationItemActive,
+  primaryNavigation,
+} from "@/lib/navigation/primary-navigation";
 
 type SidebarProps = Readonly<{
   pathname: string;
@@ -10,57 +16,124 @@ type SidebarProps = Readonly<{
   onToggle: () => void;
 }>;
 
-export function Sidebar({ pathname, collapsed, onToggle }: SidebarProps) {
+export function Sidebar({
+  pathname,
+  collapsed,
+  onToggle,
+}: SidebarProps) {
   return (
-    <aside className="app-sidebar" aria-label="Ana uygulama navigasyonu" data-collapsed={collapsed}>
+    <aside
+      aria-label="Ana uygulama navigasyonu"
+      className="app-sidebar"
+      data-collapsed={collapsed}
+      data-group-count={primaryNavigation.length}
+    >
       <div className="sidebar-brand">
-        <Link className="brand-link" href="/" aria-label="CrevaFactOS ana çalışma alanı">
-          <span className="brand-mark" aria-hidden="true">CF</span>
+        <Link
+          aria-label="CrevaFactOS ana çalışma alanı"
+          className="brand-link"
+          href="/"
+        >
+          <span
+            aria-hidden="true"
+            className="brand-mark"
+          >
+            CF
+          </span>
+
           <span className="brand-copy">
             <strong>CrevaFactOS</strong>
             <small>Factory Operations</small>
           </span>
         </Link>
+
         <IconButton
-          className="sidebar-toggle"
-          label={collapsed ? "Kenar çubuğunu genişlet" : "Kenar çubuğunu daralt"}
-          onClick={onToggle}
           aria-expanded={!collapsed}
-          title={collapsed ? "Navigasyonu genişlet" : "Navigasyonu daralt"}
+          className="sidebar-toggle"
+          label={
+            collapsed
+              ? "Kenar çubuğunu genişlet"
+              : "Kenar çubuğunu daralt"
+          }
+          onClick={onToggle}
+          title={
+            collapsed
+              ? "Navigasyonu genişlet"
+              : "Navigasyonu daralt"
+          }
         >
-          {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+          {collapsed ? (
+            <PanelLeftOpen />
+          ) : (
+            <PanelLeftClose />
+          )}
         </IconButton>
       </div>
 
-      <nav className="sidebar-navigation" aria-label="Birincil navigasyon">
+      <nav
+        aria-label="Birincil navigasyon"
+        className="sidebar-navigation"
+        data-collapsed={collapsed}
+      >
         {primaryNavigation.map((group) => (
-          <div className="navigation-group" key={group.label}>
-            <p className="navigation-group-label">{group.label}</p>
+          <section
+            aria-labelledby={`navigation-group-${group.label}`}
+            className="navigation-group"
+            key={group.label}
+          >
+            <p
+              className="navigation-group-label"
+              id={`navigation-group-${group.label}`}
+            >
+              {group.label}
+            </p>
+
             <ul className="navigation-list">
               {group.items.map((item) => {
-                const active = isNavigationItemActive(item, pathname);
+                const active =
+                  isNavigationItemActive(
+                    item,
+                    pathname,
+                  );
                 const Icon = item.icon;
+
                 return (
                   <li key={item.href}>
                     <Link
+                      aria-current={
+                        active
+                          ? "page"
+                          : undefined
+                      }
                       className="navigation-link"
+                      data-active={active}
                       href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      title={collapsed ? item.label : undefined}
+                      title={
+                        collapsed
+                          ? item.label
+                          : undefined
+                      }
                     >
                       <Icon aria-hidden="true" />
-                      <span className="navigation-label">{item.label}</span>
+
+                      <span className="navigation-label">
+                        {item.label}
+                      </span>
                     </Link>
                   </li>
                 );
               })}
             </ul>
-          </div>
+          </section>
         ))}
       </nav>
 
       <div className="sidebar-footer">
-        <span className="environment-dot" aria-hidden="true" />
+        <span
+          aria-hidden="true"
+          className="environment-dot"
+        />
+
         <span className="sidebar-footer-copy">
           <strong>UI Foundation</strong>
           <small>Operasyon katmanı</small>
