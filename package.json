@@ -1,0 +1,20 @@
+{
+  "name": "crevafactos",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Plastik enjeksiyon ve kalıp üreticileri için Factory Operating System.",
+  "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22.18.0 <23",
+    "pnpm": "11.20.0"
+  },
+  "scripts": {
+    "dev": "pnpm --recursive --parallel dev",
+    "build": "pnpm --recursive build",
+    "lint": "pnpm --recursive lint",
+    "typecheck": "pnpm --recursive typecheck",
+    "test": "pnpm --recursive test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  }
+}
