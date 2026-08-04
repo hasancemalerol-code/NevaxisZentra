@@ -1,116 +1,55 @@
-\# ADR-003: Next.js Web Platformu
+# ADR-003: Next.js Web Platform
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: Web application technology and frontend boundary
 
+## Context
 
-\- Durum: Kabul edildi
+CrevaFactOS needs a desktop-first operational interface for production planning, shift planning, AI tasks and approvals, machines, molds, maintenance, quality, material risk, and delivery risk.
 
-\- Tarih: 2026-08-04
+The Web application is not a classic ERP interface and must preserve the locked dashboard structure.
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+## Decision
 
-\- Kapsam: Web uygulaması teknolojisi ve frontend mimarisi
+The Web application uses Next.js, React, and TypeScript in `apps/web` with:
 
+- Next.js App Router
+- TypeScript strict mode
+- React Server Components by default
+- Client Components only where interaction requires them
+- A centralized, typed API client
+- Shared design tokens and UI components
+- Schema-based validation
+- Permission-aware navigation and actions
+- Tenant- and facility-scoped data access
+- Desktop-first responsive behavior
 
+## Authoritative Workflow Boundary
 
-\## Bağlam
+Web presents AI Task Center tasks and approvals from the same authoritative records used by CrevaFactOS Teams. It must not maintain browser-only or Web-only approval state.
 
+Client-side hiding is not authorization. The API revalidates tenant, permission, approval scope, delegation, expiry, and current state for every protected action.
 
+## Locked Dashboard
 
-CrevaFactOS; plastik enjeksiyon ve kalıp üreticileri için geliştirilen, masaüstü kullanım ağırlıklı kurumsal bir Factory Operating System platformudur.
+The information architecture and visual structure in `docs/product/dashboard-lock.md` must not be redesigned without an explicit product decision.
 
+The primary sidebar and dashboard must not introduce native modules for:
 
+- Finance or accounting
+- Receivables/payables
+- Official stock ledger
+- Payroll or personnel master data
+- General purchasing ERP
+- General CRM, WMS, or HR
 
-Web uygulaması aşağıdaki alanları destekleyecektir:
+Operational risk indicators based on externally owned data may appear only in the locked locations and must be labeled as synchronized or derived information.
 
+## Consequences
 
-
-\- AI Görev Merkezi
-
-\- Yönetim dashboard'u
-
-\- Üretim planlama
-
-\- Üretim emirleri
-
-\- Makine ve kalıp yönetimi
-
-\- MRP ve malzeme planlama
-
-\- Stok ve depo
-
-\- Satın alma
-
-\- Kalite
-
-\- Bakım ve arıza
-
-\- Sipariş ve CRM
-
-\- Finans ve maliyet
-
-\- İnsan kaynakları
-
-\- Doküman ve revizyon
-
-\- Müşteri ve tedarikçi portalları
-
-\- Sistem yönetimi
-
-\- Tenant, rol ve yetki yönetimi
-
-
-
-Uygulama büyük veri tabloları, filtreleme, detay ekranları, iş akışları, grafikler, canlı durum bilgileri ve yetkili onay süreçleri içerecektir.
-
-
-
-Dashboard tasarımı kurumsal ERP ve MES görünümünde olacaktır. AI özellikleri güçlü olmakla birlikte görsel sistemin tamamı yapay zekâ ürünü gibi tasarlanmayacaktır.
-
-
-
-\## Karar
-
-
-
-CrevaFactOS web uygulaması Next.js, React ve TypeScript kullanılarak geliştirilecektir.
-
-
-
-Aşağıdaki yaklaşım kullanılacaktır:
-
-
-
-\- Next.js App Router
-
-\- TypeScript strict mode
-
-\- React Server Components
-
-\- Gerektiği yerde Client Components
-
-\- Server Actions yalnızca uygun ve kontrollü kullanım alanlarında
-
-\- Merkezi API istemcisi
-
-\- Ortak tasarım token'ları
-
-\- Paylaşılan UI bileşenleri
-
-\- Şema tabanlı form doğrulama
-
-\- Yetki kontrollü navigasyon
-
-\- Tenant kapsamlı veri erişimi
-
-\- Desktop-first responsive tasarım
-
-
-
-Web uygulamasının başlangıç konumu:
-
-
-
-```text
-
-apps/web
-
+- UI packages contain presentation behavior, not domain rules.
+- Approval and write-back controls cannot be bypassed through Server Actions.
+- Accessibility, localization, loading, empty, error, stale-data, and permission-denied states are required.
+- The dashboard lock is a product acceptance criterion for relevant changes.

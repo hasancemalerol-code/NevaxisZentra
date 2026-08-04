@@ -1,8 +1,8 @@
-\# CrevaFactOS Güvenlik Temel Standardı
+# CrevaFactOS Güvenlik Temel Standardı
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,35 +14,35 @@ Bu standart aşağıdaki bileşenleri kapsar:
 
 
 
-\- Web
+- Web
 
-\- API
+- API
 
-\- Worker
+- Worker
 
-\- AI Orchestrator
+- AI Orchestrator
 
-\- Mobil uygulama
+- Mobil uygulama
 
-\- Edge Agent
+- Edge Agent
 
-\- PostgreSQL
+- PostgreSQL
 
-\- Redis
+- Redis
 
-\- RabbitMQ
+- RabbitMQ
 
-\- Object storage
+- Object storage
 
-\- Harici entegrasyonlar
+- Harici entegrasyonlar
 
-\- Omnichannel sipariş kanalları
+- Omnichannel sipariş kanalları
 
-\- Makine ve PLC bağlantıları
+- Makine ve PLC bağlantıları
 
-\- AI tool erişimleri
+- AI tool erişimleri
 
-\- CI ve deployment süreçleri
+- CI ve deployment süreçleri
 
 
 
@@ -54,7 +54,7 @@ Bir modül veya müşteri daha güçlü güvenlik gereksinimine sahip olabilir a
 
 
 
-\## Temel Güvenlik İlkeleri
+## Temel Güvenlik İlkeleri
 
 
 
@@ -87,4 +87,10 @@ auditability
 separation of duties
 
 human approval for critical actions
+
+```
+
+Non-negotiable controls include tenant isolation, permission checks at the trusted backend, authoritative AI Task Center approval, separation of duties, delegation expiry, stale-data revalidation, idempotent external execution, immutable audit evidence, secret isolation, and deny-by-default AI tools.
+
+ERP integrations are read-only-first. Edge Agent uses allowlisted device contracts and cannot bypass local safety. Security failures fail closed and receive targeted negative tests.
 

@@ -1,75 +1,94 @@
-# CrevaFactOS Human-in-the-Loop ve Birim Yönlendirme Modeli
+# CrevaFactOS Human-in-the-Loop and Unit Routing Model
 
-- Durum: Kilitli
-- Sürüm: 2.0
-- Tarih: 2026-08-04
-- Ürün: CrevaFactOS
-- İletişim uygulaması: CrevaFactOS Teams
-- Kategori: AI Factory Operations Assistant
-- Sektör: Plastik enjeksiyon ve kalıp üretimi
+- Status: Locked
+- Version: 2.0
+- Date: 2026-08-04
+- Communication application: CrevaFactOS Teams
+- Authoritative workflow: AI Task Center
 
-## Amaç
+## Purpose
 
-Bu belge CrevaFactOS içindeki Human-in-the-Loop çalışma modelini tanımlar.
+This document defines how analysis becomes a controlled factory-operation action. CrevaFactOS is not a fully autonomous factory-management system, and AI cannot approve its own work.
 
-Model aşağıdaki süreçleri kapsar:
+## Authority
 
-- AI Agent tarafından veri toplanması
-- Verilerin analiz edilmesi
-- İlgili iş biriminin belirlenmesi
-- Analizin CrevaFactOS Teams üzerinden yönlendirilmesi
-- Görev, uyarı, öneri ve onay taleplerinin oluşturulması
-- Yetkili insan incelemesi
-- Onaylanan işlemin kontrollü uygulanması
-- Sonucun doğrulanması
-- Audit ve AI Karar Defteri kaydı
+AI Task Center owns task, assignment, evidence, review, approval, delegation, expiry, execution, and result state. Web and CrevaFactOS Teams reference the same task and approval identifiers and transitions.
 
-CrevaFactOS tam otonom fabrika yönetim sistemi değildir.
+CrevaFactOS Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. A Teams message, emoji, reaction, or read receipt is not itself an approval unless it invokes a validated AI Task Center decision action.
 
-AI Agent:
-
-- Verileri toplar.
-- Verileri birleştirir.
-- Riskleri analiz eder.
-- Plan ve işlem taslakları hazırlar.
-- İlgili birimi belirler.
-- Görev veya uyarı oluşturur.
-- Yetkili kullanıcıdan onay ister.
-- Onaylanan işlemi kontrollü biçimde uygular.
-- Sonucu doğrular.
-- Bütün süreci kayıt altına alır.
-
-AI kendi işlemini onaylayamaz.
-
-## Temel Çalışma Modeli
-
-CrevaFactOS’un standart çalışma modeli:
+## Standard Flow
 
 ```text
-ERP + Makineler + Sipariş Kanalları + Belgeler
-                         ↓
-              Integration Hub
-                         ↓
-             Operational Data Hub
-                         ↓
-                    AI Agent
-                         ↓
-          Analiz + Risk + Öneri + Taslak
-                         ↓
-       İlgili Birim / Rol / Kullanıcı Belirleme
-                         ↓
-              CrevaFactOS Teams
-                         ↓
-Mesaj / Görev / Uyarı / İnceleme / Onay Talebi
-                         ↓
-             Yetkili İnsan İncelemesi
-                         ↓
-            Onay / Ret / Düzeltme
-                         ↓
-          Mevcut Durumu Yeniden Doğrulama
-                         ↓
-CrevaFactOS İşlemi / ERP Write-back / Edge İşlemi
-                         ↓
-              Sonuç Doğrulama
-                         ↓
-          Audit + AI Karar Defteri
+ERP + machines + order channels + documents
+  -> Integration Hub and Edge Agent
+  -> Operational Data Hub
+  -> authorized AI agent
+  -> analysis + evidence + freshness + confidence + risk + bounded proposal
+  -> authoritative AI Task Center task and approval request
+  -> Web and/or CrevaFactOS Teams routing
+  -> authorized human review
+  -> approve / reject / correct / delegate / expire
+  -> permission, approval, freshness, and current-state revalidation
+  -> CrevaFactOS action / approved ERP write-back / approved Edge command
+  -> outcome verification and reconciliation
+  -> audit + AI Decision Ledger
+```
+
+## Unit Routing
+
+Work may route to purchasing, warehouse/material, order operations, finance/accounting, production, shift operations, maintenance, quality, and management. Each route records intended unit, required permission, assignee or candidate group, due time, urgency, and escalation policy.
+
+Routing does not transfer authoritative data ownership and does not grant approval or execution permission.
+
+## Task Lifecycle
+
+Suggested states are:
+
+```text
+Draft -> Ready -> Assigned -> In Review -> Waiting for Approval
+      -> Approved / Rejected / Correction Requested / Expired / Cancelled
+      -> Executing -> Succeeded / Partially Succeeded / Failed / Reconciliation Required
+```
+
+Allowed transitions are permission- and state-checked. Every transition records actor, time, reason, correlation, and previous/new state.
+
+## Approval Record
+
+An approval records:
+
+- Task and proposed-operation identifiers
+- Tenant, company, facility, target records, and operation type
+- Exact parameter scope and limits
+- Evidence and source-data version/freshness
+- Requester, recommender, approver, and intended executor
+- Required permission and separation-of-duties policy
+- Decision, reason, created time, expiry, and revocation
+- Whether it is single-use or allows enumerated operations
+
+## Separation of Duties and Delegation
+
+Risk policy may require distinct requester, recommender, approver, and executor identities. AI never satisfies a human-approval requirement.
+
+Delegation is explicit, scoped, time-bound, revocable, and cannot exceed the delegator’s permission. Delegation and its use are audited. Expired or revoked delegation invalidates pending decisions that depend on it.
+
+## Expiry and Revalidation
+
+Approval expires at its deadline and is invalidated by a material change in input data, target state, permission, delegation, connector mapping, operation parameters, or risk classification.
+
+Immediately before execution the system performs stale-data revalidation: it reloads authoritative state and verifies tenant/facility, permission, approval scope, expiry, source freshness, target version, operation limits, and idempotency state. Failed revalidation returns the task for review; it does not silently execute under old evidence.
+
+## Idempotent Execution
+
+Every approved external operation uses a stable idempotency key tied to the task, approved operation, target, and version. Retries reuse that key. Ambiguous timeouts require reconciliation before another business operation is attempted.
+
+## Audit and AI Decision Ledger
+
+The record includes source evidence, freshness, agent/model/tool versions, user-facing rationale, confidence, risk, proposed scope, routing, task transitions, delegation, approval decision, revalidation, idempotency key, execution request/result, verification, and correlation identifiers.
+
+Audit records cannot be modified by AI, the approver, or the executor.
+
+## Machine and ERP Boundaries
+
+ERP access is read-only-first. Write-back must be permission-bound, approval-bound, revalidated, idempotent, and audited.
+
+Machine commands use Edge Agent and a versioned allowlist. Local safety controls remain authoritative and may reject any command. No Human-in-the-Loop approval can authorize bypassing local safety.

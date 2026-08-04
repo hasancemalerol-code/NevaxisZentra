@@ -1,8 +1,8 @@
-\# CrevaFactOS İsimlendirme Standartları
+# CrevaFactOS İsimlendirme Standartları
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,23 +14,23 @@ Amaçlar:
 
 
 
-\- Kod tabanında tutarlılık sağlamak
+- Kod tabanında tutarlılık sağlamak
 
-\- Domain dilini korumak
+- Domain dilini korumak
 
-\- Belirsiz ve genel isimleri azaltmak
+- Belirsiz ve genel isimleri azaltmak
 
-\- Modül sınırlarını görünür hâle getirmek
+- Modül sınırlarını görünür hâle getirmek
 
-\- Arama ve bakım işlemlerini kolaylaştırmak
+- Arama ve bakım işlemlerini kolaylaştırmak
 
-\- API ve mesaj sözleşmelerini anlaşılır kılmak
+- API ve mesaj sözleşmelerini anlaşılır kılmak
 
-\- Plastik enjeksiyon ve kalıp sektörüne ait terminolojiyi doğru kullanmak
+- Plastik enjeksiyon ve kalıp sektörüne ait terminolojiyi doğru kullanmak
 
 
 
-\## Genel İlkeler
+## Genel İlkeler
 
 
 
@@ -38,21 +38,21 @@ Amaçlar:
 
 
 
-\- Açık olmalıdır.
+- Açık olmalıdır.
 
-\- Gerçek sorumluluğu ifade etmelidir.
+- Gerçek sorumluluğu ifade etmelidir.
 
-\- Gereksiz kısaltma içermemelidir.
+- Gereksiz kısaltma içermemelidir.
 
-\- Domain diline uygun olmalıdır.
+- Domain diline uygun olmalıdır.
 
-\- Aynı kavram için repository genelinde aynı terimi kullanmalıdır.
+- Aynı kavram için repository genelinde aynı terimi kullanmalıdır.
 
-\- Teknik uygulama detayından çok iş anlamını yansıtmalıdır.
+- Teknik uygulama detayından çok iş anlamını yansıtmalıdır.
 
-\- Bağlam dışında anlaşılmayacak isimlerden kaçınmalıdır.
+- Bağlam dışında anlaşılmayacak isimlerden kaçınmalıdır.
 
-\- Geçici veya numaralı isimler içermemelidir.
+- Geçici veya numaralı isimler içermemelidir.
 
 
 
@@ -93,4 +93,12 @@ process
 handle
 
 doWork
+
+```
+
+Use domain-specific names that expose ownership and intent. External projections include an `External`, `Source`, or `Projection` qualifier where omission could imply CrevaFactOS ownership.
+
+Commands use imperative names, events use past tense, permissions use stable resource/action names, and integration messages include schema versions. Avoid names such as `Manager`, `Helper`, `Common`, or `Utils` unless their narrow responsibility is explicit.
+
+Classic ERP module names must not be used for native modules contrary to ADR-011.
 

@@ -1,8 +1,8 @@
-\# CrevaFactOS Ortam Stratejisi
+# CrevaFactOS Ortam Stratejisi
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,25 +14,25 @@ Amaçlar:
 
 
 
-\- Ortamlar arasında veri ve yetki izolasyonu sağlamak
+- Ortamlar arasında veri ve yetki izolasyonu sağlamak
 
-\- Local geliştirmeyi kolaylaştırmak
+- Local geliştirmeyi kolaylaştırmak
 
-\- Testlerin deterministik çalışmasını desteklemek
+- Testlerin deterministik çalışmasını desteklemek
 
-\- Staging ortamını production'a mümkün olduğunca yakın tutmak
+- Staging ortamını production'a mümkün olduğunca yakın tutmak
 
-\- Secret ve credential kullanımını güvenli hâle getirmek
+- Secret ve credential kullanımını güvenli hâle getirmek
 
-\- Dağıtım ve rollback süreçlerini standartlaştırmak
+- Dağıtım ve rollback süreçlerini standartlaştırmak
 
-\- AI, mesajlaşma, veritabanı ve Edge Agent bağımlılıklarını kontrollü biçimde yönetmek
+- AI, mesajlaşma, veritabanı ve Edge Agent bağımlılıklarını kontrollü biçimde yönetmek
 
-\- Ortam kaynaklı hataları azaltmak
+- Ortam kaynaklı hataları azaltmak
 
 
 
-\## Desteklenen Ortamlar
+## Desteklenen Ortamlar
 
 
 
@@ -49,4 +49,10 @@ test
 staging
 
 production
+
+```
+
+Each environment has separate databases, RabbitMQ virtual hosts, object storage, secrets, connector credentials, AI-provider configuration, and Edge identities. Production customer data is not copied to local or test environments.
+
+Configuration is promoted through reviewable deployment artifacts; secrets and environment-specific values are supplied externally. Staging should exercise migrations, connector failure behavior, outbox recovery, authorization, and tenant isolation before production rollout.
 

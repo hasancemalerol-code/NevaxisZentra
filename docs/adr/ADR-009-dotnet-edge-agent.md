@@ -1,112 +1,62 @@
-\# ADR-009: .NET Edge Agent
+# ADR-009: .NET Edge Agent
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: Factory-local machine, PLC, device, and network integrations
 
+## Context
 
-\- Durum: Kabul edildi
+Factory devices often use OPC UA, Modbus, MQTT, serial protocols, TCP sockets, vendor APIs, files, or local network resources that must not be exposed directly to the cloud. Connectivity can be intermittent, and machine safety must remain local.
 
-\- Tarih: 2026-08-04
+## Decision
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+CrevaFactOS uses a separate .NET Edge Agent in `apps/edge-agent` for factory-local connectivity.
 
-\- Kapsam: Fabrika içi makine, PLC, cihaz ve yerel ağ entegrasyonları
+Edge Agent responsibilities include:
 
+- Device identity and allowlisted adapter configuration
+- Read-first telemetry acquisition and normalization
+- Local buffering during connectivity loss
+- Secure outbound synchronization
+- Time, sequence, quality, and source metadata
+- Health, diagnostics, and controlled configuration updates
+- Execution of explicitly approved command contracts when enabled
 
+The cloud API never connects directly into the factory control network.
 
-\## Bağlam
+## Safety Boundary
 
+Emergency stops, interlocks, safety relays, safety PLC logic, guards, pressure limits, and hard-real-time control remain local and authoritative. Edge Agent and cloud services cannot disable, bypass, or replace them.
 
+Unrestricted Modbus writes, OPC UA writes, PLC program changes, scripts, generated control code, or arbitrary vendor commands are prohibited.
 
-CrevaFactOS, plastik enjeksiyon ve kalıp üreticileri için geliştirilen bulut merkezli bir Factory Operating System platformudur.
+## Approved Commands
 
+An approved command requires:
 
+- A versioned allowlisted command type and bounded parameters
+- Tenant, facility, device, and user permission validation
+- An active AI Task Center approval when critical
+- Approval-expiry and stale-state revalidation
+- A stable command/idempotency identifier
+- Local device and safety acceptance
+- Timeout, result, and verification behavior
+- Audit and AI Decision Ledger linkage
 
-Fabrika sahasında kullanılacak enjeksiyon makineleri, PLC sistemleri, yardımcı ekipmanlar, enerji sayaçları, barkod yazıcıları, tartılar, kalite cihazları ve yerel dosya paylaşım alanları çoğunlukla doğrudan internet erişimine açık değildir.
+Local safety logic may reject an approved cloud request. Rejection is a valid outcome and must be reported rather than bypassed.
 
+## Security and Operations
 
+- Edge identity uses rotatable per-installation credentials.
+- Configuration is signed or integrity-protected and auditable.
+- Inbound network exposure is minimized.
+- Buffered data is encrypted where sensitive and bounded by retention policy.
+- Updates support controlled rollout and rollback.
+- Telemetry includes source time and ingestion time to expose stale data.
 
-Bu cihazlar ve sistemler aşağıdaki bağlantı yöntemlerinden birini veya birkaçını kullanabilir:
+## Consequences
 
-
-
-\- OPC UA
-
-\- Modbus TCP
-
-\- Modbus RTU
-
-\- MQTT
-
-\- Seri port
-
-\- TCP socket
-
-\- Üretici API’si
-
-\- Dosya aktarımı
-
-\- Klasör izleme
-
-\- CSV veya XML çıktısı
-
-\- Dijital giriş ve çıkışlar
-
-\- Harici IoT sensörleri
-
-
-
-CrevaFactOS’un aşağıdaki verileri güvenli biçimde toplaması gerekebilir:
-
-
-
-\- Makine çalışma durumu
-
-\- Üretim sayacı
-
-\- Çevrim süresi
-
-\- Alarm ve hata kodları
-
-\- Duruş nedenleri
-
-\- Enjeksiyon basıncı
-
-\- Kalıp sıcaklığı
-
-\- Eriyik sıcaklığı
-
-\- Enerji tüketimi
-
-\- Bakım sayaçları
-
-\- Sensör ölçümleri
-
-\- Proses parametreleri
-
-\- Kalıp bağlama ve sökme bilgileri
-
-\- Üretim emri durumu
-
-\- Yardımcı ekipman durumu
-
-
-
-Bulut API’nin fabrika ağına doğrudan bağlanması güvenlik, ağ erişimi, NAT, firewall ve operasyonel sürdürülebilirlik açısından uygun değildir.
-
-
-
-\## Karar
-
-
-
-CrevaFactOS, fabrika içi makine ve cihaz entegrasyonları için ayrı bir .NET Edge Agent uygulaması kullanacaktır.
-
-
-
-Edge Agent aşağıdaki konumda geliştirilecektir:
-
-
-
-```text
-
-apps/edge-agent
-
+- Device adapters are isolated behind stable contracts.
+- Telemetry is implemented before machine commands.
+- Edge health and synchronization state are visible without leaking factory-network secrets.

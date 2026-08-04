@@ -1,84 +1,30 @@
-\# CrevaFactOS Product Documentation
+# CrevaFactOS Product Documentation
 
+This directory contains the locked product boundary for CrevaFactOS, an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing.
 
+CrevaFactOS is not a replacement ERP. Existing ERP and related systems remain authoritative for classic enterprise records; CrevaFactOS converts permitted data into operational plans, risks, tasks, approvals, and audited actions.
 
-Bu klasör, CrevaFactOS ürün kapsamını, sektörel gereksinimleri, kullanıcı rollerini, modülleri, iş akışlarını ve kabul kriterlerini içerir.
+## Authoritative Documents
 
+- [Product positioning](product-positioning.md)
+- [Core capabilities](core-capabilities.md)
+- [Out-of-scope areas](out-of-scope.md)
+- [Locked dashboard](dashboard-lock.md)
+- [User roles and authorization](user-roles.md)
+- [AI agent catalog](ai-agent-catalog.md)
+- [Human-in-the-Loop model](human-in-the-loop.md)
+- [Integration priorities](integration-priorities.md)
 
+ADR-011 defines the corresponding architecture-level product boundary and data-ownership matrix.
 
-CrevaFactOS; plastik enjeksiyon ve kalıp üreticileri için geliştirilen, AI Autopilot destekli bir Factory Operating System platformudur.
+## Locked Principles
 
-
-
-\## Ürün Konumu
-
-
-
-CrevaFactOS aşağıdaki operasyonları tek platformda yönetir:
-
-
-
-\- Sipariş ve müşteri yönetimi
-
-\- Plastik enjeksiyon üretimi
-
-\- Kalıp tasarımı ve imalatı
-
-\- Kalıp yaşam döngüsü
-
-\- Makine ve yardımcı ekipman yönetimi
-
-\- Hammadde ve malzeme planlama
-
-\- Stok ve depo
-
-\- Satın alma
-
-\- Kalite
-
-\- Bakım ve arıza
-
-\- Sevkiyat
-
-\- Finans ve maliyet
-
-\- İnsan kaynakları
-
-\- Doküman ve revizyon
-
-\- AI destekli karar ve işlem yönetimi
-
-
-
-Genel Factory OS özellikleri korunur ancak bütün ürün akışları plastik enjeksiyon ve kalıp sektörüne göre özelleştirilir.
-
-
-
-\## Temel Ürün Prensibi
-
-
-
-CrevaFactOS AI Autopilot aşağıdaki çalışma modelini kullanır:
-
-
-
-```text
-
-Veriyi izle
-
-&#x20; → Analiz et
-
-&#x20; → Plan hazırla
-
-&#x20; → İşlem taslağı oluştur
-
-&#x20; → Güven seviyesi ve gerekçe göster
-
-&#x20; → Yetkili onayı al
-
-&#x20; → İşlemi uygula
-
-&#x20; → Sonucu doğrula
-
-&#x20; → Audit kaydı oluştur
-
+- Production planning and shift planning are native CrevaFactOS capabilities.
+- Machine intelligence, mold lifecycle, maintenance, quality, and operational risk remain native.
+- AI Task Center is authoritative for tasks and approvals.
+- CrevaFactOS Teams is the internal communication and routing application; it uses the same authoritative records as Web.
+- Critical actions require Human-in-the-Loop approval.
+- ERP access is read-only-first; write-back is permission-bound, approval-bound, revalidated, idempotent, and audited.
+- Machine safety remains local and unrestricted machine writes are prohibited.
+- The locked dashboard cannot be structurally redesigned without an explicit product decision.
+- Classic ERP modules cannot be introduced silently.

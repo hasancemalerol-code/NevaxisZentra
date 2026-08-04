@@ -1,8 +1,8 @@
-\# CrevaFactOS Yapılandırma Standartları
+# CrevaFactOS Yapılandırma Standartları
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,23 +14,23 @@ Amaçlar:
 
 
 
-\- Yapılandırmayı koddan ayırmak
+- Yapılandırmayı koddan ayırmak
 
-\- Ortamlar arasında güvenli geçiş sağlamak
+- Ortamlar arasında güvenli geçiş sağlamak
 
-\- Secret değerlerinin repository içine girmesini engellemek
+- Secret değerlerinin repository içine girmesini engellemek
 
-\- Uygulama başlangıcında hatalı ayarları erken tespit etmek
+- Uygulama başlangıcında hatalı ayarları erken tespit etmek
 
-\- Web, API, Worker, AI Orchestrator, mobil ve Edge Agent arasında tutarlı yapılandırma yaklaşımı oluşturmak
+- Web, API, Worker, AI Orchestrator, mobil ve Edge Agent arasında tutarlı yapılandırma yaklaşımı oluşturmak
 
-\- Production dışı ayarların production ortamına sızmasını önlemek
+- Production dışı ayarların production ortamına sızmasını önlemek
 
-\- Yapılandırma değişikliklerini izlenebilir hâle getirmek
+- Yapılandırma değişikliklerini izlenebilir hâle getirmek
 
 
 
-\## Temel İlke
+## Temel İlke
 
 
 
@@ -42,27 +42,27 @@ Yapılandırma aşağıdaki amaçlarla kullanılabilir:
 
 
 
-\- Servis adresleri
+- Servis adresleri
 
-\- Portlar
+- Portlar
 
-\- Timeout değerleri
+- Timeout değerleri
 
-\- Feature flag'ler
+- Feature flag'ler
 
-\- Retry limitleri
+- Retry limitleri
 
-\- Sağlayıcı seçimi
+- Sağlayıcı seçimi
 
-\- Log seviyeleri
+- Log seviyeleri
 
-\- Ortam bilgisi
+- Ortam bilgisi
 
-\- Bağlantı ayarları
+- Bağlantı ayarları
 
-\- Maliyet ve kullanım limitleri
+- Maliyet ve kullanım limitleri
 
-\- Teknik kapasite sınırları
+- Teknik kapasite sınırları
 
 
 
@@ -70,19 +70,19 @@ Aşağıdakiler yalnızca configuration üzerinden belirlenmemelidir:
 
 
 
-\- Yetki kararı
+- Yetki kararı
 
-\- Tenant erişim kararı
+- Tenant erişim kararı
 
-\- Onay zorunluluğu
+- Onay zorunluluğu
 
-\- Finansal iş kuralları
+- Finansal iş kuralları
 
-\- Kalite kabul kriterleri
+- Kalite kabul kriterleri
 
-\- Makine güvenlik kuralları
+- Makine güvenlik kuralları
 
-\- Domain durum geçişleri
+- Domain durum geçişleri
 
 
 
@@ -90,7 +90,7 @@ Bu kurallar domain veya application katmanında uygulanmalıdır.
 
 
 
-\## Yapılandırma Kaynakları
+## Yapılandırma Kaynakları
 
 
 
@@ -102,11 +102,19 @@ Bu kurallar domain veya application katmanında uygulanmalıdır.
 
 Default configuration
 
-&#x20; → Environment-specific configuration
+  → Environment-specific configuration
 
-&#x20; → Environment variables
+  → Environment variables
 
-&#x20; → Secret provider
+  → Secret provider
 
-&#x20; → Runtime override
+  → Runtime override
+
+```
+
+Later sources override earlier sources only for allowlisted keys. Startup must fail with a clear error when required configuration is missing or invalid.
+
+Secrets never use committed defaults, logs, client bundles, or exception payloads. Tenant connector credentials are isolated, rotated, and referenced through a secret provider.
+
+Environment variables use a documented prefix and hierarchical mapping. Configuration changes that affect permissions, integrations, AI tools, or machine commands are audited and require controlled rollout.
 

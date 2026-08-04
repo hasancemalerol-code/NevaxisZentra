@@ -1,156 +1,62 @@
-\# ADR-007: Multi-Tenant Veri İzolasyonu
+# ADR-007: Multi-Tenant Data Isolation
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: Tenant, company, facility, and data-access isolation
 
+## Context
 
-\- Durum: Kabul edildi
+CrevaFactOS serves multiple customers through shared applications and infrastructure. A tenant may contain multiple companies, factories, facilities, branches, warehouses, or mold workshops.
 
-\- Tarih: 2026-08-04
+No tenant may read, mutate, infer, route, or execute against another tenant’s data or integrations.
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+## Decision
 
-\- Kapsam: Tenant, şirket, fabrika ve veri erişim güvenliği
+Tenant is the highest customer isolation boundary. Company and facility are subordinate operational scopes.
 
+Isolation is enforced together at:
 
+1. Authentication and active membership
+2. Tenant/company/facility context resolution
+3. Permission and operation scope evaluation
+4. Application handlers and repositories
+5. Database constraints and policies where adopted
+6. Messages, jobs, caches, files, search indexes, and telemetry
+7. Connector credentials and synchronization state
+8. Audit, logs, metrics, and traces
 
-\## Bağlam
+No single layer is considered sufficient.
 
+## Context Rules
 
+- Tenant context comes from a trusted authenticated membership, not a free-form request field.
+- Users switching tenant or facility must establish a new validated active context.
+- Background work carries an explicit tenant and originating correlation context.
+- Platform support access is time-bound, purpose-bound, least-privilege, and audited.
+- AI cannot choose or change tenant, company, facility, role, permission, or approval scope.
 
-CrevaFactOS birden fazla müşteriye hizmet veren çoklu tenant destekli bir Factory Operating System platformudur.
+## Data Rules
 
+- Tenant-scoped records include `tenant_id`.
+- Composite uniqueness and foreign keys include tenant scope where required to prevent cross-tenant references.
+- Queries fail closed when tenant context is absent.
+- Cache, object, and queue keys are tenant-namespaced.
+- Files and telemetry cannot be retrieved through guessable identifiers without authorization.
+- External connector credentials and mappings are isolated per tenant and environment.
 
+## Authorization
 
-Her müşteri aşağıdaki yapılardan bir veya daha fazlasına sahip olabilir:
+Roles are permission bundles, not the final access decision. Authorization evaluates authenticated user, active membership, tenant, company, facility, permission, resource scope, delegation, approval scope, operation limit, and current state.
 
+Delegation cannot grant permissions the delegator does not hold. It is explicit, scoped, time-bound, revocable, and audited.
 
+## Verification
 
-\- Şirket
+Every tenant-aware module requires negative isolation tests covering reads, writes, lists, exports, messages, background jobs, caches, files, and integration callbacks. Tests must use at least two tenants and verify that identifiers from one tenant cannot be resolved in another.
 
-\- Fabrika
+## Consequences
 
-\- Tesis
-
-\- Şube
-
-\- Depo
-
-\- Üretim alanı
-
-\- Kalıp atölyesi
-
-\- Fason operasyon birimi
-
-
-
-Sistem aşağıdaki kritik verileri yönetecektir:
-
-
-
-\- Siparişler
-
-\- Müşteriler
-
-\- Ürünler ve reçeteler
-
-\- Kalıplar
-
-\- Makineler
-
-\- Üretim emirleri
-
-\- Hammadde ve stoklar
-
-\- Kalite kayıtları
-
-\- Bakım ve arıza kayıtları
-
-\- Finans ve maliyet kayıtları
-
-\- AI görevleri
-
-\- Yetkili onayları
-
-\- Audit kayıtları
-
-\- Makine telemetrisi
-
-\- Omnichannel sipariş mesajları
-
-
-
-Bir tenant hiçbir koşulda başka tenant’a ait verileri görememeli, değiştirememeli veya dolaylı biçimde çıkaramamalıdır.
-
-
-
-\## Karar
-
-
-
-CrevaFactOS shared application ve shared PostgreSQL modeliyle çalışacaktır.
-
-
-
-Tenant izolasyonu aşağıdaki katmanlarda birlikte uygulanacaktır:
-
-
-
-1\. Kimlik doğrulama
-
-2\. Kullanıcı üyeliği
-
-3\. Tenant context
-
-4\. Application katmanı
-
-5\. Veri erişim katmanı
-
-6\. Veritabanı constraint ve politikaları
-
-7\. Mesajlaşma
-
-8\. Cache
-
-9\. Dosya ve object storage
-
-10\. Audit ve gözlemlenebilirlik
-
-
-
-Tek bir katmana güvenilmeyecektir.
-
-
-
-\## Tenant Modeli
-
-
-
-Tenant, CrevaFactOS içindeki en üst müşteri izolasyon sınırıdır.
-
-
-
-Bir tenant altında birden fazla şirket veya fabrika bulunabilir.
-
-
-
-Örnek:
-
-
-
-```text
-
-Tenant
-
-├── Company
-
-│   ├── Factory
-
-│   ├── Branch
-
-│   └── Warehouse
-
-└── Company
-
-&#x20;   ├── Factory
-
-&#x20;   └── Mold Workshop
-
+- Convenience APIs that permit optional tenant context are prohibited for tenant data.
+- Operational tooling must expose scope without leaking sensitive cross-tenant values.
+- A tenant-isolation failure is a security incident and blocks release.

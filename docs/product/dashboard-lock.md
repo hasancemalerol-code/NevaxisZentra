@@ -1,188 +1,97 @@
-\# CrevaFactOS Dashboard Kilidi
+# CrevaFactOS Dashboard Lock
 
+- Status: Locked
+- Date: 2026-08-04
+- Screen: Primary Dashboard / AI Task Center
+- Change level: No structural change without explicit product approval
 
+## Purpose
 
-\- Durum: Kilitli
+This document locks the primary dashboard’s information architecture, visual language, content boundary, and relationship to AI Task Center. Implementation may improve accessibility, responsiveness, performance, and data correctness without redesigning the structure.
 
-\- Tarih: 2026-08-04
+## Positioning
 
-\- Ürün: CrevaFactOS
+The dashboard is the daily factory-operations view for the AI Production Manager and AI Task Center. It is not an accounting, finance, payroll, official inventory, or general purchasing ERP screen.
 
-\- Ekran: Ana Dashboard / AI Görev Merkezi
+AI Task Center data shown on the dashboard is authoritative for tasks and approvals. CrevaFactOS Teams and Web reference the same records.
 
-\- Kategori: AI Factory Operations Assistant
+## Locked Visual Language
 
-\- Değişiklik seviyesi: Açık ürün kararı olmadan değiştirilemez
+- Light, corporate background
+- Light blue-gray sidebar
+- White content cards
+- Dark navy primary text
+- Blue active states and links
+- Green normal and success states
+- Orange attention and medium risk
+- Red critical risk and failure
+- Purple AI, confidence, and analysis emphasis
+- Light borders and restrained shadows
+- Desktop-first, readable ERP/MES-level information density
+- Clear card, table, and status boundaries
 
+The dashboard must not be converted to a dark, neon, chat-only, or heavily decorative AI interface.
 
+## Locked Structure
 
-\## Amaç
-
-
-
-Bu belge CrevaFactOS için onaylanan ana dashboard tasarımını, bilgi mimarisini, görsel dili ve içerik sınırlarını kilitler.
-
-
-
-Dashboard:
-
-
-
-\- Klasik ERP ekranı değildir.
-
-\- Finans veya muhasebe paneli değildir.
-
-\- Ana stok kayıt sistemi değildir.
-
-\- Fabrika operasyonlarının günlük yönetim ekranıdır.
-
-\- AI Üretim Müdürü ve AI Görev Merkezi'nin ana görünümüdür.
-
-\- Yöneticiye yalnızca veri değil, karar ve aksiyon sunar.
-
-
-
-Bu belgede belirtilen ana yapı, açık kullanıcı ve ürün kararı olmadan yeniden tasarlanamaz.
-
-
-
-\## Resmî Dashboard Konumlandırması
-
-
-
-CrevaFactOS ana dashboard'u aşağıdaki ürün konumlandırmasını temsil eder:
-
-
-
-> Mevcut ERP, makineler ve fabrika operasyonları üzerinde çalışan AI Factory Operations Assistant.
-
-
-
-Dashboard'un temel amacı:
-
-
-
-\- Günlük fabrika durumunu göstermek
-
-\- Kritik riskleri öne çıkarmak
-
-\- AI görevlerini ve onayları sunmak
-
-\- Üretim planını görünür hâle getirmek
-
-\- Makine, kalıp, bakım ve malzeme risklerini bir araya getirmek
-
-\- Yöneticiye öncelikli aksiyonları göstermek
-
-
-
-\## Kilitli Görsel Dil
-
-
-
-Dashboard aşağıdaki görsel karakteri korur:
-
-
-
-\- Açık ve kurumsal arka plan
-
-\- Açık mavi-gri sidebar
-
-\- Beyaz içerik kartları
-
-\- Koyu lacivert ana metinler
-
-\- Mavi aktif durumlar ve bağlantılar
-
-\- Yeşil başarı ve normal durumlar
-
-\- Turuncu dikkat ve orta risk
-
-\- Kırmızı kritik risk ve arıza
-
-\- Mor AI, güven veya analiz vurguları
-
-\- Hafif border ve gölge kullanımı
-
-\- Sıkışık olmayan kurumsal ERP/MES yoğunluğu
-
-\- Desktop-first bilgi yerleşimi
-
-\- Net kart sınırları
-
-\- Kolay taranabilir tablo ve durum yapısı
-
-
-
-Dashboard koyu temaya, neon AI stiline veya aşırı dekoratif tasarıma dönüştürülmemelidir.
-
-
-
-\## Kilitli Genel Yerleşim
-
-
-
-Ana dashboard aşağıdaki temel yerleşimi korur:
-
-
+The following order and major regions are preserved:
 
 ```text
+Left Sidebar
+  +
+Top Bar
+  +
+Top KPI Cards
+  +
+AI Task Center
+  +
+Daily Operations Summary
+  +
+Risks and Alerts
+  +
+Plan Reliability
+  +
+Machine Status
+  +
+Active Production Orders
+  +
+Live Alarms
+  +
+Material Risks
+  +
+Mold Status
+  +
+Maintenance and Breakdowns
+  +
+Quick Actions
+  +
+Subsystem Health Bar
+```
 
-Sol Sidebar
+Card contents may evolve within their purpose, but a package must not reorder, remove, merge, or replace major regions without explicit approval.
 
-&#x20; +
+## Sidebar Boundary
 
-Üst Topbar
+The primary sidebar and dashboard must not add native entries or modules for:
 
-&#x20; +
+- Finance
+- Accounting
+- Receivables/payables
+- Official or native stock ledger
+- Payroll or personnel master records
+- General purchasing ERP
+- General CRM, HR, WMS, banking, or invoicing
 
-Üst KPI Kartları
+Material risks, critical-stock alerts, supplier risks, order risks, and operational cost impact may remain because they are factory-operation analysis derived from authoritative external data. Labels must not imply ledger ownership.
 
-&#x20; +
+## Quick Actions
 
-AI Görev Merkezi
+Quick Actions may create a native plan, task, draft, review, or approval request. They must not silently finalize official ERP records, approve critical actions, or issue unrestricted machine commands.
 
-&#x20; +
+## Required States
 
-Günlük Operasyon Özeti
+Every region supports loading, empty, stale, partial, permission-denied, and error states. Source freshness and degraded integration health are visible where decisions depend on them.
 
-&#x20; +
+## Change Control
 
-Riskler ve Uyarılar
-
-&#x20; +
-
-Plan Güvenilirliği
-
-&#x20; +
-
-Makine Durumu
-
-&#x20; +
-
-Aktif Üretim Emirleri
-
-&#x20; +
-
-Canlı Alarmlar
-
-&#x20; +
-
-Malzeme Riskleri
-
-&#x20; +
-
-Kalıp Durumu
-
-&#x20; +
-
-Bakım ve Arıza
-
-&#x20; +
-
-Hızlı İşlemler
-
-&#x20; +
-
-Alt Sistem Sağlık Barı
-
+Any structural change requires a written product decision describing user evidence, affected locked regions, information-architecture impact, migration, and updated acceptance criteria. Ordinary feature work does not authorize dashboard redesign.

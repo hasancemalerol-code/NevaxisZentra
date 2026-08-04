@@ -1,4 +1,4 @@
-\# CrevaFactOS Documentation
+# CrevaFactOS Documentation
 
 
 
@@ -6,11 +6,11 @@ Bu klasör, CrevaFactOS ürün, mimari, güvenlik ve teknik karar belgelerini i�
 
 
 
-\## Klasörler
+## Klasörler
 
 
 
-\### `architecture`
+### `architecture`
 
 
 
@@ -22,27 +22,27 @@ Kapsam:
 
 
 
-\- Sistem bağlamı
+- Sistem bağlamı
 
-\- Uygulama sınırları
+- Uygulama sınırları
 
-\- Modüler monolit yapısı
+- Modüler monolit yapısı
 
-\- API, Worker ve Edge ilişkileri
+- API, Worker ve Edge ilişkileri
 
-\- Mesajlaşma akışları
+- Mesajlaşma akışları
 
-\- Veri akışları
+- Veri akışları
 
-\- Deployment görünümü
+- Deployment görünümü
 
-\- Gözlemlenebilirlik yapısı
+- Gözlemlenebilirlik yapısı
 
-\- Güvenlik sınırları
+- Güvenlik sınırları
 
 
 
-\### `product`
+### `product`
 
 
 
@@ -54,31 +54,31 @@ Kapsam:
 
 
 
-\- Ürün vizyonu
+- Ürün vizyonu
 
-\- Plastik enjeksiyon ve kalıp sektörüne özel gereksinimler
+- Plastik enjeksiyon ve kalıp sektörüne özel gereksinimler
 
-\- Modül tanımları
+- Modül tanımları
 
-\- Kullanıcı rolleri
+- Kullanıcı rolleri
 
-\- İş akışları
+- İş akışları
 
-\- Ekran tanımları
+- Ekran tanımları
 
-\- Kabul kriterleri
+- Kabul kriterleri
 
-\- Roadmap
+- Roadmap
 
-\- PRD belgeleri
+- PRD belgeleri
 
-\- AI Autopilot davranışları
+- AI Autopilot davranışları
 
-\- Omnichannel sipariş toplama akışları
+- Omnichannel sipariş toplama akışları
 
 
 
-\### `security`
+### `security`
 
 
 
@@ -90,31 +90,31 @@ Kapsam:
 
 
 
-\- Tenant izolasyonu
+- Tenant izolasyonu
 
-\- Kimlik doğrulama
+- Kimlik doğrulama
 
-\- Rol ve yetki modeli
+- Rol ve yetki modeli
 
-\- AI tool erişim sınırları
+- AI tool erişim sınırları
 
-\- Onay mekanizmaları
+- Onay mekanizmaları
 
-\- Audit
+- Audit
 
-\- Secret yönetimi
+- Secret yönetimi
 
-\- Edge Agent güvenliği
+- Edge Agent güvenliği
 
-\- Veri sınıflandırması
+- Veri sınıflandırması
 
-\- Yedekleme ve geri yükleme
+- Yedekleme ve geri yükleme
 
-\- Güvenlik testleri
+- Güvenlik testleri
 
 
 
-\### `adr`
+### `adr`
 
 
 
@@ -126,7 +126,7 @@ Her önemli teknik karar ayrı ADR ile belgelenmelidir.
 
 
 
-\## ADR Standardı
+## ADR Standardı
 
 
 
@@ -134,29 +134,29 @@ Her ADR aşağıdaki bölümleri içermelidir:
 
 
 
-\- Başlık
+- Başlık
 
-\- Durum
+- Durum
 
-\- Tarih
+- Tarih
 
-\- Karar sahipleri
+- Karar sahipleri
 
-\- Kapsam
+- Kapsam
 
-\- Bağlam
+- Bağlam
 
-\- Karar
+- Karar
 
-\- Alternatifler
+- Alternatifler
 
-\- Gerekçe
+- Gerekçe
 
-\- Olumlu sonuçlar
+- Olumlu sonuçlar
 
-\- Riskler
+- Riskler
 
-\- Geri dönüş şartları
+- Geri dönüş şartları
 
 
 
@@ -175,4 +175,12 @@ Reddedildi
 Yerine başka karar geçti
 
 Kullanımdan kaldırıldı
+
+```
+
+ADR-011 and locked product documents define the current product boundary. Earlier ADRs remain valid only where they do not conflict with that boundary.
+
+## Documentation Quality
+
+Documentation changes must use valid Markdown, close code fences, state ownership explicitly, and link superseding decisions. No implementation package may silently change a locked product decision.
 

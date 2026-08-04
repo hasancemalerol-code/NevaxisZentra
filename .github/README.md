@@ -1,4 +1,4 @@
-\# CrevaFactOS GitHub Configuration
+# CrevaFactOS GitHub Configuration
 
 
 
@@ -6,11 +6,11 @@ Bu klasör, CrevaFactOS repository'sinin GitHub tabanlı geliştirme ve kalite s
 
 
 
-\## Klasörler
+## Klasörler
 
 
 
-\### `workflows`
+### `workflows`
 
 
 
@@ -22,29 +22,29 @@ Başlangıçta aşağıdaki kalite kapıları kurulacaktır:
 
 
 
-\- Web lint
+- Web lint
 
-\- TypeScript typecheck
+- TypeScript typecheck
 
-\- Next.js production build
+- Next.js production build
 
-\- .NET restore
+- .NET restore
 
-\- .NET build
+- .NET build
 
-\- .NET test
+- .NET test
 
-\- Docker image build doğrulaması
+- Docker image build doğrulaması
 
-\- Dependency güvenlik kontrolü
+- Dependency güvenlik kontrolü
 
-\- Secret tarama
+- Secret tarama
 
-\- Test sonuçlarının saklanması
+- Test sonuçlarının saklanması
 
 
 
-\## Pull Request Kuralları
+## Pull Request Kuralları
 
 
 
@@ -52,25 +52,25 @@ Her pull request aşağıdaki kontrollerden geçmelidir:
 
 
 
-1\. İlgili branch güncel olmalıdır.
+1. İlgili branch güncel olmalıdır.
 
-2\. Web lint başarılı olmalıdır.
+2. Web lint başarılı olmalıdır.
 
-3\. TypeScript typecheck başarılı olmalıdır.
+3. TypeScript typecheck başarılı olmalıdır.
 
-4\. Next.js build başarılı olmalıdır.
+4. Next.js build başarılı olmalıdır.
 
-5\. .NET build başarılı olmalıdır.
+5. .NET build başarılı olmalıdır.
 
-6\. Testler başarılı olmalıdır.
+6. Testler başarılı olmalıdır.
 
-7\. Docker image üretilebilmelidir.
+7. Docker image üretilebilmelidir.
 
-8\. Kritik güvenlik açığı bulunmamalıdır.
+8. Kritik güvenlik açığı bulunmamalıdır.
 
-9\. Repository içinde gerçek secret bulunmamalıdır.
+9. Repository içinde gerçek secret bulunmamalıdır.
 
-10\. Kapsam dışı değişiklik yapılmamalıdır.
+10. Kapsam dışı değişiklik yapılmamalıdır.
 
 
 
@@ -78,7 +78,7 @@ Bozuk build veya başarısız test içeren değişiklikler ana branch'e alınmam
 
 
 
-\## Branch Standardı
+## Branch Standardı
 
 
 
@@ -89,4 +89,10 @@ Ana branch:
 ```text
 
 main
+
+```
+
+Feature branches use the `codex/` prefix by default. Pull requests should remain small, identify the package objective, list targeted validation, and call out product-boundary or security impact.
+
+Required checks will be added with application scaffolding. Documentation-only changes run Markdown and contract-consistency checks and do not fabricate application build results.
 

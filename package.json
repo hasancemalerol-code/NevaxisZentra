@@ -2,7 +2,7 @@
   "name": "crevafactos",
   "version": "0.0.0",
   "private": true,
-  "description": "Plastik enjeksiyon ve kalıp üreticileri için Factory Operating System.",
+  "description": "AI Factory Operations Assistant and AI Production Manager monorepo.",
   "type": "module",
   "packageManager": "pnpm@11.20.0",
   "engines": {
@@ -10,11 +10,18 @@
     "pnpm": "11.20.0"
   },
   "scripts": {
-    "dev": "pnpm --recursive --parallel dev",
-    "build": "pnpm --recursive build",
-    "lint": "pnpm --recursive lint",
-    "typecheck": "pnpm --recursive typecheck",
-    "test": "pnpm --recursive test",
+    "dev:web": "pnpm --filter @crevafactos/web dev",
+    "dev:api": "dotnet run --project apps/api/CrevaFactOS.Api.csproj",
+    "dev:worker": "dotnet run --project apps/worker/CrevaFactOS.Worker.csproj",
+    "dev:edge-agent": "dotnet run --project apps/edge-agent/CrevaFactOS.EdgeAgent.csproj",
+    "build:web": "pnpm --filter @crevafactos/web build",
+    "build:dotnet": "dotnet build CrevaFactOS.sln",
+    "build": "pnpm run build:web && pnpm run build:dotnet",
+    "lint": "pnpm --filter @crevafactos/web lint",
+    "typecheck": "pnpm --filter @crevafactos/web typecheck",
+    "test:web": "pnpm --filter @crevafactos/web test",
+    "test:dotnet": "dotnet test CrevaFactOS.sln",
+    "test": "pnpm run test:web && pnpm run test:dotnet",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }
 }

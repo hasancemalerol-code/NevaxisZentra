@@ -1,4 +1,4 @@
-\# CrevaFactOS Applications
+# CrevaFactOS Applications
 
 
 
@@ -6,11 +6,11 @@ Bu klasör, CrevaFactOS platformunun çalıştırılabilir uygulamalarını içe
 
 
 
-\## Uygulamalar
+## Uygulamalar
 
 
 
-\### `web`
+### `web`
 
 
 
@@ -22,21 +22,23 @@ Ana kullanım alanları:
 
 
 
-\- AI Görev Merkezi
+- AI Görev Merkezi
 
-\- Yönetim dashboard'u
+- Yönetim dashboard'u
 
-\- Üretim planlama
+- Üretim planlama
 
-\- Makine ve kalıp yönetimi
+- Makine ve kalıp yönetimi
 
-\- Sipariş, stok, kalite ve bakım ekranları
+- Sipariş taslakları, malzeme riskleri, kalite ve bakım ekranları
 
-\- Platform ve tenant yönetimi
+- CrevaFactOS Teams ve authoritative AI Görev Merkezi etkileşimi
+
+- Platform ve tenant yönetimi
 
 
 
-\### `api`
+### `api`
 
 
 
@@ -48,7 +50,7 @@ Modüler monolit yapısında çalışır ve CrevaFactOS iş kurallarının ana u
 
 
 
-\### `worker`
+### `worker`
 
 
 
@@ -60,21 +62,21 @@ Başlıca sorumlulukları:
 
 
 
-\- RabbitMQ mesaj tüketimi
+- RabbitMQ mesaj tüketimi
 
-\- Transactional outbox yayınlama
+- Transactional outbox yayınlama
 
-\- Zamanlanmış görevler
+- Zamanlanmış görevler
 
-\- Entegrasyon işlemleri
+- Entegrasyon işlemleri
 
-\- Uzun süren operasyonlar
+- Uzun süren operasyonlar
 
-\- Retry ve dead-letter süreçleri
+- Retry ve dead-letter süreçleri
 
 
 
-\### `ai-orchestrator`
+### `ai-orchestrator`
 
 
 
@@ -84,9 +86,11 @@ AI modelleri, araç sözleşmeleri ve AI Autopilot iş akışlarını yönetir.
 
 AI, bu uygulama üzerinden kontrollü araçlara erişir. İş kuralları ve yetkilendirme API tarafında uygulanmaya devam eder.
 
+AI doğrudan veritabanına, RabbitMQ'ya, ERP'ye, Edge Agent'a veya makinelere erişmez.
 
 
-\### `mobile`
+
+### `mobile`
 
 
 
@@ -96,9 +100,15 @@ Flutter tabanlı mobil uygulamadır.
 
 Yönetici, operatör, depo, bakım, kalite ve sevkiyat ekipleri için görev odaklı mobil deneyimler sağlar.
 
+### `teams`
+
+CrevaFactOS Teams; internal messaging, routing, task interaction, approval viewing ve shift communication uygulamasıdır.
+
+Teams bağımsız task veya approval state tutmaz; Web ile aynı authoritative AI Görev Merkezi kayıtlarını kullanır.
 
 
-\### `edge-agent`
+
+### `edge-agent`
 
 
 
@@ -110,21 +120,26 @@ OPC UA, Modbus, MQTT, seri port, dosya izleme ve üretici API adaptörlerini des
 
 
 
-\## Kurallar
+## Kurallar
 
 
 
-\- Her uygulamanın sorumluluğu açık olmalıdır.
+- Her uygulamanın sorumluluğu açık olmalıdır.
 
-\- Uygulamalar birbirlerinin iç kodlarına doğrudan bağımlı olmamalıdır.
+- Uygulamalar birbirlerinin iç kodlarına doğrudan bağımlı olmamalıdır.
 
-\- Paylaşılması gereken sözleşmeler `packages` altında tutulmalıdır.
+- Paylaşılması gereken sözleşmeler `packages` altında tutulmalıdır.
 
-\- Domain iş kuralları frontend veya AI uygulamasına kopyalanmamalıdır.
+- Domain iş kuralları frontend veya AI uygulamasına kopyalanmamalıdır.
 
-\- Tenant, yetki, audit ve correlation kuralları bütün uygulamalarda korunmalıdır.
+- Tenant, yetki, audit ve correlation kuralları bütün uygulamalarda korunmalıdır.
 
-\- Production secret'ları hiçbir uygulama klasöründe kaynak kontrolüne alınmamalıdır.
+- Web, mobil ve CrevaFactOS Teams aynı authoritative AI Görev Merkezi task ve approval kayıtlarını kullanmalıdır.
 
+- ERP erişimi read-only-first; write-back permission-bound, approval-bound, revalidated, idempotent ve audited olmalıdır.
+
+- Uygulamalar finance, accounting, official stock ledger, payroll veya general purchasing ERP system-of-record modülleri oluşturamaz.
+
+- Production secret'ları hiçbir uygulama klasöründe kaynak kontrolüne alınmamalıdır.
 
 

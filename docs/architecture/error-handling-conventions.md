@@ -1,8 +1,8 @@
-\# CrevaFactOS Hata Yönetimi Standartları
+# CrevaFactOS Hata Yönetimi Standartları
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,25 +14,25 @@ Amaçlar:
 
 
 
-\- Hataları tutarlı biçimde yönetmek
+- Hataları tutarlı biçimde yönetmek
 
-\- Domain ve teknik hataları ayırmak
+- Domain ve teknik hataları ayırmak
 
-\- Kullanıcıya anlaşılır ve güvenli mesajlar göstermek
+- Kullanıcıya anlaşılır ve güvenli mesajlar göstermek
 
-\- Hassas sistem detaylarının dışarı sızmasını önlemek
+- Hassas sistem detaylarının dışarı sızmasını önlemek
 
-\- API, Worker, AI Orchestrator, mobil ve Edge Agent arasında ortak davranış oluşturmak
+- API, Worker, AI Orchestrator, mobil ve Edge Agent arasında ortak davranış oluşturmak
 
-\- Retry, idempotency ve kısmi başarı davranışlarını standartlaştırmak
+- Retry, idempotency ve kısmi başarı davranışlarını standartlaştırmak
 
-\- Tenant ve correlation context bilgisini korumak
+- Tenant ve correlation context bilgisini korumak
 
-\- Operasyonel sorunların gözlemlenmesini kolaylaştırmak
+- Operasyonel sorunların gözlemlenmesini kolaylaştırmak
 
 
 
-\## Temel İlke
+## Temel İlke
 
 
 
@@ -48,13 +48,13 @@ Bir hata en az aşağıdaki kategorilerden biriyle ilişkilendirilmelidir:
 
 validation
 
-business\_rule
+business_rule
 
 authorization
 
 authentication
 
-not\_found
+not_found
 
 conflict
 
@@ -64,7 +64,7 @@ dependency
 
 timeout
 
-rate\_limit
+rate_limit
 
 infrastructure
 
@@ -73,4 +73,10 @@ integration
 security
 
 unexpected
+
+```
+
+Errors expose a stable code, safe user message, correlation identifier, and appropriate retry guidance. Internal stack traces, SQL, credentials, connector secrets, and cross-tenant identifiers are never returned to clients.
+
+Retries are allowed only for classified transient operations and must respect idempotency. Authorization, approval expiry, stale-data, validation, and local-safety rejection errors fail closed and are not converted into automatic success paths.
 

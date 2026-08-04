@@ -1,106 +1,106 @@
-\# CrevaFactOS
+# CrevaFactOS
 
+CrevaFactOS is an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing operations.
 
+It works above existing ERP, HR, communication, machine, and factory systems. It does not replace the systems of record for accounting, finance, receivables/payables, official inventory, invoicing, payroll, purchasing records, or enterprise master data.
 
-CrevaFactOS, plastik enjeksiyon ve kalıp üreticileri için geliştirilen AI destekli bir Factory Operating System platformudur.
+## Native Product Scope
 
+- Omnichannel order intake and AI order drafts
+- Production planning and plan reliability
+- Shift planning, skills, and operational assignment
+- Machine intelligence and performance analysis
+- Mold lifecycle and maintenance optimization
+- Maintenance and breakdown analysis
+- Quality and scrap analysis
+- Material, supplier, delivery, and bottleneck risk
+- AI Task Center and Human-in-the-Loop approvals
+- CrevaFactOS Teams for internal routing and shift communication
+- Audit and AI Decision Ledger
+- ERP connectors and controlled write-back
+- Edge Agent, telemetry, and allowlisted machine integration
 
+AI Task Center is authoritative for tasks and approvals. Web and CrevaFactOS Teams use the same task and approval records.
 
-\## Ürün Konumu
+## Operating Model
 
+```text
+Observe data
+  -> analyze freshness, risk, and impact
+  -> prepare a plan, task, or bounded action
+  -> request authorized human approval when critical
+  -> revalidate current state
+  -> execute through an allowlisted integration
+  -> verify the outcome
+  -> record audit and AI Decision Ledger evidence
+```
 
+ERP access is read-only-first. Write-back is permission-bound, approval-bound, revalidated, idempotent, and audited. Machine safety and hard-real-time controls remain local.
 
-CrevaFactOS; siparişten üretime, kalıptan makineye, hammaddeden kaliteye, bakımdan sevkiyata kadar fabrika operasyonlarını tek sistemde yönetir.
+## Technical Direction
 
+- Monorepo
+- Next.js and TypeScript Web application
+- ASP.NET Core modular-monolith backend
+- PostgreSQL
+- RabbitMQ and transactional outbox
+- .NET Edge Agent
+- Multi-tenant isolation and permission-based authorization
+- Audit and AI Decision Ledger
 
+## Documentation Authority
 
-AI Autopilot:
+- [Product positioning](docs/product/product-positioning.md)
+- [Core capabilities](docs/product/core-capabilities.md)
+- [Out of scope](docs/product/out-of-scope.md)
+- [Dashboard lock](docs/product/dashboard-lock.md)
+- [Integration priorities](docs/product/integration-priorities.md)
+- [ADR-011 product overlay](docs/adr/ADR-011-ai-factory-operations-overlay.md)
 
+When an earlier architectural document can be read as authorizing a classic ERP module, ADR-011 and the locked product documents take precedence.
 
+## Repository Status
 
-1\. Verileri analiz eder.
+The repository contains the FOUND-01 executable skeleton. Product capabilities, infrastructure, persistence, messaging, authorization, AI agents, and integrations are intentionally not implemented yet.
 
-2\. Plan ve işlem taslakları hazırlar.
+## Development Prerequisites
 
-3\. Güven seviyesi, gerekçe, risk ve tahmini etkiyi gösterir.
+- Node.js `22.18.x` as pinned by `.nvmrc`
+- pnpm `11.20.0`
+- .NET SDK `10.0.100` or a compatible `10.0` feature band allowed by `global.json`
 
-4\. Yetkili onayı ister.
+## Install
 
-5\. Onaylanan işlemleri sistem içinde uygular.
+```text
+pnpm install
+dotnet restore CrevaFactOS.sln
+```
 
-6\. Sonucu doğrular ve audit kaydı oluşturur.
+## Build and Validate
 
+```text
+pnpm build
+pnpm lint
+pnpm typecheck
+pnpm test
 
+dotnet build CrevaFactOS.sln
+dotnet test CrevaFactOS.sln
+```
 
-\## Sektörel Odak
+The root `pnpm build` and `pnpm test` commands include their corresponding .NET solution commands. The explicit .NET commands are useful for targeted validation.
 
+A repository-wide format command is intentionally not included until a formatter and format policy are selected in a dedicated package. Existing `.editorconfig` and compiler/linter checks remain authoritative.
 
+## Run Applications
 
-\- Plastik enjeksiyon üretimi
+```text
+pnpm dev:web
+pnpm dev:api
+pnpm dev:worker
+pnpm dev:edge-agent
+```
 
-\- Kalıp tasarımı ve imalatı
+The Web application defaults to `http://localhost:3000` and exposes `GET /health`. The API launch profile uses `http://localhost:5000` and exposes `GET /health/live` and `GET /health/ready`.
 
-\- Kalıp yaşam döngüsü
-
-\- Makine ve yardımcı ekipman yönetimi
-
-\- Üretim planlama ve MRP
-
-\- Hammadde, masterbatch ve regranül yönetimi
-
-\- Kalite ve izlenebilirlik
-
-\- Bakım ve arıza yönetimi
-
-\- Maliyet ve kârlılık
-
-\- Omnichannel sipariş toplama
-
-
-
-\## Mimari Yaklaşım
-
-
-
-\- Modüler monolit
-
-\- Olay tabanlı entegrasyon
-
-\- Bağımsız Worker, AI ve Edge uygulamaları
-
-\- Multi-tenant veri izolasyonu
-
-\- Human-in-the-Loop AI Autopilot
-
-
-
-\## Başlangıç Teknolojileri
-
-
-
-\- Next.js
-
-\- TypeScript
-
-\- ASP.NET Core
-
-\- PostgreSQL
-
-\- Redis
-
-\- RabbitMQ
-
-\- Docker
-
-\- Flutter
-
-\- .NET Edge Agent
-
-
-
-\## Geliştirme Durumu
-
-
-
-Repository foundation aşamasındadır.
-
+Worker and Edge Agent only validate configuration, start their generic hosts, and emit structured startup logs. They contain no product jobs or machine connectivity.

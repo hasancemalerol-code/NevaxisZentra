@@ -1,146 +1,72 @@
-\# ADR-006: Transactional Outbox
+# ADR-006: Transactional Outbox
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: Consistency between PostgreSQL transactions and message publication
 
+## Context
 
-\- Durum: Kabul edildi
+CrevaFactOS cannot atomically commit PostgreSQL data and RabbitMQ publication with a distributed transaction. Publishing before or after a database commit without durable coordination can lose events or announce state that never committed.
 
-\- Tarih: 2026-08-04
+## Decision
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+Domain changes and their outgoing messages are persisted in the same PostgreSQL transaction. A Worker publishes pending outbox records to RabbitMQ and records the publication result.
 
-\- Kapsam: Veritabanı işlemleri ile mesaj yayınlama arasındaki tutarlılık
+Application and domain services must not publish RabbitMQ messages inside the critical database transaction.
 
+## Standard Flow
 
+1. Validate tenant, permissions, approval requirements, and current state.
+2. Apply the domain change.
+3. Create versioned integration events.
+4. Persist domain changes and outbox records in one transaction.
+5. Commit.
+6. Claim eligible outbox records using concurrency-safe batching.
+7. Publish each message with its stable `message_id`.
+8. Mark successful publication and retain operational evidence.
+9. Schedule bounded retry after transient failure.
+10. Surface exhausted records for operational intervention.
 
-\## Bağlam
-
-
-
-CrevaFactOS; sipariş, üretim, stok, satın alma, kalite, bakım, sevkiyat, finans, AI Autopilot ve makine entegrasyonları arasında olay tabanlı iş akışları çalıştıracaktır.
-
-
-
-Örnek süreçler:
-
-
-
-\- Sipariş onaylandığında üretim planlama başlatılması
-
-\- Üretim emri oluşturulduğunda MRP hesaplanması
-
-\- Kritik stok oluştuğunda satın alma önerisi hazırlanması
-
-\- Makine alarmı oluştuğunda bakım görevi oluşturulması
-
-\- Kalıp bakım zamanı geldiğinde bakım planının hazırlanması
-
-\- Kalite uygunsuzluğu oluştuğunda ilgili lotların karantinaya alınması
-
-\- AI görevi onaylandığında işlemin Worker tarafından uygulanması
-
-\- Sevkiyat kesinleştiğinde müşteri bildiriminin gönderilmesi
-
-\- Muhasebe veya ERP entegrasyonuna kayıt aktarılması
-
-
-
-Bir domain işlemi veritabanında başarılı olduğu hâlde ilgili mesaj RabbitMQ’ya gönderilemezse sistem tutarsız duruma düşebilir.
-
-
-
-Tersi durumda, veritabanı işlemi başarısız olduğu hâlde mesaj yayınlanırsa gerçekte oluşmamış bir işlem diğer modüller tarafından uygulanabilir.
-
-
-
-Veritabanı ile RabbitMQ arasında dağıtık transaction kullanılmayacaktır.
-
-
-
-\## Karar
-
-
-
-CrevaFactOS, veritabanı işlemleri ile integration event yayınlama arasındaki tutarlılığı sağlamak için Transactional Outbox desenini kullanacaktır.
-
-
-
-Domain işlemi ve outbox kaydı aynı PostgreSQL transaction’ı içinde oluşturulacaktır.
-
-
-
-RabbitMQ’ya mesaj gönderimi ayrı bir Worker süreci tarafından gerçekleştirilecektir.
-
-
-
-Standart akış:
-
-
-
-1\. Uygulama domain işlemini başlatır.
-
-2\. Domain değişiklikleri hazırlanır.
-
-3\. Yayınlanacak integration event’ler oluşturulur.
-
-4\. Domain verileri ve outbox kayıtları aynı transaction içinde kaydedilir.
-
-5\. Transaction başarıyla tamamlanır.
-
-6\. Outbox Worker yayınlanmamış kayıtları okur.
-
-7\. Mesajları RabbitMQ’ya gönderir.
-
-8\. Başarılı yayın sonrası kayıt işlendi olarak işaretlenir.
-
-9\. Başarısız yayınlarda retry uygulanır.
-
-10\. Sürekli başarısız kayıtlar operasyonel incelemeye alınır.
-
-
-
-API veya domain servisi, kritik domain transaction içinde doğrudan RabbitMQ’ya mesaj yayınlamayacaktır.
-
-
-
-\## Outbox Kayıt Yapısı
-
-
-
-Başlangıç outbox kaydı aşağıdaki alanları içermelidir:
-
-
+## Outbox Record
 
 ```text
-
 id
-
-tenant\_id
-
-message\_id
-
-message\_type
-
-schema\_version
-
-occurred\_at
-
-correlation\_id
-
-causation\_id
-
+tenant_id
+message_id
+message_type
+schema_version
+occurred_at
+correlation_id
+causation_id
 payload
-
 headers
-
-created\_at
-
-published\_at
-
-attempt\_count
-
-next\_attempt\_at
-
-last\_error
-
+created_at
+published_at
+attempt_count
+next_attempt_at
+last_error
 status
+```
 
+`message_id` is unique. Claims must prevent two publisher instances from treating the same record as independently completed.
+
+## Idempotency
+
+Outbox publication is at least once. Consumers deduplicate by message or operation identity and store their processing outcome. Approved ERP write-back uses a separate stable business-operation idempotency key so retries cannot duplicate external records.
+
+An approval identifier alone is not a sufficient idempotency key when an approval can authorize more than one explicitly enumerated operation.
+
+## Operations and Audit
+
+- Payloads are versioned and protected from accidental mutation after commit.
+- Errors are sanitized before persistence and logging.
+- Metrics cover backlog age, attempt count, success rate, and exhausted records.
+- Correlation links outbox publication to authoritative AI tasks, approvals, audit, and AI decisions.
+- Manual replay is permission-bound and audited.
+
+## Consequences
+
+- Broker failure delays publication without losing committed intent.
+- Consumers still require idempotency because acknowledgement can fail after successful handling.
+- Write-back and critical actions still require immediate state and approval revalidation before execution.

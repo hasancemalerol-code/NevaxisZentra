@@ -1,4 +1,4 @@
-\# CrevaFactOS Infrastructure
+# CrevaFactOS Infrastructure
 
 
 
@@ -6,11 +6,11 @@ Bu klasör, CrevaFactOS platformunun yerel geliştirme, gözlemlenebilirlik, da�
 
 
 
-\## Klasörler
+## Klasörler
 
 
 
-\### `docker`
+### `docker`
 
 
 
@@ -22,29 +22,29 @@ Başlangıç kapsamı:
 
 
 
-\- Web image
+- Web image
 
-\- API image
+- API image
 
-\- Worker image
+- Worker image
 
-\- AI Orchestrator image
+- AI Orchestrator image
 
-\- Edge Agent geliştirme image'ı
+- Edge Agent geliştirme image'ı
 
-\- PostgreSQL
+- PostgreSQL
 
-\- Redis
+- Redis
 
-\- RabbitMQ
+- RabbitMQ
 
-\- MinIO
+- MinIO
 
-\- Docker Compose yardımcı dosyaları
+- Docker Compose yardımcı dosyaları
 
 
 
-\### `database`
+### `database`
 
 
 
@@ -56,17 +56,17 @@ Kapsam:
 
 
 
-\- Yerel başlangıç scriptleri
+- Yerel başlangıç scriptleri
 
-\- Geliştirme seed hazırlıkları
+- Geliştirme seed hazırlıkları
 
-\- Yedekleme ve geri yükleme yardımcıları
+- Yedekleme ve geri yükleme yardımcıları
 
-\- Migration operasyon notları
+- Migration operasyon notları
 
-\- Veritabanı sağlık kontrolü
+- Veritabanı sağlık kontrolü
 
-\- PostgreSQL extension tanımları
+- PostgreSQL extension tanımları
 
 
 
@@ -74,7 +74,7 @@ Ana schema değişiklikleri uygulama migration'ları üzerinden yapılmalıdır.
 
 
 
-\### `monitoring`
+### `monitoring`
 
 
 
@@ -86,33 +86,33 @@ Kapsam:
 
 
 
-\- Log toplama
+- Log toplama
 
-\- Metrik tanımları
+- Metrik tanımları
 
-\- Dashboard hazırlıkları
+- Dashboard hazırlıkları
 
-\- Alarm kuralları
+- Alarm kuralları
 
-\- API sağlık durumu
+- API sağlık durumu
 
-\- Worker sağlık durumu
+- Worker sağlık durumu
 
-\- RabbitMQ kuyrukları
+- RabbitMQ kuyrukları
 
-\- PostgreSQL bağlantıları
+- PostgreSQL bağlantıları
 
-\- Redis sağlık durumu
+- Redis sağlık durumu
 
-\- Edge Agent bağlantıları
+- Edge Agent bağlantıları
 
-\- Makine telemetrisi
+- Makine telemetrisi
 
-\- AI görev metrikleri
+- AI görev metrikleri
 
 
 
-\### `deployment`
+### `deployment`
 
 
 
@@ -124,25 +124,25 @@ Staging ve production dağıtım tanımlarını içerir.
 
 
 
-\- Container deployment
+- Container deployment
 
-\- Ortam yapılandırmaları
+- Ortam yapılandırmaları
 
-\- Secret referansları
+- Secret referansları
 
-\- Reverse proxy
+- Reverse proxy
 
-\- TLS
+- TLS
 
-\- Ölçekleme
+- Ölçekleme
 
-\- Rollback
+- Rollback
 
-\- Health probe
+- Health probe
 
-\- Backup politikaları
+- Backup politikaları
 
-\- Felaket kurtarma
+- Felaket kurtarma
 
 
 
@@ -150,7 +150,7 @@ tanımları burada tutulabilir.
 
 
 
-\## Ortamlar
+## Ortamlar
 
 
 
@@ -158,13 +158,13 @@ CrevaFactOS en az aşağıdaki ortamları destekleyecektir:
 
 
 
-\- Local
+- Local
 
-\- Test
+- Test
 
-\- Staging
+- Staging
 
-\- Production
+- Production
 
 
 
@@ -172,21 +172,21 @@ Her ortam ayrı:
 
 
 
-\- PostgreSQL veritabanı
+- PostgreSQL veritabanı
 
-\- Redis instance veya namespace
+- Redis instance veya namespace
 
-\- RabbitMQ virtual host
+- RabbitMQ virtual host
 
-\- Object storage bucket
+- Object storage bucket
 
-\- Secret
+- Secret
 
-\- Log seviyesi
+- Log seviyesi
 
-\- AI sağlayıcı yapılandırması
+- AI sağlayıcı yapılandırması
 
-\- Entegrasyon credential'ları
+- Entegrasyon credential'ları
 
 
 
@@ -194,7 +194,7 @@ kullanmalıdır.
 
 
 
-\## Yerel Geliştirme Servisleri
+## Yerel Geliştirme Servisleri
 
 
 
@@ -228,37 +228,37 @@ Portlar yalnızca development varsayımlarıdır ve merkezi yapılandırma üzer
 
 
 
-\## Temel Kurallar
+## Temel Kurallar
 
 
 
-\- Production secret'ları repository içinde tutulmamalıdır.
+- Production secret'ları repository içinde tutulmamalıdır.
 
-\- Gerçek credential değerleri yalnızca güvenli secret yönetim sistemlerinde saklanmalıdır.
+- Gerçek credential değerleri yalnızca güvenli secret yönetim sistemlerinde saklanmalıdır.
 
-\- Repository içinde yalnızca `.env.example` bulunmalıdır.
+- Repository içinde yalnızca `.env.example` bulunmalıdır.
 
-\- Local geliştirme verileri production verisi içermemelidir.
+- Local geliştirme verileri production verisi içermemelidir.
 
-\- Production schema değişiklikleri migration üzerinden yapılmalıdır.
+- Production schema değişiklikleri migration üzerinden yapılmalıdır.
 
-\- Container image'ları tekrar üretilebilir olmalıdır.
+- Container image'ları tekrar üretilebilir olmalıdır.
 
-\- Health check bulunmayan servis production'a alınmamalıdır.
+- Health check bulunmayan servis production'a alınmamalıdır.
 
-\- Backup yalnızca alınmamalı, geri yükleme testi de yapılmalıdır.
+- Backup yalnızca alınmamalı, geri yükleme testi de yapılmalıdır.
 
-\- Ortamlar arasında credential paylaşılmamalıdır.
+- Ortamlar arasında credential paylaşılmamalıdır.
 
-\- Altyapı değişiklikleri kod incelemesine tabi olmalıdır.
-
-
-
-\## Health Check Standardı
+- Altyapı değişiklikleri kod incelemesine tabi olmalıdır.
 
 
 
-\### Liveness
+## Health Check Standardı
+
+
+
+### Liveness
 
 
 
@@ -269,4 +269,10 @@ Uygulama sürecinin çalışıp çalışmadığını kontrol eder.
 ```text
 
 /health/live
+
+```
+
+Readiness checks use `/health/ready` and verify only dependencies required to accept work. Health responses must not disclose credentials, network topology, tenant data, or connector secrets.
+
+Infrastructure is introduced incrementally by approved packages. ERP connectivity is read-only-first, RabbitMQ delivery is paired with the transactional outbox, and Edge deployment cannot weaken factory-local safety controls.
 

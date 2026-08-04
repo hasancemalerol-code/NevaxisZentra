@@ -1,4 +1,4 @@
-\# CrevaFactOS Scripts
+# CrevaFactOS Scripts
 
 
 
@@ -6,7 +6,7 @@ Bu klasör, CrevaFactOS geliştirme, doğrulama, bakım ve operasyon süreçleri
 
 
 
-\## Kullanım Alanları
+## Kullanım Alanları
 
 
 
@@ -14,33 +14,33 @@ Scriptler aşağıdaki işlemler için kullanılabilir:
 
 
 
-\- Yerel geliştirme ortamını hazırlama
+- Yerel geliştirme ortamını hazırlama
 
-\- Repository doğrulama
+- Repository doğrulama
 
-\- Bağımlılık kontrolü
+- Bağımlılık kontrolü
 
-\- Kod kalite kontrolleri
+- Kod kalite kontrolleri
 
-\- Veritabanı migration işlemleri
+- Veritabanı migration işlemleri
 
-\- Development seed işlemleri
+- Development seed işlemleri
 
-\- Docker servislerini yönetme
+- Docker servislerini yönetme
 
-\- Yedekleme ve geri yükleme
+- Yedekleme ve geri yükleme
 
-\- Test verisi oluşturma
+- Test verisi oluşturma
 
-\- Mesajlaşma altyapısını doğrulama
+- Mesajlaşma altyapısını doğrulama
 
-\- Edge Agent bağlantı testleri
+- Edge Agent bağlantı testleri
 
-\- CI yardımcı işlemleri
+- CI yardımcı işlemleri
 
 
 
-\## Başlangıç Script Kategorileri
+## Başlangıç Script Kategorileri
 
 
 
@@ -65,4 +65,10 @@ scripts/
 ├── maintenance/
 
 └── ci/
+
+```
+
+Scripts must be non-interactive by default where used in CI, validate destructive targets, avoid production secrets and customer data, and return a non-zero exit code on failure.
+
+Repository scripts cannot bypass migrations, permissions, authoritative approvals, audit, connector idempotency, or Edge safety controls.
 

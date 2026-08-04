@@ -1,422 +1,94 @@
-\# CrevaFactOS Çekirdek Ürün Yetenekleri
+# CrevaFactOS Core Product Capabilities
 
+- Status: Locked
+- Date: 2026-08-04
+- Category: AI Factory Operations Assistant
+- Sector: Plastic injection molding and mold manufacturing
 
+## Product Boundary
 
-\- Durum: Kilitli
+CrevaFactOS consumes permitted data from existing ERP, HR, communication, machine, and factory systems and turns it into operational plans, risks, tasks, approvals, and audited actions.
 
-\- Tarih: 2026-08-04
+It does not own accounting, finance, receivables/payables, official stock ledger, invoicing, payroll, classic purchasing records, or official customer, supplier, and personnel master records where another system is authoritative.
 
-\- Ürün: CrevaFactOS
+## 1. Omnichannel Order Intake and AI Drafts
 
-\- Kategori: AI Factory Operations Assistant
+CrevaFactOS can ingest requests from email, WhatsApp Business Platform, Web forms, customer portals, sales messages, Excel/CSV, PDF, images, scanned documents, and entered call notes.
 
-\- Sektör: Plastik enjeksiyon ve kalıp üretimi
+AI extracts customer reference, product, quantity, due date, material, color, mold, packaging, technical requirements, attachments, and uncertainty. The result is an approval-ready draft, never an automatically final official order. Missing information is explicit and external records remain linked by source identity.
 
+## 2. AI Production Manager
 
+The AI Production Manager analyzes open demand, current production, due-date risk, machines, molds, shifts, materials, maintenance, quality, and downtime. It produces a prioritized decision list and creates authoritative AI Task Center tasks where action is needed.
 
-\## Amaç
+It cannot approve or directly execute critical actions.
 
+## 3. Daily Factory Summary
 
+The summary combines planned versus actual production, delayed work, critical machines, downtime, upcoming maintenance, mold status, material risk, shift gaps, quality/scrap signals, pending approvals, and priority management decisions. It may create tasks and approval requests rather than only generating a report.
 
-Bu belge CrevaFactOS'un kilitli çekirdek ürün yeteneklerini tanımlar.
+## 4. Production Planning
 
+Production planning is a native CrevaFactOS capability. It evaluates demand priority and due date, machine/mold compatibility, cavity and cycle data, setup and changeover, material availability, maintenance, shift capacity, operator skills, quality risk, and external operations.
 
+Plans may present alternatives such as lowest delay, setup, energy, mold changes, overtime, or risk. Each version records assumptions, evidence, freshness, constraints, expected effect, confidence, and approval state.
 
-CrevaFactOS mevcut ERP sistemlerinin yerine geçen klasik bir ERP değildir.
+## 5. Plan Reliability
 
+Reliability reflects source freshness, machine and mold availability, material sufficiency, personnel availability, cycle-data quality, maintenance conflicts, breakdown probability, quality risk, and external-operation uncertainty. Low or unknown reliability is visible and cannot be presented as certainty.
 
+## 6. Shift Planning
 
-Ürün:
+Shift planning is a native locked capability. It combines production plans with availability, skills, certificates, absence, facility scope, maintenance and quality duties, workload, and overtime risk.
 
+CrevaFactOS owns operational shift scenarios and approved shift plans. HR/ERP remains authoritative for official personnel, payroll, and leave-accounting records. Publishing a shift plan follows Human-in-the-Loop rules.
 
+## 7. Machine Intelligence
 
-\- Mevcut ERP sistemlerinden veri alır.
+Edge Agent and supported integrations provide operational status, counters, cycle times, alarms, downtime, temperature, pressure, energy, and process deviations. CrevaFactOS analyzes performance, capacity, anomaly, and maintenance impact while local machine control and safety remain authoritative.
 
-\- Makine ve saha verilerini Edge Agent üzerinden toplar.
+## 8. Machine–Mold Compatibility
 
-\- Sipariş ve iletişim kanallarındaki verileri analiz eder.
+Compatibility evaluates tonnage, mold dimensions and weight, tie-bar spacing, injection volume, screw characteristics, clamping, robotics, auxiliary equipment, process needs, and known restrictions. Risky matches show the violated constraints and supporting data.
 
-\- Üretim, vardiya, makine, kalıp, bakım, kalite ve malzeme risklerini değerlendirir.
+## 9. Mold Lifecycle and Maintenance Optimization
 
-\- AI destekli plan, görev ve işlem taslakları hazırlar.
+CrevaFactOS owns the operational mold card, location, cavity data, status, shot count, production history, maintenance, failures, quality relationships, trials, revisions, and technical documents.
 
-\- Kritik işlemleri yetkili kullanıcı onayına sunar.
+Maintenance optimization combines usage, failure history, quality signals, planned demand, and previous work to recommend a low-impact maintenance window and create a maintenance-task draft.
 
-\- Onaylanan işlemleri uygular veya mevcut sistemlere geri yazar.
+## 10. Maintenance and Breakdown Analysis
 
-\- Sonuçları doğrular ve audit kaydı oluşturur.
+Native scope covers machine, mold, and auxiliary-equipment maintenance; periodic and predictive work; breakdown reports; recurring failure analysis; MTBF/MTTR; task coordination; and root-cause evidence in the injection-molding context.
 
+## 11. Quality and Scrap Analysis
 
+Analysis correlates product, machine, mold, cavity, material lot, operator, shift, process parameter, defect, and time. AI may identify recurring patterns and propose inspection, containment, or investigation tasks. Critical containment and external write-back require approval.
 
-Finans, muhasebe, cari, ana stok muhasebesi, bordro ve diğer klasik ERP system-of-record modülleri kapsam dışıdır.
+## 12. Material and Supplier Risk
 
+CrevaFactOS reads stock, reservations, safety stock, open purchasing, lots, and expected delivery from authoritative ERP/WMS/purchasing sources. It calculates shortages, depletion, production-blocking material, supplier delay, and alternatives.
 
+It does not maintain the official inventory ledger or classic purchasing records. Approved purchasing drafts are written to the authoritative system through controlled integration.
 
-Aşağıdaki operasyonel yetenekler ürünün kilitli ana kapsamıdır.
+## 13. Delivery and Bottleneck Risk
 
+Risk analysis combines capacity, mold availability, maintenance, materials, staffing, setup, quality, downtime, outside operations, and shipment readiness to explain likely delay and recommended mitigation.
 
+## 14. AI Task Center and CrevaFactOS Teams
 
-\## 1. Omnichannel Sipariş Toplama
+AI Task Center is authoritative for task, assignment, approval, delegation, expiry, evidence, execution, and result state.
 
+CrevaFactOS Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. Teams and Web use the same task and approval records; neither creates an independent workflow truth.
 
+Tasks can route to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management units. Routing does not grant permission or change data ownership.
 
-CrevaFactOS aşağıdaki kanallardan gelen sipariş ve talepleri toplayabilir:
+## 15. Audit, AI Decision Ledger, and Controlled Execution
 
+AI outputs show rationale, confidence, risk, expected operational and financial effect, sources, freshness, missing data, approval state, and result. Critical execution requires permission and approval, immediate stale-data revalidation, bounded tool access, idempotency, outcome verification, and immutable audit evidence.
 
+ERP access is read-only-first. Machine commands remain allowlisted and local safety controls cannot be bypassed.
 
-\- WhatsApp
+## Acceptance Boundary
 
-\- E-posta
-
-\- Web formu
-
-\- Müşteri portalı
-
-\- Satış temsilcisi mesajları
-
-\- Excel
-
-\- CSV
-
-\- PDF
-
-\- Görsel
-
-\- Taratılmış belge
-
-\- Telefon görüşmesi sonrası girilen notlar
-
-
-
-AI gelen içerikten mümkün olduğunda aşağıdaki bilgileri çıkarır:
-
-
-
-\- Müşteri
-
-\- Müşteri ürün kodu
-
-\- Ürün
-
-\- Parça
-
-\- Miktar
-
-\- Termin
-
-\- Renk
-
-\- Hammadde
-
-\- Masterbatch
-
-\- Kalıp
-
-\- Ambalaj
-
-\- Teknik gereksinim
-
-\- Kalite gereksinimi
-
-\- Sevkiyat bilgisi
-
-\- Ek dosyalar
-
-\- Eksik veya belirsiz alanlar
-
-
-
-AI bilgi uyduramaz.
-
-
-
-Belirsiz alanlar açıkça işaretlenmelidir.
-
-
-
-Sonuç doğrudan kesin sipariş değil, onaya hazır sipariş taslağıdır.
-
-
-
-\## 2. Sipariş Doğrulama ve Zenginleştirme
-
-
-
-Sipariş taslağı mevcut sistem verileriyle karşılaştırılır.
-
-
-
-Kontroller:
-
-
-
-\- Müşteri eşleşmesi
-
-\- Ürün eşleşmesi
-
-\- Ürün revizyonu
-
-\- Kalıp eşleşmesi
-
-\- Fiyat bilgisi
-
-\- Termin uygunluğu
-
-\- Stok ve malzeme riski
-
-\- Makine ve kapasite uygunluğu
-
-\- Müşteri kredi veya tahsilat riski
-
-\- Duplicate sipariş ihtimali
-
-\- Kaynak mesaj güvenilirliği
-
-
-
-Fiyat, finans ve cari veriler mevcut ERP'den alınır.
-
-
-
-CrevaFactOS resmî finansal kayıt oluşturmaz.
-
-
-
-\## 3. AI Üretim Müdürü Ajanı
-
-
-
-AI Üretim Müdürü fabrikanın günlük operasyonlarını analiz eden ana ajanlardan biridir.
-
-
-
-Görevleri:
-
-
-
-\- Açık siparişleri değerlendirmek
-
-\- Günlük üretim hedeflerini analiz etmek
-
-\- Geciken üretimleri belirlemek
-
-\- Termin risklerini sıralamak
-
-\- Makine ve kalıp kapasitesini kontrol etmek
-
-\- Vardiya kapasitesini değerlendirmek
-
-\- Malzeme risklerini analiz etmek
-
-\- Bakım ve arıza etkisini belirlemek
-
-\- Kalite ve fire risklerini göstermek
-
-\- Yöneticiye öncelikli karar listesi hazırlamak
-
-\- Gerekli görevleri AI Görev Merkezi'ne aktarmak
-
-
-
-AI Üretim Müdürü doğrudan kritik işlem uygulamaz.
-
-
-
-Human-in-the-Loop onay modeli kullanılır.
-
-
-
-\## 4. AI Günlük Fabrika Özeti
-
-
-
-Her gün veya istenen zaman aralığında yönetici özeti hazırlanabilir.
-
-
-
-Özet en az aşağıdaki alanları kapsayabilir:
-
-
-
-\- Planlanan üretim
-
-\- Gerçekleşen üretim
-
-\- Plan uyumu
-
-\- Açık üretim emirleri
-
-\- Geciken üretimler
-
-\- Bekleyen onaylar
-
-\- Kritik makineler
-
-\- Plansız duruşlar
-
-\- Canlı alarmlar
-
-\- Bakımı yaklaşan makineler
-
-\- Bakımı yaklaşan kalıplar
-
-\- Termin riski taşıyan siparişler
-
-\- Malzeme riskleri
-
-\- Vardiya problemleri
-
-\- Kalite ve fire riskleri
-
-\- Günün öncelikli yönetici kararları
-
-
-
-Özet yalnızca rapor üretmez.
-
-
-
-Gerekli durumlarda görev ve onay talebi oluşturabilir.
-
-
-
-\## 5. AI Üretim Planlama
-
-
-
-Üretim planlama CrevaFactOS'un kilitli çekirdek yeteneğidir.
-
-
-
-Planlama sırasında aşağıdaki unsurlar birlikte değerlendirilir:
-
-
-
-\- Sipariş önceliği
-
-\- Sipariş termin tarihi
-
-\- Üretim miktarı
-
-\- Ürün ve parça
-
-\- Kalıp
-
-\- Kavite sayısı
-
-\- Çevrim süresi
-
-\- Teorik kapasite
-
-\- Gerçekleşen kapasite
-
-\- Makine durumu
-
-\- Makine-kalıp uyumluluğu
-
-\- Kalıp kullanılabilirliği
-
-\- Kalıp bakım ihtiyacı
-
-\- Setup süresi
-
-\- Kalıp değiştirme süresi
-
-\- Renk geçişi
-
-\- Hammadde geçişi
-
-\- Temizlik süresi
-
-\- Malzeme yeterliliği
-
-\- Vardiya kapasitesi
-
-\- Operatör uygunluğu
-
-\- Operatör yetkinliği
-
-\- Bakım planı
-
-\- Kalite riski
-
-\- Harici ve fason operasyonlar
-
-
-
-AI tek plan yerine alternatif senaryolar oluşturabilir.
-
-
-
-Örnek senaryolar:
-
-
-
-\- En kısa termin
-
-\- En düşük setup
-
-\- En düşük enerji kullanımı
-
-\- En düşük kalıp değişimi
-
-\- En yüksek makine kullanımı
-
-\- En düşük fazla mesai
-
-\- En düşük gecikme riski
-
-
-
-Her senaryonun etkisi kullanıcıya açıklanmalıdır.
-
-
-
-\## 6. Üretim Planı Güvenilirliği
-
-
-
-Her üretim planı güvenilirlik analizi taşıyabilir.
-
-
-
-Analiz faktörleri:
-
-
-
-\- Veri güncelliği
-
-\- Makine kullanılabilirliği
-
-\- Kalıp kullanılabilirliği
-
-\- Malzeme yeterliliği
-
-\- Personel uygunluğu
-
-\- Çevrim süresi doğruluğu
-
-\- Arıza ihtimali
-
-\- Bakım çakışması
-
-\- Kalite riski
-
-\- Harici operasyon belirsizliği
-
-
-
-Örnek güven sınıfları:
-
-
-
-```text
-
-Yüksek
-
-Orta
-
-Düşük
-
-Belirsiz
-
+A capability is in scope only when it supports factory operations without recreating a classic ERP system of record. Any exception requires an explicit product decision and ADR.

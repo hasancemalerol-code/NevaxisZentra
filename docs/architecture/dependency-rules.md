@@ -1,8 +1,8 @@
-\# CrevaFactOS Bağımlılık Kuralları
+# CrevaFactOS Bağımlılık Kuralları
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,23 +14,23 @@ Amaçlar:
 
 
 
-\- Modüler monolit sınırlarını korumak
+- Modüler monolit sınırlarını korumak
 
-\- Döngüsel bağımlılıkları engellemek
+- Döngüsel bağımlılıkları engellemek
 
-\- Domain iş kurallarını altyapı detaylarından ayırmak
+- Domain iş kurallarını altyapı detaylarından ayırmak
 
-\- Tenant ve güvenlik sınırlarının atlanmasını önlemek
+- Tenant ve güvenlik sınırlarının atlanmasını önlemek
 
-\- Uygulamaların birbirlerinin iç koduna bağlanmasını engellemek
+- Uygulamaların birbirlerinin iç koduna bağlanmasını engellemek
 
-\- Gelecekte bazı modüllerin ayrı servislere ayrılabilmesini kolaylaştırmak
+- Gelecekte bazı modüllerin ayrı servislere ayrılabilmesini kolaylaştırmak
 
-\- Test edilebilir ve sürdürülebilir bir kod tabanı oluşturmak
+- Test edilebilir ve sürdürülebilir bir kod tabanı oluşturmak
 
 
 
-\## Temel İlke
+## Temel İlke
 
 
 
@@ -50,11 +50,19 @@ Genel yön:
 
 Api
 
-&#x20; ↓
+  ↓
 
 Application
 
-&#x20; ↓
+  ↓
 
 Domain
+
+```
+
+Infrastructure implements inward-facing contracts. Domain code does not depend on HTTP, database, message broker, AI provider, ERP SDK, or device protocols.
+
+Modules do not access another module's internal tables. Cross-module work uses explicit application contracts or versioned events. Web, mobile, Teams, Worker, AI Orchestrator, and Edge Agent cannot bypass API authorization, authoritative AI Task Center state, or audit boundaries.
+
+Architecture tests should reject forbidden project references and cycles.
 

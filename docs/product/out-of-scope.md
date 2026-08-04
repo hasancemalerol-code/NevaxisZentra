@@ -1,20 +1,20 @@
-\# CrevaFactOS Kapsam Dışı Alanlar
+# CrevaFactOS Kapsam Dışı Alanlar
 
 
 
-\- Durum: Kilitli
+- Durum: Kilitli
 
-\- Tarih: 2026-08-04
+- Tarih: 2026-08-04
 
-\- Ürün: CrevaFactOS
+- Ürün: CrevaFactOS
 
-\- Kategori: AI Factory Operations Assistant
+- Kategori: AI Factory Operations Assistant
 
-\- Sektör: Plastik enjeksiyon ve kalıp üretimi
+- Sektör: Plastik enjeksiyon ve kalıp üretimi
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -26,23 +26,23 @@ Amaçlar:
 
 
 
-\- Ürün kapsamının kontrolsüz genişlemesini önlemek
+- Ürün kapsamının kontrolsüz genişlemesini önlemek
 
-\- CrevaFactOS'u klasik ERP ürününe dönüştürmemek
+- CrevaFactOS'u klasik ERP ürününe dönüştürmemek
 
-\- AI üretim ve fabrika operasyonları odağını korumak
+- AI üretim ve fabrika operasyonları odağını korumak
 
-\- Mevcut ERP sistemleriyle rekabet etmek yerine birlikte çalışmak
+- Mevcut ERP sistemleriyle rekabet etmek yerine birlikte çalışmak
 
-\- Mevzuat, muhasebe ve resmî kayıt yükünü azaltmak
+- Mevzuat, muhasebe ve resmî kayıt yükünü azaltmak
 
-\- Geliştirme kaynaklarını üretim, vardiya, makine, kalıp, bakım ve kalite yeteneklerine yönlendirmek
+- Geliştirme kaynaklarını üretim, vardiya, makine, kalıp, bakım ve kalite yeteneklerine yönlendirmek
 
-\- Müşterilerin mevcut kurumsal sistem yatırımlarını korumak
+- Müşterilerin mevcut kurumsal sistem yatırımlarını korumak
 
 
 
-\## Temel Ürün Sınırı
+## Temel Ürün Sınırı
 
 
 
@@ -50,21 +50,21 @@ CrevaFactOS:
 
 
 
-\- Fabrikanın mevcut ERP sisteminin yerine geçmez.
+- Fabrikanın mevcut ERP sisteminin yerine geçmez.
 
-\- Muhasebe programının yerine geçmez.
+- Muhasebe programının yerine geçmez.
 
-\- Bordro ve insan kaynakları ana sisteminin yerine geçmez.
+- Bordro ve insan kaynakları ana sisteminin yerine geçmez.
 
-\- Ana stok ve depo muhasebesi sistemi değildir.
+- Ana stok ve depo muhasebesi sistemi değildir.
 
-\- Resmî faturalama veya e-belge ürünü değildir.
+- Resmî faturalama veya e-belge ürünü değildir.
 
-\- Banka ve ödeme sistemi değildir.
+- Banka ve ödeme sistemi değildir.
 
-\- Genel amaçlı CRM değildir.
+- Genel amaçlı CRM değildir.
 
-\- Kontrolsüz tam otonom fabrika yönetim sistemi değildir.
+- Kontrolsüz tam otonom fabrika yönetim sistemi değildir.
 
 
 
@@ -72,7 +72,7 @@ CrevaFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel A
 
 
 
-\## 1. Genel Muhasebe
+## 1. Genel Muhasebe
 
 
 
@@ -84,25 +84,25 @@ Kapsam dışı işlevler:
 
 
 
-\- Hesap planı
+- Hesap planı
 
-\- Muhasebe fişi
+- Muhasebe fişi
 
-\- Yevmiye kaydı
+- Yevmiye kaydı
 
-\- Büyük defter
+- Büyük defter
 
-\- Mizan
+- Mizan
 
-\- Dönem sonu işlemleri
+- Dönem sonu işlemleri
 
-\- Vergi muhasebesi
+- Vergi muhasebesi
 
-\- Resmî mali tablolar
+- Resmî mali tablolar
 
-\- Muhasebe kapanışı
+- Muhasebe kapanışı
 
-\- Mali müşavir iş akışları
+- Mali müşavir iş akışları
 
 
 
@@ -114,7 +114,7 @@ CrevaFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için k
 
 
 
-\## 2. Cari Hesap Sistemi
+## 2. Cari Hesap Sistemi
 
 
 
@@ -126,21 +126,21 @@ Kapsam dışı işlevler:
 
 
 
-\- Müşteri cari hesabı
+- Müşteri cari hesabı
 
-\- Tedarikçi cari hesabı
+- Tedarikçi cari hesabı
 
-\- Borç ve alacak kayıtları
+- Borç ve alacak kayıtları
 
-\- Cari bakiye hareketleri
+- Cari bakiye hareketleri
 
-\- Cari mutabakat
+- Cari mutabakat
 
-\- Vade takibi ana sistemi
+- Vade takibi ana sistemi
 
-\- Tahsilat ve ödeme kayıt defteri
+- Tahsilat ve ödeme kayıt defteri
 
-\- Cari hesap kapatma işlemleri
+- Cari hesap kapatma işlemleri
 
 
 
@@ -148,15 +148,15 @@ CrevaFactOS mevcut ERP'den:
 
 
 
-\- Müşteri risk durumu
+- Müşteri risk durumu
 
-\- Kredi limiti
+- Kredi limiti
 
-\- Gecikmiş tahsilat
+- Gecikmiş tahsilat
 
-\- Tedarikçi borcu
+- Tedarikçi borcu
 
-\- Operasyonu etkileyen ödeme riski
+- Operasyonu etkileyen ödeme riski
 
 
 
@@ -164,7 +164,7 @@ gibi özet verileri alabilir.
 
 
 
-\## 3. Resmî Faturalama
+## 3. Resmî Faturalama
 
 
 
@@ -176,25 +176,25 @@ Kapsam dışı işlevler:
 
 
 
-\- Satış faturası
+- Satış faturası
 
-\- Alış faturası
+- Alış faturası
 
-\- İade faturası
+- İade faturası
 
-\- Proforma fatura ana sistemi
+- Proforma fatura ana sistemi
 
-\- E-fatura
+- E-fatura
 
-\- E-arşiv
+- E-arşiv
 
-\- E-irsaliye çekirdeği
+- E-irsaliye çekirdeği
 
-\- Vergi hesaplama
+- Vergi hesaplama
 
-\- Fatura numaralandırma
+- Fatura numaralandırma
 
-\- Resmî belge saklama
+- Resmî belge saklama
 
 
 
@@ -206,7 +206,7 @@ Resmî belge mevcut ERP veya muhasebe sistemi tarafından oluşturulur.
 
 
 
-\## 4. Banka ve Ödeme Yönetimi
+## 4. Banka ve Ödeme Yönetimi
 
 
 
@@ -218,23 +218,23 @@ Kapsam dışı işlevler:
 
 
 
-\- Banka hesap yönetimi
+- Banka hesap yönetimi
 
-\- Banka ekstresi işleme
+- Banka ekstresi işleme
 
-\- Ödeme emri ana sistemi
+- Ödeme emri ana sistemi
 
-\- EFT ve havale işlemi
+- EFT ve havale işlemi
 
-\- Çek ve senet takibi
+- Çek ve senet takibi
 
-\- Kredi yönetimi
+- Kredi yönetimi
 
-\- POS mutabakatı
+- POS mutabakatı
 
-\- Ödeme sağlayıcı entegrasyon çekirdeği
+- Ödeme sağlayıcı entegrasyon çekirdeği
 
-\- Nakit kasa işlemleri
+- Nakit kasa işlemleri
 
 
 
@@ -246,7 +246,7 @@ AI doğrudan banka işlemi başlatamaz.
 
 
 
-\## 5. Ana Stok Muhasebesi
+## 5. Ana Stok Muhasebesi
 
 
 
@@ -258,23 +258,23 @@ Kapsam dışı işlevler:
 
 
 
-\- Ana stok hareket defteri
+- Ana stok hareket defteri
 
-\- Resmî giriş ve çıkış hareketleri
+- Resmî giriş ve çıkış hareketleri
 
-\- Stok değerleme
+- Stok değerleme
 
-\- Stok maliyet muhasebesi
+- Stok maliyet muhasebesi
 
-\- Dönem sonu stok kapanışı
+- Dönem sonu stok kapanışı
 
-\- Muhasebe entegrasyon fişleri
+- Muhasebe entegrasyon fişleri
 
-\- Stok kartı ana sahipliği
+- Stok kartı ana sahipliği
 
-\- Depo muhasebesi
+- Depo muhasebesi
 
-\- Sayım farkı muhasebesi
+- Sayım farkı muhasebesi
 
 
 
@@ -286,15 +286,15 @@ CrevaFactOS bu verileri:
 
 
 
-\- Malzeme ihtiyacı
+- Malzeme ihtiyacı
 
-\- Kritik stok
+- Kritik stok
 
-\- Stok tükenme riski
+- Stok tükenme riski
 
-\- Üretim planı yetersizliği
+- Üretim planı yetersizliği
 
-\- Tedarik riski
+- Tedarik riski
 
 
 
@@ -302,7 +302,7 @@ için kullanır.
 
 
 
-\## 6. Genel Depo ERP'si
+## 6. Genel Depo ERP'si
 
 
 
@@ -314,19 +314,19 @@ Kapsam dışı işlevler:
 
 
 
-\- Tüm sektörlere uygun genel WMS
+- Tüm sektörlere uygun genel WMS
 
-\- Resmî depo giriş ve çıkış kayıt sistemi
+- Resmî depo giriş ve çıkış kayıt sistemi
 
-\- Depo muhasebesi
+- Depo muhasebesi
 
-\- Sevk irsaliyesi ana sistemi
+- Sevk irsaliyesi ana sistemi
 
-\- Raf optimizasyon ürünü
+- Raf optimizasyon ürünü
 
-\- Lojistik sağlayıcı yönetim platformu
+- Lojistik sağlayıcı yönetim platformu
 
-\- Genel e-ticaret depo operasyonu
+- Genel e-ticaret depo operasyonu
 
 
 
@@ -334,21 +334,21 @@ Ancak üretim operasyonu için gerekli aşağıdaki bilgiler analiz kapsamında 
 
 
 
-\- Malzeme hazırlık durumu
+- Malzeme hazırlık durumu
 
-\- Üretim alanına besleme durumu
+- Üretim alanına besleme durumu
 
-\- Kritik malzeme
+- Kritik malzeme
 
-\- Lot kullanılabilirliği
+- Lot kullanılabilirliği
 
-\- Üretim bekleten malzeme
+- Üretim bekleten malzeme
 
-\- Depo hazırlık görevi
+- Depo hazırlık görevi
 
 
 
-\## 7. Genel Satın Alma ERP'si
+## 7. Genel Satın Alma ERP'si
 
 
 
@@ -360,21 +360,21 @@ Kapsam dışı işlevler:
 
 
 
-\- Satın alma siparişi ana kayıt sistemi
+- Satın alma siparişi ana kayıt sistemi
 
-\- Tedarikçi cari hesapları
+- Tedarikçi cari hesapları
 
-\- Alış faturaları
+- Alış faturaları
 
-\- Satın alma muhasebesi
+- Satın alma muhasebesi
 
-\- Resmî tedarikçi sözleşme yönetimi
+- Resmî tedarikçi sözleşme yönetimi
 
-\- Ödeme planı ana sistemi
+- Ödeme planı ana sistemi
 
-\- Genel tedarikçi portalı
+- Genel tedarikçi portalı
 
-\- Bütün şirket harcamalarının yönetimi
+- Bütün şirket harcamalarının yönetimi
 
 
 
@@ -382,19 +382,19 @@ CrevaFactOS:
 
 
 
-\- Malzeme ihtiyacı tespit edebilir.
+- Malzeme ihtiyacı tespit edebilir.
 
-\- Tedarik riskini analiz edebilir.
+- Tedarik riskini analiz edebilir.
 
-\- Tedarikçi tekliflerini karşılaştırabilir.
+- Tedarikçi tekliflerini karşılaştırabilir.
 
-\- Satın alma önerisi hazırlayabilir.
+- Satın alma önerisi hazırlayabilir.
 
-\- Yetkili onayı sonrasında mevcut ERP'de satın alma taslağı oluşturabilir.
+- Yetkili onayı sonrasında mevcut ERP'de satın alma taslağı oluşturabilir.
 
 
 
-\## 8. Bordro
+## 8. Bordro
 
 
 
@@ -406,25 +406,25 @@ Kapsam dışı işlevler:
 
 
 
-\- Maaş hesaplama
+- Maaş hesaplama
 
-\- SGK hesaplamaları
+- SGK hesaplamaları
 
-\- Vergi kesintileri
+- Vergi kesintileri
 
-\- Bordro belgesi
+- Bordro belgesi
 
-\- Prim hesaplama
+- Prim hesaplama
 
-\- Yan haklar
+- Yan haklar
 
-\- Avans
+- Avans
 
-\- Kesinti
+- Kesinti
 
-\- Fazla mesai ücret hesaplaması
+- Fazla mesai ücret hesaplaması
 
-\- Banka ödeme dosyası
+- Banka ödeme dosyası
 
 
 
@@ -436,7 +436,7 @@ Maaş ve resmî ücret hesabı mevcut bordro veya İK sisteminde yapılır.
 
 
 
-\## 9. Personel Özlük Sistemi
+## 9. Personel Özlük Sistemi
 
 
 
@@ -448,25 +448,25 @@ Kapsam dışı işlevler:
 
 
 
-\- Kimlik bilgileri ana kaydı
+- Kimlik bilgileri ana kaydı
 
-\- SGK kayıtları
+- SGK kayıtları
 
-\- İş sözleşmeleri
+- İş sözleşmeleri
 
-\- Sağlık belgeleri
+- Sağlık belgeleri
 
-\- Disiplin kayıtları
+- Disiplin kayıtları
 
-\- Bordro geçmişi
+- Bordro geçmişi
 
-\- Yan haklar
+- Yan haklar
 
-\- İşe giriş ve çıkış resmî süreçleri
+- İşe giriş ve çıkış resmî süreçleri
 
-\- Personel dosyası
+- Personel dosyası
 
-\- İzin muhasebesi ana sistemi
+- İzin muhasebesi ana sistemi
 
 
 
@@ -474,23 +474,23 @@ CrevaFactOS vardiya planlama için yalnızca gerekli operasyonel personel verisi
 
 
 
-\- Personel kimliği
+- Personel kimliği
 
-\- Rol
+- Rol
 
-\- Yetkinlik
+- Yetkinlik
 
-\- Vardiya uygunluğu
+- Vardiya uygunluğu
 
-\- İzin veya devamsızlık durumu
+- İzin veya devamsızlık durumu
 
-\- Facility
+- Facility
 
-\- Operasyon yetkisi
+- Operasyon yetkisi
 
 
 
-\## 10. Genel İnsan Kaynakları Yönetimi
+## 10. Genel İnsan Kaynakları Yönetimi
 
 
 
@@ -502,23 +502,23 @@ Kapsam dışı işlevler:
 
 
 
-\- İşe alım
+- İşe alım
 
-\- Aday takip
+- Aday takip
 
-\- Performans değerlendirme ana sistemi
+- Performans değerlendirme ana sistemi
 
-\- Kariyer planlama
+- Kariyer planlama
 
-\- Ücret yönetimi
+- Ücret yönetimi
 
-\- Yan haklar
+- Yan haklar
 
-\- Çalışan bağlılığı
+- Çalışan bağlılığı
 
-\- Genel eğitim yönetim sistemi
+- Genel eğitim yönetim sistemi
 
-\- Organizasyonel yetenek yönetimi
+- Organizasyonel yetenek yönetimi
 
 
 
@@ -526,7 +526,7 @@ Kapsam dışı işlevler:
 
 
 
-\## 11. Genel CRM
+## 11. Genel CRM
 
 
 
@@ -538,21 +538,21 @@ Kapsam dışı işlevler:
 
 
 
-\- Satış pipeline yönetimi
+- Satış pipeline yönetimi
 
-\- Pazarlama otomasyonu
+- Pazarlama otomasyonu
 
-\- Toplu kampanya yönetimi
+- Toplu kampanya yönetimi
 
-\- Reklam yönetimi
+- Reklam yönetimi
 
-\- Genel müşteri destek sistemi
+- Genel müşteri destek sistemi
 
-\- Sosyal medya yönetimi
+- Sosyal medya yönetimi
 
-\- E-ticaret müşteri yönetimi
+- E-ticaret müşteri yönetimi
 
-\- Bütün sektörlere uygun CRM
+- Bütün sektörlere uygun CRM
 
 
 
@@ -560,7 +560,7 @@ CrevaFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli müş
 
 
 
-\## 12. Genel Satış ERP'si
+## 12. Genel Satış ERP'si
 
 
 
@@ -572,21 +572,21 @@ Kapsam dışı işlevler:
 
 
 
-\- Genel teklif yönetimi
+- Genel teklif yönetimi
 
-\- Fiyat listesi ana sahipliği
+- Fiyat listesi ana sahipliği
 
-\- İskonto muhasebesi
+- İskonto muhasebesi
 
-\- Satış primi
+- Satış primi
 
-\- Bayi yönetimi
+- Bayi yönetimi
 
-\- E-ticaret sipariş yönetimi
+- E-ticaret sipariş yönetimi
 
-\- Satış faturası
+- Satış faturası
 
-\- Resmî sipariş arşivi
+- Resmî sipariş arşivi
 
 
 
@@ -594,7 +594,7 @@ CrevaFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut 
 
 
 
-\## 13. Genel Doküman Yönetim Sistemi
+## 13. Genel Doküman Yönetim Sistemi
 
 
 
@@ -606,17 +606,17 @@ Kapsam dışı işlevler:
 
 
 
-\- Kurum genelinde bütün belge türleri
+- Kurum genelinde bütün belge türleri
 
-\- Genel elektronik imza platformu
+- Genel elektronik imza platformu
 
-\- Resmî evrak kayıt sistemi
+- Resmî evrak kayıt sistemi
 
-\- Genel arşiv ve yazışma yönetimi
+- Genel arşiv ve yazışma yönetimi
 
-\- Hukuk belge yönetimi
+- Hukuk belge yönetimi
 
-\- Genel sözleşme yaşam döngüsü
+- Genel sözleşme yaşam döngüsü
 
 
 
@@ -624,23 +624,23 @@ CrevaFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
 
 
 
-\- Kalıp teknik dosyaları
+- Kalıp teknik dosyaları
 
-\- Ürün teknik çizimleri
+- Ürün teknik çizimleri
 
-\- Proses talimatları
+- Proses talimatları
 
-\- Kalite belgeleri
+- Kalite belgeleri
 
-\- Bakım belgeleri
+- Bakım belgeleri
 
-\- Sipariş ekleri
+- Sipariş ekleri
 
-\- Makine dokümanları
+- Makine dokümanları
 
 
 
-\## 14. Genel Proje Yönetim Sistemi
+## 14. Genel Proje Yönetim Sistemi
 
 
 
@@ -652,15 +652,15 @@ Kapsam dışı işlevler:
 
 
 
-\- Genel şirket proje yönetimi
+- Genel şirket proje yönetimi
 
-\- Yazılım geliştirme iş takibi
+- Yazılım geliştirme iş takibi
 
-\- Pazarlama proje planlama
+- Pazarlama proje planlama
 
-\- Genel görev yönetimi
+- Genel görev yönetimi
 
-\- Bütün departmanlar için kanban sistemi
+- Bütün departmanlar için kanban sistemi
 
 
 
@@ -668,23 +668,23 @@ CrevaFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
 
 
 
-\- Üretim görevi
+- Üretim görevi
 
-\- Vardiya görevi
+- Vardiya görevi
 
-\- Bakım görevi
+- Bakım görevi
 
-\- Kalite görevi
+- Kalite görevi
 
-\- Kalıp görevi
+- Kalıp görevi
 
-\- Malzeme hazırlık görevi
+- Malzeme hazırlık görevi
 
-\- AI onay görevi
+- AI onay görevi
 
 
 
-\## 15. Genel Bakım Yönetim Ürünü
+## 15. Genel Bakım Yönetim Ürünü
 
 
 
@@ -696,15 +696,15 @@ Kapsam dışı:
 
 
 
-\- Bina yönetimi
+- Bina yönetimi
 
-\- Araç filosu bakımı
+- Araç filosu bakımı
 
-\- Genel tesis yönetimi
+- Genel tesis yönetimi
 
-\- Sağlık cihazı bakımı
+- Sağlık cihazı bakımı
 
-\- Bütün sektörlere uygun bakım ürünü
+- Bütün sektörlere uygun bakım ürünü
 
 
 
@@ -712,7 +712,7 @@ Bakım yetenekleri plastik enjeksiyon ve kalıp üretimi bağlamında geliştiri
 
 
 
-\## 16. Genel MES Ürünü
+## 16. Genel MES Ürünü
 
 
 
@@ -724,17 +724,17 @@ Kapsam dışı:
 
 
 
-\- Her sektör için genel rota motoru
+- Her sektör için genel rota motoru
 
-\- Kimya üretim reçeteleri
+- Kimya üretim reçeteleri
 
-\- Gıda üretim mevzuatı
+- Gıda üretim mevzuatı
 
-\- İlaç üretim batch sistemi
+- İlaç üretim batch sistemi
 
-\- Tekstil üretim özel akışları
+- Tekstil üretim özel akışları
 
-\- Metal üretim genel MES kapsamı
+- Metal üretim genel MES kapsamı
 
 
 
@@ -742,7 +742,7 @@ Kapsam dışı:
 
 
 
-\## 17. PLC ve Güvenlik Kontrol Sistemi
+## 17. PLC ve Güvenlik Kontrol Sistemi
 
 
 
@@ -754,21 +754,21 @@ Kapsam dışı:
 
 
 
-\- Acil durdurma kontrolü
+- Acil durdurma kontrolü
 
-\- Güvenlik rölesi yönetimi
+- Güvenlik rölesi yönetimi
 
-\- Kapı kilidi kontrolü
+- Kapı kilidi kontrolü
 
-\- Işık perdesi kontrolü
+- Işık perdesi kontrolü
 
-\- Safety PLC mantığı
+- Safety PLC mantığı
 
-\- Basınç emniyet kontrolü
+- Basınç emniyet kontrolü
 
-\- Operatör güvenlik devresi
+- Operatör güvenlik devresi
 
-\- Sert gerçek zamanlı makine kontrolü
+- Sert gerçek zamanlı makine kontrolü
 
 
 
@@ -780,7 +780,7 @@ CrevaFactOS bu sistemleri devre dışı bırakamaz.
 
 
 
-\## 18. Keyfi Makine Kontrolü
+## 18. Keyfi Makine Kontrolü
 
 
 
@@ -792,21 +792,21 @@ Kapsam dışı:
 
 
 
-\- Keyfi Modbus register yazma
+- Keyfi Modbus register yazma
 
-\- Keyfi OPC UA node yazma
+- Keyfi OPC UA node yazma
 
-\- Keyfi PLC programı değiştirme
+- Keyfi PLC programı değiştirme
 
-\- Güvenlik parametresi değiştirme
+- Güvenlik parametresi değiştirme
 
-\- Serbest script çalıştırma
+- Serbest script çalıştırma
 
-\- AI tarafından üretilen kontrol kodu
+- AI tarafından üretilen kontrol kodu
 
-\- Onaysız reçete gönderme
+- Onaysız reçete gönderme
 
-\- Onaysız üretim durdurma
+- Onaysız üretim durdurma
 
 
 
@@ -814,7 +814,7 @@ Desteklenen komutlar allowlist ve açık onay ile sınırlandırılır.
 
 
 
-\## 19. Kontrolsüz Tam Otonomi
+## 19. Kontrolsüz Tam Otonomi
 
 
 
@@ -826,25 +826,25 @@ AI aşağıdaki işlemleri kendi başına gerçekleştiremez:
 
 
 
-\- Siparişi kesinleştirmek
+- Siparişi kesinleştirmek
 
-\- Üretim planını yayınlamak
+- Üretim planını yayınlamak
 
-\- Vardiya planını uygulamak
+- Vardiya planını uygulamak
 
-\- Satın alma siparişi vermek
+- Satın alma siparişi vermek
 
-\- Fiyat değiştirmek
+- Fiyat değiştirmek
 
-\- Kalite karantinası uygulamak
+- Kalite karantinası uygulamak
 
-\- Makineye kritik komut göndermek
+- Makineye kritik komut göndermek
 
-\- ERP'ye finansal kayıt yazmak
+- ERP'ye finansal kayıt yazmak
 
-\- Kullanıcı yetkisi değiştirmek
+- Kullanıcı yetkisi değiştirmek
 
-\- Kendi onayını oluşturmak
+- Kendi onayını oluşturmak
 
 
 
@@ -852,7 +852,7 @@ Kritik işlemler Human-in-the-Loop onayına tabidir.
 
 
 
-\## 20. AI Tarafından Serbest Kod Çalıştırma
+## 20. AI Tarafından Serbest Kod Çalıştırma
 
 
 
@@ -860,23 +860,23 @@ AI:
 
 
 
-\- SQL çalıştıramaz.
+- SQL çalıştıramaz.
 
-\- Shell komutu çalıştıramaz.
+- Shell komutu çalıştıramaz.
 
-\- PowerShell çalıştıramaz.
+- PowerShell çalıştıramaz.
 
-\- Keyfi Python kodu çalıştıramaz.
+- Keyfi Python kodu çalıştıramaz.
 
-\- Keyfi HTTP isteği yapamaz.
+- Keyfi HTTP isteği yapamaz.
 
-\- Dosya sistemine serbest erişemez.
+- Dosya sistemine serbest erişemez.
 
-\- Secret okuyamaz.
+- Secret okuyamaz.
 
-\- RabbitMQ'ya doğrudan mesaj gönderemez.
+- RabbitMQ'ya doğrudan mesaj gönderemez.
 
-\- PLC'ye doğrudan bağlanamaz.
+- PLC'ye doğrudan bağlanamaz.
 
 
 
@@ -884,7 +884,7 @@ AI yalnızca sürümlenmiş ve izinli tool sözleşmelerini kullanır.
 
 
 
-\## 21. Genel Veri Ambarı
+## 21. Genel Veri Ambarı
 
 
 
@@ -896,17 +896,17 @@ Kapsam dışı:
 
 
 
-\- Bütün şirket departmanlarının ham verisi
+- Bütün şirket departmanlarının ham verisi
 
-\- Pazarlama veri gölü
+- Pazarlama veri gölü
 
-\- Finansal raporlama veri ambarı
+- Finansal raporlama veri ambarı
 
-\- Genel BI platformu
+- Genel BI platformu
 
-\- Sınırsız dosya arşivi
+- Sınırsız dosya arşivi
 
-\- Bütün kurumsal sistemlerin tam kopyası
+- Bütün kurumsal sistemlerin tam kopyası
 
 
 
@@ -914,7 +914,7 @@ Operational Data Hub yalnızca fabrika operasyon kararı için gerekli verileri 
 
 
 
-\## 22. ERP Veritabanının Tam Kopyası
+## 22. ERP Veritabanının Tam Kopyası
 
 
 
@@ -926,15 +926,15 @@ Kapsam dışı:
 
 
 
-\- Bütün ERP tablolarının replikasyonu
+- Bütün ERP tablolarının replikasyonu
 
-\- ERP schema'sının birebir kopyası
+- ERP schema'sının birebir kopyası
 
-\- Kaynak sistemdeki bütün geçmiş hareketler
+- Kaynak sistemdeki bütün geçmiş hareketler
 
-\- Operasyonla ilgisiz finans ve muhasebe verileri
+- Operasyonla ilgisiz finans ve muhasebe verileri
 
-\- Kaynak ERP'nin yerine geçen bağımsız kayıt seti
+- Kaynak ERP'nin yerine geçen bağımsız kayıt seti
 
 
 
@@ -942,7 +942,7 @@ Yalnızca operasyonel karar için gerekli kanonik alanlar tutulur.
 
 
 
-\## 23. Kaynak Sistemden Bağımsız Veri Değiştirme
+## 23. Kaynak Sistemden Bağımsız Veri Değiştirme
 
 
 
@@ -954,17 +954,17 @@ CrevaFactOS system-of-record olarak belirlenmemiş verileri tek taraflı değiş
 
 
 
-\- ERP stok miktarı
+- ERP stok miktarı
 
-\- Cari bakiye
+- Cari bakiye
 
-\- Resmî sipariş
+- Resmî sipariş
 
-\- Personel özlük bilgisi
+- Personel özlük bilgisi
 
-\- Finansal kayıt
+- Finansal kayıt
 
-\- Tedarikçi ana kartı
+- Tedarikçi ana kartı
 
 
 
@@ -972,7 +972,7 @@ Bu veriler yalnızca desteklenen ve onaylanan write-back akışıyla kaynak sist
 
 
 
-\## 24. Genel RPA Platformu
+## 24. Genel RPA Platformu
 
 
 
@@ -984,15 +984,15 @@ Kapsam dışı:
 
 
 
-\- Kullanıcının serbest bot oluşturması
+- Kullanıcının serbest bot oluşturması
 
-\- Keyfi masaüstü otomasyonu
+- Keyfi masaüstü otomasyonu
 
-\- Genel tarayıcı otomasyonu
+- Genel tarayıcı otomasyonu
 
-\- Kod yazmadan sınırsız workflow oluşturma
+- Kod yazmadan sınırsız workflow oluşturma
 
-\- Her uygulamaya açık RPA marketplace
+- Her uygulamaya açık RPA marketplace
 
 
 
@@ -1000,7 +1000,7 @@ RPA benzeri adaptörler yalnızca API bulunmayan belirli ERP entegrasyonları i�
 
 
 
-\## 25. Genel Low-Code Platformu
+## 25. Genel Low-Code Platformu
 
 
 
@@ -1012,17 +1012,17 @@ Kapsam dışı:
 
 
 
-\- Serbest veri modeli oluşturma
+- Serbest veri modeli oluşturma
 
-\- Keyfi ekran tasarlama
+- Keyfi ekran tasarlama
 
-\- Kod yazmadan bütün iş akışlarını değiştirme
+- Kod yazmadan bütün iş akışlarını değiştirme
 
-\- Genel form builder
+- Genel form builder
 
-\- Genel workflow engine ürünü
+- Genel workflow engine ürünü
 
-\- Müşteri tarafından sınırsız modül üretimi
+- Müşteri tarafından sınırsız modül üretimi
 
 
 
@@ -1030,7 +1030,7 @@ Yapılandırılabilir alanlar kontrollü ürün sınırlarında kalır.
 
 
 
-\## 26. Genel BI ve Raporlama Ürünü
+## 26. Genel BI ve Raporlama Ürünü
 
 
 
@@ -1042,15 +1042,15 @@ Kapsam dışı:
 
 
 
-\- Bütün şirket verileri için genel rapor tasarım aracı
+- Bütün şirket verileri için genel rapor tasarım aracı
 
-\- Serbest SQL raporu
+- Serbest SQL raporu
 
-\- Keyfi dashboard builder
+- Keyfi dashboard builder
 
-\- Genel finans BI sistemi
+- Genel finans BI sistemi
 
-\- Sınırsız veri kaynaklı analytics platformu
+- Sınırsız veri kaynaklı analytics platformu
 
 
 
@@ -1058,7 +1058,7 @@ CrevaFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir A
 
 
 
-\## 27. Genel Enerji Yönetim Sistemi
+## 27. Genel Enerji Yönetim Sistemi
 
 
 
@@ -1070,15 +1070,15 @@ Kapsam dışı:
 
 
 
-\- Elektrik tedarik sözleşmeleri
+- Elektrik tedarik sözleşmeleri
 
-\- Enerji faturası yönetimi
+- Enerji faturası yönetimi
 
-\- Dağıtım şirketi mutabakatı
+- Dağıtım şirketi mutabakatı
 
-\- Resmî enerji raporlama sistemi
+- Resmî enerji raporlama sistemi
 
-\- Genel bina enerji yönetimi
+- Genel bina enerji yönetimi
 
 
 
@@ -1086,13 +1086,13 @@ CrevaFactOS:
 
 
 
-\- Makine enerji tüketimini
+- Makine enerji tüketimini
 
-\- Parça başı enerjiyi
+- Parça başı enerjiyi
 
-\- Enerji anomalilerini
+- Enerji anomalilerini
 
-\- Üretim planı enerji etkisini
+- Üretim planı enerji etkisini
 
 
 
@@ -1100,7 +1100,7 @@ analiz edebilir.
 
 
 
-\## 28. Genel İş Sağlığı ve Güvenliği Sistemi
+## 28. Genel İş Sağlığı ve Güvenliği Sistemi
 
 
 
@@ -1112,15 +1112,15 @@ Kapsam dışı:
 
 
 
-\- Resmî iş kazası bildirim sistemi
+- Resmî iş kazası bildirim sistemi
 
-\- Genel risk değerlendirme platformu
+- Genel risk değerlendirme platformu
 
-\- Sağlık muayenesi takibi
+- Sağlık muayenesi takibi
 
-\- İSG mevzuat raporları
+- İSG mevzuat raporları
 
-\- Genel eğitim ve sertifika sistemi
+- Genel eğitim ve sertifika sistemi
 
 
 
@@ -1128,7 +1128,7 @@ Kapsam dışı:
 
 
 
-\## 29. Genel Lojistik ve Filo Yönetimi
+## 29. Genel Lojistik ve Filo Yönetimi
 
 
 
@@ -1140,19 +1140,19 @@ Kapsam dışı:
 
 
 
-\- Araç filo yönetimi
+- Araç filo yönetimi
 
-\- Yakıt yönetimi
+- Yakıt yönetimi
 
-\- Sürücü yönetimi
+- Sürücü yönetimi
 
-\- GPS filo takibi
+- GPS filo takibi
 
-\- Genel rota optimizasyonu
+- Genel rota optimizasyonu
 
-\- Kargo şirketi yönetimi
+- Kargo şirketi yönetimi
 
-\- Gümrük yönetimi
+- Gümrük yönetimi
 
 
 
@@ -1160,7 +1160,7 @@ CrevaFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu
 
 
 
-\## 30. Genel Tedarikçi Marketplace
+## 30. Genel Tedarikçi Marketplace
 
 
 
@@ -1172,15 +1172,15 @@ Kapsam dışı:
 
 
 
-\- Açık tedarikçi marketplace
+- Açık tedarikçi marketplace
 
-\- E-ticaret satın alma platformu
+- E-ticaret satın alma platformu
 
-\- Tedarikçi reklamları
+- Tedarikçi reklamları
 
-\- Açık teklif pazarı
+- Açık teklif pazarı
 
-\- Komisyon bazlı tedarik platformu
+- Komisyon bazlı tedarik platformu
 
 
 
@@ -1188,7 +1188,7 @@ Tedarikçi verileri yalnızca müşterinin mevcut ERP ve onaylı entegrasyonlar�
 
 
 
-\## 31. Genel Müşteri Portalı
+## 31. Genel Müşteri Portalı
 
 
 
@@ -1200,15 +1200,15 @@ Kapsam dışı:
 
 
 
-\- Genel e-ticaret mağazası
+- Genel e-ticaret mağazası
 
-\- Pazarlama portalı
+- Pazarlama portalı
 
-\- Müşteri destek merkezi
+- Müşteri destek merkezi
 
-\- Genel topluluk platformu
+- Genel topluluk platformu
 
-\- Finansal self-servis portalı
+- Finansal self-servis portalı
 
 
 
@@ -1216,21 +1216,21 @@ Desteklenebilecek sınırlı alanlar:
 
 
 
-\- Sipariş talebi
+- Sipariş talebi
 
-\- Sipariş durumu
+- Sipariş durumu
 
-\- Termin
+- Termin
 
-\- Belge paylaşımı
+- Belge paylaşımı
 
-\- Numune onayı
+- Numune onayı
 
-\- Üretim ilerleme bilgisi
+- Üretim ilerleme bilgisi
 
 
 
-\## 32. Genel Tedarikçi Portalı
+## 32. Genel Tedarikçi Portalı
 
 
 
@@ -1242,15 +1242,15 @@ Gerekirse sınırlı kapsam:
 
 
 
-\- Teslim tarihi doğrulama
+- Teslim tarihi doğrulama
 
-\- Teklif paylaşımı
+- Teklif paylaşımı
 
-\- Belge yükleme
+- Belge yükleme
 
-\- Sipariş durumu
+- Sipariş durumu
 
-\- Malzeme sertifikası
+- Malzeme sertifikası
 
 
 
@@ -1258,7 +1258,7 @@ ile sınırlandırılabilir.
 
 
 
-\## 33. Ana Veri Yönetimi Platformu
+## 33. Ana Veri Yönetimi Platformu
 
 
 
@@ -1270,15 +1270,15 @@ Kapsam dışı:
 
 
 
-\- Şirket genelinde bütün ana veri sahipliği
+- Şirket genelinde bütün ana veri sahipliği
 
-\- Müşteri ana veri yönetimi
+- Müşteri ana veri yönetimi
 
-\- Tedarikçi ana veri yönetimi
+- Tedarikçi ana veri yönetimi
 
-\- Finansal ana veri
+- Finansal ana veri
 
-\- Kurum genelinde ürün master yönetimi
+- Kurum genelinde ürün master yönetimi
 
 
 
@@ -1286,7 +1286,7 @@ CrevaFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
 
 
 
-\## 34. Kaynak ERP'yi Zorunlu Olarak Değiştirme
+## 34. Kaynak ERP'yi Zorunlu Olarak Değiştirme
 
 
 
@@ -1306,7 +1306,7 @@ ERP değiştirme projesi CrevaFactOS satışının ön koşulu değildir.
 
 
 
-\## 35. Her ERP İçin Baştan Özel Ürün
+## 35. Her ERP İçin Baştan Özel Ürün
 
 
 
@@ -1318,15 +1318,15 @@ Kapsam dışı:
 
 
 
-\- Müşteriye özel ayrı ürün fork'u
+- Müşteriye özel ayrı ürün fork'u
 
-\- Ortak connector yapısını atlayan entegrasyon
+- Ortak connector yapısını atlayan entegrasyon
 
-\- Doğrudan müşteri veritabanına özel dağınık kod
+- Doğrudan müşteri veritabanına özel dağınık kod
 
-\- Sürümlenmeyen alan eşlemeleri
+- Sürümlenmeyen alan eşlemeleri
 
-\- Ortak ürün sınırını bozan özel modüller
+- Ortak ürün sınırını bozan özel modüller
 
 
 
@@ -1334,7 +1334,7 @@ Müşteri ihtiyaçları ortak connector, configuration ve adaptör yapılarıyla
 
 
 
-\## 36. Gerçek Müşteri Verisiyle Geliştirme
+## 36. Gerçek Müşteri Verisiyle Geliştirme
 
 
 
@@ -1346,13 +1346,13 @@ Kapsam dışı:
 
 
 
-\- Production verisinin geliştirici bilgisayarına kopyalanması
+- Production verisinin geliştirici bilgisayarına kopyalanması
 
-\- Gerçek müşteri dosyalarının test fixture olarak kullanılması
+- Gerçek müşteri dosyalarının test fixture olarak kullanılması
 
-\- Gerçek WhatsApp mesajlarının kontrolsüz paylaşılması
+- Gerçek WhatsApp mesajlarının kontrolsüz paylaşılması
 
-\- Gerçek finans verisinin test ortamına taşınması
+- Gerçek finans verisinin test ortamına taşınması
 
 
 
@@ -1360,7 +1360,7 @@ Yapay veya anonimleştirilmiş veri kullanılmalıdır.
 
 
 
-\## Kapsamda Kalıp System-of-Record Olmayan Alanlar
+## Kapsamda Kalıp System-of-Record Olmayan Alanlar
 
 
 
@@ -1388,7 +1388,7 @@ Aşağıdaki alanlar CrevaFactOS içinde analiz ve karar desteği olarak bulunur
 
 
 
-\## Kapsamda Kalan Çekirdek Alanlar
+## Kapsamda Kalan Çekirdek Alanlar
 
 
 
@@ -1396,75 +1396,75 @@ Aşağıdaki alanlar kapsam dışı değildir ve aynen korunur:
 
 
 
-\- Omnichannel sipariş toplama
+- Omnichannel sipariş toplama
 
-\- AI sipariş taslağı
+- AI sipariş taslağı
 
-\- AI Üretim Müdürü
+- AI Üretim Müdürü
 
-\- AI Günlük Fabrika Özeti
+- AI Günlük Fabrika Özeti
 
-\- Üretim planlama
+- Üretim planlama
 
-\- Plan güvenilirliği
+- Plan güvenilirliği
 
-\- Üretim emri orkestrasyonu
+- Üretim emri orkestrasyonu
 
-\- Vardiya planlama
+- Vardiya planlama
 
-\- Operatör ve görev dağılımı
+- Operatör ve görev dağılımı
 
-\- Makine takibi
+- Makine takibi
 
-\- Makine performans analizi
+- Makine performans analizi
 
-\- Makine-kalıp uyumluluğu
+- Makine-kalıp uyumluluğu
 
-\- Kalıp yaşam döngüsü
+- Kalıp yaşam döngüsü
 
-\- Kalıp baskı sayacı
+- Kalıp baskı sayacı
 
-\- AI kalıp bakım optimizasyonu
+- AI kalıp bakım optimizasyonu
 
-\- Makine ve kalıp bakımı
+- Makine ve kalıp bakımı
 
-\- Arıza ve duruş analizi
+- Arıza ve duruş analizi
 
-\- Kalite ve fire analizi
+- Kalite ve fire analizi
 
-\- Üretim izlenebilirliği
+- Üretim izlenebilirliği
 
-\- Termin ve darboğaz tahmini
+- Termin ve darboğaz tahmini
 
-\- Malzeme risk analizi
+- Malzeme risk analizi
 
-\- Tedarik riski
+- Tedarik riski
 
-\- Operasyonel finans ve maliyet analizi
+- Operasyonel finans ve maliyet analizi
 
-\- AI Görev Merkezi
+- AI Görev Merkezi
 
-\- Human-in-the-Loop
+- Human-in-the-Loop
 
-\- AI Karar Defteri
+- AI Karar Defteri
 
-\- Audit
+- Audit
 
-\- ERP connector'ları
+- ERP connector'ları
 
-\- ERP write-back
+- ERP write-back
 
-\- Operational Data Hub
+- Operational Data Hub
 
-\- Edge Agent
+- Edge Agent
 
-\- Kontrollü makine komutları
+- Kontrollü makine komutları
 
-\- Kilitli dashboard yapısı
+- Kilitli dashboard yapısı
 
 
 
-\## Dashboard Kapsam Dışı Alanları
+## Dashboard Kapsam Dışı Alanları
 
 
 
@@ -1472,23 +1472,23 @@ Kilitli ana dashboard içinde bağımsız ana menü veya modül olarak bulunmama
 
 
 
-\- Finans
+- Finans
 
-\- Muhasebe
+- Muhasebe
 
-\- Cari
+- Cari
 
-\- Ana stok yönetimi
+- Ana stok yönetimi
 
-\- Genel satın alma
+- Genel satın alma
 
-\- Bordro
+- Bordro
 
-\- Özlük
+- Özlük
 
-\- Banka
+- Banka
 
-\- Resmî faturalama
+- Resmî faturalama
 
 
 
@@ -1496,13 +1496,13 @@ Dashboard'da bulunmaya devam eden:
 
 
 
-\- Malzeme Riskleri
+- Malzeme Riskleri
 
-\- Kritik stok uyarıları
+- Kritik stok uyarıları
 
-\- Tedarik riskleri
+- Tedarik riskleri
 
-\- Operasyonel maliyet etkisi
+- Operasyonel maliyet etkisi
 
 
 
@@ -1510,7 +1510,7 @@ mevcut ERP verisinin AI tarafından analiz edilmesini temsil eder.
 
 
 
-\## Yeni Özellik Değerlendirme Soruları
+## Yeni Özellik Değerlendirme Soruları
 
 
 
@@ -1518,29 +1518,29 @@ Yeni bir özellik önerildiğinde aşağıdaki sorular cevaplanmalıdır:
 
 
 
-1\. Bu özellik üretim veya fabrika operasyonuna doğrudan değer sağlıyor mu?
+1. Bu özellik üretim veya fabrika operasyonuna doğrudan değer sağlıyor mu?
 
-2\. Mevcut ERP'nin ana kayıt işlevini tekrar mı geliştiriyor?
+2. Mevcut ERP'nin ana kayıt işlevini tekrar mı geliştiriyor?
 
-3\. Bu veri başka bir sistemde system-of-record olarak tutuluyor mu?
+3. Bu veri başka bir sistemde system-of-record olarak tutuluyor mu?
 
-4\. Özellik AI planlama, analiz veya görev oluşturmayı güçlendiriyor mu?
+4. Özellik AI planlama, analiz veya görev oluşturmayı güçlendiriyor mu?
 
-5\. Plastik enjeksiyon ve kalıp sektörüne özgü mü?
+5. Plastik enjeksiyon ve kalıp sektörüne özgü mü?
 
-6\. Entegrasyonla çözülmesi mümkün mü?
+6. Entegrasyonla çözülmesi mümkün mü?
 
-7\. Mevzuat veya resmî muhasebe kapsamı oluşturuyor mu?
+7. Mevzuat veya resmî muhasebe kapsamı oluşturuyor mu?
 
-8\. Ürün odağını dağıtıyor mu?
+8. Ürün odağını dağıtıyor mu?
 
-9\. İlk pilot için gerekli mi?
+9. İlk pilot için gerekli mi?
 
-10\. Ayrı ürün veya entegrasyon olması daha doğru mu?
+10. Ayrı ürün veya entegrasyon olması daha doğru mu?
 
 
 
-\## Kapsam Değişikliği Süreci
+## Kapsam Değişikliği Süreci
 
 
 
@@ -1548,23 +1548,23 @@ Bu belgede kapsam dışı olarak kilitlenen bir alan ürüne eklenmek istenirse:
 
 
 
-1\. İş gerekçesi hazırlanır.
+1. İş gerekçesi hazırlanır.
 
-2\. Hedef müşteri ihtiyacı doğrulanır.
+2. Hedef müşteri ihtiyacı doğrulanır.
 
-3\. Mevcut ERP entegrasyonuyla çözülememe nedeni açıklanır.
+3. Mevcut ERP entegrasyonuyla çözülememe nedeni açıklanır.
 
-4\. Mevzuat ve güvenlik etkisi değerlendirilir.
+4. Mevzuat ve güvenlik etkisi değerlendirilir.
 
-5\. Geliştirme ve bakım maliyeti hesaplanır.
+5. Geliştirme ve bakım maliyeti hesaplanır.
 
-6\. Ürün odağına etkisi incelenir.
+6. Ürün odağına etkisi incelenir.
 
-7\. Ayrı ürün seçeneği değerlendirilir.
+7. Ayrı ürün seçeneği değerlendirilir.
 
-8\. Yeni ADR oluşturulur.
+8. Yeni ADR oluşturulur.
 
-9\. Açık ürün kararı alınır.
+9. Açık ürün kararı alınır.
 
 
 
@@ -1572,7 +1572,7 @@ Klasik ERP kapsamı sessizce geri eklenemez.
 
 
 
-\## Nihai Kapsam Sınırı
+## Nihai Kapsam Sınırı
 
 
 

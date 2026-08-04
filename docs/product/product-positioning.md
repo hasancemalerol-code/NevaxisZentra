@@ -1,20 +1,20 @@
-\# CrevaFactOS Ürün Konumlandırması
+# CrevaFactOS Ürün Konumlandırması
 
 
 
-\- Durum: Kilitli
+- Durum: Kilitli
 
-\- Tarih: 2026-08-04
+- Tarih: 2026-08-04
 
-\- Ürün: CrevaFactOS
+- Ürün: CrevaFactOS
 
-\- Kategori: AI Factory Operations Assistant
+- Kategori: AI Factory Operations Assistant
 
-\- Ana uzmanlık: Plastik enjeksiyon ve kalıp üretim operasyonları
+- Ana uzmanlık: Plastik enjeksiyon ve kalıp üretim operasyonları
 
 
 
-\## Ürün Tanımı
+## Ürün Tanımı
 
 
 
@@ -26,25 +26,25 @@ CrevaFactOS:
 
 
 
-\- Siparişleri farklı kanallardan toplar.
+- Siparişleri farklı kanallardan toplar.
 
-\- Sipariş taleplerini yapılandırılmış taslaklara dönüştürür.
+- Sipariş taleplerini yapılandırılmış taslaklara dönüştürür.
 
-\- Üretim planları hazırlar.
+- Üretim planları hazırlar.
 
-\- Vardiya ve görev dağılımı oluşturur.
+- Vardiya ve görev dağılımı oluşturur.
 
-\- Makine ve kalıp uygunluğunu analiz eder.
+- Makine ve kalıp uygunluğunu analiz eder.
 
-\- Makine performansını takip eder.
+- Makine performansını takip eder.
 
-\- Kalıp bakım zamanlarını optimize eder.
+- Kalıp bakım zamanlarını optimize eder.
 
-\- Malzeme, kalite, bakım ve termin risklerini tahmin eder.
+- Malzeme, kalite, bakım ve termin risklerini tahmin eder.
 
-\- Yetkililerin günlük karar yükünü azaltır.
+- Yetkililerin günlük karar yükünü azaltır.
 
-\- Onaylanan işlemleri kontrollü biçimde uygular veya mevcut sistemlere aktarır.
+- Onaylanan işlemleri kontrollü biçimde uygular veya mevcut sistemlere aktarır.
 
 
 
@@ -60,7 +60,7 @@ CrevaFactOS bu sistemlerden aldığı verileri operasyonel karar, plan, görev, 
 
 
 
-\## Kısa Ürün Tanımı
+## Kısa Ürün Tanımı
 
 
 
@@ -68,7 +68,7 @@ CrevaFactOS bu sistemlerden aldığı verileri operasyonel karar, plan, görev, 
 
 
 
-\## Ana Satış Mesajı
+## Ana Satış Mesajı
 
 
 
@@ -84,7 +84,7 @@ Alternatif satış mesajı:
 
 
 
-\## Ürünün Temel Vaadi
+## Ürünün Temel Vaadi
 
 
 
@@ -96,29 +96,29 @@ CrevaFactOS fabrikanın dağınık verilerini günlük operasyon kararlarına d�
 
 
 
-\- Daha hızlı üretim planlama
+- Daha hızlı üretim planlama
 
-\- Daha erken termin riski tespiti
+- Daha erken termin riski tespiti
 
-\- Daha düşük plansız makine duruşu
+- Daha düşük plansız makine duruşu
 
-\- Daha doğru kalıp bakım zamanı
+- Daha doğru kalıp bakım zamanı
 
-\- Daha görünür malzeme riski
+- Daha görünür malzeme riski
 
-\- Daha dengeli vardiya ve görev dağılımı
+- Daha dengeli vardiya ve görev dağılımı
 
-\- Daha düşük manuel takip yükü
+- Daha düşük manuel takip yükü
 
-\- Daha hızlı yönetici kararı
+- Daha hızlı yönetici kararı
 
-\- Daha açıklanabilir AI önerileri
+- Daha açıklanabilir AI önerileri
 
-\- Daha kontrollü ve denetlenebilir otomasyon
+- Daha kontrollü ve denetlenebilir otomasyon
 
 
 
-\## Hedef Müşteri
+## Hedef Müşteri
 
 
 
@@ -126,55 +126,55 @@ Birincil hedef müşteriler:
 
 
 
-\- Plastik enjeksiyon üreticileri
+- Plastik enjeksiyon üreticileri
 
-\- Kalıp üreticileri
+- Kalıp üreticileri
 
-\- Plastik parça üreticileri
+- Plastik parça üreticileri
 
-\- Enjeksiyon ve kalıp operasyonlarını birlikte yürüten fabrikalar
+- Enjeksiyon ve kalıp operasyonlarını birlikte yürüten fabrikalar
 
-\- Birden fazla makine ve kalıpla çalışan üretim tesisleri
+- Birden fazla makine ve kalıpla çalışan üretim tesisleri
 
-\- Sipariş, planlama ve saha verileri farklı sistemlere dağılmış işletmeler
+- Sipariş, planlama ve saha verileri farklı sistemlere dağılmış işletmeler
 
-\- ERP kullandığı hâlde üretim planlama ve operasyon takibini Excel veya WhatsApp ile sürdüren fabrikalar
-
-
-
-\## Birincil Kullanıcılar
+- ERP kullandığı hâlde üretim planlama ve operasyon takibini Excel veya WhatsApp ile sürdüren fabrikalar
 
 
 
-\- Fabrika sahibi
-
-\- Genel müdür
-
-\- Fabrika müdürü
-
-\- Üretim müdürü
-
-\- Üretim planlama uzmanı
-
-\- Vardiya sorumlusu
-
-\- Kalıp bakım sorumlusu
-
-\- Makine bakım sorumlusu
-
-\- Kalite yöneticisi
-
-\- Depo ve malzeme sorumlusu
-
-\- Satış ve sipariş operasyon ekipleri
+## Birincil Kullanıcılar
 
 
 
-\## Çözülen Ana Problemler
+- Fabrika sahibi
+
+- Genel müdür
+
+- Fabrika müdürü
+
+- Üretim müdürü
+
+- Üretim planlama uzmanı
+
+- Vardiya sorumlusu
+
+- Kalıp bakım sorumlusu
+
+- Makine bakım sorumlusu
+
+- Kalite yöneticisi
+
+- Depo ve malzeme sorumlusu
+
+- Satış ve sipariş operasyon ekipleri
 
 
 
-\### Dağınık Sipariş Kanalları
+## Çözülen Ana Problemler
+
+
+
+### Dağınık Sipariş Kanalları
 
 
 
@@ -182,23 +182,23 @@ Sipariş talepleri aşağıdaki kaynaklardan gelebilir:
 
 
 
-\- WhatsApp
+- WhatsApp
 
-\- E-posta
+- E-posta
 
-\- Telefon görüşmesi notları
+- Telefon görüşmesi notları
 
-\- Web formu
+- Web formu
 
-\- Müşteri portalı
+- Müşteri portalı
 
-\- Excel
+- Excel
 
-\- PDF
+- PDF
 
-\- Görsel
+- Görsel
 
-\- Satış temsilcisi mesajı
+- Satış temsilcisi mesajı
 
 
 
@@ -206,17 +206,17 @@ Bu talepler manuel olarak ERP'ye aktarılırken:
 
 
 
-\- Bilgi kaybı
+- Bilgi kaybı
 
-\- Yanlış miktar
+- Yanlış miktar
 
-\- Yanlış ürün
+- Yanlış ürün
 
-\- Termin uyuşmazlığı
+- Termin uyuşmazlığı
 
-\- Tekrarlı kayıt
+- Tekrarlı kayıt
 
-\- Gecikme
+- Gecikme
 
 
 
@@ -228,7 +228,7 @@ CrevaFactOS bu içerikleri analiz ederek onaya hazır sipariş taslağı oluştu
 
 
 
-\### Manuel Üretim Planlama
+### Manuel Üretim Planlama
 
 
 
@@ -236,15 +236,15 @@ CrevaFactOS bu içerikleri analiz ederek onaya hazır sipariş taslağı oluştu
 
 
 
-\- Excel
+- Excel
 
-\- Beyaz tahta
+- Beyaz tahta
 
-\- Kişisel deneyim
+- Kişisel deneyim
 
-\- Telefon görüşmeleri
+- Telefon görüşmeleri
 
-\- Anlık saha bilgisi
+- Anlık saha bilgisi
 
 
 
@@ -256,29 +256,29 @@ Planlama sırasında aynı anda değerlendirilmesi gereken unsurlar:
 
 
 
-\- Sipariş önceliği
+- Sipariş önceliği
 
-\- Termin
+- Termin
 
-\- Makine kapasitesi
+- Makine kapasitesi
 
-\- Kalıp uygunluğu
+- Kalıp uygunluğu
 
-\- Çevrim süresi
+- Çevrim süresi
 
-\- Kavite sayısı
+- Kavite sayısı
 
-\- Malzeme
+- Malzeme
 
-\- Renk geçişi
+- Renk geçişi
 
-\- Setup süresi
+- Setup süresi
 
-\- Bakım planı
+- Bakım planı
 
-\- Vardiya kapasitesi
+- Vardiya kapasitesi
 
-\- Operatör yetkinliği
+- Operatör yetkinliği
 
 
 
@@ -290,7 +290,7 @@ CrevaFactOS bu verileri birleştirerek alternatif üretim planları hazırlar.
 
 
 
-\### Vardiya ve Görev Dağılımı
+### Vardiya ve Görev Dağılımı
 
 
 
@@ -302,17 +302,17 @@ Bunun sonucunda:
 
 
 
-\- Operatör eksikliği
+- Operatör eksikliği
 
-\- Yetkin olmayan personel ataması
+- Yetkin olmayan personel ataması
 
-\- Fazla mesai
+- Fazla mesai
 
-\- Bakım ve kalite görevlerinde çakışma
+- Bakım ve kalite görevlerinde çakışma
 
-\- Vardiya kapasitesi yetersizliği
+- Vardiya kapasitesi yetersizliği
 
-\- Kritik pozisyon boşluğu
+- Kritik pozisyon boşluğu
 
 
 
@@ -324,7 +324,7 @@ CrevaFactOS üretim programıyla personel uygunluğunu birleştirerek vardiya ve
 
 
 
-\### Makine Görünürlüğü
+### Makine Görünürlüğü
 
 
 
@@ -336,19 +336,19 @@ CrevaFactOS:
 
 
 
-\- Makine çalışma durumunu
+- Makine çalışma durumunu
 
-\- Duruşları
+- Duruşları
 
-\- Alarmları
+- Alarmları
 
-\- Üretim sayaçlarını
+- Üretim sayaçlarını
 
-\- Çevrim sürelerini
+- Çevrim sürelerini
 
-\- Planlanan ve gerçekleşen üretimi
+- Planlanan ve gerçekleşen üretimi
 
-\- Kapasite kullanımını
+- Kapasite kullanımını
 
 
 
@@ -356,7 +356,7 @@ Edge Agent ve desteklenen cihaz bağlantıları üzerinden izler.
 
 
 
-\### Kalıp Bakım Zamanlaması
+### Kalıp Bakım Zamanlaması
 
 
 
@@ -364,15 +364,15 @@ Kalıp bakımları yalnızca sabit takvimle planlandığında:
 
 
 
-\- Gereğinden erken bakım
+- Gereğinden erken bakım
 
-\- Gecikmiş bakım
+- Gecikmiş bakım
 
-\- Üretim sırasında arıza
+- Üretim sırasında arıza
 
-\- Kalite bozulması
+- Kalite bozulması
 
-\- Plansız duruş
+- Plansız duruş
 
 
 
@@ -384,15 +384,15 @@ CrevaFactOS:
 
 
 
-\- Baskı sayısı
+- Baskı sayısı
 
-\- Arıza geçmişi
+- Arıza geçmişi
 
-\- Kalite problemleri
+- Kalite problemleri
 
-\- Planlanan üretim yükü
+- Planlanan üretim yükü
 
-\- Önceki bakım sonuçları
+- Önceki bakım sonuçları
 
 
 
@@ -400,7 +400,7 @@ CrevaFactOS:
 
 
 
-\### Geç Görülen Riskler
+### Geç Görülen Riskler
 
 
 
@@ -412,31 +412,31 @@ CrevaFactOS aşağıdaki riskleri önceden tespit etmeyi hedefler:
 
 
 
-\- Termin gecikmesi
+- Termin gecikmesi
 
-\- Makine darboğazı
+- Makine darboğazı
 
-\- Kalıp uygunluk sorunu
+- Kalıp uygunluk sorunu
 
-\- Bakım çakışması
+- Bakım çakışması
 
-\- Malzeme eksikliği
+- Malzeme eksikliği
 
-\- Vardiya yetersizliği
+- Vardiya yetersizliği
 
-\- Çevrim süresi sapması
+- Çevrim süresi sapması
 
-\- Kalite ve fire artışı
+- Kalite ve fire artışı
 
-\- Makine arıza ihtimali
-
-
-
-\## Ana Ürün Yetenekleri
+- Makine arıza ihtimali
 
 
 
-\### Omnichannel Sipariş Toplama
+## Ana Ürün Yetenekleri
+
+
+
+### Omnichannel Sipariş Toplama
 
 
 
@@ -444,29 +444,29 @@ AI aşağıdaki bilgileri çıkarır:
 
 
 
-\- Müşteri
+- Müşteri
 
-\- Ürün
+- Ürün
 
-\- Ürün kodu
+- Ürün kodu
 
-\- Miktar
+- Miktar
 
-\- Termin
+- Termin
 
-\- Renk
+- Renk
 
-\- Malzeme
+- Malzeme
 
-\- Kalıp
+- Kalıp
 
-\- Teknik gereksinim
+- Teknik gereksinim
 
-\- Ambalaj
+- Ambalaj
 
-\- Ek belge
+- Ek belge
 
-\- Eksik veya belirsiz alanlar
+- Eksik veya belirsiz alanlar
 
 
 
@@ -474,7 +474,7 @@ Sonuç doğrudan kesin sipariş değil, onaya hazır sipariş taslağıdır.
 
 
 
-\### AI Üretim Müdürü Ajanı
+### AI Üretim Müdürü Ajanı
 
 
 
@@ -482,23 +482,23 @@ AI Üretim Müdürü:
 
 
 
-\- Açık siparişleri inceler.
+- Açık siparişleri inceler.
 
-\- Günlük üretim durumunu analiz eder.
+- Günlük üretim durumunu analiz eder.
 
-\- Termin risklerini sıralar.
+- Termin risklerini sıralar.
 
-\- Makine, kalıp ve vardiya kapasitesini değerlendirir.
+- Makine, kalıp ve vardiya kapasitesini değerlendirir.
 
-\- Kritik görevleri belirler.
+- Kritik görevleri belirler.
 
-\- Yöneticiye öncelikli karar listesini sunar.
+- Yöneticiye öncelikli karar listesini sunar.
 
-\- Onay bekleyen plan ve aksiyonları hazırlar.
+- Onay bekleyen plan ve aksiyonları hazırlar.
 
 
 
-\### AI Üretim Planlama
+### AI Üretim Planlama
 
 
 
@@ -506,29 +506,29 @@ Planlama sırasında:
 
 
 
-\- Sipariş önceliği
+- Sipariş önceliği
 
-\- Termin
+- Termin
 
-\- Makine kapasitesi
+- Makine kapasitesi
 
-\- Makine-kalıp uyumluluğu
+- Makine-kalıp uyumluluğu
 
-\- Kalıp kullanılabilirliği
+- Kalıp kullanılabilirliği
 
-\- Çevrim süresi
+- Çevrim süresi
 
-\- Kavite sayısı
+- Kavite sayısı
 
-\- Setup süresi
+- Setup süresi
 
-\- Renk ve malzeme geçişleri
+- Renk ve malzeme geçişleri
 
-\- Bakım takvimi
+- Bakım takvimi
 
-\- Vardiya kapasitesi
+- Vardiya kapasitesi
 
-\- Operatör yetkinliği
+- Operatör yetkinliği
 
 
 
@@ -540,7 +540,7 @@ AI tek bir sonuç vermek yerine alternatif senaryolar hazırlayabilir.
 
 
 
-\### Vardiya Planlama
+### Vardiya Planlama
 
 
 
@@ -552,21 +552,21 @@ Sistem:
 
 
 
-\- Üretim planını
+- Üretim planını
 
-\- Personel uygunluğunu
+- Personel uygunluğunu
 
-\- Yetkinlikleri
+- Yetkinlikleri
 
-\- İzin ve devamsızlık bilgilerini
+- İzin ve devamsızlık bilgilerini
 
-\- Vardiya kapasitesini
+- Vardiya kapasitesini
 
-\- Bakım görevlerini
+- Bakım görevlerini
 
-\- Kalite görevlerini
+- Kalite görevlerini
 
-\- Fazla mesai riskini
+- Fazla mesai riskini
 
 
 
@@ -578,17 +578,17 @@ AI:
 
 
 
-\- Operatör dağılımı
+- Operatör dağılımı
 
-\- Vardiya dağılımı
+- Vardiya dağılımı
 
-\- Görev ataması
+- Görev ataması
 
-\- Kritik personel açığı
+- Kritik personel açığı
 
-\- Yetkinlik çakışması
+- Yetkinlik çakışması
 
-\- Alternatif vardiya senaryosu
+- Alternatif vardiya senaryosu
 
 
 
@@ -600,7 +600,7 @@ CrevaFactOS bordro veya personel özlük sistemi değildir.
 
 
 
-\### Makine Takibi
+### Makine Takibi
 
 
 
@@ -608,33 +608,33 @@ Desteklenen operasyonel veriler:
 
 
 
-\- Çalışıyor
+- Çalışıyor
 
-\- Duruşta
+- Duruşta
 
-\- Arızalı
+- Arızalı
 
-\- Setup
+- Setup
 
-\- Bakımda
+- Bakımda
 
-\- Üretim sayacı
+- Üretim sayacı
 
-\- Çevrim süresi
+- Çevrim süresi
 
-\- Alarm
+- Alarm
 
-\- Sıcaklık
+- Sıcaklık
 
-\- Basınç
+- Basınç
 
-\- Enerji
+- Enerji
 
-\- Proses sapması
+- Proses sapması
 
 
 
-\### Makine–Kalıp Uyumluluğu
+### Makine–Kalıp Uyumluluğu
 
 
 
@@ -642,25 +642,25 @@ Kontrol edilen başlıca alanlar:
 
 
 
-\- Makine tonajı
+- Makine tonajı
 
-\- Kalıp ölçüsü
+- Kalıp ölçüsü
 
-\- Kalıp ağırlığı
+- Kalıp ağırlığı
 
-\- Kolon aralığı
+- Kolon aralığı
 
-\- Enjeksiyon hacmi
+- Enjeksiyon hacmi
 
-\- Vida çapı
+- Vida çapı
 
-\- Bağlama sistemi
+- Bağlama sistemi
 
-\- Robot bağlantısı
+- Robot bağlantısı
 
-\- Yardımcı ekipman
+- Yardımcı ekipman
 
-\- Proses gereksinimi
+- Proses gereksinimi
 
 
 
@@ -668,7 +668,7 @@ Riskli eşleşmeler kullanıcıya açıklanır.
 
 
 
-\### Kalıp Yaşam Döngüsü
+### Kalıp Yaşam Döngüsü
 
 
 
@@ -676,35 +676,35 @@ Kapsam:
 
 
 
-\- Kalıp kartı
+- Kalıp kartı
 
-\- Kalıp sahibi
+- Kalıp sahibi
 
-\- Kalıp konumu
+- Kalıp konumu
 
-\- Kavite sayısı
+- Kavite sayısı
 
-\- Baskı sayısı
+- Baskı sayısı
 
-\- Kalıp durumu
+- Kalıp durumu
 
-\- Üretim geçmişi
+- Üretim geçmişi
 
-\- Bakım geçmişi
+- Bakım geçmişi
 
-\- Arıza geçmişi
+- Arıza geçmişi
 
-\- Kalite geçmişi
+- Kalite geçmişi
 
-\- Deneme geçmişi
+- Deneme geçmişi
 
-\- Revizyonlar
+- Revizyonlar
 
-\- Teknik belgeler
+- Teknik belgeler
 
 
 
-\### Kalıp Bakım Optimizasyonu
+### Kalıp Bakım Optimizasyonu
 
 
 
@@ -712,21 +712,21 @@ AI:
 
 
 
-\- Bakım ihtiyacını tahmin eder.
+- Bakım ihtiyacını tahmin eder.
 
-\- Üretim planıyla bakım zamanını karşılaştırır.
+- Üretim planıyla bakım zamanını karşılaştırır.
 
-\- Üretimi en az etkileyecek bakım aralığını önerir.
+- Üretimi en az etkileyecek bakım aralığını önerir.
 
-\- Geciken bakımları gösterir.
+- Geciken bakımları gösterir.
 
-\- Yaklaşan kritik bakım riskini bildirir.
+- Yaklaşan kritik bakım riskini bildirir.
 
-\- Bakım iş emri taslağı hazırlayabilir.
+- Bakım iş emri taslağı hazırlayabilir.
 
 
 
-\### Bakım ve Arıza Yönetimi
+### Bakım ve Arıza Yönetimi
 
 
 
@@ -734,31 +734,31 @@ Kapsam:
 
 
 
-\- Makine bakımı
+- Makine bakımı
 
-\- Kalıp bakımı
+- Kalıp bakımı
 
-\- Yardımcı ekipman bakımı
+- Yardımcı ekipman bakımı
 
-\- Periyodik bakım
+- Periyodik bakım
 
-\- Kestirimci bakım
+- Kestirimci bakım
 
-\- Arıza kayıtları
+- Arıza kayıtları
 
-\- Bakım görevleri
+- Bakım görevleri
 
-\- MTBF
+- MTBF
 
-\- MTTR
+- MTTR
 
-\- Arıza tekrarları
+- Arıza tekrarları
 
-\- Kök neden analizi
+- Kök neden analizi
 
 
 
-\### Malzeme Riski
+### Malzeme Riski
 
 
 
@@ -770,17 +770,17 @@ Sistem mevcut ERP'den:
 
 
 
-\- Mevcut stok
+- Mevcut stok
 
-\- Rezerve stok
+- Rezerve stok
 
-\- Güvenlik stoğu
+- Güvenlik stoğu
 
-\- Açık satın alma
+- Açık satın alma
 
-\- Malzeme lotları
+- Malzeme lotları
 
-\- Tahmini teslim tarihi
+- Tahmini teslim tarihi
 
 
 
@@ -792,15 +792,15 @@ Bu verileri üretim planıyla karşılaştırarak:
 
 
 
-\- Malzeme açığı
+- Malzeme açığı
 
-\- Stok tükenme riski
+- Stok tükenme riski
 
-\- Kritik stok
+- Kritik stok
 
-\- Satın alma ihtiyacı
+- Satın alma ihtiyacı
 
-\- Alternatif malzeme ihtiyacı
+- Alternatif malzeme ihtiyacı
 
 
 
@@ -808,7 +808,7 @@ oluşturur.
 
 
 
-\### Kalite ve Fire Analizi
+### Kalite ve Fire Analizi
 
 
 
@@ -816,25 +816,25 @@ Analiz boyutları:
 
 
 
-\- Makine
+- Makine
 
-\- Kalıp
+- Kalıp
 
-\- Kavite
+- Kavite
 
-\- Ürün
+- Ürün
 
-\- Malzeme lotu
+- Malzeme lotu
 
-\- Operatör
+- Operatör
 
-\- Vardiya
+- Vardiya
 
-\- Proses parametresi
+- Proses parametresi
 
-\- Hata türü
+- Hata türü
 
-\- Zaman aralığı
+- Zaman aralığı
 
 
 
@@ -842,7 +842,7 @@ AI tekrarlayan kalite ve fire desenlerini belirler.
 
 
 
-\### Termin ve Darboğaz Tahmini
+### Termin ve Darboğaz Tahmini
 
 
 
@@ -850,27 +850,27 @@ AI aşağıdaki kaynaklı gecikmeleri analiz eder:
 
 
 
-\- Makine kapasitesi
+- Makine kapasitesi
 
-\- Kalıp uygunluğu
+- Kalıp uygunluğu
 
-\- Kalıp bakımı
+- Kalıp bakımı
 
-\- Malzeme eksikliği
+- Malzeme eksikliği
 
-\- Personel eksikliği
+- Personel eksikliği
 
-\- Setup süresi
+- Setup süresi
 
-\- Kalite problemi
+- Kalite problemi
 
-\- Plansız duruş
+- Plansız duruş
 
-\- Harici operasyon
+- Harici operasyon
 
 
 
-\### AI Günlük Fabrika Özeti
+### AI Günlük Fabrika Özeti
 
 
 
@@ -878,29 +878,29 @@ Günlük özet:
 
 
 
-\- Planlanan üretim
+- Planlanan üretim
 
-\- Gerçekleşen üretim
+- Gerçekleşen üretim
 
-\- Geciken işler
+- Geciken işler
 
-\- Kritik makineler
+- Kritik makineler
 
-\- Arızalar
+- Arızalar
 
-\- Bakımı yaklaşan kalıplar
+- Bakımı yaklaşan kalıplar
 
-\- Termin riski taşıyan siparişler
+- Termin riski taşıyan siparişler
 
-\- Malzeme riskleri
+- Malzeme riskleri
 
-\- Vardiya sorunları
+- Vardiya sorunları
 
-\- Kalite ve fire riskleri
+- Kalite ve fire riskleri
 
-\- Yönetici kararları
+- Yönetici kararları
 
-\- Onay bekleyen AI görevleri
+- Onay bekleyen AI görevleri
 
 
 
@@ -908,7 +908,7 @@ içerir.
 
 
 
-\### AI Görev Merkezi
+### AI Görev Merkezi
 
 
 
@@ -920,31 +920,31 @@ Her görev mümkün olduğunda aşağıdaki bilgileri gösterir:
 
 
 
-\- Önerilen işlem
+- Önerilen işlem
 
-\- Gerekçe
+- Gerekçe
 
-\- Güven seviyesi
+- Güven seviyesi
 
-\- Risk seviyesi
+- Risk seviyesi
 
-\- Beklenen operasyonel etki
+- Beklenen operasyonel etki
 
-\- Beklenen mali etki
+- Beklenen mali etki
 
-\- Kullanılan veri kaynakları
+- Kullanılan veri kaynakları
 
-\- Eksik veya eski veriler
+- Eksik veya eski veriler
 
-\- Onay durumu
+- Onay durumu
 
-\- Uygulama sonucu
+- Uygulama sonucu
 
-\- Audit geçmişi
+- Audit geçmişi
 
 
 
-\## Human-in-the-Loop Autopilot
+## Human-in-the-Loop Autopilot
 
 
 
@@ -960,19 +960,33 @@ Standart çalışma modeli:
 
 Veriyi al
 
-&#x20; → Analiz et
+  → Analiz et
 
-&#x20; → Plan veya görev hazırla
+  → Plan veya görev hazırla
 
-&#x20; → Gerekçe, güven, risk ve etkiyi göster
+  → Gerekçe, güven, risk ve etkiyi göster
 
-&#x20; → Yetkili onayı al
+  → Yetkili onayı al
 
-&#x20; → Mevcut durumu yeniden doğrula
+  → Mevcut durumu yeniden doğrula
 
-&#x20; → Onaylanan işlemi uygula
+  → Onaylanan işlemi uygula
 
-&#x20; → Sonucu kontrol et
+  → Sonucu kontrol et
 
-&#x20; → Audit kaydı oluştur
+  → Audit kaydı oluştur
+
+```
+
+## Task and Communication Authority
+
+AI Task Center is authoritative for factory-operation tasks and approvals. CrevaFactOS Teams is the internal messaging, routing, task-interaction, approval-viewing, and shift-communication application. Web and Teams reference the same task and approval records.
+
+Tasks may route to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management without transferring data ownership or execution permission.
+
+## Integration and Safety Boundary
+
+ERP access is read-only-first. Approved write-back is permission-bound, approval-bound, revalidated against current data, idempotent, verified, and audited.
+
+Machine integrations run through Edge Agent. Local machine and PLC safety controls remain authoritative, and unrestricted machine writes are prohibited.
 

@@ -1,222 +1,73 @@
-\# ADR-010: AI Tool Access Boundary
+# ADR-010: AI Tool Access Boundary
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: AI data access, proposals, approvals, and controlled execution
 
+## Context
 
-\- Durum: Kabul edildi
+AI agents analyze orders, plans, shifts, machines, molds, maintenance, quality, materials, suppliers, and delivery risk. Useful agents need controlled access to data and actions, but direct database, queue, ERP, file-system, or PLC access would bypass authorization and audit boundaries.
 
-\- Tarih: 2026-08-04
+## Decision
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+AI uses only versioned, allowlisted, validated, permission-checked, and audited tool contracts. AI has no direct access to PostgreSQL, RabbitMQ, object storage, external systems, secrets, Edge devices, PLCs, or machines.
 
-\- Kapsam: AI Autopilot araç erişimi, yetkilendirme ve insan onayı sınırları
+AI is not an independent user or approver and cannot choose its tenant, elevate permission, approve its own proposal, change approval state, or remove audit evidence.
 
+## Tool Classes
 
+### Read tools
 
-\## Bağlam
+Read tools return the minimum authorized data, including provenance and freshness. They are tenant- and facility-scoped and may retrieve operational projections from ERP-owned data.
 
+### Analysis and draft tools
 
+These create explainable scenarios, risks, tasks, plans, or drafts. A draft is not an external business record and does not imply approval.
 
-CrevaFactOS, plastik enjeksiyon ve kalıp üreticileri için geliştirilen AI destekli bir Factory Operating System platformudur.
+### Execution tools
 
+Execution tools perform one bounded, versioned operation. Critical tools require an active authoritative AI Task Center approval that names the operation, targets, parameter limits, and expiry.
 
+Machine execution additionally follows ADR-009. ERP execution follows ADR-011 and the integration priority contract.
 
-AI Autopilot aşağıdaki alanlarda aktif rol alacaktır:
+## Standard Flow
 
+1. Authenticate the initiating user or trusted system actor.
+2. Resolve tenant, facility, permissions, delegation, and operation limits.
+3. Retrieve minimum data through read tools.
+4. Evaluate freshness, completeness, conflicts, and source ownership.
+5. Produce analysis, evidence, confidence, risk, impact, and a bounded proposal.
+6. Create or update the authoritative AI Task Center task.
+7. Request approval where required and route it through Web and/or Teams.
+8. Record approval, rejection, correction, delegation, or expiry.
+9. Immediately before execution, revalidate permission, approval, data freshness, and target state.
+10. Execute exactly the approved operation with a stable idempotency key.
+11. Verify the outcome and reconcile ambiguous external results.
+12. Record audit and AI Decision Ledger entries.
 
+## Separation of Duties and Approval
 
-\- Sipariş mesajlarını analiz etmek
+Risk policy may require different requester, recommender, approver, and executor identities. AI never satisfies a human-approval requirement.
 
-\- WhatsApp ve e-posta taleplerinden sipariş formu hazırlamak
+Delegation is explicit, permission-limited, task- or operation-scoped, time-bound, revocable, and audited. Approval expires when its deadline passes or when relevant permission, input data, target state, or operation scope materially changes.
 
-\- Üretim planı oluşturmak
+## Prompt and Data Safety
 
-\- MRP ve malzeme ihtiyacı hesaplamak
+- External content is untrusted data, not instructions.
+- Tool selection and arguments are validated outside the model.
+- Sensitive data is minimized and redacted where possible.
+- Retrieved records cannot grant new tools or permissions.
+- Tool output size, rate, timeout, and recursion are bounded.
+- The model cannot access raw secrets or unrestricted network clients.
 
-\- Satın alma siparişi hazırlamak
+## Audit Requirements
 
-\- Makine ve kalıp bakım planı oluşturmak
+Records include agent and model identity, prompt/template version, tool contract version, authorized actor, tenant and facility, sources, freshness, proposal, confidence, risk, approval scope, delegation, idempotency key, execution result, correlation, and timestamps. Hidden reasoning is not required; decision evidence and user-facing rationale are.
 
-\- Kalite risklerini analiz etmek
+## Consequences
 
-\- Sevkiyat planı hazırlamak
-
-\- Finansal risk ve nakit akışı tahmini yapmak
-
-\- Maliyet optimizasyonu önermek
-
-\- Makine telemetrisini analiz etmek
-
-\- Risk, anomali ve gecikmeleri tespit etmek
-
-\- Yetkili onayından sonra işlemleri sistem içinde uygulamak
-
-
-
-AI yalnızca metin üreten bir sohbet asistanı olmayacaktır.
-
-
-
-AI, CrevaFactOS içindeki kontrollü araçları kullanarak taslak, öneri ve onaylanmış işlemler oluşturabilecektir.
-
-
-
-Bu yetenek yüksek operasyonel değer sağlarken aşağıdaki riskleri doğurur:
-
-
-
-\- Yetkisiz işlem
-
-\- Yanlış tenant verisine erişim
-
-\- Onay kapsamı dışında işlem yapma
-
-\- Hatalı veriyle karar oluşturma
-
-\- Prompt injection
-
-\- Araç çağrısının manipüle edilmesi
-
-\- Hassas verinin modele gönderilmesi
-
-\- AI’ın kendi adına onay üretmesi
-
-\- Kritik makine komutlarının kontrolsüz uygulanması
-
-\- Kullanıcının görmediği ek işlemlerin gerçekleştirilmesi
-
-\- Zincir hâlindeki işlemlerde kapsamın genişlemesi
-
-
-
-\## Karar
-
-
-
-CrevaFactOS AI sistemi açık bir Tool Access Boundary kullanacaktır.
-
-
-
-AI hiçbir veritabanına, mesaj kuyruğuna, dosya alanına, harici entegrasyona veya makineye doğrudan erişmeyecektir.
-
-
-
-Bütün AI işlemleri yalnızca CrevaFactOS tarafından tanımlanmış, sürümlenmiş, doğrulanan ve yetkilendirilen araç sözleşmeleri üzerinden gerçekleştirilecektir.
-
-
-
-Standart akış:
-
-
-
-1\. Kullanıcı veya sistem bir AI görevi oluşturur.
-
-2\. AI gerekli verileri yalnızca yetkili read tool’lar üzerinden alır.
-
-3\. AI analiz ve işlem önerisi oluşturur.
-
-4\. Sistem öneriyi doğrular.
-
-5\. Güven seviyesi, gerekçe, risk, mali etki ve kaynaklar kullanıcıya gösterilir.
-
-6\. Gerekli işlemler yetkili onayına sunulur.
-
-7\. Yetkili kullanıcı kapsamı onaylar veya reddeder.
-
-8\. Sistem onayın geçerliliğini ve kapsamını tekrar doğrular.
-
-9\. AI veya Worker yalnızca onaylanmış write tool’ları çağırır.
-
-10\. Sonuç doğrulanır.
-
-11\. Audit ve AI Karar Defteri kaydı oluşturulur.
-
-12\. Kullanıcı ve ilgili taraflar bilgilendirilir.
-
-
-
-\## AI Yetki İlkesi
-
-
-
-AI bağımsız bir kullanıcı veya yönetici değildir.
-
-
-
-AI aşağıdaki yetkilere sahip olmayacaktır:
-
-
-
-\- Kendi rolünü belirlemek
-
-\- Kendi yetkisini yükseltmek
-
-\- Kullanıcı adına onay vermek
-
-\- Onay kaydı üretmek
-
-\- Tenant seçmek veya değiştirmek
-
-\- Yetki sınırını aşmak
-
-\- Gizli sistem araçlarını keşfetmek
-
-\- Doğrudan SQL çalıştırmak
-
-\- Doğrudan RabbitMQ mesajı yayınlamak
-
-\- Doğrudan object storage dosyasına erişmek
-
-\- Doğrudan makine veya PLC komutu göndermek
-
-\- Güvenlik politikalarını değiştirmek
-
-\- Audit kayıtlarını silmek veya değiştirmek
-
-
-
-AI çağrıları, işlemi başlatan kullanıcı ve tenant context kapsamında yürütülecektir.
-
-
-
-\## Tool Sınıfları
-
-
-
-AI araçları risk seviyelerine göre sınıflandırılacaktır.
-
-
-
-\### Read Tools
-
-
-
-Yalnızca veri okur.
-
-
-
-Örnekler:
-
-
-
-```text
-
-get\_order
-
-list\_open\_orders
-
-get\_machine\_status
-
-get\_mold\_lifecycle
-
-get\_material\_stock
-
-get\_supplier\_quotes
-
-get\_maintenance\_history
-
-get\_quality\_summary
-
-get\_cashflow\_forecast
-
-search\_documents
-
+- New tools require security and product-boundary review.
+- Read access does not imply write permission.
+- UI confirmation alone is not an approval record.
+- Tool execution must fail closed when context or evidence is stale or incomplete.

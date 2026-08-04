@@ -1,108 +1,51 @@
-\# ADR-008: Flutter Mobil Uygulama Platformu
+# ADR-008: Flutter Mobile Platform
 
+- Status: Accepted
+- Date: 2026-08-04
+- Decision owners: CrevaFactOS Product & Development
+- Scope: Mobile field experience
 
+## Context
 
-\- Durum: Kabul edildi
+Factory managers, supervisors, operators, maintenance teams, quality teams, and material handlers require task-focused mobile access. Maintaining separate Android and iOS codebases would increase delivery and maintenance cost.
 
-\- Tarih: 2026-08-04
+## Decision
 
-\- Karar sahipleri: CrevaFactOS Product \& Development
+CrevaFactOS mobile applications use Flutter in `apps/mobile`.
 
-\- Kapsam: Mobil uygulamalar ve saha kullanım deneyimi
+Mobile scope may include:
 
+- AI Task Center task interaction and approval viewing
+- Shift communication through CrevaFactOS Teams
+- Production-plan and work-context viewing
+- Machine and mold operational status
+- Barcode and QR verification
+- Material preparation and lot verification
+- Maintenance and breakdown tasks
+- Quality checks, first-piece review, and nonconformance capture
+- Photos, attachments, alarms, and notifications
+- Explicitly designed offline field workflows
 
+Mobile stock checks or movements are operational interactions with the authoritative ERP/WMS integration; they do not establish a native official stock ledger. Mobile purchasing interaction is limited to risk review, task handling, and approved external drafts.
 
-\## Bağlam
+## Task and Approval Authority
 
+Mobile and Teams display the same authoritative AI Task Center task and approval records as Web. Local offline state cannot create a final approval. Approval submission requires server validation of identity, permission, delegation, expiry, scope, and current data.
 
+## Offline Rules
 
-CrevaFactOS; plastik enjeksiyon ve kalıp üreticileri için geliştirilen, masaüstü ağırlıklı ancak fabrika sahasında mobil kullanım gerektiren bir Factory Operating System platformudur.
+- Offline-capable operations are explicitly allowlisted.
+- Local data is encrypted and minimized.
+- Sync uses stable client operation identifiers and idempotent server handling.
+- Conflicts and stale approvals fail safely and require review.
+- Critical ERP write-back and machine commands are not executed solely from unvalidated offline state.
 
+## Security
 
+The application uses secure token storage, certificate-valid HTTPS, permission-aware screens, remote session revocation, and auditable device/session context. Secrets and unrestricted connector credentials are never embedded in the client.
 
-Mobil uygulama aşağıdaki kullanıcı gruplarını destekleyecektir:
+## Consequences
 
-
-
-\- Yöneticiler
-
-\- Üretim sorumluları
-
-\- Operatörler
-
-\- Depo çalışanları
-
-\- Bakım ekipleri
-
-\- Kalite ekipleri
-
-\- Satın alma çalışanları
-
-\- Sevkiyat ekipleri
-
-\- Saha servis personeli
-
-
-
-Mobil kullanım senaryoları:
-
-
-
-\- AI Görev Merkezi bildirimleri
-
-\- Yetkili onay ve ret işlemleri
-
-\- Üretim emri görüntüleme
-
-\- Operatör iş başlangıç ve bitiş kayıtları
-
-\- Makine ve kalıp durum takibi
-
-\- Barkod ve QR kod tarama
-
-\- Malzeme ve lot doğrulama
-
-\- Stok hareketleri
-
-\- Depolar arası transfer
-
-\- Kalıp bağlama ve sökme kontrol listeleri
-
-\- Bakım iş emirleri
-
-\- Fotoğraflı arıza bildirimi
-
-\- Kalite kontrol formları
-
-\- İlk parça onayı
-
-\- Uygunsuzluk kaydı
-
-\- Sevkiyat doğrulama
-
-\- Anlık alarm ve bildirimler
-
-\- Çevrimdışı saha işlemleri
-
-
-
-Android ve iOS için ayrı kod tabanları oluşturmak geliştirme ve bakım maliyetini artıracaktır.
-
-
-
-\## Karar
-
-
-
-CrevaFactOS mobil uygulamaları Flutter ile geliştirilecektir.
-
-
-
-Başlangıç uygulama konumu:
-
-
-
-```text
-
-apps/mobile
-
+- Flutter is an additional toolchain that requires pinned versions and targeted CI.
+- Mobile features follow product ownership boundaries in ADR-011.
+- Mobile UI does not replace the locked desktop dashboard.

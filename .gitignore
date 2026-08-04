@@ -42,7 +42,6 @@ TestResults/
 *.nupkg
 *.snupkg
 .nuget/
-packages/
 
 # Visual Studio
 .vs/

@@ -1,8 +1,8 @@
-\# CrevaFactOS Test Stratejisi
+# CrevaFactOS Test Stratejisi
 
 
 
-\## Amaç
+## Amaç
 
 
 
@@ -14,27 +14,27 @@ Amaçlar:
 
 
 
-\- Domain iş kurallarını güvence altına almak
+- Domain iş kurallarını güvence altına almak
 
-\- Tenant izolasyonunu doğrulamak
+- Tenant izolasyonunu doğrulamak
 
-\- Kritik onay ve yetkilendirme akışlarını korumak
+- Kritik onay ve yetkilendirme akışlarını korumak
 
-\- API, Worker, AI Orchestrator, mobil ve Edge Agent davranışlarını doğrulamak
+- API, Worker, AI Orchestrator, mobil ve Edge Agent davranışlarını doğrulamak
 
-\- Mesajlaşma ve transactional outbox güvenilirliğini test etmek
+- Mesajlaşma ve transactional outbox güvenilirliğini test etmek
 
-\- Plastik enjeksiyon ve kalıp sektörüne özel iş akışlarını doğrulamak
+- Plastik enjeksiyon ve kalıp sektörüne özel iş akışlarını doğrulamak
 
-\- Regresyon riskini azaltmak
+- Regresyon riskini azaltmak
 
-\- Hataları production öncesinde yakalamak
+- Hataları production öncesinde yakalamak
 
-\- Küçük ve geri alınabilir geliştirme paketlerini desteklemek
+- Küçük ve geri alınabilir geliştirme paketlerini desteklemek
 
 
 
-\## Temel İlke
+## Temel İlke
 
 
 
@@ -46,21 +46,21 @@ Her test:
 
 
 
-\- Gerçek bir davranışı doğrulamalıdır.
+- Gerçek bir davranışı doğrulamalıdır.
 
-\- Açık bir risk veya iş kuralıyla ilişkili olmalıdır.
+- Açık bir risk veya iş kuralıyla ilişkili olmalıdır.
 
-\- Deterministik olmalıdır.
+- Deterministik olmalıdır.
 
-\- Tekrarlanabilir olmalıdır.
+- Tekrarlanabilir olmalıdır.
 
-\- Gereksiz dış bağımlılık taşımamalıdır.
+- Gereksiz dış bağımlılık taşımamalıdır.
 
-\- Başarısız olduğunda nedenini açıkça göstermelidir.
+- Başarısız olduğunda nedenini açıkça göstermelidir.
 
 
 
-\## Test Piramidi
+## Test Piramidi
 
 
 
@@ -70,13 +70,19 @@ CrevaFactOS aşağıdaki test dağılımını hedefler:
 
 ```text
 
-&#x20;            End-to-End
+             End-to-End
 
-&#x20;         Contract / System
+          Contract / System
 
-&#x20;       Integration / Security
+        Integration / Security
 
-&#x20;     Application / Domain Tests
+      Application / Domain Tests
 
-&#x20;            Unit Tests
+             Unit Tests
+
+```
+
+Targeted package validation covers the changed behavior and its principal risks. Mandatory cross-cutting suites include tenant isolation, permission denial, approval state/expiry/delegation, stale-data revalidation, outbox and consumer idempotency, ERP write-back reconciliation, audit linkage, AI tool boundaries, and Edge safety rejection.
+
+Tests use synthetic or anonymized data. Documentation-only packages run documentation checks rather than application builds when no application exists.
 

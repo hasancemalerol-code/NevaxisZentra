@@ -1,210 +1,66 @@
-\# CrevaFactOS Security Documentation
+# CrevaFactOS Security Documentation
 
+CrevaFactOS is a multi-tenant AI Factory Operations Assistant operating above ERP and factory systems. It is not a replacement ERP and does not gain authority merely by synchronizing external data.
 
+## Security Boundaries
 
-Bu klasör, CrevaFactOS güvenlik mimarisini, politikalarını, tehdit sınırlarını ve doğrulama gereksinimlerini içerir.
+- Tenant, company, and facility isolation
+- Permission-based authorization and scoped memberships
+- AI Task Center task and approval authority
+- Separation of duties, delegation, and approval expiry
+- Audit and AI Decision Ledger integrity
+- Versioned AI tool access
+- Read-only-first ERP connectors and controlled write-back
+- RabbitMQ, outbox, and consumer idempotency
+- Edge Agent identity and factory-local machine safety
+- Secret, file, telemetry, and personal-data protection
 
+## Authorization
 
+Roles are permission bundles. Final access evaluates authenticated identity, active membership, tenant/facility, permission, resource scope, delegation, approval scope, operation limits, and current state.
 
-CrevaFactOS; plastik enjeksiyon ve kalıp üreticileri için geliştirilen, çoklu tenant destekli ve AI Autopilot özellikleri bulunan kurumsal bir Factory Operating System platformudur.
-
-
-
-Sistem aşağıdaki kritik alanları yönettiği için güvenlik ürünün temel mimari bileşenidir:
-
-
-
-\- Müşteri ve sipariş verileri
-
-\- Üretim planları ve üretim emirleri
-
-\- Kalıp ve makine kayıtları
-
-\- Proses parametreleri
-
-\- Hammadde ve stok hareketleri
-
-\- Kalite ve izlenebilirlik kayıtları
-
-\- Bakım ve arıza bilgileri
-
-\- Finans ve maliyet verileri
-
-\- Personel ve yetki kayıtları
-
-\- AI tarafından hazırlanan işlemler
-
-\- Yetkili onayları
-
-\- Makine, PLC ve Edge Agent bağlantıları
-
-\- WhatsApp ve e-posta sipariş içerikleri
-
-
-
-\## Güvenlik İlkeleri
-
-
-
-CrevaFactOS aşağıdaki temel güvenlik ilkelerini uygular:
-
-
-
-\- Minimum yetki
-
-\- Varsayılan olarak reddet
-
-\- Katmanlı güvenlik
-
-\- Tenant izolasyonu
-
-\- Açık yetkilendirme
-
-\- İnsan onaylı kritik işlemler
-
-\- Değiştirilemez audit geçmişi
-
-\- Secret minimizasyonu
-
-\- Güvenli varsayılanlar
-
-\- Sürümlenmiş sözleşmeler
-
-\- Veri minimizasyonu
-
-\- Güvenli hata yönetimi
-
-\- Gözlemlenebilirlik
-
-\- Geri alınabilir veya telafi edilebilir işlemler
-
-
-
-\## Güvenlik Alanları
-
-
-
-\### Tenant İzolasyonu
-
-
-
-Her müşteri verisi ayrı tenant güvenlik sınırında tutulur.
-
-
-
-Tenant izolasyonu aşağıdaki katmanlarda uygulanır:
-
-
-
-\- Kimlik doğrulama
-
-\- Üyelik
-
-\- Tenant context
-
-\- API yetkilendirmesi
-
-\- Veri erişim katmanı
-
-\- PostgreSQL Row-Level Security
-
-\- Mesajlaşma
-
-\- Redis cache
-
-\- Object storage
-
-\- AI ve RAG
-
-\- Edge Agent
-
-\- Audit
-
-
-
-Bir tenant başka tenant verisini okuyamaz, değiştiremez veya dolaylı biçimde çıkaramaz.
-
-
-
-\### Kimlik Doğrulama
-
-
-
-Kimlik doğrulama sistemi aşağıdaki özellikleri desteklemelidir:
-
-
-
-\- Güvenli oturum açma
-
-\- Çok faktörlü kimlik doğrulama hazırlığı
-
-\- Access token
-
-\- Refresh token
-
-\- Oturum süresi
-
-\- Oturum iptali
-
-\- Cihaz oturumu
-
-\- Şüpheli giriş tespiti
-
-\- Parola politikası
-
-\- Hesap kilitleme
-
-\- Audit kaydı
-
-
-
-Kimlik doğrulama ile yetkilendirme ayrı sorumluluklar olarak ele alınmalıdır.
-
-
-
-\### Yetkilendirme
-
-
-
-Yetkilendirme permission bazlı olacaktır.
-
-
-
-Roller yalnızca permission paketleri olarak kullanılabilir.
-
-
-
-Örnek permission alanları:
-
-
+Example permission families include:
 
 ```text
-
-orders.read
-
-orders.create
-
-orders.approve
-
-production.read
-
-production.release
-
-machines.read
-
-machines.command
-
-molds.maintain
-
-inventory.transfer
-
-purchasing.approve
-
-quality.quarantine
-
-finance.approve
-
-ai\_tasks.approve
-
+production_plans.read
+production_plans.propose
+production_plans.publish
+shift_plans.read
+shift_plans.propose
+shift_plans.publish
+ai_tasks.read
+ai_tasks.assign
+ai_tasks.approve
+maintenance.execute
+quality.containment.approve
+integrations.configure
+integrations.write_back.execute
+edge_commands.approve
 audit.read
+```
 
+Permission names describe bounded operations. Permissions for native finance, accounting, official stock, payroll, or general purchasing ledgers are not defined because those are not CrevaFactOS-owned modules.
+
+## Critical Action Controls
+
+Critical actions require an authoritative approval containing exact scope, evidence version, limits, approver, expiry, and separation-of-duties result. Immediately before execution the backend revalidates permissions, delegation, approval, data freshness, target state, and idempotency.
+
+ERP writes are allowlisted, approval-bound, safe to retry, reconciled, and audited. AI never writes directly to ERP or machines.
+
+## Edge Safety
+
+Edge Agent connects through least-privilege, per-installation identity. Telemetry is read-first. Approved machine commands remain bounded and may be rejected by local safety logic. Emergency stops, interlocks, safety PLCs, and hard-real-time controls cannot be overridden from CrevaFactOS.
+
+## Data and Secrets
+
+- Collect and retain only data necessary for factory-operation decisions.
+- Keep tenant credentials and connector mappings isolated.
+- Never commit production secrets or use production customer data in development.
+- Redact secrets and unnecessary sensitive data from logs, messages, prompts, and errors.
+- Encrypt transport and sensitive persisted data using managed keys where required.
+
+## Verification
+
+Security-sensitive packages include targeted negative tests for cross-tenant access, missing permission, invalid delegation, self-approval, expired approval, stale evidence, duplicate execution, connector ambiguity, AI tool misuse, and local machine-safety rejection.
+
+Security exceptions require an explicit risk decision, owner, expiry, compensating controls, and audit trail.
