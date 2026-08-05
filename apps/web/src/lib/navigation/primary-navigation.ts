@@ -63,9 +63,9 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     label: "Fabrika operasyonları",
     items: [
       {
-        label: "Üretim",
-        href: "/uretim",
-        icon: Factory,
+        label: "Siparişler",
+        href: "/siparisler",
+        icon: ShoppingBasket,
       },
       {
         label: "Planlama",
@@ -73,9 +73,9 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         icon: CalendarRange,
       },
       {
-        label: "Siparişler",
-        href: "/siparisler",
-        icon: ShoppingBasket,
+        label: "Üretim",
+        href: "/uretim",
+        icon: Factory,
       },
       {
         label: "Vardiyalar",
