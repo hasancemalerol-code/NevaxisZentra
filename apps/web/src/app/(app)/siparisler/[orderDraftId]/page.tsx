@@ -1,3 +1,5 @@
+import { OrderTransferExecutionPreviewPanel } from "@/features/orders/components/order-transfer-execution-preview-panel";
+import { OrderTransferCommandPanel } from "@/features/orders/components/order-transfer-command-panel";
 import { OrderTransferReadinessPanel } from "@/features/orders/components/order-transfer-readiness-panel";
 import { OrderTransferTargetCard } from "@/features/orders/components/order-transfer-target-card";
 import {
@@ -490,6 +492,12 @@ export default async function OrderDraftDetailPage({
         orderDraft={orderDraft}
       />
       <OrderTransferReadinessPanel
+        orderDraft={orderDraft}
+      />
+      <OrderTransferCommandPanel
+        orderDraft={orderDraft}
+      />
+      <OrderTransferExecutionPreviewPanel
         orderDraft={orderDraft}
       />
       <OrderTransferTargetCard
