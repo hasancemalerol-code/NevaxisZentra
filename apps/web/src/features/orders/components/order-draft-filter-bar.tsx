@@ -14,7 +14,14 @@ import type {
   OrderDraftStatus,
   OrderIntakeSource,
   OrderMatchConfidence,
+  OrderTransferStatus,
 } from "../domain/order-draft";
+import {
+  getOrderConfidenceLabel,
+  getOrderDraftStatusLabel,
+  getOrderIntakeSourceLabel,
+  getOrderTransferStatusLabel,
+} from "../presentation/order-draft-labels";
 
 type OrderDraftFilterBarProps = Readonly<{
   filter: OrderDraftFilter;
@@ -23,95 +30,42 @@ type OrderDraftFilterBarProps = Readonly<{
   ) => void;
 }>;
 
-const SOURCE_OPTIONS: readonly Readonly<{
-  value: OrderIntakeSource;
-  label: string;
-}>[] = [
-  {
-    value: "email",
-    label: "E-posta",
-  },
-  {
-    value: "whatsapp",
-    label: "WhatsApp",
-  },
-  {
-    value: "erp",
-    label: "ERP",
-  },
-  {
-    value: "customer-portal",
-    label: "Müşteri Portalı",
-  },
-  {
-    value: "sales-representative",
-    label: "Satış Temsilcisi",
-  },
-  {
-    value: "web-form",
-    label: "Web Formu",
-  },
-  {
-    value: "file-upload",
-    label: "Dosya Yükleme",
-  },
+const SOURCE_OPTIONS: readonly OrderIntakeSource[] = [
+  "email",
+  "whatsapp",
+  "erp",
+  "customer-portal",
+  "sales-representative",
+  "web-form",
+  "file-upload",
 ];
 
-const STATUS_OPTIONS: readonly Readonly<{
-  value: OrderDraftStatus;
-  label: string;
-}>[] = [
-  {
-    value: "collecting",
-    label: "Veri toplanıyor",
-  },
-  {
-    value: "needs-review",
-    label: "İnceleme gerekiyor",
-  },
-  {
-    value: "ready-for-approval",
-    label: "Onaya hazır",
-  },
-  {
-    value: "approved",
-    label: "Onaylandı",
-  },
-  {
-    value: "rejected",
-    label: "Reddedildi",
-  },
-  {
-    value: "transferring",
-    label: "ERP'ye aktarılıyor",
-  },
-  {
-    value: "transferred",
-    label: "ERP'ye aktarıldı",
-  },
-  {
-    value: "transfer-failed",
-    label: "Aktarım başarısız",
-  },
+const STATUS_OPTIONS: readonly OrderDraftStatus[] = [
+  "collecting",
+  "needs-review",
+  "ready-for-approval",
+  "approved",
+  "rejected",
+  "transferring",
+  "transferred",
+  "transfer-failed",
 ];
 
-const CONFIDENCE_OPTIONS: readonly Readonly<{
-  value: OrderMatchConfidence;
-  label: string;
-}>[] = [
-  {
-    value: "high",
-    label: "Yüksek güven",
-  },
-  {
-    value: "medium",
-    label: "Orta güven",
-  },
-  {
-    value: "low",
-    label: "Düşük güven",
-  },
-];
+const CONFIDENCE_OPTIONS:
+  readonly OrderMatchConfidence[] = [
+    "high",
+    "medium",
+    "low",
+  ];
+
+const TRANSFER_OPTIONS:
+  readonly OrderTransferStatus[] = [
+    "not-started",
+    "pending",
+    "in-progress",
+    "completed",
+    "failed",
+  ];
 
 function hasActiveFilters(
   filter: OrderDraftFilter,
@@ -181,12 +135,12 @@ export function OrderDraftFilterBar({
             Tüm kaynaklar
           </option>
 
-          {SOURCE_OPTIONS.map((option) => (
+          {SOURCE_OPTIONS.map((source) => (
             <option
-              key={option.value}
-              value={option.value}
+              key={source}
+              value={source}
             >
-              {option.label}
+              {getOrderIntakeSourceLabel(source)}
             </option>
           ))}
         </select>
@@ -211,12 +165,12 @@ export function OrderDraftFilterBar({
             Tüm durumlar
           </option>
 
-          {STATUS_OPTIONS.map((option) => (
+          {STATUS_OPTIONS.map((status) => (
             <option
-              key={option.value}
-              value={option.value}
+              key={status}
+              value={status}
             >
-              {option.label}
+              {getOrderDraftStatusLabel(status)}
             </option>
           ))}
         </select>
@@ -241,14 +195,52 @@ export function OrderDraftFilterBar({
             Tüm güven seviyeleri
           </option>
 
-          {CONFIDENCE_OPTIONS.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
-              {option.label}
-            </option>
-          ))}
+          {CONFIDENCE_OPTIONS.map(
+            (confidenceLevel) => (
+              <option
+                key={confidenceLevel}
+                value={confidenceLevel}
+              >
+                {getOrderConfidenceLabel(
+                  confidenceLevel,
+                )}
+              </option>
+            ),
+          )}
+        </select>
+      </label>
+
+      <label className="order-draft-filter-bar__field">
+        <span>ERP aktarımı</span>
+
+        <select
+          onChange={(event) => {
+            updateFilter({
+              transferStatus:
+                (event.target.value ||
+                  undefined) as
+                  | OrderTransferStatus
+                  | undefined,
+            });
+          }}
+          value={filter.transferStatus ?? ""}
+        >
+          <option value="">
+            Tüm aktarım durumları
+          </option>
+
+          {TRANSFER_OPTIONS.map(
+            (transferStatus) => (
+              <option
+                key={transferStatus}
+                value={transferStatus}
+              >
+                {getOrderTransferStatusLabel(
+                  transferStatus,
+                )}
+              </option>
+            ),
+          )}
         </select>
       </label>
 

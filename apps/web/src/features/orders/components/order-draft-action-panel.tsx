@@ -18,6 +18,10 @@ import {
   type OrderDraftApproval,
   type OrderDraftTransfer,
 } from "../domain/order-draft";
+import {
+  getOrderApprovalStatusLabel,
+  getOrderTransferStatusLabel,
+} from "../presentation/order-draft-labels";
 
 type OrderDraftActionPanelProps = Readonly<{
   orderDraft: OrderDraft;
@@ -29,28 +33,6 @@ type BadgeTone =
   | "success"
   | "danger"
   | "ai";
-
-function getApprovalLabel(
-  approval: OrderDraftApproval,
-): string {
-  switch (approval.status) {
-    case "pending":
-      return "Onay bekliyor";
-
-    case "approved":
-      return "Onaylandı";
-
-    case "rejected":
-      return "Reddedildi";
-
-    case "expired":
-      return "Onay süresi doldu";
-
-    case "not-required":
-    default:
-      return "Henüz onaya gönderilmedi";
-  }
-}
 
 function getApprovalTone(
   approval: OrderDraftApproval,
@@ -69,28 +51,6 @@ function getApprovalTone(
     case "not-required":
     default:
       return "neutral";
-  }
-}
-
-function getTransferLabel(
-  transfer: OrderDraftTransfer,
-): string {
-  switch (transfer.status) {
-    case "pending":
-      return "Aktarım bekliyor";
-
-    case "in-progress":
-      return "ERP'ye aktarılıyor";
-
-    case "completed":
-      return "ERP'ye aktarıldı";
-
-    case "failed":
-      return "Aktarım başarısız";
-
-    case "not-started":
-    default:
-      return "Aktarım başlatılmadı";
   }
 }
 
@@ -163,8 +123,9 @@ export function OrderDraftActionPanel({
             )}
           >
             <CheckCircle2 aria-hidden="true" />
-            {getApprovalLabel(
-              orderDraft.approval,
+
+            {getOrderApprovalStatusLabel(
+              orderDraft.approval.status,
             )}
           </Badge>
         </div>
@@ -178,8 +139,9 @@ export function OrderDraftActionPanel({
             )}
           >
             <Database aria-hidden="true" />
-            {getTransferLabel(
-              orderDraft.transfer,
+
+            {getOrderTransferStatusLabel(
+              orderDraft.transfer.status,
             )}
           </Badge>
         </div>

@@ -1,3 +1,7 @@
+import {
+  formatOrderConfidence,
+  formatOrderShortDateTime,
+} from "../presentation/order-draft-formatters";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -23,6 +27,13 @@ import type {
   OrderIntakeSource,
   OrderMatchConfidence,
 } from "../domain/order-draft";
+import {
+  getOrderApprovalStatusLabel,
+  getOrderConfidenceLabel,
+  getOrderDraftStatusLabel,
+  getOrderIntakeSourceLabel,
+  getOrderTransferStatusLabel,
+} from "../presentation/order-draft-labels";
 
 type OrderDraftCardProps = Readonly<{
   orderDraft: OrderDraft;
@@ -36,7 +47,6 @@ type BadgeTone =
   | "ai";
 
 type SourcePresentation = Readonly<{
-  label: string;
   icon: LucideIcon;
 }>;
 
@@ -44,46 +54,26 @@ const SOURCE_PRESENTATIONS: Readonly<
   Record<OrderIntakeSource, SourcePresentation>
 > = {
   email: {
-    label: "E-posta",
     icon: Mail,
   },
   whatsapp: {
-    label: "WhatsApp",
     icon: MessageCircle,
   },
   erp: {
-    label: "ERP",
     icon: Database,
   },
   "customer-portal": {
-    label: "Müşteri Portalı",
     icon: Globe2,
   },
   "sales-representative": {
-    label: "Satış Temsilcisi",
     icon: UserRound,
   },
   "web-form": {
-    label: "Web Formu",
     icon: Globe2,
   },
   "file-upload": {
-    label: "Dosya Yükleme",
     icon: FileUp,
   },
-};
-
-const STATUS_LABELS: Readonly<
-  Record<OrderDraftStatus, string>
-> = {
-  collecting: "Veri toplanıyor",
-  "needs-review": "İnceleme gerekiyor",
-  "ready-for-approval": "Onaya hazır",
-  approved: "Onaylandı",
-  rejected: "Reddedildi",
-  transferring: "ERP'ye aktarılıyor",
-  transferred: "ERP'ye aktarıldı",
-  "transfer-failed": "Aktarım başarısız",
 };
 
 function getStatusTone(
@@ -109,22 +99,6 @@ function getStatusTone(
   }
 }
 
-function getConfidenceLabel(
-  confidenceLevel: OrderMatchConfidence,
-): string {
-  switch (confidenceLevel) {
-    case "high":
-      return "Yüksek güven";
-
-    case "medium":
-      return "Orta güven";
-
-    case "low":
-    default:
-      return "Düşük güven";
-  }
-}
-
 function getConfidenceTone(
   confidenceLevel: OrderMatchConfidence,
 ): BadgeTone {
@@ -139,24 +113,6 @@ function getConfidenceTone(
     default:
       return "danger";
   }
-}
-
-function formatConfidence(
-  confidence: number,
-): string {
-  return new Intl.NumberFormat("tr-TR", {
-    style: "percent",
-    maximumFractionDigits: 0,
-  }).format(confidence);
-}
-
-function formatDateTime(
-  value: string,
-): string {
-  return new Intl.DateTimeFormat("tr-TR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
 }
 
 export function OrderDraftCard({
@@ -183,7 +139,9 @@ export function OrderDraftCard({
                 tone="neutral"
               >
                 <Icon aria-hidden="true" />
-                {presentation.label}
+                {getOrderIntakeSourceLabel(
+                  source.source,
+                )}
               </Badge>
             );
           })}
@@ -200,7 +158,9 @@ export function OrderDraftCard({
             <RefreshCw aria-hidden="true" />
           )}
 
-          {STATUS_LABELS[orderDraft.status]}
+          {getOrderDraftStatusLabel(
+            orderDraft.status,
+          )}
         </Badge>
       </div>
 
@@ -223,10 +183,11 @@ export function OrderDraftCard({
             orderDraft.confidenceLevel,
           )}
         >
-          {getConfidenceLabel(
+          {getOrderConfidenceLabel(
             orderDraft.confidenceLevel,
           )}
-          · {formatConfidence(
+          {" · "}
+          {formatOrderConfidence(
             orderDraft.overallConfidence,
           )}
         </Badge>
@@ -263,13 +224,9 @@ export function OrderDraftCard({
           <dt>Onay durumu</dt>
 
           <dd>
-            {orderDraft.approval.status === "approved"
-              ? "Onaylandı"
-              : orderDraft.approval.status === "pending"
-                ? "Onay bekliyor"
-                : orderDraft.approval.status === "rejected"
-                  ? "Reddedildi"
-                  : "Henüz gönderilmedi"}
+            {getOrderApprovalStatusLabel(
+              orderDraft.approval.status,
+            )}
           </dd>
         </div>
 
@@ -277,13 +234,9 @@ export function OrderDraftCard({
           <dt>ERP aktarımı</dt>
 
           <dd>
-            {orderDraft.transfer.status === "completed"
-              ? "Tamamlandı"
-              : orderDraft.transfer.status === "in-progress"
-                ? "Devam ediyor"
-                : orderDraft.transfer.status === "failed"
-                  ? "Başarısız"
-                  : "Başlatılmadı"}
+            {getOrderTransferStatusLabel(
+              orderDraft.transfer.status,
+            )}
           </dd>
         </div>
       </dl>
@@ -292,7 +245,7 @@ export function OrderDraftCard({
         <span>
           Son güncelleme:
           {" "}
-          {formatDateTime(orderDraft.updatedAt)}
+          {formatOrderShortDateTime(orderDraft.updatedAt)}
         </span>
 
         <Link

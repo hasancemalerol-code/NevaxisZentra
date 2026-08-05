@@ -1,3 +1,30 @@
+import { OrderTransferReadinessPanel } from "@/features/orders/components/order-transfer-readiness-panel";
+import { OrderTransferTargetCard } from "@/features/orders/components/order-transfer-target-card";
+import {
+  getOrderTargetSystemDescription,
+  getOrderTargetSystemLabel,
+} from "@/features/orders/presentation/order-target-system-labels";
+import { OrderDraftSourceEvidencePanel } from "@/features/orders/components/order-draft-source-evidence-panel";
+import { OrderDraftClarificationMessage } from "@/features/orders/components/order-draft-clarification-message";
+import { OrderDraftClarificationPanel } from "@/features/orders/components/order-draft-clarification-panel";
+import { OrderDraftTimeline } from "@/features/orders/components/order-draft-timeline";
+import {
+  formatOrderConfidence,
+  formatOrderDate,
+  formatOrderDateTime,
+  formatOrderMoney,
+  formatOrderQuantity,
+} from "@/features/orders/presentation/order-draft-formatters";
+import {
+  getOrderApprovalStatusLabel,
+  getOrderFieldIssueLabel,
+  getOrderIntakeSourceLabel,
+  getOrderTransferStatusLabel,
+} from "@/features/orders/presentation/order-draft-labels";
+import {
+  getOrderApprovalRoleDescription,
+  getOrderApprovalRoleLabel,
+} from "@/features/orders/presentation/order-approval-role-labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -23,7 +50,6 @@ import {
 import { OrderDraftActionPanel } from "@/features/orders/components/order-draft-action-panel";
 import { findOrderDraftById } from "@/features/orders/data/order-draft-preview-data";
 import type {
-  OrderFieldIssueType,
   OrderIntakeSource,
   OrderMatchConfidence,
 } from "@/features/orders/domain/order-draft";
@@ -41,28 +67,6 @@ type BadgeTone =
   | "danger"
   | "ai";
 
-const SOURCE_LABELS: Readonly<
-  Record<OrderIntakeSource, string>
-> = {
-  email: "E-posta",
-  whatsapp: "WhatsApp",
-  erp: "ERP",
-  "customer-portal": "Müşteri Portalı",
-  "sales-representative": "Satış Temsilcisi",
-  "web-form": "Web Formu",
-  "file-upload": "Dosya Yükleme",
-};
-
-const ISSUE_LABELS: Readonly<
-  Record<OrderFieldIssueType, string>
-> = {
-  missing: "Eksik bilgi",
-  conflicting: "Çelişkili bilgi",
-  "low-confidence": "Düşük güven",
-  invalid: "Geçersiz bilgi",
-  outdated: "Güncel olmayan bilgi",
-};
-
 function getConfidenceTone(
   confidence: OrderMatchConfidence,
 ): BadgeTone {
@@ -75,55 +79,6 @@ function getConfidenceTone(
   }
 
   return "danger";
-}
-
-function formatPercent(
-  value: number,
-): string {
-  return new Intl.NumberFormat("tr-TR", {
-    style: "percent",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatMoney(
-  value: number | undefined,
-  currency: string | undefined,
-): string {
-  if (value === undefined) {
-    return "Tanımlanmadı";
-  }
-
-  return new Intl.NumberFormat("tr-TR", {
-    style: "currency",
-    currency: currency ?? "TRY",
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatDateTime(
-  value: string | undefined,
-): string {
-  if (!value) {
-    return "Tanımlanmadı";
-  }
-
-  return new Intl.DateTimeFormat("tr-TR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
-function formatDate(
-  value: string | undefined,
-): string {
-  if (!value) {
-    return "Tanımlanmadı";
-  }
-
-  return new Intl.DateTimeFormat("tr-TR", {
-    dateStyle: "medium",
-  }).format(new Date(value));
 }
 
 function getSourceIcon(
@@ -178,7 +133,7 @@ export default async function OrderDraftDetailPage({
           >
             AI güveni
             {" "}
-            {formatPercent(
+            {formatOrderConfidence(
               orderDraft.overallConfidence,
             )}
           </Badge>
@@ -228,11 +183,11 @@ export default async function OrderDraftDetailPage({
                 <div>
                   <div className="order-draft-detail__source-heading">
                     <h2>
-                      {SOURCE_LABELS[source.source]}
+                      {getOrderIntakeSourceLabel(source.source)}
                     </h2>
 
                     <Badge tone="neutral">
-                      {formatDateTime(source.receivedAt)}
+                      {formatOrderDateTime(source.receivedAt)}
                     </Badge>
                   </div>
 
@@ -273,7 +228,7 @@ export default async function OrderDraftDetailPage({
               orderDraft.customer.confidenceLevel,
             )}
           >
-            {formatPercent(
+            {formatOrderConfidence(
               orderDraft.customer.confidence,
             )}
             {" "}
@@ -352,7 +307,7 @@ export default async function OrderDraftDetailPage({
                     line.confidenceLevel,
                   )}
                 >
-                  {formatPercent(line.confidence)}
+                  {formatOrderConfidence(line.confidence)}
                   {" "}
                   güven
                 </Badge>
@@ -362,16 +317,17 @@ export default async function OrderDraftDetailPage({
                 <div>
                   <dt>Miktar</dt>
                   <dd>
-                    {line.quantity ?? "Tanımlanmadı"}
-                    {" "}
-                    {line.unit ?? ""}
+                    {formatOrderQuantity(
+                      line.quantity,
+                      line.unit,
+                    )}
                   </dd>
                 </div>
 
                 <div>
                   <dt>Birim fiyat</dt>
                   <dd>
-                    {formatMoney(
+                    {formatOrderMoney(
                       line.unitPrice,
                       line.currency,
                     )}
@@ -381,7 +337,7 @@ export default async function OrderDraftDetailPage({
                 <div>
                   <dt>Termin</dt>
                   <dd>
-                    {formatDate(
+                    {formatOrderDate(
                       line.requestedDeliveryDate,
                     )}
                   </dd>
@@ -428,7 +384,7 @@ export default async function OrderDraftDetailPage({
                 <div>
                   <div>
                     <strong>
-                      {ISSUE_LABELS[issue.type]}
+                      {getOrderFieldIssueLabel(issue.type)}
                     </strong>
 
                     {issue.blocking ? (
@@ -466,14 +422,23 @@ export default async function OrderDraftDetailPage({
           <dl>
             <div>
               <dt>Onay durumu</dt>
-              <dd>{orderDraft.approval.status}</dd>
+              <dd>
+                {getOrderApprovalStatusLabel(
+                  orderDraft.approval.status,
+                )}
+              </dd>
             </div>
 
             <div>
               <dt>Gerekli rol</dt>
-              <dd>
-                {orderDraft.approval.requiredRole ??
-                  "Tanımlanmadı"}
+              <dd
+                title={getOrderApprovalRoleDescription(
+                  orderDraft.approval.requiredRole,
+                )}
+              >
+                {getOrderApprovalRoleLabel(
+                  orderDraft.approval.requiredRole,
+                )}
               </dd>
             </div>
 
@@ -487,14 +452,17 @@ export default async function OrderDraftDetailPage({
 
             <div>
               <dt>Aktarım durumu</dt>
-              <dd>{orderDraft.transfer.status}</dd>
+              <dd>
+                {getOrderTransferStatusLabel(
+                  orderDraft.transfer.status,
+                )}
+              </dd>
             </div>
 
             <div>
               <dt>Hedef sistem</dt>
               <dd>
-                {orderDraft.transfer.targetSystem?.toUpperCase() ??
-                  "Tanımlanmadı"}
+                {getOrderTargetSystemLabel(orderDraft.transfer.targetSystem)}
               </dd>
             </div>
 
@@ -510,6 +478,24 @@ export default async function OrderDraftDetailPage({
       </Section>
     
       <OrderDraftActionPanel
+        orderDraft={orderDraft}
+      />
+      <OrderDraftSourceEvidencePanel
+        orderDraft={orderDraft}
+      />
+      <OrderDraftClarificationPanel
+        orderDraft={orderDraft}
+      />
+      <OrderDraftClarificationMessage
+        orderDraft={orderDraft}
+      />
+      <OrderTransferReadinessPanel
+        orderDraft={orderDraft}
+      />
+      <OrderTransferTargetCard
+        orderDraft={orderDraft}
+      />
+      <OrderDraftTimeline
         orderDraft={orderDraft}
       /></PageContent>
   );

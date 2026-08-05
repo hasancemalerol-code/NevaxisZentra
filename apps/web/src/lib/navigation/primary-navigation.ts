@@ -98,7 +98,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         icon: Wrench,
       },
       {
-        label: "Kalite",
+        label: "Kalite Kontrol",
         href: "/kalite",
         icon: ShieldCheck,
       },

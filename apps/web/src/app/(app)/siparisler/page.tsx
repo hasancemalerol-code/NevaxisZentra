@@ -1,3 +1,5 @@
+import { calculateOrderDraftSummary } from "@/features/orders/application/order-draft-query";
+import { OrderDraftKpiLinks } from "@/features/orders/components/order-draft-kpi-links";
 import {
   Bot,
   CheckCircle2,
@@ -16,7 +18,7 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { OrderDraftWorkspace } from "@/features/orders/components/order-draft-workspace";
+import { OrderDraftFilteredWorkspace } from "@/features/orders/components/order-draft-filtered-workspace";
 import { ORDER_DRAFT_PREVIEW_DATA } from "@/features/orders/data/order-draft-preview-data";
 
 const intakeSources = [
@@ -74,6 +76,10 @@ const workflowSteps = [
 ] as const;
 
 export default function OrdersPage() {
+  const orderDraftSummary =
+    calculateOrderDraftSummary(
+      ORDER_DRAFT_PREVIEW_DATA,
+    );
   return (
     <PageContent>
       <PageHeader
@@ -81,6 +87,9 @@ export default function OrdersPage() {
         eyebrow="Omnichannel Sipariş Yönetimi"
         preview
         title="Siparişler"
+      />
+      <OrderDraftKpiLinks
+        summary={orderDraftSummary}
       />
 
       <Section
@@ -130,7 +139,7 @@ export default function OrdersPage() {
         description="Farklı kanallardan toplanan sipariş taleplerini, AI güven puanlarını, açık sorunları ve onay durumlarını inceleyin."
         title="Sipariş taslakları"
       >
-        <OrderDraftWorkspace
+        <OrderDraftFilteredWorkspace
           orderDrafts={ORDER_DRAFT_PREVIEW_DATA}
         />
       </Section>
