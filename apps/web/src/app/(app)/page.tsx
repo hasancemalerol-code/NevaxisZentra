@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import {
+  Plus,
   RefreshCw,
   Sparkles,
 } from "lucide-react";
@@ -35,14 +37,24 @@ export default function HomePage() {
     <PageContent>
       <PageHeader
         actions={
-          <Button
-            disabled
-            leadingIcon={<RefreshCw />}
-            title="Gerçek veri bağlantısı sonraki entegrasyon paketlerinde uygulanacaktır."
-            variant="secondary"
-          >
-            Veriyi yenile
-          </Button>
+          <>
+            <Link
+              className="ai-task-create-button"
+              href="/ai-gorevleri/yeni"
+            >
+              <Plus aria-hidden="true" />
+              <span>AI&apos;ya Görev Ver</span>
+            </Link>
+
+            <Button
+              disabled
+              leadingIcon={<RefreshCw />}
+              title="Gerçek veri bağlantısı sonraki entegrasyon paketlerinde uygulanacaktır."
+              variant="secondary"
+            >
+              Veriyi yenile
+            </Button>
+          </>
         }
         description="Üretim, kalite, bakım, malzeme, ticari zekâ ve ERP entegrasyonlarından oluşan AI önerilerini tek merkezden inceleyin."
         eyebrow="AI Görev Merkezi"

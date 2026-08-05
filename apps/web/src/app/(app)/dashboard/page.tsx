@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AiTaskCenterSummary } from "@/components/dashboard/ai-task-center-summary";
 import { CriticalRisksPanel } from "@/components/dashboard/critical-risks-panel";
 import { DailyOperationsSummary } from "@/components/dashboard/daily-operations-summary";
@@ -43,6 +44,34 @@ export default function DashboardPage() {
         </div>
 
         <div className="command-center__titlebar-actions">
+          <Link
+            className="command-center__ai-task-button"
+            href="/ai-gorevleri/yeni"
+          >
+            <span
+              aria-hidden="true"
+              className="command-center__ai-task-button-icon"
+            >
+              <svg
+                fill="none"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+              >
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="2"
+                />
+              </svg>
+            </span>
+
+            <span className="command-center__ai-task-button-copy">
+              <strong>AI&apos;ya Görev Ver</strong>
+              <span>Yeni analiz veya işlem başlat</span>
+            </span>
+          </Link>
           <button
             aria-label="CrevaFact Teams mesajlarını görüntüle"
             className="command-center__teams-button"

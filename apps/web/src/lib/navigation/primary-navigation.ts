@@ -73,6 +73,11 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         icon: CalendarRange,
       },
       {
+        label: "Siparişler",
+        href: "/siparisler",
+        icon: ShoppingBasket,
+      },
+      {
         label: "Vardiyalar",
         href: "/vardiyalar",
         icon: CalendarClock,
