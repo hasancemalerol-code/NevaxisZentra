@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-import { queryProductionPlanDetail } from "@/features/production-planning/application/production-plan-detail-query";
+import { readProductionPlanningDetail } from "@/features/production-planning/server/production-plan-reader";
 import { createProductionPlanDetailViewModel } from "@/features/production-planning/application/production-plan-detail-view-model";
 import { createProductionPlanRiskViewModel } from "@/features/production-planning/application/production-plan-risk-view-model";
 import { createProductionPlanApprovalTransferViewModel } from "@/features/production-planning/application/production-plan-approval-transfer-view-model";
@@ -24,7 +24,6 @@ import { ProductionPlanApprovalTransferPanel } from "@/features/production-plann
 import { ProductionPlanDemandTable } from "@/features/production-planning/components/production-plan-demand-table";
 import { ProductionPlanTimeline } from "@/features/production-planning/components/production-plan-timeline";
 import { ProductionPlanHistoryPanel } from "@/features/production-planning/components/production-plan-history-panel";
-import { PRODUCTION_PLAN_PREVIEW_DATA } from "@/features/production-planning/data/production-plan-preview-data";
 import { getProductionPlanFallbackLabel } from "@/features/production-planning/presentation/production-plan-fallback-labels";
 import {
   getProductionPlanConfidenceLabel,
@@ -46,10 +45,20 @@ export default async function ProductionPlanDetailPage({
 }: ProductionPlanDetailPageProps) {
   const { planId } = await params;
 
-  const result = queryProductionPlanDetail(
-    PRODUCTION_PLAN_PREVIEW_DATA,
-    planId,
-  );
+  const result =
+    await readProductionPlanningDetail(
+      planId,
+    );
+
+  if (result.status === "failure") {
+    throw new Error(
+      [
+        "Production plan detail could not be loaded.",
+        result.code,
+        result.message,
+      ].join(" "),
+    );
+  }
 
   if (result.status === "not-found") {
     notFound();

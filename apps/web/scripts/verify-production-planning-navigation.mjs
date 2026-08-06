@@ -93,7 +93,7 @@ const previewData =
 
 requireText(
   listPage,
-  "PRODUCTION_PLAN_PREVIEW_DATA",
+  "readProductionPlanningWorkspace",
   "planlama/page.tsx",
 );
 
@@ -123,19 +123,49 @@ requireText(
 
 requireText(
   detailPage,
-  "queryProductionPlanDetail",
+  "readProductionPlanningDetail",
   "planlama/[planId]/page.tsx",
 );
 
 requireText(
   detailPage,
+  "production-plan-reader",
+  "planlama/[planId]/page.tsx",
+);
+
+forbidText(
+  listPage,
   "PRODUCTION_PLAN_PREVIEW_DATA",
+  "planlama/page.tsx",
+);
+
+forbidText(
+  listPage,
+  "createProductionPlanPreviewRepository",
+  "planlama/page.tsx",
+);
+
+forbidText(
+  detailPage,
+  "PRODUCTION_PLAN_PREVIEW_DATA",
+  "planlama/[planId]/page.tsx",
+);
+
+forbidText(
+  detailPage,
+  "createProductionPlanPreviewRepository",
   "planlama/[planId]/page.tsx",
 );
 
 requireText(
   detailQuery,
   "findProductionPlanById",
+  "production-plan-detail-query.ts",
+);
+
+requireText(
+  detailQuery,
+  "readProductionPlanDetail",
   "production-plan-detail-query.ts",
 );
 
@@ -149,6 +179,34 @@ requireText(
   previewData,
   "PRODUCTION_PLAN_PREVIEW_DATA",
   "production-plan-preview-data.ts",
+);
+
+const previewRepository =
+  readRequiredFile(
+    "src/features/production-planning/data/production-plan-preview-repository.ts",
+  );
+
+requireText(
+  previewRepository,
+  "createProductionPlanPreviewRepository",
+  "production-plan-preview-repository.ts",
+);
+
+requireText(
+  previewRepository,
+  "Multiple plans use id",
+  "production-plan-preview-repository.ts",
+);
+
+const repositoryFactory =
+  readRequiredFile(
+    "src/features/production-planning/server/production-plan-repository-factory.ts",
+  );
+
+requireText(
+  repositoryFactory,
+  "PRODUCTION_PLAN_PREVIEW_DATA",
+  "production-plan-repository-factory.ts",
 );
 
 const forbiddenRoutePatterns = [
@@ -184,7 +242,7 @@ console.log(
   [
     "Verified list-to-detail links,",
     "detail back navigation,",
-    "shared preview data,",
+    "server reader boundary,",
     "and canonical /planlama routes.",
   ].join(" "),
 );

@@ -6,6 +6,11 @@ import type {
   ProductionPlanStatus,
   ProductionPlanTargetSystem,
 } from "../domain/production-plan";
+import type {
+  ProductionPlanRepository,
+  ProductionPlanRepositoryListResult,
+  ProductionPlanRepositoryScope,
+} from "./production-plan-repository";
 
 export type ProductionPlanFilter =
   Readonly<{
@@ -368,4 +373,13 @@ export function calculateProductionPlanSummary(
           productionPlan.aiGenerated,
       ).length,
   };
+}
+
+export async function readProductionPlans(
+  repository: ProductionPlanRepository,
+  scope: ProductionPlanRepositoryScope,
+): Promise<ProductionPlanRepositoryListResult> {
+  return repository.list({
+    scope,
+  });
 }

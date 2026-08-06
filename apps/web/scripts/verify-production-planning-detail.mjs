@@ -218,7 +218,43 @@ requireText(
 
 requireText(
   detailPage,
+  "readProductionPlanningDetail",
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  "production-plan-reader",
+  "planlama/[planId]/page.tsx",
+);
+
+forbidText(
+  detailPage,
   "PRODUCTION_PLAN_PREVIEW_DATA",
+  "planlama/[planId]/page.tsx",
+);
+
+forbidText(
+  detailPage,
+  "createProductionPlanPreviewRepository",
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  'result.status === "failure"',
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  'result.status === "not-found"',
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  "notFound();",
   "planlama/[planId]/page.tsx",
 );
 

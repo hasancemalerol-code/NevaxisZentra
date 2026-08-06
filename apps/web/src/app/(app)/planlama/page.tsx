@@ -10,14 +10,32 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-import { calculateProductionPlanSummary } from "@/features/production-planning/application/production-plan-query";
+import {
+  calculateProductionPlanSummary,
+} from "@/features/production-planning/application/production-plan-query";
 import { ProductionPlanFilteredWorkspace } from "@/features/production-planning/components/production-plan-filtered-workspace";
-import { PRODUCTION_PLAN_PREVIEW_DATA } from "@/features/production-planning/data/production-plan-preview-data";
+import { readProductionPlanningWorkspace } from "@/features/production-planning/server/production-plan-reader";
 
-export default function ProductionPlanningPage() {
-const summary =
+export default async function ProductionPlanningPage() {
+  const workspaceResult =
+    await readProductionPlanningWorkspace();
+
+  if (workspaceResult.status === "failure") {
+    throw new Error(
+      [
+        "Production planning list could not be loaded.",
+        workspaceResult.code,
+        workspaceResult.message,
+      ].join(" "),
+    );
+  }
+
+  const productionPlans =
+    workspaceResult.productionPlans;
+
+  const summary =
     calculateProductionPlanSummary(
-      PRODUCTION_PLAN_PREVIEW_DATA,
+      productionPlans,
     );
 
   return (
@@ -146,9 +164,7 @@ const summary =
       </section>
 
       <ProductionPlanFilteredWorkspace
-        productionPlans={
-          PRODUCTION_PLAN_PREVIEW_DATA
-        }
+        productionPlans={productionPlans}
       />
     </main>
   );

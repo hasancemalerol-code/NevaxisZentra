@@ -1,4 +1,9 @@
 import type { ProductionPlan } from "../domain/production-plan";
+import type {
+  ProductionPlanRepository,
+  ProductionPlanRepositoryFailure,
+  ProductionPlanRepositoryFindByIdInput,
+} from "./production-plan-repository";
 
 export type ProductionPlanDetailQueryResult =
   | Readonly<{
@@ -9,6 +14,10 @@ export type ProductionPlanDetailQueryResult =
       status: "not-found";
       productionPlan: null;
     }>;
+
+export type ProductionPlanDetailReadResult =
+  | ProductionPlanDetailQueryResult
+  | ProductionPlanRepositoryFailure;
 
 function normalizeProductionPlanId(
   productionPlanId: string,
@@ -87,4 +96,29 @@ export function requireProductionPlanById(
   }
 
   return result.productionPlan;
+}
+
+export async function readProductionPlanDetail(
+  repository: ProductionPlanRepository,
+  input: ProductionPlanRepositoryFindByIdInput,
+): Promise<ProductionPlanDetailReadResult> {
+  const result = await repository.findById(
+    input,
+  );
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  if (result.status === "not-found") {
+    return {
+      status: "not-found",
+      productionPlan: null,
+    };
+  }
+
+  return {
+    status: "found",
+    productionPlan: result.productionPlan,
+  };
 }

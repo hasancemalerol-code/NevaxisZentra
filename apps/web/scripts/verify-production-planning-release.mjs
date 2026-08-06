@@ -66,6 +66,18 @@ function requireText(
   }
 }
 
+function forbidText(
+  source,
+  forbiddenText,
+  fileLabel,
+) {
+  if (source.includes(forbiddenText)) {
+    fail(
+      `${fileLabel} must not contain "${forbiddenText}".`,
+    );
+  }
+}
+
 const requiredVerifierFiles = [
   "scripts/verify-production-planning-detail.mjs",
   "scripts/verify-production-planning-navigation.mjs",
@@ -134,13 +146,37 @@ requireText(
 
 requireText(
   listPage,
+  "readProductionPlanningWorkspace",
+  "planlama/page.tsx",
+);
+
+requireText(
+  listPage,
+  "production-plan-reader",
+  "planlama/page.tsx",
+);
+
+forbidText(
+  listPage,
   "PRODUCTION_PLAN_PREVIEW_DATA",
   "planlama/page.tsx",
 );
 
 requireText(
   detailPage,
-  "queryProductionPlanDetail",
+  "readProductionPlanningDetail",
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  "production-plan-reader",
+  "planlama/[planId]/page.tsx",
+);
+
+forbidText(
+  detailPage,
+  "PRODUCTION_PLAN_PREVIEW_DATA",
   "planlama/[planId]/page.tsx",
 );
 
@@ -297,6 +333,91 @@ if (integrationResult.status !== 0) {
   );
 }
 
+const repositoryContract =
+  readRequiredFile(
+    "src/features/production-planning/application/production-plan-repository.ts",
+  );
+
+const previewRepository =
+  readRequiredFile(
+    "src/features/production-planning/data/production-plan-preview-repository.ts",
+  );
+
+const scopeResolver =
+  readRequiredFile(
+    "src/features/production-planning/server/production-plan-scope.ts",
+  );
+
+const repositoryFactory =
+  readRequiredFile(
+    "src/features/production-planning/server/production-plan-repository-factory.ts",
+  );
+
+const productionPlanReader =
+  readRequiredFile(
+    "src/features/production-planning/server/production-plan-reader.ts",
+  );
+
+requireText(
+  repositoryContract,
+  "export interface ProductionPlanRepository",
+  "production-plan-repository.ts",
+);
+
+requireText(
+  previewRepository,
+  "createProductionPlanPreviewRepository",
+  "production-plan-preview-repository.ts",
+);
+
+requireText(
+  scopeResolver,
+  "resolveProductionPlanningServerScope",
+  "production-plan-scope.ts",
+);
+
+requireText(
+  repositoryFactory,
+  "createProductionPlanRepository",
+  "production-plan-repository-factory.ts",
+);
+
+requireText(
+  repositoryFactory,
+  "PRODUCTION_PLAN_PREVIEW_DATA",
+  "production-plan-repository-factory.ts",
+);
+
+requireText(
+  productionPlanReader,
+  "readProductionPlanningWorkspace",
+  "production-plan-reader.ts",
+);
+
+requireText(
+  productionPlanReader,
+  "readProductionPlanningDetail",
+  "production-plan-reader.ts",
+);
+
+if (previewRepository.trim().length === 0) {
+  fail(
+    "Preview repository file is empty.",
+  );
+}
+
+if (repositoryFactory.trim().length === 0) {
+  fail(
+    "Repository factory file is empty.",
+  );
+}
+
+if (productionPlanReader.trim().length === 0) {
+  fail(
+    "Production plan reader file is empty.",
+  );
+}
+
 console.log("");
 console.log(
   "Production planning release verification passed.",
@@ -305,6 +426,8 @@ console.log(
 console.log(
   [
     "Verified canonical routes,",
+    "server composition boundary,",
+    "repository-backed read flow,",
     "detail composition,",
     "integration gates,",
     "non-empty global CSS,",
