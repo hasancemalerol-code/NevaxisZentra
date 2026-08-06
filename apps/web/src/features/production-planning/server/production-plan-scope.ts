@@ -1,7 +1,12 @@
+import "./production-plan-server-boundary";
+
 import type { ProductionPlanRepositoryScope } from "../application/production-plan-repository";
+import type { ProductionPlanRuntimeConfig } from "./production-plan-runtime-config";
 
 export type ProductionPlanningScopeSource =
-  "preview-fallback";
+  | "development-preview-config"
+  | "development-api-config"
+  | "server-config";
 
 export type ProductionPlanningServerScope =
   Readonly<
@@ -10,10 +15,14 @@ export type ProductionPlanningServerScope =
     }
   >;
 
+export type ProductionPlanningScopeResolutionFailureCode =
+  | "invalid-scope"
+  | "configuration-error";
+
 export type ProductionPlanningScopeResolutionFailure =
   Readonly<{
     status: "failure";
-    code: "invalid-scope";
+    code: ProductionPlanningScopeResolutionFailureCode;
     message: string;
     retryable: false;
   }>;
@@ -24,12 +33,6 @@ export type ProductionPlanningScopeResolutionResult =
       scope: ProductionPlanningServerScope;
     }>
   | ProductionPlanningScopeResolutionFailure;
-
-const PREVIEW_FALLBACK_TENANT_ID =
-  "tenant-crevafactos";
-
-const PREVIEW_FALLBACK_FACILITY_ID =
-  "facility-istanbul";
 
 function normalizeScopeValue(
   value: string | undefined,
@@ -48,41 +51,114 @@ function createInvalidScopeFailure(
   };
 }
 
-function createPreviewFallbackScope(): ProductionPlanningServerScope {
-  const tenantId = normalizeScopeValue(
-    PREVIEW_FALLBACK_TENANT_ID,
-  );
-  const facilityId = normalizeScopeValue(
-    PREVIEW_FALLBACK_FACILITY_ID,
-  );
-
-  if (!tenantId || !facilityId) {
-    throw new Error(
-      "Preview fallback scope constants are invalid.",
-    );
-  }
-
+function createConfigurationFailure(
+  message: string,
+): ProductionPlanningScopeResolutionFailure {
   return {
-    tenantId,
-    facilityId,
-    source: "preview-fallback",
+    status: "failure",
+    code: "configuration-error",
+    message,
+    retryable: false,
   };
 }
 
-export function resolveProductionPlanningServerScope(): ProductionPlanningScopeResolutionResult {
-  const scope = createPreviewFallbackScope();
+function resolveDevelopmentPreviewScope(
+  config: ProductionPlanRuntimeConfig,
+): ProductionPlanningScopeResolutionResult {
+  const tenantId = normalizeScopeValue(
+    config.previewTenantId,
+  );
+  const facilityId = normalizeScopeValue(
+    config.previewFacilityId,
+  );
 
-  if (
-    !normalizeScopeValue(scope.tenantId) ||
-    !normalizeScopeValue(scope.facilityId)
-  ) {
-    return createInvalidScopeFailure(
-      "tenantId and facilityId are required.",
+  if (!tenantId || !facilityId) {
+    return createConfigurationFailure(
+      "Development preview tenant and facility scope are required.",
     );
   }
 
   return {
     status: "success",
-    scope,
+    scope: {
+      tenantId,
+      facilityId,
+      source: "development-preview-config",
+    },
   };
+}
+
+function resolveDevelopmentApiScope(
+  config: ProductionPlanRuntimeConfig,
+): ProductionPlanningScopeResolutionResult {
+  const tenantKey = normalizeScopeValue(
+    config.developmentAuth?.tenantKey,
+  );
+  const facilityId = normalizeScopeValue(
+    config.facilityId,
+  );
+
+  if (!tenantKey || !facilityId) {
+    return createConfigurationFailure(
+      "Development API tenant and facility scope are required.",
+    );
+  }
+
+  return {
+    status: "success",
+    scope: {
+      tenantId: tenantKey,
+      facilityId,
+      source: "development-api-config",
+    },
+  };
+}
+
+function resolveProductionApiScope(
+  config: ProductionPlanRuntimeConfig,
+): ProductionPlanningScopeResolutionResult {
+  const facilityId = normalizeScopeValue(
+    config.facilityId,
+  );
+
+  if (!facilityId) {
+    return createInvalidScopeFailure(
+      "A server-side facility identifier is required.",
+    );
+  }
+
+  return {
+    status: "success",
+    scope: {
+      tenantId: "",
+      facilityId,
+      source: "server-config",
+    },
+  };
+}
+
+export function resolveProductionPlanningServerScope(
+  config: ProductionPlanRuntimeConfig,
+): ProductionPlanningScopeResolutionResult {
+  switch (config.mode) {
+    case "development-preview":
+      return resolveDevelopmentPreviewScope(
+        config,
+      );
+
+    case "development-api":
+      return resolveDevelopmentApiScope(
+        config,
+      );
+
+    case "api":
+      return resolveProductionApiScope(
+        config,
+      );
+
+    default:
+      return createConfigurationFailure(
+        "Production planning runtime mode is invalid.",
+      );
+  }
 }

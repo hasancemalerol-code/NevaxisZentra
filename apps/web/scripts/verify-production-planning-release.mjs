@@ -85,6 +85,9 @@ const requiredVerifierFiles = [
   "scripts/verify-production-planning-filter-url.mjs",
   "scripts/verify-production-planning-preview-isolation.mjs",
   "scripts/verify-production-planning-integration.mjs",
+  "scripts/verify-production-planning-api-bridge.mjs",
+  "scripts/verify-production-planning-server-boundary.mjs",
+  "scripts/verify-production-planning-runtime-mode.mjs",
 ];
 
 for (
@@ -331,6 +334,53 @@ if (integrationResult.status !== 0) {
   fail(
     `Integration verifier exited with status ${integrationResult.status ?? "unknown"}.`,
   );
+}
+
+const additionalVerifiers = [
+  "scripts/verify-production-planning-api-bridge.mjs",
+  "scripts/verify-production-planning-server-boundary.mjs",
+  "scripts/verify-production-planning-runtime-mode.mjs",
+];
+
+for (const verifier of additionalVerifiers) {
+  console.log("");
+  console.log(
+    `Running ${verifier}.`,
+  );
+
+  const verifierPath =
+    resolveWebPath(verifier);
+
+  const verifierResult = spawnSync(
+    process.execPath,
+    [verifierPath],
+    {
+      cwd: resolve(
+        webRoot,
+        "../..",
+      ),
+      encoding: "utf8",
+      stdio: "pipe",
+    },
+  );
+
+  if (verifierResult.stdout) {
+    process.stdout.write(
+      verifierResult.stdout,
+    );
+  }
+
+  if (verifierResult.stderr) {
+    process.stderr.write(
+      verifierResult.stderr,
+    );
+  }
+
+  if (verifierResult.status !== 0) {
+    fail(
+      `${verifier} exited with status ${verifierResult.status ?? "unknown"}.`,
+    );
+  }
 }
 
 const repositoryContract =

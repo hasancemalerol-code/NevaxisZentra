@@ -327,7 +327,13 @@ requireText(
 
 requireText(
   scopeResolver,
-  "preview-fallback",
+  "development-preview-config",
+  "production-plan-scope.ts",
+);
+
+requireText(
+  scopeResolver,
+  "server-config",
   "production-plan-scope.ts",
 );
 
@@ -375,7 +381,7 @@ requireText(
 
 requireText(
   productionPlanReader,
-  "resolveProductionPlanningServerScope",
+  "parseProductionPlanRuntimeConfig",
   "production-plan-reader.ts",
 );
 

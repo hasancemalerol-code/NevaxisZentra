@@ -18,8 +18,11 @@ export interface ProductionPlanRepositoryFindByIdInput {
 
 export type ProductionPlanRepositoryFailureCode =
   | "invalid-scope"
+  | "unauthenticated"
+  | "configuration-error"
   | "permission-denied"
   | "source-unavailable"
+  | "invalid-response"
   | "unexpected-error";
 
 export interface ProductionPlanRepositoryFailure {
