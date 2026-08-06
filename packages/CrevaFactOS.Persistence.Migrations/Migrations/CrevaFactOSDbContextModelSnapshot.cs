@@ -490,6 +490,74 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("tenant_role_permissions", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Facilities.Facility", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("time_zone_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("facilities", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_facilities_code", "code <> ''");
+
+                            t.HasCheckConstraint("ck_facilities_name", "name <> ''");
+
+                            t.HasCheckConstraint("ck_facilities_status", "status IN ('Active', 'Inactive')");
+
+                            t.HasCheckConstraint("ck_facilities_time_zone_id", "time_zone_id <> ''");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Identity.IdentitySubject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -714,6 +782,198 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AiExplanation")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("ai_explanation");
+
+                    b.Property<bool>("AiGenerated")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ai_generated");
+
+                    b.Property<string>("ApprovalJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("approval_json");
+
+                    b.Property<string>("ApprovalStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("approval_status");
+
+                    b.Property<string>("Confidence")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("confidence");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DemandsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("demands_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("HistoryJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("history_json");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("origin");
+
+                    b.Property<DateTimeOffset>("PlannedEndAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_at_utc");
+
+                    b.Property<DateTimeOffset>("PlannedStartAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_start_at_utc");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reference_code");
+
+                    b.Property<string>("ResourceAssignmentJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("resource_assignment_json");
+
+                    b.Property<string>("RisksJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("risks_json");
+
+                    b.Property<string>("SourceReferencesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("source_references_json");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TimeWindowJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("time_window_json");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("TransferJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("transfer_json");
+
+                    b.Property<string>("TransferStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("transfer_status");
+
+                    b.Property<string>("TransferTargetSystem")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("transfer_target_system");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "ReferenceCode")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FacilityId", "Status");
+
+                    b.HasIndex("TenantId", "FacilityId", "UpdatedAtUtc");
+
+                    b.ToTable("production_plans", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_production_plans_approval_json", "jsonb_typeof(approval_json) = 'object'");
+
+                            t.HasCheckConstraint("ck_production_plans_approval_status", "approval_status IN ('not-required', 'pending', 'approved', 'rejected', 'expired')");
+
+                            t.HasCheckConstraint("ck_production_plans_confidence", "confidence IN ('low', 'medium', 'high')");
+
+                            t.HasCheckConstraint("ck_production_plans_created_by", "created_by <> ''");
+
+                            t.HasCheckConstraint("ck_production_plans_demands_json", "jsonb_typeof(demands_json) = 'array'");
+
+                            t.HasCheckConstraint("ck_production_plans_history_json", "jsonb_typeof(history_json) = 'array'");
+
+                            t.HasCheckConstraint("ck_production_plans_origin", "origin IN ('approved-order', 'erp-production-request', 'manual', 'ai-recommendation')");
+
+                            t.HasCheckConstraint("ck_production_plans_planned_window", "planned_end_at_utc >= planned_start_at_utc");
+
+                            t.HasCheckConstraint("ck_production_plans_reference_code", "reference_code <> ''");
+
+                            t.HasCheckConstraint("ck_production_plans_resource_assignment_json", "jsonb_typeof(resource_assignment_json) = 'object'");
+
+                            t.HasCheckConstraint("ck_production_plans_risks_json", "jsonb_typeof(risks_json) = 'array'");
+
+                            t.HasCheckConstraint("ck_production_plans_source_references_json", "jsonb_typeof(source_references_json) = 'array'");
+
+                            t.HasCheckConstraint("ck_production_plans_status", "status IN ('draft', 'needs-review', 'ready-for-approval', 'approved', 'rejected', 'scheduled', 'in-progress', 'completed', 'cancelled')");
+
+                            t.HasCheckConstraint("ck_production_plans_time_window_json", "jsonb_typeof(time_window_json) = 'object'");
+
+                            t.HasCheckConstraint("ck_production_plans_title", "title <> ''");
+
+                            t.HasCheckConstraint("ck_production_plans_transfer_json", "jsonb_typeof(transfer_json) = 'object'");
+
+                            t.HasCheckConstraint("ck_production_plans_transfer_status", "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed')");
+
+                            t.HasCheckConstraint("ck_production_plans_transfer_target_system", "transfer_target_system IS NULL OR transfer_target_system IN ('erp', 'mes', 'crevafactos')");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -868,6 +1128,15 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Facilities.Facility", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Identity.TenantMembership", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Identity.IdentitySubject", null)
@@ -888,6 +1157,22 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

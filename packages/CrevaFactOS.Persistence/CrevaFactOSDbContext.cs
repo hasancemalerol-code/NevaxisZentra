@@ -5,6 +5,9 @@ using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
+using CrevaFactOS.Persistence.Facilities;
+using CrevaFactOS.Persistence.ProductionPlanning;
+using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
 
@@ -44,6 +47,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiDecisionRecord> AiDecisionRecords => Set<AiDecisionRecord>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<Facility> Facilities => Set<Facility>();
+
+    public DbSet<ProductionPlan> ProductionPlans => Set<ProductionPlan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -410,6 +417,19 @@ public sealed class CrevaFactOSDbContext : DbContext
                 && tenantContextAccessor.IsAvailable
                 && message.TenantId == tenantContextAccessor.Current!.TenantId);
         });
+
+        modelBuilder.ApplyConfiguration(new FacilityEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductionPlanEntityConfiguration());
+
+        modelBuilder.Entity<Facility>().HasQueryFilter(facility =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && facility.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.Entity<ProductionPlan>().HasQueryFilter(plan =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && plan.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
