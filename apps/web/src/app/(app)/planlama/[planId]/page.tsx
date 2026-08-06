@@ -1,0 +1,235 @@
+import {
+  ArrowLeft,
+  Bot,
+  CalendarRange,
+  Factory,
+  ShieldCheck,
+} from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+
+import { queryProductionPlanDetail } from "@/features/production-planning/application/production-plan-detail-query";
+import { createProductionPlanDetailViewModel } from "@/features/production-planning/application/production-plan-detail-view-model";
+import { createProductionPlanRiskViewModel } from "@/features/production-planning/application/production-plan-risk-view-model";
+import { createProductionPlanApprovalTransferViewModel } from "@/features/production-planning/application/production-plan-approval-transfer-view-model";
+import { createProductionPlanDemandViewModel } from "@/features/production-planning/application/production-plan-demand-view-model";
+import { createProductionPlanTimelineViewModel } from "@/features/production-planning/application/production-plan-timeline-view-model";
+import { createProductionPlanHistoryViewModel } from "@/features/production-planning/application/production-plan-history-view-model";
+import { ProductionPlanResourceCards } from "@/features/production-planning/components/production-plan-resource-cards";
+import { ProductionPlanRiskPanel } from "@/features/production-planning/components/production-plan-risk-panel";
+import { ProductionPlanApprovalTransferPanel } from "@/features/production-planning/components/production-plan-approval-transfer-panel";
+import { ProductionPlanDemandTable } from "@/features/production-planning/components/production-plan-demand-table";
+import { ProductionPlanTimeline } from "@/features/production-planning/components/production-plan-timeline";
+import { ProductionPlanHistoryPanel } from "@/features/production-planning/components/production-plan-history-panel";
+import { PRODUCTION_PLAN_PREVIEW_DATA } from "@/features/production-planning/data/production-plan-preview-data";
+import { getProductionPlanFallbackLabel } from "@/features/production-planning/presentation/production-plan-fallback-labels";
+import {
+  getProductionPlanConfidenceLabel,
+  getProductionPlanOriginLabel,
+  getProductionPlanPriorityLabel,
+  getProductionPlanStatusLabel,
+  getProductionPlanTargetSystemLabel,
+} from "@/features/production-planning/presentation/production-plan-labels";
+
+type ProductionPlanDetailPageProps =
+  Readonly<{
+    params: Promise<{
+      planId: string;
+    }>;
+  }>;
+
+export default async function ProductionPlanDetailPage({
+  params,
+}: ProductionPlanDetailPageProps) {
+  const { planId } = await params;
+
+  const result = queryProductionPlanDetail(
+    PRODUCTION_PLAN_PREVIEW_DATA,
+    planId,
+  );
+
+  if (result.status === "not-found") {
+    notFound();
+  }
+
+  const { productionPlan } = result;
+
+  const viewModel =
+    createProductionPlanDetailViewModel(
+      productionPlan,
+    );
+
+  const riskViewModel =
+    createProductionPlanRiskViewModel(
+      productionPlan,
+    );
+
+  const approvalTransferViewModel =
+    createProductionPlanApprovalTransferViewModel(
+      productionPlan,
+    );
+
+  const demandViewModel =
+    createProductionPlanDemandViewModel(
+      productionPlan,
+    );
+
+  const timelineViewModel =
+    createProductionPlanTimelineViewModel(
+      productionPlan,
+    );
+
+  const historyViewModel =
+    createProductionPlanHistoryViewModel(
+      productionPlan,
+    );
+
+  return (
+    <main className="production-plan-detail-page">
+      <div className="production-plan-detail-page__back">
+        <Link href="/planlama">
+          <ArrowLeft aria-hidden="true" />
+          Planlama çalışma alanına dön
+        </Link>
+      </div>
+
+      <header className="production-plan-detail-page__header">
+        <div>
+          <p>Üretim Planı Detayı</p>
+
+          <h1>{productionPlan.title}</h1>
+
+          <span>
+            {productionPlan.id}
+          </span>
+        </div>
+
+        <div className="production-plan-detail-page__badges">
+          <Badge tone="information">
+            {getProductionPlanStatusLabel(
+              productionPlan.status,
+            )}
+          </Badge>
+
+          <Badge tone="neutral">
+            {getProductionPlanPriorityLabel(
+              productionPlan.demands[0]?.priority ??
+                "normal",
+            )}
+          </Badge>
+
+          <Badge tone="ai">
+            <Bot aria-hidden="true" />
+            {getProductionPlanConfidenceLabel(
+              productionPlan.confidence,
+            )}
+          </Badge>
+        </div>
+      </header>
+
+      <section className="production-plan-detail-page__summary">
+        <Card>
+          <CalendarRange aria-hidden="true" />
+
+          <div>
+            <span>Plan dönemi</span>
+            <strong>
+              {productionPlan.timeWindow.plannedStartAt}
+            </strong>
+            <small>
+              {productionPlan.timeWindow.plannedEndAt}
+            </small>
+          </div>
+        </Card>
+
+        <Card>
+          <Factory aria-hidden="true" />
+
+          <div>
+            <span>Kaynak</span>
+            <strong>
+              {getProductionPlanOriginLabel(
+                productionPlan.origin,
+              )}
+            </strong>
+            <small>
+              {productionPlan.facilityId ?? getProductionPlanFallbackLabel("facility")}
+            </small>
+          </div>
+        </Card>
+
+        <Card>
+          <ShieldCheck aria-hidden="true" />
+
+          <div>
+            <span>Hedef sistem</span>
+            <strong>
+              {productionPlan.transfer.targetSystem
+                ? getProductionPlanTargetSystemLabel(
+                    productionPlan.transfer.targetSystem,
+                  )
+                : getProductionPlanFallbackLabel(
+                    "targetSystem",
+                  )}
+            </strong>
+            <small>
+              Yetkili aktarım bekleniyor
+            </small>
+          </div>
+        </Card>
+      </section>
+
+      <section className="production-plan-detail-page__content">
+        <Card>
+          <p>Plan özeti</p>
+
+          <h2>
+            {productionPlan.notes ?? getProductionPlanFallbackLabel("notes")}
+          </h2>
+        </Card>
+
+        <Card>
+          <p>Human-in-the-Loop</p>
+
+          <h2>
+            Plan yetkili onayı olmadan üretime
+            aktarılmaz
+          </h2>
+
+          <span>
+            Makine, kalıp, malzeme, operatör,
+            kapasite ve termin riskleri plan
+            onayından önce kontrol edilir.
+          </span>
+        </Card>
+      </section>
+
+      <ProductionPlanTimeline
+        viewModel={timelineViewModel}
+      />
+
+      <ProductionPlanDemandTable
+        viewModel={demandViewModel}
+      />
+
+      <ProductionPlanResourceCards
+        viewModel={viewModel}
+      />
+
+      <ProductionPlanRiskPanel
+        viewModel={riskViewModel}
+      />
+
+      <ProductionPlanApprovalTransferPanel
+        viewModel={approvalTransferViewModel}
+      />
+
+      <ProductionPlanHistoryPanel
+        viewModel={historyViewModel}
+      />
+    </main>
+  );
+}
