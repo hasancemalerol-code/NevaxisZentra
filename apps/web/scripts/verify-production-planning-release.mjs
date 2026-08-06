@@ -71,6 +71,7 @@ const requiredVerifierFiles = [
   "scripts/verify-production-planning-navigation.mjs",
   "scripts/verify-production-planning-states.mjs",
   "scripts/verify-production-planning-filter-url.mjs",
+  "scripts/verify-production-planning-preview-isolation.mjs",
   "scripts/verify-production-planning-integration.mjs",
 ];
 
@@ -204,6 +205,53 @@ for (
 }
 
 console.log(
+  "Running production planning preview isolation verifier.",
+);
+
+const previewIsolationVerifierPath =
+  resolveWebPath(
+    "scripts/verify-production-planning-preview-isolation.mjs",
+  );
+
+const previewIsolationResult = spawnSync(
+  process.execPath,
+  [previewIsolationVerifierPath],
+  {
+    cwd: resolve(
+      webRoot,
+      "../..",
+    ),
+    encoding: "utf8",
+    stdio: "pipe",
+  },
+);
+
+if (previewIsolationResult.stdout) {
+  process.stdout.write(
+    previewIsolationResult.stdout,
+  );
+}
+
+if (previewIsolationResult.stderr) {
+  process.stderr.write(
+    previewIsolationResult.stderr,
+  );
+}
+
+if (previewIsolationResult.error) {
+  fail(
+    `Preview isolation verifier could not start: ${previewIsolationResult.error.message}`,
+  );
+}
+
+if (previewIsolationResult.status !== 0) {
+  fail(
+    `Preview isolation verifier exited with status ${previewIsolationResult.status ?? "unknown"}.`,
+  );
+}
+
+console.log("");
+console.log(
   "Running production planning integration verifier.",
 );
 
@@ -260,6 +308,6 @@ console.log(
     "detail composition,",
     "integration gates,",
     "non-empty global CSS,",
-    "and all planning premium style blocks.",
+    "preview-data isolation, and all planning premium style blocks.",
   ].join(" "),
 );
