@@ -25,6 +25,21 @@ const summaryDto = {
   transferTargetSystem: "mes",
   updatedAtUtc:
     "2026-08-07T17:00:00.000Z",
+  demandCount: 2,
+  primaryRequiredQuantity: 1500,
+  primaryUnit: "adet",
+  primaryProductCode: "PP-100",
+  primaryProductName: "Pilot part",
+  highestDemandPriority: "high",
+  riskCount: 1,
+  criticalRiskCount: 0,
+  blockingRiskCount: 1,
+  hasBlockingRisk: true,
+  hasMachineAssignment: true,
+  hasMoldAssignment: true,
+  hasMaterialAssignment: false,
+  hasOperatorGroupAssignment: false,
+  shiftName: "A vardiyası",
 };
 
 test("valid summary dto maps to domain without tenant leakage", () => {
@@ -47,6 +62,14 @@ test("valid summary dto maps to domain without tenant leakage", () => {
     assert.equal(
       result.value.demands.length,
       0,
+    );
+    assert.equal(
+      result.value.listSummary?.demandCount,
+      2,
+    );
+    assert.equal(
+      result.value.listSummary?.hasBlockingRisk,
+      true,
     );
   }
 });

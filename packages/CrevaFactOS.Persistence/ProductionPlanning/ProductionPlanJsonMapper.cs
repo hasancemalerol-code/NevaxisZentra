@@ -50,6 +50,18 @@ public static class ProductionPlanJsonMapper
     public static ProductionPlanJsonMapResult<ProductionPlanDetailMappedReadModel> MapDetail(
         ProductionPlanDetailReadModel plan)
     {
+        var operationalSummary = MapListOperationalSummary(
+            plan.DemandsJson,
+            plan.RisksJson,
+            plan.ResourceAssignmentJson,
+            plan.TimeWindowJson);
+
+        if (!operationalSummary.Succeeded)
+        {
+            return MapFailure<ProductionPlanDetailMappedReadModel>(operationalSummary.Failure!);
+        }
+
+        var listSummary = operationalSummary.Value!;
         var summary = new ProductionPlanSummaryReadModel(
             plan.Id,
             plan.ReferenceCode,
@@ -64,7 +76,25 @@ public static class ProductionPlanJsonMapper
             plan.ApprovalStatus,
             plan.TransferStatus,
             plan.TransferTargetSystem,
-            plan.UpdatedAtUtc);
+            plan.UpdatedAtUtc,
+            listSummary.DemandCount,
+            listSummary.TotalRequiredQuantity,
+            listSummary.TotalRequiredQuantityUnit,
+            listSummary.PrimaryRequiredQuantity,
+            listSummary.PrimaryUnit,
+            listSummary.PrimaryProductCode,
+            listSummary.PrimaryProductName,
+            listSummary.HighestDemandPriority,
+            listSummary.RiskCount,
+            listSummary.CriticalRiskCount,
+            listSummary.BlockingRiskCount,
+            listSummary.HasBlockingRisk,
+            listSummary.HasMachineAssignment,
+            listSummary.HasMoldAssignment,
+            listSummary.HasMaterialAssignment,
+            listSummary.HasOperatorGroupAssignment,
+            listSummary.ShiftName,
+            listSummary.EarliestRequestedDeliveryDateUtc);
 
         var demands = MapDemands(plan.DemandsJson);
         if (!demands.Succeeded)
@@ -130,6 +160,118 @@ public static class ProductionPlanJsonMapper
                 transfer.Value!,
                 sourceReferences.Value!,
                 history.Value!));
+    }
+
+    public static ProductionPlanJsonMapResult<ProductionPlanListOperationalSummaryReadModel>
+        MapListOperationalSummary(
+            string demandsJson,
+            string risksJson,
+            string resourceAssignmentJson,
+            string timeWindowJson)
+    {
+        var demands = MapDemands(demandsJson);
+        if (!demands.Succeeded)
+        {
+            return MapFailure<ProductionPlanListOperationalSummaryReadModel>(demands.Failure!);
+        }
+
+        var risks = MapRisks(risksJson);
+        if (!risks.Succeeded)
+        {
+            return MapFailure<ProductionPlanListOperationalSummaryReadModel>(risks.Failure!);
+        }
+
+        var resources = MapResources(resourceAssignmentJson);
+        if (!resources.Succeeded)
+        {
+            return MapFailure<ProductionPlanListOperationalSummaryReadModel>(resources.Failure!);
+        }
+
+        var timeWindow = MapTimeWindow(timeWindowJson);
+        if (!timeWindow.Succeeded)
+        {
+            return MapFailure<ProductionPlanListOperationalSummaryReadModel>(timeWindow.Failure!);
+        }
+
+        var demandItems = demands.Value!;
+        var riskItems = risks.Value!;
+        var primaryDemand = demandItems.Count > 0 ? demandItems[0] : null;
+        var highestDemandPriority = GetHighestDemandPriority(demandItems);
+        var criticalRiskCount = 0;
+        var blockingRiskCount = 0;
+
+        foreach (var risk in riskItems)
+        {
+            if (risk.Severity == "critical")
+            {
+                criticalRiskCount++;
+            }
+
+            if (risk.Blocking)
+            {
+                blockingRiskCount++;
+            }
+        }
+
+        decimal? totalRequiredQuantity = null;
+        if (demandItems.Count > 0)
+        {
+            var unit = demandItems[0].Unit;
+            if (demandItems.All(demand => demand.Unit == unit))
+            {
+                totalRequiredQuantity = demandItems.Sum(demand => demand.RequiredQuantity);
+            }
+        }
+
+        return MapSuccess(new ProductionPlanListOperationalSummaryReadModel(
+            DemandCount: demandItems.Count,
+            TotalRequiredQuantity: totalRequiredQuantity,
+            TotalRequiredQuantityUnit: totalRequiredQuantity.HasValue ? primaryDemand?.Unit : null,
+            PrimaryRequiredQuantity: primaryDemand?.RequiredQuantity,
+            PrimaryUnit: primaryDemand?.Unit,
+            PrimaryProductCode: primaryDemand?.ProductCode,
+            PrimaryProductName: primaryDemand?.ProductName,
+            HighestDemandPriority: highestDemandPriority,
+            RiskCount: riskItems.Count,
+            CriticalRiskCount: criticalRiskCount,
+            BlockingRiskCount: blockingRiskCount,
+            HasBlockingRisk: blockingRiskCount > 0,
+            HasMachineAssignment: !string.IsNullOrWhiteSpace(resources.Value!.MachineId)
+                || !string.IsNullOrWhiteSpace(resources.Value.MachineName),
+            HasMoldAssignment: !string.IsNullOrWhiteSpace(resources.Value.MoldId)
+                || !string.IsNullOrWhiteSpace(resources.Value.MoldName),
+            HasMaterialAssignment: !string.IsNullOrWhiteSpace(resources.Value.MaterialId)
+                || !string.IsNullOrWhiteSpace(resources.Value.MaterialName),
+            HasOperatorGroupAssignment: !string.IsNullOrWhiteSpace(resources.Value.OperatorGroupId)
+                || !string.IsNullOrWhiteSpace(resources.Value.OperatorGroupName),
+            ShiftName: timeWindow.Value!.ShiftName,
+            EarliestRequestedDeliveryDateUtc: demandItems
+                .Where(demand => demand.RequestedDeliveryDateUtc.HasValue)
+                .Select(demand => demand.RequestedDeliveryDateUtc)
+                .OrderBy(value => value)
+                .FirstOrDefault()));
+    }
+
+    private static string? GetHighestDemandPriority(
+        IReadOnlyList<ProductionPlanDemandReadModel> demands)
+    {
+        if (demands.Count == 0)
+        {
+            return null;
+        }
+
+        var priorityWeight = new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["low"] = 0,
+            ["normal"] = 1,
+            ["high"] = 2,
+            ["urgent"] = 3,
+        };
+
+        return demands
+            .Select(demand => demand.Priority)
+            .OrderByDescending(priority => priorityWeight.GetValueOrDefault(priority, -1))
+            .First();
     }
 
     private static ProductionPlanJsonMapResult<IReadOnlyList<ProductionPlanDemandReadModel>> MapDemands(

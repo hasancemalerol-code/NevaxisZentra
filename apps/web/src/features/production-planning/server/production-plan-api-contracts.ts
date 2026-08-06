@@ -14,7 +14,7 @@ export type ApiValidationResult<T> =
     }>
   | ApiValidationFailure;
 
-export type ProductionPlanSummaryApiDto =
+export type ProductionPlanCoreApiDto =
   Readonly<{
     id: string;
     referenceCode: string;
@@ -30,6 +30,27 @@ export type ProductionPlanSummaryApiDto =
     transferStatus: string;
     transferTargetSystem?: string;
     updatedAtUtc: string;
+  }>;
+
+export type ProductionPlanSummaryApiDto =
+  ProductionPlanCoreApiDto &
+  Readonly<{
+    demandCount: number;
+    primaryRequiredQuantity?: number;
+    primaryUnit?: string;
+    primaryProductCode?: string;
+    primaryProductName?: string;
+    highestDemandPriority?: string;
+    riskCount: number;
+    criticalRiskCount: number;
+    blockingRiskCount: number;
+    hasBlockingRisk: boolean;
+    hasMachineAssignment: boolean;
+    hasMoldAssignment: boolean;
+    hasMaterialAssignment: boolean;
+    hasOperatorGroupAssignment: boolean;
+    shiftName?: string;
+    earliestRequestedDeliveryDateUtc?: string;
   }>;
 
 export type ProductionPlanListApiResponse =
@@ -127,22 +148,9 @@ export type ProductionPlanHistoryEntryApiDto =
   }>;
 
 export type ProductionPlanDetailApiDto =
+  ProductionPlanCoreApiDto &
   Readonly<{
-    id: string;
-    referenceCode: string;
-    title: string;
-    facilityId: string;
-    status: string;
-    origin: string;
-    aiGenerated: boolean;
-    confidence: string;
-    plannedStartAtUtc: string;
-    plannedEndAtUtc: string;
-    approvalStatus: string;
-    transferStatus: string;
-    transferTargetSystem?: string;
     createdAtUtc: string;
-    updatedAtUtc: string;
     version: number;
     notes?: string;
     createdBy: string;
@@ -345,19 +353,13 @@ function readRequiredArray(
   };
 }
 
-function parseSummaryDto(
-  value: unknown,
-): ApiValidationResult<ProductionPlanSummaryApiDto> {
-  if (!isRecord(value)) {
-    return createValidationFailure(
-      "Production plan summary must be an object.",
-    );
-  }
-
+function parsePlanCoreDto(
+  value: Record<string, unknown>,
+): ApiValidationResult<ProductionPlanCoreApiDto> {
   const id = readNonEmptyString(
     value,
     "id",
-    "summary.id",
+    "plan.id",
   );
   if (id.status === "failure") {
     return id;
@@ -366,7 +368,7 @@ function parseSummaryDto(
   const referenceCode = readNonEmptyString(
     value,
     "referenceCode",
-    "summary.referenceCode",
+    "plan.referenceCode",
   );
   if (referenceCode.status === "failure") {
     return referenceCode;
@@ -375,7 +377,7 @@ function parseSummaryDto(
   const title = readNonEmptyString(
     value,
     "title",
-    "summary.title",
+    "plan.title",
   );
   if (title.status === "failure") {
     return title;
@@ -384,7 +386,7 @@ function parseSummaryDto(
   const facilityId = readNonEmptyString(
     value,
     "facilityId",
-    "summary.facilityId",
+    "plan.facilityId",
   );
   if (facilityId.status === "failure") {
     return facilityId;
@@ -393,7 +395,7 @@ function parseSummaryDto(
   const status = readNonEmptyString(
     value,
     "status",
-    "summary.status",
+    "plan.status",
   );
   if (status.status === "failure") {
     return status;
@@ -402,7 +404,7 @@ function parseSummaryDto(
   const origin = readNonEmptyString(
     value,
     "origin",
-    "summary.origin",
+    "plan.origin",
   );
   if (origin.status === "failure") {
     return origin;
@@ -411,7 +413,7 @@ function parseSummaryDto(
   const aiGenerated = readRequiredBoolean(
     value,
     "aiGenerated",
-    "summary.aiGenerated",
+    "plan.aiGenerated",
   );
   if (aiGenerated.status === "failure") {
     return aiGenerated;
@@ -420,7 +422,7 @@ function parseSummaryDto(
   const confidence = readNonEmptyString(
     value,
     "confidence",
-    "summary.confidence",
+    "plan.confidence",
   );
   if (confidence.status === "failure") {
     return confidence;
@@ -430,7 +432,7 @@ function parseSummaryDto(
     readRequiredIsoDate(
       value,
       "plannedStartAtUtc",
-      "summary.plannedStartAtUtc",
+      "plan.plannedStartAtUtc",
     );
   if (
     plannedStartAtUtc.status === "failure"
@@ -441,7 +443,7 @@ function parseSummaryDto(
   const plannedEndAtUtc = readRequiredIsoDate(
     value,
     "plannedEndAtUtc",
-    "summary.plannedEndAtUtc",
+    "plan.plannedEndAtUtc",
   );
   if (plannedEndAtUtc.status === "failure") {
     return plannedEndAtUtc;
@@ -450,7 +452,7 @@ function parseSummaryDto(
   const approvalStatus = readNonEmptyString(
     value,
     "approvalStatus",
-    "summary.approvalStatus",
+    "plan.approvalStatus",
   );
   if (approvalStatus.status === "failure") {
     return approvalStatus;
@@ -459,7 +461,7 @@ function parseSummaryDto(
   const transferStatus = readNonEmptyString(
     value,
     "transferStatus",
-    "summary.transferStatus",
+    "plan.transferStatus",
   );
   if (transferStatus.status === "failure") {
     return transferStatus;
@@ -468,7 +470,7 @@ function parseSummaryDto(
   const updatedAtUtc = readRequiredIsoDate(
     value,
     "updatedAtUtc",
-    "summary.updatedAtUtc",
+    "plan.updatedAtUtc",
   );
   if (updatedAtUtc.status === "failure") {
     return updatedAtUtc;
@@ -499,6 +501,177 @@ function parseSummaryDto(
           "transferTargetSystem",
         ),
       updatedAtUtc: updatedAtUtc.value,
+    },
+  };
+}
+
+function parseSummaryDto(
+  value: unknown,
+): ApiValidationResult<ProductionPlanSummaryApiDto> {
+  if (!isRecord(value)) {
+    return createValidationFailure(
+      "Production plan summary must be an object.",
+    );
+  }
+
+  const core = parsePlanCoreDto(value);
+  if (core.status === "failure") {
+    return core;
+  }
+
+  const demandCount = readRequiredNumber(
+    value,
+    "demandCount",
+    "summary.demandCount",
+  );
+  if (demandCount.status === "failure") {
+    return demandCount;
+  }
+
+  const riskCount = readRequiredNumber(
+    value,
+    "riskCount",
+    "summary.riskCount",
+  );
+  if (riskCount.status === "failure") {
+    return riskCount;
+  }
+
+  const criticalRiskCount = readRequiredNumber(
+    value,
+    "criticalRiskCount",
+    "summary.criticalRiskCount",
+  );
+  if (criticalRiskCount.status === "failure") {
+    return criticalRiskCount;
+  }
+
+  const blockingRiskCount = readRequiredNumber(
+    value,
+    "blockingRiskCount",
+    "summary.blockingRiskCount",
+  );
+  if (blockingRiskCount.status === "failure") {
+    return blockingRiskCount;
+  }
+
+  const hasBlockingRisk = readRequiredBoolean(
+    value,
+    "hasBlockingRisk",
+    "summary.hasBlockingRisk",
+  );
+  if (hasBlockingRisk.status === "failure") {
+    return hasBlockingRisk;
+  }
+
+  const hasMachineAssignment = readRequiredBoolean(
+    value,
+    "hasMachineAssignment",
+    "summary.hasMachineAssignment",
+  );
+  if (hasMachineAssignment.status === "failure") {
+    return hasMachineAssignment;
+  }
+
+  const hasMoldAssignment = readRequiredBoolean(
+    value,
+    "hasMoldAssignment",
+    "summary.hasMoldAssignment",
+  );
+  if (hasMoldAssignment.status === "failure") {
+    return hasMoldAssignment;
+  }
+
+  const hasMaterialAssignment = readRequiredBoolean(
+    value,
+    "hasMaterialAssignment",
+    "summary.hasMaterialAssignment",
+  );
+  if (hasMaterialAssignment.status === "failure") {
+    return hasMaterialAssignment;
+  }
+
+  const hasOperatorGroupAssignment =
+    readRequiredBoolean(
+      value,
+      "hasOperatorGroupAssignment",
+      "summary.hasOperatorGroupAssignment",
+    );
+  if (
+    hasOperatorGroupAssignment.status ===
+    "failure"
+  ) {
+    return hasOperatorGroupAssignment;
+  }
+
+  const primaryRequiredQuantityValue =
+    value.primaryRequiredQuantity;
+  const primaryRequiredQuantity =
+    typeof primaryRequiredQuantityValue ===
+      "number" &&
+    Number.isFinite(
+      primaryRequiredQuantityValue,
+    )
+      ? primaryRequiredQuantityValue
+      : undefined;
+
+  const earliestRequestedDeliveryDateUtc =
+    readOptionalIsoDate(
+      value,
+      "earliestRequestedDeliveryDateUtc",
+      "summary.earliestRequestedDeliveryDateUtc",
+    );
+  if (
+    earliestRequestedDeliveryDateUtc.status ===
+    "failure"
+  ) {
+    return earliestRequestedDeliveryDateUtc;
+  }
+
+  return {
+    status: "success",
+    value: {
+      ...core.value,
+      demandCount: demandCount.value,
+      primaryRequiredQuantity,
+      primaryUnit: readOptionalString(
+        value,
+        "primaryUnit",
+      ),
+      primaryProductCode: readOptionalString(
+        value,
+        "primaryProductCode",
+      ),
+      primaryProductName: readOptionalString(
+        value,
+        "primaryProductName",
+      ),
+      highestDemandPriority:
+        readOptionalString(
+          value,
+          "highestDemandPriority",
+        ),
+      riskCount: riskCount.value,
+      criticalRiskCount:
+        criticalRiskCount.value,
+      blockingRiskCount:
+        blockingRiskCount.value,
+      hasBlockingRisk:
+        hasBlockingRisk.value,
+      hasMachineAssignment:
+        hasMachineAssignment.value,
+      hasMoldAssignment:
+        hasMoldAssignment.value,
+      hasMaterialAssignment:
+        hasMaterialAssignment.value,
+      hasOperatorGroupAssignment:
+        hasOperatorGroupAssignment.value,
+      shiftName: readOptionalString(
+        value,
+        "shiftName",
+      ),
+      earliestRequestedDeliveryDateUtc:
+        earliestRequestedDeliveryDateUtc.value,
     },
   };
 }
@@ -1100,9 +1273,9 @@ function parseDetailDto(
     );
   }
 
-  const summary = parseSummaryDto(value);
-  if (summary.status === "failure") {
-    return summary;
+  const core = parsePlanCoreDto(value);
+  if (core.status === "failure") {
+    return core;
   }
 
   const createdAtUtc = readRequiredIsoDate(
@@ -1256,7 +1429,7 @@ function parseDetailDto(
   return {
     status: "success",
     value: {
-      ...summary.value,
+      ...core.value,
       createdAtUtc: createdAtUtc.value,
       version: version.value,
       notes: readOptionalString(

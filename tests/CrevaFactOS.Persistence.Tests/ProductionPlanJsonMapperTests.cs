@@ -1,4 +1,6 @@
+using CrevaFactOS.Persistence.Development;
 using CrevaFactOS.Persistence.ProductionPlanning;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -123,6 +125,90 @@ public sealed class ProductionPlanJsonMapperTests
         Assert.False(result.Succeeded);
         Assert.DoesNotContain("[", result.Failure!.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("{", result.Failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MapListOperationalSummaryCountsDemandsAndRisks()
+    {
+        var result = ProductionPlanJsonMapper.MapListOperationalSummary(
+            """
+            [
+              {"id":"d1","productId":"p1","productName":"Kapak","productCode":"PP-100","requiredQuantity":1200,"unit":"adet","priority":"high"},
+              {"id":"d2","productId":"p2","productName":"Gövde","productCode":"PP-200","requiredQuantity":800,"unit":"adet","priority":"normal"}
+            ]
+            """,
+            """
+            [
+              {"id":"r1","type":"mold-conflict","severity":"critical","title":"Kalıp","description":"Desc","blocking":true},
+              {"id":"r2","type":"delivery-risk","severity":"warning","title":"Teslim","description":"Desc","blocking":false}
+            ]
+            """,
+            """{"machineId":"m1","machineName":"IM-07","moldId":"mo1","moldName":"KLP-42"}""",
+            """{"plannedStartAt":"2026-08-06T05:00:00.000Z","plannedEndAt":"2026-08-07T17:00:00.000Z","shiftName":"A vardiyası"}""");
+
+        Assert.True(result.Succeeded);
+        Assert.NotNull(result.Value);
+        Assert.Equal(2, result.Value!.DemandCount);
+        Assert.Equal(2000, result.Value.TotalRequiredQuantity);
+        Assert.Equal("adet", result.Value.TotalRequiredQuantityUnit);
+        Assert.Equal(1200, result.Value.PrimaryRequiredQuantity);
+        Assert.Equal("high", result.Value.HighestDemandPriority);
+        Assert.Equal(2, result.Value.RiskCount);
+        Assert.Equal(1, result.Value.CriticalRiskCount);
+        Assert.Equal(1, result.Value.BlockingRiskCount);
+        Assert.True(result.Value.HasBlockingRisk);
+        Assert.True(result.Value.HasMachineAssignment);
+        Assert.True(result.Value.HasMoldAssignment);
+        Assert.Equal("A vardiyası", result.Value.ShiftName);
+    }
+
+    [Fact]
+    public void MapListOperationalSummaryRejectsInvalidDemandJson()
+    {
+        var result = ProductionPlanJsonMapper.MapListOperationalSummary(
+            "{}",
+            "[]",
+            "{}",
+            "{}");
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("demands", result.Failure!.Field);
+        Assert.Equal(ProductionPlanReadFailureCodes.InvalidRow, result.Failure.Code);
+    }
+
+    [Fact]
+    public void MapListOperationalSummaryTreatsEmptyArraysAsZeroCounts()
+    {
+        var result = ProductionPlanJsonMapper.MapListOperationalSummary(
+            "[]",
+            "[]",
+            "{}",
+            "{}");
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(0, result.Value!.DemandCount);
+        Assert.Equal(0, result.Value.RiskCount);
+        Assert.False(result.Value.HasBlockingRisk);
+        Assert.False(result.Value.HasMachineAssignment);
+    }
+
+    [Fact]
+    public void MapListOperationalSummaryDoesNotSumMixedUnits()
+    {
+        var result = ProductionPlanJsonMapper.MapListOperationalSummary(
+            """
+            [
+              {"id":"d1","productId":"p1","productName":"A","requiredQuantity":10,"unit":"adet","priority":"normal"},
+              {"id":"d2","productId":"p2","productName":"B","requiredQuantity":5,"unit":"kg","priority":"normal"}
+            ]
+            """,
+            "[]",
+            "{}",
+            "{}");
+
+        Assert.True(result.Succeeded);
+        Assert.Null(result.Value!.TotalRequiredQuantity);
+        Assert.Equal(10, result.Value.PrimaryRequiredQuantity);
     }
 
     private static ProductionPlanDetailReadModel CreateValidDetailRow() => new(

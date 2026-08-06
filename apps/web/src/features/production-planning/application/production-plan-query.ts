@@ -6,6 +6,10 @@ import type {
   ProductionPlanStatus,
   ProductionPlanTargetSystem,
 } from "../domain/production-plan";
+import {
+  hasBlockingProductionPlanRisks,
+  resolveProductionPlanHighestPriority,
+} from "../domain/production-plan";
 import type {
   ProductionPlanRepository,
   ProductionPlanRepositoryListResult,
@@ -61,6 +65,15 @@ function getProductionPlanSearchText(
     .filter(Boolean)
     .join(" ");
 
+  const listSummaryText = [
+    productionPlan.listSummary
+      ?.primaryProductCode,
+    productionPlan.listSummary
+      ?.primaryProductName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const resourceText = [
     productionPlan.resourceAssignment.machineName,
     productionPlan.resourceAssignment.moldName,
@@ -77,6 +90,7 @@ function getProductionPlanSearchText(
       productionPlan.notes,
       productionPlan.aiExplanation,
       demandText,
+      listSummaryText,
       resourceText,
     ]
       .filter(Boolean)
@@ -87,31 +101,16 @@ function getProductionPlanSearchText(
 function getHighestProductionPlanPriority(
   productionPlan: ProductionPlan,
 ): ProductionPlanPriority {
-  const priorityWeight = {
-    low: 0,
-    normal: 1,
-    high: 2,
-    urgent: 3,
-  } satisfies Record<
-    ProductionPlanPriority,
-    number
-  >;
-
-  return productionPlan.demands.reduce(
-    (highestPriority, demand) =>
-      priorityWeight[demand.priority] >
-      priorityWeight[highestPriority]
-        ? demand.priority
-        : highestPriority,
-    "low" as ProductionPlanPriority,
+  return resolveProductionPlanHighestPriority(
+    productionPlan,
   );
 }
 
 function hasBlockingRisk(
   productionPlan: ProductionPlan,
 ): boolean {
-  return productionPlan.risks.some(
-    (risk) => risk.blocking,
+  return hasBlockingProductionPlanRisks(
+    productionPlan,
   );
 }
 

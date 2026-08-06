@@ -36,3 +36,47 @@ There are no native accounting, finance, receivables/payables, payroll, official
 ## Deferred work
 
 UI-01 performs no API fetching and contains no real factory data, full dashboard, chart, authentication UI, tenant-switcher behavior, CRUD workflow, RabbitMQ publishing, connector, AI agent, Teams messaging, ERP screen, or machine control.
+
+## Production Planning — development pilot (read-only)
+
+The Planlama module supports three server runtime modes via `CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE`:
+
+| Mode | Purpose |
+| --- | --- |
+| `development-preview` | Static preview data; no API |
+| `development-api` | Real API with development identity headers |
+| `api` | Production mode (requires real auth — not implemented in this pilot) |
+
+### Prerequisites
+
+1. PostgreSQL running locally with migrations applied.
+2. API running with `DevelopmentPilot:Enabled=true` (see [apps/api/README.md](../api/README.md)).
+3. Pilot facility id: `bb000001-0005-4000-8000-000000000005`.
+
+### Web development-api mode (local `.env.local` — do not commit)
+
+```bash
+CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-api
+CREVAFACTOS_API_BASE_URL=http://127.0.0.1:5000
+CREVAFACTOS_DEV_AUTH_ISSUER=crevafactos-dev
+CREVAFACTOS_DEV_AUTH_SUBJECT=planning-pilot-user
+CREVAFACTOS_DEV_TENANT_KEY=dev-pilot-tenant
+CREVAFACTOS_DEV_FACILITY_ID=bb000001-0005-4000-8000-000000000005
+```
+
+Start the web app:
+
+```bash
+pnpm --filter @crevafactos/web dev
+```
+
+### URLs
+
+- List: `/planlama`
+- Detail: `/planlama/{planId}`
+
+### Return to preview mode
+
+Set `CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-preview` or remove the variable.
+
+**Production-ready değildir:** production auth bridge and multi-facility selection are not part of this pilot.

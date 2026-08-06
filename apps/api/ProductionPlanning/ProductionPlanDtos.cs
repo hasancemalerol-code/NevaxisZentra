@@ -14,7 +14,23 @@ public sealed record ProductionPlanSummaryDto(
     string ApprovalStatus,
     string TransferStatus,
     string? TransferTargetSystem,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    int DemandCount,
+    decimal? PrimaryRequiredQuantity,
+    string? PrimaryUnit,
+    string? PrimaryProductCode,
+    string? PrimaryProductName,
+    string? HighestDemandPriority,
+    int RiskCount,
+    int CriticalRiskCount,
+    int BlockingRiskCount,
+    bool HasBlockingRisk,
+    bool HasMachineAssignment,
+    bool HasMoldAssignment,
+    bool HasMaterialAssignment,
+    bool HasOperatorGroupAssignment,
+    string? ShiftName,
+    DateTimeOffset? EarliestRequestedDeliveryDateUtc);
 
 public sealed record ProductionPlanDemandDto(
     string Id,

@@ -142,7 +142,23 @@ public sealed class ProductionPlanReadService(IProductionPlanReadRepository repo
             model.ApprovalStatus,
             model.TransferStatus,
             model.TransferTargetSystem,
-            model.UpdatedAtUtc);
+            model.UpdatedAtUtc,
+            model.DemandCount,
+            model.PrimaryRequiredQuantity,
+            model.PrimaryUnit,
+            model.PrimaryProductCode,
+            model.PrimaryProductName,
+            model.HighestDemandPriority,
+            model.RiskCount,
+            model.CriticalRiskCount,
+            model.BlockingRiskCount,
+            model.HasBlockingRisk,
+            model.HasMachineAssignment,
+            model.HasMoldAssignment,
+            model.HasMaterialAssignment,
+            model.HasOperatorGroupAssignment,
+            model.ShiftName,
+            model.EarliestRequestedDeliveryDateUtc);
 
     private static ProductionPlanDetailDto MapDetail(ProductionPlanDetailMappedReadModel model) =>
         new(

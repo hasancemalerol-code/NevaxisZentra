@@ -29,11 +29,11 @@ public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
         try
         {
             var query = ApplyListFilters(dbContext.ProductionPlans.AsNoTracking(), input);
-            var items = await query
+            var rows = await query
                 .OrderByDescending(plan => plan.UpdatedAtUtc)
                 .ThenBy(plan => plan.Id)
                 .Take(input.Limit)
-                .Select(plan => new ProductionPlanSummaryReadModel(
+                .Select(plan => new ProductionPlanListSourceRow(
                     plan.Id,
                     plan.ReferenceCode,
                     plan.Title,
@@ -49,8 +49,64 @@ public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
                     plan.TransferTargetSystem.HasValue
                         ? ProductionPlanValueConversions.ToStorage(plan.TransferTargetSystem.Value)
                         : null,
-                    plan.UpdatedAtUtc))
+                    plan.UpdatedAtUtc,
+                    plan.DemandsJson,
+                    plan.RisksJson,
+                    plan.ResourceAssignmentJson,
+                    plan.TimeWindowJson))
                 .ToListAsync(cancellationToken);
+
+            var items = new List<ProductionPlanSummaryReadModel>(rows.Count);
+            foreach (var row in rows)
+            {
+                var operationalSummary = ProductionPlanJsonMapper.MapListOperationalSummary(
+                    row.DemandsJson,
+                    row.RisksJson,
+                    row.ResourceAssignmentJson,
+                    row.TimeWindowJson);
+
+                if (!operationalSummary.Succeeded)
+                {
+                    return ProductionPlanListReadResult.Fail(
+                        ProductionPlanReadFailure.InvalidRow(
+                            operationalSummary.Failure!.Message));
+                }
+
+                var summary = operationalSummary.Value!;
+                items.Add(new ProductionPlanSummaryReadModel(
+                    row.Id,
+                    row.ReferenceCode,
+                    row.Title,
+                    row.FacilityId,
+                    row.Status,
+                    row.Origin,
+                    row.AiGenerated,
+                    row.Confidence,
+                    row.PlannedStartAtUtc,
+                    row.PlannedEndAtUtc,
+                    row.ApprovalStatus,
+                    row.TransferStatus,
+                    row.TransferTargetSystem,
+                    row.UpdatedAtUtc,
+                    summary.DemandCount,
+                    summary.TotalRequiredQuantity,
+                    summary.TotalRequiredQuantityUnit,
+                    summary.PrimaryRequiredQuantity,
+                    summary.PrimaryUnit,
+                    summary.PrimaryProductCode,
+                    summary.PrimaryProductName,
+                    summary.HighestDemandPriority,
+                    summary.RiskCount,
+                    summary.CriticalRiskCount,
+                    summary.BlockingRiskCount,
+                    summary.HasBlockingRisk,
+                    summary.HasMachineAssignment,
+                    summary.HasMoldAssignment,
+                    summary.HasMaterialAssignment,
+                    summary.HasOperatorGroupAssignment,
+                    summary.ShiftName,
+                    summary.EarliestRequestedDeliveryDateUtc));
+            }
 
             return ProductionPlanListReadResult.Success(items);
         }
@@ -185,6 +241,26 @@ public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
         return null;
     }
 }
+
+internal sealed record ProductionPlanListSourceRow(
+    Guid Id,
+    string ReferenceCode,
+    string Title,
+    Guid FacilityId,
+    string Status,
+    string Origin,
+    bool AiGenerated,
+    string Confidence,
+    DateTimeOffset PlannedStartAtUtc,
+    DateTimeOffset PlannedEndAtUtc,
+    string ApprovalStatus,
+    string TransferStatus,
+    string? TransferTargetSystem,
+    DateTimeOffset UpdatedAtUtc,
+    string DemandsJson,
+    string RisksJson,
+    string ResourceAssignmentJson,
+    string TimeWindowJson);
 
 public sealed class UnavailableProductionPlanReadRepository : IProductionPlanReadRepository
 {

@@ -218,16 +218,30 @@ export function formatProductionPlanTimeWindow(
 export function formatProductionPlanRiskCount(
   productionPlan: ProductionPlan,
 ): string {
-  const criticalCount =
-    productionPlan.risks.filter(
-      (risk) =>
-        risk.severity === "critical",
-    ).length;
+  const listSummary =
+    productionPlan.listSummary;
 
   const blockingCount =
-    productionPlan.risks.filter(
-      (risk) => risk.blocking,
-    ).length;
+    productionPlan.risks.length > 0
+      ? productionPlan.risks.filter(
+          (risk) => risk.blocking,
+        ).length
+      : (listSummary?.blockingRiskCount ??
+        0);
+
+  const criticalCount =
+    productionPlan.risks.length > 0
+      ? productionPlan.risks.filter(
+          (risk) =>
+            risk.severity === "critical",
+        ).length
+      : (listSummary?.criticalRiskCount ??
+        0);
+
+  const totalRiskCount =
+    productionPlan.risks.length > 0
+      ? productionPlan.risks.length
+      : (listSummary?.riskCount ?? 0);
 
   if (blockingCount > 0) {
     return `${blockingCount} engelleyici risk`;
@@ -237,9 +251,9 @@ export function formatProductionPlanRiskCount(
     return `${criticalCount} kritik risk`;
   }
 
-  if (productionPlan.risks.length === 0) {
+  if (totalRiskCount === 0) {
     return "Risk bulunmuyor";
   }
 
-  return `${productionPlan.risks.length} risk`;
+  return `${totalRiskCount} risk`;
 }

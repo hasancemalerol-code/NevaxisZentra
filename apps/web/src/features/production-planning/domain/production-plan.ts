@@ -142,6 +142,25 @@ export type ProductionPlanTransfer =
     errorMessage?: string;
   }>;
 
+export type ProductionPlanListSummary =
+  Readonly<{
+    demandCount: number;
+    primaryRequiredQuantity?: number;
+    primaryUnit?: string;
+    primaryProductCode?: string;
+    primaryProductName?: string;
+    highestDemandPriority?: ProductionPlanPriority;
+    riskCount: number;
+    criticalRiskCount: number;
+    blockingRiskCount: number;
+    hasBlockingRisk: boolean;
+    hasMachineAssignment: boolean;
+    hasMoldAssignment: boolean;
+    hasMaterialAssignment: boolean;
+    hasOperatorGroupAssignment: boolean;
+    shiftName?: string;
+  }>;
+
 export type ProductionPlan =
   Readonly<{
     id: string;
@@ -166,13 +185,53 @@ export type ProductionPlan =
     aiGenerated: boolean;
     aiExplanation?: string;
     notes?: string;
+    listSummary?: ProductionPlanListSummary;
   }>;
 
 export function hasBlockingProductionPlanRisks(
   productionPlan: ProductionPlan,
 ): boolean {
-  return productionPlan.risks.some(
-    (risk) => risk.blocking,
+  if (
+    productionPlan.risks.some(
+      (risk) => risk.blocking,
+    )
+  ) {
+    return true;
+  }
+
+  return (
+    productionPlan.listSummary
+      ?.hasBlockingRisk ?? false
+  );
+}
+
+export function resolveProductionPlanHighestPriority(
+  productionPlan: ProductionPlan,
+): ProductionPlanPriority {
+  const priorityWeight = {
+    low: 0,
+    normal: 1,
+    high: 2,
+    urgent: 3,
+  } satisfies Record<
+    ProductionPlanPriority,
+    number
+  >;
+
+  if (productionPlan.demands.length > 0) {
+    return productionPlan.demands.reduce(
+      (highestPriority, demand) =>
+        priorityWeight[demand.priority] >
+        priorityWeight[highestPriority]
+          ? demand.priority
+          : highestPriority,
+      "low" as ProductionPlanPriority,
+    );
+  }
+
+  return (
+    productionPlan.listSummary
+      ?.highestDemandPriority ?? "low"
   );
 }
 

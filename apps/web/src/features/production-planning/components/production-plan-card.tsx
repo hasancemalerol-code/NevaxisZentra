@@ -19,6 +19,10 @@ import type {
   ProductionPlanStatus,
 } from "../domain/production-plan";
 import {
+  hasBlockingProductionPlanRisks,
+  resolveProductionPlanHighestPriority,
+} from "../domain/production-plan";
+import {
   formatProductionPlanConfidence,
   formatProductionPlanQuantity,
   formatProductionPlanRiskCount,
@@ -104,29 +108,6 @@ function getRiskTone(
   }
 }
 
-function getHighestPriority(
-  productionPlan: ProductionPlan,
-): ProductionPlanPriority {
-  const weight = {
-    low: 0,
-    normal: 1,
-    high: 2,
-    urgent: 3,
-  } satisfies Record<
-    ProductionPlanPriority,
-    number
-  >;
-
-  return productionPlan.demands.reduce(
-    (highest, demand) =>
-      weight[demand.priority] >
-      weight[highest]
-        ? demand.priority
-        : highest,
-    "low" as ProductionPlanPriority,
-  );
-}
-
 function getHighestRiskSeverity(
   productionPlan: ProductionPlan,
 ): ProductionPlanRiskSeverity | null {
@@ -139,28 +120,52 @@ function getHighestRiskSeverity(
     number
   >;
 
-  return productionPlan.risks.reduce<
-    ProductionPlanRiskSeverity | null
-  >(
-    (highest, risk) => {
-      if (!highest) {
-        return risk.severity;
-      }
+  const highestFromRisks =
+    productionPlan.risks.reduce<
+      ProductionPlanRiskSeverity | null
+    >(
+      (highest, risk) => {
+        if (!highest) {
+          return risk.severity;
+        }
 
-      return weight[risk.severity] >
-        weight[highest]
-        ? risk.severity
-        : highest;
-    },
-    null,
-  );
+        return weight[risk.severity] >
+          weight[highest]
+          ? risk.severity
+          : highest;
+      },
+      null,
+    );
+
+  if (highestFromRisks) {
+    return highestFromRisks;
+  }
+
+  const listSummary =
+    productionPlan.listSummary;
+
+  if (
+    (listSummary?.blockingRiskCount ?? 0) >
+      0 ||
+    (listSummary?.criticalRiskCount ?? 0) > 0
+  ) {
+    return "critical";
+  }
+
+  if ((listSummary?.riskCount ?? 0) > 0) {
+    return "warning";
+  }
+
+  return null;
 }
 
 export function ProductionPlanCard({
   productionPlan,
 }: ProductionPlanCardProps) {
   const highestPriority =
-    getHighestPriority(productionPlan);
+    resolveProductionPlanHighestPriority(
+      productionPlan,
+    );
 
   const highestRiskSeverity =
     getHighestRiskSeverity(productionPlan);
@@ -168,10 +173,21 @@ export function ProductionPlanCard({
   const primaryDemand =
     productionPlan.demands[0];
 
+  const listSummary =
+    productionPlan.listSummary;
+
   const blockingRiskCount =
-    productionPlan.risks.filter(
-      (risk) => risk.blocking,
-    ).length;
+    productionPlan.risks.length > 0
+      ? productionPlan.risks.filter(
+          (risk) => risk.blocking,
+        ).length
+      : (listSummary?.blockingRiskCount ??
+        0);
+
+  const hasBlockingRisk =
+    hasBlockingProductionPlanRisks(
+      productionPlan,
+    );
 
   return (
     <Card className="production-plan-card">
@@ -247,12 +263,23 @@ export function ProductionPlanCard({
                     primaryDemand.requiredQuantity,
                     primaryDemand.unit,
                   )
-                : "Talep bulunmuyor"}
+                : listSummary?.primaryRequiredQuantity !==
+                    undefined
+                  ? formatProductionPlanQuantity(
+                      listSummary.primaryRequiredQuantity,
+                      listSummary.primaryUnit,
+                    )
+                  : (listSummary?.demandCount ??
+                        0) > 0
+                    ? `${listSummary?.demandCount ?? 0} talep`
+                    : "Talep bulunmuyor"}
             </strong>
 
             <small>
               {primaryDemand?.productCode ??
                 primaryDemand?.productName ??
+                listSummary?.primaryProductCode ??
+                listSummary?.primaryProductName ??
                 "Ürün belirlenmedi"}
             </small>
           </div>
@@ -273,6 +300,7 @@ export function ProductionPlanCard({
             <small>
               {productionPlan.timeWindow
                 .shiftName ??
+                listSummary?.shiftName ??
                 "Vardiya belirlenmedi"}
             </small>
           </div>
@@ -337,10 +365,12 @@ export function ProductionPlanCard({
             </strong>
           </div>
 
-          {highestRiskSeverity ? (
+          {highestRiskSeverity ||
+          hasBlockingRisk ? (
             <Badge
               tone={getRiskTone(
-                highestRiskSeverity,
+                highestRiskSeverity ??
+                  "critical",
               )}
             >
               {blockingRiskCount > 0

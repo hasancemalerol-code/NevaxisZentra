@@ -88,6 +88,7 @@ const requiredVerifierFiles = [
   "scripts/verify-production-planning-api-bridge.mjs",
   "scripts/verify-production-planning-server-boundary.mjs",
   "scripts/verify-production-planning-runtime-mode.mjs",
+  "scripts/verify-production-planning-development-pilot.mjs",
 ];
 
 for (
@@ -340,6 +341,7 @@ const additionalVerifiers = [
   "scripts/verify-production-planning-api-bridge.mjs",
   "scripts/verify-production-planning-server-boundary.mjs",
   "scripts/verify-production-planning-runtime-mode.mjs",
+  "scripts/verify-production-planning-development-pilot.mjs",
 ];
 
 for (const verifier of additionalVerifiers) {

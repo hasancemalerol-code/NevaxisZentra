@@ -367,7 +367,23 @@ public sealed class ProductionPlanningApiEndpointTests
                     "not-required",
                     "not-started",
                     null,
-                    DateTimeOffset.UtcNow))
+                    DateTimeOffset.UtcNow,
+                    DemandCount: 1,
+                    PrimaryRequiredQuantity: 100,
+                    PrimaryUnit: "adet",
+                    PrimaryProductCode: "PP-100",
+                    PrimaryProductName: "Pilot part",
+                    HighestDemandPriority: "normal",
+                    RiskCount: 0,
+                    CriticalRiskCount: 0,
+                    BlockingRiskCount: 0,
+                    HasBlockingRisk: false,
+                    HasMachineAssignment: true,
+                    HasMoldAssignment: true,
+                    HasMaterialAssignment: false,
+                    HasOperatorGroupAssignment: false,
+                    ShiftName: "A vardiyası",
+                    EarliestRequestedDeliveryDateUtc: null))
                 .ToArray();
 
             return Task.FromResult(

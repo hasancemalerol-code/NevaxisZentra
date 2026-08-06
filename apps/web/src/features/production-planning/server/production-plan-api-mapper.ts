@@ -20,6 +20,7 @@ import type {
 } from "../domain/production-plan";
 import type {
   ProductionPlanDetailApiDto,
+  ProductionPlanCoreApiDto,
   ProductionPlanSummaryApiDto,
   ApiValidationFailure,
   ApiValidationResult,
@@ -231,7 +232,8 @@ function mapTransferFromSummary(
 }
 
 function mapSummaryCoreFields(
-  summary: ProductionPlanSummaryApiDto,
+  summary: ProductionPlanCoreApiDto,
+  timeWindowShiftName?: string,
 ): ApiValidationResult<
   Pick<
     ProductionPlan,
@@ -296,6 +298,7 @@ function mapSummaryCoreFields(
         summary.plannedStartAtUtc,
       plannedEndAt:
         summary.plannedEndAtUtc,
+      shiftName: timeWindowShiftName,
     };
 
   return {
@@ -321,11 +324,48 @@ export function mapProductionPlanSummaryApiDtoToDomain(
 ): ApiValidationResult<ProductionPlan> {
   const coreFields = mapSummaryCoreFields(
     summary,
+    summary.shiftName,
   );
 
   if (coreFields.status === "failure") {
     return coreFields;
   }
+
+  let highestDemandPriority:
+    | ProductionPlanPriority
+    | undefined;
+
+  if (summary.highestDemandPriority) {
+    const parsedPriority = parseEnumValue(
+      summary.highestDemandPriority,
+      PRODUCTION_PLAN_PRIORITIES,
+      "summary.highestDemandPriority",
+    );
+
+    if (parsedPriority.status === "failure") {
+      return parsedPriority;
+    }
+
+    highestDemandPriority =
+      parsedPriority.value;
+  }
+
+  const resourceAssignment: ProductionPlanResourceAssignment =
+    {
+      machineName: summary.hasMachineAssignment
+        ? "Atandı"
+        : undefined,
+      moldName: summary.hasMoldAssignment
+        ? "Atandı"
+        : undefined,
+      materialName: summary.hasMaterialAssignment
+        ? "Atandı"
+        : undefined,
+      operatorGroupName:
+        summary.hasOperatorGroupAssignment
+          ? "Atandı"
+          : undefined,
+    };
 
   return {
     status: "success",
@@ -336,10 +376,37 @@ export function mapProductionPlanSummaryApiDtoToDomain(
       createdBy: "",
       sourceReferences: [],
       demands: [],
-      resourceAssignment: {},
+      resourceAssignment,
       risks: [],
       notes: undefined,
       aiExplanation: undefined,
+      listSummary: {
+        demandCount: summary.demandCount,
+        primaryRequiredQuantity:
+          summary.primaryRequiredQuantity,
+        primaryUnit: summary.primaryUnit,
+        primaryProductCode:
+          summary.primaryProductCode,
+        primaryProductName:
+          summary.primaryProductName,
+        highestDemandPriority,
+        riskCount: summary.riskCount,
+        criticalRiskCount:
+          summary.criticalRiskCount,
+        blockingRiskCount:
+          summary.blockingRiskCount,
+        hasBlockingRisk:
+          summary.hasBlockingRisk,
+        hasMachineAssignment:
+          summary.hasMachineAssignment,
+        hasMoldAssignment:
+          summary.hasMoldAssignment,
+        hasMaterialAssignment:
+          summary.hasMaterialAssignment,
+        hasOperatorGroupAssignment:
+          summary.hasOperatorGroupAssignment,
+        shiftName: summary.shiftName,
+      },
     },
   };
 }
@@ -549,6 +616,7 @@ export function mapProductionPlanDetailApiDtoToDomain(
 ): ApiValidationResult<ProductionPlan> {
   const coreFields = mapSummaryCoreFields(
     detail,
+    detail.timeWindow.shiftName,
   );
 
   if (coreFields.status === "failure") {

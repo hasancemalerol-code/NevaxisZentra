@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 import type { ProductionPlan } from "../domain/production-plan";
+import { hasBlockingProductionPlanRisks } from "../domain/production-plan";
 import { ProductionPlanCard } from "./production-plan-card";
 
 type ProductionPlanWorkspaceProps = Readonly<{
@@ -21,10 +22,7 @@ export function ProductionPlanWorkspace({
 }: ProductionPlanWorkspaceProps) {
   const blockingPlanCount =
     productionPlans.filter(
-      (productionPlan) =>
-        productionPlan.risks.some(
-          (risk) => risk.blocking,
-        ),
+      hasBlockingProductionPlanRisks,
     ).length;
 
   if (productionPlans.length === 0) {
