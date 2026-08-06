@@ -13,6 +13,7 @@ public static class PermissionPolicies
     public const string SystemAiDecisionRead = "Permission:" + InfrastructurePermissionKeys.SystemAiDecisionRead;
     public const string SystemOutboxWrite = "Permission:" + InfrastructurePermissionKeys.SystemOutboxWrite;
     public const string SystemOutboxRead = "Permission:" + InfrastructurePermissionKeys.SystemOutboxRead;
+    public const string ProductionPlanningRead = "Permission:" + ProductionPlanningPermissionKeys.Read;
 
     public static void AddInfrastructurePolicies(AuthorizationOptions options)
     {
@@ -24,10 +25,18 @@ public static class PermissionPolicies
         Add(options, SystemAiDecisionRead, InfrastructurePermissionKeys.SystemAiDecisionRead);
         Add(options, SystemOutboxWrite, InfrastructurePermissionKeys.SystemOutboxWrite);
         Add(options, SystemOutboxRead, InfrastructurePermissionKeys.SystemOutboxRead);
+        AddProductionPlanningReadPolicy(options);
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();
     }
+
+    public static void AddProductionPlanningReadPolicy(AuthorizationOptions options) =>
+        options.AddPolicy(
+            ProductionPlanningRead,
+            policy => policy
+                .RequireAuthenticatedUser()
+                .AddRequirements(new ProductionPlanningReadRequirement()));
 
     private static void Add(AuthorizationOptions options, string policyName, string permissionKey) =>
         options.AddPolicy(

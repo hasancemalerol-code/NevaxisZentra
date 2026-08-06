@@ -10,6 +10,7 @@ using CrevaFactOS.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using CrevaFactOS.Api.Audit;
+using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
@@ -27,6 +28,7 @@ builder.Services.AddCrevaFactOSAuthentication(
     builder.Environment);
 builder.Services.AddAuthorization(PermissionPolicies.AddInfrastructurePolicies);
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddCrevaFactOSFacilityAccess();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 var app = builder.Build();

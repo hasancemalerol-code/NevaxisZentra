@@ -62,6 +62,7 @@ public sealed class PersistenceInfrastructureTests
                 typeof(AiDecisionRecord),
                 typeof(AuditRecord),
                 typeof(Facility),
+                typeof(FacilityMembership),
                 typeof(IdentitySubject),
                 typeof(OutboxMessage),
                 typeof(PermissionDefinition),
@@ -82,7 +83,7 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(8, migrations.Length);
+        Assert.Equal(9, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
@@ -91,6 +92,7 @@ public sealed class PersistenceInfrastructureTests
         Assert.EndsWith("_AddAiDecisionLedgerFoundation", migrations[5], StringComparison.Ordinal);
         Assert.EndsWith("_AddTransactionalOutboxFoundation", migrations[6], StringComparison.Ordinal);
         Assert.EndsWith("_AddFacilityAndProductionPlanningFoundation", migrations[7], StringComparison.Ordinal);
+        Assert.EndsWith("_AddFacilityMembershipAndPlanningReadPermission", migrations[8], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);
