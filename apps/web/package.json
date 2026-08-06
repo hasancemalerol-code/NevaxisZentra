@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/page.test.tsx"
+    "test": "tsx --test tests/page.test.tsx",
+    "verify:production-planning": "node scripts/verify-production-planning-release.mjs"
   },
   "dependencies": {
     "lucide-react": "1.27.0",
