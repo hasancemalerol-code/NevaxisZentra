@@ -1,17 +1,29 @@
 using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.Facilities;
+using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Api.Facilities;
 
-public sealed class PostgreSqlFacilityAccessReadStore(CrevaFactOSDbContext dbContext)
+public sealed class PostgreSqlFacilityAccessReadStore(
+    CrevaFactOSDbContext dbContext,
+    TenantDatabaseSession tenantDatabaseSession)
     : IFacilityAccessReadStore
 {
-    public async Task<FacilityAccessProbeResult> ProbeAsync(
+    public Task<FacilityAccessProbeResult> ProbeAsync(
         Guid tenantId,
         Guid facilityId,
         Guid tenantMembershipId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => ProbeCoreAsync(tenantId, facilityId, tenantMembershipId, ct),
+            cancellationToken);
+
+    private async Task<FacilityAccessProbeResult> ProbeCoreAsync(
+        Guid tenantId,
+        Guid facilityId,
+        Guid tenantMembershipId,
+        CancellationToken cancellationToken)
     {
         var facilityExistsAndActive = await dbContext.Facilities
             .AsNoTracking()

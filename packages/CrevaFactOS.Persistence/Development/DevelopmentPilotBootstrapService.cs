@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 namespace CrevaFactOS.Persistence.Development;
 
 internal sealed class DevelopmentPilotBootstrapService(
-    CrevaFactOSDbContext dbContext,
     IOptions<DevelopmentPilotOptions> options)
     : IDevelopmentPilotBootstrapService
 {
@@ -29,45 +28,63 @@ internal sealed class DevelopmentPilotBootstrapService(
                 ProductionPlanCount: 0);
         }
 
+        var bootstrapContext =
+            DevelopmentPilotBootstrapDbContextFactory.Create();
+        await using var dbContext = bootstrapContext.DbContext;
+
         await using var transaction =
             await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         var seedTimestampUtc = DateTimeOffset.UtcNow;
         var tenant = await EnsureTenantAsync(
+            dbContext,
             pilotOptions,
             seedTimestampUtc,
             cancellationToken);
+
+        bootstrapContext.TenantContextAccessor.Set(
+            new TenantContext(
+                tenant.Id,
+                tenant.TenantKey,
+                DevelopmentPilotIds.TenantMembershipId));
         var identitySubject = await EnsureIdentitySubjectAsync(
+            dbContext,
             pilotOptions,
             seedTimestampUtc,
             cancellationToken);
         var tenantMembership = await EnsureTenantMembershipAsync(
+            dbContext,
             tenant.Id,
             identitySubject.Id,
             seedTimestampUtc,
             cancellationToken);
         var tenantRole = await EnsureTenantRoleAsync(
+            dbContext,
             tenant.Id,
             pilotOptions,
             seedTimestampUtc,
             cancellationToken);
         await EnsurePlanningReadPermissionAssignmentAsync(
+            dbContext,
             tenant.Id,
             tenantRole.Id,
             seedTimestampUtc,
             cancellationToken);
         await EnsureMembershipRoleAsync(
+            dbContext,
             tenant.Id,
             tenantMembership.Id,
             tenantRole.Id,
             seedTimestampUtc,
             cancellationToken);
         var facility = await EnsureFacilityAsync(
+            dbContext,
             tenant.Id,
             pilotOptions,
             seedTimestampUtc,
             cancellationToken);
         await EnsureFacilityMembershipAsync(
+            dbContext,
             tenant.Id,
             facility.Id,
             tenantMembership.Id,
@@ -78,6 +95,7 @@ internal sealed class DevelopmentPilotBootstrapService(
         if (pilotOptions.ProductionPlanSeedEnabled)
         {
             productionPlanCount = await EnsureProductionPlansAsync(
+                dbContext,
                 tenant.Id,
                 facility.Id,
                 pilotOptions.DevelopmentSubject,
@@ -97,7 +115,8 @@ internal sealed class DevelopmentPilotBootstrapService(
             productionPlanCount);
     }
 
-    private async Task<Tenant> EnsureTenantAsync(
+    private static async Task<Tenant> EnsureTenantAsync(
+        CrevaFactOSDbContext dbContext,
         DevelopmentPilotOptions pilotOptions,
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
@@ -127,7 +146,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         return tenant;
     }
 
-    private async Task<IdentitySubject> EnsureIdentitySubjectAsync(
+    private static async Task<IdentitySubject> EnsureIdentitySubjectAsync(
+        CrevaFactOSDbContext dbContext,
         DevelopmentPilotOptions pilotOptions,
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
@@ -160,7 +180,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         return identitySubject;
     }
 
-    private async Task<TenantMembership> EnsureTenantMembershipAsync(
+    private static async Task<TenantMembership> EnsureTenantMembershipAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         Guid identitySubjectId,
         DateTimeOffset seedTimestampUtc,
@@ -192,7 +213,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         return membership;
     }
 
-    private async Task<TenantRole> EnsureTenantRoleAsync(
+    private static async Task<TenantRole> EnsureTenantRoleAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         DevelopmentPilotOptions pilotOptions,
         DateTimeOffset seedTimestampUtc,
@@ -225,7 +247,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         return tenantRole;
     }
 
-    private async Task EnsurePlanningReadPermissionAssignmentAsync(
+    private static async Task EnsurePlanningReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         Guid tenantRoleId,
         DateTimeOffset seedTimestampUtc,
@@ -271,7 +294,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         });
     }
 
-    private async Task EnsureMembershipRoleAsync(
+    private static async Task EnsureMembershipRoleAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         Guid tenantMembershipId,
         Guid tenantRoleId,
@@ -300,7 +324,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         });
     }
 
-    private async Task<Facility> EnsureFacilityAsync(
+    private static async Task<Facility> EnsureFacilityAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         DevelopmentPilotOptions pilotOptions,
         DateTimeOffset seedTimestampUtc,
@@ -339,7 +364,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         return facility;
     }
 
-    private async Task EnsureFacilityMembershipAsync(
+    private static async Task EnsureFacilityMembershipAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         Guid facilityId,
         Guid tenantMembershipId,
@@ -373,7 +399,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         });
     }
 
-    private async Task<int> EnsureProductionPlansAsync(
+    private static async Task<int> EnsureProductionPlansAsync(
+        CrevaFactOSDbContext dbContext,
         Guid tenantId,
         Guid facilityId,
         string createdBy,

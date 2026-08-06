@@ -1,9 +1,12 @@
 using CrevaFactOS.Persistence;
+using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.ProductionPlanning;
 
-public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
+public sealed class ProductionPlanReadRepository(
+    CrevaFactOSDbContext dbContext,
+    TenantDatabaseSession tenantDatabaseSession)
     : IProductionPlanReadRepository
 {
     public const int DefaultLimit = 50;
@@ -28,87 +31,92 @@ public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
 
         try
         {
-            var query = ApplyListFilters(dbContext.ProductionPlans.AsNoTracking(), input);
-            var rows = await query
-                .OrderByDescending(plan => plan.UpdatedAtUtc)
-                .ThenBy(plan => plan.Id)
-                .Take(input.Limit)
-                .Select(plan => new ProductionPlanListSourceRow(
-                    plan.Id,
-                    plan.ReferenceCode,
-                    plan.Title,
-                    plan.FacilityId,
-                    ProductionPlanValueConversions.ToStorage(plan.Status),
-                    ProductionPlanValueConversions.ToStorage(plan.Origin),
-                    plan.AiGenerated,
-                    ProductionPlanValueConversions.ToStorage(plan.Confidence),
-                    plan.PlannedStartAtUtc,
-                    plan.PlannedEndAtUtc,
-                    ProductionPlanValueConversions.ToStorage(plan.ApprovalStatus),
-                    ProductionPlanValueConversions.ToStorage(plan.TransferStatus),
-                    plan.TransferTargetSystem.HasValue
-                        ? ProductionPlanValueConversions.ToStorage(plan.TransferTargetSystem.Value)
-                        : null,
-                    plan.UpdatedAtUtc,
-                    plan.DemandsJson,
-                    plan.RisksJson,
-                    plan.ResourceAssignmentJson,
-                    plan.TimeWindowJson))
-                .ToListAsync(cancellationToken);
-
-            var items = new List<ProductionPlanSummaryReadModel>(rows.Count);
-            foreach (var row in rows)
-            {
-                var operationalSummary = ProductionPlanJsonMapper.MapListOperationalSummary(
-                    row.DemandsJson,
-                    row.RisksJson,
-                    row.ResourceAssignmentJson,
-                    row.TimeWindowJson);
-
-                if (!operationalSummary.Succeeded)
+            return await tenantDatabaseSession.ExecuteReadAsync(
+                async cancellationToken =>
                 {
-                    return ProductionPlanListReadResult.Fail(
-                        ProductionPlanReadFailure.InvalidRow(
-                            operationalSummary.Failure!.Message));
-                }
+                    var query = ApplyListFilters(dbContext.ProductionPlans.AsNoTracking(), input);
+                    var rows = await query
+                        .OrderByDescending(plan => plan.UpdatedAtUtc)
+                        .ThenBy(plan => plan.Id)
+                        .Take(input.Limit)
+                        .Select(plan => new ProductionPlanListSourceRow(
+                            plan.Id,
+                            plan.ReferenceCode,
+                            plan.Title,
+                            plan.FacilityId,
+                            ProductionPlanValueConversions.ToStorage(plan.Status),
+                            ProductionPlanValueConversions.ToStorage(plan.Origin),
+                            plan.AiGenerated,
+                            ProductionPlanValueConversions.ToStorage(plan.Confidence),
+                            plan.PlannedStartAtUtc,
+                            plan.PlannedEndAtUtc,
+                            ProductionPlanValueConversions.ToStorage(plan.ApprovalStatus),
+                            ProductionPlanValueConversions.ToStorage(plan.TransferStatus),
+                            plan.TransferTargetSystem.HasValue
+                                ? ProductionPlanValueConversions.ToStorage(plan.TransferTargetSystem.Value)
+                                : null,
+                            plan.UpdatedAtUtc,
+                            plan.DemandsJson,
+                            plan.RisksJson,
+                            plan.ResourceAssignmentJson,
+                            plan.TimeWindowJson))
+                        .ToListAsync(cancellationToken);
 
-                var summary = operationalSummary.Value!;
-                items.Add(new ProductionPlanSummaryReadModel(
-                    row.Id,
-                    row.ReferenceCode,
-                    row.Title,
-                    row.FacilityId,
-                    row.Status,
-                    row.Origin,
-                    row.AiGenerated,
-                    row.Confidence,
-                    row.PlannedStartAtUtc,
-                    row.PlannedEndAtUtc,
-                    row.ApprovalStatus,
-                    row.TransferStatus,
-                    row.TransferTargetSystem,
-                    row.UpdatedAtUtc,
-                    summary.DemandCount,
-                    summary.TotalRequiredQuantity,
-                    summary.TotalRequiredQuantityUnit,
-                    summary.PrimaryRequiredQuantity,
-                    summary.PrimaryUnit,
-                    summary.PrimaryProductCode,
-                    summary.PrimaryProductName,
-                    summary.HighestDemandPriority,
-                    summary.RiskCount,
-                    summary.CriticalRiskCount,
-                    summary.BlockingRiskCount,
-                    summary.HasBlockingRisk,
-                    summary.HasMachineAssignment,
-                    summary.HasMoldAssignment,
-                    summary.HasMaterialAssignment,
-                    summary.HasOperatorGroupAssignment,
-                    summary.ShiftName,
-                    summary.EarliestRequestedDeliveryDateUtc));
-            }
+                    var items = new List<ProductionPlanSummaryReadModel>(rows.Count);
+                    foreach (var row in rows)
+                    {
+                        var operationalSummary = ProductionPlanJsonMapper.MapListOperationalSummary(
+                            row.DemandsJson,
+                            row.RisksJson,
+                            row.ResourceAssignmentJson,
+                            row.TimeWindowJson);
 
-            return ProductionPlanListReadResult.Success(items);
+                        if (!operationalSummary.Succeeded)
+                        {
+                            return ProductionPlanListReadResult.Fail(
+                                ProductionPlanReadFailure.InvalidRow(
+                                    operationalSummary.Failure!.Message));
+                        }
+
+                        var summary = operationalSummary.Value!;
+                        items.Add(new ProductionPlanSummaryReadModel(
+                            row.Id,
+                            row.ReferenceCode,
+                            row.Title,
+                            row.FacilityId,
+                            row.Status,
+                            row.Origin,
+                            row.AiGenerated,
+                            row.Confidence,
+                            row.PlannedStartAtUtc,
+                            row.PlannedEndAtUtc,
+                            row.ApprovalStatus,
+                            row.TransferStatus,
+                            row.TransferTargetSystem,
+                            row.UpdatedAtUtc,
+                            summary.DemandCount,
+                            summary.TotalRequiredQuantity,
+                            summary.TotalRequiredQuantityUnit,
+                            summary.PrimaryRequiredQuantity,
+                            summary.PrimaryUnit,
+                            summary.PrimaryProductCode,
+                            summary.PrimaryProductName,
+                            summary.HighestDemandPriority,
+                            summary.RiskCount,
+                            summary.CriticalRiskCount,
+                            summary.BlockingRiskCount,
+                            summary.HasBlockingRisk,
+                            summary.HasMachineAssignment,
+                            summary.HasMoldAssignment,
+                            summary.HasMaterialAssignment,
+                            summary.HasOperatorGroupAssignment,
+                            summary.ShiftName,
+                            summary.EarliestRequestedDeliveryDateUtc));
+                    }
+
+                    return ProductionPlanListReadResult.Success(items);
+                },
+                cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -135,53 +143,58 @@ public sealed class ProductionPlanReadRepository(CrevaFactOSDbContext dbContext)
 
         try
         {
-            var matches = await dbContext.ProductionPlans
-                .AsNoTracking()
-                .Where(plan =>
-                    plan.TenantId == input.TenantId
-                    && plan.FacilityId == input.FacilityId
-                    && plan.Id == input.ProductionPlanId)
-                .Select(plan => new ProductionPlanDetailReadModel(
-                    plan.Id,
-                    plan.ReferenceCode,
-                    plan.Title,
-                    plan.FacilityId,
-                    ProductionPlanValueConversions.ToStorage(plan.Status),
-                    ProductionPlanValueConversions.ToStorage(plan.Origin),
-                    plan.AiGenerated,
-                    ProductionPlanValueConversions.ToStorage(plan.Confidence),
-                    plan.PlannedStartAtUtc,
-                    plan.PlannedEndAtUtc,
-                    ProductionPlanValueConversions.ToStorage(plan.ApprovalStatus),
-                    ProductionPlanValueConversions.ToStorage(plan.TransferStatus),
-                    plan.TransferTargetSystem.HasValue
-                        ? ProductionPlanValueConversions.ToStorage(plan.TransferTargetSystem.Value)
-                        : null,
-                    plan.CreatedAtUtc,
-                    plan.UpdatedAtUtc,
-                    plan.Version,
-                    plan.Notes,
-                    plan.CreatedBy,
-                    plan.AiExplanation,
-                    plan.DemandsJson,
-                    plan.RisksJson,
-                    plan.ResourceAssignmentJson,
-                    plan.TimeWindowJson,
-                    plan.ApprovalJson,
-                    plan.TransferJson,
-                    plan.SourceReferencesJson,
-                    plan.HistoryJson))
-                .ToListAsync(cancellationToken);
+            return await tenantDatabaseSession.ExecuteReadAsync(
+                async cancellationToken =>
+                {
+                    var matches = await dbContext.ProductionPlans
+                        .AsNoTracking()
+                        .Where(plan =>
+                            plan.TenantId == input.TenantId
+                            && plan.FacilityId == input.FacilityId
+                            && plan.Id == input.ProductionPlanId)
+                        .Select(plan => new ProductionPlanDetailReadModel(
+                            plan.Id,
+                            plan.ReferenceCode,
+                            plan.Title,
+                            plan.FacilityId,
+                            ProductionPlanValueConversions.ToStorage(plan.Status),
+                            ProductionPlanValueConversions.ToStorage(plan.Origin),
+                            plan.AiGenerated,
+                            ProductionPlanValueConversions.ToStorage(plan.Confidence),
+                            plan.PlannedStartAtUtc,
+                            plan.PlannedEndAtUtc,
+                            ProductionPlanValueConversions.ToStorage(plan.ApprovalStatus),
+                            ProductionPlanValueConversions.ToStorage(plan.TransferStatus),
+                            plan.TransferTargetSystem.HasValue
+                                ? ProductionPlanValueConversions.ToStorage(plan.TransferTargetSystem.Value)
+                                : null,
+                            plan.CreatedAtUtc,
+                            plan.UpdatedAtUtc,
+                            plan.Version,
+                            plan.Notes,
+                            plan.CreatedBy,
+                            plan.AiExplanation,
+                            plan.DemandsJson,
+                            plan.RisksJson,
+                            plan.ResourceAssignmentJson,
+                            plan.TimeWindowJson,
+                            plan.ApprovalJson,
+                            plan.TransferJson,
+                            plan.SourceReferencesJson,
+                            plan.HistoryJson))
+                        .ToListAsync(cancellationToken);
 
-            return matches.Count switch
-            {
-                0 => ProductionPlanDetailReadResult.Fail(
-                    ProductionPlanReadFailure.NotFound("Production plan was not found in the requested scope.")),
-                1 => ProductionPlanDetailReadResult.Success(matches[0]),
-                _ => ProductionPlanDetailReadResult.Fail(
-                    ProductionPlanReadFailure.DataIntegrity(
-                        "Multiple production plans matched a single identifier within the requested scope.")),
-            };
+                    return matches.Count switch
+                    {
+                        0 => ProductionPlanDetailReadResult.Fail(
+                            ProductionPlanReadFailure.NotFound("Production plan was not found in the requested scope.")),
+                        1 => ProductionPlanDetailReadResult.Success(matches[0]),
+                        _ => ProductionPlanDetailReadResult.Fail(
+                            ProductionPlanReadFailure.DataIntegrity(
+                                "Multiple production plans matched a single identifier within the requested scope.")),
+                    };
+                },
+                cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

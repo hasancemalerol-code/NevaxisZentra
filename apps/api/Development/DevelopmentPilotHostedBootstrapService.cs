@@ -19,8 +19,13 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
         using var scope = serviceProvider.CreateScope();
         var bootstrapService =
-            scope.ServiceProvider.GetRequiredService<
+            scope.ServiceProvider.GetService<
                 CrevaFactOS.Persistence.Development.IDevelopmentPilotBootstrapService>();
+
+        if (bootstrapService is null)
+        {
+            return;
+        }
 
         _ = await bootstrapService.BootstrapAsync(cancellationToken);
     }

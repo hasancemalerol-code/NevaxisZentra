@@ -6,11 +6,13 @@ using CrevaFactOS.Api.ProductionPlanning;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Tenancy;
-using Microsoft.AspNetCore.Authentication;
+using CrevaFactOS.Api.Development;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace CrevaFactOS.SmokeTests;
 
@@ -196,6 +198,19 @@ public sealed class ProductionPlanningApiEndpointTests
     }
 
     [Fact]
+    public async Task DevelopmentBootstrapDoesNotRunInTestHost()
+    {
+        await using var factory = CreateFactory(new GrantingFacilityAccessResolver());
+        using var client = factory.CreateClient();
+        using var request = CreateRequest(
+            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public void ApplicationDoesNotExposeWriteRoutes()
     {
         var routeMethods = typeof(Program).Assembly
@@ -213,16 +228,20 @@ public sealed class ProductionPlanningApiEndpointTests
             .WithWebHostBuilder(builder =>
             {
                 builder.UseEnvironment("Development");
+                builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+                {
+                    configurationBuilder.AddInMemoryCollection(
+                        new Dictionary<string, string?>
+                        {
+                            ["Authentication:Mode"] = "Development",
+                            ["Persistence:Enabled"] = "false",
+                            ["DevelopmentPilot:Enabled"] = "false",
+                            ["DevelopmentPilot:ProductionPlanSeedEnabled"] = "false",
+                        });
+                });
                 builder.ConfigureServices(services =>
                 {
-                    services.AddAuthentication(options =>
-                        {
-                            options.DefaultAuthenticateScheme = DevelopmentAuthenticationHandler.SchemeName;
-                            options.DefaultChallengeScheme = DevelopmentAuthenticationHandler.SchemeName;
-                        })
-                        .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
-                            DevelopmentAuthenticationHandler.SchemeName,
-                            _ => { });
+                    RemoveHostedService<DevelopmentPilotHostedBootstrapService>(services);
                     services.RemoveAll<IIdentitySubjectResolver>();
                     services.RemoveAll<ITenantMembershipResolver>();
                     services.RemoveAll<IPermissionEvaluator>();
@@ -240,6 +259,21 @@ public sealed class ProductionPlanningApiEndpointTests
                         readService ?? new StubProductionPlanReadService());
                 });
             });
+
+    private static void RemoveHostedService<TImplementation>(IServiceCollection services)
+        where TImplementation : class, IHostedService
+    {
+        var descriptors = services
+            .Where(descriptor =>
+                descriptor.ServiceType == typeof(IHostedService)
+                && descriptor.ImplementationType == typeof(TImplementation))
+            .ToArray();
+
+        foreach (var descriptor in descriptors)
+        {
+            services.Remove(descriptor);
+        }
+    }
 
     private static HttpRequestMessage CreateRequest(string path)
     {

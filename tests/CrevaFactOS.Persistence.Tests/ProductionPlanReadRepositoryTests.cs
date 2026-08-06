@@ -1,4 +1,5 @@
 using CrevaFactOS.Persistence.ProductionPlanning;
+using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Tests;
@@ -121,7 +122,7 @@ public sealed class ProductionPlanReadRepositoryTests
     public async Task ListAsyncRejectsInvalidScope()
     {
         using var context = CreateContext();
-        var repository = new ProductionPlanReadRepository(context);
+        var repository = new ProductionPlanReadRepository(context, CreateTenantSession(context));
         var result = await repository.ListAsync(
             new ProductionPlanListReadInput(Guid.Empty, FacilityA, null, null, 50));
 
@@ -133,7 +134,7 @@ public sealed class ProductionPlanReadRepositoryTests
     public async Task ListAsyncRejectsInvalidLimit()
     {
         using var context = CreateContext();
-        var repository = new ProductionPlanReadRepository(context);
+        var repository = new ProductionPlanReadRepository(context, CreateTenantSession(context));
         var result = await repository.ListAsync(
             new ProductionPlanListReadInput(TenantA, FacilityA, null, null, 0));
 
@@ -145,7 +146,7 @@ public sealed class ProductionPlanReadRepositoryTests
     public async Task FindByIdAsyncRejectsMissingProductionPlanId()
     {
         using var context = CreateContext();
-        var repository = new ProductionPlanReadRepository(context);
+        var repository = new ProductionPlanReadRepository(context, CreateTenantSession(context));
         var result = await repository.FindByIdAsync(
             new ProductionPlanDetailReadInput(TenantA, FacilityA, Guid.Empty));
 
@@ -204,6 +205,19 @@ public sealed class ProductionPlanReadRepositoryTests
         CreatedAtUtc = updatedAtUtc.AddDays(-1),
         UpdatedAtUtc = updatedAtUtc,
     };
+
+    private static TenantDatabaseSession CreateTenantSession(CrevaFactOSDbContext context) =>
+        new(context, new UnavailableTenantContextAccessor());
+
+    private sealed class UnavailableTenantContextAccessor : ITenantContextAccessor
+    {
+        public bool IsAvailable => false;
+
+        public TenantContext? Current => null;
+
+        public Guid RequireTenantId() =>
+            throw new InvalidOperationException("Tenant context is unavailable in this unit test.");
+    }
 
     private static CrevaFactOSDbContext CreateContext()
     {

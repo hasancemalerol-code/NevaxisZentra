@@ -3,6 +3,7 @@ using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.ProductionPlanning;
+using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CrevaFactOS.Api.ProductionPlanning;
@@ -121,7 +122,9 @@ public static class ProductionPlanningServiceCollectionExtensions
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanReadRepository()
-                : new ProductionPlanReadRepository(dbContext);
+                : new ProductionPlanReadRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
         services.AddScoped<IProductionPlanReadService, ProductionPlanReadService>();
         return services;

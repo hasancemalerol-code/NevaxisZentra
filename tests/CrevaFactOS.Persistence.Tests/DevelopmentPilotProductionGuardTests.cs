@@ -48,9 +48,7 @@ public sealed class DevelopmentPilotProductionGuardTests
     [Fact]
     public async Task DisabledBootstrapReturnsWithoutExecuting()
     {
-        using var context = CreateContext();
         var service = new DevelopmentPilotBootstrapService(
-            context,
             Microsoft.Extensions.Options.Options.Create(new DevelopmentPilotOptions
             {
                 Enabled = false,

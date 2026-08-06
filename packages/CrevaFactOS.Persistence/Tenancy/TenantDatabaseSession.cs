@@ -24,4 +24,12 @@ public sealed class TenantDatabaseSession(
             throw;
         }
     }
+
+    public async Task<T> ExecuteReadAsync<T>(
+        Func<CancellationToken, Task<T>> action,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await BeginTransactionAsync(cancellationToken);
+        return await action(cancellationToken);
+    }
 }

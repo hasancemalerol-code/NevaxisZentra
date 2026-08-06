@@ -1,5 +1,6 @@
 using CrevaFactOS.Api.Authorization;
 using CrevaFactOS.Persistence;
+using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Authorization;
 
 namespace CrevaFactOS.Api.Facilities;
@@ -14,7 +15,9 @@ public static class FacilityAccessServiceCollectionExtensions
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableFacilityAccessReadStore()
-                : new PostgreSqlFacilityAccessReadStore(dbContext);
+                : new PostgreSqlFacilityAccessReadStore(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
         services.AddScoped<IFacilityAccessResolver, FacilityAccessResolver>();
         services.AddScoped<IAuthorizationHandler, ProductionPlanningReadAuthorizationHandler>();
