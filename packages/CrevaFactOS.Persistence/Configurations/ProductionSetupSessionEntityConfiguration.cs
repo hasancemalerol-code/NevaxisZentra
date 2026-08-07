@@ -28,6 +28,12 @@ internal sealed class ProductionSetupSessionEntityConfiguration
         entity.Property(s => s.Comment).HasColumnName("comment").HasMaxLength(1000);
         entity.Property(s => s.StartedBySubjectId).HasColumnName("started_by_subject_id").HasMaxLength(200);
         entity.Property(s => s.CompletedBySubjectId).HasColumnName("completed_by_subject_id").HasMaxLength(200);
+
+        // 4L recovery metadata
+        entity.Property(s => s.RecoveredAtUtc).HasColumnName("recovered_at_utc");
+        entity.Property(s => s.RecoveredBySubjectId).HasColumnName("recovered_by_subject_id").HasMaxLength(200);
+        entity.Property(s => s.RecoveryReason).HasColumnName("recovery_reason").HasMaxLength(1000);
+
         entity.Property(s => s.CorrelationId).HasColumnName("correlation_id");
         entity.Property(s => s.Version).HasColumnName("version");
 

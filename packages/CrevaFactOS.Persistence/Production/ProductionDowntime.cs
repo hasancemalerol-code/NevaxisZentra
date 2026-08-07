@@ -32,6 +32,15 @@ public sealed class ProductionDowntime : ITenantScopedEntity
 
     public string StartedBySubjectId { get; set; } = string.Empty;
     public string? EndedBySubjectId { get; set; }
+
+    // ── 4L: Recovery metadata ─────────────────────────────────────────────────
+    // Populated only when a stale downtime is manually recovered via the recovery endpoint.
+    // Kept separate from EndedAtUtc / EndedBySubjectId to preserve recovery provenance.
+
+    public DateTimeOffset? RecoveredAtUtc { get; set; }
+    public string? RecoveredBySubjectId { get; set; }
+    public string? RecoveryReason { get; set; }
+
     public Guid CorrelationId { get; set; }
     public uint Version { get; set; } = 1;
 }

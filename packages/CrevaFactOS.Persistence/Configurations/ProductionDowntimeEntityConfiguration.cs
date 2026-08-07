@@ -25,6 +25,12 @@ internal sealed class ProductionDowntimeEntityConfiguration
         entity.Property(d => d.Comment).HasColumnName("comment").HasMaxLength(1000);
         entity.Property(d => d.StartedBySubjectId).HasColumnName("started_by_subject_id").HasMaxLength(200);
         entity.Property(d => d.EndedBySubjectId).HasColumnName("ended_by_subject_id").HasMaxLength(200);
+
+        // 4L recovery metadata
+        entity.Property(d => d.RecoveredAtUtc).HasColumnName("recovered_at_utc");
+        entity.Property(d => d.RecoveredBySubjectId).HasColumnName("recovered_by_subject_id").HasMaxLength(200);
+        entity.Property(d => d.RecoveryReason).HasColumnName("recovery_reason").HasMaxLength(1000);
+
         entity.Property(d => d.CorrelationId).HasColumnName("correlation_id");
         entity.Property(d => d.Version).HasColumnName("version");
 

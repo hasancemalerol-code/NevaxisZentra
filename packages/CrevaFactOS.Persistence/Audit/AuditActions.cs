@@ -43,6 +43,15 @@ public static class AuditActions
     // 3L — manual cycle
     public const string ProductionCycleManualRecord = "production.order.cycle.manual.record";
 
+    // 4L — exceptions
+    public const string ProductionExceptionRaise = "production.order.exception.raise";
+    public const string ProductionExceptionAcknowledge = "production.order.exception.acknowledge";
+    public const string ProductionExceptionResolve = "production.order.exception.resolve";
+
+    // 4L — recovery
+    public const string ProductionDowntimeRecover = "production.order.downtime.recover";
+    public const string ProductionSetupRecover = "production.order.setup.recover";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         Authenticate,
@@ -79,5 +88,10 @@ public static class AuditActions
         ProductionSetupStart,
         ProductionSetupComplete,
         ProductionCycleManualRecord,
+        ProductionExceptionRaise,
+        ProductionExceptionAcknowledge,
+        ProductionExceptionResolve,
+        ProductionDowntimeRecover,
+        ProductionSetupRecover,
     };
 }

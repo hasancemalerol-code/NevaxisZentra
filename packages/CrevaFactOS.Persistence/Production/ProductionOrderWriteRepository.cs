@@ -277,17 +277,30 @@ public sealed class ProductionOrderWriteRepository(
         StartProductionOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        // 4L: Block Start if an active setup session exists — setup must be completed first.
         return await ExecuteLifecycleAsync(
             context,
             command.ProductionOrderId,
             command.ExpectedVersion,
-            order =>
+            async (order, ct) =>
             {
                 if (order.Status != ProductionOrderStatus.Ready)
                 {
                     return ProductionOrderWriteResult.Fail(
                         ProductionOrderFailureCodes.InvalidTransition,
                         $"Only Ready orders can be started. Current status: '{ProductionOrderValueConversions.ToStorage(order.Status)}'.");
+                }
+
+                var hasActiveSetup = await dbContext.ProductionSetupSessions
+                    .AnyAsync(s => s.TenantId == context.TenantId
+                        && s.ProductionOrderId == order.Id
+                        && s.CompletedAtUtc == null, ct);
+
+                if (hasActiveSetup)
+                {
+                    return ProductionOrderWriteResult.Fail(
+                        ProductionOrderFailureCodes.ActiveSetupExists,
+                        "An active setup session exists. Complete or recover it before starting production.");
                 }
 
                 return null;
@@ -343,17 +356,30 @@ public sealed class ProductionOrderWriteRepository(
         ResumeProductionOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        // 4L: Block Resume if an active downtime exists — end or recover it first.
         return await ExecuteLifecycleAsync(
             context,
             command.ProductionOrderId,
             command.ExpectedVersion,
-            order =>
+            async (order, ct) =>
             {
                 if (order.Status != ProductionOrderStatus.Paused)
                 {
                     return ProductionOrderWriteResult.Fail(
                         ProductionOrderFailureCodes.InvalidTransition,
                         $"Only Paused orders can be resumed. Current status: '{ProductionOrderValueConversions.ToStorage(order.Status)}'.");
+                }
+
+                var hasActiveDowntime = await dbContext.ProductionDowntimes
+                    .AnyAsync(d => d.TenantId == context.TenantId
+                        && d.ProductionOrderId == order.Id
+                        && d.EndedAtUtc == null, ct);
+
+                if (hasActiveDowntime)
+                {
+                    return ProductionOrderWriteResult.Fail(
+                        ProductionOrderFailureCodes.ActiveDowntimeExists,
+                        "An active downtime session exists. End or recover it before resuming production.");
                 }
 
                 return null;
@@ -380,17 +406,55 @@ public sealed class ProductionOrderWriteRepository(
         // can mutate the value before the taxonomy strings are read inside ExecuteLifecycleAsync.
         var shortFlag = new[] { false };
 
+        // 4L: Block Complete if active sessions or critical exceptions exist.
         return await ExecuteLifecycleAsync(
             context,
             command.ProductionOrderId,
             command.ExpectedVersion,
-            order =>
+            async (order, ct) =>
             {
                 if (order.Status != ProductionOrderStatus.InProgress)
                 {
                     return ProductionOrderWriteResult.Fail(
                         ProductionOrderFailureCodes.InvalidTransition,
                         $"Only InProgress orders can be completed. Current status: '{ProductionOrderValueConversions.ToStorage(order.Status)}'.");
+                }
+
+                var hasActiveDowntime = await dbContext.ProductionDowntimes
+                    .AnyAsync(d => d.TenantId == context.TenantId
+                        && d.ProductionOrderId == order.Id
+                        && d.EndedAtUtc == null, ct);
+
+                if (hasActiveDowntime)
+                {
+                    return ProductionOrderWriteResult.Fail(
+                        ProductionOrderFailureCodes.ActiveDowntimeExists,
+                        "An active downtime session must be ended or recovered before completing the order.");
+                }
+
+                var hasActiveSetup = await dbContext.ProductionSetupSessions
+                    .AnyAsync(s => s.TenantId == context.TenantId
+                        && s.ProductionOrderId == order.Id
+                        && s.CompletedAtUtc == null, ct);
+
+                if (hasActiveSetup)
+                {
+                    return ProductionOrderWriteResult.Fail(
+                        ProductionOrderFailureCodes.ActiveSetupExists,
+                        "An active setup session must be completed or recovered before completing the order.");
+                }
+
+                var hasCriticalException = await dbContext.ProductionExecutionExceptions
+                    .AnyAsync(e => e.TenantId == context.TenantId
+                        && e.ProductionOrderId == order.Id
+                        && e.Severity == ProductionExceptionSeverities.Critical
+                        && ProductionExceptionStatuses.Unresolved.Contains(e.Status), ct);
+
+                if (hasCriticalException)
+                {
+                    return ProductionOrderWriteResult.Fail(
+                        ProductionOrderFailureCodes.CriticalExceptionOpen,
+                        "One or more critical exceptions are unresolved. Resolve them before completing the order.");
                 }
 
                 // Quantity guard: if planned quantity is known, enforce completion rules
@@ -446,7 +510,8 @@ public sealed class ProductionOrderWriteRepository(
         Func<string> outboxMessageTypeSelector,
         CancellationToken cancellationToken) =>
         ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
-            validateTransition, applyTransition,
+            (order, _) => Task.FromResult(validateTransition(order)),
+            applyTransition,
             auditActionSelector, auditEventTypeSelector, outboxMessageTypeSelector,
             cancellationToken);
 
@@ -461,15 +526,49 @@ public sealed class ProductionOrderWriteRepository(
         string outboxMessageType,
         CancellationToken cancellationToken) =>
         ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
-            validateTransition, applyTransition,
+            (order, _) => Task.FromResult(validateTransition(order)),
+            applyTransition,
             () => auditAction, () => auditEventType, () => outboxMessageType,
+            cancellationToken);
+
+    // 4L: Async validation overload — allows lifecycle guards to perform DB queries
+    // (active session checks, critical exception checks) within the same transaction.
+    private Task<ProductionOrderWriteResult> ExecuteLifecycleAsync(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        uint expectedVersion,
+        Func<ProductionOrder, CancellationToken, Task<ProductionOrderWriteResult?>> validateTransitionAsync,
+        Action<ProductionOrder, DateTimeOffset> applyTransition,
+        string auditAction,
+        string auditEventType,
+        string outboxMessageType,
+        CancellationToken cancellationToken) =>
+        ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
+            validateTransitionAsync, applyTransition,
+            () => auditAction, () => auditEventType, () => outboxMessageType,
+            cancellationToken);
+
+    // 4L: Async validation overload with lazy taxonomy selectors.
+    private Task<ProductionOrderWriteResult> ExecuteLifecycleAsync(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        uint expectedVersion,
+        Func<ProductionOrder, CancellationToken, Task<ProductionOrderWriteResult?>> validateTransitionAsync,
+        Action<ProductionOrder, DateTimeOffset> applyTransition,
+        Func<string> auditActionSelector,
+        Func<string> auditEventTypeSelector,
+        Func<string> outboxMessageTypeSelector,
+        CancellationToken cancellationToken) =>
+        ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
+            validateTransitionAsync, applyTransition,
+            auditActionSelector, auditEventTypeSelector, outboxMessageTypeSelector,
             cancellationToken);
 
     private async Task<ProductionOrderWriteResult> ExecuteLifecycleAsyncCore(
         ProductionOrderOperationContext context,
         Guid productionOrderId,
         uint expectedVersion,
-        Func<ProductionOrder, ProductionOrderWriteResult?> validateTransition,
+        Func<ProductionOrder, CancellationToken, Task<ProductionOrderWriteResult?>> validateTransitionAsync,
         Action<ProductionOrder, DateTimeOffset> applyTransition,
         Func<string> auditActionSelector,
         Func<string> auditEventTypeSelector,
@@ -510,7 +609,7 @@ public sealed class ProductionOrderWriteRepository(
                             "The production order has been modified. Please reload and try again.");
                     }
 
-                    var validationFailure = validateTransition(order);
+                    var validationFailure = await validateTransitionAsync(order, ct);
                     if (validationFailure is not null)
                     {
                         return validationFailure;

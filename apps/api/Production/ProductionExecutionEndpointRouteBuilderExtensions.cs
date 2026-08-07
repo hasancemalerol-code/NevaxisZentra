@@ -5,6 +5,7 @@ using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace CrevaFactOS.Api.Production;
 
@@ -21,6 +22,9 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapGet("/{productionOrderId:guid}/setups", ListSetupSessionsAsync);
         group.MapGet("/{productionOrderId:guid}/cycles", ListCycleEntriesAsync);
         group.MapGet("/{productionOrderId:guid}/runtime-summary", GetRuntimeSummaryAsync);
+        // 4L read endpoints
+        group.MapGet("/{productionOrderId:guid}/exceptions", ListExceptionsAsync);
+        group.MapGet("/{productionOrderId:guid}/health-summary", GetHealthSummaryAsync);
         return endpoints;
     }
 
@@ -41,6 +45,12 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapPost("/orders/{productionOrderId:guid}/setups/start", StartSetupSessionAsync);
         group.MapPost("/orders/{productionOrderId:guid}/setups/{setupSessionId:guid}/complete", CompleteSetupSessionAsync);
         group.MapPost("/orders/{productionOrderId:guid}/cycles/manual", RecordManualCycleAsync);
+        // 4L write endpoints
+        group.MapPost("/orders/{productionOrderId:guid}/exceptions", RaiseExceptionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/exceptions/{exceptionId:guid}/acknowledge", AcknowledgeExceptionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/exceptions/{exceptionId:guid}/resolve", ResolveExceptionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/downtimes/{downtimeId:guid}/recover", RecoverDowntimeAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/setups/{setupSessionId:guid}/recover", RecoverSetupSessionAsync);
         return endpoints;
     }
 
@@ -795,6 +805,234 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         return MapOperationsResult(result);
     }
 
+    // ─────────────────────────── 4L: List Exceptions ───────────────────────────
+
+    private static async Task<IResult> ListExceptionsAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await exceptionRepository.ListExceptionsAsync(context, productionOrderId, limit ?? 50, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(result.Items!.Select(e => new ExceptionSummaryDto(
+            e.Id, e.ExceptionType, e.Severity, e.Status, e.Message,
+            e.RaisedAtUtc, e.RaisedBySubjectId, e.ResolvedAtUtc, e.ResolvedBySubjectId, e.ResolutionNote,
+            e.Version)).ToList());
+    }
+
+    // ─────────────────────────── 4L: Health Summary ────────────────────────────
+
+    private static async Task<IResult> GetHealthSummaryAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        Microsoft.Extensions.Options.IOptions<ProductionExecutionOptions> executionOptions,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await operationsRepository.GetHealthSummaryAsync(
+            context, productionOrderId, executionOptions.Value, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var s = result.Summary!;
+        return TypedResults.Ok(new ProductionExecutionHealthSummaryDto(
+            s.Status, s.OpenExceptionCount, s.CriticalExceptionCount,
+            s.HasActiveDowntime, s.DowntimeIsStale, s.HasActiveSetup, s.SetupIsStale,
+            s.QuantityProgress, s.ScheduleOverrun, s.LastOperationalActivityAtUtc, s.RequiresAttention));
+    }
+
+    // ─────────────────────────── 4L: Raise Exception ───────────────────────────
+
+    private static async Task<IResult> RaiseExceptionAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RaiseExceptionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Exception,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await exceptionRepository.RaiseExceptionAsync(
+            context,
+            new RaiseExceptionCommand(
+                productionOrderId,
+                body.ExpectedVersion,
+                body.ExceptionType,
+                body.Severity,
+                body.Message?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapExceptionResult(result);
+    }
+
+    // ─────────────────────────── 4L: Acknowledge Exception ─────────────────────
+
+    private static async Task<IResult> AcknowledgeExceptionAsync(
+        Guid productionOrderId,
+        Guid exceptionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] AcknowledgeExceptionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Exception,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await exceptionRepository.AcknowledgeExceptionAsync(
+            context,
+            new AcknowledgeExceptionCommand(productionOrderId, exceptionId, body.ExpectedVersion),
+            cancellationToken);
+
+        return MapExceptionResult(result);
+    }
+
+    // ─────────────────────────── 4L: Resolve Exception ─────────────────────────
+
+    private static async Task<IResult> ResolveExceptionAsync(
+        Guid productionOrderId,
+        Guid exceptionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ResolveExceptionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Exception,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await exceptionRepository.ResolveExceptionAsync(
+            context,
+            new ResolveExceptionCommand(
+                productionOrderId, exceptionId, body.ExpectedVersion,
+                body.ResolutionNote?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapExceptionResult(result);
+    }
+
+    // ─────────────────────────── 4L: Recover Downtime ──────────────────────────
+
+    private static async Task<IResult> RecoverDowntimeAsync(
+        Guid productionOrderId,
+        Guid downtimeId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RecoverDowntimeApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Downtime,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await operationsRepository.RecoverDowntimeAsync(
+            context,
+            new RecoverDowntimeCommand(
+                productionOrderId, downtimeId, body.ExpectedVersion,
+                body.Resolution?.Trim() ?? string.Empty, body.ResumeProduction),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 4L: Recover Setup ─────────────────────────────
+
+    private static async Task<IResult> RecoverSetupSessionAsync(
+        Guid productionOrderId,
+        Guid setupSessionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RecoverSetupApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Setup,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await operationsRepository.RecoverSetupSessionAsync(
+            context,
+            new RecoverSetupSessionCommand(
+                productionOrderId, setupSessionId, body.ExpectedVersion,
+                body.Resolution?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    private static IResult MapExceptionResult(ProductionExceptionWriteResult result)
+    {
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(new ExceptionWriteSuccessDto(
+            result.ExceptionId!.Value,
+            result.OrderVersion!.Value,
+            result.ExceptionVersion!.Value));
+    }
+
     private static IResult MapOperationsResult(ProductionOperationsWriteResult result)
     {
         if (!result.Succeeded)
@@ -1041,6 +1279,48 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidCycleQuantity)),
 
+            // 4L
+            ProductionOrderFailureCodes.ExceptionNotFound => TypedResults.Problem(
+                title: "Exception not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ExceptionNotFound)),
+            ProductionOrderFailureCodes.ExceptionAlreadyResolved => TypedResults.Problem(
+                title: reason ?? "This exception has already been resolved.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ExceptionAlreadyResolved)),
+            ProductionOrderFailureCodes.InvalidExceptionType => TypedResults.Problem(
+                title: reason ?? "Invalid exception type.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidExceptionType)),
+            ProductionOrderFailureCodes.InvalidExceptionSeverity => TypedResults.Problem(
+                title: reason ?? "Invalid exception severity.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidExceptionSeverity)),
+            ProductionOrderFailureCodes.ResolutionNoteRequired => TypedResults.Problem(
+                title: reason ?? "A resolution note is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ResolutionNoteRequired)),
+            ProductionOrderFailureCodes.CriticalExceptionOpen => TypedResults.Problem(
+                title: reason ?? "Unresolved critical exceptions must be resolved before completing.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.CriticalExceptionOpen)),
+            ProductionOrderFailureCodes.ProductionStateInconsistent => TypedResults.Problem(
+                title: reason ?? "Production state is inconsistent.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ProductionStateInconsistent)),
+            ProductionOrderFailureCodes.DowntimeNotActive => TypedResults.Problem(
+                title: reason ?? "Downtime is not active and cannot be recovered.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.DowntimeNotActive)),
+            ProductionOrderFailureCodes.SetupSessionNotActive => TypedResults.Problem(
+                title: reason ?? "Setup session is not active and cannot be recovered.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.SetupSessionNotActive)),
+            ProductionOrderFailureCodes.MessageTooLong => TypedResults.Problem(
+                title: reason ?? "Message exceeds maximum allowed length.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidRequest)),
+
             _ => TypedResults.Problem(
                 title: "An unexpected error occurred.",
                 statusCode: StatusCodes.Status500InternalServerError,
@@ -1092,6 +1372,21 @@ public static class ProductionExecutionServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+
+        // 4L — exception repository
+        services.AddScoped<IProductionExceptionRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionExceptionRepository()
+                : new ProductionExceptionRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        // 4L — execution options (development defaults; override in appsettings)
+        services.AddOptions<ProductionExecutionOptions>()
+            .BindConfiguration(ProductionExecutionOptions.SectionName);
 
         return services;
     }

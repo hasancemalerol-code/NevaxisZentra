@@ -12,4 +12,7 @@ public static class ProductionExecutionPermissionKeys
     // 3L
     public const string Downtime = "production.execution.downtime";
     public const string Setup = "production.execution.setup";
+
+    // 4L
+    public const string Exception = "production.execution.exception";
 }

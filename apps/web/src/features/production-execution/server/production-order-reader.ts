@@ -10,6 +10,10 @@ import type {
   ProductionCycleEntrySummary,
   ProductionRuntimeSummary,
 } from "../domain/production-execution-operations";
+import type {
+  ProductionExecutionExceptionSummary,
+  ProductionExecutionHealthSummary,
+} from "../domain/production-execution-exceptions";
 import {
   getProductionOrderById,
   listProductionOrders,
@@ -18,6 +22,8 @@ import {
   listSetupSessions,
   listCycleEntries,
   getRuntimeSummary,
+  listExceptions,
+  getHealthSummary,
   type ProductionOrderApiFailure,
 } from "./production-order-api-client";
 import type { ProductionExecutionEntry } from "../domain/production-execution-entry";
@@ -67,6 +73,14 @@ export type ProductionCycleEntryListResult =
 
 export type ProductionRuntimeSummaryResult =
   | Readonly<{ status: "success"; summary: ProductionRuntimeSummary }>
+  | ProductionOrderReadFailure;
+
+export type ProductionExceptionListResult =
+  | Readonly<{ status: "success"; exceptions: ProductionExecutionExceptionSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type ProductionHealthSummaryResult =
+  | Readonly<{ status: "success"; summary: ProductionExecutionHealthSummary }>
   | ProductionOrderReadFailure;
 
 type ResolvedContext =
@@ -280,6 +294,39 @@ export async function readRuntimeSummary(
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getRuntimeSummary(context, normalizedId, context.facilityId);
+  if (result.status === "failure") return result;
+  return { status: "success", summary: result.value };
+}
+
+// ── 4L: Exception + health reads ──────────────────────────────────────────────
+
+export async function readExceptions(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ProductionExceptionListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listExceptions(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", exceptions: result.value };
+}
+
+export async function readHealthSummary(
+  productionOrderId: string,
+): Promise<ProductionHealthSummaryResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await getHealthSummary(context, normalizedId, context.facilityId);
   if (result.status === "failure") return result;
   return { status: "success", summary: result.value };
 }

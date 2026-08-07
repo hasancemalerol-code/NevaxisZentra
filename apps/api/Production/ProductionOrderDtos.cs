@@ -37,6 +37,17 @@ public static class ProductionExecutionApiFailureCodes
     public const string InvalidSetupType = "invalid-setup-type";
     public const string InvalidCycleDuration = "invalid-cycle-duration";
     public const string InvalidCycleQuantity = "invalid-cycle-quantity";
+
+    // 4L
+    public const string ExceptionNotFound = "exception-not-found";
+    public const string ExceptionAlreadyResolved = "exception-already-resolved";
+    public const string InvalidExceptionType = "invalid-exception-type";
+    public const string InvalidExceptionSeverity = "invalid-exception-severity";
+    public const string ResolutionNoteRequired = "resolution-note-required";
+    public const string CriticalExceptionOpen = "critical-exception-open";
+    public const string ProductionStateInconsistent = "production-state-inconsistent";
+    public const string DowntimeNotActive = "downtime-not-active";
+    public const string SetupSessionNotActive = "setup-session-not-active";
 }
 
 public sealed record QuantitySummaryDto(
@@ -198,6 +209,60 @@ public sealed record RecordManualCycleApiRequest(
     string? Comment);
 
 public sealed record ConsumeHandoffApiRequest(uint ExpectedHandoffVersion);
+
+// ── 4L ─────────────────────────────────────────────────────────────────────────
+
+public sealed record ExceptionSummaryDto(
+    Guid Id,
+    string ExceptionType,
+    string Severity,
+    string Status,
+    string Message,
+    DateTimeOffset RaisedAtUtc,
+    string RaisedBySubjectId,
+    DateTimeOffset? ResolvedAtUtc,
+    string? ResolvedBySubjectId,
+    string? ResolutionNote,
+    uint Version);
+
+public sealed record ProductionExecutionHealthSummaryDto(
+    string Status,
+    int OpenExceptionCount,
+    int CriticalExceptionCount,
+    bool HasActiveDowntime,
+    bool DowntimeIsStale,
+    bool HasActiveSetup,
+    bool SetupIsStale,
+    decimal? QuantityProgress,
+    bool ScheduleOverrun,
+    DateTimeOffset? LastOperationalActivityAtUtc,
+    bool RequiresAttention);
+
+public sealed record RaiseExceptionApiRequest(
+    uint ExpectedVersion,
+    string ExceptionType,
+    string Severity,
+    string Message);
+
+public sealed record AcknowledgeExceptionApiRequest(uint ExpectedVersion);
+
+public sealed record ResolveExceptionApiRequest(
+    uint ExpectedVersion,
+    string ResolutionNote);
+
+public sealed record ExceptionWriteSuccessDto(
+    Guid ExceptionId,
+    uint OrderVersion,
+    uint ExceptionVersion);
+
+public sealed record RecoverDowntimeApiRequest(
+    uint ExpectedVersion,
+    string Resolution,
+    bool ResumeProduction = false);
+
+public sealed record RecoverSetupApiRequest(
+    uint ExpectedVersion,
+    string Resolution);
 
 public sealed record StartProductionOrderApiRequest(uint ExpectedVersion);
 

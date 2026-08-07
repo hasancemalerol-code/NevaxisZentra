@@ -81,6 +81,41 @@ public sealed record RecordManualCycleCommand(
     decimal? QuantityProduced,
     string? Comment);
 
+// ── 4L: Exception Commands ────────────────────────────────────────────────────
+
+public sealed record RaiseExceptionCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    string ExceptionType,
+    string Severity,
+    string Message);
+
+public sealed record AcknowledgeExceptionCommand(
+    Guid ProductionOrderId,
+    Guid ExceptionId,
+    uint ExpectedVersion);
+
+public sealed record ResolveExceptionCommand(
+    Guid ProductionOrderId,
+    Guid ExceptionId,
+    uint ExpectedVersion,
+    string ResolutionNote);
+
+// ── 4L: Recovery Commands ─────────────────────────────────────────────────────
+
+public sealed record RecoverDowntimeCommand(
+    Guid ProductionOrderId,
+    Guid DowntimeId,
+    uint ExpectedVersion,
+    string Resolution,
+    bool ResumeProduction);
+
+public sealed record RecoverSetupSessionCommand(
+    Guid ProductionOrderId,
+    Guid SetupSessionId,
+    uint ExpectedVersion,
+    string Resolution);
+
 // ── 3L: Read Models ───────────────────────────────────────────────────────────
 
 public sealed record DowntimeReadModel(
@@ -135,6 +170,43 @@ public sealed record ProductionRuntimeSummary(
     DateTimeOffset? LastCycleAtUtc,
     DowntimeReadModel? ActiveDowntime,
     SetupSessionReadModel? ActiveSetup);
+
+// ── 4L: Exception Read Model ──────────────────────────────────────────────────
+
+public sealed record ExceptionReadModel(
+    Guid Id,
+    string ExceptionType,
+    string Severity,
+    string Status,
+    string Message,
+    DateTimeOffset RaisedAtUtc,
+    string RaisedBySubjectId,
+    DateTimeOffset? ResolvedAtUtc,
+    string? ResolvedBySubjectId,
+    string? ResolutionNote,
+    Guid CorrelationId,
+    uint Version);
+
+// ── 4L: Health Summary Read Model ────────────────────────────────────────────
+
+/// <summary>
+/// Derived read-time health summary for a production order.
+/// All fields are computed from current state — none are persisted.
+/// </summary>
+public sealed record ProductionExecutionHealthSummary(
+    /// <summary>"normal" | "attention" | "critical"</summary>
+    string Status,
+    int OpenExceptionCount,
+    int CriticalExceptionCount,
+    bool HasActiveDowntime,
+    bool DowntimeIsStale,
+    bool HasActiveSetup,
+    bool SetupIsStale,
+    decimal? QuantityProgress,
+    bool ScheduleOverrun,
+    DateTimeOffset? LastOperationalActivityAtUtc,
+    /// <summary>True when any signal requires operator attention (stale, critical exception, overrun).</summary>
+    bool RequiresAttention);
 
 // ── 3L: Write Result wrappers ─────────────────────────────────────────────────
 
@@ -219,6 +291,18 @@ public static class ProductionOrderFailureCodes
     public const string InvalidSetupType = "invalid-setup-type";
     public const string InvalidCycleDuration = "invalid-cycle-duration";
     public const string InvalidCycleQuantity = "invalid-cycle-quantity";
+
+    // 4L additions
+    public const string ExceptionNotFound = "exception-not-found";
+    public const string ExceptionAlreadyResolved = "exception-already-resolved";
+    public const string InvalidExceptionType = "invalid-exception-type";
+    public const string InvalidExceptionSeverity = "invalid-exception-severity";
+    public const string ResolutionNoteRequired = "resolution-note-required";
+    public const string CriticalExceptionOpen = "critical-exception-open";
+    public const string ProductionStateInconsistent = "production-state-inconsistent";
+    public const string DowntimeNotActive = "downtime-not-active";
+    public const string SetupSessionNotActive = "setup-session-not-active";
+    public const string MessageTooLong = "message-too-long";
 }
 
 public sealed record ProductionQuantitySummary(
@@ -395,5 +479,39 @@ public sealed record ProductionOrderDetailResult
         new() { Succeeded = false, NotFound = true, FailureCode = ProductionOrderFailureCodes.NotFound };
 
     public static ProductionOrderDetailResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+// ── 4L: Exception Write Result ────────────────────────────────────────────────
+
+public sealed record ProductionExceptionWriteResult
+{
+    public required bool Succeeded { get; init; }
+    public Guid? ExceptionId { get; init; }
+    public uint? OrderVersion { get; init; }
+    public uint? ExceptionVersion { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionExceptionWriteResult Success(Guid exceptionId, uint orderVersion, uint exceptionVersion) =>
+        new() { Succeeded = true, ExceptionId = exceptionId, OrderVersion = orderVersion, ExceptionVersion = exceptionVersion };
+
+    public static ProductionExceptionWriteResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+// ── 4L: Health Summary Result ─────────────────────────────────────────────────
+
+public sealed record ProductionHealthSummaryResult
+{
+    public required bool Succeeded { get; init; }
+    public ProductionExecutionHealthSummary? Summary { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionHealthSummaryResult Success(ProductionExecutionHealthSummary summary) =>
+        new() { Succeeded = true, Summary = summary };
+
+    public static ProductionHealthSummaryResult Fail(string failureCode, string reason) =>
         new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
 }

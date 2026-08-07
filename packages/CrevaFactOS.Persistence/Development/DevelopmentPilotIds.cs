@@ -104,4 +104,8 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ExecutionSetupPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000023");
+
+    // 4L — exception permission definition
+    public static readonly Guid ExecutionExceptionPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000024");
 }

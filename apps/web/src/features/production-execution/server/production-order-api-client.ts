@@ -7,6 +7,10 @@ import type {
   ProductionCycleEntrySummary,
   ProductionRuntimeSummary,
 } from "../domain/production-execution-operations";
+import type {
+  ProductionExecutionExceptionSummary,
+  ProductionExecutionHealthSummary,
+} from "../domain/production-execution-exceptions";
 import {
   parseProductionOrderDetailApiResponse,
   parseProductionOrderListApiResponse,
@@ -17,6 +21,10 @@ import {
   parseCycleEntryListApiResponse,
   parseRuntimeSummaryApiResponse,
 } from "./production-execution-operations-api-contracts";
+import {
+  parseExceptionListApiResponse,
+  parseHealthSummaryApiResponse,
+} from "./production-execution-exceptions-api-contracts";
 import type { ProductionOrderRequestContext } from "./production-order-request-context";
 
 export type ProductionOrderApiFailure = Readonly<{
@@ -530,4 +538,104 @@ export async function getRuntimeSummary(
     if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
     return { status: "success", value: parsed.value };
   });
+}
+
+// ── 4L: Exceptions ────────────────────────────────────────────────────────────
+
+export async function listExceptions(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ProductionExecutionExceptionSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseExceptionListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function getHealthSummary(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+): Promise<ProductionOrderApiResult<ProductionExecutionHealthSummary>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/health-summary?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseHealthSummaryApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function raiseException(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  exceptionType: string,
+  severity: string,
+  message: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, exceptionType, severity, message });
+}
+
+export async function acknowledgeException(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions/${encodeURIComponent(exceptionId)}/acknowledge?${params.toString()}`;
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function resolveException(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+  resolutionNote: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions/${encodeURIComponent(exceptionId)}/resolve?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, resolutionNote });
+}
+
+export async function recoverDowntime(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  downtimeId: string,
+  expectedVersion: number,
+  resolution: string,
+  resumeProduction: boolean,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/downtimes/${encodeURIComponent(downtimeId)}/recover?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, resolution, resumeProduction });
+}
+
+export async function recoverSetupSession(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  setupId: string,
+  expectedVersion: number,
+  resolution: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/setups/${encodeURIComponent(setupId)}/recover?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, resolution });
 }

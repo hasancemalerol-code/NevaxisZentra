@@ -15,6 +15,7 @@ import type { ProductionOrderStatus } from "../domain/production-order";
 import type {
   startSetupSessionAction,
   completeSetupSessionAction,
+  recoverSetupSessionAction,
 } from "../server/production-order-writer";
 
 type SetupPanelProps = Readonly<{
@@ -24,13 +25,16 @@ type SetupPanelProps = Readonly<{
   activeSetup?: ProductionSetupSessionSummary;
   recentSessions: ProductionSetupSessionSummary[];
   totalSetupSeconds: number;
+  setupIsStale?: boolean;
   onStartSetup: typeof startSetupSessionAction;
   onCompleteSetup: typeof completeSetupSessionAction;
+  onRecoverSetup?: typeof recoverSetupSessionAction;
 }>;
 
 type PanelState =
   | { kind: "idle" }
   | { kind: "start-dialog" }
+  | { kind: "recover-dialog" }
   | { kind: "pending"; action: string }
   | { kind: "error"; message: string };
 
@@ -41,13 +45,16 @@ export function ProductionSetupPanel({
   activeSetup,
   recentSessions,
   totalSetupSeconds,
+  setupIsStale,
   onStartSetup,
   onCompleteSetup,
+  onRecoverSetup,
 }: SetupPanelProps) {
   const router = useRouter();
   const [panelState, setPanelState] = useState<PanelState>({ kind: "idle" });
   const [selectedType, setSelectedType] = useState("initial-setup");
   const [comment, setComment] = useState("");
+  const [recoveryResolution, setRecoveryResolution] = useState("");
 
   const canStart = (status === "ready" || status === "paused") && !activeSetup;
   const canComplete = activeSetup !== undefined;
@@ -85,6 +92,23 @@ export function ProductionSetupPanel({
     }
   }, [orderId, activeSetup, version, onCompleteSetup, router]);
 
+  const handleRecoverSubmit = useCallback(async () => {
+    if (!activeSetup || !onRecoverSetup || !recoveryResolution.trim()) return;
+    setPanelState({ kind: "pending", action: "Setup kaydı uzlaştırılıyor…" });
+    try {
+      const result = await onRecoverSetup(orderId, activeSetup.id, version, recoveryResolution.trim());
+      if (result.status === "failure") {
+        setPanelState({ kind: "error", message: result.message ?? "Uzlaştırma başarısız." });
+      } else {
+        setPanelState({ kind: "idle" });
+        setRecoveryResolution("");
+        router.refresh();
+      }
+    } catch {
+      setPanelState({ kind: "error", message: "Bir hata oluştu." });
+    }
+  }, [orderId, activeSetup, version, recoveryResolution, onRecoverSetup, router]);
+
   return (
     <div className="ops-panel">
       <div className="ops-panel__header">
@@ -102,10 +126,16 @@ export function ProductionSetupPanel({
       </div>
 
       {activeSetup && (
-        <div className="ops-panel__active-session ops-panel__active-session--setup">
+        <div className={`ops-panel__active-session ops-panel__active-session--setup${setupIsStale ? " ops-panel__active-session--stale" : ""}`}>
           <div className="ops-panel__active-badge">
             <span className="ops-panel__active-dot ops-panel__active-dot--primary" />
             Aktif Setup
+            {setupIsStale && (
+              <span className="stale-badge">
+                <Clock aria-hidden="true" />
+                Uzun süredir açık
+              </span>
+            )}
           </div>
           <div className="ops-panel__active-content">
             <div className="ops-panel__active-reason">
@@ -118,6 +148,60 @@ export function ProductionSetupPanel({
             {activeSetup.comment && (
               <p className="ops-panel__active-comment">{activeSetup.comment}</p>
             )}
+            {setupIsStale && onRecoverSetup && panelState.kind === "idle" && (
+              <button
+                type="button"
+                className="button button-ghost button-medium stale-recover-btn"
+                onClick={() => { setRecoveryResolution(""); setPanelState({ kind: "recover-dialog" }); }}
+              >
+                Setup Kaydını Kapat
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {panelState.kind === "recover-dialog" && (
+        <div className="workflow-action-dialog">
+          <div className="workflow-action-dialog__content">
+            <h3 className="workflow-action-dialog__title">Setup Kaydını Kapat</h3>
+            <p className="workflow-action-dialog__description">
+              Uzun süredir açık olan setup kaydını kapatmak için bir çözüm notu girin. Üretim otomatik başlamaz.
+            </p>
+
+            <div className="workflow-action-dialog__field">
+              <label className="workflow-action-dialog__label" htmlFor="setup-recovery-resolution">
+                Çözüm Açıklaması <span style={{ color: "#bd2c36" }}>*</span>
+              </label>
+              <textarea
+                id="setup-recovery-resolution"
+                className="workflow-action-dialog__textarea"
+                rows={3}
+                maxLength={500}
+                placeholder="Setup neden kapandı, ne yapıldı?…"
+                value={recoveryResolution}
+                onChange={(e) => setRecoveryResolution(e.target.value)}
+              />
+            </div>
+
+            <div className="workflow-action-dialog__footer">
+              <button
+                type="button"
+                className="button button-ghost button-medium"
+                onClick={() => { setPanelState({ kind: "idle" }); setRecoveryResolution(""); }}
+                disabled={isPending}
+              >
+                İptal
+              </button>
+              <button
+                type="button"
+                className="button button-medium"
+                onClick={handleRecoverSubmit}
+                disabled={isPending || !recoveryResolution.trim()}
+              >
+                {isPending ? "Kapatılıyor…" : "Setup Kaydını Kapat"}
+              </button>
+            </div>
           </div>
         </div>
       )}

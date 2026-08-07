@@ -19,6 +19,8 @@ import { ProductionDowntimePanel } from "@/features/production-execution/compone
 import { ProductionSetupPanel } from "@/features/production-execution/components/production-setup-panel";
 import { ProductionCyclePanel } from "@/features/production-execution/components/production-cycle-panel";
 import { ProductionRuntimeAnalytics } from "@/features/production-execution/components/production-runtime-analytics";
+import { ProductionHealthPanel } from "@/features/production-execution/components/production-health-panel";
+import { ProductionExceptionPanel } from "@/features/production-execution/components/production-exception-panel";
 import { getProductionOrderStatusLabel } from "@/features/production-execution/domain/production-order";
 import {
   readProductionOrderById,
@@ -27,6 +29,8 @@ import {
   readSetupSessions,
   readCycleEntries,
   readRuntimeSummary,
+  readExceptions,
+  readHealthSummary,
 } from "@/features/production-execution/server/production-order-reader";
 import {
   completeProductionOrderAction,
@@ -40,6 +44,11 @@ import {
   startSetupSessionAction,
   completeSetupSessionAction,
   recordManualCycleAction,
+  raiseExceptionAction,
+  acknowledgeExceptionAction,
+  resolveExceptionAction,
+  recoverDowntimeAction,
+  recoverSetupSessionAction,
 } from "@/features/production-execution/server/production-order-writer";
 import type { ProductionOrderStatus } from "@/features/production-execution/domain/production-order";
 
@@ -101,7 +110,7 @@ export default async function ProductionOrderDetailPage({
 }: ProductionOrderDetailPageProps) {
   const { orderId } = await params;
 
-  const [result, entriesResult, downtimesResult, setupsResult, cyclesResult, runtimeResult] =
+  const [result, entriesResult, downtimesResult, setupsResult, cyclesResult, runtimeResult, exceptionsResult, healthResult] =
     await Promise.all([
       readProductionOrderById(orderId),
       readProductionEntries(orderId, 50),
@@ -109,6 +118,8 @@ export default async function ProductionOrderDetailPage({
       readSetupSessions(orderId, 20),
       readCycleEntries(orderId, 20),
       readRuntimeSummary(orderId),
+      readExceptions(orderId, 30),
+      readHealthSummary(orderId),
     ]);
 
   if (result.status === "failure") {
@@ -163,6 +174,8 @@ export default async function ProductionOrderDetailPage({
 
   const activeDowntime = runtimeSummary.activeDowntime;
   const activeSetup = runtimeSummary.activeSetup;
+  const exceptions = exceptionsResult.status === "success" ? exceptionsResult.exceptions : [];
+  const healthSummary = healthResult.status === "success" ? healthResult.summary : null;
 
   return (
     <main className="production-order-detail-page">
@@ -197,6 +210,12 @@ export default async function ProductionOrderDetailPage({
           )}
           {activeSetup && (
             <Badge tone="information">Aktif Setup</Badge>
+          )}
+          {healthSummary?.scheduleOverrun && order.status !== "completed" && (
+            <Badge tone="warning">Planlanan bitiş aşıldı</Badge>
+          )}
+          {healthSummary?.criticalExceptionCount !== undefined && healthSummary.criticalExceptionCount > 0 && (
+            <Badge tone="danger">Kritik İstisna</Badge>
           )}
         </div>
       </header>
@@ -253,7 +272,17 @@ export default async function ProductionOrderDetailPage({
         </Card>
       </section>
 
-      {/* 3 — Runtime analytics */}
+      {/* 3 — Operational health summary (4L) */}
+      {healthSummary && (
+        <section
+          className="production-order-detail-page__health"
+          aria-label="Operasyon sağlığı"
+        >
+          <ProductionHealthPanel summary={healthSummary} />
+        </section>
+      )}
+
+      {/* 3b — Runtime analytics */}
       <section
         className="production-order-detail-page__runtime"
         aria-label="Çalışma analitiği"
@@ -294,8 +323,10 @@ export default async function ProductionOrderDetailPage({
           activeDowntime={activeDowntime}
           recentDowntimes={downtimes}
           totalDowntimeSeconds={runtimeSummary.totalDowntimeSeconds}
+          downtimeIsStale={healthSummary?.downtimeIsStale}
           onStartDowntime={startDowntimeAction}
           onEndDowntime={endDowntimeAction}
+          onRecoverDowntime={recoverDowntimeAction}
         />
 
         <ProductionSetupPanel
@@ -305,8 +336,10 @@ export default async function ProductionOrderDetailPage({
           activeSetup={activeSetup}
           recentSessions={setups}
           totalSetupSeconds={runtimeSummary.totalSetupSeconds}
+          setupIsStale={healthSummary?.setupIsStale}
           onStartSetup={startSetupSessionAction}
           onCompleteSetup={completeSetupSessionAction}
+          onRecoverSetup={recoverSetupSessionAction}
         />
 
         <ProductionCyclePanel
@@ -318,6 +351,21 @@ export default async function ProductionOrderDetailPage({
           lastCycleAtUtc={runtimeSummary.lastCycleAtUtc}
           recentCycles={cycles}
           onRecordCycle={recordManualCycleAction}
+        />
+      </section>
+
+      {/* 6b — Exception management panel (4L) */}
+      <section
+        className="production-order-detail-page__exceptions"
+        aria-label="Operasyon istisnaları"
+      >
+        <ProductionExceptionPanel
+          orderId={order.id}
+          version={order.version}
+          exceptions={exceptions}
+          onRaiseException={raiseExceptionAction}
+          onAcknowledgeException={acknowledgeExceptionAction}
+          onResolveException={resolveExceptionAction}
         />
       </section>
 

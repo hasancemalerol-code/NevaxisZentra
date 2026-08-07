@@ -46,6 +46,15 @@ public static class AuditEventTypes
     // 3L — manual cycle
     public const string ProductionCycleManualRecorded = "production.order.cycle.manual.recorded";
 
+    // 4L — exceptions
+    public const string ProductionExceptionRaised = "production.order.exception.raised";
+    public const string ProductionExceptionAcknowledged = "production.order.exception.acknowledged";
+    public const string ProductionExceptionResolved = "production.order.exception.resolved";
+
+    // 4L — recovery
+    public const string ProductionDowntimeRecovered = "production.order.downtime.recovered";
+    public const string ProductionSetupRecovered = "production.order.setup.recovered";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -85,5 +94,10 @@ public static class AuditEventTypes
         ProductionSetupStarted,
         ProductionSetupCompleted,
         ProductionCycleManualRecorded,
+        ProductionExceptionRaised,
+        ProductionExceptionAcknowledged,
+        ProductionExceptionResolved,
+        ProductionDowntimeRecovered,
+        ProductionSetupRecovered,
     };
 }

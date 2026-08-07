@@ -1916,6 +1916,449 @@
   color: #155eef;
 }
 
+/* ─── 4L: Health Panel ─── */
+
+.health-panel {
+  border-radius: 14px;
+  border: 1.5px solid #d5e0ec;
+  background: #ffffff;
+  padding: 20px 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.health-panel--attention {
+  border-color: #f0d5ae;
+  background: #fffcf8;
+}
+
+.health-panel--critical {
+  border-color: #f5c2c7;
+  background: #fff8f8;
+}
+
+.health-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.health-panel__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #66758b;
+}
+
+.health-panel--attention .health-panel__icon {
+  color: #ad5d0b;
+}
+
+.health-panel--critical .health-panel__icon {
+  color: #bd2c36;
+}
+
+.health-panel__eyebrow {
+  color: #66758b;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px;
+}
+
+.health-panel__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #10213c;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.health-panel__attention-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #f0d5ae;
+  background: #fff8ef;
+  color: #ad5d0b;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.health-panel__attention-badge > svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.health-panel__signals {
+  display: grid;
+  gap: 6px;
+}
+
+.health-panel__signal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.health-panel__signal > svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.health-panel__signal--critical {
+  background: #fff3f3;
+  color: #bd2c36;
+}
+
+.health-panel__signal--warning {
+  background: #fff8ef;
+  color: #ad5d0b;
+}
+
+.health-panel__signal--info {
+  background: #edf4ff;
+  color: #155eef;
+}
+
+.health-panel__signal--ok {
+  background: #f0faf5;
+  color: #1a7a46;
+}
+
+.health-panel__progress {
+  display: grid;
+  gap: 6px;
+}
+
+.health-panel__progress-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #e6edf5;
+  overflow: hidden;
+}
+
+.health-panel__progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: #155eef;
+  transition: width 300ms ease;
+}
+
+.health-panel__progress-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #66758b;
+  text-align: right;
+}
+
+/* ─── 4L: Stale session indicators ─── */
+
+.ops-panel__active-session--stale {
+  border-color: #f0d5ae !important;
+  background: #fffcf8 !important;
+}
+
+.stale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #fff8ef;
+  border: 1px solid #f0d5ae;
+  color: #ad5d0b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stale-badge > svg {
+  width: 11px;
+  height: 11px;
+}
+
+.stale-recover-btn {
+  margin-top: 10px;
+  border: 1.5px dashed #f0d5ae;
+  color: #ad5d0b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stale-recover-btn:hover {
+  background: #fff8ef;
+  border-color: #c4690c;
+}
+
+/* ─── 4L: Exception Panel ─── */
+
+.exception-panel {
+  grid-column: 1 / -1;
+}
+
+.exception-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 4px;
+  display: grid;
+  gap: 8px;
+}
+
+.exception-panel__list--resolved {
+  opacity: 0.7;
+}
+
+.exception-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #d5e0ec;
+  background: #f8fafc;
+  display: grid;
+  gap: 6px;
+}
+
+.exception-item--critical {
+  border-color: #f5c2c7;
+  background: #fff8f8;
+}
+
+.exception-item--warning {
+  border-color: #f0d5ae;
+  background: #fffcf8;
+}
+
+.exception-item--info {
+  border-color: #c3d9f7;
+  background: #f5f9ff;
+}
+
+.exception-item--resolved {
+  border-color: #d5e0ec;
+  background: #f8fafc;
+  opacity: 0.75;
+}
+
+.exception-item__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exception-item__type {
+  font-size: 12px;
+  font-weight: 800;
+  color: #10213c;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exception-item__severity {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exception-item__severity--critical {
+  background: #fde8ea;
+  color: #bd2c36;
+}
+
+.exception-item__severity--warning {
+  background: #fff0df;
+  color: #ad5d0b;
+}
+
+.exception-item__severity--info {
+  background: #edf4ff;
+  color: #155eef;
+}
+
+.exception-item__status {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exception-item__status--open {
+  background: #fde8ea;
+  color: #bd2c36;
+}
+
+.exception-item__status--acknowledged {
+  background: #fff0df;
+  color: #ad5d0b;
+}
+
+.exception-item__status--resolved {
+  background: #f0faf5;
+  color: #1a7a46;
+}
+
+.exception-item__message {
+  font-size: 13px;
+  color: #15243b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.exception-item__resolution {
+  font-size: 12px;
+  color: #66758b;
+  font-style: italic;
+  margin: 0;
+}
+
+.exception-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #66758b;
+}
+
+.exception-item__actor {
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.exception-item__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.exception-panel__empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 14px;
+  color: #66758b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.exception-panel__empty > svg {
+  width: 16px;
+  height: 16px;
+  color: #1a7a46;
+  flex-shrink: 0;
+}
+
+.exception-panel__resolved {
+  border-top: 1px solid #e6edf5;
+  padding-top: 10px;
+}
+
+.exception-panel__resolved-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #66758b;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  padding: 4px 0;
+}
+
+.exception-panel__resolved-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.exception-panel__resolved-toggle > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ─── 4L: Exception raise form extras ─── */
+
+.exception-severity-select {
+  display: flex;
+  gap: 8px;
+}
+
+.exception-severity-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1.5px solid #d5e0ec;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 700;
+  color: #66758b;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.exception-severity-btn--info.exception-severity-btn--selected {
+  border-color: #93c5fd;
+  background: #edf4ff;
+  color: #155eef;
+}
+
+.exception-severity-btn--warning.exception-severity-btn--selected {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  color: #ad5d0b;
+}
+
+.exception-severity-btn--critical.exception-severity-btn--selected {
+  border-color: #fca5a5;
+  background: #fff3f3;
+  color: #bd2c36;
+}
+
+.workflow-action-dialog__char-count {
+  font-size: 10.5px;
+  color: #99aabb;
+  text-align: right;
+  display: block;
+  margin-top: 2px;
+}
+
+.recovery-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #15243b;
+  cursor: pointer;
+}
+
+.recovery-checkbox-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #155eef;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* ─── Responsive Design ─── */
 
 @media (max-width: 1279px) {

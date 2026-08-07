@@ -1012,6 +1012,407 @@ public sealed class ProductionOperationsRepository(
         });
     }
 
+    // ────────────────────────── 4L: Recover Downtime ─────────────────────────
+
+    public async Task<ProductionOperationsWriteResult> RecoverDowntimeAsync(
+        ProductionOrderOperationContext context,
+        RecoverDowntimeCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(command);
+
+        if (context.TenantId == Guid.Empty || context.FacilityId == Guid.Empty)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.InvalidScope,
+                "Tenant and facility identifiers are required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Resolution))
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.CommentRequired,
+                "A resolution reason is required to recover a stale downtime.");
+        }
+
+        try
+        {
+            return await tenantDatabaseSession.ExecuteWriteAsync(
+                async ct =>
+                {
+                    var order = await dbContext.ProductionOrders
+                        .SingleOrDefaultAsync(
+                            o => o.TenantId == context.TenantId
+                                && o.FacilityId == context.FacilityId
+                                && o.Id == command.ProductionOrderId,
+                            ct);
+
+                    if (order is null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.NotFound,
+                            "Production order was not found.");
+                    }
+
+                    if (order.Version != command.ExpectedVersion)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.ConcurrencyConflict,
+                            "The production order has been modified. Please reload and try again.");
+                    }
+
+                    var downtime = await dbContext.ProductionDowntimes
+                        .SingleOrDefaultAsync(
+                            d => d.TenantId == context.TenantId
+                                && d.ProductionOrderId == command.ProductionOrderId
+                                && d.Id == command.DowntimeId,
+                            ct);
+
+                    if (downtime is null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.DowntimeNotFound,
+                            "Downtime session was not found.");
+                    }
+
+                    if (downtime.EndedAtUtc is not null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.DowntimeNotActive,
+                            "Only active (not yet ended) downtime sessions can be recovered.");
+                    }
+
+                    var now = DateTimeOffset.UtcNow;
+                    var correlationId = context.CorrelationId ?? Guid.NewGuid();
+                    var actorSubjectId = context.IdentitySubjectId.ToString();
+
+                    var durationSeconds = (long)(now - downtime.StartedAtUtc).TotalSeconds;
+
+                    downtime.EndedAtUtc = now;
+                    downtime.EndedBySubjectId = actorSubjectId;
+                    downtime.DurationSeconds = durationSeconds;
+                    downtime.RecoveredAtUtc = now;
+                    downtime.RecoveredBySubjectId = actorSubjectId;
+                    downtime.RecoveryReason = command.Resolution.Trim();
+                    downtime.Version += 1;
+
+                    order.TotalDowntimeSeconds += durationSeconds;
+                    order.LastModifiedBySubjectId = actorSubjectId;
+                    order.Version += 1;
+                    order.UpdatedAtUtc = now;
+
+                    if (command.ResumeProduction && order.Status == ProductionOrderStatus.Paused)
+                    {
+                        order.Status = ProductionOrderStatus.InProgress;
+                    }
+
+                    var auditAction = ProductionAuditActions.ProductionDowntimeRecover;
+                    var auditEventType = ProductionAuditEventTypes.ProductionDowntimeRecovered;
+                    var outboxType = ProductionOutboxMessageTypes.ProductionDowntimeRecovered;
+
+                    AddAudit(context, auditAction, auditEventType, "production.order", order.Id.ToString(),
+                        correlationId, now, new
+                        {
+                            productionOrderId = order.Id.ToString(),
+                            downtimeId = downtime.Id.ToString(),
+                            durationSeconds,
+                            resumeProduction = command.ResumeProduction,
+                        });
+
+                    AddOutbox(context, outboxType, "production-order", order.Id.ToString(), correlationId, now,
+                        new Dictionary<string, string?>
+                        {
+                            ["tenantId"] = context.TenantId.ToString(),
+                            ["facilityId"] = context.FacilityId.ToString(),
+                            ["productionOrderId"] = order.Id.ToString(),
+                            ["downtimeId"] = downtime.Id.ToString(),
+                            ["occurredAtUtc"] = now.ToString("O"),
+                        });
+
+                    await dbContext.SaveChangesAsync(ct);
+
+                    return ProductionOperationsWriteResult.Success(downtime.Id, order.Version);
+                },
+                cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.ConcurrencyConflict,
+                "The production order was modified concurrently. Please reload and try again.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.SourceUnavailable,
+                "Production operations service is unavailable.");
+        }
+    }
+
+    // ────────────────────────── 4L: Recover Setup ─────────────────────────────
+
+    public async Task<ProductionOperationsWriteResult> RecoverSetupSessionAsync(
+        ProductionOrderOperationContext context,
+        RecoverSetupSessionCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(command);
+
+        if (context.TenantId == Guid.Empty || context.FacilityId == Guid.Empty)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.InvalidScope,
+                "Tenant and facility identifiers are required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Resolution))
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.CommentRequired,
+                "A resolution reason is required to recover a stale setup session.");
+        }
+
+        try
+        {
+            return await tenantDatabaseSession.ExecuteWriteAsync(
+                async ct =>
+                {
+                    var order = await dbContext.ProductionOrders
+                        .SingleOrDefaultAsync(
+                            o => o.TenantId == context.TenantId
+                                && o.FacilityId == context.FacilityId
+                                && o.Id == command.ProductionOrderId,
+                            ct);
+
+                    if (order is null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.NotFound,
+                            "Production order was not found.");
+                    }
+
+                    if (order.Version != command.ExpectedVersion)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.ConcurrencyConflict,
+                            "The production order has been modified. Please reload and try again.");
+                    }
+
+                    var session = await dbContext.ProductionSetupSessions
+                        .SingleOrDefaultAsync(
+                            s => s.TenantId == context.TenantId
+                                && s.ProductionOrderId == command.ProductionOrderId
+                                && s.Id == command.SetupSessionId,
+                            ct);
+
+                    if (session is null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.SetupSessionNotFound,
+                            "Setup session was not found.");
+                    }
+
+                    if (session.CompletedAtUtc is not null)
+                    {
+                        return ProductionOperationsWriteResult.Fail(
+                            ProductionOrderFailureCodes.SetupSessionNotActive,
+                            "Only active (not yet completed) setup sessions can be recovered.");
+                    }
+
+                    var now = DateTimeOffset.UtcNow;
+                    var correlationId = context.CorrelationId ?? Guid.NewGuid();
+                    var actorSubjectId = context.IdentitySubjectId.ToString();
+
+                    var durationSeconds = (long)(now - session.StartedAtUtc).TotalSeconds;
+
+                    session.CompletedAtUtc = now;
+                    session.CompletedBySubjectId = actorSubjectId;
+                    session.DurationSeconds = durationSeconds;
+                    session.RecoveredAtUtc = now;
+                    session.RecoveredBySubjectId = actorSubjectId;
+                    session.RecoveryReason = command.Resolution.Trim();
+                    session.Version += 1;
+
+                    order.TotalSetupSeconds += durationSeconds;
+                    order.LastModifiedBySubjectId = actorSubjectId;
+                    order.Version += 1;
+                    order.UpdatedAtUtc = now;
+
+                    AddAudit(context, ProductionAuditActions.ProductionSetupRecover,
+                        ProductionAuditEventTypes.ProductionSetupRecovered, "production.order", order.Id.ToString(),
+                        correlationId, now, new
+                        {
+                            productionOrderId = order.Id.ToString(),
+                            setupSessionId = session.Id.ToString(),
+                            durationSeconds,
+                        });
+
+                    AddOutbox(context, ProductionOutboxMessageTypes.ProductionSetupRecovered,
+                        "production-order", order.Id.ToString(), correlationId, now,
+                        new Dictionary<string, string?>
+                        {
+                            ["tenantId"] = context.TenantId.ToString(),
+                            ["facilityId"] = context.FacilityId.ToString(),
+                            ["productionOrderId"] = order.Id.ToString(),
+                            ["setupSessionId"] = session.Id.ToString(),
+                            ["occurredAtUtc"] = now.ToString("O"),
+                        });
+
+                    await dbContext.SaveChangesAsync(ct);
+
+                    return ProductionOperationsWriteResult.Success(session.Id, order.Version);
+                },
+                cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.ConcurrencyConflict,
+                "The production order was modified concurrently. Please reload and try again.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionOperationsWriteResult.Fail(
+                ProductionOrderFailureCodes.SourceUnavailable,
+                "Production operations service is unavailable.");
+        }
+    }
+
+    // ────────────────────────── 4L: Health Summary ────────────────────────────
+
+    public async Task<ProductionHealthSummaryResult> GetHealthSummaryAsync(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        ProductionExecutionOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (context.TenantId == Guid.Empty || context.FacilityId == Guid.Empty)
+        {
+            return ProductionHealthSummaryResult.Fail(
+                ProductionOrderFailureCodes.InvalidScope,
+                "Tenant and facility identifiers are required.");
+        }
+
+        try
+        {
+            var order = await dbContext.ProductionOrders
+                .AsNoTracking()
+                .SingleOrDefaultAsync(
+                    o => o.TenantId == context.TenantId
+                        && o.FacilityId == context.FacilityId
+                        && o.Id == productionOrderId,
+                    cancellationToken);
+
+            if (order is null)
+            {
+                return ProductionHealthSummaryResult.Fail(
+                    ProductionOrderFailureCodes.NotFound,
+                    "Production order was not found.");
+            }
+
+            var now = DateTimeOffset.UtcNow;
+
+            // Active sessions
+            var activeDowntime = await dbContext.ProductionDowntimes
+                .AsNoTracking()
+                .Where(d => d.TenantId == context.TenantId
+                    && d.ProductionOrderId == productionOrderId
+                    && d.EndedAtUtc == null)
+                .Select(d => new { d.Id, d.StartedAtUtc })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var activeSetup = await dbContext.ProductionSetupSessions
+                .AsNoTracking()
+                .Where(s => s.TenantId == context.TenantId
+                    && s.ProductionOrderId == productionOrderId
+                    && s.CompletedAtUtc == null)
+                .Select(s => new { s.Id, s.StartedAtUtc })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Exceptions
+            var exceptionCounts = await dbContext.ProductionExecutionExceptions
+                .Where(e => e.TenantId == context.TenantId
+                    && e.ProductionOrderId == productionOrderId
+                    && ProductionExceptionStatuses.Unresolved.Contains(e.Status))
+                .GroupBy(e => e.Severity)
+                .Select(g => new { Severity = g.Key, Count = g.Count() })
+                .ToListAsync(cancellationToken);
+
+            var openExceptionCount = exceptionCounts.Sum(g => g.Count);
+            var criticalExceptionCount = exceptionCounts
+                .Where(g => g.Severity == ProductionExceptionSeverities.Critical)
+                .Sum(g => g.Count);
+
+            // Stale detection (read-time deterministic)
+            var downtimeIsStale = activeDowntime is not null
+                && (now - activeDowntime.StartedAtUtc).TotalMinutes > options.StaleDowntimeThresholdMinutes;
+
+            var setupIsStale = activeSetup is not null
+                && (now - activeSetup.StartedAtUtc).TotalMinutes > options.StaleSetupThresholdMinutes;
+
+            // Schedule overrun
+            var scheduleOverrun = order.PlannedEndAtUtc < now
+                && order.Status != ProductionOrderStatus.Completed;
+
+            // Quantity progress
+            decimal? quantityProgress = order.PlannedQuantity.HasValue && order.PlannedQuantity.Value > 0
+                ? Math.Min(order.GoodQuantity / order.PlannedQuantity.Value * 100m, 100m)
+                : null;
+
+            // Last operational activity
+            var lastActivity = new[] {
+                order.LastProductionEntryAtUtc,
+                order.LastCycleAtUtc,
+                order.ActualStartAtUtc,
+            }
+            .Where(t => t.HasValue)
+            .Select(t => t!.Value)
+            .DefaultIfEmpty()
+            .Max();
+
+            DateTimeOffset? lastActivityUtc = lastActivity == default ? null : lastActivity;
+
+            // Attention signals
+            var requiresAttention = openExceptionCount > 0
+                || criticalExceptionCount > 0
+                || downtimeIsStale
+                || setupIsStale
+                || scheduleOverrun;
+
+            var healthStatus = criticalExceptionCount > 0
+                ? "critical"
+                : requiresAttention
+                    ? "attention"
+                    : "normal";
+
+            var summary = new ProductionExecutionHealthSummary(
+                Status: healthStatus,
+                OpenExceptionCount: openExceptionCount,
+                CriticalExceptionCount: criticalExceptionCount,
+                HasActiveDowntime: activeDowntime is not null,
+                DowntimeIsStale: downtimeIsStale,
+                HasActiveSetup: activeSetup is not null,
+                SetupIsStale: setupIsStale,
+                QuantityProgress: quantityProgress,
+                ScheduleOverrun: scheduleOverrun,
+                LastOperationalActivityAtUtc: lastActivityUtc,
+                RequiresAttention: requiresAttention);
+
+            return ProductionHealthSummaryResult.Success(summary);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionHealthSummaryResult.Fail(
+                ProductionOrderFailureCodes.SourceUnavailable,
+                "Production health summary service is unavailable.");
+        }
+    }
+
     private void AddOutbox(
         ProductionOrderOperationContext context,
         string messageType,
@@ -1095,6 +1496,11 @@ public sealed class UnavailableProductionOperationsRepository : IProductionOpera
             ProductionOrderFailureCodes.SourceUnavailable,
             "Production operations service is unavailable because persistence is disabled.");
 
+    private static readonly ProductionHealthSummaryResult UnavailableHealth =
+        ProductionHealthSummaryResult.Fail(
+            ProductionOrderFailureCodes.SourceUnavailable,
+            "Production operations service is unavailable because persistence is disabled.");
+
     public Task<ProductionOperationsWriteResult> StartDowntimeAsync(ProductionOrderOperationContext context, StartDowntimeCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
     public Task<ProductionOperationsWriteResult> EndDowntimeAsync(ProductionOrderOperationContext context, EndDowntimeCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
     public Task<ProductionOperationsListResult<DowntimeReadModel>> ListDowntimesAsync(ProductionOrderOperationContext context, Guid productionOrderId, int limit, CancellationToken cancellationToken = default) => Task.FromResult(ProductionOperationsListResult.Fail<DowntimeReadModel>(ProductionOrderFailureCodes.SourceUnavailable, "Unavailable."));
@@ -1104,4 +1510,7 @@ public sealed class UnavailableProductionOperationsRepository : IProductionOpera
     public Task<ProductionOperationsWriteResult> RecordManualCycleAsync(ProductionOrderOperationContext context, RecordManualCycleCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
     public Task<ProductionOperationsListResult<CycleEntryReadModel>> ListCycleEntriesAsync(ProductionOrderOperationContext context, Guid productionOrderId, int limit, CancellationToken cancellationToken = default) => Task.FromResult(ProductionOperationsListResult.Fail<CycleEntryReadModel>(ProductionOrderFailureCodes.SourceUnavailable, "Unavailable."));
     public Task<ProductionRuntimeSummaryResult> GetRuntimeSummaryAsync(ProductionOrderOperationContext context, Guid productionOrderId, CancellationToken cancellationToken = default) => Task.FromResult(UnavailableSummary);
+    public Task<ProductionOperationsWriteResult> RecoverDowntimeAsync(ProductionOrderOperationContext context, RecoverDowntimeCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
+    public Task<ProductionOperationsWriteResult> RecoverSetupSessionAsync(ProductionOrderOperationContext context, RecoverSetupSessionCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
+    public Task<ProductionHealthSummaryResult> GetHealthSummaryAsync(ProductionOrderOperationContext context, Guid productionOrderId, ProductionExecutionOptions options, CancellationToken cancellationToken = default) => Task.FromResult(UnavailableHealth);
 }

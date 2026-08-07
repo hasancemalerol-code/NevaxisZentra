@@ -70,6 +70,9 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     public DbSet<ProductionCycleEntry> ProductionCycleEntries => Set<ProductionCycleEntry>();
 
+    // 4L — execution exceptions
+    public DbSet<ProductionExecutionExceptionRecord> ProductionExecutionExceptions => Set<ProductionExecutionExceptionRecord>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -500,6 +503,13 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // 4L
+        modelBuilder.ApplyConfiguration(new ProductionExecutionExceptionEntityConfiguration());
+        modelBuilder.Entity<ProductionExecutionExceptionRecord>().HasQueryFilter(ex =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && ex.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

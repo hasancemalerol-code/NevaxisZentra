@@ -27,6 +27,15 @@ public static class ProductionAuditActions
 
     // 3L — manual cycle
     public const string ProductionCycleManualRecord = "production.order.cycle.manual.record";
+
+    // 4L — exceptions
+    public const string ProductionExceptionRaise = "production.order.exception.raise";
+    public const string ProductionExceptionAcknowledge = "production.order.exception.acknowledge";
+    public const string ProductionExceptionResolve = "production.order.exception.resolve";
+
+    // 4L — recovery
+    public const string ProductionDowntimeRecover = "production.order.downtime.recover";
+    public const string ProductionSetupRecover = "production.order.setup.recover";
 }
 
 /// <summary>
@@ -56,6 +65,15 @@ public static class ProductionAuditEventTypes
 
     // 3L — manual cycle
     public const string ProductionCycleManualRecorded = "production.order.cycle.manual.recorded";
+
+    // 4L — exceptions
+    public const string ProductionExceptionRaised = "production.order.exception.raised";
+    public const string ProductionExceptionAcknowledged = "production.order.exception.acknowledged";
+    public const string ProductionExceptionResolved = "production.order.exception.resolved";
+
+    // 4L — recovery
+    public const string ProductionDowntimeRecovered = "production.order.downtime.recovered";
+    public const string ProductionSetupRecovered = "production.order.setup.recovered";
 }
 
 /// <summary>
@@ -85,4 +103,13 @@ public static class ProductionOutboxMessageTypes
 
     // 3L — manual cycle
     public const string ProductionManualCycleRecorded = "production-order-manual-cycle-recorded";
+
+    // 4L — exceptions
+    public const string ProductionExceptionRaised = "production-order-exception-raised";
+    public const string ProductionExceptionAcknowledged = "production-order-exception-acknowledged";
+    public const string ProductionExceptionResolved = "production-order-exception-resolved";
+
+    // 4L — recovery
+    public const string ProductionDowntimeRecovered = "production-order-downtime-recovered";
+    public const string ProductionSetupRecovered = "production-order-setup-recovered";
 }

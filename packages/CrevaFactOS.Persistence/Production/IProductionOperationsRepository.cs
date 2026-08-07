@@ -61,4 +61,24 @@ public interface IProductionOperationsRepository
         ProductionOrderOperationContext context,
         Guid productionOrderId,
         CancellationToken cancellationToken = default);
+
+    // ── 4L: Recovery ──────────────────────────────────────────────────────────
+
+    Task<ProductionOperationsWriteResult> RecoverDowntimeAsync(
+        ProductionOrderOperationContext context,
+        RecoverDowntimeCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<ProductionOperationsWriteResult> RecoverSetupSessionAsync(
+        ProductionOrderOperationContext context,
+        RecoverSetupSessionCommand command,
+        CancellationToken cancellationToken = default);
+
+    // ── 4L: Health Summary ────────────────────────────────────────────────────
+
+    Task<ProductionHealthSummaryResult> GetHealthSummaryAsync(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        ProductionExecutionOptions options,
+        CancellationToken cancellationToken = default);
 }

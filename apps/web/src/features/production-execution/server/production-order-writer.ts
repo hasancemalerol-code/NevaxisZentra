@@ -15,6 +15,11 @@ import {
   startSetupSession,
   completeSetupSession,
   recordManualCycle,
+  raiseException,
+  acknowledgeException,
+  resolveException,
+  recoverDowntime,
+  recoverSetupSession,
   type ProductionOrderWriteResult,
 } from "./production-order-api-client";
 import {
@@ -340,5 +345,100 @@ export async function recordManualCycleAction(
     return { status: "failure", code: "invalid-request", message: "Miktar negatif olamaz." };
   }
   const result = await recordManualCycle(resolved.context, productionOrderId, expectedVersion, cycleDurationMilliseconds, quantityProduced, comment?.trim() || undefined);
+  return mapWriteResult(result);
+}
+
+// ── 4L: Exception management ──────────────────────────────────────────────────
+
+export async function raiseExceptionAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  exceptionType: string,
+  severity: string,
+  message: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!exceptionType.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna türü zorunludur." };
+  }
+  if (!severity.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Önem derecesi zorunludur." };
+  }
+  if (!message.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna mesajı zorunludur." };
+  }
+  const result = await raiseException(resolved.context, productionOrderId, expectedVersion, exceptionType.trim(), severity.trim(), message.trim());
+  return mapWriteResult(result);
+}
+
+export async function acknowledgeExceptionAction(
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!exceptionId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
+  }
+  const result = await acknowledgeException(resolved.context, productionOrderId, exceptionId.trim(), expectedVersion);
+  return mapWriteResult(result);
+}
+
+export async function resolveExceptionAction(
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+  resolutionNote: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!exceptionId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
+  }
+  if (!resolutionNote.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Çözüm notu zorunludur." };
+  }
+  const result = await resolveException(resolved.context, productionOrderId, exceptionId.trim(), expectedVersion, resolutionNote.trim());
+  return mapWriteResult(result);
+}
+
+// ── 4L: Session recovery ──────────────────────────────────────────────────────
+
+export async function recoverDowntimeAction(
+  productionOrderId: string,
+  downtimeId: string,
+  expectedVersion: number,
+  resolution: string,
+  resumeProduction: boolean,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!downtimeId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Duruş ID zorunludur." };
+  }
+  if (!resolution.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Çözüm açıklaması zorunludur." };
+  }
+  const result = await recoverDowntime(resolved.context, productionOrderId, downtimeId.trim(), expectedVersion, resolution.trim(), resumeProduction);
+  return mapWriteResult(result);
+}
+
+export async function recoverSetupSessionAction(
+  productionOrderId: string,
+  setupId: string,
+  expectedVersion: number,
+  resolution: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!setupId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Setup ID zorunludur." };
+  }
+  if (!resolution.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Çözüm açıklaması zorunludur." };
+  }
+  const result = await recoverSetupSession(resolved.context, productionOrderId, setupId.trim(), expectedVersion, resolution.trim());
   return mapWriteResult(result);
 }
