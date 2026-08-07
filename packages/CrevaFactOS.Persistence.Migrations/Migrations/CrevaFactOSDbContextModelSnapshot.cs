@@ -1021,9 +1021,137 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                             t.HasCheckConstraint("ck_production_plans_transfer_json", "jsonb_typeof(transfer_json) = 'object'");
 
-                            t.HasCheckConstraint("ck_production_plans_transfer_status", "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed')");
+                            t.HasCheckConstraint("ck_production_plans_transfer_status", "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed', 'uncertain')");
 
                             t.HasCheckConstraint("ck_production_plans_transfer_target_system", "transfer_target_system IS NULL OR transfer_target_system IN ('erp', 'mes', 'crevafactos')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanTransferRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_number");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("ExternalReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("external_reference");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FailureCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_code");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("OperationType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("operation_type");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<DateTimeOffset>("RequestedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("requested_at_utc");
+
+                    b.Property<string>("RequestedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("requested_by_subject_id");
+
+                    b.Property<string>("ResponseFingerprint")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("response_fingerprint");
+
+                    b.Property<bool?>("RetryableFailure")
+                        .HasColumnType("boolean")
+                        .HasColumnName("retryable_failure");
+
+                    b.Property<string>("SafeFailureMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("safe_failure_message");
+
+                    b.Property<DateTimeOffset?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetSystem")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("target_system");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("ProductionPlanId");
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.HasIndex("TenantId", "FacilityId", "ProductionPlanId");
+
+                    b.HasIndex("TenantId", "TargetSystem", "Status");
+
+                    b.ToTable("production_plan_transfer_requests", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_transfer_requests_attempt_number", "attempt_number >= 1");
+
+                            t.HasCheckConstraint("ck_transfer_requests_idempotency_key", "idempotency_key <> ''");
+
+                            t.HasCheckConstraint("ck_transfer_requests_operation_type", "operation_type <> ''");
+
+                            t.HasCheckConstraint("ck_transfer_requests_status", "status IN ('requested', 'processing', 'succeeded', 'failed', 'uncertain')");
+
+                            t.HasCheckConstraint("ck_transfer_requests_target_system", "target_system IN ('erp', 'mes')");
                         });
                 });
 
@@ -1239,6 +1367,28 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", b =>
                 {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanTransferRequest", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")

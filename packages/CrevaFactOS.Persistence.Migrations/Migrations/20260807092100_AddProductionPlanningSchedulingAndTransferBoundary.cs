@@ -79,6 +79,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                 CREATE INDEX ix_transfer_requests_tenant_target_status
                     ON production_plan_transfer_requests (tenant_id, target_system, status);
+
+                CREATE INDEX "IX_production_plan_transfer_requests_production_plan_id"
+                    ON production_plan_transfer_requests (production_plan_id);
                 """);
 
             // 3. Runtime grants for transfer requests table
