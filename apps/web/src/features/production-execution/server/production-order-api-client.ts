@@ -1,10 +1,22 @@
 import "./production-order-server-boundary";
 
 import type { ProductionOrder, ProductionOrderSummary } from "../domain/production-order";
+import type {
+  ProductionDowntimeSummary,
+  ProductionSetupSessionSummary,
+  ProductionCycleEntrySummary,
+  ProductionRuntimeSummary,
+} from "../domain/production-execution-operations";
 import {
   parseProductionOrderDetailApiResponse,
   parseProductionOrderListApiResponse,
 } from "./production-order-api-contracts";
+import {
+  parseDowntimeListApiResponse,
+  parseSetupSessionListApiResponse,
+  parseCycleEntryListApiResponse,
+  parseRuntimeSummaryApiResponse,
+} from "./production-execution-operations-api-contracts";
 import type { ProductionOrderRequestContext } from "./production-order-request-context";
 
 export type ProductionOrderApiFailure = Readonly<{
@@ -388,4 +400,134 @@ export async function consumeHandoff(
   const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/handoffs/${encodeURIComponent(handoffId.trim())}/consume?${params.toString()}`;
 
   return executePost(context, url, { expectedHandoffVersion });
+}
+
+export async function startDowntime(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  reasonCode: string,
+  comment?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/downtimes/start?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, reasonCode, comment });
+}
+
+export async function endDowntime(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  downtimeId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/downtimes/${encodeURIComponent(downtimeId)}/end?${params.toString()}`;
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function listDowntimes(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ProductionDowntimeSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/downtimes?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseDowntimeListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function startSetupSession(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  setupType: string,
+  comment?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/setups/start?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, setupType, comment });
+}
+
+export async function completeSetupSession(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  setupId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/setups/${encodeURIComponent(setupId)}/complete?${params.toString()}`;
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function listSetupSessions(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ProductionSetupSessionSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/setups?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseSetupSessionListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function recordManualCycle(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  cycleDurationMilliseconds: number,
+  quantityProduced?: number,
+  comment?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/cycles/manual?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, cycleDurationMilliseconds, quantityProduced, comment });
+}
+
+export async function listCycleEntries(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ProductionCycleEntrySummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/cycles?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseCycleEntryListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function getRuntimeSummary(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+): Promise<ProductionOrderApiResult<ProductionRuntimeSummary>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/runtime-summary?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseRuntimeSummaryApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
 }

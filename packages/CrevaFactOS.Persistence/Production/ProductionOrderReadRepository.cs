@@ -85,7 +85,9 @@ public sealed class ProductionOrderReadRepository(
                             o.GoodQuantity,
                             o.ScrapQuantity,
                             o.Version,
-                            o.UpdatedAtUtc))
+                            o.UpdatedAtUtc,
+                            o.TotalDowntimeSeconds,
+                            o.ManualCycleCount))
                         .ToListAsync(ct);
 
                     return ProductionOrderListResult.Success(orders);
@@ -160,7 +162,12 @@ public sealed class ProductionOrderReadRepository(
                         order.Version,
                         order.CreatedAtUtc,
                         order.UpdatedAtUtc,
-                        order.HistoryJson));
+                        order.HistoryJson,
+                        order.TotalDowntimeSeconds,
+                        order.TotalSetupSeconds,
+                        order.ManualCycleCount,
+                        order.TotalManualCycleDurationMilliseconds,
+                        order.LastCycleAtUtc));
                 },
                 cancellationToken);
         }

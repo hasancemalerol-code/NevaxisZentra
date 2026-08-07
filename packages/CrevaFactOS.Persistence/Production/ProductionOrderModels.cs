@@ -50,6 +50,140 @@ public sealed record ReverseProductionEntryCommand(
     uint ExpectedVersion,
     string Reason);
 
+// ── 3L: Operational Commands ──────────────────────────────────────────────────
+
+public sealed record StartDowntimeCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    string ReasonCode,
+    string? Comment);
+
+public sealed record EndDowntimeCommand(
+    Guid ProductionOrderId,
+    Guid DowntimeId,
+    uint ExpectedVersion);
+
+public sealed record StartSetupSessionCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    string SetupType,
+    string? Comment);
+
+public sealed record CompleteSetupSessionCommand(
+    Guid ProductionOrderId,
+    Guid SetupSessionId,
+    uint ExpectedVersion);
+
+public sealed record RecordManualCycleCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    long CycleDurationMilliseconds,
+    decimal? QuantityProduced,
+    string? Comment);
+
+// ── 3L: Read Models ───────────────────────────────────────────────────────────
+
+public sealed record DowntimeReadModel(
+    Guid Id,
+    string Category,
+    string ReasonCode,
+    DateTimeOffset StartedAtUtc,
+    DateTimeOffset? EndedAtUtc,
+    long? DurationSeconds,
+    string? Comment,
+    string StartedBySubjectId,
+    string? EndedBySubjectId,
+    bool IsActive);
+
+public sealed record SetupSessionReadModel(
+    Guid Id,
+    string SetupType,
+    DateTimeOffset StartedAtUtc,
+    DateTimeOffset? CompletedAtUtc,
+    long? DurationSeconds,
+    string? Comment,
+    string StartedBySubjectId,
+    string? CompletedBySubjectId,
+    bool IsActive);
+
+public sealed record CycleEntryReadModel(
+    Guid Id,
+    int CycleNumber,
+    DateTimeOffset CycleStartedAtUtc,
+    DateTimeOffset CycleEndedAtUtc,
+    long CycleDurationMilliseconds,
+    decimal? QuantityProduced,
+    string RecordedBySubjectId,
+    DateTimeOffset RecordedAtUtc,
+    string Source,
+    string? Comment);
+
+/// <summary>
+/// Derived runtime summary computed from ProductionOrder denormalized counters
+/// and optional active session queries. Elapsed, net running, and average cycle
+/// are computed at read time — not persisted.
+/// </summary>
+public sealed record ProductionRuntimeSummary(
+    DateTimeOffset? ActualStartAtUtc,
+    DateTimeOffset? ActualEndAtUtc,
+    long? CurrentElapsedSeconds,
+    long TotalDowntimeSeconds,
+    long TotalSetupSeconds,
+    long? NetRunningSeconds,
+    int ManualCycleCount,
+    long? AverageManualCycleMilliseconds,
+    DateTimeOffset? LastCycleAtUtc,
+    DowntimeReadModel? ActiveDowntime,
+    SetupSessionReadModel? ActiveSetup);
+
+// ── 3L: Write Result wrappers ─────────────────────────────────────────────────
+
+public sealed record ProductionOperationsWriteResult
+{
+    public required bool Succeeded { get; init; }
+    public Guid? ResourceId { get; init; }
+    public uint? OrderVersion { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionOperationsWriteResult Success(Guid resourceId, uint orderVersion) =>
+        new() { Succeeded = true, ResourceId = resourceId, OrderVersion = orderVersion };
+
+    public static ProductionOperationsWriteResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record ProductionOperationsListResult<T>
+{
+    public required bool Succeeded { get; init; }
+    public IReadOnlyList<T>? Items { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+}
+
+public static class ProductionOperationsListResult
+{
+    public static ProductionOperationsListResult<T> Success<T>(IReadOnlyList<T> items) =>
+        new() { Succeeded = true, Items = items };
+
+    public static ProductionOperationsListResult<T> Fail<T>(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record ProductionRuntimeSummaryResult
+{
+    public required bool Succeeded { get; init; }
+    public ProductionRuntimeSummary? Summary { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionRuntimeSummaryResult Success(ProductionRuntimeSummary summary) =>
+        new() { Succeeded = true, Summary = summary };
+
+    public static ProductionRuntimeSummaryResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
 public static class ProductionOrderFailureCodes
 {
     public const string InvalidScope = "invalid-scope";
@@ -69,6 +203,22 @@ public static class ProductionOrderFailureCodes
     public const string ProductionTargetNotReached = "production-target-not-reached";
     public const string CompletionReasonRequired = "completion-reason-required";
     public const string CommentRequired = "comment-required";
+
+    // 3L additions
+    public const string ActiveDowntimeExists = "active-downtime-exists";
+    public const string NoActiveDowntime = "no-active-downtime";
+    public const string DowntimeNotFound = "downtime-not-found";
+    public const string DowntimeWrongOrder = "downtime-wrong-order";
+    public const string DowntimeAlreadyEnded = "downtime-already-ended";
+    public const string ActiveSetupExists = "active-setup-exists";
+    public const string NoActiveSetup = "no-active-setup";
+    public const string SetupSessionNotFound = "setup-session-not-found";
+    public const string SetupSessionWrongOrder = "setup-session-wrong-order";
+    public const string SetupSessionAlreadyCompleted = "setup-session-already-completed";
+    public const string InvalidDowntimeReason = "invalid-downtime-reason";
+    public const string InvalidSetupType = "invalid-setup-type";
+    public const string InvalidCycleDuration = "invalid-cycle-duration";
+    public const string InvalidCycleQuantity = "invalid-cycle-quantity";
 }
 
 public sealed record ProductionQuantitySummary(
@@ -149,7 +299,12 @@ public sealed record ProductionOrderReadModel(
     uint Version,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
-    string HistoryJson);
+    string HistoryJson,
+    long TotalDowntimeSeconds,
+    long TotalSetupSeconds,
+    int ManualCycleCount,
+    long TotalManualCycleDurationMilliseconds,
+    DateTimeOffset? LastCycleAtUtc);
 
 public sealed record ProductionOrderListReadModel(
     Guid Id,
@@ -168,7 +323,9 @@ public sealed record ProductionOrderListReadModel(
     decimal GoodQuantity,
     decimal ScrapQuantity,
     uint Version,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    long TotalDowntimeSeconds,
+    int ManualCycleCount);
 
 public sealed record ProductionOrderWriteResult
 {

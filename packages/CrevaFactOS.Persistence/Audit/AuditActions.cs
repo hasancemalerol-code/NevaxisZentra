@@ -32,6 +32,17 @@ public static class AuditActions
     public const string ProductionQuantityScrapRecord = "production.order.quantity.scrap.record";
     public const string ProductionQuantityReverse = "production.order.quantity.reverse";
 
+    // 3L — downtime
+    public const string ProductionDowntimeStart = "production.order.downtime.start";
+    public const string ProductionDowntimeEnd = "production.order.downtime.end";
+
+    // 3L — setup
+    public const string ProductionSetupStart = "production.order.setup.start";
+    public const string ProductionSetupComplete = "production.order.setup.complete";
+
+    // 3L — manual cycle
+    public const string ProductionCycleManualRecord = "production.order.cycle.manual.record";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         Authenticate,
@@ -63,5 +74,10 @@ public static class AuditActions
         ProductionQuantityGoodRecord,
         ProductionQuantityScrapRecord,
         ProductionQuantityReverse,
+        ProductionDowntimeStart,
+        ProductionDowntimeEnd,
+        ProductionSetupStart,
+        ProductionSetupComplete,
+        ProductionCycleManualRecord,
     };
 }

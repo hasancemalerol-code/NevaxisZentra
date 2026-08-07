@@ -16,6 +16,11 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapGet("/", ListProductionOrdersAsync);
         group.MapGet("/{productionOrderId:guid}", GetProductionOrderDetailAsync);
         group.MapGet("/{productionOrderId:guid}/quantity-entries", ListQuantityEntriesAsync);
+        // 3L read endpoints
+        group.MapGet("/{productionOrderId:guid}/downtimes", ListDowntimesAsync);
+        group.MapGet("/{productionOrderId:guid}/setups", ListSetupSessionsAsync);
+        group.MapGet("/{productionOrderId:guid}/cycles", ListCycleEntriesAsync);
+        group.MapGet("/{productionOrderId:guid}/runtime-summary", GetRuntimeSummaryAsync);
         return endpoints;
     }
 
@@ -30,6 +35,12 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapPost("/orders/{productionOrderId:guid}/quantities/good", RecordGoodProductionAsync);
         group.MapPost("/orders/{productionOrderId:guid}/quantities/scrap", RecordScrapAsync);
         group.MapPost("/orders/{productionOrderId:guid}/quantity-entries/{entryId:guid}/reverse", ReverseEntryAsync);
+        // 3L write endpoints
+        group.MapPost("/orders/{productionOrderId:guid}/downtimes/start", StartDowntimeAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/downtimes/{downtimeId:guid}/end", EndDowntimeAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/setups/start", StartSetupSessionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/setups/{setupSessionId:guid}/complete", CompleteSetupSessionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/cycles/manual", RecordManualCycleAsync);
         return endpoints;
     }
 
@@ -87,7 +98,9 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.GoodQuantity,
             o.ScrapQuantity,
             o.Version,
-            o.UpdatedAtUtc)).ToArray();
+            o.UpdatedAtUtc,
+            o.TotalDowntimeSeconds,
+            o.ManualCycleCount)).ToArray();
 
         return TypedResults.Ok(dtos);
     }
@@ -174,7 +187,12 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.LastModifiedBySubjectId,
             o.Version,
             o.CreatedAtUtc,
-            o.UpdatedAtUtc));
+            o.UpdatedAtUtc,
+            o.TotalDowntimeSeconds,
+            o.TotalSetupSeconds,
+            o.ManualCycleCount,
+            o.TotalManualCycleDurationMilliseconds,
+            o.LastCycleAtUtc));
     }
 
     // ─────────────────────────── Write: Consume Handoff ───────────────────────────
@@ -475,6 +493,318 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         return MapEntryResult(result);
     }
 
+    // ─────────────────────────── 3L Read: Downtimes ───────────────────────────
+
+    private static async Task<IResult> ListDowntimesAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var effective = Math.Clamp(limit ?? 50, 1, 200);
+        var result = await operationsRepository.ListDowntimesAsync(context, productionOrderId, effective, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var dtos = result.Items!.Select(d => new DowntimeSummaryDto(
+            d.Id, d.Category, d.ReasonCode, d.StartedAtUtc, d.EndedAtUtc, d.DurationSeconds,
+            d.Comment, d.StartedBySubjectId, d.EndedBySubjectId, d.IsActive)).ToArray();
+
+        return TypedResults.Ok(dtos);
+    }
+
+    // ─────────────────────────── 3L Read: Setup Sessions ───────────────────────────
+
+    private static async Task<IResult> ListSetupSessionsAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var effective = Math.Clamp(limit ?? 50, 1, 200);
+        var result = await operationsRepository.ListSetupSessionsAsync(context, productionOrderId, effective, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var dtos = result.Items!.Select(s => new SetupSessionSummaryDto(
+            s.Id, s.SetupType, s.StartedAtUtc, s.CompletedAtUtc, s.DurationSeconds,
+            s.Comment, s.StartedBySubjectId, s.CompletedBySubjectId, s.IsActive)).ToArray();
+
+        return TypedResults.Ok(dtos);
+    }
+
+    // ─────────────────────────── 3L Read: Cycle Entries ───────────────────────────
+
+    private static async Task<IResult> ListCycleEntriesAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var effective = Math.Clamp(limit ?? 50, 1, 200);
+        var result = await operationsRepository.ListCycleEntriesAsync(context, productionOrderId, effective, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var dtos = result.Items!.Select(c => new CycleEntrySummaryDto(
+            c.Id, c.CycleNumber, c.CycleStartedAtUtc, c.CycleEndedAtUtc, c.CycleDurationMilliseconds,
+            c.QuantityProduced, c.RecordedBySubjectId, c.RecordedAtUtc, c.Source, c.Comment)).ToArray();
+
+        return TypedResults.Ok(dtos);
+    }
+
+    // ─────────────────────────── 3L Read: Runtime Summary ───────────────────────────
+
+    private static async Task<IResult> GetRuntimeSummaryAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+            return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await operationsRepository.GetRuntimeSummaryAsync(context, productionOrderId, cancellationToken);
+
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var s = result.Summary!;
+
+        return TypedResults.Ok(new ProductionRuntimeSummaryDto(
+            s.ActualStartAtUtc,
+            s.ActualEndAtUtc,
+            s.CurrentElapsedSeconds,
+            s.TotalDowntimeSeconds,
+            s.TotalSetupSeconds,
+            s.NetRunningSeconds,
+            s.ManualCycleCount,
+            s.AverageManualCycleMilliseconds,
+            s.LastCycleAtUtc,
+            s.ActiveDowntime is null ? null : new DowntimeSummaryDto(
+                s.ActiveDowntime.Id, s.ActiveDowntime.Category, s.ActiveDowntime.ReasonCode,
+                s.ActiveDowntime.StartedAtUtc, s.ActiveDowntime.EndedAtUtc, s.ActiveDowntime.DurationSeconds,
+                s.ActiveDowntime.Comment, s.ActiveDowntime.StartedBySubjectId, s.ActiveDowntime.EndedBySubjectId, true),
+            s.ActiveSetup is null ? null : new SetupSessionSummaryDto(
+                s.ActiveSetup.Id, s.ActiveSetup.SetupType,
+                s.ActiveSetup.StartedAtUtc, s.ActiveSetup.CompletedAtUtc, s.ActiveSetup.DurationSeconds,
+                s.ActiveSetup.Comment, s.ActiveSetup.StartedBySubjectId, s.ActiveSetup.CompletedBySubjectId, true)));
+    }
+
+    // ─────────────────────────── 3L Write: Downtime Start ───────────────────────────
+
+    private static async Task<IResult> StartDowntimeAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] StartDowntimeApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Downtime,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        if (string.IsNullOrWhiteSpace(body.ReasonCode))
+        {
+            return TypedResults.Problem(
+                title: "A downtime reason code is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidDowntimeReason));
+        }
+
+        var result = await operationsRepository.StartDowntimeAsync(
+            context,
+            new StartDowntimeCommand(productionOrderId, body.ExpectedVersion, body.ReasonCode.Trim(), body.Comment?.Trim()),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 3L Write: Downtime End ───────────────────────────
+
+    private static async Task<IResult> EndDowntimeAsync(
+        Guid productionOrderId,
+        Guid downtimeId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] EndDowntimeApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Downtime,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await operationsRepository.EndDowntimeAsync(
+            context,
+            new EndDowntimeCommand(productionOrderId, downtimeId, body.ExpectedVersion),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 3L Write: Setup Start ───────────────────────────
+
+    private static async Task<IResult> StartSetupSessionAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] StartSetupApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Setup,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        if (string.IsNullOrWhiteSpace(body.SetupType))
+        {
+            return TypedResults.Problem(
+                title: "A setup type is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidSetupType));
+        }
+
+        var result = await operationsRepository.StartSetupSessionAsync(
+            context,
+            new StartSetupSessionCommand(productionOrderId, body.ExpectedVersion, body.SetupType.Trim(), body.Comment?.Trim()),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 3L Write: Setup Complete ───────────────────────────
+
+    private static async Task<IResult> CompleteSetupSessionAsync(
+        Guid productionOrderId,
+        Guid setupSessionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CompleteSetupApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Setup,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await operationsRepository.CompleteSetupSessionAsync(
+            context,
+            new CompleteSetupSessionCommand(productionOrderId, setupSessionId, body.ExpectedVersion),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 3L Write: Manual Cycle ───────────────────────────
+
+    private static async Task<IResult> RecordManualCycleAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RecordManualCycleApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperationsRepository operationsRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Record,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+            return failResult!;
+
+        var result = await operationsRepository.RecordManualCycleAsync(
+            context,
+            new RecordManualCycleCommand(
+                productionOrderId,
+                body.ExpectedVersion,
+                body.CycleDurationMilliseconds,
+                body.QuantityProduced,
+                body.Comment?.Trim()),
+            cancellationToken);
+
+        return MapOperationsResult(result);
+    }
+
+    private static IResult MapOperationsResult(ProductionOperationsWriteResult result)
+    {
+        if (!result.Succeeded)
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(new ProductionOperationsWriteSuccessDto(
+            result.ResourceId!.Value,
+            result.OrderVersion!.Value));
+    }
+
     private static IResult MapEntryResult(ProductionExecutionEntryWriteResult result)
     {
         if (!result.Succeeded)
@@ -652,6 +982,65 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
                 title: reason ?? "A comment is required for this scrap reason.",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: FailureExt(ProductionExecutionApiFailureCodes.CommentRequired)),
+
+            // 3L
+            ProductionOrderFailureCodes.ActiveDowntimeExists => TypedResults.Problem(
+                title: reason ?? "There is already an active downtime for this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ActiveDowntimeExists)),
+            ProductionOrderFailureCodes.NoActiveDowntime => TypedResults.Problem(
+                title: reason ?? "There is no active downtime for this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.NoActiveDowntime)),
+            ProductionOrderFailureCodes.DowntimeNotFound => TypedResults.Problem(
+                title: "Downtime record not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.DowntimeNotFound)),
+            ProductionOrderFailureCodes.DowntimeWrongOrder => TypedResults.Problem(
+                title: reason ?? "Downtime does not belong to this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.DowntimeNotFound)),
+            ProductionOrderFailureCodes.DowntimeAlreadyEnded => TypedResults.Problem(
+                title: reason ?? "This downtime has already ended.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.DowntimeAlreadyEnded)),
+            ProductionOrderFailureCodes.ActiveSetupExists => TypedResults.Problem(
+                title: reason ?? "There is already an active setup for this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ActiveSetupExists)),
+            ProductionOrderFailureCodes.NoActiveSetup => TypedResults.Problem(
+                title: reason ?? "There is no active setup for this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.NoActiveSetup)),
+            ProductionOrderFailureCodes.SetupSessionNotFound => TypedResults.Problem(
+                title: "Setup session not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.SetupSessionNotFound)),
+            ProductionOrderFailureCodes.SetupSessionWrongOrder => TypedResults.Problem(
+                title: reason ?? "Setup session does not belong to this order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.SetupSessionNotFound)),
+            ProductionOrderFailureCodes.SetupSessionAlreadyCompleted => TypedResults.Problem(
+                title: reason ?? "This setup session has already been completed.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.SetupSessionAlreadyCompleted)),
+            ProductionOrderFailureCodes.InvalidDowntimeReason => TypedResults.Problem(
+                title: reason ?? "Invalid downtime reason code.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidDowntimeReason)),
+            ProductionOrderFailureCodes.InvalidSetupType => TypedResults.Problem(
+                title: reason ?? "Invalid setup type.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidSetupType)),
+            ProductionOrderFailureCodes.InvalidCycleDuration => TypedResults.Problem(
+                title: reason ?? "Invalid cycle duration.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidCycleDuration)),
+            ProductionOrderFailureCodes.InvalidCycleQuantity => TypedResults.Problem(
+                title: reason ?? "Invalid cycle quantity.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidCycleQuantity)),
+
             _ => TypedResults.Problem(
                 title: "An unexpected error occurred.",
                 statusCode: StatusCodes.Status500InternalServerError,
@@ -692,6 +1081,16 @@ public static class ProductionExecutionServiceCollectionExtensions
             return new ProductionExecutionEntryRepository(
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionOperationsRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionOperationsRepository()
+                : new ProductionOperationsRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
         return services;

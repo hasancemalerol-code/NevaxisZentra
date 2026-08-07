@@ -221,6 +221,10 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExecutionRecordPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionDowntimePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionSetupPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
             seedTimestampUtc, cancellationToken);
@@ -1007,6 +1011,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ProductionExecutionPermissionKeys.Record,
             DevelopmentPilotIds.ExecutionRecordPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionDowntimePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Downtime,
+            DevelopmentPilotIds.ExecutionDowntimePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionSetupPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Setup,
+            DevelopmentPilotIds.ExecutionSetupPermissionDefinitionId,
             cancellationToken);
 
     private static async Task EnsureNamedPermissionAssignmentAsync(

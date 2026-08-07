@@ -4,10 +4,20 @@ import type {
   ProductionOrder,
   ProductionOrderSummary,
 } from "../domain/production-order";
+import type {
+  ProductionDowntimeSummary,
+  ProductionSetupSessionSummary,
+  ProductionCycleEntrySummary,
+  ProductionRuntimeSummary,
+} from "../domain/production-execution-operations";
 import {
   getProductionOrderById,
   listProductionOrders,
   listQuantityEntries,
+  listDowntimes,
+  listSetupSessions,
+  listCycleEntries,
+  getRuntimeSummary,
   type ProductionOrderApiFailure,
 } from "./production-order-api-client";
 import type { ProductionExecutionEntry } from "../domain/production-execution-entry";
@@ -41,6 +51,22 @@ export type ProductionOrderDetailResult =
 
 export type ProductionEntryListResult =
   | Readonly<{ status: "success"; entries: ProductionExecutionEntry[] }>
+  | ProductionOrderReadFailure;
+
+export type ProductionDowntimeListResult =
+  | Readonly<{ status: "success"; downtimes: ProductionDowntimeSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type ProductionSetupSessionListResult =
+  | Readonly<{ status: "success"; sessions: ProductionSetupSessionSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type ProductionCycleEntryListResult =
+  | Readonly<{ status: "success"; cycles: ProductionCycleEntrySummary[] }>
+  | ProductionOrderReadFailure;
+
+export type ProductionRuntimeSummaryResult =
+  | Readonly<{ status: "success"; summary: ProductionRuntimeSummary }>
   | ProductionOrderReadFailure;
 
 type ResolvedContext =
@@ -193,4 +219,67 @@ export async function readProductionEntries(
   }
 
   return { status: "success", entries: parsed.value };
+}
+
+export async function readDowntimes(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ProductionDowntimeListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listDowntimes(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", downtimes: result.value };
+}
+
+export async function readSetupSessions(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ProductionSetupSessionListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listSetupSessions(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", sessions: result.value };
+}
+
+export async function readCycleEntries(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ProductionCycleEntryListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listCycleEntries(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", cycles: result.value };
+}
+
+export async function readRuntimeSummary(
+  productionOrderId: string,
+): Promise<ProductionRuntimeSummaryResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) {
+    return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  }
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await getRuntimeSummary(context, normalizedId, context.facilityId);
+  if (result.status === "failure") return result;
+  return { status: "success", summary: result.value };
 }

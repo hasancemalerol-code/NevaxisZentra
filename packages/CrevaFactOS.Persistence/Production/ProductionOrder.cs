@@ -32,4 +32,22 @@ public sealed class ProductionOrder : ITenantScopedEntity
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
     public string HistoryJson { get; set; } = "[]";
+
+    // ── Operational summary fields (3L) ─────────────────────────────────────
+    // Denormalized counters kept in sync atomically with each operational write.
+
+    /// <summary>Cumulative duration of all ended downtime sessions in seconds.</summary>
+    public long TotalDowntimeSeconds { get; set; }
+
+    /// <summary>Cumulative duration of all completed setup sessions in seconds.</summary>
+    public long TotalSetupSeconds { get; set; }
+
+    /// <summary>Number of manual cycle entries recorded. Doubles as the next cycle number source.</summary>
+    public int ManualCycleCount { get; set; }
+
+    /// <summary>Cumulative manual cycle duration across all recorded cycles in milliseconds.</summary>
+    public long TotalManualCycleDurationMilliseconds { get; set; }
+
+    /// <summary>Timestamp of the most recently recorded manual cycle.</summary>
+    public DateTimeOffset? LastCycleAtUtc { get; set; }
 }

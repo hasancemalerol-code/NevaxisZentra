@@ -34,6 +34,11 @@ export type ProductionOrder = Readonly<{
   moldReference?: string;
   productReference?: string;
   quantitySummary: ProductionQuantitySummary;
+  totalDowntimeSeconds?: number;
+  totalSetupSeconds?: number;
+  manualCycleCount?: number;
+  totalManualCycleDurationMilliseconds?: number;
+  lastCycleAtUtc?: string;
   createdBySubjectId: string;
   lastModifiedBySubjectId: string;
   version: number;
@@ -57,6 +62,8 @@ export type ProductionOrderSummary = Readonly<{
   plannedQuantity?: number;
   goodQuantity: number;
   scrapQuantity: number;
+  totalDowntimeSeconds?: number;
+  manualCycleCount?: number;
   version: number;
   updatedAtUtc: string;
 }>;

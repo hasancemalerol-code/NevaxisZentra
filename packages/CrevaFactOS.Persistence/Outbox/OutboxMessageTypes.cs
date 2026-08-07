@@ -27,6 +27,17 @@ public static class OutboxMessageTypes
     public const string ProductionScrapRecorded = "production-order-scrap-recorded";
     public const string ProductionQuantityReversed = "production-order-quantity-reversed";
 
+    // 3L — downtime
+    public const string ProductionDowntimeStarted = "production-order-downtime-started";
+    public const string ProductionDowntimeEnded = "production-order-downtime-ended";
+
+    // 3L — setup
+    public const string ProductionSetupStarted = "production-order-setup-started";
+    public const string ProductionSetupCompleted = "production-order-setup-completed";
+
+    // 3L — manual cycle
+    public const string ProductionManualCycleRecorded = "production-order-manual-cycle-recorded";
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -55,6 +66,11 @@ public static class OutboxMessageTypes
             ProductionGoodQuantityRecorded,
             ProductionScrapRecorded,
             ProductionQuantityReversed,
+            ProductionDowntimeStarted,
+            ProductionDowntimeEnded,
+            ProductionSetupStarted,
+            ProductionSetupCompleted,
+            ProductionManualCycleRecorded,
         ],
         StringComparer.Ordinal);
 }

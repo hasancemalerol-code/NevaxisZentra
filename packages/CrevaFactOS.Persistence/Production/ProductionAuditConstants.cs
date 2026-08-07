@@ -16,6 +16,17 @@ public static class ProductionAuditActions
     public const string ProductionQuantityGoodRecord = "production.order.quantity.good.record";
     public const string ProductionQuantityScrapRecord = "production.order.quantity.scrap.record";
     public const string ProductionQuantityReverse = "production.order.quantity.reverse";
+
+    // 3L — downtime
+    public const string ProductionDowntimeStart = "production.order.downtime.start";
+    public const string ProductionDowntimeEnd = "production.order.downtime.end";
+
+    // 3L — setup
+    public const string ProductionSetupStart = "production.order.setup.start";
+    public const string ProductionSetupComplete = "production.order.setup.complete";
+
+    // 3L — manual cycle
+    public const string ProductionCycleManualRecord = "production.order.cycle.manual.record";
 }
 
 /// <summary>
@@ -34,6 +45,17 @@ public static class ProductionAuditEventTypes
     public const string ProductionQuantityGoodRecorded = "production.order.quantity.good.recorded";
     public const string ProductionQuantityScrapRecorded = "production.order.quantity.scrap.recorded";
     public const string ProductionQuantityReversed = "production.order.quantity.reversed";
+
+    // 3L — downtime
+    public const string ProductionDowntimeStarted = "production.order.downtime.started";
+    public const string ProductionDowntimeEnded = "production.order.downtime.ended";
+
+    // 3L — setup
+    public const string ProductionSetupStarted = "production.order.setup.started";
+    public const string ProductionSetupCompleted = "production.order.setup.completed";
+
+    // 3L — manual cycle
+    public const string ProductionCycleManualRecorded = "production.order.cycle.manual.recorded";
 }
 
 /// <summary>
@@ -52,4 +74,15 @@ public static class ProductionOutboxMessageTypes
     public const string ProductionGoodQuantityRecorded = "production-order-good-quantity-recorded";
     public const string ProductionScrapRecorded = "production-order-scrap-recorded";
     public const string ProductionQuantityReversed = "production-order-quantity-reversed";
+
+    // 3L — downtime
+    public const string ProductionDowntimeStarted = "production-order-downtime-started";
+    public const string ProductionDowntimeEnded = "production-order-downtime-ended";
+
+    // 3L — setup
+    public const string ProductionSetupStarted = "production-order-setup-started";
+    public const string ProductionSetupCompleted = "production-order-setup-completed";
+
+    // 3L — manual cycle
+    public const string ProductionManualCycleRecorded = "production-order-manual-cycle-recorded";
 }

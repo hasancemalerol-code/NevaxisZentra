@@ -15,10 +15,18 @@ import { ProductionOrderLifecycleActions } from "@/features/production-execution
 import { ProductionQuantityPanel } from "@/features/production-execution/components/production-quantity-panel";
 import { ProductionOperatorActions } from "@/features/production-execution/components/production-operator-actions";
 import { ProductionEntryHistory } from "@/features/production-execution/components/production-entry-history";
+import { ProductionDowntimePanel } from "@/features/production-execution/components/production-downtime-panel";
+import { ProductionSetupPanel } from "@/features/production-execution/components/production-setup-panel";
+import { ProductionCyclePanel } from "@/features/production-execution/components/production-cycle-panel";
+import { ProductionRuntimeAnalytics } from "@/features/production-execution/components/production-runtime-analytics";
 import { getProductionOrderStatusLabel } from "@/features/production-execution/domain/production-order";
 import {
   readProductionOrderById,
   readProductionEntries,
+  readDowntimes,
+  readSetupSessions,
+  readCycleEntries,
+  readRuntimeSummary,
 } from "@/features/production-execution/server/production-order-reader";
 import {
   completeProductionOrderAction,
@@ -27,6 +35,11 @@ import {
   startProductionOrderAction,
   recordGoodProductionAction,
   recordScrapAction,
+  startDowntimeAction,
+  endDowntimeAction,
+  startSetupSessionAction,
+  completeSetupSessionAction,
+  recordManualCycleAction,
 } from "@/features/production-execution/server/production-order-writer";
 import type { ProductionOrderStatus } from "@/features/production-execution/domain/production-order";
 
@@ -88,10 +101,15 @@ export default async function ProductionOrderDetailPage({
 }: ProductionOrderDetailPageProps) {
   const { orderId } = await params;
 
-  const [result, entriesResult] = await Promise.all([
-    readProductionOrderById(orderId),
-    readProductionEntries(orderId, 50),
-  ]);
+  const [result, entriesResult, downtimesResult, setupsResult, cyclesResult, runtimeResult] =
+    await Promise.all([
+      readProductionOrderById(orderId),
+      readProductionEntries(orderId, 50),
+      readDowntimes(orderId, 20),
+      readSetupSessions(orderId, 20),
+      readCycleEntries(orderId, 20),
+      readRuntimeSummary(orderId),
+    ]);
 
   if (result.status === "failure") {
     if (result.code === "not-found") {
@@ -122,6 +140,29 @@ export default async function ProductionOrderDetailPage({
 
   const { order } = result;
   const entries = entriesResult.status === "success" ? entriesResult.entries : [];
+  const downtimes = downtimesResult.status === "success" ? downtimesResult.downtimes : [];
+  const setups = setupsResult.status === "success" ? setupsResult.sessions : [];
+  const cycles = cyclesResult.status === "success" ? cyclesResult.cycles : [];
+  const runtimeSummary =
+    runtimeResult.status === "success"
+      ? runtimeResult.summary
+      : {
+          currentElapsedSeconds: 0,
+          totalDowntimeSeconds: order.totalDowntimeSeconds ?? 0,
+          totalSetupSeconds: order.totalSetupSeconds ?? 0,
+          netRunningSeconds: 0,
+          manualCycleCount: order.manualCycleCount ?? 0,
+          averageManualCycleMilliseconds:
+            (order.manualCycleCount ?? 0) > 0 && (order.totalManualCycleDurationMilliseconds ?? 0) > 0
+              ? (order.totalManualCycleDurationMilliseconds ?? 0) / (order.manualCycleCount ?? 1)
+              : undefined,
+          lastCycleAtUtc: order.lastCycleAtUtc,
+          activeDowntime: undefined,
+          activeSetup: undefined,
+        };
+
+  const activeDowntime = runtimeSummary.activeDowntime;
+  const activeSetup = runtimeSummary.activeSetup;
 
   return (
     <main className="production-order-detail-page">
@@ -151,6 +192,12 @@ export default async function ProductionOrderDetailPage({
           <Badge tone={getStatusTone(order.status)}>
             {getProductionOrderStatusLabel(order.status)}
           </Badge>
+          {activeDowntime && (
+            <Badge tone="warning">Aktif Duruş</Badge>
+          )}
+          {activeSetup && (
+            <Badge tone="information">Aktif Setup</Badge>
+          )}
         </div>
       </header>
 
@@ -206,7 +253,15 @@ export default async function ProductionOrderDetailPage({
         </Card>
       </section>
 
-      {/* 3 — Quantity / progress */}
+      {/* 3 — Runtime analytics */}
+      <section
+        className="production-order-detail-page__runtime"
+        aria-label="Çalışma analitiği"
+      >
+        <ProductionRuntimeAnalytics summary={runtimeSummary} />
+      </section>
+
+      {/* 4 — Quantity / progress */}
       <section
         className="production-order-detail-page__quantity"
         aria-label="Üretim miktarı"
@@ -214,7 +269,7 @@ export default async function ProductionOrderDetailPage({
         <ProductionQuantityPanel summary={order.quantitySummary} />
       </section>
 
-      {/* 4 — Lifecycle controls */}
+      {/* 5 — Lifecycle controls */}
       <ProductionOrderLifecycleActions
         orderId={order.id}
         orderTitle={order.title}
@@ -227,7 +282,46 @@ export default async function ProductionOrderDetailPage({
         onComplete={completeProductionOrderAction}
       />
 
-      {/* 5 — Operator quantity actions */}
+      {/* 6 — Downtime + Setup + Cycle panels */}
+      <section
+        className="production-order-detail-page__ops-panels"
+        aria-label="Operasyonel yönetim"
+      >
+        <ProductionDowntimePanel
+          orderId={order.id}
+          status={order.status}
+          version={order.version}
+          activeDowntime={activeDowntime}
+          recentDowntimes={downtimes}
+          totalDowntimeSeconds={runtimeSummary.totalDowntimeSeconds}
+          onStartDowntime={startDowntimeAction}
+          onEndDowntime={endDowntimeAction}
+        />
+
+        <ProductionSetupPanel
+          orderId={order.id}
+          status={order.status}
+          version={order.version}
+          activeSetup={activeSetup}
+          recentSessions={setups}
+          totalSetupSeconds={runtimeSummary.totalSetupSeconds}
+          onStartSetup={startSetupSessionAction}
+          onCompleteSetup={completeSetupSessionAction}
+        />
+
+        <ProductionCyclePanel
+          orderId={order.id}
+          status={order.status}
+          version={order.version}
+          manualCycleCount={runtimeSummary.manualCycleCount}
+          averageManualCycleMilliseconds={runtimeSummary.averageManualCycleMilliseconds}
+          lastCycleAtUtc={runtimeSummary.lastCycleAtUtc}
+          recentCycles={cycles}
+          onRecordCycle={recordManualCycleAction}
+        />
+      </section>
+
+      {/* 7 — Operator quantity actions */}
       <section
         className="production-order-detail-page__actions"
         aria-label="Operatör miktarı girişi"
@@ -243,7 +337,7 @@ export default async function ProductionOrderDetailPage({
         />
       </section>
 
-      {/* 6 — Execution history */}
+      {/* 8 — Execution history */}
       <section
         className="production-order-detail-page__history"
         aria-label="Üretim geçmişi"
@@ -251,7 +345,7 @@ export default async function ProductionOrderDetailPage({
         <ProductionEntryHistory entries={entries} />
       </section>
 
-      {/* 7 — Source planning context */}
+      {/* 9 — Source planning context */}
       <section
         className="production-order-detail-page__content"
         aria-label="Kaynak planlama bağlamı"

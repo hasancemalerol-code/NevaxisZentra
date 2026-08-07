@@ -78,6 +78,13 @@ internal sealed class ProductionOrderEntityConfiguration
             .HasColumnName("history_json")
             .HasColumnType("jsonb");
 
+        // 3L — operational summary fields
+        entity.Property(o => o.TotalDowntimeSeconds).HasColumnName("total_downtime_seconds");
+        entity.Property(o => o.TotalSetupSeconds).HasColumnName("total_setup_seconds");
+        entity.Property(o => o.ManualCycleCount).HasColumnName("manual_cycle_count");
+        entity.Property(o => o.TotalManualCycleDurationMilliseconds).HasColumnName("total_manual_cycle_duration_ms");
+        entity.Property(o => o.LastCycleAtUtc).HasColumnName("last_cycle_at_utc");
+
         entity.HasIndex(o => o.ProductionPlanHandoffId).IsUnique();
         entity.HasIndex(o => new { o.TenantId, o.FacilityId, o.Status });
         entity.HasIndex(o => new { o.TenantId, o.FacilityId, o.PlannedStartAtUtc });

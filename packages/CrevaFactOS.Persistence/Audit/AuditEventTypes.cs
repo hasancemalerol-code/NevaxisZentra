@@ -35,6 +35,17 @@ public static class AuditEventTypes
     public const string ProductionQuantityScrapRecorded = "production.order.quantity.scrap.recorded";
     public const string ProductionQuantityReversed = "production.order.quantity.reversed";
 
+    // 3L — downtime
+    public const string ProductionDowntimeStarted = "production.order.downtime.started";
+    public const string ProductionDowntimeEnded = "production.order.downtime.ended";
+
+    // 3L — setup
+    public const string ProductionSetupStarted = "production.order.setup.started";
+    public const string ProductionSetupCompleted = "production.order.setup.completed";
+
+    // 3L — manual cycle
+    public const string ProductionCycleManualRecorded = "production.order.cycle.manual.recorded";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -69,5 +80,10 @@ public static class AuditEventTypes
         ProductionQuantityGoodRecorded,
         ProductionQuantityScrapRecorded,
         ProductionQuantityReversed,
+        ProductionDowntimeStarted,
+        ProductionDowntimeEnded,
+        ProductionSetupStarted,
+        ProductionSetupCompleted,
+        ProductionCycleManualRecorded,
     };
 }

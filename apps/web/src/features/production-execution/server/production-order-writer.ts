@@ -10,6 +10,11 @@ import {
   recordGoodProduction,
   recordScrap,
   reverseEntry,
+  startDowntime,
+  endDowntime,
+  startSetupSession,
+  completeSetupSession,
+  recordManualCycle,
   type ProductionOrderWriteResult,
 } from "./production-order-api-client";
 import {
@@ -261,5 +266,79 @@ export async function reverseEntryAction(
     reason.trim(),
   );
 
+  return mapWriteResult(result);
+}
+
+export async function startDowntimeAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  reasonCode: string,
+  comment?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!reasonCode.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Duruş nedeni zorunludur." };
+  }
+  const result = await startDowntime(resolved.context, productionOrderId, expectedVersion, reasonCode.trim(), comment?.trim() || undefined);
+  return mapWriteResult(result);
+}
+
+export async function endDowntimeAction(
+  productionOrderId: string,
+  downtimeId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const result = await endDowntime(resolved.context, productionOrderId, downtimeId, expectedVersion);
+  return mapWriteResult(result);
+}
+
+export async function startSetupSessionAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  setupType: string,
+  comment?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!setupType.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Setup türü zorunludur." };
+  }
+  const result = await startSetupSession(resolved.context, productionOrderId, expectedVersion, setupType.trim(), comment?.trim() || undefined);
+  return mapWriteResult(result);
+}
+
+export async function completeSetupSessionAction(
+  productionOrderId: string,
+  setupId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const result = await completeSetupSession(resolved.context, productionOrderId, setupId, expectedVersion);
+  return mapWriteResult(result);
+}
+
+export async function recordManualCycleAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  cycleDurationMilliseconds: number,
+  quantityProduced?: number,
+  comment?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (cycleDurationMilliseconds <= 0) {
+    return { status: "failure", code: "invalid-request", message: "Çevrim süresi sıfırdan büyük olmalıdır." };
+  }
+  if (cycleDurationMilliseconds > 86_400_000) {
+    return { status: "failure", code: "invalid-request", message: "Çevrim süresi 24 saati aşamaz." };
+  }
+  if (quantityProduced !== undefined && quantityProduced < 0) {
+    return { status: "failure", code: "invalid-request", message: "Miktar negatif olamaz." };
+  }
+  const result = await recordManualCycle(resolved.context, productionOrderId, expectedVersion, cycleDurationMilliseconds, quantityProduced, comment?.trim() || undefined);
   return mapWriteResult(result);
 }

@@ -63,6 +63,13 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     public DbSet<ProductionExecutionEntry> ProductionExecutionEntries => Set<ProductionExecutionEntry>();
 
+    // 3L — operational event stores
+    public DbSet<ProductionDowntime> ProductionDowntimes => Set<ProductionDowntime>();
+
+    public DbSet<ProductionSetupSession> ProductionSetupSessions => Set<ProductionSetupSession>();
+
+    public DbSet<ProductionCycleEntry> ProductionCycleEntries => Set<ProductionCycleEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -474,6 +481,25 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && entry.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // 3L
+        modelBuilder.ApplyConfiguration(new ProductionDowntimeEntityConfiguration());
+        modelBuilder.Entity<ProductionDowntime>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionSetupSessionEntityConfiguration());
+        modelBuilder.Entity<ProductionSetupSession>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionCycleEntryEntityConfiguration());
+        modelBuilder.Entity<ProductionCycleEntry>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

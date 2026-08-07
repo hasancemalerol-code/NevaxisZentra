@@ -8,4 +8,8 @@ public static class ProductionExecutionPermissionKeys
     public const string Pause = "production.execution.pause";
     public const string Complete = "production.execution.complete";
     public const string Record = "production.execution.record";
+
+    // 3L
+    public const string Downtime = "production.execution.downtime";
+    public const string Setup = "production.execution.setup";
 }

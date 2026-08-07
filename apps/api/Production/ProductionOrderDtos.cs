@@ -23,6 +23,20 @@ public static class ProductionExecutionApiFailureCodes
     public const string ProductionTargetNotReached = "production-target-not-reached";
     public const string CompletionReasonRequired = "completion-reason-required";
     public const string CommentRequired = "comment-required";
+
+    // 3L
+    public const string ActiveDowntimeExists = "active-downtime-exists";
+    public const string NoActiveDowntime = "no-active-downtime";
+    public const string NoActiveSetup = "no-active-setup";
+    public const string DowntimeNotFound = "downtime-not-found";
+    public const string DowntimeAlreadyEnded = "downtime-already-ended";
+    public const string ActiveSetupExists = "active-setup-exists";
+    public const string SetupSessionNotFound = "setup-session-not-found";
+    public const string SetupSessionAlreadyCompleted = "setup-session-already-completed";
+    public const string InvalidDowntimeReason = "invalid-downtime-reason";
+    public const string InvalidSetupType = "invalid-setup-type";
+    public const string InvalidCycleDuration = "invalid-cycle-duration";
+    public const string InvalidCycleQuantity = "invalid-cycle-quantity";
 }
 
 public sealed record QuantitySummaryDto(
@@ -52,7 +66,9 @@ public sealed record ProductionOrderSummaryDto(
     decimal GoodQuantity,
     decimal ScrapQuantity,
     uint Version,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    long TotalDowntimeSeconds,
+    int ManualCycleCount);
 
 public sealed record ProductionOrderDetailDto(
     Guid Id,
@@ -76,7 +92,12 @@ public sealed record ProductionOrderDetailDto(
     string LastModifiedBySubjectId,
     uint Version,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    long TotalDowntimeSeconds,
+    long TotalSetupSeconds,
+    int ManualCycleCount,
+    long TotalManualCycleDurationMilliseconds,
+    DateTimeOffset? LastCycleAtUtc);
 
 public sealed record ProductionOrderWriteSuccessDto(
     Guid Id,
@@ -101,6 +122,80 @@ public sealed record ProductionExecutionEntryDto(
     string RecordedBySubjectId,
     bool IsReversed,
     Guid? ReversesEntryId);
+
+// ── 3L ─────────────────────────────────────────────────────────────────────────
+
+public sealed record DowntimeSummaryDto(
+    Guid Id,
+    string Category,
+    string ReasonCode,
+    DateTimeOffset StartedAtUtc,
+    DateTimeOffset? EndedAtUtc,
+    long? DurationSeconds,
+    string? Comment,
+    string StartedBySubjectId,
+    string? EndedBySubjectId,
+    bool IsActive);
+
+public sealed record SetupSessionSummaryDto(
+    Guid Id,
+    string SetupType,
+    DateTimeOffset StartedAtUtc,
+    DateTimeOffset? CompletedAtUtc,
+    long? DurationSeconds,
+    string? Comment,
+    string StartedBySubjectId,
+    string? CompletedBySubjectId,
+    bool IsActive);
+
+public sealed record CycleEntrySummaryDto(
+    Guid Id,
+    int CycleNumber,
+    DateTimeOffset CycleStartedAtUtc,
+    DateTimeOffset CycleEndedAtUtc,
+    long CycleDurationMilliseconds,
+    decimal? QuantityProduced,
+    string RecordedBySubjectId,
+    DateTimeOffset RecordedAtUtc,
+    string Source,
+    string? Comment);
+
+public sealed record ProductionRuntimeSummaryDto(
+    DateTimeOffset? ActualStartAtUtc,
+    DateTimeOffset? ActualEndAtUtc,
+    long? CurrentElapsedSeconds,
+    long TotalDowntimeSeconds,
+    long TotalSetupSeconds,
+    long? NetRunningSeconds,
+    int ManualCycleCount,
+    long? AverageManualCycleMilliseconds,
+    DateTimeOffset? LastCycleAtUtc,
+    DowntimeSummaryDto? ActiveDowntime,
+    SetupSessionSummaryDto? ActiveSetup);
+
+public sealed record ProductionOperationsWriteSuccessDto(
+    Guid ResourceId,
+    uint OrderVersion);
+
+public sealed record StartDowntimeApiRequest(
+    uint ExpectedVersion,
+    string ReasonCode,
+    string? Comment);
+
+public sealed record EndDowntimeApiRequest(uint ExpectedVersion);
+
+public sealed record StartSetupApiRequest(
+    uint ExpectedVersion,
+    string SetupType,
+    string? Comment);
+
+public sealed record CompleteSetupApiRequest(uint ExpectedVersion);
+
+public sealed record RecordManualCycleApiRequest(
+    uint ExpectedVersion,
+    long CycleDurationMilliseconds,
+    decimal? QuantityProduced,
+    string? Comment);
 
 public sealed record ConsumeHandoffApiRequest(uint ExpectedHandoffVersion);
 

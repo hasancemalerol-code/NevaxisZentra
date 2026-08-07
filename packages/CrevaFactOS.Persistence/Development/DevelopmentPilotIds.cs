@@ -97,4 +97,11 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid OperatorFacilityMembershipId =
         Guid.Parse("bb000001-0033-4000-8000-000000000033");
+
+    // 3L — downtime + setup permission definitions
+    public static readonly Guid ExecutionDowntimePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000022");
+
+    public static readonly Guid ExecutionSetupPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000023");
 }
