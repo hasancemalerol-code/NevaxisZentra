@@ -317,7 +317,7 @@ public sealed class ProductionPlanWorkflowRepository(
                         TenantMembershipId = context.MembershipId,
                         EventType = auditEventType,
                         Action = auditAction,
-                        ResourceType = "production-plan",
+                        ResourceType = "production.plan",
                         ResourceId = plan.Id.ToString(),
                         Outcome = AuditOutcome.Success,
                         PermissionKey = context.PermissionKey,

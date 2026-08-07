@@ -55,8 +55,8 @@ public sealed class AddProductionPlanningApprovalWorkflowMigrationTests
     {
         var source = ReadMigrationSource();
 
-        Assert.Contains("production.plan.workflow.submit-for-review", source, StringComparison.Ordinal);
-        Assert.Contains("production.plan.workflow.request-revision", source, StringComparison.Ordinal);
+        Assert.Contains("production.plan.workflow.submit.for.review", source, StringComparison.Ordinal);
+        Assert.Contains("production.plan.workflow.request.revision", source, StringComparison.Ordinal);
         Assert.Contains("production.plan.workflow.approve", source, StringComparison.Ordinal);
         Assert.Contains("production.plan.workflow.reject", source, StringComparison.Ordinal);
     }
@@ -66,8 +66,8 @@ public sealed class AddProductionPlanningApprovalWorkflowMigrationTests
     {
         var source = ReadMigrationSource();
 
-        Assert.Contains("production.plan.submitted-for-review", source, StringComparison.Ordinal);
-        Assert.Contains("production.plan.revision-requested", source, StringComparison.Ordinal);
+        Assert.Contains("production.plan.submitted.for.review", source, StringComparison.Ordinal);
+        Assert.Contains("production.plan.revision.requested", source, StringComparison.Ordinal);
         Assert.Contains("production.plan.approved", source, StringComparison.Ordinal);
         Assert.Contains("production.plan.rejected", source, StringComparison.Ordinal);
     }

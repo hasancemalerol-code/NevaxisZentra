@@ -13,8 +13,8 @@ public static class AuditEventTypes
     public const string AiDecisionRecorded = "ai.decision.recorded";
     public const string ProductionPlanDraftCreated = "production.plan.draft.created";
     public const string ProductionPlanDraftUpdated = "production.plan.draft.updated";
-    public const string ProductionPlanSubmittedForReview = "production.plan.submitted-for-review";
-    public const string ProductionPlanRevisionRequested = "production.plan.revision-requested";
+    public const string ProductionPlanSubmittedForReview = "production.plan.submitted.for.review";
+    public const string ProductionPlanRevisionRequested = "production.plan.revision.requested";
     public const string ProductionPlanApproved = "production.plan.approved";
     public const string ProductionPlanRejected = "production.plan.rejected";
 

@@ -10,8 +10,8 @@ public static class AuditActions
     public const string AppendAiDecision = "ai.decision.append";
     public const string ProductionPlanDraftCreate = "production.plan.draft.create";
     public const string ProductionPlanDraftUpdate = "production.plan.draft.update";
-    public const string ProductionPlanSubmitForReview = "production.plan.workflow.submit-for-review";
-    public const string ProductionPlanRequestRevision = "production.plan.workflow.request-revision";
+    public const string ProductionPlanSubmitForReview = "production.plan.workflow.submit.for.review";
+    public const string ProductionPlanRequestRevision = "production.plan.workflow.request.revision";
     public const string ProductionPlanApprove = "production.plan.workflow.approve";
     public const string ProductionPlanReject = "production.plan.workflow.reject";
 

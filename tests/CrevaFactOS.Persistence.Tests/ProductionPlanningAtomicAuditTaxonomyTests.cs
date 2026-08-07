@@ -117,8 +117,8 @@ public sealed class ProductionPlanningAtomicAuditTaxonomyTests
     [Fact]
     public void WorkflowAuditActionStringsMatchMigrationSql()
     {
-        Assert.Equal("production.plan.workflow.submit-for-review", AuditActions.ProductionPlanSubmitForReview);
-        Assert.Equal("production.plan.workflow.request-revision", AuditActions.ProductionPlanRequestRevision);
+        Assert.Equal("production.plan.workflow.submit.for.review", AuditActions.ProductionPlanSubmitForReview);
+        Assert.Equal("production.plan.workflow.request.revision", AuditActions.ProductionPlanRequestRevision);
         Assert.Equal("production.plan.workflow.approve", AuditActions.ProductionPlanApprove);
         Assert.Equal("production.plan.workflow.reject", AuditActions.ProductionPlanReject);
     }
@@ -126,8 +126,8 @@ public sealed class ProductionPlanningAtomicAuditTaxonomyTests
     [Fact]
     public void WorkflowAuditEventTypeStringsMatchMigrationSql()
     {
-        Assert.Equal("production.plan.submitted-for-review", AuditEventTypes.ProductionPlanSubmittedForReview);
-        Assert.Equal("production.plan.revision-requested", AuditEventTypes.ProductionPlanRevisionRequested);
+        Assert.Equal("production.plan.submitted.for.review", AuditEventTypes.ProductionPlanSubmittedForReview);
+        Assert.Equal("production.plan.revision.requested", AuditEventTypes.ProductionPlanRevisionRequested);
         Assert.Equal("production.plan.approved", AuditEventTypes.ProductionPlanApproved);
         Assert.Equal("production.plan.rejected", AuditEventTypes.ProductionPlanRejected);
     }

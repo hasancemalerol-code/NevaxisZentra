@@ -45,8 +45,8 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                             'ai.decision.append',
                             'production.plan.draft.create',
                             'production.plan.draft.update',
-                            'production.plan.workflow.submit-for-review',
-                            'production.plan.workflow.request-revision',
+                            'production.plan.workflow.submit.for.review',
+                            'production.plan.workflow.request.revision',
                             'production.plan.workflow.approve',
                             'production.plan.workflow.reject'
                         ));
@@ -66,8 +66,8 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                             'ai.decision.recorded',
                             'production.plan.draft.created',
                             'production.plan.draft.updated',
-                            'production.plan.submitted-for-review',
-                            'production.plan.revision-requested',
+                            'production.plan.submitted.for.review',
+                            'production.plan.revision.requested',
                             'production.plan.approved',
                             'production.plan.rejected'
                         ));

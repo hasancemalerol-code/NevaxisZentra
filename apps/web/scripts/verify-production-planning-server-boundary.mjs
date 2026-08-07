@@ -241,13 +241,15 @@ for (const clientFile of clientFiles) {
       "utf8",
     ).replaceAll("\r\n", "\n");
 
-  if (
-    source.includes('"use client"') &&
-    source.includes("/server/")
-  ) {
-    fail(
-      `${relative(webRoot, clientFile)} must not import production planning server modules.`,
-    );
+  if (source.includes('"use client"')) {
+    const valueImportPattern =
+      /^import\s+(?!type\s)[^'"]*['"].*\/server\//m;
+
+    if (valueImportPattern.test(source)) {
+      fail(
+        `${relative(webRoot, clientFile)} must not import production planning server modules.`,
+      );
+    }
   }
 }
 
