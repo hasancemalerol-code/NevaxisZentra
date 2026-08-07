@@ -97,6 +97,7 @@ export const PRODUCTION_PLAN_TRANSFER_STATUS_LABELS = {
   "in-progress": "Aktarılıyor",
   completed: "Aktarım tamamlandı",
   failed: "Aktarım başarısız",
+  uncertain: "Belirsiz",
 } satisfies Record<
   ProductionPlanTransfer["status"],
   string

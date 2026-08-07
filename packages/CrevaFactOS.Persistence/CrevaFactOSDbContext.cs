@@ -6,6 +6,7 @@ using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.Facilities;
+using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Configurations;
 
@@ -57,6 +58,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ProductionPlanHandoff> ProductionPlanHandoffs => Set<ProductionPlanHandoff>();
 
     public DbSet<FacilityMembership> FacilityMemberships => Set<FacilityMembership>();
+
+    public DbSet<ProductionOrder> ProductionOrders => Set<ProductionOrder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -455,6 +458,13 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && membership.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionOrderEntityConfiguration());
+
+        modelBuilder.Entity<ProductionOrder>().HasQueryFilter(order =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && order.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

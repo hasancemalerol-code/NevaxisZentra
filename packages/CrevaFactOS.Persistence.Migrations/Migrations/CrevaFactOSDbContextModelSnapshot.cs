@@ -835,6 +835,139 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ActualEndAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actual_end_at_utc");
+
+                    b.Property<DateTimeOffset?>("ActualStartAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actual_start_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("HistoryJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("history_json");
+
+                    b.Property<string>("LastModifiedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("last_modified_by_subject_id");
+
+                    b.Property<string>("MachineReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("machine_reference");
+
+                    b.Property<string>("MoldReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("mold_reference");
+
+                    b.Property<DateTimeOffset>("PlannedEndAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_at_utc");
+
+                    b.Property<DateTimeOffset>("PlannedStartAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_start_at_utc");
+
+                    b.Property<string>("ProductReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("product_reference");
+
+                    b.Property<Guid>("ProductionPlanHandoffId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_handoff_id");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("reference_code");
+
+                    b.Property<string>("ShiftName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("shift_name");
+
+                    b.Property<Guid>("SourceProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_production_plan_id");
+
+                    b.Property<long>("SourceProductionPlanVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("source_production_plan_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionPlanHandoffId")
+                        .IsUnique();
+
+                    b.HasIndex("SourceProductionPlanId");
+
+                    b.HasIndex("TenantId", "FacilityId", "PlannedStartAtUtc");
+
+                    b.HasIndex("TenantId", "FacilityId", "ReferenceCode");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status");
+
+                    b.ToTable("production_orders", t =>
+                        {
+                            t.HasCheckConstraint("ck_production_orders_actual_times", "(actual_start_at_utc IS NULL OR actual_end_at_utc IS NULL OR actual_end_at_utc >= actual_start_at_utc)");
+                            t.HasCheckConstraint("ck_production_orders_reference_code", "reference_code <> ''");
+                            t.HasCheckConstraint("ck_production_orders_status", "status IN ('ready', 'in-progress', 'paused', 'completed', 'cancelled')");
+                            t.HasCheckConstraint("ck_production_orders_title", "title <> ''");
+                            t.HasCheckConstraint("ck_production_orders_version", "version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1472,6 +1605,28 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanHandoff", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionPlanHandoffId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

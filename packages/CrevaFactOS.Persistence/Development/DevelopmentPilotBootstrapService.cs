@@ -1,6 +1,7 @@
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -194,6 +195,35 @@ internal sealed class DevelopmentPilotBootstrapService(
             reviewerMembership.Id,
             seedTimestampUtc,
             cancellationToken);
+
+        // Give planner and reviewer production execution read
+        await EnsureExecutionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+
+        // Third identity: production-pilot-operator (full execution permissions)
+        var operatorIdentity = await EnsureOperatorIdentitySubjectAsync(
+            dbContext, pilotOptions, seedTimestampUtc, cancellationToken);
+        var operatorMembership = await EnsureOperatorTenantMembershipAsync(
+            dbContext, tenant.Id, operatorIdentity.Id, seedTimestampUtc, cancellationToken);
+        var operatorRole = await EnsureOperatorTenantRoleAsync(
+            dbContext, tenant.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionStartPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionPausePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionCompletePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMembershipRoleAsync(
+            dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
+            seedTimestampUtc, cancellationToken);
+        await EnsureOperatorFacilityMembershipAsync(
+            dbContext, tenant.Id, facility.Id, operatorMembership.Id, seedTimestampUtc, cancellationToken);
 
         var productionPlanCount = 0;
         if (pilotOptions.ProductionPlanSeedEnabled)
@@ -913,6 +943,232 @@ internal sealed class DevelopmentPilotBootstrapService(
         dbContext.FacilityMemberships.Add(new FacilityMembership
         {
             Id = DevelopmentPilotIds.ReviewerFacilityMembershipId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            TenantMembershipId = tenantMembershipId,
+            Status = FacilityMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
+    }
+
+    private static Task EnsureExecutionReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Read,
+            DevelopmentPilotIds.ExecutionReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionWritePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Write,
+            DevelopmentPilotIds.ExecutionWritePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionStartPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Start,
+            DevelopmentPilotIds.ExecutionStartPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionPausePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Pause,
+            DevelopmentPilotIds.ExecutionPausePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionCompletePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Complete,
+            DevelopmentPilotIds.ExecutionCompletePermissionDefinitionId,
+            cancellationToken);
+
+    private static async Task EnsureNamedPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid tenantRoleId,
+        string permissionKey,
+        Guid fallbackPermissionId,
+        CancellationToken cancellationToken)
+    {
+        var permissionDefinition = await dbContext.PermissionDefinitions
+            .SingleOrDefaultAsync(p => p.Key == permissionKey, cancellationToken)
+            ?? await dbContext.PermissionDefinitions
+                .SingleOrDefaultAsync(p => p.Id == fallbackPermissionId, cancellationToken);
+
+        if (permissionDefinition is null)
+        {
+            return;
+        }
+
+        var exists = await dbContext.TenantRolePermissions
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                a =>
+                    a.TenantId == tenantId
+                    && a.TenantRoleId == tenantRoleId
+                    && a.PermissionDefinitionId == permissionDefinition.Id,
+                cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
+        {
+            TenantId = tenantId,
+            TenantRoleId = tenantRoleId,
+            PermissionDefinitionId = permissionDefinition.Id,
+        });
+    }
+
+    private static async Task<IdentitySubject> EnsureOperatorIdentitySubjectAsync(
+        CrevaFactOSDbContext dbContext,
+        DevelopmentPilotOptions pilotOptions,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string operatorSubject = "production-pilot-operator";
+        var issuer = pilotOptions.DevelopmentIssuer.Trim();
+
+        var existing = await dbContext.IdentitySubjects
+            .SingleOrDefaultAsync(
+                i => i.ExternalIssuer == issuer && i.ExternalSubject == operatorSubject,
+                cancellationToken)
+            ?? await dbContext.IdentitySubjects
+                .SingleOrDefaultAsync(
+                    i => i.Id == DevelopmentPilotIds.OperatorIdentitySubjectId,
+                    cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var identity = new IdentitySubject
+        {
+            Id = DevelopmentPilotIds.OperatorIdentitySubjectId,
+            ExternalIssuer = issuer,
+            ExternalSubject = operatorSubject,
+            Status = IdentitySubjectStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.IdentitySubjects.Add(identity);
+        return identity;
+    }
+
+    private static async Task<TenantMembership> EnsureOperatorTenantMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid identitySubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.TenantMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                m => m.TenantId == tenantId && m.IdentitySubjectId == identitySubjectId,
+                cancellationToken)
+            ?? await dbContext.TenantMemberships
+                .IgnoreQueryFilters()
+                .SingleOrDefaultAsync(
+                    m => m.TenantId == tenantId && m.Id == DevelopmentPilotIds.OperatorTenantMembershipId,
+                    cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var membership = new TenantMembership
+        {
+            Id = DevelopmentPilotIds.OperatorTenantMembershipId,
+            TenantId = tenantId,
+            IdentitySubjectId = identitySubjectId,
+            Status = TenantMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantMemberships.Add(membership);
+        return membership;
+    }
+
+    private static async Task<TenantRole> EnsureOperatorTenantRoleAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string operatorRoleKey = "production-execution-operator";
+
+        var existing = await dbContext.TenantRoles
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                r => r.TenantId == tenantId
+                    && (r.Key == operatorRoleKey || r.Id == DevelopmentPilotIds.OperatorTenantRoleId),
+                cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var role = new TenantRole
+        {
+            Id = DevelopmentPilotIds.OperatorTenantRoleId,
+            TenantId = tenantId,
+            Key = operatorRoleKey,
+            DisplayName = "Production Execution Operator",
+            Status = AuthorizationStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantRoles.Add(role);
+        return role;
+    }
+
+    private static async Task EnsureOperatorFacilityMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        Guid tenantMembershipId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.FacilityMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                m =>
+                    m.TenantId == tenantId
+                    && m.FacilityId == facilityId
+                    && m.TenantMembershipId == tenantMembershipId,
+                cancellationToken);
+
+        if (existing is not null)
+        {
+            return;
+        }
+
+        dbContext.FacilityMemberships.Add(new FacilityMembership
+        {
+            Id = DevelopmentPilotIds.OperatorFacilityMembershipId,
             TenantId = tenantId,
             FacilityId = facilityId,
             TenantMembershipId = tenantMembershipId,

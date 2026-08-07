@@ -21,6 +21,12 @@ public static class AuditActions
     public const string ProductionPlanTransferFail = "production.plan.transfer.fail";
     public const string ProductionPlanTransferMarkUncertain = "production.plan.transfer.mark.uncertain";
     public const string ProductionPlanHandoffPrepare = "production.plan.handoff.prepare";
+    public const string ProductionOrderCreate = "production.order.create";
+    public const string ProductionOrderStart = "production.order.start";
+    public const string ProductionOrderPause = "production.order.pause";
+    public const string ProductionOrderResume = "production.order.resume";
+    public const string ProductionOrderComplete = "production.order.complete";
+    public const string ProductionPlanHandoffConsume = "production.plan.handoff.consume";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -43,5 +49,11 @@ public static class AuditActions
         ProductionPlanTransferFail,
         ProductionPlanTransferMarkUncertain,
         ProductionPlanHandoffPrepare,
+        ProductionOrderCreate,
+        ProductionOrderStart,
+        ProductionOrderPause,
+        ProductionOrderResume,
+        ProductionOrderComplete,
+        ProductionPlanHandoffConsume,
     };
 }

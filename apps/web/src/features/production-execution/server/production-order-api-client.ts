@@ -1,0 +1,318 @@
+import "./production-order-server-boundary";
+
+import type { ProductionOrder, ProductionOrderSummary } from "../domain/production-order";
+import {
+  parseProductionOrderDetailApiResponse,
+  parseProductionOrderListApiResponse,
+} from "./production-order-api-contracts";
+import type { ProductionOrderRequestContext } from "./production-order-request-context";
+
+export type ProductionOrderApiFailure = Readonly<{
+  status: "failure";
+  code:
+    | "source-unavailable"
+    | "unauthenticated"
+    | "permission-denied"
+    | "not-found"
+    | "configuration-error"
+    | "invalid-request"
+    | "invalid-response"
+    | "conflict";
+  message: string;
+  retryable: boolean;
+}>;
+
+export type ProductionOrderApiResult<T> =
+  | Readonly<{ status: "success"; value: T }>
+  | ProductionOrderApiFailure;
+
+export type ProductionOrderWriteResult = Readonly<{
+  status: "success" | "failure";
+  code?: string;
+  message?: string;
+  id?: string;
+  referenceCode?: string;
+  orderStatus?: string;
+  version?: number;
+}>;
+
+function fail(
+  code: ProductionOrderApiFailure["code"],
+  message: string,
+  retryable: boolean,
+): ProductionOrderApiFailure {
+  return { status: "failure", code, message, retryable };
+}
+
+function trimTrailingSlash(baseUrl: string): string {
+  return baseUrl.replace(/\/+$/, "");
+}
+
+async function readResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function mapHttpStatus(
+  status: number,
+  body: unknown,
+): ProductionOrderApiFailure {
+  const failureCode =
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as Record<string, unknown>)["failureCode"] === "string"
+      ? String((body as Record<string, unknown>)["failureCode"])
+      : undefined;
+
+  if (status === 401) {
+    return fail("unauthenticated", "Authentication required.", false);
+  }
+
+  if (status === 403) {
+    return fail("permission-denied", "Authorization denied.", false);
+  }
+
+  if (status === 404) {
+    return fail("not-found", "Production order not found.", false);
+  }
+
+  if (status === 409) {
+    const msg =
+      typeof body === "object" &&
+      body !== null &&
+      typeof (body as Record<string, unknown>)["title"] === "string"
+        ? String((body as Record<string, unknown>)["title"])
+        : "Conflict.";
+    return fail("conflict", `${failureCode ?? "conflict"}: ${msg}`, false);
+  }
+
+  if (status >= 500) {
+    return fail("source-unavailable", "Production execution service is unavailable.", true);
+  }
+
+  return fail("invalid-response", `Unexpected status: ${status}`, false);
+}
+
+async function executeGet<T>(
+  context: ProductionOrderRequestContext,
+  url: string,
+  parse: (body: unknown) => ProductionOrderApiResult<T>,
+): Promise<ProductionOrderApiResult<T>> {
+  if (!context.apiBaseUrl.trim()) {
+    return fail("configuration-error", "API base URL is not configured.", false);
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...context.requestHeaders,
+      },
+      cache: "no-store",
+    });
+  } catch {
+    return fail(
+      "source-unavailable",
+      "The production execution service is unavailable.",
+      true,
+    );
+  }
+
+  const body = await readResponseBody(response);
+
+  if (!response.ok) {
+    return mapHttpStatus(response.status, body);
+  }
+
+  return parse(body);
+}
+
+async function executePost(
+  context: ProductionOrderRequestContext,
+  url: string,
+  requestBody: unknown,
+): Promise<ProductionOrderWriteResult> {
+  if (!context.apiBaseUrl.trim()) {
+    return {
+      status: "failure",
+      code: "configuration-error",
+      message: "API base URL is not configured.",
+    };
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...context.requestHeaders,
+      },
+      body: JSON.stringify(requestBody),
+      cache: "no-store",
+    });
+  } catch {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: "The production execution service is unavailable.",
+    };
+  }
+
+  const body = await readResponseBody(response);
+
+  if (!response.ok) {
+    const failure = mapHttpStatus(response.status, body);
+    return {
+      status: "failure",
+      code: failure.code,
+      message: failure.message,
+    };
+  }
+
+  if (typeof body === "object" && body !== null) {
+    const o = body as Record<string, unknown>;
+    return {
+      status: "success",
+      id: typeof o.id === "string" ? o.id : undefined,
+      referenceCode: typeof o.referenceCode === "string" ? o.referenceCode : undefined,
+      orderStatus: typeof o.status === "string" ? o.status : undefined,
+      version: typeof o.version === "number" ? o.version : undefined,
+    };
+  }
+
+  return { status: "success" };
+}
+
+export async function listProductionOrders(
+  context: ProductionOrderRequestContext,
+  query: { facilityId: string; status?: string; search?: string; limit?: number },
+): Promise<ProductionOrderApiResult<ProductionOrderSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", query.facilityId.trim());
+
+  if (query.status?.trim()) {
+    params.set("status", query.status.trim());
+  }
+
+  if (query.search?.trim()) {
+    params.set("search", query.search.trim());
+  }
+
+  if (query.limit !== undefined) {
+    params.set("limit", String(query.limit));
+  }
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders?${params.toString()}`;
+
+  return executeGet(context, url, (body) => {
+    const parsed = parseProductionOrderListApiResponse(body);
+
+    if (parsed.status === "failure") {
+      return fail("invalid-response", `invalid-response ${parsed.message}`, false);
+    }
+
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function getProductionOrderById(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+): Promise<ProductionOrderApiResult<ProductionOrder>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}?${params.toString()}`;
+
+  return executeGet(context, url, (body) => {
+    const parsed = parseProductionOrderDetailApiResponse(body);
+
+    if (parsed.status === "failure") {
+      return fail("invalid-response", `invalid-response ${parsed.message}`, false);
+    }
+
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function startProductionOrder(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/start?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function pauseProductionOrder(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  reason: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/pause?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion, reason });
+}
+
+export async function resumeProductionOrder(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/resume?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function completeProductionOrder(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/complete?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion });
+}
+
+export async function consumeHandoff(
+  context: ProductionOrderRequestContext,
+  handoffId: string,
+  expectedHandoffVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/handoffs/${encodeURIComponent(handoffId.trim())}/consume?${params.toString()}`;
+
+  return executePost(context, url, { expectedHandoffVersion });
+}

@@ -10,6 +10,7 @@ using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.ProductionPlanning;
+using CrevaFactOS.Persistence.Production;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -66,6 +67,7 @@ public sealed class PersistenceInfrastructureTests
                 typeof(IdentitySubject),
                 typeof(OutboxMessage),
                 typeof(PermissionDefinition),
+                typeof(ProductionOrder),
                 typeof(ProductionPlan),
                 typeof(ProductionPlanHandoff),
                 typeof(ProductionPlanTransferRequest),
@@ -85,7 +87,7 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(15, migrations.Length);
+        Assert.Equal(16, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
@@ -101,6 +103,7 @@ public sealed class PersistenceInfrastructureTests
         Assert.EndsWith("_FixWorkflowAuditActionTaxonomy", migrations[12], StringComparison.Ordinal);
         Assert.EndsWith("_AddProductionPlanningSchedulingAndTransferBoundary", migrations[13], StringComparison.Ordinal);
         Assert.EndsWith("_AddProductionPlanningHandoffAndMakerChecker", migrations[14], StringComparison.Ordinal);
+        Assert.EndsWith("_AddProductionExecutionFoundation", migrations[15], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);

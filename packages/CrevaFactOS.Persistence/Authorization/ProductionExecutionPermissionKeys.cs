@@ -1,0 +1,10 @@
+namespace CrevaFactOS.Persistence.Authorization;
+
+public static class ProductionExecutionPermissionKeys
+{
+    public const string Read = "production.execution.read";
+    public const string Write = "production.execution.write";
+    public const string Start = "production.execution.start";
+    public const string Pause = "production.execution.pause";
+    public const string Complete = "production.execution.complete";
+}

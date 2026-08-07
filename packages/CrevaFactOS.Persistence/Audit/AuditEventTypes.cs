@@ -24,6 +24,12 @@ public static class AuditEventTypes
     public const string ProductionPlanTransferFailed = "production.plan.transfer.failed";
     public const string ProductionPlanTransferUncertain = "production.plan.transfer.uncertain";
     public const string ProductionPlanHandoffPrepared = "production.plan.handoff.prepared";
+    public const string ProductionOrderCreated = "production.order.created";
+    public const string ProductionOrderStarted = "production.order.started";
+    public const string ProductionOrderPaused = "production.order.paused";
+    public const string ProductionOrderResumed = "production.order.resumed";
+    public const string ProductionOrderCompleted = "production.order.completed";
+    public const string ProductionPlanHandoffConsumed = "production.plan.handoff.consumed";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -49,5 +55,11 @@ public static class AuditEventTypes
         ProductionPlanTransferFailed,
         ProductionPlanTransferUncertain,
         ProductionPlanHandoffPrepared,
+        ProductionOrderCreated,
+        ProductionOrderStarted,
+        ProductionOrderPaused,
+        ProductionOrderResumed,
+        ProductionOrderCompleted,
+        ProductionPlanHandoffConsumed,
     };
 }

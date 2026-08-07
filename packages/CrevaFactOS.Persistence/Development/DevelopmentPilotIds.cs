@@ -65,4 +65,33 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ReviewerFacilityMembershipId =
         Guid.Parse("bb000001-0023-4000-8000-000000000023");
+
+    // Production execution permission definitions
+    public static readonly Guid ExecutionReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000016");
+
+    public static readonly Guid ExecutionWritePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000017");
+
+    public static readonly Guid ExecutionStartPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000018");
+
+    public static readonly Guid ExecutionPausePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000019");
+
+    public static readonly Guid ExecutionCompletePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000020");
+
+    // Third dev identity: production-pilot-operator (execution role)
+    public static readonly Guid OperatorIdentitySubjectId =
+        Guid.Parse("bb000001-0030-4000-8000-000000000030");
+
+    public static readonly Guid OperatorTenantMembershipId =
+        Guid.Parse("bb000001-0031-4000-8000-000000000031");
+
+    public static readonly Guid OperatorTenantRoleId =
+        Guid.Parse("bb000001-0032-4000-8000-000000000032");
+
+    public static readonly Guid OperatorFacilityMembershipId =
+        Guid.Parse("bb000001-0033-4000-8000-000000000033");
 }

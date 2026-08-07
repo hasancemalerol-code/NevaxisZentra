@@ -315,13 +315,13 @@ public sealed class ProductionPlanHandoffRepository(
             DateTimeOffset? end = null;
             string? shiftName = null;
 
-            if (doc.RootElement.TryGetProperty("scheduledStartAtUtc", out var startProp)
+            if (doc.RootElement.TryGetProperty("plannedStartAt", out var startProp)
                 && DateTimeOffset.TryParse(startProp.GetString(), out var parsedStart))
             {
                 start = parsedStart;
             }
 
-            if (doc.RootElement.TryGetProperty("scheduledEndAtUtc", out var endProp)
+            if (doc.RootElement.TryGetProperty("plannedEndAt", out var endProp)
                 && DateTimeOffset.TryParse(endProp.GetString(), out var parsedEnd))
             {
                 end = parsedEnd;

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization.Policy;
 using CrevaFactOS.Api.Audit;
 using CrevaFactOS.Api.Development;
 using CrevaFactOS.Api.Facilities;
+using CrevaFactOS.Api.Production;
 using CrevaFactOS.Api.ProductionPlanning;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
@@ -33,6 +34,7 @@ builder.Services.AddAuthorization(PermissionPolicies.AddInfrastructurePolicies);
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddCrevaFactOSFacilityAccess();
 builder.Services.AddCrevaFactOSProductionPlanning();
+builder.Services.AddCrevaFactOSProductionExecution();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -64,6 +66,9 @@ app.UseAuthorization();
 app.MapProductionPlanningReadEndpoints();
 app.MapProductionPlanningWriteEndpoints();
 app.MapProductionPlanningWorkflowEndpoints();
+
+app.MapProductionExecutionReadEndpoints();
+app.MapProductionExecutionWriteEndpoints();
 
 app.MapHealthChecks(
     "/health/live",

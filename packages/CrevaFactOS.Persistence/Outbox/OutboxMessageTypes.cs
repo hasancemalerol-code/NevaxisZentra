@@ -16,6 +16,12 @@ public static class OutboxMessageTypes
     public const string ProductionPlanTransferFailed = "production-plan-transfer-failed";
     public const string ProductionPlanTransferUncertain = "production-plan-transfer-uncertain";
     public const string ProductionPlanHandoffPrepared = "production-plan-handoff-prepared";
+    public const string ProductionOrderCreated = "production-order-created";
+    public const string ProductionOrderStarted = "production-order-started";
+    public const string ProductionOrderPaused = "production-order-paused";
+    public const string ProductionOrderResumed = "production-order-resumed";
+    public const string ProductionOrderCompleted = "production-order-completed";
+    public const string ProductionPlanHandoffConsumed = "production-plan-handoff-consumed";
 
     public const int SchemaVersion = 1;
 
@@ -35,6 +41,12 @@ public static class OutboxMessageTypes
             ProductionPlanTransferFailed,
             ProductionPlanTransferUncertain,
             ProductionPlanHandoffPrepared,
+            ProductionOrderCreated,
+            ProductionOrderStarted,
+            ProductionOrderPaused,
+            ProductionOrderResumed,
+            ProductionOrderCompleted,
+            ProductionPlanHandoffConsumed,
         ],
         StringComparer.Ordinal);
 }
