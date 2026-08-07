@@ -219,6 +219,8 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExecutionCompletePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionRecordPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
             seedTimestampUtc, cancellationToken);
@@ -996,6 +998,15 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ProductionExecutionPermissionKeys.Complete,
             DevelopmentPilotIds.ExecutionCompletePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionRecordPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Record,
+            DevelopmentPilotIds.ExecutionRecordPermissionDefinitionId,
             cancellationToken);
 
     private static async Task EnsureNamedPermissionAssignmentAsync(

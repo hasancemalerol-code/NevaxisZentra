@@ -8,6 +8,7 @@ import "./globals.css";
 import "./dashboard.css";
 import "./dashboard-layout-fix.css";
 import "./command-center.css";
+import "./production-execution.css";
 
 const config = getWebApplicationConfig();
 

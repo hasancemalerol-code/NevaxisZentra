@@ -26,7 +26,11 @@ public static class AuditActions
     public const string ProductionOrderPause = "production.order.pause";
     public const string ProductionOrderResume = "production.order.resume";
     public const string ProductionOrderComplete = "production.order.complete";
+    public const string ProductionOrderCompleteShort = "production.order.complete.short";
     public const string ProductionPlanHandoffConsume = "production.plan.handoff.consume";
+    public const string ProductionQuantityGoodRecord = "production.order.quantity.good.record";
+    public const string ProductionQuantityScrapRecord = "production.order.quantity.scrap.record";
+    public const string ProductionQuantityReverse = "production.order.quantity.reverse";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -54,6 +58,10 @@ public static class AuditActions
         ProductionOrderPause,
         ProductionOrderResume,
         ProductionOrderComplete,
+        ProductionOrderCompleteShort,
         ProductionPlanHandoffConsume,
+        ProductionQuantityGoodRecord,
+        ProductionQuantityScrapRecord,
+        ProductionQuantityReverse,
     };
 }

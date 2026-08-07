@@ -7,4 +7,5 @@ public static class ProductionExecutionPermissionKeys
     public const string Start = "production.execution.start";
     public const string Pause = "production.execution.pause";
     public const string Complete = "production.execution.complete";
+    public const string Record = "production.execution.record";
 }

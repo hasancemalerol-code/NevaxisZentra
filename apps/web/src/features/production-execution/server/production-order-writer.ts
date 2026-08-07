@@ -7,6 +7,9 @@ import {
   pauseProductionOrder,
   resumeProductionOrder,
   startProductionOrder,
+  recordGoodProduction,
+  recordScrap,
+  reverseEntry,
   type ProductionOrderWriteResult,
 } from "./production-order-api-client";
 import {
@@ -156,6 +159,7 @@ export async function resumeProductionOrderAction(
 export async function completeProductionOrderAction(
   productionOrderId: string,
   expectedVersion: number,
+  options?: { allowShortCompletion?: boolean; completionReason?: string },
 ): Promise<ProductionOrderActionResult> {
   const resolved = resolveWriteContext();
 
@@ -167,6 +171,94 @@ export async function completeProductionOrderAction(
     resolved.context,
     productionOrderId,
     expectedVersion,
+    options,
+  );
+
+  return mapWriteResult(result);
+}
+
+export async function recordGoodProductionAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  quantity: number,
+  comment?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  if (quantity <= 0) {
+    return { status: "failure", code: "invalid-quantity", message: "Miktar sıfırdan büyük olmalıdır." };
+  }
+
+  const result = await recordGoodProduction(
+    resolved.context,
+    productionOrderId,
+    expectedVersion,
+    quantity,
+    comment,
+  );
+
+  return mapWriteResult(result);
+}
+
+export async function recordScrapAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  quantity: number,
+  reasonCode: string,
+  comment?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  if (quantity <= 0) {
+    return { status: "failure", code: "invalid-quantity", message: "Miktar sıfırdan büyük olmalıdır." };
+  }
+
+  if (!reasonCode.trim()) {
+    return { status: "failure", code: "invalid-scrap-reason", message: "Fire nedeni zorunludur." };
+  }
+
+  const result = await recordScrap(
+    resolved.context,
+    productionOrderId,
+    expectedVersion,
+    quantity,
+    reasonCode.trim(),
+    comment,
+  );
+
+  return mapWriteResult(result);
+}
+
+export async function reverseEntryAction(
+  productionOrderId: string,
+  entryId: string,
+  expectedVersion: number,
+  reason: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  if (!reason.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İptal nedeni zorunludur." };
+  }
+
+  const result = await reverseEntry(
+    resolved.context,
+    productionOrderId,
+    entryId,
+    expectedVersion,
+    reason.trim(),
   );
 
   return mapWriteResult(result);

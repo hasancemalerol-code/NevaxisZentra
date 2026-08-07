@@ -16,7 +16,24 @@ public static class ProductionExecutionApiFailureCodes
     public const string ConcurrencyConflict = "concurrency-conflict";
     public const string SourceUnavailable = "source-unavailable";
     public const string UnexpectedError = "unexpected-error";
+    public const string InvalidQuantity = "invalid-quantity";
+    public const string InvalidScrapReason = "invalid-scrap-reason";
+    public const string ProductionEntryNotFound = "production-entry-not-found";
+    public const string ProductionEntryAlreadyReversed = "production-entry-already-reversed";
+    public const string ProductionTargetNotReached = "production-target-not-reached";
+    public const string CompletionReasonRequired = "completion-reason-required";
+    public const string CommentRequired = "comment-required";
 }
+
+public sealed record QuantitySummaryDto(
+    decimal? PlannedQuantity,
+    string? PlannedQuantityUnit,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    decimal GrossProducedQuantity,
+    decimal? RemainingQuantity,
+    decimal? CompletionPercentage,
+    DateTimeOffset? LastEntryAtUtc);
 
 public sealed record ProductionOrderSummaryDto(
     Guid Id,
@@ -31,6 +48,9 @@ public sealed record ProductionOrderSummaryDto(
     string? MachineReference,
     string? MoldReference,
     string? ShiftName,
+    decimal? PlannedQuantity,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
     uint Version,
     DateTimeOffset UpdatedAtUtc);
 
@@ -51,6 +71,7 @@ public sealed record ProductionOrderDetailDto(
     string? MachineReference,
     string? MoldReference,
     string? ProductReference,
+    QuantitySummaryDto QuantitySummary,
     string CreatedBySubjectId,
     string LastModifiedBySubjectId,
     uint Version,
@@ -65,6 +86,22 @@ public sealed record ProductionOrderWriteSuccessDto(
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc);
 
+public sealed record ExecutionEntryWriteSuccessDto(
+    Guid EntryId,
+    uint OrderVersion);
+
+public sealed record ProductionExecutionEntryDto(
+    Guid Id,
+    string EntryType,
+    decimal Quantity,
+    string Unit,
+    string? ReasonCode,
+    string? Comment,
+    DateTimeOffset RecordedAtUtc,
+    string RecordedBySubjectId,
+    bool IsReversed,
+    Guid? ReversesEntryId);
+
 public sealed record ConsumeHandoffApiRequest(uint ExpectedHandoffVersion);
 
 public sealed record StartProductionOrderApiRequest(uint ExpectedVersion);
@@ -73,4 +110,22 @@ public sealed record PauseProductionOrderApiRequest(uint ExpectedVersion, string
 
 public sealed record ResumeProductionOrderApiRequest(uint ExpectedVersion);
 
-public sealed record CompleteProductionOrderApiRequest(uint ExpectedVersion);
+public sealed record CompleteProductionOrderApiRequest(
+    uint ExpectedVersion,
+    bool AllowShortCompletion = false,
+    string? CompletionReason = null);
+
+public sealed record RecordGoodProductionApiRequest(
+    uint ExpectedVersion,
+    decimal Quantity,
+    string? Comment);
+
+public sealed record RecordScrapApiRequest(
+    uint ExpectedVersion,
+    decimal Quantity,
+    string ReasonCode,
+    string? Comment);
+
+public sealed record ReverseEntryApiRequest(
+    uint ExpectedVersion,
+    string Reason);

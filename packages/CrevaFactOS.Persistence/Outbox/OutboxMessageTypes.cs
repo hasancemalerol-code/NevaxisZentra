@@ -21,7 +21,11 @@ public static class OutboxMessageTypes
     public const string ProductionOrderPaused = "production-order-paused";
     public const string ProductionOrderResumed = "production-order-resumed";
     public const string ProductionOrderCompleted = "production-order-completed";
+    public const string ProductionOrderCompletedShort = "production-order-completed-short";
     public const string ProductionPlanHandoffConsumed = "production-plan-handoff-consumed";
+    public const string ProductionGoodQuantityRecorded = "production-order-good-quantity-recorded";
+    public const string ProductionScrapRecorded = "production-order-scrap-recorded";
+    public const string ProductionQuantityReversed = "production-order-quantity-reversed";
 
     public const int SchemaVersion = 1;
 
@@ -46,7 +50,11 @@ public static class OutboxMessageTypes
             ProductionOrderPaused,
             ProductionOrderResumed,
             ProductionOrderCompleted,
+            ProductionOrderCompletedShort,
             ProductionPlanHandoffConsumed,
+            ProductionGoodQuantityRecorded,
+            ProductionScrapRecorded,
+            ProductionQuantityReversed,
         ],
         StringComparer.Ordinal);
 }

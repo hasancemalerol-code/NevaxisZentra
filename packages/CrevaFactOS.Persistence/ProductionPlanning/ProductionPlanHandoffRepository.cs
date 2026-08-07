@@ -354,7 +354,7 @@ public sealed class ProductionPlanHandoffRepository(
             foreach (var demand in doc.RootElement.EnumerateArray())
             {
                 string? productCode = null;
-                string? quantity = null;
+                decimal? quantity = null;
                 string? unit = null;
 
                 if (demand.TryGetProperty("productCode", out var pc))
@@ -362,9 +362,21 @@ public sealed class ProductionPlanHandoffRepository(
                     productCode = pc.GetString();
                 }
 
-                if (demand.TryGetProperty("quantity", out var qty))
+                // Plans store the demand quantity as "requiredQuantity"; fall back to "quantity" for legacy payloads.
+                // Emit as decimal so the handoff payload carries a JSON number, not a string.
+                if (demand.TryGetProperty("requiredQuantity", out var reqQty)
+                    && reqQty.ValueKind == JsonValueKind.Number
+                    && reqQty.TryGetDecimal(out var reqQtyDecimal)
+                    && reqQtyDecimal > 0)
                 {
-                    quantity = qty.GetRawText();
+                    quantity = reqQtyDecimal;
+                }
+                else if (demand.TryGetProperty("quantity", out var qty)
+                    && qty.ValueKind == JsonValueKind.Number
+                    && qty.TryGetDecimal(out var qtyDecimal)
+                    && qtyDecimal > 0)
+                {
+                    quantity = qtyDecimal;
                 }
 
                 if (demand.TryGetProperty("unit", out var u))

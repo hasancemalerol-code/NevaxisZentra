@@ -29,7 +29,11 @@ public static class AuditEventTypes
     public const string ProductionOrderPaused = "production.order.paused";
     public const string ProductionOrderResumed = "production.order.resumed";
     public const string ProductionOrderCompleted = "production.order.completed";
+    public const string ProductionOrderCompletedShort = "production.order.completed.short";
     public const string ProductionPlanHandoffConsumed = "production.plan.handoff.consumed";
+    public const string ProductionQuantityGoodRecorded = "production.order.quantity.good.recorded";
+    public const string ProductionQuantityScrapRecorded = "production.order.quantity.scrap.recorded";
+    public const string ProductionQuantityReversed = "production.order.quantity.reversed";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -60,6 +64,10 @@ public static class AuditEventTypes
         ProductionOrderPaused,
         ProductionOrderResumed,
         ProductionOrderCompleted,
+        ProductionOrderCompletedShort,
         ProductionPlanHandoffConsumed,
+        ProductionQuantityGoodRecorded,
+        ProductionQuantityScrapRecorded,
+        ProductionQuantityReversed,
     };
 }

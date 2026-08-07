@@ -21,6 +21,11 @@ public sealed class ProductionOrder : ITenantScopedEntity
     public string? MachineReference { get; set; }
     public string? MoldReference { get; set; }
     public string? ProductReference { get; set; }
+    public decimal? PlannedQuantity { get; set; }
+    public string? PlannedQuantityUnit { get; set; }
+    public decimal GoodQuantity { get; set; }
+    public decimal ScrapQuantity { get; set; }
+    public DateTimeOffset? LastProductionEntryAtUtc { get; set; }
     public string CreatedBySubjectId { get; set; } = string.Empty;
     public string LastModifiedBySubjectId { get; set; } = string.Empty;
     public uint Version { get; set; }

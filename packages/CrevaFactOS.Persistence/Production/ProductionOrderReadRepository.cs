@@ -81,6 +81,9 @@ public sealed class ProductionOrderReadRepository(
                             o.MachineReference,
                             o.MoldReference,
                             o.ShiftName,
+                            o.PlannedQuantity,
+                            o.GoodQuantity,
+                            o.ScrapQuantity,
                             o.Version,
                             o.UpdatedAtUtc))
                         .ToListAsync(ct);
@@ -147,6 +150,11 @@ public sealed class ProductionOrderReadRepository(
                         order.MachineReference,
                         order.MoldReference,
                         order.ProductReference,
+                        order.PlannedQuantity,
+                        order.PlannedQuantityUnit,
+                        order.GoodQuantity,
+                        order.ScrapQuantity,
+                        order.LastProductionEntryAtUtc,
                         order.CreatedBySubjectId,
                         order.LastModifiedBySubjectId,
                         order.Version,

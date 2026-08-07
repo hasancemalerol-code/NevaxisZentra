@@ -3,6 +3,7 @@ import {
   CalendarClock,
   CalendarRange,
   Factory,
+  ShieldCheck,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
@@ -11,13 +12,21 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ProductionOrderLifecycleActions } from "@/features/production-execution/components/production-order-lifecycle-actions";
+import { ProductionQuantityPanel } from "@/features/production-execution/components/production-quantity-panel";
+import { ProductionOperatorActions } from "@/features/production-execution/components/production-operator-actions";
+import { ProductionEntryHistory } from "@/features/production-execution/components/production-entry-history";
 import { getProductionOrderStatusLabel } from "@/features/production-execution/domain/production-order";
-import { readProductionOrderById } from "@/features/production-execution/server/production-order-reader";
+import {
+  readProductionOrderById,
+  readProductionEntries,
+} from "@/features/production-execution/server/production-order-reader";
 import {
   completeProductionOrderAction,
   pauseProductionOrderAction,
   resumeProductionOrderAction,
   startProductionOrderAction,
+  recordGoodProductionAction,
+  recordScrapAction,
 } from "@/features/production-execution/server/production-order-writer";
 import type { ProductionOrderStatus } from "@/features/production-execution/domain/production-order";
 
@@ -63,6 +72,11 @@ function formatUtcDate(iso: string | undefined): string {
   }
 }
 
+function shortId(id: string): string {
+  if (id.length > 12) return `…${id.slice(-8)}`;
+  return id;
+}
+
 type ProductionOrderDetailPageProps = Readonly<{
   params: Promise<{
     orderId: string;
@@ -74,26 +88,44 @@ export default async function ProductionOrderDetailPage({
 }: ProductionOrderDetailPageProps) {
   const { orderId } = await params;
 
-  const result = await readProductionOrderById(orderId);
+  const [result, entriesResult] = await Promise.all([
+    readProductionOrderById(orderId),
+    readProductionEntries(orderId, 50),
+  ]);
 
   if (result.status === "failure") {
     if (result.code === "not-found") {
       notFound();
     }
 
-    throw new Error(
-      [
-        "Üretim emri detayı yüklenemedi.",
-        result.code,
-        result.message,
-      ].join(" "),
+    return (
+      <main className="production-order-detail-page">
+        <div className="production-order-detail-page__back">
+          <Link href="/uretim">
+            <ArrowLeft aria-hidden="true" />
+            Üretim emirlerine dön
+          </Link>
+        </div>
+
+        <div role="alert" className="state-panel error-state">
+          <div className="state-icon">
+            <ShieldCheck aria-hidden="true" />
+          </div>
+          <div>
+            <h3>Üretim emri yüklenemedi</h3>
+            <p>Veriler alınırken bir hata oluştu. Lütfen sayfayı yenileyin.</p>
+          </div>
+        </div>
+      </main>
     );
   }
 
   const { order } = result;
+  const entries = entriesResult.status === "success" ? entriesResult.entries : [];
 
   return (
     <main className="production-order-detail-page">
+      {/* Back navigation */}
       <div className="production-order-detail-page__back">
         <Link href="/uretim">
           <ArrowLeft aria-hidden="true" />
@@ -101,13 +133,18 @@ export default async function ProductionOrderDetailPage({
         </Link>
       </div>
 
+      {/* 1 — Page header */}
       <header className="production-order-detail-page__header">
         <div>
-          <p>Üretim Emri Detayı</p>
+          <p className="production-order-detail-page__header-eyebrow">
+            ÜRETİM EMRİ
+          </p>
 
           <h1>{order.title}</h1>
 
-          <span>{order.referenceCode}</span>
+          <span className="production-order-detail-page__header-ref">
+            {order.referenceCode}
+          </span>
         </div>
 
         <div className="production-order-detail-page__badges">
@@ -117,7 +154,11 @@ export default async function ProductionOrderDetailPage({
         </div>
       </header>
 
-      <section className="production-order-detail-page__summary">
+      {/* 2 — Key operational summary */}
+      <section
+        className="production-order-detail-page__summary"
+        aria-label="Operasyonel özet"
+      >
         <Card>
           <CalendarRange aria-hidden="true" />
 
@@ -165,40 +206,82 @@ export default async function ProductionOrderDetailPage({
         </Card>
       </section>
 
-      <section className="production-order-detail-page__content">
-        <Card>
-          <p>Kaynak planlama bilgisi</p>
-
-          <h2>Plan: {order.sourceProductionPlanId}</h2>
-
-          <span>
-            El değişimi: {order.productionPlanHandoffId} — Versiyon:{" "}
-            {order.sourceProductionPlanVersion}
-          </span>
-        </Card>
-
-        <Card>
-          <p>Versiyon ve değişiklik bilgisi</p>
-
-          <h2>Versiyon {order.version}</h2>
-
-          <span>
-            Oluşturan: {order.createdBySubjectId} —{" "}
-            {formatUtcDate(order.createdAtUtc)}
-          </span>
-        </Card>
+      {/* 3 — Quantity / progress */}
+      <section
+        className="production-order-detail-page__quantity"
+        aria-label="Üretim miktarı"
+      >
+        <ProductionQuantityPanel summary={order.quantitySummary} />
       </section>
 
+      {/* 4 — Lifecycle controls */}
       <ProductionOrderLifecycleActions
         orderId={order.id}
         orderTitle={order.title}
         status={order.status}
         version={order.version}
+        quantitySummary={order.quantitySummary}
         onStart={startProductionOrderAction}
         onPause={pauseProductionOrderAction}
         onResume={resumeProductionOrderAction}
         onComplete={completeProductionOrderAction}
       />
+
+      {/* 5 — Operator quantity actions */}
+      <section
+        className="production-order-detail-page__actions"
+        aria-label="Operatör miktarı girişi"
+      >
+        <ProductionOperatorActions
+          orderId={order.id}
+          status={order.status}
+          version={order.version}
+          onRecordGood={recordGoodProductionAction}
+          onRecordScrap={recordScrapAction}
+          plannedQuantity={order.quantitySummary.plannedQuantity}
+          goodQuantity={order.quantitySummary.goodQuantity}
+        />
+      </section>
+
+      {/* 6 — Execution history */}
+      <section
+        className="production-order-detail-page__history"
+        aria-label="Üretim geçmişi"
+      >
+        <ProductionEntryHistory entries={entries} />
+      </section>
+
+      {/* 7 — Source planning context */}
+      <section
+        className="production-order-detail-page__content"
+        aria-label="Kaynak planlama bağlamı"
+      >
+        <div className="production-order-detail-page__context-card">
+          <p>KAYNAK PLANLAMA</p>
+
+          <h2>Versiyon {order.sourceProductionPlanVersion}</h2>
+
+          <span>
+            Plan:{" "}
+            <span className="production-order-detail-page__context-card__guid">
+              {shortId(order.sourceProductionPlanId)}
+            </span>
+          </span>
+        </div>
+
+        <div className="production-order-detail-page__context-card">
+          <p>KAYIT BİLGİSİ</p>
+
+          <h2>v{order.version} — {formatUtcDate(order.createdAtUtc)}</h2>
+
+          <span>
+            El değişimi:{" "}
+            <span className="production-order-detail-page__context-card__guid">
+              {shortId(order.productionPlanHandoffId)}
+            </span>
+          </span>
+        </div>
+      </section>
     </main>
   );
 }

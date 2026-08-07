@@ -58,6 +58,13 @@ internal sealed class ProductionOrderEntityConfiguration
         entity.Property(o => o.ProductReference)
             .HasColumnName("product_reference")
             .HasMaxLength(200);
+        entity.Property(o => o.PlannedQuantity).HasColumnName("planned_quantity");
+        entity.Property(o => o.PlannedQuantityUnit)
+            .HasColumnName("planned_quantity_unit")
+            .HasMaxLength(50);
+        entity.Property(o => o.GoodQuantity).HasColumnName("good_quantity");
+        entity.Property(o => o.ScrapQuantity).HasColumnName("scrap_quantity");
+        entity.Property(o => o.LastProductionEntryAtUtc).HasColumnName("last_production_entry_at_utc");
         entity.Property(o => o.CreatedBySubjectId)
             .HasColumnName("created_by_subject_id")
             .HasMaxLength(200);

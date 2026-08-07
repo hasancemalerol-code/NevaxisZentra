@@ -61,6 +61,8 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     public DbSet<ProductionOrder> ProductionOrders => Set<ProductionOrder>();
 
+    public DbSet<ProductionExecutionEntry> ProductionExecutionEntries => Set<ProductionExecutionEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -465,6 +467,13 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && order.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionExecutionEntryEntityConfiguration());
+
+        modelBuilder.Entity<ProductionExecutionEntry>().HasQueryFilter(entry =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && entry.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

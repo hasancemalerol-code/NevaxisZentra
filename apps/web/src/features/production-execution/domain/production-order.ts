@@ -5,6 +5,17 @@ export type ProductionOrderStatus =
   | "completed"
   | "cancelled";
 
+export type ProductionQuantitySummary = Readonly<{
+  plannedQuantity?: number;
+  plannedQuantityUnit?: string;
+  goodQuantity: number;
+  scrapQuantity: number;
+  grossProducedQuantity: number;
+  remainingQuantity?: number;
+  completionPercentage?: number;
+  lastEntryAtUtc?: string;
+}>;
+
 export type ProductionOrder = Readonly<{
   id: string;
   facilityId: string;
@@ -22,6 +33,7 @@ export type ProductionOrder = Readonly<{
   machineReference?: string;
   moldReference?: string;
   productReference?: string;
+  quantitySummary: ProductionQuantitySummary;
   createdBySubjectId: string;
   lastModifiedBySubjectId: string;
   version: number;
@@ -42,6 +54,9 @@ export type ProductionOrderSummary = Readonly<{
   machineReference?: string;
   moldReference?: string;
   shiftName?: string;
+  plannedQuantity?: number;
+  goodQuantity: number;
+  scrapQuantity: number;
   version: number;
   updatedAtUtc: string;
 }>;

@@ -140,6 +140,10 @@ public sealed class ProductionOrderWriteRepository(
                         MachineReference = mapResult.MachineReference,
                         MoldReference = mapResult.MoldReference,
                         ProductReference = mapResult.ProductReference,
+                        PlannedQuantity = mapResult.PlannedQuantity,
+                        PlannedQuantityUnit = mapResult.PlannedQuantityUnit,
+                        GoodQuantity = 0,
+                        ScrapQuantity = 0,
                         CreatedBySubjectId = actorSubjectId,
                         LastModifiedBySubjectId = actorSubjectId,
                         Version = 1,
@@ -371,6 +375,11 @@ public sealed class ProductionOrderWriteRepository(
         CompleteProductionOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        // isShortCompletion is set inside the validation lambda but must be used for taxonomy
+        // selection AFTER the lambda runs. Use a ref-box (single-element array) so the closure
+        // can mutate the value before the taxonomy strings are read inside ExecuteLifecycleAsync.
+        var shortFlag = new[] { false };
+
         return await ExecuteLifecycleAsync(
             context,
             command.ProductionOrderId,
@@ -384,6 +393,31 @@ public sealed class ProductionOrderWriteRepository(
                         $"Only InProgress orders can be completed. Current status: '{ProductionOrderValueConversions.ToStorage(order.Status)}'.");
                 }
 
+                // Quantity guard: if planned quantity is known, enforce completion rules
+                if (order.PlannedQuantity.HasValue)
+                {
+                    var targetReached = order.GoodQuantity >= order.PlannedQuantity.Value;
+
+                    if (!targetReached)
+                    {
+                        if (!command.AllowShortCompletion)
+                        {
+                            return ProductionOrderWriteResult.Fail(
+                                ProductionOrderFailureCodes.ProductionTargetNotReached,
+                                $"Good quantity {order.GoodQuantity} has not reached planned quantity {order.PlannedQuantity}. Use allowShortCompletion=true with a completionReason to override.");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(command.CompletionReason))
+                        {
+                            return ProductionOrderWriteResult.Fail(
+                                ProductionOrderFailureCodes.CompletionReasonRequired,
+                                "A completion reason is required when completing short of the planned quantity.");
+                        }
+
+                        shortFlag[0] = true;
+                    }
+                }
+
                 return null;
             },
             (order, now) =>
@@ -391,15 +425,32 @@ public sealed class ProductionOrderWriteRepository(
                 order.Status = ProductionOrderStatus.Completed;
                 order.ActualEndAtUtc = now;
             },
-            ProductionAuditActions.ProductionOrderComplete,
-            ProductionAuditEventTypes.ProductionOrderCompleted,
-            ProductionOutboxMessageTypes.ProductionOrderCompleted,
+            () => shortFlag[0] ? ProductionAuditActions.ProductionOrderCompleteShort : ProductionAuditActions.ProductionOrderComplete,
+            () => shortFlag[0] ? ProductionAuditEventTypes.ProductionOrderCompletedShort : ProductionAuditEventTypes.ProductionOrderCompleted,
+            () => shortFlag[0] ? ProductionOutboxMessageTypes.ProductionOrderCompletedShort : ProductionOutboxMessageTypes.ProductionOrderCompleted,
             cancellationToken);
     }
 
     // ─────────────────────────── Shared lifecycle helper ───────────────────────────
 
-    private async Task<ProductionOrderWriteResult> ExecuteLifecycleAsync(
+    // Overload with lazy taxonomy selectors — evaluated after validateTransition runs,
+    // allowing validation lambdas to influence audit/outbox taxonomy (e.g. short completion).
+    private Task<ProductionOrderWriteResult> ExecuteLifecycleAsync(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        uint expectedVersion,
+        Func<ProductionOrder, ProductionOrderWriteResult?> validateTransition,
+        Action<ProductionOrder, DateTimeOffset> applyTransition,
+        Func<string> auditActionSelector,
+        Func<string> auditEventTypeSelector,
+        Func<string> outboxMessageTypeSelector,
+        CancellationToken cancellationToken) =>
+        ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
+            validateTransition, applyTransition,
+            auditActionSelector, auditEventTypeSelector, outboxMessageTypeSelector,
+            cancellationToken);
+
+    private Task<ProductionOrderWriteResult> ExecuteLifecycleAsync(
         ProductionOrderOperationContext context,
         Guid productionOrderId,
         uint expectedVersion,
@@ -408,6 +459,21 @@ public sealed class ProductionOrderWriteRepository(
         string auditAction,
         string auditEventType,
         string outboxMessageType,
+        CancellationToken cancellationToken) =>
+        ExecuteLifecycleAsyncCore(context, productionOrderId, expectedVersion,
+            validateTransition, applyTransition,
+            () => auditAction, () => auditEventType, () => outboxMessageType,
+            cancellationToken);
+
+    private async Task<ProductionOrderWriteResult> ExecuteLifecycleAsyncCore(
+        ProductionOrderOperationContext context,
+        Guid productionOrderId,
+        uint expectedVersion,
+        Func<ProductionOrder, ProductionOrderWriteResult?> validateTransition,
+        Action<ProductionOrder, DateTimeOffset> applyTransition,
+        Func<string> auditActionSelector,
+        Func<string> auditEventTypeSelector,
+        Func<string> outboxMessageTypeSelector,
         CancellationToken cancellationToken)
     {
         if (context.TenantId == Guid.Empty || context.FacilityId == Guid.Empty)
@@ -449,6 +515,12 @@ public sealed class ProductionOrderWriteRepository(
                     {
                         return validationFailure;
                     }
+
+                    // Evaluate taxonomy selectors AFTER validation so lambdas like
+                    // CompleteAsync can influence audit/outbox types (e.g. short completion).
+                    var auditAction = auditActionSelector();
+                    var auditEventType = auditEventTypeSelector();
+                    var outboxMessageType = outboxMessageTypeSelector();
 
                     var now = DateTimeOffset.UtcNow;
                     var correlationId = context.CorrelationId ?? Guid.NewGuid();
@@ -551,6 +623,8 @@ public sealed class ProductionOrderWriteRepository(
         string? MachineReference,
         string? MoldReference,
         string? ProductReference,
+        decimal? PlannedQuantity,
+        string? PlannedQuantityUnit,
         string? FailureReason);
 
     private static HandoffMapResult MapHandoffToOrder(
@@ -569,6 +643,8 @@ public sealed class ProductionOrderWriteRepository(
             string? machineReference = null;
             string? moldReference = null;
             string? productReference = null;
+            decimal? plannedQuantity = null;
+            string? plannedQuantityUnit = null;
 
             if (root.TryGetProperty("scheduledStartAtUtc", out var startProp)
                 && startProp.ValueKind == JsonValueKind.String
@@ -620,14 +696,47 @@ public sealed class ProductionOrderWriteRepository(
             {
                 foreach (var demand in demandsProp.EnumerateArray())
                 {
-                    if (demand.TryGetProperty("productCode", out var pcProp)
+                    if (productReference is null
+                        && demand.TryGetProperty("productCode", out var pcProp)
                         && pcProp.ValueKind == JsonValueKind.String)
                     {
                         var pc = pcProp.GetString()?.Trim();
                         if (!string.IsNullOrEmpty(pc))
                         {
                             productReference = pc;
-                            break;
+                        }
+                    }
+
+                    // Extract planned quantity from first demand that has one.
+                    // Accept both JSON number (canonical) and JSON string (legacy handoffs stored quantity as GetRawText()).
+                    if (plannedQuantity is null)
+                    {
+                        if (demand.TryGetProperty("quantity", out var qtyProp))
+                        {
+                            if (qtyProp.ValueKind == JsonValueKind.Number
+                                && qtyProp.TryGetDecimal(out var qtyNum)
+                                && qtyNum > 0)
+                            {
+                                plannedQuantity = qtyNum;
+                            }
+                            else if (qtyProp.ValueKind == JsonValueKind.String
+                                && decimal.TryParse(qtyProp.GetString(), System.Globalization.NumberStyles.Number,
+                                    System.Globalization.CultureInfo.InvariantCulture, out var qtyStr)
+                                && qtyStr > 0)
+                            {
+                                plannedQuantity = qtyStr;
+                            }
+                        }
+                    }
+
+                    if (plannedQuantityUnit is null
+                        && demand.TryGetProperty("unit", out var unitProp)
+                        && unitProp.ValueKind == JsonValueKind.String)
+                    {
+                        plannedQuantityUnit = unitProp.GetString()?.Trim();
+                        if (string.IsNullOrEmpty(plannedQuantityUnit))
+                        {
+                            plannedQuantityUnit = null;
                         }
                     }
                 }
@@ -636,19 +745,20 @@ public sealed class ProductionOrderWriteRepository(
             if (start is null || end is null)
             {
                 return new HandoffMapResult(
-                    false, null, null, null, null, null, null, null,
+                    false, null, null, null, null, null, null, null, null, null,
                     "Handoff payload is missing scheduled start or end times.");
             }
 
             var title = $"{handoff.ReferenceCode} — Üretim Emri";
 
             return new HandoffMapResult(
-                true, title, start, end, shiftName, machineReference, moldReference, productReference, null);
+                true, title, start, end, shiftName, machineReference, moldReference, productReference,
+                plannedQuantity, plannedQuantityUnit ?? (plannedQuantity.HasValue ? "piece" : null), null);
         }
         catch
         {
             return new HandoffMapResult(
-                false, null, null, null, null, null, null, null,
+                false, null, null, null, null, null, null, null, null, null,
                 "Handoff payload could not be parsed.");
         }
     }

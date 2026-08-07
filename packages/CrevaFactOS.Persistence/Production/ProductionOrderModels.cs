@@ -27,7 +27,28 @@ public sealed record ResumeProductionOrderCommand(
 
 public sealed record CompleteProductionOrderCommand(
     Guid ProductionOrderId,
-    uint ExpectedVersion);
+    uint ExpectedVersion,
+    bool AllowShortCompletion = false,
+    string? CompletionReason = null);
+
+public sealed record RecordGoodProductionCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    decimal Quantity,
+    string? Comment);
+
+public sealed record RecordScrapCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    decimal Quantity,
+    string ReasonCode,
+    string? Comment);
+
+public sealed record ReverseProductionEntryCommand(
+    Guid ProductionOrderId,
+    Guid EntryId,
+    uint ExpectedVersion,
+    string Reason);
 
 public static class ProductionOrderFailureCodes
 {
@@ -41,6 +62,64 @@ public static class ProductionOrderFailureCodes
     public const string ConcurrencyConflict = "concurrency-conflict";
     public const string SourceUnavailable = "source-unavailable";
     public const string DataIntegrity = "data-integrity";
+    public const string InvalidQuantity = "invalid-quantity";
+    public const string InvalidScrapReason = "invalid-scrap-reason";
+    public const string ProductionEntryNotFound = "production-entry-not-found";
+    public const string ProductionEntryAlreadyReversed = "production-entry-already-reversed";
+    public const string ProductionTargetNotReached = "production-target-not-reached";
+    public const string CompletionReasonRequired = "completion-reason-required";
+    public const string CommentRequired = "comment-required";
+}
+
+public sealed record ProductionQuantitySummary(
+    decimal? PlannedQuantity,
+    string? PlannedQuantityUnit,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    decimal GrossProducedQuantity,
+    decimal? RemainingQuantity,
+    decimal? CompletionPercentage,
+    DateTimeOffset? LastEntryAtUtc);
+
+public sealed record ProductionExecutionEntryReadModel(
+    Guid Id,
+    string EntryType,
+    decimal Quantity,
+    string Unit,
+    string? ReasonCode,
+    string? Comment,
+    DateTimeOffset RecordedAtUtc,
+    string RecordedBySubjectId,
+    bool IsReversed,
+    Guid? ReversesEntryId);
+
+public sealed record ProductionExecutionEntryWriteResult
+{
+    public required bool Succeeded { get; init; }
+    public Guid? EntryId { get; init; }
+    public uint? OrderVersion { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionExecutionEntryWriteResult Success(Guid entryId, uint orderVersion) =>
+        new() { Succeeded = true, EntryId = entryId, OrderVersion = orderVersion };
+
+    public static ProductionExecutionEntryWriteResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record ProductionExecutionEntryListResult
+{
+    public required bool Succeeded { get; init; }
+    public IReadOnlyList<ProductionExecutionEntryReadModel>? Items { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionExecutionEntryListResult Success(IReadOnlyList<ProductionExecutionEntryReadModel> items) =>
+        new() { Succeeded = true, Items = items };
+
+    public static ProductionExecutionEntryListResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
 }
 
 public sealed record ProductionOrderReadModel(
@@ -60,6 +139,11 @@ public sealed record ProductionOrderReadModel(
     string? MachineReference,
     string? MoldReference,
     string? ProductReference,
+    decimal? PlannedQuantity,
+    string? PlannedQuantityUnit,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    DateTimeOffset? LastProductionEntryAtUtc,
     string CreatedBySubjectId,
     string LastModifiedBySubjectId,
     uint Version,
@@ -80,6 +164,9 @@ public sealed record ProductionOrderListReadModel(
     string? MachineReference,
     string? MoldReference,
     string? ShiftName,
+    decimal? PlannedQuantity,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
     uint Version,
     DateTimeOffset UpdatedAtUtc);
 

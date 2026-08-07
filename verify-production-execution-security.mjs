@@ -122,7 +122,7 @@ for (const method of writeMethods) {
   // Each write method should use expectedVersion/ExpectedVersion
   const methodIndex = writeRepo?.indexOf(method) ?? -1;
   if (methodIndex >= 0) {
-    const methodBody = writeRepo?.substring(methodIndex, methodIndex + 600);
+    const methodBody = writeRepo?.substring(methodIndex, methodIndex + 900);
     check(
       `${method} enforces expectedVersion`,
       (methodBody?.includes("expectedVersion") || methodBody?.includes("ExpectedVersion")) ?? false,

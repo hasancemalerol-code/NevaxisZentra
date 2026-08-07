@@ -82,6 +82,9 @@ public static class DevelopmentPilotIds
     public static readonly Guid ExecutionCompletePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000020");
 
+    public static readonly Guid ExecutionRecordPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000021");
+
     // Third dev identity: production-pilot-operator (execution role)
     public static readonly Guid OperatorIdentitySubjectId =
         Guid.Parse("bb000001-0030-4000-8000-000000000030");

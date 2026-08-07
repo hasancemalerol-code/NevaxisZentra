@@ -835,6 +835,95 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionExecutionEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("comment");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EntryType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("entry_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("ProductionOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_order_id");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("ReasonCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at_utc");
+
+                    b.Property<string>("RecordedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("recorded_by_subject_id");
+
+                    b.Property<Guid?>("ReversesEntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reverses_entry_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("unit");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionOrderId");
+
+                    b.HasIndex("ReversesEntryId")
+                        .HasFilter("reverses_entry_id IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "ProductionOrderId", "RecordedAtUtc");
+
+                    b.ToTable("production_execution_entries", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_execution_entries_entry_type", "entry_type IN ('good-production', 'scrap', 'reversal')");
+
+                            t.HasCheckConstraint("ck_execution_entries_quantity_positive", "quantity > 0");
+
+                            t.HasCheckConstraint("ck_execution_entries_unit", "unit IN ('piece')");
+
+                            t.HasCheckConstraint("ck_execution_entries_version", "version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -864,6 +953,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<decimal>("GoodQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("good_quantity");
+
                     b.Property<string>("HistoryJson")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -874,6 +967,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("last_modified_by_subject_id");
+
+                    b.Property<DateTimeOffset?>("LastProductionEntryAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_production_entry_at_utc");
 
                     b.Property<string>("MachineReference")
                         .HasMaxLength(200)
@@ -888,6 +985,15 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Property<DateTimeOffset>("PlannedEndAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("planned_end_at_utc");
+
+                    b.Property<decimal?>("PlannedQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("planned_quantity");
+
+                    b.Property<string>("PlannedQuantityUnit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("planned_quantity_unit");
 
                     b.Property<DateTimeOffset>("PlannedStartAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -907,6 +1013,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("reference_code");
+
+                    b.Property<decimal>("ScrapQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("scrap_quantity");
 
                     b.Property<string>("ShiftName")
                         .HasMaxLength(100)
@@ -958,12 +1068,16 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "FacilityId", "Status");
 
-                    b.ToTable("production_orders", t =>
+                    b.ToTable("production_orders", null, t =>
                         {
                             t.HasCheckConstraint("ck_production_orders_actual_times", "(actual_start_at_utc IS NULL OR actual_end_at_utc IS NULL OR actual_end_at_utc >= actual_start_at_utc)");
+
                             t.HasCheckConstraint("ck_production_orders_reference_code", "reference_code <> ''");
+
                             t.HasCheckConstraint("ck_production_orders_status", "status IN ('ready', 'in-progress', 'paused', 'completed', 'cancelled')");
+
                             t.HasCheckConstraint("ck_production_orders_title", "title <> ''");
+
                             t.HasCheckConstraint("ck_production_orders_version", "version >= 1");
                         });
                 });
@@ -1011,10 +1125,6 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("created_by");
 
-                    b.Property<Guid?>("LastModifiedBySubjectId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("last_modified_by_subject_id");
-
                     b.Property<string>("DemandsJson")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -1028,6 +1138,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("history_json");
+
+                    b.Property<Guid?>("LastModifiedBySubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_subject_id");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(4000)
@@ -1213,11 +1327,6 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("prepared_by_subject_id");
 
-                    b.Property<string>("ProductionReference")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("production_reference");
-
                     b.Property<Guid>("ProductionPlanId")
                         .HasColumnType("uuid")
                         .HasColumnName("production_plan_id");
@@ -1225,6 +1334,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Property<long>("ProductionPlanVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("production_plan_version");
+
+                    b.Property<string>("ProductionReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("production_reference");
 
                     b.Property<string>("ReferenceCode")
                         .IsRequired()
@@ -1255,18 +1369,22 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("IdempotencyKey")
                         .IsUnique();
 
-                    b.HasIndex("TenantId", "FacilityId", "ProductionPlanId");
+                    b.HasIndex("ProductionPlanId");
 
                     b.HasIndex("TenantId", "Status");
 
-                    b.HasIndex("ProductionPlanId");
+                    b.HasIndex("TenantId", "FacilityId", "ProductionPlanId");
 
-                    b.ToTable("production_plan_handoffs", t =>
+                    b.ToTable("production_plan_handoffs", null, t =>
                         {
                             t.HasCheckConstraint("ck_handoffs_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+
                             t.HasCheckConstraint("ck_handoffs_idempotency_key", "idempotency_key <> ''");
+
                             t.HasCheckConstraint("ck_handoffs_reference_code", "reference_code <> ''");
+
                             t.HasCheckConstraint("ck_handoffs_status", "status IN ('prepared', 'consumed', 'failed')");
+
                             t.HasCheckConstraint("ck_handoffs_version", "version >= 1");
                         });
                 });
@@ -1609,8 +1727,14 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionExecutionEntry", b =>
                 {
+                    b.HasOne("CrevaFactOS.Persistence.Production.ProductionOrder", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
@@ -1623,10 +1747,26 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
+                {
                     b.HasOne("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanHandoff", null)
                         .WithMany()
                         .HasForeignKey("ProductionPlanHandoffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

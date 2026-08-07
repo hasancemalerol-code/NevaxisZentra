@@ -7,8 +7,13 @@ import type {
 import {
   getProductionOrderById,
   listProductionOrders,
+  listQuantityEntries,
   type ProductionOrderApiFailure,
 } from "./production-order-api-client";
+import type { ProductionExecutionEntry } from "../domain/production-execution-entry";
+import {
+  parseProductionExecutionEntryListApiResponse,
+} from "./production-execution-entry-api-contracts";
 import {
   resolveProductionOrderRequestContext,
   type ProductionOrderRequestContext,
@@ -32,6 +37,10 @@ export type ProductionOrderListResult =
 
 export type ProductionOrderDetailResult =
   | Readonly<{ status: "success"; order: ProductionOrder }>
+  | ProductionOrderReadFailure;
+
+export type ProductionEntryListResult =
+  | Readonly<{ status: "success"; entries: ProductionExecutionEntry[] }>
   | ProductionOrderReadFailure;
 
 type ResolvedContext =
@@ -142,4 +151,46 @@ export async function readProductionOrderById(
   }
 
   return { status: "success", order: result.value };
+}
+
+export async function readProductionEntries(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ProductionEntryListResult> {
+  const normalizedId = productionOrderId.trim();
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "productionOrderId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const { context } = resolved;
+
+  const result = await listQuantityEntries(context, normalizedId, context.facilityId, limit);
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  const parsed = parseProductionExecutionEntryListApiResponse(result.value);
+  if (parsed.status === "failure") {
+    return {
+      status: "failure",
+      code: "invalid-response" as const,
+      message: parsed.message,
+      retryable: false,
+    };
+  }
+
+  return { status: "success", entries: parsed.value };
 }

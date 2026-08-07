@@ -295,13 +295,86 @@ export async function completeProductionOrder(
   context: ProductionOrderRequestContext,
   productionOrderId: string,
   expectedVersion: number,
+  options?: { allowShortCompletion?: boolean; completionReason?: string },
 ): Promise<ProductionOrderWriteResult> {
   const params = new URLSearchParams();
   params.set("facilityId", context.facilityId.trim());
 
   const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/complete?${params.toString()}`;
 
-  return executePost(context, url, { expectedVersion });
+  return executePost(context, url, {
+    expectedVersion,
+    allowShortCompletion: options?.allowShortCompletion ?? false,
+    completionReason: options?.completionReason,
+  });
+}
+
+export async function recordGoodProduction(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  quantity: number,
+  comment?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/quantities/good?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion, quantity, comment });
+}
+
+export async function recordScrap(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  quantity: number,
+  reasonCode: string,
+  comment?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/quantities/scrap?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion, quantity, reasonCode, comment });
+}
+
+export async function reverseEntry(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  entryId: string,
+  expectedVersion: number,
+  reason: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/quantity-entries/${encodeURIComponent(entryId)}/reverse?${params.toString()}`;
+
+  return executePost(context, url, { expectedVersion, reason });
+}
+
+export async function listQuantityEntries(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<unknown[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) {
+    params.set("limit", String(limit));
+  }
+
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/quantity-entries?${params.toString()}`;
+
+  return executeGet(context, url, (body) => {
+    if (!Array.isArray(body)) {
+      return fail("invalid-response", "Expected an array.", false);
+    }
+    return { status: "success", value: body as unknown[] };
+  });
 }
 
 export async function consumeHandoff(

@@ -3,7 +3,10 @@
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { ProductionOrderStatus } from "../domain/production-order";
+import type {
+  ProductionOrderStatus,
+  ProductionQuantitySummary,
+} from "../domain/production-order";
 import type {
   completeProductionOrderAction,
   pauseProductionOrderAction,
@@ -16,6 +19,7 @@ export type ProductionOrderLifecycleActionsProps = Readonly<{
   orderTitle: string;
   status: ProductionOrderStatus;
   version: number;
+  quantitySummary?: ProductionQuantitySummary;
   onStart: typeof startProductionOrderAction;
   onPause: typeof pauseProductionOrderAction;
   onResume: typeof resumeProductionOrderAction;
@@ -28,6 +32,7 @@ type LifecycleActionState =
   | { kind: "confirm-pause" }
   | { kind: "confirm-resume" }
   | { kind: "confirm-complete" }
+  | { kind: "confirm-short-complete" }
   | { kind: "pending"; action: string }
   | { kind: "error"; message: string };
 
@@ -91,6 +96,7 @@ export function ProductionOrderLifecycleActions({
   orderTitle,
   status,
   version,
+  quantitySummary,
   onStart,
   onPause,
   onResume,
@@ -101,8 +107,14 @@ export function ProductionOrderLifecycleActions({
     kind: "idle",
   });
   const pauseReasonRef = useRef<HTMLTextAreaElement>(null);
+  const shortCompletionReasonRef = useRef<HTMLTextAreaElement>(null);
 
   const isPending = actionState.kind === "pending";
+
+  const targetReached =
+    quantitySummary?.plannedQuantity !== undefined
+      ? quantitySummary.goodQuantity >= quantitySummary.plannedQuantity
+      : true;
 
   const canStart = status === "ready";
   const canPause = status === "in-progress";
@@ -131,8 +143,7 @@ export function ProductionOrderLifecycleActions({
         if (result.status === "success") {
           handleSuccess();
         } else {
-          const msg =
-            result.message ?? `${label} işlemi başarısız oldu.`;
+          const msg = result.message ?? `${label} işlemi başarısız oldu.`;
           handleError(msg);
         }
       } catch {
@@ -162,8 +173,26 @@ export function ProductionOrderLifecycleActions({
   }, [executeAction, onResume, orderId, version]);
 
   const doComplete = useCallback(async () => {
+    if (!targetReached) {
+      setActionState({ kind: "confirm-short-complete" });
+      return;
+    }
     await executeAction("Tamamla", () => onComplete(orderId, version));
-  }, [executeAction, onComplete, orderId, version]);
+  }, [executeAction, onComplete, orderId, version, targetReached]);
+
+  const doShortComplete = useCallback(async () => {
+    const reason = shortCompletionReasonRef.current?.value.trim() ?? "";
+    if (reason.length < 3) {
+      handleError("Kısa tamamlama gerekçesi en az 3 karakter olmalıdır.");
+      return;
+    }
+    await executeAction("Kısa tamamlama", () =>
+      onComplete(orderId, version, {
+        allowShortCompletion: true,
+        completionReason: reason,
+      }),
+    );
+  }, [executeAction, onComplete, orderId, version, handleError]);
 
   const dismiss = useCallback(() => {
     setActionState({ kind: "idle" });
@@ -176,7 +205,8 @@ export function ProductionOrderLifecycleActions({
   return (
     <div className="production-order-lifecycle-actions">
       <div className="production-order-lifecycle-actions__heading">
-        <p>Yaşam döngüsü aksiyonları</p>
+        <p>OPERASYON KONTROLÜ</p>
+        <h2>Üretim emri işlemleri</h2>
       </div>
 
       {actionState.kind === "error" ? (
@@ -201,17 +231,27 @@ export function ProductionOrderLifecycleActions({
           {canStart ? (
             <button
               type="button"
-              className="button button-primary button-small"
+              className="button button-primary button-medium"
               onClick={() => setActionState({ kind: "confirm-start" })}
             >
               Başlat
             </button>
           ) : null}
 
+          {canResume ? (
+            <button
+              type="button"
+              className="button button-primary button-medium"
+              onClick={() => setActionState({ kind: "confirm-resume" })}
+            >
+              Devam Et
+            </button>
+          ) : null}
+
           {canPause ? (
             <button
               type="button"
-              className="button button-secondary button-small"
+              className="button button-secondary button-medium"
               onClick={() => {
                 if (pauseReasonRef.current) {
                   pauseReasonRef.current.value = "";
@@ -226,20 +266,10 @@ export function ProductionOrderLifecycleActions({
           {canComplete ? (
             <button
               type="button"
-              className="button button-primary button-small"
+              className="button button-primary button-medium"
               onClick={() => setActionState({ kind: "confirm-complete" })}
             >
               Tamamla
-            </button>
-          ) : null}
-
-          {canResume ? (
-            <button
-              type="button"
-              className="button button-primary button-small"
-              onClick={() => setActionState({ kind: "confirm-resume" })}
-            >
-              Devam Et
             </button>
           ) : null}
         </div>
@@ -254,8 +284,8 @@ export function ProductionOrderLifecycleActions({
           isPending={isPending}
         >
           <p className="workflow-action-dialog__description">
-            <strong>{orderTitle}</strong> üretim emri başlatılacak.
-            Gerçek başlangıç zamanı sunucu tarafından kaydedilecektir.
+            <strong>{orderTitle}</strong> üretim emri başlatılacak. Gerçek
+            başlangıç zamanı sunucu tarafından kaydedilecektir.
           </p>
         </InlineDialog>
       ) : null}
@@ -273,7 +303,10 @@ export function ProductionOrderLifecycleActions({
           </p>
 
           <label className="workflow-action-dialog__label">
-            Duraklatma gerekçesi <span aria-hidden="true">*</span>
+            Duraklatma gerekçesi{" "}
+            <span aria-hidden="true" style={{ color: "#bd2c36" }}>
+              *
+            </span>
             <textarea
               ref={pauseReasonRef}
               className="workflow-action-dialog__textarea"
@@ -310,8 +343,55 @@ export function ProductionOrderLifecycleActions({
         >
           <p className="workflow-action-dialog__description">
             <strong>{orderTitle}</strong> üretim emri tamamlandı olarak
-            işaretlenecek. Gerçek bitiş zamanı sunucu tarafından kaydedilecektir.
+            işaretlenecek. Gerçek bitiş zamanı sunucu tarafından
+            kaydedilecektir.
           </p>
+          {!targetReached && quantitySummary?.plannedQuantity !== undefined && (
+            <p className="workflow-action-dialog__warning">
+              ⚠ Planlanan iyi üretim miktarına henüz ulaşılmadı (
+              {quantitySummary.goodQuantity.toLocaleString("tr-TR")}{" "}
+              / {quantitySummary.plannedQuantity.toLocaleString("tr-TR")}{" "}
+              adet). Devam ederseniz kısa tamamlama onayı istenecektir.
+            </p>
+          )}
+        </InlineDialog>
+      ) : null}
+
+      {actionState.kind === "confirm-short-complete" ? (
+        <InlineDialog
+          title="Kısa Tamamlama Onayı"
+          onCancel={dismiss}
+          onConfirm={doShortComplete}
+          confirmLabel="Kısa Tamamla"
+          confirmTone="danger"
+          isPending={isPending}
+        >
+          <p className="workflow-action-dialog__description">
+            Planlanan miktara ulaşılmadan tamamlıyorsunuz.
+            {quantitySummary?.plannedQuantity !== undefined && (
+              <>
+                {" "}İyi üretim:{" "}
+                <strong>
+                  {quantitySummary.goodQuantity.toLocaleString("tr-TR")} /{" "}
+                  {quantitySummary.plannedQuantity.toLocaleString("tr-TR")} adet
+                </strong>
+              </>
+            )}
+          </p>
+          <label className="workflow-action-dialog__label">
+            Kısa tamamlama gerekçesi{" "}
+            <span aria-hidden="true" style={{ color: "#bd2c36" }}>
+              *
+            </span>
+            <textarea
+              ref={shortCompletionReasonRef}
+              className="workflow-action-dialog__textarea"
+              placeholder="Neden kısa tamamlanıyor?"
+              maxLength={500}
+              required
+              rows={3}
+            />
+          </label>
         </InlineDialog>
       ) : null}
 
@@ -320,7 +400,7 @@ export function ProductionOrderLifecycleActions({
           className="production-order-lifecycle-actions__pending"
           aria-live="polite"
         >
-          <span>{actionState.action} işlemi gerçekleştiriliyor…</span>
+          {actionState.action} işlemi gerçekleştiriliyor…
         </div>
       ) : null}
     </div>

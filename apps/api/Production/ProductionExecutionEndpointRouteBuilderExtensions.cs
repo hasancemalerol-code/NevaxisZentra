@@ -15,6 +15,7 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         var group = endpoints.MapGroup("/api/production/orders").RequireAuthorization();
         group.MapGet("/", ListProductionOrdersAsync);
         group.MapGet("/{productionOrderId:guid}", GetProductionOrderDetailAsync);
+        group.MapGet("/{productionOrderId:guid}/quantity-entries", ListQuantityEntriesAsync);
         return endpoints;
     }
 
@@ -26,6 +27,9 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapPost("/orders/{productionOrderId:guid}/pause", PauseProductionOrderAsync);
         group.MapPost("/orders/{productionOrderId:guid}/resume", ResumeProductionOrderAsync);
         group.MapPost("/orders/{productionOrderId:guid}/complete", CompleteProductionOrderAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/quantities/good", RecordGoodProductionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/quantities/scrap", RecordScrapAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/quantity-entries/{entryId:guid}/reverse", ReverseEntryAsync);
         return endpoints;
     }
 
@@ -79,6 +83,9 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.MachineReference,
             o.MoldReference,
             o.ShiftName,
+            o.PlannedQuantity,
+            o.GoodQuantity,
+            o.ScrapQuantity,
             o.Version,
             o.UpdatedAtUtc)).ToArray();
 
@@ -129,6 +136,14 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         }
 
         var o = result.Order!;
+        var gross = o.GoodQuantity + o.ScrapQuantity;
+        decimal? remaining = o.PlannedQuantity.HasValue
+            ? Math.Max(o.PlannedQuantity.Value - o.GoodQuantity, 0)
+            : null;
+        decimal? percentage = o.PlannedQuantity.HasValue && o.PlannedQuantity.Value > 0
+            ? o.GoodQuantity / o.PlannedQuantity.Value * 100
+            : null;
+
         return TypedResults.Ok(new ProductionOrderDetailDto(
             o.Id,
             o.FacilityId,
@@ -146,6 +161,15 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.MachineReference,
             o.MoldReference,
             o.ProductReference,
+            new QuantitySummaryDto(
+                o.PlannedQuantity,
+                o.PlannedQuantityUnit,
+                o.GoodQuantity,
+                o.ScrapQuantity,
+                gross,
+                remaining,
+                percentage,
+                o.LastProductionEntryAtUtc),
             o.CreatedBySubjectId,
             o.LastModifiedBySubjectId,
             o.Version,
@@ -304,9 +328,161 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         }
 
         var result = await writeRepository.CompleteAsync(
-            context, new CompleteProductionOrderCommand(productionOrderId, body.ExpectedVersion), cancellationToken);
+            context,
+            new CompleteProductionOrderCommand(
+                productionOrderId,
+                body.ExpectedVersion,
+                body.AllowShortCompletion,
+                body.CompletionReason),
+            cancellationToken);
 
         return MapLifecycleResult(result);
+    }
+
+    // ─────────────────────────── Read: Quantity Entries ───────────────────────────
+
+    private static async Task<IResult> ListQuantityEntriesAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExecutionEntryRepository entryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(
+                FacilityAccessFailureCodes.FacilityMissing,
+                "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var effectiveLimit = Math.Clamp(limit ?? 50, 1, 200);
+        var result = await entryRepository.ListEntriesAsync(context, productionOrderId, effectiveLimit, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        var dtos = result.Items!.Select(e => new ProductionExecutionEntryDto(
+            e.Id,
+            e.EntryType,
+            e.Quantity,
+            e.Unit,
+            e.ReasonCode,
+            e.Comment,
+            e.RecordedAtUtc,
+            e.RecordedBySubjectId,
+            e.IsReversed,
+            e.ReversesEntryId)).ToArray();
+
+        return TypedResults.Ok(dtos);
+    }
+
+    // ─────────────────────────── Write: Record Good ───────────────────────────
+
+    private static async Task<IResult> RecordGoodProductionAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RecordGoodProductionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExecutionEntryRepository entryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Record,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await entryRepository.RecordGoodAsync(
+            context,
+            new RecordGoodProductionCommand(productionOrderId, body.ExpectedVersion, body.Quantity, body.Comment),
+            cancellationToken);
+
+        return MapEntryResult(result);
+    }
+
+    // ─────────────────────────── Write: Record Scrap ───────────────────────────
+
+    private static async Task<IResult> RecordScrapAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RecordScrapApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExecutionEntryRepository entryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Record,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await entryRepository.RecordScrapAsync(
+            context,
+            new RecordScrapCommand(productionOrderId, body.ExpectedVersion, body.Quantity, body.ReasonCode, body.Comment),
+            cancellationToken);
+
+        return MapEntryResult(result);
+    }
+
+    // ─────────────────────────── Write: Reverse Entry ───────────────────────────
+
+    private static async Task<IResult> ReverseEntryAsync(
+        Guid productionOrderId,
+        Guid entryId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ReverseEntryApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExecutionEntryRepository entryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Record,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await entryRepository.ReverseAsync(
+            context,
+            new ReverseProductionEntryCommand(productionOrderId, entryId, body.ExpectedVersion, body.Reason),
+            cancellationToken);
+
+        return MapEntryResult(result);
+    }
+
+    private static IResult MapEntryResult(ProductionExecutionEntryWriteResult result)
+    {
+        if (!result.Succeeded)
+        {
+            return MapWriteFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new ExecutionEntryWriteSuccessDto(result.EntryId!.Value, result.OrderVersion!.Value));
     }
 
     // ─────────────────────────── Helpers ───────────────────────────
@@ -448,6 +624,34 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
                 title: "Production order service is unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable,
                 extensions: FailureExt(ProductionExecutionApiFailureCodes.SourceUnavailable)),
+            ProductionOrderFailureCodes.InvalidQuantity => TypedResults.Problem(
+                title: reason ?? "Invalid quantity.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidQuantity)),
+            ProductionOrderFailureCodes.InvalidScrapReason => TypedResults.Problem(
+                title: reason ?? "Invalid scrap reason.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidScrapReason)),
+            ProductionOrderFailureCodes.ProductionEntryNotFound => TypedResults.Problem(
+                title: "Production entry not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ProductionEntryNotFound)),
+            ProductionOrderFailureCodes.ProductionEntryAlreadyReversed => TypedResults.Problem(
+                title: reason ?? "Production entry has already been reversed.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ProductionEntryAlreadyReversed)),
+            ProductionOrderFailureCodes.ProductionTargetNotReached => TypedResults.Problem(
+                title: reason ?? "Production target has not been reached.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ProductionTargetNotReached)),
+            ProductionOrderFailureCodes.CompletionReasonRequired => TypedResults.Problem(
+                title: reason ?? "A completion reason is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.CompletionReasonRequired)),
+            ProductionOrderFailureCodes.CommentRequired => TypedResults.Problem(
+                title: reason ?? "A comment is required for this scrap reason.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.CommentRequired)),
             _ => TypedResults.Problem(
                 title: "An unexpected error occurred.",
                 statusCode: StatusCodes.Status500InternalServerError,
@@ -480,6 +684,14 @@ public static class ProductionExecutionServiceCollectionExtensions
                 : new ProductionOrderWriteRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionExecutionEntryRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetRequiredService<CrevaFactOSDbContext>();
+            return new ProductionExecutionEntryRepository(
+                dbContext,
+                serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
         return services;

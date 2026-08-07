@@ -4,6 +4,7 @@ import type {
   ProductionOrder,
   ProductionOrderStatus,
   ProductionOrderSummary,
+  ProductionQuantitySummary,
 } from "../domain/production-order";
 
 const PRODUCTION_ORDER_STATUSES = new Set<ProductionOrderStatus>([
@@ -28,6 +29,31 @@ function isOptionalString(v: unknown): v is string | undefined {
 
 function isNumber(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v);
+}
+
+function isOptionalNumber(v: unknown): v is number | undefined {
+  return v === undefined || v === null || (typeof v === "number" && Number.isFinite(v));
+}
+
+function parseQuantitySummary(raw: unknown): ParseResult<ProductionQuantitySummary> {
+  if (typeof raw !== "object" || raw === null) {
+    return fail("quantitySummary must be an object.");
+  }
+  const o = raw as Record<string, unknown>;
+  if (!isOptionalNumber(o.plannedQuantity)) return fail("quantitySummary.plannedQuantity must be a number.");
+  if (!isNumber(o.goodQuantity)) return fail("quantitySummary.goodQuantity is required.");
+  if (!isNumber(o.scrapQuantity)) return fail("quantitySummary.scrapQuantity is required.");
+  if (!isNumber(o.grossProducedQuantity)) return fail("quantitySummary.grossProducedQuantity is required.");
+  return ok<ProductionQuantitySummary>({
+    plannedQuantity: isOptionalNumber(o.plannedQuantity) ? (o.plannedQuantity as number | undefined) ?? undefined : undefined,
+    plannedQuantityUnit: isOptionalString(o.plannedQuantityUnit) ? o.plannedQuantityUnit ?? undefined : undefined,
+    goodQuantity: o.goodQuantity as number,
+    scrapQuantity: o.scrapQuantity as number,
+    grossProducedQuantity: o.grossProducedQuantity as number,
+    remainingQuantity: isOptionalNumber(o.remainingQuantity) ? (o.remainingQuantity as number | undefined) ?? undefined : undefined,
+    completionPercentage: isOptionalNumber(o.completionPercentage) ? (o.completionPercentage as number | undefined) ?? undefined : undefined,
+    lastEntryAtUtc: isOptionalString(o.lastEntryAtUtc) ? o.lastEntryAtUtc ?? undefined : undefined,
+  });
 }
 
 export type ParseResult<T> =
@@ -75,6 +101,9 @@ export function parseProductionOrderSummaryApiResponse(
     machineReference: isOptionalString(o.machineReference) ? o.machineReference ?? undefined : undefined,
     moldReference: isOptionalString(o.moldReference) ? o.moldReference ?? undefined : undefined,
     shiftName: isOptionalString(o.shiftName) ? o.shiftName ?? undefined : undefined,
+    plannedQuantity: isOptionalNumber(o.plannedQuantity) ? (o.plannedQuantity as number | undefined) ?? undefined : undefined,
+    goodQuantity: isNumber(o.goodQuantity) ? o.goodQuantity : 0,
+    scrapQuantity: isNumber(o.scrapQuantity) ? o.scrapQuantity : 0,
     version: o.version,
     updatedAtUtc: o.updatedAtUtc,
   });
@@ -127,6 +156,11 @@ export function parseProductionOrderDetailApiResponse(
   if (!isString(o.createdAtUtc)) return fail("createdAtUtc is required.");
   if (!isString(o.updatedAtUtc)) return fail("updatedAtUtc is required.");
 
+  const quantitySummaryResult = parseQuantitySummary(o.quantitySummary);
+  if (quantitySummaryResult.status === "failure") {
+    return fail(quantitySummaryResult.message);
+  }
+
   return ok<ProductionOrder>({
     id: o.id,
     facilityId: o.facilityId,
@@ -144,6 +178,7 @@ export function parseProductionOrderDetailApiResponse(
     machineReference: isOptionalString(o.machineReference) ? o.machineReference ?? undefined : undefined,
     moldReference: isOptionalString(o.moldReference) ? o.moldReference ?? undefined : undefined,
     productReference: isOptionalString(o.productReference) ? o.productReference ?? undefined : undefined,
+    quantitySummary: quantitySummaryResult.value,
     createdBySubjectId: o.createdBySubjectId,
     lastModifiedBySubjectId: o.lastModifiedBySubjectId,
     version: o.version,
