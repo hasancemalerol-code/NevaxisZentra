@@ -37,4 +37,10 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid PlanningWritePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000010");
+
+    public static readonly Guid PlanningReviewPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000011");
+
+    public static readonly Guid PlanningApprovePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000012");
 }

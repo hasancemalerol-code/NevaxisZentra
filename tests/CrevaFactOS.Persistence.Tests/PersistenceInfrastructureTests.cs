@@ -83,7 +83,7 @@ public sealed class PersistenceInfrastructureTests
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(10, migrations.Length);
+        Assert.Equal(12, migrations.Length);
         Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
@@ -94,6 +94,8 @@ public sealed class PersistenceInfrastructureTests
         Assert.EndsWith("_AddFacilityAndProductionPlanningFoundation", migrations[7], StringComparison.Ordinal);
         Assert.EndsWith("_AddFacilityMembershipAndPlanningReadPermission", migrations[8], StringComparison.Ordinal);
         Assert.EndsWith("_AddPlanningRuntimeReadPolicies", migrations[9], StringComparison.Ordinal);
+        Assert.EndsWith("_AddProductionPlanningDraftWriteSupport", migrations[10], StringComparison.Ordinal);
+        Assert.EndsWith("_AddProductionPlanningApprovalWorkflow", migrations[11], StringComparison.Ordinal);
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);

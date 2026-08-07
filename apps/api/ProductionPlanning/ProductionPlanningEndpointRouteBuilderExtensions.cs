@@ -32,6 +32,19 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         return endpoints;
     }
 
+    public static IEndpointRouteBuilder MapProductionPlanningWorkflowEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/production-planning/plans")
+            .RequireAuthorization();
+
+        group.MapPost("/{productionPlanId:guid}/submit-for-review", SubmitProductionPlanForReviewAsync);
+        group.MapPost("/{productionPlanId:guid}/request-revision", RequestProductionPlanRevisionAsync);
+        group.MapPost("/{productionPlanId:guid}/approve", ApproveProductionPlanAsync);
+        group.MapPost("/{productionPlanId:guid}/reject", RejectProductionPlanAsync);
+
+        return endpoints;
+    }
+
     private static async Task<IResult> ListProductionPlansAsync(
         [FromQuery] Guid? facilityId,
         [FromQuery] string? status,
@@ -201,6 +214,202 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         return ProductionPlanApiResultMapper.MapWriteServiceResult(result, isCreate: false);
     }
 
+    private static async Task<IResult> SubmitProductionPlanForReviewAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] SubmitProductionPlanForReviewRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanWorkflowService workflowService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Review));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Review),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await workflowService.SubmitForReviewAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWorkflowResult(result);
+    }
+
+    private static async Task<IResult> RequestProductionPlanRevisionAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RequestProductionPlanRevisionRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanWorkflowService workflowService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Review));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Review),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await workflowService.RequestRevisionAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWorkflowResult(result);
+    }
+
+    private static async Task<IResult> ApproveProductionPlanAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ApproveProductionPlanRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanWorkflowService workflowService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Approve));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Approve),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await workflowService.ApproveAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWorkflowResult(result);
+    }
+
+    private static async Task<IResult> RejectProductionPlanAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RejectProductionPlanRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanWorkflowService workflowService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Approve));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Approve),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await workflowService.RejectAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWorkflowResult(result);
+    }
+
     private static Guid? ReadCorrelationId(CorrelationContext correlationContext) =>
         correlationContext.IsAvailable ? correlationContext.CorrelationId : null;
 }
@@ -229,6 +438,16 @@ public static class ProductionPlanningServiceCollectionExtensions
         });
         services.AddScoped<IProductionPlanReadService, ProductionPlanReadService>();
         services.AddScoped<IProductionPlanDraftWriteService, ProductionPlanDraftWriteService>();
+        services.AddScoped<IProductionPlanWorkflowRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionPlanWorkflowRepository()
+                : new ProductionPlanWorkflowRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+        services.AddScoped<IProductionPlanWorkflowService, ProductionPlanWorkflowService>();
         return services;
     }
 }

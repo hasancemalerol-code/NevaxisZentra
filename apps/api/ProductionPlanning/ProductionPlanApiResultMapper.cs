@@ -168,6 +168,69 @@ public static class ProductionPlanApiResultMapper
             productionPlanId,
             correlationId);
 
+    public static IResult MapWorkflowResult(ProductionPlanWorkflowApiResult result)
+    {
+        if (result.Succeeded)
+        {
+            var response = new ProductionPlanWorkflowSuccessResponse(
+                result.ProductionPlanId!.Value,
+                result.ReferenceCode!,
+                result.PreviousStatus!,
+                result.Status!,
+                result.Version!.Value,
+                result.UpdatedAtUtc!.Value,
+                result.ApprovalStatus!);
+
+            return TypedResults.Ok(response);
+        }
+
+        return MapWorkflowFailure(result);
+    }
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapWorkflowFailure(
+        ProductionPlanWorkflowApiResult result) =>
+        result.FailureCode switch
+        {
+            ProductionPlanWorkflowFailureCodes.InvalidScope
+                or ProductionPlanWorkflowFailureCodes.ValidationFailed => TypedResults.Problem(
+                    title: result.FailureReason ?? "Validation failed.",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: WriteFailureExtensions(
+                        result.FailureCode == ProductionPlanWorkflowFailureCodes.ValidationFailed
+                            ? ProductionPlanApiFailureCodes.ValidationFailed
+                            : ProductionPlanApiFailureCodes.InvalidRequest,
+                        result.FieldErrors?.Select(e =>
+                            new ProductionPlanWriteFieldError(e.Field, e.Code, e.Message)).ToArray())),
+            ProductionPlanWorkflowFailureCodes.NotFound => TypedResults.Problem(
+                title: "Production plan not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.NotFound)),
+            ProductionPlanWorkflowFailureCodes.InvalidTransition => TypedResults.Problem(
+                title: result.FailureReason ?? "This workflow transition is not allowed.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.InvalidTransition)),
+            ProductionPlanWorkflowFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: result.FailureReason ?? "The production plan was modified by another user.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.ConcurrencyConflict)),
+            ProductionPlanWorkflowFailureCodes.AuditFailure => TypedResults.Problem(
+                title: "The workflow transition could not be recorded. Please try again.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.AuditFailure)),
+            ProductionPlanWorkflowFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: "Production plan workflow service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.SourceUnavailable)),
+            ProductionPlanWorkflowFailureCodes.DataIntegrity => TypedResults.Problem(
+                title: "A data integrity error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.DataIntegrity)),
+            _ => TypedResults.Problem(
+                title: "An unexpected error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.UnexpectedError)),
+        };
+
     private static Dictionary<string, object?> FailureExtensions(string failureCode) =>
         new()
         {

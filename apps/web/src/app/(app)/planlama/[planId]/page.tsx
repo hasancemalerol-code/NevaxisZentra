@@ -24,6 +24,7 @@ import { ProductionPlanApprovalTransferPanel } from "@/features/production-plann
 import { ProductionPlanDemandTable } from "@/features/production-planning/components/production-plan-demand-table";
 import { ProductionPlanTimeline } from "@/features/production-planning/components/production-plan-timeline";
 import { ProductionPlanHistoryPanel } from "@/features/production-planning/components/production-plan-history-panel";
+import { ProductionPlanWorkflowActions } from "@/features/production-planning/components/production-plan-workflow-actions";
 import { getProductionPlanFallbackLabel } from "@/features/production-planning/presentation/production-plan-fallback-labels";
 import {
   getProductionPlanConfidenceLabel,
@@ -32,6 +33,12 @@ import {
   getProductionPlanStatusLabel,
   getProductionPlanTargetSystemLabel,
 } from "@/features/production-planning/presentation/production-plan-labels";
+import {
+  approveAction,
+  rejectAction,
+  requestRevisionAction,
+  submitForReviewAction,
+} from "@/features/production-planning/server/production-plan-workflow-actions";
 
 type ProductionPlanDetailPageProps =
   Readonly<{
@@ -243,6 +250,17 @@ export default async function ProductionPlanDetailPage({
 
       <ProductionPlanRiskPanel
         viewModel={riskViewModel}
+      />
+
+      <ProductionPlanWorkflowActions
+        planId={productionPlan.id}
+        planStatus={productionPlan.status}
+        version={productionPlan.version}
+        planTitle={productionPlan.title}
+        onSubmitForReview={submitForReviewAction}
+        onRequestRevision={requestRevisionAction}
+        onApprove={approveAction}
+        onReject={rejectAction}
       />
 
       <ProductionPlanApprovalTransferPanel

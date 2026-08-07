@@ -60,6 +60,7 @@ app.UseAuthorization();
 
 app.MapProductionPlanningReadEndpoints();
 app.MapProductionPlanningWriteEndpoints();
+app.MapProductionPlanningWorkflowEndpoints();
 
 app.MapHealthChecks(
     "/health/live",

@@ -1,12 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using CrevaFactOS.Api.Authentication;
+using CrevaFactOS.Api.Development;
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Api.ProductionPlanning;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
-using CrevaFactOS.Api.Development;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -18,212 +19,532 @@ namespace CrevaFactOS.SmokeTests;
 
 public sealed class ProductionPlanningApiEndpointTests
 {
-    private static readonly Guid IdentityId = Guid.Parse("99000000-0000-4000-8000-000000000001");
-    private static readonly Guid TenantId = Guid.Parse("99000000-0000-4000-8000-000000000002");
-    private static readonly Guid MembershipId = Guid.Parse("99000000-0000-4000-8000-000000000003");
-    private static readonly Guid FacilityId = Guid.Parse("99000000-0000-4000-8000-000000000004");
-    private static readonly Guid PlanId = Guid.Parse("99000000-0000-4000-8000-000000000005");
+    private static readonly Guid IdentityId = Guid.Parse("99000002-0000-4000-8000-000000000001");
+    private static readonly Guid TenantId = Guid.Parse("99000002-0000-4000-8000-000000000002");
+    private static readonly Guid MembershipId = Guid.Parse("99000002-0000-4000-8000-000000000003");
+    private static readonly Guid FacilityId = Guid.Parse("99000002-0000-4000-8000-000000000004");
+    private static readonly Guid PlanId = Guid.Parse("99000002-0000-4000-8000-000000000005");
+
+    // ── Submit for review ─────────────────────────────────────────────────────
 
     [Fact]
-    public async Task MissingAuthenticationReturns401()
+    public async Task SubmitWithoutAuthenticationReturns401()
     {
         await using var factory = CreateFactory();
         using var client = factory.CreateClient();
-        using var response = await client.GetAsync(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+
+        using var response = await client.PostAsJsonAsync(
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
-    public async Task MissingFacilityIdReturns400()
+    public async Task SubmitWithoutFacilityIdReturns400()
     {
-        await using var factory = CreateFactory(new GrantingFacilityAccessResolver());
+        await using var factory = CreateFactory(new GrantingReviewAccessResolver());
         using var client = factory.CreateClient();
-        using var request = CreateRequest("/api/production-planning/plans");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review",
+            new { expectedVersion = 1 });
 
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.InvalidRequest, body!.FailureCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidRequest, problem!.FailureCode);
     }
 
     [Fact]
-    public async Task FacilityMembershipDeniedReturns403()
-    {
-        await using var factory = CreateFactory(new DenyingFacilityAccessResolver(
-            FacilityAccessFailureCodes.FacilityAccessDenied));
-        using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
-
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.FacilityAccessDenied, body!.FailureCode);
-    }
-
-    [Fact]
-    public async Task PermissionDeniedReturns403()
-    {
-        await using var factory = CreateFactory(new DenyingFacilityAccessResolver(
-            FacilityAccessFailureCodes.PermissionDenied));
-        using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
-
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.PermissionDenied, body!.FailureCode);
-    }
-
-    [Fact]
-    public async Task AuthorizedListReturns200()
+    public async Task SubmitWithoutMembershipReturns403()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(listCount: 1));
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.FacilityAccessDenied));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
 
-        using var response = await client.SendAsync(request);
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.FacilityAccessDenied, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task SubmitWithoutReviewPermissionReturns403()
+    {
+        await using var factory = CreateFactory(
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.PermissionDenied, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task SubmitWithReviewPermissionReturns200()
+    {
+        await using var factory = CreateFactory(
+            new GrantingReviewAccessResolver(),
+            workflowService: new SucceedingWorkflowService("ready-for-approval"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
-    public async Task EmptyListReturns200WithEmptyItems()
+    public async Task SubmitStaleVersionReturns409ConcurrencyConflict()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(listCount: 0));
+            new GrantingReviewAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ConcurrencyConflict));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
 
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProductionPlanListResponse>();
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ConcurrencyConflict, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task SubmitApprovedPlanReturns409InvalidTransition()
+    {
+        await using var factory = CreateFactory(
+            new GrantingReviewAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.InvalidTransition));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidTransition, problem!.FailureCode);
+    }
+
+    // ── Request revision ─────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task RevisionWithoutReviewPermissionReturns403()
+    {
+        await using var factory = CreateFactory(
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/request-revision?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Needs more detail." });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.PermissionDenied, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task RevisionWithReviewPermissionReturns200()
+    {
+        await using var factory = CreateFactory(
+            new GrantingReviewAccessResolver(),
+            workflowService: new SucceedingWorkflowService("needs-review"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/request-revision?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Needs more detail." });
+
+        using var response = await client.SendAsync(body);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(body);
-        Assert.Empty(body!.Items);
-        Assert.Equal(0, body.Count);
     }
 
     [Fact]
-    public async Task MissingDetailReturns404()
+    public async Task RevisionWithEmptyReasonReturns400()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(detailFailureCode: ProductionPlanApiFailureCodes.NotFound));
+            new GrantingReviewAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ValidationFailed));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans/{PlanId:D}?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/request-revision?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "" });
 
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.NotFound, body!.FailureCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ValidationFailed, problem!.FailureCode);
     }
 
     [Fact]
-    public async Task CrossTenantDetailDoesNotLeakExistence()
+    public async Task RevisionDraftPlanReturns409InvalidTransition()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(detailFailureCode: ProductionPlanApiFailureCodes.NotFound));
+            new GrantingReviewAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.InvalidTransition));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans/{Guid.Parse("99000000-0000-4000-8000-000000009999"):D}?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/request-revision?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Needs more detail." });
 
-        using var response = await client.SendAsync(request);
-        var rawBody = await response.Content.ReadAsStringAsync();
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.DoesNotContain("another tenant", rawBody, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidTransition, problem!.FailureCode);
     }
 
     [Fact]
-    public async Task SourceUnavailableReturns503()
+    public async Task RevisionStaleVersionReturns409ConcurrencyConflict()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(listFailureCode: ProductionPlanApiFailureCodes.SourceUnavailable));
+            new GrantingReviewAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ConcurrencyConflict));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/request-revision?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Needs more detail." });
 
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ConcurrencyConflict, problem!.FailureCode);
+    }
+
+    // ── Approve ───────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ApproveWithoutApprovePermissionReturns403()
+    {
+        await using var factory = CreateFactory(
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.PermissionDenied, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task ApproveWithApprovePermissionReturns200()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new SucceedingWorkflowService("approved"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ApproveDraftPlanReturns409InvalidTransition()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.InvalidTransition));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidTransition, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task ApproveNeedsReviewPlanReturns409InvalidTransition()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.InvalidTransition));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidTransition, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task ApproveStaleVersionReturns409ConcurrencyConflict()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ConcurrencyConflict));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ConcurrencyConflict, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task ApproveWithSourceUnavailableReturns503()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.SourceUnavailable));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.SourceUnavailable, body!.FailureCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.SourceUnavailable, problem!.FailureCode);
     }
 
+    // ── Reject ────────────────────────────────────────────────────────────────
+
     [Fact]
-    public async Task InvalidRowReturns500()
+    public async Task RejectWithoutApprovePermissionReturns403()
     {
         await using var factory = CreateFactory(
-            new GrantingFacilityAccessResolver(),
-            new StubProductionPlanReadService(detailFailureCode: ProductionPlanApiFailureCodes.InvalidRow));
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans/{PlanId:D}?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/reject?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Not sufficient." });
 
-        using var response = await client.SendAsync(request);
-        var body = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-        Assert.Equal(ProductionPlanApiFailureCodes.InvalidRow, body!.FailureCode);
-    }
-
-    [Fact]
-    public async Task DevelopmentAuthDoesNotBypassFacilityMembershipChecks()
-    {
-        await using var factory = CreateFactory(new DenyingFacilityAccessResolver(
-            FacilityAccessFailureCodes.FacilityAccessDenied));
-        using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
-
-        using var response = await client.SendAsync(request);
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.PermissionDenied, problem!.FailureCode);
     }
 
     [Fact]
-    public async Task DevelopmentBootstrapDoesNotRunInTestHost()
+    public async Task RejectWithApprovePermissionReturns200()
     {
-        await using var factory = CreateFactory(new GrantingFacilityAccessResolver());
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new SucceedingWorkflowService("rejected"));
         using var client = factory.CreateClient();
-        using var request = CreateRequest(
-            $"/api/production-planning/plans?facilityId={FacilityId:D}");
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/reject?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Not sufficient." });
 
-        using var response = await client.SendAsync(request);
+        using var response = await client.SendAsync(body);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
-    public void ApplicationExposesProductionPlanningTypes()
+    public async Task RejectWithMissingReasonReturns400()
     {
-        var planningTypes = typeof(Program).Assembly
-            .GetTypes()
-            .Where(type => type.FullName?.Contains("ProductionPlanning", StringComparison.Ordinal) == true)
-            .ToArray();
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ValidationFailed));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/reject?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "" });
 
-        Assert.NotEmpty(planningTypes);
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ValidationFailed, problem!.FailureCode);
     }
+
+    [Fact]
+    public async Task RejectDraftPlanReturns409InvalidTransition()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.InvalidTransition));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/reject?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Not sufficient." });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.InvalidTransition, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task RejectStaleVersionReturns409ConcurrencyConflict()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.ConcurrencyConflict));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/reject?facilityId={FacilityId:D}",
+            new { expectedVersion = 1, reason = "Not sufficient." });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.ConcurrencyConflict, problem!.FailureCode);
+    }
+
+    // ── Permission separation ─────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ReviewPermissionCannotApprove()
+    {
+        await using var factory = CreateFactory(
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied),
+            workflowService: new SucceedingWorkflowService("approved"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WritePermissionAloneCannotSubmit()
+    {
+        await using var factory = CreateFactory(
+            new DenyingFacilityAccessResolver(FacilityAccessFailureCodes.PermissionDenied),
+            workflowService: new SucceedingWorkflowService("ready-for-approval"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/submit-for-review?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task NotFoundReturns404()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.NotFound));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(ProductionPlanApiFailureCodes.NotFound, problem!.FailureCode);
+    }
+
+    [Fact]
+    public async Task ApproveSuccessBodyContainsApprovedStatus()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new SucceedingWorkflowService("approved"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var result = await response.Content.ReadFromJsonAsync<WorkflowSuccessResponse>();
+
+        Assert.Equal("approved", result!.Status);
+    }
+
+    [Fact]
+    public async Task ApproveSuccessBodyContainsIncreasedVersion()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new SucceedingWorkflowService("approved"));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var result = await response.Content.ReadFromJsonAsync<WorkflowSuccessResponse>();
+
+        Assert.True(result!.Version >= 1);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static WebApplicationFactory<Program> CreateFactory(
         IFacilityAccessResolver? facilityAccessResolver = null,
-        IProductionPlanReadService? readService = null) =>
+        IProductionPlanWorkflowService? workflowService = null) =>
         new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
@@ -246,17 +567,19 @@ public sealed class ProductionPlanningApiEndpointTests
                     services.RemoveAll<ITenantMembershipResolver>();
                     services.RemoveAll<IPermissionEvaluator>();
                     services.RemoveAll<IFacilityAccessResolver>();
-                    services.RemoveAll<IProductionPlanReadService>();
+                    services.RemoveAll<IProductionPlanWorkflowService>();
                     services.AddScoped<IIdentitySubjectResolver, StubIdentityResolver>();
                     services.AddScoped<ITenantMembershipResolver, StubMembershipResolver>();
                     services.AddScoped<IPermissionEvaluator>(_ =>
                         new StubPermissionEvaluator(
-                            new HashSet<string>([ProductionPlanningPermissionKeys.Read], StringComparer.Ordinal)));
+                            new HashSet<string>(
+                                [ProductionPlanningPermissionKeys.Review, ProductionPlanningPermissionKeys.Approve],
+                                StringComparer.Ordinal)));
                     services.AddScoped<IFacilityAccessResolver>(_ =>
                         facilityAccessResolver ?? new DenyingFacilityAccessResolver(
                             FacilityAccessFailureCodes.FacilityAccessDenied));
-                    services.AddScoped<IProductionPlanReadService>(_ =>
-                        readService ?? new StubProductionPlanReadService());
+                    services.AddScoped<IProductionPlanWorkflowService>(_ =>
+                        workflowService ?? new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.SourceUnavailable));
                 });
             });
 
@@ -275,9 +598,12 @@ public sealed class ProductionPlanningApiEndpointTests
         }
     }
 
-    private static HttpRequestMessage CreateRequest(string path)
+    private static HttpRequestMessage CreateRequest(HttpMethod method, string path, object body)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        var request = new HttpRequestMessage(method, path)
+        {
+            Content = JsonContent.Create(body),
+        };
         request.Headers.Add(DevelopmentAuthenticationHandler.IssuerHeader, "local-tests");
         request.Headers.Add(DevelopmentAuthenticationHandler.SubjectHeader, "active-subject");
         request.Headers.Add("X-CrevaFactOS-Tenant", "tenant-a");
@@ -287,6 +613,15 @@ public sealed class ProductionPlanningApiEndpointTests
     private sealed record ProblemDetailsResponse(
         int Status,
         [property: System.Text.Json.Serialization.JsonPropertyName("failureCode")] string? FailureCode);
+
+    private sealed record WorkflowSuccessResponse(
+        Guid Id,
+        string ReferenceCode,
+        string PreviousStatus,
+        string Status,
+        uint Version,
+        DateTimeOffset UpdatedAtUtc,
+        string ApprovalStatus);
 
     private sealed class StubIdentityResolver : IIdentitySubjectResolver
     {
@@ -326,7 +661,7 @@ public sealed class ProductionPlanningApiEndpointTests
                     : PermissionCheckResult.Deny("Not assigned."));
     }
 
-    private sealed class GrantingFacilityAccessResolver : IFacilityAccessResolver
+    private sealed class GrantingReviewAccessResolver : IFacilityAccessResolver
     {
         public Task<FacilityAccessResolutionResult> ResolveAsync(
             FacilityAccessRequest request,
@@ -337,10 +672,27 @@ public sealed class ProductionPlanningApiEndpointTests
                 request.FacilityId,
                 MembershipId,
                 IdentityId,
-                request.PermissionKey,
+                ProductionPlanningPermissionKeys.Review,
                 "test",
                 true);
+            return Task.FromResult(FacilityAccessResolutionResult.Grant(access, DateTimeOffset.UtcNow));
+        }
+    }
 
+    private sealed class GrantingApproveAccessResolver : IFacilityAccessResolver
+    {
+        public Task<FacilityAccessResolutionResult> ResolveAsync(
+            FacilityAccessRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var access = new FacilityAccessContext(
+                TenantId,
+                request.FacilityId,
+                MembershipId,
+                IdentityId,
+                ProductionPlanningPermissionKeys.Approve,
+                "test",
+                true);
             return Task.FromResult(FacilityAccessResolutionResult.Grant(access, DateTimeOffset.UtcNow));
         }
     }
@@ -359,119 +711,58 @@ public sealed class ProductionPlanningApiEndpointTests
                     permissionKey: request.PermissionKey));
     }
 
-    private sealed class StubProductionPlanReadService : IProductionPlanReadService
+    private sealed class SucceedingWorkflowService(string newStatus) : IProductionPlanWorkflowService
     {
-        private readonly int listCount;
-        private readonly string? listFailureCode;
-        private readonly string? detailFailureCode;
+        private ProductionPlanWorkflowApiResult BuildSuccess() =>
+            new(
+                Succeeded: true,
+                ProductionPlanId: PlanId,
+                ReferenceCode: "PP-TEST-WF-001",
+                PreviousStatus: "draft",
+                Status: newStatus,
+                Version: 2u,
+                UpdatedAtUtc: DateTimeOffset.UtcNow,
+                ApprovalStatus: newStatus,
+                FailureCode: null,
+                FailureReason: null,
+                FieldErrors: null);
 
-        public StubProductionPlanReadService(
-            int listCount = 0,
-            string? listFailureCode = null,
-            string? detailFailureCode = null)
-        {
-            this.listCount = listCount;
-            this.listFailureCode = listFailureCode;
-            this.detailFailureCode = detailFailureCode;
-        }
+        public Task<ProductionPlanWorkflowApiResult> SubmitForReviewAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, SubmitProductionPlanForReviewRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildSuccess());
 
-        public Task<ProductionPlanServiceResult<ProductionPlanListResponse>> ListAsync(
-            ProductionPlanReadOperationContext operationContext,
-            ProductionPlanListRequest request,
-            CancellationToken cancellationToken = default)
-        {
-            if (listFailureCode is not null)
-            {
-                return Task.FromResult(
-                    new ProductionPlanServiceResult<ProductionPlanListResponse>(false, null, listFailureCode));
-            }
+        public Task<ProductionPlanWorkflowApiResult> RequestRevisionAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, RequestProductionPlanRevisionRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildSuccess());
 
-            var items = Enumerable.Range(0, listCount)
-                .Select(index => new ProductionPlanSummaryDto(
-                    Guid.NewGuid(),
-                    $"plan-{index}",
-                    $"Plan {index}",
-                    request.FacilityId,
-                    "draft",
-                    "manual",
-                    false,
-                    "medium",
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow.AddHours(1),
-                    "not-required",
-                    "not-started",
-                    null,
-                    DateTimeOffset.UtcNow,
-                    DemandCount: 1,
-                    PrimaryRequiredQuantity: 100,
-                    PrimaryUnit: "adet",
-                    PrimaryProductCode: "PP-100",
-                    PrimaryProductName: "Pilot part",
-                    HighestDemandPriority: "normal",
-                    RiskCount: 0,
-                    CriticalRiskCount: 0,
-                    BlockingRiskCount: 0,
-                    HasBlockingRisk: false,
-                    HasMachineAssignment: true,
-                    HasMoldAssignment: true,
-                    HasMaterialAssignment: false,
-                    HasOperatorGroupAssignment: false,
-                    ShiftName: "A vardiyası",
-                    EarliestRequestedDeliveryDateUtc: null))
-                .ToArray();
+        public Task<ProductionPlanWorkflowApiResult> ApproveAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, ApproveProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildSuccess());
 
-            return Task.FromResult(
-                new ProductionPlanServiceResult<ProductionPlanListResponse>(
-                    true,
-                    new ProductionPlanListResponse(request.FacilityId, items.Length, items),
-                    null));
-        }
+        public Task<ProductionPlanWorkflowApiResult> RejectAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, RejectProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildSuccess());
+    }
 
-        public Task<ProductionPlanServiceResult<ProductionPlanDetailResponse>> GetDetailAsync(
-            ProductionPlanReadOperationContext operationContext,
-            ProductionPlanDetailRequest request,
-            CancellationToken cancellationToken = default)
-        {
-            if (detailFailureCode is not null)
-            {
-                return Task.FromResult(
-                    new ProductionPlanServiceResult<ProductionPlanDetailResponse>(false, null, detailFailureCode));
-            }
+    private sealed class FailingWorkflowService(string failureCode) : IProductionPlanWorkflowService
+    {
+        private ProductionPlanWorkflowApiResult BuildFailure() =>
+            new(false, null, null, null, null, null, null, null, failureCode, "Stub failure.", null);
 
-            var detail = new ProductionPlanDetailDto(
-                request.ProductionPlanId,
-                "plan-a",
-                "Plan A",
-                request.FacilityId,
-                "draft",
-                "manual",
-                false,
-                "medium",
-                DateTimeOffset.UtcNow,
-                DateTimeOffset.UtcNow.AddHours(1),
-                "not-required",
-                "not-started",
-                null,
-                DateTimeOffset.UtcNow.AddDays(-1),
-                DateTimeOffset.UtcNow,
-                1,
-                null,
-                "creator",
-                null,
-                [],
-                [],
-                new ProductionPlanResourceAssignmentDto(null, null, null, null, null, null, null, null),
-                new ProductionPlanTimeWindowDto(null, null, null, null, null),
-                new ProductionPlanApprovalDto("not-required", null, null, null, null, null, null, null, null),
-                new ProductionPlanTransferDto(null, "not-started", null, null, null, null, null),
-                [],
-                []);
+        public Task<ProductionPlanWorkflowApiResult> SubmitForReviewAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, SubmitProductionPlanForReviewRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildFailure());
 
-            return Task.FromResult(
-                new ProductionPlanServiceResult<ProductionPlanDetailResponse>(
-                    true,
-                    new ProductionPlanDetailResponse(detail),
-                    null));
-        }
+        public Task<ProductionPlanWorkflowApiResult> RequestRevisionAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, RequestProductionPlanRevisionRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildFailure());
+
+        public Task<ProductionPlanWorkflowApiResult> ApproveAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, ApproveProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildFailure());
+
+        public Task<ProductionPlanWorkflowApiResult> RejectAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, RejectProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildFailure());
     }
 }

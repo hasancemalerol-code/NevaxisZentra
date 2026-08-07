@@ -13,7 +13,9 @@ public static class ProductionPlanApiFailureCodes
     public const string NotFound = "not-found";
     public const string PlanNotEditable = "plan-not-editable";
     public const string ReferenceCodeConflict = "reference-code-conflict";
+    public const string InvalidTransition = "invalid-transition";
     public const string ConcurrencyConflict = "concurrency-conflict";
+    public const string AuditFailure = "audit-failure";
     public const string SourceUnavailable = "source-unavailable";
     public const string InvalidRow = "invalid-row";
     public const string DataIntegrity = "data-integrity";

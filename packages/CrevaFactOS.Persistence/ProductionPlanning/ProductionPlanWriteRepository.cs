@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -102,6 +103,30 @@ public sealed class ProductionPlanWriteRepository(
                     };
 
                     dbContext.ProductionPlans.Add(plan);
+
+                    dbContext.AuditRecords.Add(new AuditRecord
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        IdentitySubjectId = context.IdentitySubjectId,
+                        TenantMembershipId = context.MembershipId,
+                        EventType = AuditEventTypes.ProductionPlanDraftCreated,
+                        Action = AuditActions.ProductionPlanDraftCreate,
+                        ResourceType = "production-plan",
+                        ResourceId = plan.Id.ToString(),
+                        Outcome = AuditOutcome.Success,
+                        CorrelationId = Guid.NewGuid(),
+                        Source = AuditSource.Api,
+                        OccurredAtUtc = now,
+                        RecordedAtUtc = now,
+                        MetadataJson = JsonSerializer.Serialize(new
+                        {
+                            referenceCode = plan.ReferenceCode,
+                            status = ProductionPlanValueConversions.ToStorage(plan.Status),
+                            version = plan.Version,
+                        }),
+                    });
+
                     await dbContext.SaveChangesAsync(ct);
 
                     return ProductionPlanWriteResult.Success(
@@ -240,6 +265,29 @@ public sealed class ProductionPlanWriteRepository(
                     }
 
                     plan.SourceReferencesJson = SerializeSourceReferences(command.SourceReferences);
+
+                    dbContext.AuditRecords.Add(new AuditRecord
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        IdentitySubjectId = context.IdentitySubjectId,
+                        TenantMembershipId = context.MembershipId,
+                        EventType = AuditEventTypes.ProductionPlanDraftUpdated,
+                        Action = AuditActions.ProductionPlanDraftUpdate,
+                        ResourceType = "production-plan",
+                        ResourceId = plan.Id.ToString(),
+                        Outcome = AuditOutcome.Success,
+                        CorrelationId = Guid.NewGuid(),
+                        Source = AuditSource.Api,
+                        OccurredAtUtc = now,
+                        RecordedAtUtc = now,
+                        MetadataJson = JsonSerializer.Serialize(new
+                        {
+                            referenceCode = plan.ReferenceCode,
+                            status = ProductionPlanValueConversions.ToStorage(plan.Status),
+                            version = plan.Version,
+                        }),
+                    });
 
                     await dbContext.SaveChangesAsync(ct);
 
