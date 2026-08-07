@@ -211,14 +211,14 @@ public sealed class ProductionPlanningApiEndpointTests
     }
 
     [Fact]
-    public void ApplicationDoesNotExposeWriteRoutes()
+    public void ApplicationExposesProductionPlanningTypes()
     {
-        var routeMethods = typeof(Program).Assembly
+        var planningTypes = typeof(Program).Assembly
             .GetTypes()
             .Where(type => type.FullName?.Contains("ProductionPlanning", StringComparison.Ordinal) == true)
             .ToArray();
 
-        Assert.NotEmpty(routeMethods);
+        Assert.NotEmpty(planningTypes);
     }
 
     private static WebApplicationFactory<Program> CreateFactory(

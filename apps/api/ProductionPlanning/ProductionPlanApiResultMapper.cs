@@ -1,5 +1,6 @@
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.ProductionPlanning;
 
 namespace CrevaFactOS.Api.ProductionPlanning;
 
@@ -64,6 +65,90 @@ public static class ProductionPlanApiResultMapper
                 statusCode: StatusCodes.Status500InternalServerError,
                 extensions: FailureExtensions(ProductionPlanApiFailureCodes.UnexpectedError)),
         };
+
+    public static IResult MapWriteServiceResult(ProductionPlanWriteApiResult result, bool isCreate)
+    {
+        if (result.Succeeded)
+        {
+            var response = new ProductionPlanWriteSuccessResponse(
+                result.ProductionPlanId!.Value,
+                result.ReferenceCode!,
+                result.Status!,
+                result.Version!.Value,
+                result.CreatedAtUtc!.Value,
+                result.UpdatedAtUtc!.Value);
+
+            return isCreate
+                ? TypedResults.Created((string?)null, response)
+                : TypedResults.Ok(response);
+        }
+
+        return MapWriteFailure(result);
+    }
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapWriteFailure(ProductionPlanWriteApiResult result) =>
+        result.FailureCode switch
+        {
+            ProductionPlanWriteFailureCodes.InvalidScope
+                or ProductionPlanWriteFailureCodes.ValidationFailed => TypedResults.Problem(
+                    title: result.FailureReason ?? "Validation failed.",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: WriteFailureExtensions(
+                        result.FailureCode == ProductionPlanWriteFailureCodes.ValidationFailed
+                            ? ProductionPlanApiFailureCodes.ValidationFailed
+                            : ProductionPlanApiFailureCodes.InvalidRequest,
+                        result.FieldErrors)),
+            ProductionPlanWriteFailureCodes.NotFound => TypedResults.Problem(
+                title: "Production plan not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.NotFound)),
+            ProductionPlanWriteFailureCodes.PlanNotEditable => TypedResults.Problem(
+                title: result.FailureReason ?? "This production plan cannot be edited.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.PlanNotEditable)),
+            ProductionPlanWriteFailureCodes.ReferenceCodeConflict => TypedResults.Problem(
+                title: "A production plan with this reference code already exists.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.ReferenceCodeConflict)),
+            ProductionPlanWriteFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: result.FailureReason ?? "The production plan was modified by another user.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.ConcurrencyConflict)),
+            ProductionPlanWriteFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: "Production plan service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.SourceUnavailable)),
+            ProductionPlanWriteFailureCodes.DataIntegrity => TypedResults.Problem(
+                title: "A data integrity error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.DataIntegrity)),
+            _ => TypedResults.Problem(
+                title: "An unexpected error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.UnexpectedError)),
+        };
+
+    private static Dictionary<string, object?> WriteFailureExtensions(
+        string failureCode,
+        IReadOnlyList<ProductionPlanWriteFieldError>? fieldErrors = null)
+    {
+        var ext = new Dictionary<string, object?>
+        {
+            ["failureCode"] = failureCode,
+        };
+
+        if (fieldErrors is { Count: > 0 })
+        {
+            ext["fieldErrors"] = fieldErrors.Select(e => new
+            {
+                field = e.Field,
+                code = e.Code,
+                message = e.Message,
+            }).ToArray();
+        }
+
+        return ext;
+    }
 
     public static ProductionPlanReadOperationContext CreateOperationContext(
         FacilityAccessContext access,

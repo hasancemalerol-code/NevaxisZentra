@@ -21,6 +21,17 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         return endpoints;
     }
 
+    public static IEndpointRouteBuilder MapProductionPlanningWriteEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/production-planning/plans")
+            .RequireAuthorization();
+
+        group.MapPost("/", CreateProductionPlanDraftAsync);
+        group.MapPut("/{productionPlanId:guid}", UpdateProductionPlanDraftAsync);
+
+        return endpoints;
+    }
+
     private static async Task<IResult> ListProductionPlansAsync(
         [FromQuery] Guid? facilityId,
         [FromQuery] string? status,
@@ -109,6 +120,87 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
             : ProductionPlanApiResultMapper.MapServiceFailure(serviceResult.FailureCode!);
     }
 
+    private static async Task<IResult> CreateProductionPlanDraftAsync(
+        [FromBody] CreateProductionPlanDraftRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanDraftWriteService writeService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (body is null || body.FacilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required in the request body.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Write));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(body.FacilityId, ProductionPlanningPermissionKeys.Write),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await writeService.CreateDraftAsync(operationContext, body, cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWriteServiceResult(result, isCreate: true);
+    }
+
+    private static async Task<IResult> UpdateProductionPlanDraftAsync(
+        Guid productionPlanId,
+        [FromBody] UpdateProductionPlanDraftRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanDraftWriteService writeService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (body is null || body.FacilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required in the request body.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Write));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(body.FacilityId, ProductionPlanningPermissionKeys.Write),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await writeService.UpdateDraftAsync(
+            operationContext,
+            productionPlanId,
+            body,
+            cancellationToken);
+
+        return ProductionPlanApiResultMapper.MapWriteServiceResult(result, isCreate: false);
+    }
+
     private static Guid? ReadCorrelationId(CorrelationContext correlationContext) =>
         correlationContext.IsAvailable ? correlationContext.CorrelationId : null;
 }
@@ -126,7 +218,17 @@ public static class ProductionPlanningServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+        services.AddScoped<IProductionPlanWriteRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionPlanWriteRepository()
+                : new ProductionPlanWriteRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
         services.AddScoped<IProductionPlanReadService, ProductionPlanReadService>();
+        services.AddScoped<IProductionPlanDraftWriteService, ProductionPlanDraftWriteService>();
         return services;
     }
 }

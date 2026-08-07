@@ -96,6 +96,10 @@ export default async function ProductionPlanDetailPage({
       productionPlan,
     );
 
+  const isEditable =
+    productionPlan.status === "draft" ||
+    productionPlan.status === "needs-review";
+
   return (
     <main className="production-plan-detail-page">
       <div className="production-plan-detail-page__back">
@@ -122,6 +126,15 @@ export default async function ProductionPlanDetailPage({
               productionPlan.status,
             )}
           </Badge>
+
+          {isEditable ? (
+            <Link
+              href={`/planlama/${productionPlan.id}/duzenle`}
+              className="button button-secondary button-small"
+            >
+              Düzenle
+            </Link>
+          ) : null}
 
           <Badge tone="neutral">
             {getProductionPlanPriorityLabel(

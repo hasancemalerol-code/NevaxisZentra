@@ -23,21 +23,48 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                 ALTER TABLE facilities ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE facilities FORCE ROW LEVEL SECURITY;
-                CREATE POLICY facilities_select_current
-                    ON facilities FOR SELECT TO crevafactos_runtime
-                    USING (tenant_id = current_tenant_id());
+                DO $$ BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_policies
+                        WHERE schemaname = current_schema()
+                          AND tablename = 'facilities'
+                          AND policyname = 'facilities_select_current'
+                    ) THEN
+                        CREATE POLICY facilities_select_current
+                            ON facilities FOR SELECT TO crevafactos_runtime
+                            USING (tenant_id = current_tenant_id());
+                    END IF;
+                END $$;
 
                 ALTER TABLE facility_memberships ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE facility_memberships FORCE ROW LEVEL SECURITY;
-                CREATE POLICY facility_memberships_select_current
-                    ON facility_memberships FOR SELECT TO crevafactos_runtime
-                    USING (tenant_id = current_tenant_id());
+                DO $$ BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_policies
+                        WHERE schemaname = current_schema()
+                          AND tablename = 'facility_memberships'
+                          AND policyname = 'facility_memberships_select_current'
+                    ) THEN
+                        CREATE POLICY facility_memberships_select_current
+                            ON facility_memberships FOR SELECT TO crevafactos_runtime
+                            USING (tenant_id = current_tenant_id());
+                    END IF;
+                END $$;
 
                 ALTER TABLE production_plans ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE production_plans FORCE ROW LEVEL SECURITY;
-                CREATE POLICY production_plans_select_current
-                    ON production_plans FOR SELECT TO crevafactos_runtime
-                    USING (tenant_id = current_tenant_id());
+                DO $$ BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_policies
+                        WHERE schemaname = current_schema()
+                          AND tablename = 'production_plans'
+                          AND policyname = 'production_plans_select_current'
+                    ) THEN
+                        CREATE POLICY production_plans_select_current
+                            ON production_plans FOR SELECT TO crevafactos_runtime
+                            USING (tenant_id = current_tenant_id());
+                    END IF;
+                END $$;
                 """);
         }
 

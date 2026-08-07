@@ -32,4 +32,22 @@ public sealed class TenantDatabaseSession(
         await using var transaction = await BeginTransactionAsync(cancellationToken);
         return await action(cancellationToken);
     }
+
+    public async Task<T> ExecuteWriteAsync<T>(
+        Func<CancellationToken, Task<T>> action,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var result = await action(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
 }

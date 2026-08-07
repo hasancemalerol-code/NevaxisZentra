@@ -11,6 +11,8 @@ public static class AuditEventTypes
     public const string AuditWriteFailed = "audit.write.failed";
     public const string InfrastructureConfigurationRejected = "infrastructure.configuration.rejected";
     public const string AiDecisionRecorded = "ai.decision.recorded";
+    public const string ProductionPlanDraftCreated = "production.plan.draft.created";
+    public const string ProductionPlanDraftUpdated = "production.plan.draft.updated";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -23,5 +25,7 @@ public static class AuditEventTypes
         AuditWriteFailed,
         InfrastructureConfigurationRejected,
         AiDecisionRecorded,
+        ProductionPlanDraftCreated,
+        ProductionPlanDraftUpdated,
     };
 }

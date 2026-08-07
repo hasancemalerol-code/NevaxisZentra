@@ -89,6 +89,9 @@ const requiredVerifierFiles = [
   "scripts/verify-production-planning-server-boundary.mjs",
   "scripts/verify-production-planning-runtime-mode.mjs",
   "scripts/verify-production-planning-development-pilot.mjs",
+  "scripts/verify-production-planning-draft-write.mjs",
+  "scripts/verify-production-planning-concurrency.mjs",
+  "scripts/verify-production-planning-write-security.mjs",
 ];
 
 for (
@@ -342,6 +345,9 @@ const additionalVerifiers = [
   "scripts/verify-production-planning-server-boundary.mjs",
   "scripts/verify-production-planning-runtime-mode.mjs",
   "scripts/verify-production-planning-development-pilot.mjs",
+  "scripts/verify-production-planning-draft-write.mjs",
+  "scripts/verify-production-planning-concurrency.mjs",
+  "scripts/verify-production-planning-write-security.mjs",
 ];
 
 for (const verifier of additionalVerifiers) {

@@ -238,6 +238,7 @@ function mapSummaryCoreFields(
   Pick<
     ProductionPlan,
     | "id"
+    | "referenceCode"
     | "facilityId"
     | "title"
     | "status"
@@ -305,6 +306,7 @@ function mapSummaryCoreFields(
     status: "success",
     value: {
       id: summary.id.toLowerCase(),
+      referenceCode: summary.referenceCode,
       facilityId: summary.facilityId.toLowerCase(),
       title: summary.title,
       status: status.value,
@@ -372,6 +374,7 @@ export function mapProductionPlanSummaryApiDtoToDomain(
     value: {
       ...coreFields.value,
       tenantId: "",
+      version: 0,
       createdAt: summary.updatedAtUtc,
       createdBy: "",
       sourceReferences: [],
@@ -693,6 +696,7 @@ export function mapProductionPlanDetailApiDtoToDomain(
     value: {
       ...coreFields.value,
       tenantId: "",
+      version: detail.version,
       createdAt: createdAt.value,
       createdBy: detail.createdBy,
       sourceReferences,

@@ -59,6 +59,7 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 app.UseAuthorization();
 
 app.MapProductionPlanningReadEndpoints();
+app.MapProductionPlanningWriteEndpoints();
 
 app.MapHealthChecks(
     "/health/live",

@@ -166,10 +166,12 @@ export type ProductionPlan =
     id: string;
     tenantId: string;
     facilityId?: string;
+    referenceCode: string;
     title: string;
     status: ProductionPlanStatus;
     origin: ProductionPlanOrigin;
     confidence: ProductionPlanConfidence;
+    version: number;
     createdAt: string;
     updatedAt: string;
     createdBy: string;
@@ -187,6 +189,12 @@ export type ProductionPlan =
     notes?: string;
     listSummary?: ProductionPlanListSummary;
   }>;
+
+export type ProductionPlanDraftFieldError = Readonly<{
+  field: string;
+  code: string;
+  message: string;
+}>;
 
 export function hasBlockingProductionPlanRisks(
   productionPlan: ProductionPlan,

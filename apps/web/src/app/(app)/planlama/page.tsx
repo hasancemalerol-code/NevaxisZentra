@@ -6,6 +6,7 @@ import {
   Factory,
   Send,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -51,6 +52,12 @@ export default async function ProductionPlanningPage() {
           verileriyle açıklanabilir üretim planları
           oluşturun.
         </span>
+
+        <div className="production-planning-header__actions">
+          <Link href="/planlama/yeni" className="button button-primary button-medium">
+            Yeni Plan Oluştur
+          </Link>
+        </div>
       </header>
 
       <section className="production-planning-kpis">
