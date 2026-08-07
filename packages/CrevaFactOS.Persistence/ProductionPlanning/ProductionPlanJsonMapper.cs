@@ -29,7 +29,7 @@ public static class ProductionPlanJsonMapper
 
     private static readonly HashSet<string> AllowedHistoryTypes = new(StringComparer.Ordinal)
     {
-        "created", "updated", "approval", "transfer",
+        "created", "updated", "approval", "scheduling", "transfer",
     };
 
     private static readonly HashSet<string> AllowedApprovalStatuses = new(StringComparer.Ordinal)
@@ -39,7 +39,7 @@ public static class ProductionPlanJsonMapper
 
     private static readonly HashSet<string> AllowedTransferStatuses = new(StringComparer.Ordinal)
     {
-        "not-started", "pending", "in-progress", "completed", "failed",
+        "not-started", "pending", "in-progress", "completed", "failed", "uncertain",
     };
 
     private static readonly HashSet<string> AllowedTargetSystems = new(StringComparer.Ordinal)

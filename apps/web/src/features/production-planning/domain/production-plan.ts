@@ -134,7 +134,8 @@ export type ProductionPlanTransfer =
       | "pending"
       | "in-progress"
       | "completed"
-      | "failed";
+      | "failed"
+      | "uncertain";
     externalPlanId?: string;
     startedAt?: string;
     completedAt?: string;

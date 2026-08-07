@@ -1,0 +1,43 @@
+{
+  "facilityId": "bb000001-0005-4000-8000-000000000005",
+  "referenceCode": "GATE-E2E-002",
+  "title": "Gate Revision Plan (After Revision)",
+  "notes": "Revised per reviewer feedback",
+  "origin": "manual",
+  "aiGenerated": false,
+  "confidence": "high",
+  "plannedStartAtUtc": "2026-09-05T06:00:00Z",
+  "plannedEndAtUtc": "2026-09-07T18:00:00Z",
+  "demands": [
+    {
+      "id": "d1",
+      "productId": "prod-gate-002",
+      "productName": "Gate Revision Product",
+      "requiredQuantity": 700,
+      "unit": "pcs",
+      "priority": "high",
+      "orderReference": null,
+      "customerId": null,
+      "customerName": null,
+      "productCode": "GATE-PROD-002",
+      "requestedDeliveryDateUtc": null
+    }
+  ],
+  "risks": [],
+  "resources": {
+    "machineId": null,
+    "machineName": null,
+    "moldId": null,
+    "moldName": null,
+    "materialId": null,
+    "materialName": null,
+    "operatorGroupId": null,
+    "operatorGroupName": null
+  },
+  "timeWindow": null,
+  "approval": null,
+  "transfer": null,
+  "sourceReferences": [],
+  "aiExplanation": null,
+  "expectedVersion": 3
+}

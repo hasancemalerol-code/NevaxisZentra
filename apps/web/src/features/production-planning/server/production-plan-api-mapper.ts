@@ -99,6 +99,7 @@ const PRODUCTION_PLAN_TRANSFER_STATUSES =
     "in-progress",
     "completed",
     "failed",
+    "uncertain",
   ]);
 
 const PRODUCTION_PLAN_TARGET_SYSTEMS =
