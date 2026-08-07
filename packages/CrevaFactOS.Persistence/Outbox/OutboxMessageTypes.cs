@@ -15,6 +15,7 @@ public static class OutboxMessageTypes
     public const string ProductionPlanTransferSucceeded = "production-plan-transfer-succeeded";
     public const string ProductionPlanTransferFailed = "production-plan-transfer-failed";
     public const string ProductionPlanTransferUncertain = "production-plan-transfer-uncertain";
+    public const string ProductionPlanHandoffPrepared = "production-plan-handoff-prepared";
 
     public const int SchemaVersion = 1;
 
@@ -33,6 +34,7 @@ public static class OutboxMessageTypes
             ProductionPlanTransferSucceeded,
             ProductionPlanTransferFailed,
             ProductionPlanTransferUncertain,
+            ProductionPlanHandoffPrepared,
         ],
         StringComparer.Ordinal);
 }

@@ -20,6 +20,7 @@ public static class AuditActions
     public const string ProductionPlanTransferSucceed = "production.plan.transfer.succeed";
     public const string ProductionPlanTransferFail = "production.plan.transfer.fail";
     public const string ProductionPlanTransferMarkUncertain = "production.plan.transfer.mark.uncertain";
+    public const string ProductionPlanHandoffPrepare = "production.plan.handoff.prepare";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -41,5 +42,6 @@ public static class AuditActions
         ProductionPlanTransferSucceed,
         ProductionPlanTransferFail,
         ProductionPlanTransferMarkUncertain,
+        ProductionPlanHandoffPrepare,
     };
 }

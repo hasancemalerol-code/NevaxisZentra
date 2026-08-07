@@ -229,6 +229,10 @@ public static class ProductionPlanApiResultMapper
                         result.FailureCode == ProductionPlanWorkflowFailureCodes.ScheduleBlockedByRisk
                             ? ProductionPlanApiFailureCodes.ScheduleBlockedByRisk
                             : ProductionPlanApiFailureCodes.InvalidTransition)),
+            ProductionPlanWorkflowFailureCodes.SelfApprovalNotAllowed => TypedResults.Problem(
+                title: result.FailureReason ?? "Self-approval is not allowed.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: WriteFailureExtensions("self-approval-not-allowed")),
             ProductionPlanWorkflowFailureCodes.ConcurrencyConflict => TypedResults.Problem(
                 title: result.FailureReason ?? "The production plan was modified by another user.",
                 statusCode: StatusCodes.Status409Conflict,

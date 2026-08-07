@@ -355,6 +355,27 @@ public sealed class ProductionPlanningApiEndpointTests
         Assert.Equal(ProductionPlanApiFailureCodes.SourceUnavailable, problem!.FailureCode);
     }
 
+    // ── Maker-checker: self-approval blocked ──────────────────────────────────
+
+    [Fact]
+    public async Task ApproveSelfEditedPlanReturns409SelfApprovalNotAllowed()
+    {
+        await using var factory = CreateFactory(
+            new GrantingApproveAccessResolver(),
+            workflowService: new FailingWorkflowService(ProductionPlanWorkflowFailureCodes.SelfApprovalNotAllowed));
+        using var client = factory.CreateClient();
+        using var body = CreateRequest(
+            HttpMethod.Post,
+            $"/api/production-planning/plans/{PlanId:D}/approve?facilityId={FacilityId:D}",
+            new { expectedVersion = 1 });
+
+        using var response = await client.SendAsync(body);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal("self-approval-not-allowed", problem!.FailureCode);
+    }
+
     // ── Reject ────────────────────────────────────────────────────────────────
 
     [Fact]

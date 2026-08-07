@@ -49,4 +49,20 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid PlanningTransferPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000014");
+
+    public static readonly Guid PlanningHandoffPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000015");
+
+    // Second dev identity: planning-pilot-reviewer (approve/review role)
+    public static readonly Guid ReviewerIdentitySubjectId =
+        Guid.Parse("bb000001-0020-4000-8000-000000000020");
+
+    public static readonly Guid ReviewerTenantMembershipId =
+        Guid.Parse("bb000001-0021-4000-8000-000000000021");
+
+    public static readonly Guid ReviewerTenantRoleId =
+        Guid.Parse("bb000001-0022-4000-8000-000000000022");
+
+    public static readonly Guid ReviewerFacilityMembershipId =
+        Guid.Parse("bb000001-0023-4000-8000-000000000023");
 }

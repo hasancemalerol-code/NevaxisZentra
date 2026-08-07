@@ -73,6 +73,8 @@ internal sealed class ProductionPlanEntityConfiguration
         entity.Property(plan => plan.CreatedBy)
             .HasColumnName("created_by")
             .HasMaxLength(200);
+        entity.Property(plan => plan.LastModifiedBySubjectId)
+            .HasColumnName("last_modified_by_subject_id");
         entity.Property(plan => plan.AiExplanation)
             .HasColumnName("ai_explanation")
             .HasMaxLength(4000);

@@ -162,6 +162,14 @@ public sealed class ProductionPlanWorkflowRepository(
                         $"Cannot approve a plan with status '{ProductionPlanValueConversions.ToStorage(plan.Status)}'. Only ReadyForApproval plans may be approved.");
                 }
 
+                if (plan.LastModifiedBySubjectId.HasValue
+                    && plan.LastModifiedBySubjectId.Value == context.IdentitySubjectId)
+                {
+                    return ProductionPlanWorkflowResult.Fail(
+                        ProductionPlanWorkflowFailureCodes.SelfApprovalNotAllowed,
+                        "The person who last edited this plan cannot also approve it. A different user must approve.");
+                }
+
                 return null;
             },
             (plan, now, previousStatus) =>

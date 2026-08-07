@@ -23,6 +23,7 @@ public static class AuditEventTypes
     public const string ProductionPlanTransferSucceeded = "production.plan.transfer.succeeded";
     public const string ProductionPlanTransferFailed = "production.plan.transfer.failed";
     public const string ProductionPlanTransferUncertain = "production.plan.transfer.uncertain";
+    public const string ProductionPlanHandoffPrepared = "production.plan.handoff.prepared";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -47,5 +48,6 @@ public static class AuditEventTypes
         ProductionPlanTransferSucceeded,
         ProductionPlanTransferFailed,
         ProductionPlanTransferUncertain,
+        ProductionPlanHandoffPrepared,
     };
 }

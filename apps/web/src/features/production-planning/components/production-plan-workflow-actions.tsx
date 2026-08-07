@@ -135,17 +135,19 @@ export function ProductionPlanWorkflowActions({
   }, [router]);
 
   const executeAction = useCallback(
-    async (label: string, fn: () => Promise<{ status: string; message?: string }>) => {
+    async (label: string, fn: () => Promise<{ status: string; code?: string; message?: string }>) => {
       setActionState({ kind: "pending", action: label });
       try {
         const result = await fn();
         if (result.status === "success") {
           handleSuccess();
         } else {
-          handleError(
-            (result as { status: string; message?: string }).message ??
-              `${label} işlemi başarısız oldu.`,
-          );
+          const code = (result as { status: string; code?: string }).code;
+          const message = code === "self-approval-not-allowed"
+            ? "Bu planı son düzenleyen kullanıcı aynı planı onaylayamaz."
+            : (result as { status: string; message?: string }).message ??
+              `${label} işlemi başarısız oldu.`;
+          handleError(message);
         }
       } catch {
         handleError(`${label} sırasında beklenmeyen bir hata oluştu.`);

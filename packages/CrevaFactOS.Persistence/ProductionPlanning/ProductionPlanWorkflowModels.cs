@@ -51,6 +51,9 @@ public static class ProductionPlanWorkflowFailureCodes
     public const string TransferAlreadyRequested = "transfer-already-requested";
     public const string TransferAlreadySucceeded = "transfer-already-succeeded";
     public const string TransferNotRetryable = "transfer-not-retryable";
+    public const string SelfApprovalNotAllowed = "self-approval-not-allowed";
+    public const string HandoffAlreadyPrepared = "handoff-already-prepared";
+    public const string HandoffNotEligible = "handoff-not-eligible";
 }
 
 public sealed record ProductionPlanWorkflowFieldError(

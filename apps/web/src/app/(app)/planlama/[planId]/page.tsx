@@ -46,6 +46,8 @@ import {
   createTransferRequestAction,
   executeTransferAction,
 } from "@/features/production-planning/server/production-plan-transfer-actions";
+import { ProductionPlanHandoffPanel } from "@/features/production-planning/components/production-plan-handoff-panel";
+import { prepareHandoffAction } from "@/features/production-planning/server/production-plan-handoff-actions";
 
 type ProductionPlanDetailPageProps =
   Readonly<{
@@ -286,6 +288,15 @@ export default async function ProductionPlanDetailPage({
         transferStatus={productionPlan.transfer.status}
         onCreateTransferRequest={createTransferRequestAction}
         onExecuteTransfer={executeTransferAction}
+      />
+
+      <ProductionPlanHandoffPanel
+        planId={productionPlan.id}
+        planStatus={productionPlan.status}
+        version={productionPlan.version}
+        planTitle={productionPlan.title}
+        transferStatus={productionPlan.transfer.status}
+        onPrepareHandoff={prepareHandoffAction}
       />
 
       <ProductionPlanApprovalTransferPanel

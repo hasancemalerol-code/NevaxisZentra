@@ -45,6 +45,7 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         group.MapPost("/{productionPlanId:guid}/transfer-requests", CreateTransferRequestAsync);
         group.MapPost("/{productionPlanId:guid}/transfer-requests/{transferRequestId:guid}/execute",
             ExecuteTransferAsync);
+        group.MapPost("/{productionPlanId:guid}/handoff", PrepareHandoffAsync);
 
         return endpoints;
     }
@@ -666,6 +667,103 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
                 extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.UnexpectedError }),
         };
 
+    private static async Task<IResult> PrepareHandoffAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] PrepareHandoffApiRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanHandoffService handoffService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Handoff));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Handoff),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await handoffService.PrepareHandoffAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapHandoffFailure(result.FailureCode!, result.FailureReason!);
+        }
+
+        return TypedResults.Created(
+            (string?)null,
+            new ProductionPlanHandoffApiResponse(
+                result.HandoffId!.Value,
+                result.ProductionPlanId!.Value,
+                result.ReferenceCode!,
+                result.Status!,
+                result.HandoffVersion!.Value,
+                result.PreparedAtUtc!.Value));
+    }
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapHandoffFailure(string failureCode, string reason) =>
+        failureCode switch
+        {
+            ProductionPlanHandoffFailureCodes.InvalidScope => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest }),
+            ProductionPlanHandoffFailureCodes.NotFound => TypedResults.Problem(
+                title: "Production plan not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.NotFound }),
+            ProductionPlanHandoffFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.ConcurrencyConflict }),
+            ProductionPlanHandoffFailureCodes.NotScheduled
+                or ProductionPlanHandoffFailureCodes.NotEligible
+                or ProductionPlanHandoffFailureCodes.BlockingRisk => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidTransition }),
+            ProductionPlanHandoffFailureCodes.AlreadyPrepared => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = "handoff-already-prepared" }),
+            ProductionPlanHandoffFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: "Handoff service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.SourceUnavailable }),
+            _ => TypedResults.Problem(
+                title: "An unexpected error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.UnexpectedError }),
+        };
+
     private static Guid? ReadCorrelationId(CorrelationContext correlationContext) =>
         correlationContext.IsAvailable ? correlationContext.CorrelationId : null;
 }
@@ -721,6 +819,17 @@ public static class ProductionPlanningServiceCollectionExtensions
             var adapters = serviceProvider.GetServices<IProductionPlanTransferAdapter>();
             return new ProductionPlanTransferService(repository, adapters);
         });
+
+        services.AddScoped<IProductionPlanHandoffRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionPlanHandoffRepository()
+                : new ProductionPlanHandoffRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+        services.AddScoped<IProductionPlanHandoffService, ProductionPlanHandoffService>();
 
         return services;
     }

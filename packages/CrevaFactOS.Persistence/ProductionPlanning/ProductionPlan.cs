@@ -36,6 +36,8 @@ public sealed class ProductionPlan : ITenantScopedEntity
 
     public string CreatedBy { get; set; } = string.Empty;
 
+    public Guid? LastModifiedBySubjectId { get; set; }
+
     public string? AiExplanation { get; set; }
 
     public DateTimeOffset CreatedAtUtc { get; set; }

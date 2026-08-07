@@ -9,7 +9,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/page.test.tsx",
-    "verify:production-planning": "node scripts/verify-production-planning-release.mjs"
+    "verify:production-planning": "node scripts/verify-production-planning-release.mjs && node scripts/verify-production-planning-maker-checker.mjs && node scripts/verify-production-planning-handoff.mjs && node scripts/verify-production-planning-final-hardening.mjs"
   },
   "dependencies": {
     "lucide-react": "1.27.0",

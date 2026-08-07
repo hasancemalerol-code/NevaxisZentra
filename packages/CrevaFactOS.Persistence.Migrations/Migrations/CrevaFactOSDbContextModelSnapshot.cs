@@ -878,6 +878,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("created_by");
 
+                    b.Property<Guid?>("LastModifiedBySubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_modified_by_subject_id");
+
                     b.Property<string>("DemandsJson")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -1024,6 +1028,113 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                             t.HasCheckConstraint("ck_production_plans_transfer_status", "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed', 'uncertain')");
 
                             t.HasCheckConstraint("ck_production_plans_transfer_target_system", "transfer_target_system IS NULL OR transfer_target_system IN ('erp', 'mes', 'crevafactos')");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanHandoff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at_utc");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FailureCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_code");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<DateTimeOffset>("PreparedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("prepared_at_utc");
+
+                    b.Property<string>("PreparedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("prepared_by_subject_id");
+
+                    b.Property<string>("ProductionReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("production_reference");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<long>("ProductionPlanVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("production_plan_version");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reference_code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FacilityId", "ProductionPlanId");
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.HasIndex("ProductionPlanId");
+
+                    b.ToTable("production_plan_handoffs", t =>
+                        {
+                            t.HasCheckConstraint("ck_handoffs_correlation", "correlation_id <> '00000000-0000-0000-0000-000000000000'::uuid");
+                            t.HasCheckConstraint("ck_handoffs_idempotency_key", "idempotency_key <> ''");
+                            t.HasCheckConstraint("ck_handoffs_reference_code", "reference_code <> ''");
+                            t.HasCheckConstraint("ck_handoffs_status", "status IN ('prepared', 'consumed', 'failed')");
+                            t.HasCheckConstraint("ck_handoffs_version", "version >= 1");
                         });
                 });
 
@@ -1367,6 +1478,28 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", b =>
                 {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlanHandoff", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")

@@ -88,6 +88,7 @@ public sealed class ProductionPlanWriteRepository(
                         TransferStatus = ProductionPlanTransferStatus.NotStarted,
                         TransferTargetSystem = null,
                         CreatedBy = context.IdentitySubjectId.ToString(),
+                        LastModifiedBySubjectId = context.IdentitySubjectId,
                         AiExplanation = command.AiExplanation?.Trim(),
                         CreatedAtUtc = now,
                         UpdatedAtUtc = now,
@@ -247,6 +248,7 @@ public sealed class ProductionPlanWriteRepository(
                     plan.PlannedStartAtUtc = command.PlannedStartAtUtc;
                     plan.PlannedEndAtUtc = command.PlannedEndAtUtc;
                     plan.AiExplanation = command.AiExplanation?.Trim();
+                    plan.LastModifiedBySubjectId = context.IdentitySubjectId;
                     plan.UpdatedAtUtc = now;
                     plan.Version = plan.Version + 1;
                     plan.DemandsJson = SerializeDemands(command.Demands);

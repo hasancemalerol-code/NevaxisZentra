@@ -54,6 +54,8 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     public DbSet<ProductionPlanTransferRequest> ProductionPlanTransferRequests => Set<ProductionPlanTransferRequest>();
 
+    public DbSet<ProductionPlanHandoff> ProductionPlanHandoffs => Set<ProductionPlanHandoff>();
+
     public DbSet<FacilityMembership> FacilityMemberships => Set<FacilityMembership>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -425,6 +427,7 @@ public sealed class CrevaFactOSDbContext : DbContext
         modelBuilder.ApplyConfiguration(new FacilityEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanTransferRequestEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductionPlanHandoffEntityConfiguration());
 
         modelBuilder.Entity<Facility>().HasQueryFilter(facility =>
             tenantContextAccessor != null
@@ -440,6 +443,11 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && request.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.Entity<ProductionPlanHandoff>().HasQueryFilter(handoff =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && handoff.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new FacilityMembershipEntityConfiguration());
 

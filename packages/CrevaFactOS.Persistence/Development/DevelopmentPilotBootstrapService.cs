@@ -100,6 +100,12 @@ internal sealed class DevelopmentPilotBootstrapService(
             tenantRole.Id,
             seedTimestampUtc,
             cancellationToken);
+        await EnsurePlanningHandoffPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            tenantRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -118,6 +124,74 @@ internal sealed class DevelopmentPilotBootstrapService(
             tenant.Id,
             facility.Id,
             tenantMembership.Id,
+            seedTimestampUtc,
+            cancellationToken);
+
+        // Second identity: planning-pilot-reviewer (approve/review role for maker-checker)
+        var reviewerIdentity = await EnsureReviewerIdentitySubjectAsync(
+            dbContext,
+            pilotOptions,
+            seedTimestampUtc,
+            cancellationToken);
+        var reviewerMembership = await EnsureReviewerTenantMembershipAsync(
+            dbContext,
+            tenant.Id,
+            reviewerIdentity.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        var reviewerRole = await EnsureReviewerTenantRoleAsync(
+            dbContext,
+            tenant.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningReadPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningReviewPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningApprovePermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningSchedulePermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningTransferPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningHandoffPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsureMembershipRoleAsync(
+            dbContext,
+            tenant.Id,
+            reviewerMembership.Id,
+            reviewerRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsureReviewerFacilityMembershipAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            reviewerMembership.Id,
             seedTimestampUtc,
             cancellationToken);
 
@@ -645,6 +719,200 @@ internal sealed class DevelopmentPilotBootstrapService(
         dbContext.FacilityMemberships.Add(new FacilityMembership
         {
             Id = DevelopmentPilotIds.FacilityMembershipId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            TenantMembershipId = tenantMembershipId,
+            Status = FacilityMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
+    }
+
+    private static async Task EnsurePlanningHandoffPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var permissionDefinition = await dbContext.PermissionDefinitions
+            .SingleOrDefaultAsync(
+                permission =>
+                    permission.Key == ProductionPlanningPermissionKeys.Handoff,
+                cancellationToken)
+            ?? await dbContext.PermissionDefinitions
+                .SingleOrDefaultAsync(
+                    permission =>
+                        permission.Id == DevelopmentPilotIds.PlanningHandoffPermissionDefinitionId,
+                    cancellationToken);
+
+        if (permissionDefinition is null)
+        {
+            return;
+        }
+
+        var existingAssignment = await dbContext.TenantRolePermissions
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                assignment =>
+                    assignment.TenantId == tenantId
+                    && assignment.TenantRoleId == tenantRoleId
+                    && assignment.PermissionDefinitionId == permissionDefinition.Id,
+                cancellationToken);
+
+        if (existingAssignment)
+        {
+            return;
+        }
+
+        dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
+        {
+            TenantId = tenantId,
+            TenantRoleId = tenantRoleId,
+            PermissionDefinitionId = permissionDefinition.Id,
+        });
+    }
+
+    private static async Task<IdentitySubject> EnsureReviewerIdentitySubjectAsync(
+        CrevaFactOSDbContext dbContext,
+        DevelopmentPilotOptions pilotOptions,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string reviewerSubject = "planning-pilot-reviewer";
+        var issuer = pilotOptions.DevelopmentIssuer.Trim();
+
+        var existingIdentity = await dbContext.IdentitySubjects
+            .SingleOrDefaultAsync(
+                identity =>
+                    identity.ExternalIssuer == issuer
+                    && identity.ExternalSubject == reviewerSubject,
+                cancellationToken)
+            ?? await dbContext.IdentitySubjects
+                .SingleOrDefaultAsync(
+                    identity => identity.Id == DevelopmentPilotIds.ReviewerIdentitySubjectId,
+                    cancellationToken);
+
+        if (existingIdentity is not null)
+        {
+            return existingIdentity;
+        }
+
+        var identitySubject = new IdentitySubject
+        {
+            Id = DevelopmentPilotIds.ReviewerIdentitySubjectId,
+            ExternalIssuer = issuer,
+            ExternalSubject = reviewerSubject,
+            Status = IdentitySubjectStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.IdentitySubjects.Add(identitySubject);
+        return identitySubject;
+    }
+
+    private static async Task<TenantMembership> EnsureReviewerTenantMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid identitySubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existingMembership = await dbContext.TenantMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                membership =>
+                    membership.TenantId == tenantId
+                    && membership.IdentitySubjectId == identitySubjectId,
+                cancellationToken)
+            ?? await dbContext.TenantMemberships
+                .IgnoreQueryFilters()
+                .SingleOrDefaultAsync(
+                    membership =>
+                        membership.TenantId == tenantId
+                        && membership.Id == DevelopmentPilotIds.ReviewerTenantMembershipId,
+                    cancellationToken);
+
+        if (existingMembership is not null)
+        {
+            return existingMembership;
+        }
+
+        var membership = new TenantMembership
+        {
+            Id = DevelopmentPilotIds.ReviewerTenantMembershipId,
+            TenantId = tenantId,
+            IdentitySubjectId = identitySubjectId,
+            Status = TenantMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantMemberships.Add(membership);
+        return membership;
+    }
+
+    private static async Task<TenantRole> EnsureReviewerTenantRoleAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string reviewerRoleKey = "production-planning-reviewer";
+
+        var existingRole = await dbContext.TenantRoles
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                role =>
+                    role.TenantId == tenantId
+                    && (role.Key == reviewerRoleKey
+                        || role.Id == DevelopmentPilotIds.ReviewerTenantRoleId),
+                cancellationToken);
+
+        if (existingRole is not null)
+        {
+            return existingRole;
+        }
+
+        var tenantRole = new TenantRole
+        {
+            Id = DevelopmentPilotIds.ReviewerTenantRoleId,
+            TenantId = tenantId,
+            Key = reviewerRoleKey,
+            DisplayName = "Production Planning Reviewer",
+            Status = AuthorizationStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantRoles.Add(tenantRole);
+        return tenantRole;
+    }
+
+    private static async Task EnsureReviewerFacilityMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        Guid tenantMembershipId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existingMembership = await dbContext.FacilityMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                membership =>
+                    membership.TenantId == tenantId
+                    && membership.FacilityId == facilityId
+                    && membership.TenantMembershipId == tenantMembershipId,
+                cancellationToken);
+
+        if (existingMembership is not null)
+        {
+            return;
+        }
+
+        dbContext.FacilityMemberships.Add(new FacilityMembership
+        {
+            Id = DevelopmentPilotIds.ReviewerFacilityMembershipId,
             TenantId = tenantId,
             FacilityId = facilityId,
             TenantMembershipId = tenantMembershipId,
