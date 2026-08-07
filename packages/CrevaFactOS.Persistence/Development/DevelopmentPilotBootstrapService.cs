@@ -88,6 +88,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             tenantRole.Id,
             seedTimestampUtc,
             cancellationToken);
+        await EnsurePlanningSchedulePermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            tenantRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePlanningTransferPermissionAssignmentAsync(
+            dbContext,
+            tenant.Id,
+            tenantRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -419,6 +431,96 @@ internal sealed class DevelopmentPilotBootstrapService(
                 .SingleOrDefaultAsync(
                     permission =>
                         permission.Id == DevelopmentPilotIds.PlanningApprovePermissionDefinitionId,
+                    cancellationToken);
+
+        if (permissionDefinition is null)
+        {
+            return;
+        }
+
+        var existingAssignment = await dbContext.TenantRolePermissions
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                assignment =>
+                    assignment.TenantId == tenantId
+                    && assignment.TenantRoleId == tenantRoleId
+                    && assignment.PermissionDefinitionId == permissionDefinition.Id,
+                cancellationToken);
+
+        if (existingAssignment)
+        {
+            return;
+        }
+
+        dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
+        {
+            TenantId = tenantId,
+            TenantRoleId = tenantRoleId,
+            PermissionDefinitionId = permissionDefinition.Id,
+        });
+    }
+
+    private static async Task EnsurePlanningSchedulePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var permissionDefinition = await dbContext.PermissionDefinitions
+            .SingleOrDefaultAsync(
+                permission =>
+                    permission.Key == ProductionPlanningPermissionKeys.Schedule,
+                cancellationToken)
+            ?? await dbContext.PermissionDefinitions
+                .SingleOrDefaultAsync(
+                    permission =>
+                        permission.Id == DevelopmentPilotIds.PlanningSchedulePermissionDefinitionId,
+                    cancellationToken);
+
+        if (permissionDefinition is null)
+        {
+            return;
+        }
+
+        var existingAssignment = await dbContext.TenantRolePermissions
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                assignment =>
+                    assignment.TenantId == tenantId
+                    && assignment.TenantRoleId == tenantRoleId
+                    && assignment.PermissionDefinitionId == permissionDefinition.Id,
+                cancellationToken);
+
+        if (existingAssignment)
+        {
+            return;
+        }
+
+        dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
+        {
+            TenantId = tenantId,
+            TenantRoleId = tenantRoleId,
+            PermissionDefinitionId = permissionDefinition.Id,
+        });
+    }
+
+    private static async Task EnsurePlanningTransferPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var permissionDefinition = await dbContext.PermissionDefinitions
+            .SingleOrDefaultAsync(
+                permission =>
+                    permission.Key == ProductionPlanningPermissionKeys.Transfer,
+                cancellationToken)
+            ?? await dbContext.PermissionDefinitions
+                .SingleOrDefaultAsync(
+                    permission =>
+                        permission.Id == DevelopmentPilotIds.PlanningTransferPermissionDefinitionId,
                     cancellationToken);
 
         if (permissionDefinition is null)

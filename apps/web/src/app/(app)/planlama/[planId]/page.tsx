@@ -25,6 +25,8 @@ import { ProductionPlanDemandTable } from "@/features/production-planning/compon
 import { ProductionPlanTimeline } from "@/features/production-planning/components/production-plan-timeline";
 import { ProductionPlanHistoryPanel } from "@/features/production-planning/components/production-plan-history-panel";
 import { ProductionPlanWorkflowActions } from "@/features/production-planning/components/production-plan-workflow-actions";
+import { ProductionPlanSchedulingActions } from "@/features/production-planning/components/production-plan-scheduling-actions";
+import { ProductionPlanTransferPanel } from "@/features/production-planning/components/production-plan-transfer-panel";
 import { getProductionPlanFallbackLabel } from "@/features/production-planning/presentation/production-plan-fallback-labels";
 import {
   getProductionPlanConfidenceLabel,
@@ -39,6 +41,11 @@ import {
   requestRevisionAction,
   submitForReviewAction,
 } from "@/features/production-planning/server/production-plan-workflow-actions";
+import { scheduleAction } from "@/features/production-planning/server/production-plan-scheduling-actions";
+import {
+  createTransferRequestAction,
+  executeTransferAction,
+} from "@/features/production-planning/server/production-plan-transfer-actions";
 
 type ProductionPlanDetailPageProps =
   Readonly<{
@@ -261,6 +268,24 @@ export default async function ProductionPlanDetailPage({
         onRequestRevision={requestRevisionAction}
         onApprove={approveAction}
         onReject={rejectAction}
+      />
+
+      <ProductionPlanSchedulingActions
+        planId={productionPlan.id}
+        planStatus={productionPlan.status}
+        version={productionPlan.version}
+        planTitle={productionPlan.title}
+        onSchedule={scheduleAction}
+      />
+
+      <ProductionPlanTransferPanel
+        planId={productionPlan.id}
+        planStatus={productionPlan.status}
+        version={productionPlan.version}
+        planTitle={productionPlan.title}
+        transferStatus={productionPlan.transfer.status}
+        onCreateTransferRequest={createTransferRequestAction}
+        onExecuteTransfer={executeTransferAction}
       />
 
       <ProductionPlanApprovalTransferPanel

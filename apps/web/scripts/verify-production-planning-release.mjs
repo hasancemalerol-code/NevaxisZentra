@@ -92,6 +92,9 @@ const requiredVerifierFiles = [
   "scripts/verify-production-planning-draft-write.mjs",
   "scripts/verify-production-planning-concurrency.mjs",
   "scripts/verify-production-planning-write-security.mjs",
+  "scripts/verify-production-planning-scheduling.mjs",
+  "scripts/verify-production-planning-transfer-boundary.mjs",
+  "scripts/verify-production-planning-transfer-security.mjs",
 ];
 
 for (
@@ -223,6 +226,18 @@ requireText(
   "planlama/[planId]/page.tsx",
 );
 
+requireText(
+  detailPage,
+  "ProductionPlanSchedulingActions",
+  "planlama/[planId]/page.tsx",
+);
+
+requireText(
+  detailPage,
+  "ProductionPlanTransferPanel",
+  "planlama/[planId]/page.tsx",
+);
+
 const requiredCssMarkers = [
   "PRODUCTION PLANNING PREMIUM START",
   "PRODUCTION PLAN FILTER PREMIUM START",
@@ -348,6 +363,9 @@ const additionalVerifiers = [
   "scripts/verify-production-planning-draft-write.mjs",
   "scripts/verify-production-planning-concurrency.mjs",
   "scripts/verify-production-planning-write-security.mjs",
+  "scripts/verify-production-planning-scheduling.mjs",
+  "scripts/verify-production-planning-transfer-boundary.mjs",
+  "scripts/verify-production-planning-transfer-security.mjs",
 ];
 
 for (const verifier of additionalVerifiers) {

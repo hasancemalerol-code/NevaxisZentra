@@ -723,6 +723,9 @@ public sealed class ProductionPlanningApiEndpointTests
                 Version: 2u,
                 UpdatedAtUtc: DateTimeOffset.UtcNow,
                 ApprovalStatus: newStatus,
+                PlannedStartAtUtc: null,
+                PlannedEndAtUtc: null,
+                ScheduledAtUtc: null,
                 FailureCode: null,
                 FailureReason: null,
                 FieldErrors: null);
@@ -742,12 +745,16 @@ public sealed class ProductionPlanningApiEndpointTests
         public Task<ProductionPlanWorkflowApiResult> RejectAsync(
             ProductionPlanWriteOperationContext ctx, Guid id, RejectProductionPlanRequest req,
             CancellationToken ct = default) => Task.FromResult(BuildSuccess());
+
+        public Task<ProductionPlanWorkflowApiResult> ScheduleAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, ScheduleProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildSuccess());
     }
 
     private sealed class FailingWorkflowService(string failureCode) : IProductionPlanWorkflowService
     {
         private ProductionPlanWorkflowApiResult BuildFailure() =>
-            new(false, null, null, null, null, null, null, null, failureCode, "Stub failure.", null);
+            new(false, null, null, null, null, null, null, null, null, null, null, failureCode, "Stub failure.", null);
 
         public Task<ProductionPlanWorkflowApiResult> SubmitForReviewAsync(
             ProductionPlanWriteOperationContext ctx, Guid id, SubmitProductionPlanForReviewRequest req,
@@ -763,6 +770,10 @@ public sealed class ProductionPlanningApiEndpointTests
 
         public Task<ProductionPlanWorkflowApiResult> RejectAsync(
             ProductionPlanWriteOperationContext ctx, Guid id, RejectProductionPlanRequest req,
+            CancellationToken ct = default) => Task.FromResult(BuildFailure());
+
+        public Task<ProductionPlanWorkflowApiResult> ScheduleAsync(
+            ProductionPlanWriteOperationContext ctx, Guid id, ScheduleProductionPlanRequest req,
             CancellationToken ct = default) => Task.FromResult(BuildFailure());
     }
 }

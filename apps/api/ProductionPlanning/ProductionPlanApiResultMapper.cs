@@ -172,6 +172,22 @@ public static class ProductionPlanApiResultMapper
     {
         if (result.Succeeded)
         {
+            if (result.ScheduledAtUtc.HasValue)
+            {
+                var scheduleResponse = new ProductionPlanScheduleSuccessResponse(
+                    result.ProductionPlanId!.Value,
+                    result.ReferenceCode!,
+                    result.PreviousStatus!,
+                    result.Status!,
+                    result.Version!.Value,
+                    result.UpdatedAtUtc!.Value,
+                    result.ApprovalStatus!,
+                    result.PlannedStartAtUtc!.Value,
+                    result.PlannedEndAtUtc!.Value,
+                    result.ScheduledAtUtc.Value);
+                return TypedResults.Ok(scheduleResponse);
+            }
+
             var response = new ProductionPlanWorkflowSuccessResponse(
                 result.ProductionPlanId!.Value,
                 result.ReferenceCode!,
@@ -205,10 +221,14 @@ public static class ProductionPlanApiResultMapper
                 title: "Production plan not found.",
                 statusCode: StatusCodes.Status404NotFound,
                 extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.NotFound)),
-            ProductionPlanWorkflowFailureCodes.InvalidTransition => TypedResults.Problem(
-                title: result.FailureReason ?? "This workflow transition is not allowed.",
-                statusCode: StatusCodes.Status409Conflict,
-                extensions: WriteFailureExtensions(ProductionPlanApiFailureCodes.InvalidTransition)),
+            ProductionPlanWorkflowFailureCodes.InvalidTransition
+                or ProductionPlanWorkflowFailureCodes.ScheduleBlockedByRisk => TypedResults.Problem(
+                    title: result.FailureReason ?? "This workflow transition is not allowed.",
+                    statusCode: StatusCodes.Status409Conflict,
+                    extensions: WriteFailureExtensions(
+                        result.FailureCode == ProductionPlanWorkflowFailureCodes.ScheduleBlockedByRisk
+                            ? ProductionPlanApiFailureCodes.ScheduleBlockedByRisk
+                            : ProductionPlanApiFailureCodes.InvalidTransition)),
             ProductionPlanWorkflowFailureCodes.ConcurrencyConflict => TypedResults.Problem(
                 title: result.FailureReason ?? "The production plan was modified by another user.",
                 statusCode: StatusCodes.Status409Conflict,

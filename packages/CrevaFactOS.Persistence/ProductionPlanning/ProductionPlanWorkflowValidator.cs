@@ -6,6 +6,8 @@ public static class ProductionPlanWorkflowValidator
     public const int MinReasonLength = 3;
     public const int MaxReasonLength = 2000;
     public const int MaxNoteLength = 2000;
+    public const int MaxShiftNameLength = 100;
+    public const int MaxSchedulingCommentLength = 2000;
 
     private static readonly HashSet<ProductionPlanStatus> SubmitAllowedStatuses = new()
     {
@@ -26,6 +28,11 @@ public static class ProductionPlanWorkflowValidator
     private static readonly HashSet<ProductionPlanStatus> RejectAllowedStatuses = new()
     {
         ProductionPlanStatus.ReadyForApproval,
+    };
+
+    private static readonly HashSet<ProductionPlanStatus> ScheduleAllowedStatuses = new()
+    {
+        ProductionPlanStatus.Approved,
     };
 
     public static IReadOnlyList<ProductionPlanWorkflowFieldError> ValidateSubmitForReview(
@@ -149,6 +156,56 @@ public static class ProductionPlanWorkflowValidator
         return errors;
     }
 
+    public static IReadOnlyList<ProductionPlanWorkflowFieldError> ValidateSchedule(
+        ScheduleProductionPlanCommand command)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        var errors = new List<ProductionPlanWorkflowFieldError>();
+
+        if (command.ProductionPlanId == Guid.Empty)
+        {
+            errors.Add(new("productionPlanId", "required", "Production plan identifier is required."));
+        }
+
+        if (command.ExpectedVersion == 0)
+        {
+            errors.Add(new("expectedVersion", "required", "Expected version must be greater than zero."));
+        }
+
+        if (command.PlannedStartAtUtc == default)
+        {
+            errors.Add(new("plannedStartAtUtc", "required", "Planned start date/time is required."));
+        }
+
+        if (command.PlannedEndAtUtc == default)
+        {
+            errors.Add(new("plannedEndAtUtc", "required", "Planned end date/time is required."));
+        }
+
+        if (command.PlannedStartAtUtc != default && command.PlannedEndAtUtc != default
+            && command.PlannedEndAtUtc <= command.PlannedStartAtUtc)
+        {
+            errors.Add(new("plannedEndAtUtc", "invalid-window",
+                "Planned end date/time must be after planned start date/time."));
+        }
+
+        var shiftName = command.ShiftName?.Trim();
+        if (shiftName is not null && shiftName.Length > MaxShiftNameLength)
+        {
+            errors.Add(new("shiftName", "too-long",
+                $"Shift name must not exceed {MaxShiftNameLength} characters."));
+        }
+
+        var comment = command.SchedulingComment?.Trim();
+        if (comment is not null && comment.Length > MaxSchedulingCommentLength)
+        {
+            errors.Add(new("schedulingComment", "too-long",
+                $"Scheduling comment must not exceed {MaxSchedulingCommentLength} characters."));
+        }
+
+        return errors;
+    }
+
     public static bool IsValidSubmitTransition(ProductionPlanStatus currentStatus) =>
         SubmitAllowedStatuses.Contains(currentStatus);
 
@@ -160,4 +217,7 @@ public static class ProductionPlanWorkflowValidator
 
     public static bool IsValidRejectTransition(ProductionPlanStatus currentStatus) =>
         RejectAllowedStatuses.Contains(currentStatus);
+
+    public static bool IsValidScheduleTransition(ProductionPlanStatus currentStatus) =>
+        ScheduleAllowedStatuses.Contains(currentStatus);
 }

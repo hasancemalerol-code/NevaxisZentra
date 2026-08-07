@@ -18,6 +18,13 @@ public sealed record RejectProductionPlanRequest(
     uint ExpectedVersion,
     string Reason);
 
+public sealed record ScheduleProductionPlanRequest(
+    uint ExpectedVersion,
+    DateTimeOffset PlannedStartAtUtc,
+    DateTimeOffset PlannedEndAtUtc,
+    string? ShiftName,
+    string? SchedulingComment);
+
 public sealed record ProductionPlanWorkflowApiResult(
     bool Succeeded,
     Guid? ProductionPlanId,
@@ -27,6 +34,9 @@ public sealed record ProductionPlanWorkflowApiResult(
     uint? Version,
     DateTimeOffset? UpdatedAtUtc,
     string? ApprovalStatus,
+    DateTimeOffset? PlannedStartAtUtc,
+    DateTimeOffset? PlannedEndAtUtc,
+    DateTimeOffset? ScheduledAtUtc,
     string? FailureCode,
     string? FailureReason,
     IReadOnlyList<ProductionPlanWorkflowFieldError>? FieldErrors);
@@ -39,6 +49,18 @@ public sealed record ProductionPlanWorkflowSuccessResponse(
     uint Version,
     DateTimeOffset UpdatedAtUtc,
     string ApprovalStatus);
+
+public sealed record ProductionPlanScheduleSuccessResponse(
+    Guid Id,
+    string ReferenceCode,
+    string PreviousStatus,
+    string Status,
+    uint Version,
+    DateTimeOffset UpdatedAtUtc,
+    string ApprovalStatus,
+    DateTimeOffset PlannedStartAtUtc,
+    DateTimeOffset PlannedEndAtUtc,
+    DateTimeOffset ScheduledAtUtc);
 
 public interface IProductionPlanWorkflowService
 {
@@ -64,6 +86,12 @@ public interface IProductionPlanWorkflowService
         ProductionPlanWriteOperationContext operationContext,
         Guid productionPlanId,
         RejectProductionPlanRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<ProductionPlanWorkflowApiResult> ScheduleAsync(
+        ProductionPlanWriteOperationContext operationContext,
+        Guid productionPlanId,
+        ScheduleProductionPlanRequest request,
         CancellationToken cancellationToken = default);
 }
 
@@ -166,6 +194,33 @@ public sealed class ProductionPlanWorkflowService(IProductionPlanWorkflowReposit
         return Map(result);
     }
 
+    public async Task<ProductionPlanWorkflowApiResult> ScheduleAsync(
+        ProductionPlanWriteOperationContext operationContext,
+        Guid productionPlanId,
+        ScheduleProductionPlanRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(operationContext);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (productionPlanId == Guid.Empty)
+        {
+            return Fail(ProductionPlanWorkflowFailureCodes.InvalidScope, "Production plan identifier is required.");
+        }
+
+        var context = BuildContext(operationContext);
+        var command = new ScheduleProductionPlanCommand(
+            productionPlanId,
+            request.ExpectedVersion,
+            request.PlannedStartAtUtc,
+            request.PlannedEndAtUtc,
+            request.ShiftName,
+            request.SchedulingComment);
+
+        var result = await workflowRepository.ScheduleAsync(context, command, cancellationToken);
+        return Map(result);
+    }
+
     private static ProductionPlanWorkflowContext BuildContext(ProductionPlanWriteOperationContext operationContext) =>
         new(
             operationContext.TenantId,
@@ -185,10 +240,13 @@ public sealed class ProductionPlanWorkflowService(IProductionPlanWorkflowReposit
             result.Version,
             result.UpdatedAtUtc,
             result.ApprovalStatus,
+            result.PlannedStartAtUtc,
+            result.PlannedEndAtUtc,
+            result.ScheduledAtUtc,
             result.FailureCode,
             result.FailureReason,
             result.FieldErrors);
 
     private static ProductionPlanWorkflowApiResult Fail(string failureCode, string reason) =>
-        new(false, null, null, null, null, null, null, null, failureCode, reason, null);
+        new(false, null, null, null, null, null, null, null, null, null, null, failureCode, reason, null);
 }

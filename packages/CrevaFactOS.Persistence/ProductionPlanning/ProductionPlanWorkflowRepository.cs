@@ -246,6 +246,265 @@ public sealed class ProductionPlanWorkflowRepository(
             cancellationToken);
     }
 
+    public async Task<ProductionPlanWorkflowResult> ScheduleAsync(
+        ProductionPlanWorkflowContext context,
+        ScheduleProductionPlanCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(command);
+
+        var validationErrors = ProductionPlanWorkflowValidator.ValidateSchedule(command);
+        if (validationErrors.Count > 0)
+        {
+            return ProductionPlanWorkflowResult.Fail(
+                ProductionPlanWorkflowFailureCodes.ValidationFailed,
+                "Validation failed.",
+                validationErrors);
+        }
+
+        if (context.TenantId == Guid.Empty || context.FacilityId == Guid.Empty)
+        {
+            return ProductionPlanWorkflowResult.Fail(
+                ProductionPlanWorkflowFailureCodes.InvalidScope,
+                "Tenant and facility identifiers are required.");
+        }
+
+        try
+        {
+            return await tenantDatabaseSession.ExecuteWriteAsync(
+                async ct =>
+                {
+                    var plan = await dbContext.ProductionPlans
+                        .SingleOrDefaultAsync(
+                            p =>
+                                p.TenantId == context.TenantId
+                                && p.FacilityId == context.FacilityId
+                                && p.Id == command.ProductionPlanId,
+                            ct);
+
+                    if (plan is null)
+                    {
+                        return ProductionPlanWorkflowResult.Fail(
+                            ProductionPlanWorkflowFailureCodes.NotFound,
+                            "Production plan was not found in the requested scope.");
+                    }
+
+                    if (!ProductionPlanWorkflowValidator.IsValidScheduleTransition(plan.Status))
+                    {
+                        return ProductionPlanWorkflowResult.Fail(
+                            ProductionPlanWorkflowFailureCodes.InvalidTransition,
+                            $"Cannot schedule a plan with status '{ProductionPlanValueConversions.ToStorage(plan.Status)}'. Only Approved plans may be scheduled.");
+                    }
+
+                    if (plan.Version != command.ExpectedVersion)
+                    {
+                        return ProductionPlanWorkflowResult.Fail(
+                            ProductionPlanWorkflowFailureCodes.ConcurrencyConflict,
+                            "The production plan has been modified by another user. Please reload and try again.");
+                    }
+
+                    if (plan.ApprovalStatus != ProductionPlanApprovalStatus.Approved)
+                    {
+                        return ProductionPlanWorkflowResult.Fail(
+                            ProductionPlanWorkflowFailureCodes.InvalidTransition,
+                            "Plan does not have an approved approval status.");
+                    }
+
+                    if (HasBlockingRisk(plan.RisksJson))
+                    {
+                        return ProductionPlanWorkflowResult.Fail(
+                            ProductionPlanWorkflowFailureCodes.ScheduleBlockedByRisk,
+                            "Plan has one or more blocking risks. Resolve all blocking risks before scheduling.");
+                    }
+
+                    var now = DateTimeOffset.UtcNow;
+                    var previousStatus = plan.Status;
+                    var previousStatusStr = ProductionPlanValueConversions.ToStorage(previousStatus);
+                    var correlationId = context.CorrelationId ?? Guid.NewGuid();
+                    var shiftName = command.ShiftName?.Trim();
+                    var comment = command.SchedulingComment?.Trim();
+
+                    plan.Status = ProductionPlanStatus.Scheduled;
+                    plan.PlannedStartAtUtc = command.PlannedStartAtUtc;
+                    plan.PlannedEndAtUtc = command.PlannedEndAtUtc;
+                    plan.UpdatedAtUtc = now;
+                    plan.TimeWindowJson = SerializeSchedulingWindow(
+                        command.PlannedStartAtUtc,
+                        command.PlannedEndAtUtc,
+                        now,
+                        context.IdentitySubjectId,
+                        shiftName,
+                        comment);
+                    plan.HistoryJson = AppendHistory(plan.HistoryJson, new WorkflowHistoryEntry(
+                        Guid.NewGuid().ToString(),
+                        "scheduling",
+                        "Planlandı",
+                        string.IsNullOrEmpty(comment)
+                            ? "Plan üretim takviminde planlandı."
+                            : $"Plan planlandı. Yorum: {Truncate(comment, 200)}",
+                        now,
+                        previousStatusStr,
+                        ProductionPlanValueConversions.ToStorage(ProductionPlanStatus.Scheduled),
+                        context.IdentitySubjectId.ToString(),
+                        plan.Version,
+                        plan.Version + 1));
+                    plan.Version = plan.Version + 1;
+
+                    var newStatusStr = ProductionPlanValueConversions.ToStorage(plan.Status);
+
+                    dbContext.AuditRecords.Add(new AuditRecord
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        IdentitySubjectId = context.IdentitySubjectId,
+                        TenantMembershipId = context.MembershipId,
+                        EventType = AuditEventTypes.ProductionPlanScheduled,
+                        Action = AuditActions.ProductionPlanSchedule,
+                        ResourceType = "production.plan",
+                        ResourceId = plan.Id.ToString(),
+                        Outcome = AuditOutcome.Success,
+                        PermissionKey = context.PermissionKey,
+                        CorrelationId = correlationId,
+                        Source = AuditSource.Api,
+                        OccurredAtUtc = now,
+                        RecordedAtUtc = now,
+                        MetadataJson = JsonSerializer.Serialize(new
+                        {
+                            previousStatus = previousStatusStr,
+                            newStatus = newStatusStr,
+                            versionBefore = command.ExpectedVersion,
+                            versionAfter = plan.Version,
+                            plannedStartAtUtc = command.PlannedStartAtUtc.ToString("O"),
+                            plannedEndAtUtc = command.PlannedEndAtUtc.ToString("O"),
+                            scheduledAtUtc = now.ToString("O"),
+                            shiftName,
+                        }),
+                    });
+
+                    dbContext.OutboxMessages.Add(new OutboxMessage
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        MessageType = OutboxMessageTypes.ProductionPlanScheduled,
+                        SchemaVersion = OutboxMessageTypes.SchemaVersion,
+                        AggregateType = "production-plan",
+                        AggregateId = plan.Id.ToString(),
+                        CorrelationId = correlationId,
+                        IdempotencyKey = $"{plan.Id}:{plan.Version}:{OutboxMessageTypes.ProductionPlanScheduled}",
+                        PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+                        {
+                            ["tenantId"] = context.TenantId.ToString(),
+                            ["facilityId"] = context.FacilityId.ToString(),
+                            ["productionPlanId"] = plan.Id.ToString(),
+                            ["referenceCode"] = plan.ReferenceCode,
+                            ["previousStatus"] = previousStatusStr,
+                            ["newStatus"] = newStatusStr,
+                            ["actorSubjectId"] = context.IdentitySubjectId.ToString(),
+                            ["occurredAtUtc"] = now.ToString("O"),
+                            ["version"] = plan.Version.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            ["plannedStartAtUtc"] = command.PlannedStartAtUtc.ToString("O"),
+                            ["plannedEndAtUtc"] = command.PlannedEndAtUtc.ToString("O"),
+                        }),
+                        HeadersJson = "{}",
+                        Status = OutboxMessageStatus.Pending,
+                        OccurredAtUtc = now,
+                        RecordedAtUtc = now,
+                        AvailableAtUtc = now,
+                        AttemptCount = 0,
+                    });
+
+                    await dbContext.SaveChangesAsync(ct);
+
+                    return ProductionPlanWorkflowResult.SuccessScheduled(
+                        plan.Id,
+                        plan.ReferenceCode,
+                        previousStatusStr,
+                        newStatusStr,
+                        plan.Version,
+                        plan.UpdatedAtUtc,
+                        ProductionPlanValueConversions.ToStorage(plan.ApprovalStatus),
+                        plan.PlannedStartAtUtc,
+                        plan.PlannedEndAtUtc,
+                        now);
+                },
+                cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return ProductionPlanWorkflowResult.Fail(
+                ProductionPlanWorkflowFailureCodes.ConcurrencyConflict,
+                "The production plan has been modified by another user. Please reload and try again.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionPlanWorkflowResult.Fail(
+                ProductionPlanWorkflowFailureCodes.SourceUnavailable,
+                "Production plan workflow service is unavailable.");
+        }
+    }
+
+    private static bool HasBlockingRisk(string risksJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(risksJson);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                return false;
+            }
+
+            foreach (var risk in doc.RootElement.EnumerateArray())
+            {
+                if (risk.TryGetProperty("blocking", out var blocking)
+                    && blocking.ValueKind == JsonValueKind.True)
+                {
+                    return true;
+                }
+
+                if (risk.TryGetProperty("severity", out var severity)
+                    && severity.GetString() is "blocking")
+                {
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            // Malformed JSON — treat as no blocking risk
+        }
+
+        return false;
+    }
+
+    private static string SerializeSchedulingWindow(
+        DateTimeOffset plannedStart,
+        DateTimeOffset plannedEnd,
+        DateTimeOffset scheduledAt,
+        Guid scheduledBy,
+        string? shiftName,
+        string? comment)
+    {
+        var dict = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["scheduledAt"] = scheduledAt.ToString("O"),
+            ["scheduledBy"] = scheduledBy.ToString(),
+            ["plannedStartAtUtc"] = plannedStart.ToString("O"),
+            ["plannedEndAtUtc"] = plannedEnd.ToString("O"),
+        };
+        if (!string.IsNullOrEmpty(shiftName))
+        {
+            dict["shiftName"] = shiftName;
+        }
+
+        if (!string.IsNullOrEmpty(comment))
+        {
+            dict["schedulingComment"] = comment;
+        }
+
+        return JsonSerializer.Serialize(dict, JsonOptions);
+    }
+
     private async Task<ProductionPlanWorkflowResult> ExecuteWorkflowAsync(
         ProductionPlanWorkflowContext context,
         Guid productionPlanId,
@@ -570,6 +829,12 @@ public sealed class UnavailableProductionPlanWorkflowRepository : IProductionPla
     public Task<ProductionPlanWorkflowResult> RejectAsync(
         ProductionPlanWorkflowContext context,
         RejectProductionPlanCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(UnavailableResult);
+
+    public Task<ProductionPlanWorkflowResult> ScheduleAsync(
+        ProductionPlanWorkflowContext context,
+        ScheduleProductionPlanCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(UnavailableResult);
 }

@@ -134,7 +134,7 @@ internal sealed class ProductionPlanEntityConfiguration
             "approval_status IN ('not-required', 'pending', 'approved', 'rejected', 'expired')"));
         entity.ToTable(table => table.HasCheckConstraint(
             "ck_production_plans_transfer_status",
-            "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed')"));
+            "transfer_status IN ('not-started', 'pending', 'in-progress', 'completed', 'failed', 'uncertain')"));
         entity.ToTable(table => table.HasCheckConstraint(
             "ck_production_plans_transfer_target_system",
             "transfer_target_system IS NULL OR transfer_target_system IN ('erp', 'mes', 'crevafactos')"));

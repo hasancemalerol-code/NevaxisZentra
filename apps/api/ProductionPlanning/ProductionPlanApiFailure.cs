@@ -20,6 +20,11 @@ public static class ProductionPlanApiFailureCodes
     public const string InvalidRow = "invalid-row";
     public const string DataIntegrity = "data-integrity";
     public const string UnexpectedError = "unexpected-error";
+    public const string ScheduleBlockedByRisk = "schedule-blocked-by-risk";
+    public const string TransferAlreadyRequested = "transfer-already-requested";
+    public const string TransferAlreadySucceeded = "transfer-already-succeeded";
+    public const string TransferNotRetryable = "transfer-not-retryable";
+    public const string AdapterNotFound = "adapter-not-found";
 }
 
 public sealed record ProductionPlanWriteSuccessResponse(

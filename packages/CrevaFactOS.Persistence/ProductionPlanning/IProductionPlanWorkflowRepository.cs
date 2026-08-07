@@ -21,4 +21,9 @@ public interface IProductionPlanWorkflowRepository
         ProductionPlanWorkflowContext context,
         RejectProductionPlanCommand command,
         CancellationToken cancellationToken = default);
+
+    Task<ProductionPlanWorkflowResult> ScheduleAsync(
+        ProductionPlanWorkflowContext context,
+        ScheduleProductionPlanCommand command,
+        CancellationToken cancellationToken = default);
 }

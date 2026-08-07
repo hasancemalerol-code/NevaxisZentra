@@ -41,6 +41,10 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         group.MapPost("/{productionPlanId:guid}/request-revision", RequestProductionPlanRevisionAsync);
         group.MapPost("/{productionPlanId:guid}/approve", ApproveProductionPlanAsync);
         group.MapPost("/{productionPlanId:guid}/reject", RejectProductionPlanAsync);
+        group.MapPost("/{productionPlanId:guid}/schedule", ScheduleProductionPlanAsync);
+        group.MapPost("/{productionPlanId:guid}/transfer-requests", CreateTransferRequestAsync);
+        group.MapPost("/{productionPlanId:guid}/transfer-requests/{transferRequestId:guid}/execute",
+            ExecuteTransferAsync);
 
         return endpoints;
     }
@@ -410,6 +414,258 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
         return ProductionPlanApiResultMapper.MapWorkflowResult(result);
     }
 
+    private static async Task<IResult> ScheduleProductionPlanAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ScheduleProductionPlanRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanWorkflowService workflowService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Schedule));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Schedule),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await workflowService.ScheduleAsync(operationContext, productionPlanId, body, cancellationToken);
+        return ProductionPlanApiResultMapper.MapWorkflowResult(result);
+    }
+
+    private static async Task<IResult> CreateTransferRequestAsync(
+        Guid productionPlanId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreateTransferRequestApiRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanTransferService transferService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Transfer));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Transfer),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var (result, isCreated) = await transferService.CreateTransferRequestAsync(
+            operationContext, productionPlanId, body, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapTransferRequestFailure(result.FailureCode!, result.FailureReason!);
+        }
+
+        var response = new TransferRequestCreatedResponse(
+            result.TransferRequestId!.Value,
+            result.ProductionPlanId!.Value,
+            result.TargetSystem!,
+            result.Status!,
+            result.RequestedAtUtc!.Value,
+            result.IsIdempotentDuplicate);
+
+        return isCreated
+            ? TypedResults.Created((string?)null, response)
+            : TypedResults.Ok(response);
+    }
+
+    private static async Task<IResult> ExecuteTransferAsync(
+        Guid productionPlanId,
+        Guid transferRequestId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ExecuteTransferApiRequest? body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionPlanTransferService transferService,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(
+                FacilityAccessResolutionResult.Deny(
+                    FacilityAccessFailureCodes.FacilityMissing,
+                    "A facility identifier is required.",
+                    DateTimeOffset.UtcNow,
+                    permissionKey: ProductionPlanningPermissionKeys.Transfer));
+        }
+
+        if (body is null)
+        {
+            return TypedResults.Problem(
+                title: "Request body is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest });
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionPlanningPermissionKeys.Transfer),
+            cancellationToken);
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return ProductionPlanApiResultMapper.MapAccessFailure(accessResult);
+        }
+
+        var operationContext = new ProductionPlanWriteOperationContext(
+            accessResult.Access.TenantId,
+            accessResult.Access.FacilityId,
+            accessResult.Access.MembershipId,
+            accessResult.Access.IdentitySubjectId,
+            accessResult.Access.PermissionKey,
+            ReadCorrelationId(correlationContext));
+
+        var result = await transferService.ExecuteTransferAsync(
+            operationContext, productionPlanId, transferRequestId, body, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapTransferExecuteFailure(result.FailureCode!, result.FailureReason!);
+        }
+
+        return TypedResults.Ok(new TransferExecuteResponse(
+            result.TransferRequestId!.Value,
+            result.FinalStatus!,
+            result.ExternalReference,
+            result.Retryable,
+            result.SafeFailureMessage,
+            result.ReconciliationRequired));
+    }
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapTransferRequestFailure(string failureCode, string reason) =>
+        failureCode switch
+        {
+            ProductionPlanTransferFailureCodes.InvalidScope
+                or ProductionPlanTransferFailureCodes.ValidationFailed => TypedResults.Problem(
+                    title: reason,
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest }),
+            ProductionPlanTransferFailureCodes.NotFound => TypedResults.Problem(
+                title: "Production plan not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.NotFound }),
+            ProductionPlanTransferFailureCodes.InvalidTransition => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidTransition }),
+            ProductionPlanTransferFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.ConcurrencyConflict }),
+            ProductionPlanTransferFailureCodes.TransferAlreadyRequested => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.TransferAlreadyRequested }),
+            ProductionPlanTransferFailureCodes.TransferAlreadySucceeded => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.TransferAlreadySucceeded }),
+            ProductionPlanTransferFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: "Transfer service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.SourceUnavailable }),
+            _ => TypedResults.Problem(
+                title: "An unexpected error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.UnexpectedError }),
+        };
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapTransferExecuteFailure(string failureCode, string reason) =>
+        failureCode switch
+        {
+            ProductionPlanTransferFailureCodes.InvalidScope
+                or ProductionPlanTransferFailureCodes.ValidationFailed => TypedResults.Problem(
+                    title: reason,
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidRequest }),
+            ProductionPlanTransferFailureCodes.NotFound => TypedResults.Problem(
+                title: "Transfer request or plan not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.NotFound }),
+            ProductionPlanTransferFailureCodes.InvalidTransition => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.InvalidTransition }),
+            ProductionPlanTransferFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.ConcurrencyConflict }),
+            ProductionPlanTransferFailureCodes.TransferAlreadySucceeded => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.TransferAlreadySucceeded }),
+            ProductionPlanTransferFailureCodes.TransferNotRetryable => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.TransferNotRetryable }),
+            ProductionPlanTransferFailureCodes.AdapterNotFound => TypedResults.Problem(
+                title: reason,
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.AdapterNotFound }),
+            ProductionPlanTransferFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: "Transfer execution service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.SourceUnavailable }),
+            _ => TypedResults.Problem(
+                title: "An unexpected error occurred.",
+                statusCode: StatusCodes.Status500InternalServerError,
+                extensions: new Dictionary<string, object?> { ["failureCode"] = ProductionPlanApiFailureCodes.UnexpectedError }),
+        };
+
     private static Guid? ReadCorrelationId(CorrelationContext correlationContext) =>
         correlationContext.IsAvailable ? correlationContext.CorrelationId : null;
 }
@@ -448,6 +704,24 @@ public static class ProductionPlanningServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
         services.AddScoped<IProductionPlanWorkflowService, ProductionPlanWorkflowService>();
+
+        services.AddScoped<IProductionPlanTransferRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionPlanTransferRepository()
+                : new ProductionPlanTransferRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionPlanTransferService>(serviceProvider =>
+        {
+            var repository = serviceProvider.GetRequiredService<IProductionPlanTransferRepository>();
+            var adapters = serviceProvider.GetServices<IProductionPlanTransferAdapter>();
+            return new ProductionPlanTransferService(repository, adapters);
+        });
+
         return services;
     }
 }

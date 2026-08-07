@@ -7,4 +7,5 @@ public enum ProductionPlanTransferStatus
     InProgress,
     Completed,
     Failed,
+    Uncertain,
 }

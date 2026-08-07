@@ -47,6 +47,9 @@ if (builder.Environment.IsDevelopment())
         builder.Environment);
     builder.Services.AddCrevaFactOSDevelopmentPilotHostedBootstrap(
         builder.Environment);
+    builder.Services.AddSingleton<
+        CrevaFactOS.Persistence.ProductionPlanning.IProductionPlanTransferAdapter,
+        CrevaFactOS.Persistence.ProductionPlanning.FakeProductionPlanTransferAdapter>();
 }
 
 var app = builder.Build();

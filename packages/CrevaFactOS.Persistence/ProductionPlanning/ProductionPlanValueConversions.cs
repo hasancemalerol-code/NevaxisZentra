@@ -51,6 +51,7 @@ public static class ProductionPlanValueConversions
             [ProductionPlanTransferStatus.InProgress] = "in-progress",
             [ProductionPlanTransferStatus.Completed] = "completed",
             [ProductionPlanTransferStatus.Failed] = "failed",
+            [ProductionPlanTransferStatus.Uncertain] = "uncertain",
         };
 
     private static readonly Dictionary<ProductionPlanTargetSystem, string> TargetSystemValues =

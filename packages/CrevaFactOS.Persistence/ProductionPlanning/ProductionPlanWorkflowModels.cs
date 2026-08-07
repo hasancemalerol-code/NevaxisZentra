@@ -28,6 +28,14 @@ public sealed record RejectProductionPlanCommand(
     uint ExpectedVersion,
     string Reason);
 
+public sealed record ScheduleProductionPlanCommand(
+    Guid ProductionPlanId,
+    uint ExpectedVersion,
+    DateTimeOffset PlannedStartAtUtc,
+    DateTimeOffset PlannedEndAtUtc,
+    string? ShiftName,
+    string? SchedulingComment);
+
 public static class ProductionPlanWorkflowFailureCodes
 {
     public const string InvalidScope = "invalid-scope";
@@ -39,6 +47,10 @@ public static class ProductionPlanWorkflowFailureCodes
     public const string AuditFailure = "audit-failure";
     public const string DataIntegrity = "data-integrity";
     public const string UnexpectedError = "unexpected-error";
+    public const string ScheduleBlockedByRisk = "schedule-blocked-by-risk";
+    public const string TransferAlreadyRequested = "transfer-already-requested";
+    public const string TransferAlreadySucceeded = "transfer-already-succeeded";
+    public const string TransferNotRetryable = "transfer-not-retryable";
 }
 
 public sealed record ProductionPlanWorkflowFieldError(
@@ -56,6 +68,9 @@ public sealed record ProductionPlanWorkflowResult
     public uint? Version { get; init; }
     public DateTimeOffset? UpdatedAtUtc { get; init; }
     public string? ApprovalStatus { get; init; }
+    public DateTimeOffset? PlannedStartAtUtc { get; init; }
+    public DateTimeOffset? PlannedEndAtUtc { get; init; }
+    public DateTimeOffset? ScheduledAtUtc { get; init; }
     public string? FailureCode { get; init; }
     public string? FailureReason { get; init; }
     public IReadOnlyList<ProductionPlanWorkflowFieldError>? FieldErrors { get; init; }
@@ -78,6 +93,32 @@ public sealed record ProductionPlanWorkflowResult
             Version = version,
             UpdatedAtUtc = updatedAtUtc,
             ApprovalStatus = approvalStatus,
+        };
+
+    public static ProductionPlanWorkflowResult SuccessScheduled(
+        Guid productionPlanId,
+        string referenceCode,
+        string previousStatus,
+        string status,
+        uint version,
+        DateTimeOffset updatedAtUtc,
+        string approvalStatus,
+        DateTimeOffset plannedStartAtUtc,
+        DateTimeOffset plannedEndAtUtc,
+        DateTimeOffset scheduledAtUtc) =>
+        new()
+        {
+            Succeeded = true,
+            ProductionPlanId = productionPlanId,
+            ReferenceCode = referenceCode,
+            PreviousStatus = previousStatus,
+            Status = status,
+            Version = version,
+            UpdatedAtUtc = updatedAtUtc,
+            ApprovalStatus = approvalStatus,
+            PlannedStartAtUtc = plannedStartAtUtc,
+            PlannedEndAtUtc = plannedEndAtUtc,
+            ScheduledAtUtc = scheduledAtUtc,
         };
 
     public static ProductionPlanWorkflowResult Fail(
