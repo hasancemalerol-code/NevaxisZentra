@@ -51,6 +51,11 @@ internal sealed class ExportShipmentEntityConfiguration : IEntityTypeConfigurati
         entity.Property(e => e.ActualArrivalAtUtc).HasColumnName("actual_arrival_at_utc");
         entity.Property(e => e.BookingReference).HasColumnName("booking_reference").HasMaxLength(100);
         entity.Property(e => e.TrackingReference).HasColumnName("tracking_reference").HasMaxLength(200);
+        entity.Property(e => e.RouteSummary).HasColumnName("route_summary").HasMaxLength(500);
+        entity.Property(e => e.OriginLocation).HasColumnName("origin_location").HasMaxLength(200);
+        entity.Property(e => e.BorderCustomsPoint).HasColumnName("border_customs_point").HasMaxLength(200);
+        entity.Property(e => e.PortOrAirport).HasColumnName("port_or_airport").HasMaxLength(200);
+        entity.Property(e => e.ResponsibilityNotes).HasColumnName("responsibility_notes").HasMaxLength(2000);
         entity.Property(e => e.TotalGrossWeight).HasColumnName("total_gross_weight").HasPrecision(14, 4);
         entity.Property(e => e.TotalNetWeight).HasColumnName("total_net_weight").HasPrecision(14, 4);
         entity.Property(e => e.TotalPackageCount).HasColumnName("total_package_count");

@@ -250,4 +250,125 @@ public static class ExportValueConversions
 
     public static bool TryCorrectionStatusFromStorage(string value, out ExportBrokerCorrectionStatus status) =>
         StorageToCorrectionStatus.TryGetValue(value, out status);
+
+    // EXPORT-3L conversions
+    public static string ToStorage(ExportCountryRulePackStatus status) =>
+        status switch
+        {
+            ExportCountryRulePackStatus.Draft => "draft",
+            ExportCountryRulePackStatus.UnderReview => "under-review",
+            ExportCountryRulePackStatus.Verified => "verified",
+            ExportCountryRulePackStatus.Superseded => "superseded",
+            ExportCountryRulePackStatus.Archived => "archived",
+            _ => throw new InvalidOperationException($"Unknown ExportCountryRulePackStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportComplianceRuleType ruleType) =>
+        ruleType switch
+        {
+            ExportComplianceRuleType.Document => "document",
+            ExportComplianceRuleType.Certification => "certification",
+            ExportComplianceRuleType.Labeling => "labeling",
+            ExportComplianceRuleType.Packaging => "packaging",
+            ExportComplianceRuleType.Origin => "origin",
+            ExportComplianceRuleType.Customs => "customs",
+            ExportComplianceRuleType.Technical => "technical",
+            ExportComplianceRuleType.Restriction => "restriction",
+            ExportComplianceRuleType.Inspection => "inspection",
+            ExportComplianceRuleType.Transport => "transport",
+            ExportComplianceRuleType.Other => "other",
+            _ => throw new InvalidOperationException($"Unknown ExportComplianceRuleType: {ruleType}"),
+        };
+
+    public static string ToStorage(ExportComplianceSeverity severity) =>
+        severity switch
+        {
+            ExportComplianceSeverity.Info => "info",
+            ExportComplianceSeverity.Warning => "warning",
+            ExportComplianceSeverity.Blocking => "blocking",
+            _ => throw new InvalidOperationException($"Unknown ExportComplianceSeverity: {severity}"),
+        };
+
+    public static string ToStorage(ExportComplianceRequirementMode mode) =>
+        mode switch
+        {
+            ExportComplianceRequirementMode.Mandatory => "mandatory",
+            ExportComplianceRequirementMode.Conditional => "conditional",
+            ExportComplianceRequirementMode.Informational => "informational",
+            _ => throw new InvalidOperationException($"Unknown ExportComplianceRequirementMode: {mode}"),
+        };
+
+    public static string ToStorage(ExportComplianceRequirementStatus status) =>
+        status switch
+        {
+            ExportComplianceRequirementStatus.Missing => "missing",
+            ExportComplianceRequirementStatus.Pending => "pending",
+            ExportComplianceRequirementStatus.Satisfied => "satisfied",
+            ExportComplianceRequirementStatus.NotApplicable => "not-applicable",
+            ExportComplianceRequirementStatus.UnableToEvaluate => "unable-to-evaluate",
+            _ => throw new InvalidOperationException($"Unknown ExportComplianceRequirementStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportComplianceEvaluationResult result) =>
+        result switch
+        {
+            ExportComplianceEvaluationResult.Ready => "ready",
+            ExportComplianceEvaluationResult.Attention => "attention",
+            ExportComplianceEvaluationResult.Blocked => "blocked",
+            ExportComplianceEvaluationResult.UnableToEvaluate => "unable-to-evaluate",
+            _ => throw new InvalidOperationException($"Unknown ExportComplianceEvaluationResult: {result}"),
+        };
+
+    public static string ToStorage(ExportCountryResearchCaseStatus status) =>
+        status switch
+        {
+            ExportCountryResearchCaseStatus.Draft => "draft",
+            ExportCountryResearchCaseStatus.Researching => "researching",
+            ExportCountryResearchCaseStatus.ReviewRequired => "review-required",
+            ExportCountryResearchCaseStatus.Verified => "verified",
+            ExportCountryResearchCaseStatus.Completed => "completed",
+            ExportCountryResearchCaseStatus.Archived => "archived",
+            _ => throw new InvalidOperationException($"Unknown ExportCountryResearchCaseStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportCountryResearchFindingCategory category) =>
+        category switch
+        {
+            ExportCountryResearchFindingCategory.Customs => "customs",
+            ExportCountryResearchFindingCategory.Tariff => "tariff",
+            ExportCountryResearchFindingCategory.Documentation => "documentation",
+            ExportCountryResearchFindingCategory.Origin => "origin",
+            ExportCountryResearchFindingCategory.Technical => "technical",
+            ExportCountryResearchFindingCategory.Certification => "certification",
+            ExportCountryResearchFindingCategory.Labeling => "labeling",
+            ExportCountryResearchFindingCategory.Packaging => "packaging",
+            ExportCountryResearchFindingCategory.RestrictedGoods => "restricted-goods",
+            ExportCountryResearchFindingCategory.TradeAgreement => "trade-agreement",
+            ExportCountryResearchFindingCategory.Logistics => "logistics",
+            ExportCountryResearchFindingCategory.BrokerQuestion => "broker-question",
+            ExportCountryResearchFindingCategory.Other => "other",
+            _ => throw new InvalidOperationException($"Unknown ExportCountryResearchFindingCategory: {category}"),
+        };
+
+    public static string ToStorage(ExportSourceVerificationStatus status) =>
+        status switch
+        {
+            ExportSourceVerificationStatus.Unverified => "unverified",
+            ExportSourceVerificationStatus.UnderReview => "under-review",
+            ExportSourceVerificationStatus.Verified => "verified",
+            ExportSourceVerificationStatus.Superseded => "superseded",
+            ExportSourceVerificationStatus.RevalidationRequired => "revalidation-required",
+            _ => throw new InvalidOperationException($"Unknown ExportSourceVerificationStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportCountryKnowledgeAuthority authority) =>
+        authority switch
+        {
+            ExportCountryKnowledgeAuthority.VerifiedRule => "verified-rule",
+            ExportCountryKnowledgeAuthority.HistoricalObservation => "historical-observation",
+            ExportCountryKnowledgeAuthority.CustomerRequirement => "customer-requirement",
+            ExportCountryKnowledgeAuthority.BrokerInput => "broker-input",
+            ExportCountryKnowledgeAuthority.ManualEntry => "manual-entry",
+            _ => throw new InvalidOperationException($"Unknown ExportCountryKnowledgeAuthority: {authority}"),
+        };
 }

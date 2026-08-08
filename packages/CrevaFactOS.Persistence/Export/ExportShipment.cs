@@ -25,6 +25,11 @@ public sealed class ExportShipment : ITenantScopedEntity
     public DateTimeOffset? ActualArrivalAtUtc { get; set; }
     public string? BookingReference { get; set; }
     public string? TrackingReference { get; set; }
+    public string? RouteSummary { get; set; }
+    public string? OriginLocation { get; set; }
+    public string? BorderCustomsPoint { get; set; }
+    public string? PortOrAirport { get; set; }
+    public string? ResponsibilityNotes { get; set; }
     public decimal? TotalGrossWeight { get; set; }
     public decimal? TotalNetWeight { get; set; }
     public int? TotalPackageCount { get; set; }

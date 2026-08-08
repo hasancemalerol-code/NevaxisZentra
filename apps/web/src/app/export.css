@@ -1761,6 +1761,197 @@
   font-size: 11px;
 }
 
+/* ─── EXPORT-3L panels ─── */
+
+.export-compliance-panel,
+.export-traceability-panel,
+.export-country-research-workspace,
+.export-country-knowledge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.export-compliance-panel__header,
+.export-traceability-panel__header,
+.export-country-research-workspace__header,
+.export-country-knowledge-panel__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.export-compliance-panel__header p,
+.export-traceability-panel__header p,
+.export-country-research-workspace__header p,
+.export-country-knowledge-panel__header p {
+  margin: 0;
+  color: #8491a4;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.export-compliance-panel__summary,
+.export-traceability-panel__chain,
+.export-country-research-workspace__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.export-compliance-panel__summary > div,
+.export-country-research-workspace__meta > div {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e4ebf5;
+}
+
+.export-compliance-panel__actions,
+.export-country-research-workspace__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.export-compliance-panel__actions button,
+.export-country-research-workspace__actions button,
+.export-country-knowledge-panel__form button,
+.export-country-research-workspace__form button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #155eef;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-compliance-panel__secondary,
+.export-country-research-workspace__secondary {
+  background: #eef3ff !important;
+  color: #155eef !important;
+}
+
+.export-compliance-panel__requirements ul,
+.export-country-research-workspace__findings ul,
+.export-country-knowledge-panel__list ul,
+.export-traceability-panel__chain ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.export-compliance-panel__requirements li,
+.export-country-research-workspace__findings li,
+.export-country-knowledge-panel__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e4ebf5;
+  border-radius: 10px;
+}
+
+.export-traceability-panel__chain {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.export-traceability-panel__chain article {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e4ebf5;
+  background: #fff;
+}
+
+.export-traceability-panel__chain li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #4d5e73;
+}
+
+.export-compliance-panel__feedback,
+.export-country-research-workspace__feedback,
+.export-country-knowledge-panel__feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.export-compliance-panel__feedback--error,
+.export-country-research-workspace__feedback--error,
+.export-country-knowledge-panel__feedback--error {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.export-compliance-panel__feedback--success,
+.export-country-research-workspace__feedback--success,
+.export-country-knowledge-panel__feedback--success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.export-compliance-panel__satisfy,
+.export-country-research-workspace__form,
+.export-country-knowledge-panel__form {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed #cfd8e6;
+}
+
+.export-compliance-panel__alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fffaeb;
+  color: #b54708;
+  font-size: 13px;
+}
+
+.export-case-card__compliance-badge {
+  font-size: 11px;
+}
+
+.export-country-knowledge-panel__entry-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.export-country-knowledge-panel__entry-actions button {
+  border: none;
+  background: transparent;
+  color: #155eef;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.export-traceability-panel__empty,
+.export-compliance-panel__empty,
+.export-country-research-workspace__empty,
+.export-country-knowledge-panel__empty {
+  color: #8491a4;
+  font-size: 13px;
+}
+
 /* ─── Responsive ─── */
 
 @media (max-width: 1100px) {

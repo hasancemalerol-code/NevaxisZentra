@@ -15,6 +15,13 @@ import type {
   UpdateShipmentInput,
 } from "../domain/export-2l";
 import type {
+  AddResearchFindingInput,
+  CreateKnowledgeEntryInput,
+  CreateResearchCaseInput,
+  EvaluateComplianceInput,
+  SatisfyComplianceRequirementInput,
+} from "../domain/export-3l";
+import type {
   EnsureExportCaseFromOrderInput,
   ExportCaseWriteSuccess,
   RegisterExportDocumentInput,
@@ -28,23 +35,39 @@ import type {
   PackingUnitWriteSuccess,
   ShipmentWriteSuccess,
 } from "./export-2l-api-contracts";
+import type {
+  ComplianceRequirementWriteSuccess,
+  ComplianceWriteSuccess,
+  KnowledgeWriteSuccess,
+  ResearchFindingWriteSuccess,
+  ResearchWriteSuccess,
+} from "./export-3l-api-contracts";
 import {
   acknowledgeExportBroker,
   addExportPackingItem,
+  addCountryResearchFinding,
   completeExportPacking,
+  completeCountryResearchCase,
+  createCountryKnowledgeEntry,
+  createCountryResearchCase,
   createExportBrokerCorrection,
   createExportBrokerWorkspace,
   createExportPackingUnit,
   createExportShipment,
   ensureExportCaseFromOrder as ensureExportCaseFromOrderApi,
+  evaluateExportCompliance,
   prepareExportBrokerPackage,
   registerExportDocument,
   rejectExportDocument,
+  revalidateExportCompliance,
   resolveExportBrokerCorrection,
+  reviewCountryResearchCase,
+  satisfyExportComplianceRequirement,
   sendExportBrokerPackage,
   transitionExportShipment,
   updateExportPackingUnit,
   updateExportShipment,
+  verifyCountryKnowledgeEntry,
   verifyExportDocument,
   verifyExportPacking,
   type ExportCaseApiResult,
@@ -815,6 +838,240 @@ export async function resolveBrokerCorrectionAction(
       resolution: input.resolution.trim(),
       resolutionNote: input.resolutionNote?.trim() || undefined,
     },
+  );
+
+  return map2LResult(result);
+}
+
+// ─── EXPORT-3L — Compliance actions ──────────────────────────────────────────
+
+export async function evaluateComplianceAction(
+  exportCaseId: string,
+  input: EvaluateComplianceInput,
+): Promise<Export2LActionResult<ComplianceWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedCaseVersion)) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await evaluateExportCompliance(
+    resolved.context,
+    exportCaseId.trim(),
+    input,
+  );
+
+  return map2LResult(result);
+}
+
+export async function revalidateComplianceAction(
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<Export2LActionResult<ComplianceWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!Number.isFinite(expectedCaseVersion)) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await revalidateExportCompliance(
+    resolved.context,
+    exportCaseId.trim(),
+    expectedCaseVersion,
+  );
+
+  return map2LResult(result);
+}
+
+export async function satisfyComplianceRequirementAction(
+  exportCaseId: string,
+  requirementId: string,
+  input: SatisfyComplianceRequirementInput,
+): Promise<Export2LActionResult<ComplianceRequirementWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !requirementId.trim()) {
+    return invalidRequest("Dosya ve gereksinim kimliği zorunludur.");
+  }
+  if (!input.resolutionType.trim() || !input.resolutionNote.trim()) {
+    return invalidRequest("Çözüm tipi ve notu zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedRequirementVersion)) {
+    return invalidRequest("Beklenen gereksinim sürümü geçersiz.");
+  }
+
+  const result = await satisfyExportComplianceRequirement(
+    resolved.context,
+    exportCaseId.trim(),
+    requirementId.trim(),
+    {
+      expectedRequirementVersion: input.expectedRequirementVersion,
+      resolutionType: input.resolutionType.trim(),
+      resolutionNote: input.resolutionNote.trim(),
+    },
+  );
+
+  return map2LResult(result);
+}
+
+// ─── EXPORT-3L — Research actions ────────────────────────────────────────────
+
+export async function createResearchCaseAction(
+  input: CreateResearchCaseInput,
+): Promise<Export2LActionResult<ResearchWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!input.countryCode.trim()) {
+    return invalidRequest("Ülke kodu zorunludur.");
+  }
+
+  const result = await createCountryResearchCase(resolved.context, {
+    countryCode: input.countryCode.trim().toUpperCase(),
+    productReference: input.productReference?.trim() || undefined,
+    productDescription: input.productDescription?.trim() || undefined,
+    productGroup: input.productGroup?.trim() || undefined,
+    hsCode: input.hsCode?.trim() || undefined,
+    originCountryCode: input.originCountryCode?.trim().toUpperCase() || undefined,
+    purposeNotes: input.purposeNotes?.trim() || undefined,
+  });
+
+  return map2LResult(result);
+}
+
+export async function addResearchFindingAction(
+  researchCaseId: string,
+  input: AddResearchFindingInput,
+): Promise<Export2LActionResult<ResearchFindingWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!researchCaseId.trim()) {
+    return invalidRequest("Araştırma dosyası kimliği zorunludur.");
+  }
+  if (
+    !input.category.trim() ||
+    !input.title.trim() ||
+    !input.summary.trim() ||
+    !input.sourcePublisher.trim() ||
+    !input.sourceTitle.trim()
+  ) {
+    return invalidRequest("Kategori, başlık, özet ve kaynak bilgileri zorunludur.");
+  }
+
+  const result = await addCountryResearchFinding(
+    resolved.context,
+    researchCaseId.trim(),
+    input,
+  );
+
+  return map2LResult(result);
+}
+
+export async function reviewResearchCaseAction(
+  researchCaseId: string,
+  expectedVersion: number,
+): Promise<Export2LActionResult<ResearchWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!researchCaseId.trim()) {
+    return invalidRequest("Araştırma dosyası kimliği zorunludur.");
+  }
+
+  const result = await reviewCountryResearchCase(
+    resolved.context,
+    researchCaseId.trim(),
+    expectedVersion,
+  );
+
+  return map2LResult(result);
+}
+
+export async function completeResearchCaseAction(
+  researchCaseId: string,
+  expectedVersion: number,
+): Promise<Export2LActionResult<ResearchWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!researchCaseId.trim()) {
+    return invalidRequest("Araştırma dosyası kimliği zorunludur.");
+  }
+
+  const result = await completeCountryResearchCase(
+    resolved.context,
+    researchCaseId.trim(),
+    expectedVersion,
+  );
+
+  return map2LResult(result);
+}
+
+// ─── EXPORT-3L — Knowledge actions ───────────────────────────────────────────
+
+export async function createKnowledgeEntryAction(
+  input: CreateKnowledgeEntryInput,
+): Promise<Export2LActionResult<KnowledgeWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (
+    !input.countryCode.trim() ||
+    !input.category.trim() ||
+    !input.title.trim() ||
+    !input.summary.trim() ||
+    !input.sourcePublisher.trim() ||
+    !input.sourceTitle.trim() ||
+    !input.authority.trim()
+  ) {
+    return invalidRequest("Zorunlu bilgi alanları eksik.");
+  }
+
+  const result = await createCountryKnowledgeEntry(resolved.context, {
+    ...input,
+    countryCode: input.countryCode.trim().toUpperCase(),
+    category: input.category.trim(),
+    title: input.title.trim(),
+    summary: input.summary.trim(),
+    sourcePublisher: input.sourcePublisher.trim(),
+    sourceTitle: input.sourceTitle.trim(),
+    sourceUrl: input.sourceUrl?.trim() || undefined,
+    authority: input.authority.trim(),
+    productScope: input.productScope?.trim() || undefined,
+    productGroup: input.productGroup?.trim() || undefined,
+    hsCodePattern: input.hsCodePattern?.trim() || undefined,
+    createdFromResearchCaseId:
+      input.createdFromResearchCaseId?.trim() || undefined,
+  });
+
+  return map2LResult(result);
+}
+
+export async function verifyKnowledgeEntryAction(
+  knowledgeEntryId: string,
+  expectedVersion: number,
+): Promise<Export2LActionResult<KnowledgeWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!knowledgeEntryId.trim()) {
+    return invalidRequest("Bilgi kaydı kimliği zorunludur.");
+  }
+
+  const result = await verifyCountryKnowledgeEntry(
+    resolved.context,
+    knowledgeEntryId.trim(),
+    expectedVersion,
   );
 
   return map2LResult(result);

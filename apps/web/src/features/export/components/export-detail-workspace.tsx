@@ -10,6 +10,10 @@ import type {
   ExportShipmentReadiness,
 } from "../domain/export-2l";
 import type {
+  ExportComplianceSummary,
+  ExportTraceability,
+} from "../domain/export-3l";
+import type {
   ExportActivity,
   ExportCaseDetail,
   ExportDocument,
@@ -32,13 +36,18 @@ import type {
   updateShipmentAction,
   verifyExportDocumentAction,
   verifyPackingAction,
+  evaluateComplianceAction,
+  revalidateComplianceAction,
+  satisfyComplianceRequirementAction,
 } from "../server/export-case-writer";
 import { ExportActivityTimeline } from "./export-activity-timeline";
 import { ExportBrokerPanel } from "./export-broker-panel";
+import { ExportCompliancePanel } from "./export-compliance-panel";
 import { ExportDocumentsPanel } from "./export-documents-panel";
 import { ExportPackingPanel } from "./export-packing-panel";
 import { ExportReadinessPanel } from "./export-readiness-panel";
 import { ExportShipmentPanel } from "./export-shipment-panel";
+import { ExportTraceabilityPanel } from "./export-traceability-panel";
 
 export type ExportDetailTab =
   | "overview"
@@ -46,6 +55,8 @@ export type ExportDetailTab =
   | "packing"
   | "shipment"
   | "broker"
+  | "compliance"
+  | "traceability"
   | "activity";
 
 const TABS: readonly { id: ExportDetailTab; label: string }[] = [
@@ -54,6 +65,8 @@ const TABS: readonly { id: ExportDetailTab; label: string }[] = [
   { id: "packing", label: "Paketleme" },
   { id: "shipment", label: "Sevkiyat" },
   { id: "broker", label: "Gümrük Broker" },
+  { id: "compliance", label: "Uygunluk" },
+  { id: "traceability", label: "İzlenebilirlik" },
   { id: "activity", label: "Aktivite" },
 ] as const;
 
@@ -67,6 +80,8 @@ type ExportDetailWorkspaceProps = Readonly<{
   shipments: readonly ExportShipment[];
   shipmentReadinessById: Readonly<Record<string, ExportShipmentReadiness>>;
   brokerWorkspace: ExportBrokerWorkspace | null;
+  compliance: ExportComplianceSummary | null;
+  traceability: ExportTraceability | null;
   initialTab?: ExportDetailTab;
   actions: Readonly<{
     registerDocument: typeof registerExportDocumentAction;
@@ -85,6 +100,9 @@ type ExportDetailWorkspaceProps = Readonly<{
     acknowledgeBroker: typeof acknowledgeBrokerAction;
     createBrokerCorrection: typeof createBrokerCorrectionAction;
     resolveBrokerCorrection: typeof resolveBrokerCorrectionAction;
+    evaluateCompliance: typeof evaluateComplianceAction;
+    revalidateCompliance: typeof revalidateComplianceAction;
+    satisfyComplianceRequirement: typeof satisfyComplianceRequirementAction;
   }>;
 }>;
 
@@ -94,6 +112,8 @@ function normalizeTab(value: string | undefined): ExportDetailTab {
     case "packing":
     case "shipment":
     case "broker":
+    case "compliance":
+    case "traceability":
     case "activity":
     case "overview":
       return value;
@@ -112,6 +132,8 @@ export function ExportDetailWorkspace({
   shipments,
   shipmentReadinessById,
   brokerWorkspace,
+  compliance,
+  traceability,
   initialTab,
   actions,
 }: ExportDetailWorkspaceProps) {
@@ -164,6 +186,9 @@ export function ExportDetailWorkspace({
                 Paketleme: {packing?.packingStatus ?? "—"} · Sevkiyat:{" "}
                 {shipments.length} · Broker:{" "}
                 {brokerWorkspace?.status ?? "yok"}
+                {compliance
+                  ? ` · Uygunluk: ${compliance.complianceStatus}`
+                  : ""}
               </span>
             </div>
           </section>
@@ -218,6 +243,21 @@ export function ExportDetailWorkspace({
             onCreateCorrection={actions.createBrokerCorrection}
             onResolveCorrection={actions.resolveBrokerCorrection}
           />
+        ) : null}
+
+        {tab === "compliance" ? (
+          <ExportCompliancePanel
+            exportCaseId={exportCase.id}
+            caseVersion={exportCase.version}
+            compliance={compliance}
+            onEvaluate={actions.evaluateCompliance}
+            onRevalidate={actions.revalidateCompliance}
+            onSatisfyRequirement={actions.satisfyComplianceRequirement}
+          />
+        ) : null}
+
+        {tab === "traceability" ? (
+          <ExportTraceabilityPanel traceability={traceability} />
         ) : null}
 
         {tab === "activity" ? (

@@ -24,6 +24,15 @@ public sealed class ExportCase : ITenantScopedEntity
     public string? PackingCompletedBySubjectId { get; set; }
     public DateTimeOffset? PackingVerifiedAtUtc { get; set; }
     public string? PackingVerifiedBySubjectId { get; set; }
+    public string? ProductReference { get; set; }
+    public string? ProductGroup { get; set; }
+    public string? HsCode { get; set; }
+    public ExportHsCodeStatus HsCodeStatus { get; set; } = ExportHsCodeStatus.Unknown;
+    public ExportOriginConfirmationStatus OriginConfirmationStatus { get; set; } = ExportOriginConfirmationStatus.Unknown;
+    public Guid? CurrentComplianceEvaluationId { get; set; }
+    public ExportComplianceEvaluationResult ComplianceStatus { get; set; } = ExportComplianceEvaluationResult.UnableToEvaluate;
+    public bool ComplianceRevalidationRequired { get; set; }
+    public Guid? LinkedResearchCaseId { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public string CreatedBySubjectId { get; set; } = string.Empty;
     public DateTimeOffset UpdatedAtUtc { get; set; }

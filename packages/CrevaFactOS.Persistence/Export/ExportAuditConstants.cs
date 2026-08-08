@@ -28,6 +28,23 @@ public static class ExportAuditActions
     public const string ExportBrokerWorkspaceAcknowledged = "export.broker.workspace.acknowledged";
     public const string ExportBrokerCorrectionCreated = "export.broker.correction.created";
     public const string ExportBrokerCorrectionResolved = "export.broker.correction.resolved";
+
+    // EXPORT-3L
+    public const string ExportComplianceEvaluated = "export.compliance.evaluated";
+    public const string ExportComplianceRevalidated = "export.compliance.revalidated";
+    public const string ExportComplianceRequirementSatisfied = "export.compliance.requirement.satisfied";
+    public const string ExportCountryRulePackCreated = "export.country.rule.pack.created";
+    public const string ExportCountryRuleAdded = "export.country.rule.added";
+    public const string ExportCountryRulePackVerified = "export.country.rule.pack.verified";
+    public const string ExportCountryRulePackSuperseded = "export.country.rule.pack.superseded";
+    public const string ExportCountryResearchCreated = "export.country.research.created";
+    public const string ExportCountryResearchFindingAdded = "export.country.research.finding.added";
+    public const string ExportCountryResearchReviewed = "export.country.research.reviewed";
+    public const string ExportCountryResearchCompleted = "export.country.research.completed";
+    public const string ExportCountryResearchLinked = "export.country.research.linked";
+    public const string ExportCountryKnowledgeCreated = "export.country.knowledge.created";
+    public const string ExportCountryKnowledgeVerified = "export.country.knowledge.verified";
+    public const string ExportCountryKnowledgeSuperseded = "export.country.knowledge.superseded";
 }
 
 /// <summary>
@@ -58,6 +75,23 @@ public static class ExportAuditEventTypes
     public const string ExportBrokerWorkspaceAcknowledged = "export.broker.workspace.acknowledged";
     public const string ExportBrokerCorrectionCreated = "export.broker.correction.created";
     public const string ExportBrokerCorrectionResolved = "export.broker.correction.resolved";
+
+    // EXPORT-3L
+    public const string ExportComplianceEvaluated = "export.compliance.evaluated";
+    public const string ExportComplianceRevalidated = "export.compliance.revalidated";
+    public const string ExportComplianceRequirementSatisfied = "export.compliance.requirement.satisfied";
+    public const string ExportCountryRulePackCreated = "export.country.rule.pack.created";
+    public const string ExportCountryRuleAdded = "export.country.rule.added";
+    public const string ExportCountryRulePackVerified = "export.country.rule.pack.verified";
+    public const string ExportCountryRulePackSuperseded = "export.country.rule.pack.superseded";
+    public const string ExportCountryResearchCreated = "export.country.research.created";
+    public const string ExportCountryResearchFindingAdded = "export.country.research.finding.added";
+    public const string ExportCountryResearchReviewed = "export.country.research.reviewed";
+    public const string ExportCountryResearchCompleted = "export.country.research.completed";
+    public const string ExportCountryResearchLinked = "export.country.research.linked";
+    public const string ExportCountryKnowledgeCreated = "export.country.knowledge.created";
+    public const string ExportCountryKnowledgeVerified = "export.country.knowledge.verified";
+    public const string ExportCountryKnowledgeSuperseded = "export.country.knowledge.superseded";
 }
 
 /// <summary>Activity event types appended to export_case_activities (avoid spam).</summary>
@@ -87,4 +121,14 @@ public static class ExportActivityEventTypes
     public const string BrokerWorkspaceAcknowledged = "broker-workspace-acknowledged";
     public const string BrokerCorrectionCreated = "broker-correction-created";
     public const string BrokerCorrectionResolved = "broker-correction-resolved";
+
+    // EXPORT-3L
+    public const string ComplianceEvaluated = "compliance-evaluated";
+    public const string ComplianceBlocked = "compliance-blocked";
+    public const string ComplianceCleared = "compliance-cleared";
+    public const string ComplianceRevalidationRequired = "compliance-revalidation-required";
+    public const string CountryResearchCreated = "country-research-created";
+    public const string CountryResearchVerified = "country-research-verified";
+    public const string CountryResearchLinked = "country-research-linked";
+    public const string CountryRulePackUpdated = "country-rule-pack-updated";
 }

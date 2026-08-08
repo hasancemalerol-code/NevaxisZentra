@@ -94,6 +94,23 @@ public static class AuditEventTypes
     public const string ExportBrokerCorrectionCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerCorrectionCreated;
     public const string ExportBrokerCorrectionResolved = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerCorrectionResolved;
 
+    // Export 3L
+    public const string ExportComplianceEvaluated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportComplianceEvaluated;
+    public const string ExportComplianceRevalidated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportComplianceRevalidated;
+    public const string ExportComplianceRequirementSatisfied = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportComplianceRequirementSatisfied;
+    public const string ExportCountryRulePackCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryRulePackCreated;
+    public const string ExportCountryRuleAdded = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryRuleAdded;
+    public const string ExportCountryRulePackVerified = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryRulePackVerified;
+    public const string ExportCountryRulePackSuperseded = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryRulePackSuperseded;
+    public const string ExportCountryResearchCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryResearchCreated;
+    public const string ExportCountryResearchFindingAdded = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryResearchFindingAdded;
+    public const string ExportCountryResearchReviewed = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryResearchReviewed;
+    public const string ExportCountryResearchCompleted = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryResearchCompleted;
+    public const string ExportCountryResearchLinked = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryResearchLinked;
+    public const string ExportCountryKnowledgeCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryKnowledgeCreated;
+    public const string ExportCountryKnowledgeVerified = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryKnowledgeVerified;
+    public const string ExportCountryKnowledgeSuperseded = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCountryKnowledgeSuperseded;
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -165,5 +182,20 @@ public static class AuditEventTypes
         ExportBrokerWorkspaceAcknowledged,
         ExportBrokerCorrectionCreated,
         ExportBrokerCorrectionResolved,
+        ExportComplianceEvaluated,
+        ExportComplianceRevalidated,
+        ExportComplianceRequirementSatisfied,
+        ExportCountryRulePackCreated,
+        ExportCountryRuleAdded,
+        ExportCountryRulePackVerified,
+        ExportCountryRulePackSuperseded,
+        ExportCountryResearchCreated,
+        ExportCountryResearchFindingAdded,
+        ExportCountryResearchReviewed,
+        ExportCountryResearchCompleted,
+        ExportCountryResearchLinked,
+        ExportCountryKnowledgeCreated,
+        ExportCountryKnowledgeVerified,
+        ExportCountryKnowledgeSuperseded,
     };
 }

@@ -1598,7 +1598,8 @@ public static class ExportServiceCollectionExtensions
                 ? new UnavailableExportCaseWriteRepository()
                 : new ExportCaseWriteRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IExportComplianceWriteRepository>());
         });
 
         // EXPORT-2L repositories
@@ -1629,6 +1630,52 @@ public static class ExportServiceCollectionExtensions
 
         services.AddScoped<IExportBrokerWriteRepository>(serviceProvider =>
             new ExportBrokerWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        // EXPORT-3L repositories
+        services.AddScoped<IExportCountryRulePackReadRepository>(serviceProvider =>
+            new ExportCountryRulePackReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportCountryRulePackWriteRepository>(serviceProvider =>
+            new ExportCountryRulePackWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportComplianceReadRepository>(serviceProvider =>
+            new ExportComplianceReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportComplianceWriteRepository>(serviceProvider =>
+            new ExportComplianceWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportCountryResearchReadRepository>(serviceProvider =>
+            new ExportCountryResearchReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportCountryResearchWriteRepository>(serviceProvider =>
+            new ExportCountryResearchWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportCountryKnowledgeReadRepository>(serviceProvider =>
+            new ExportCountryKnowledgeReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportCountryKnowledgeWriteRepository>(serviceProvider =>
+            new ExportCountryKnowledgeWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportTraceabilityReadRepository>(serviceProvider =>
+            new ExportTraceabilityReadRepository(
                 serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 

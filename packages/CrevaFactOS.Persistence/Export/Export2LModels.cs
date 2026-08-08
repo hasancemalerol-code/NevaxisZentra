@@ -10,7 +10,8 @@ public sealed record ExportOperationalReadinessContext(
     string? ShipmentTransportMode,
     DateTimeOffset? PlannedDepartureAtUtc,
     bool HasVerifiedCommercialInvoice,
-    bool HasVerifiedPackingList);
+    bool HasVerifiedPackingList,
+    ExportComplianceOperationalContext? Compliance = null);
 
 // ─── Failure codes (2L additions) ────────────────────────────────────────────
 

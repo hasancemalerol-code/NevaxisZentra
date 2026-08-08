@@ -98,6 +98,18 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ExportBrokerPackageDocument> ExportBrokerPackageDocuments => Set<ExportBrokerPackageDocument>();
     public DbSet<ExportBrokerCorrection> ExportBrokerCorrections => Set<ExportBrokerCorrection>();
 
+    // Export 3L — compliance
+    public DbSet<ExportCountryRulePack> ExportCountryRulePacks => Set<ExportCountryRulePack>();
+    public DbSet<ExportCountryComplianceRule> ExportCountryComplianceRules => Set<ExportCountryComplianceRule>();
+    public DbSet<ExportCustomerRequirement> ExportCustomerRequirements => Set<ExportCustomerRequirement>();
+    public DbSet<ExportComplianceEvaluation> ExportComplianceEvaluations => Set<ExportComplianceEvaluation>();
+    public DbSet<ExportComplianceRequirement> ExportComplianceRequirements => Set<ExportComplianceRequirement>();
+
+    // Export 3L — country research & knowledge
+    public DbSet<ExportCountryResearchCase> ExportCountryResearchCases => Set<ExportCountryResearchCase>();
+    public DbSet<ExportCountryResearchFinding> ExportCountryResearchFindings => Set<ExportCountryResearchFinding>();
+    public DbSet<ExportCountryKnowledgeEntry> ExportCountryKnowledgeEntries => Set<ExportCountryKnowledgeEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -620,6 +632,56 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 3L — compliance
+        modelBuilder.ApplyConfiguration(new ExportCountryRulePackEntityConfiguration());
+        modelBuilder.Entity<ExportCountryRulePack>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportCountryComplianceRuleEntityConfiguration());
+        modelBuilder.Entity<ExportCountryComplianceRule>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportCustomerRequirementEntityConfiguration());
+        modelBuilder.Entity<ExportCustomerRequirement>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportComplianceEvaluationEntityConfiguration());
+        modelBuilder.Entity<ExportComplianceEvaluation>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportComplianceRequirementEntityConfiguration());
+        modelBuilder.Entity<ExportComplianceRequirement>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 3L — country research & knowledge
+        modelBuilder.ApplyConfiguration(new ExportCountryResearchCaseEntityConfiguration());
+        modelBuilder.Entity<ExportCountryResearchCase>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportCountryResearchFindingEntityConfiguration());
+        modelBuilder.Entity<ExportCountryResearchFinding>().HasQueryFilter(f =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && f.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportCountryKnowledgeEntryEntityConfiguration());
+        modelBuilder.Entity<ExportCountryKnowledgeEntry>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

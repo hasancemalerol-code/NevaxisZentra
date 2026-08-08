@@ -241,6 +241,9 @@ internal sealed class ExportReadinessPersistence(CrevaFactOSDbContext dbContext)
             string.Equals(d.DocumentType, ExportDocumentType.PackingList, StringComparison.Ordinal)
             && d.DocumentStatus == ExportDocumentStatus.Verified);
 
+        var compliance = await BuildComplianceOperationalContextAsync(
+            context, exportCase, cancellationToken);
+
         return new ExportOperationalReadinessContext(
             exportCase.PackingStatus,
             reconciliation.Status,
@@ -249,7 +252,59 @@ internal sealed class ExportReadinessPersistence(CrevaFactOSDbContext dbContext)
             primaryShipment?.TransportMode,
             primaryShipment?.PlannedDepartureAtUtc,
             hasVerifiedInvoice,
-            hasVerifiedPackingList);
+            hasVerifiedPackingList,
+            compliance);
+    }
+
+    private async Task<ExportComplianceOperationalContext> BuildComplianceOperationalContextAsync(
+        ExportOperationContext context,
+        ExportCase exportCase,
+        CancellationToken cancellationToken)
+    {
+        if (!exportCase.CurrentComplianceEvaluationId.HasValue)
+        {
+            return new ExportComplianceOperationalContext(
+                ExportComplianceEvaluationResult.UnableToEvaluate,
+                0,
+                exportCase.ComplianceRevalidationRequired,
+                HasBlockingComplianceRequirement: true);
+        }
+
+        var evaluation = await dbContext.ExportComplianceEvaluations
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                e => e.TenantId == context.TenantId
+                    && e.FacilityId == context.FacilityId
+                    && e.Id == exportCase.CurrentComplianceEvaluationId.Value,
+                cancellationToken);
+
+        if (evaluation is null)
+        {
+            return new ExportComplianceOperationalContext(
+                exportCase.ComplianceStatus,
+                0,
+                exportCase.ComplianceRevalidationRequired,
+                HasBlockingComplianceRequirement: true);
+        }
+
+        var requirements = await dbContext.ExportComplianceRequirements
+            .AsNoTracking()
+            .Where(r =>
+                r.TenantId == context.TenantId
+                && r.FacilityId == context.FacilityId
+                && r.EvaluationId == evaluation.Id)
+            .ToListAsync(cancellationToken);
+
+        var hasBlocking = requirements.Any(r =>
+            r.Blocking
+            && r.Status is not ExportComplianceRequirementStatus.Satisfied
+                and not ExportComplianceRequirementStatus.NotApplicable);
+
+        return new ExportComplianceOperationalContext(
+            exportCase.ComplianceStatus,
+            evaluation.ReadinessPercent,
+            exportCase.ComplianceRevalidationRequired || evaluation.RevalidationRequired || evaluation.IsStale,
+            hasBlocking);
     }
 
     public void AppendActivity(

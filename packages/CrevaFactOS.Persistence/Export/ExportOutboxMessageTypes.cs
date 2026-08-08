@@ -20,4 +20,12 @@ public static class ExportOutboxMessageTypes
     public const string ExportShipmentStatusChanged = "export-shipment-status-changed";
     public const string ExportBrokerPackageSent = "export-broker-package-sent";
     public const string ExportBrokerWorkspaceAcknowledged = "export-broker-workspace-acknowledged";
+
+    // EXPORT-3L
+    public const string ExportComplianceBlocked = "export-compliance-blocked";
+    public const string ExportComplianceReady = "export-compliance-ready";
+    public const string ExportComplianceRevalidationRequired = "export-compliance-revalidation-required";
+    public const string ExportCountryResearchCompleted = "export-country-research-completed";
+    public const string ExportCountryRulePackVerified = "export-country-rule-pack-verified";
+    public const string ExportCountryKnowledgeUpdated = "export-country-knowledge-updated";
 }

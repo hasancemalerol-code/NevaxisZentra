@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ExportCaseCard } from "@/features/export/components/export-case-card";
 import type { ExportCaseSummary } from "@/features/export/domain/export-case";
-import { readExportCases } from "@/features/export/server/export-case-reader";
+import type { ComplianceEvaluationResult } from "@/features/export/domain/export-3l";
+import {
+  readComplianceSummary,
+  readExportCases,
+} from "@/features/export/server/export-case-reader";
 
 function countActive(cases: ExportCaseSummary[]): number {
   return cases.filter((c) => c.status !== "closed").length;
@@ -61,6 +65,37 @@ export default async function ExportCasesPage() {
   }
 
   const cases = result.cases;
+  const complianceByCaseId: Record<
+    string,
+    { status: ComplianceEvaluationResult; percent: number }
+  > = {};
+
+  if (cases.length > 0 && cases.length <= 24) {
+    const complianceResults = await Promise.all(
+      cases.map(async (exportCase) => {
+        const complianceResult = await readComplianceSummary(exportCase.id);
+        return complianceResult.status === "success"
+          ? ([
+              exportCase.id,
+              {
+                status: complianceResult.compliance.complianceStatus,
+                percent: complianceResult.compliance.complianceReadinessPercent,
+              },
+            ] as const)
+          : null;
+      }),
+    );
+
+    for (const entry of complianceResults) {
+      if (entry) {
+        complianceByCaseId[entry[0]] = {
+          status: entry[1].status,
+          percent: entry[1].percent,
+        };
+      }
+    }
+  }
+
   const activeCount = countActive(cases);
   const readyCount = countReady(cases);
   const missingCount = countMissingDocs(cases);
@@ -161,7 +196,14 @@ export default async function ExportCasesPage() {
         ) : (
           <div className="export-workspace__list">
             {cases.map((exportCase) => (
-              <ExportCaseCard key={exportCase.id} exportCase={exportCase} />
+              <ExportCaseCard
+                key={exportCase.id}
+                exportCase={exportCase}
+                complianceStatus={complianceByCaseId[exportCase.id]?.status}
+                complianceReadinessPercent={
+                  complianceByCaseId[exportCase.id]?.percent
+                }
+              />
             ))}
           </div>
         )}

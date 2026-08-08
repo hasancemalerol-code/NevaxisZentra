@@ -20,6 +20,8 @@ import {
   getExportCaseStatusLabel,
   getExportReadinessStatusLabel,
 } from "../domain/export-case";
+import type { ComplianceEvaluationResult } from "../domain/export-3l";
+import { getComplianceStatusLabel } from "../domain/export-3l";
 
 type BadgeTone =
   | "neutral"
@@ -73,9 +75,15 @@ function formatUtcDate(iso: string): string {
 
 type ExportCaseCardProps = Readonly<{
   exportCase: ExportCaseSummary;
+  complianceStatus?: ComplianceEvaluationResult;
+  complianceReadinessPercent?: number;
 }>;
 
-export function ExportCaseCard({ exportCase }: ExportCaseCardProps) {
+export function ExportCaseCard({
+  exportCase,
+  complianceStatus,
+  complianceReadinessPercent,
+}: ExportCaseCardProps) {
   const progressWidth = Math.min(Math.max(exportCase.readinessPercent, 0), 100);
 
   return (
@@ -88,6 +96,14 @@ export function ExportCaseCard({ exportCase }: ExportCaseCardProps) {
           <Badge tone={getReadinessTone(exportCase.readinessStatus)}>
             {getExportReadinessStatusLabel(exportCase.readinessStatus)}
           </Badge>
+          {complianceStatus ? (
+            <Badge tone="information" className="export-case-card__compliance-badge">
+              Uygunluk: {getComplianceStatusLabel(complianceStatus)}
+              {complianceReadinessPercent !== undefined
+                ? ` · %${complianceReadinessPercent}`
+                : ""}
+            </Badge>
+          ) : null}
         </div>
 
         <h2>{exportCase.caseNumber}</h2>

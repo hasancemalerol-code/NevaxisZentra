@@ -26,6 +26,7 @@ import {
 import type { ExportShipmentReadiness } from "@/features/export/domain/export-2l";
 import {
   readBrokerWorkspace,
+  readComplianceSummary,
   readExportActivity,
   readExportCaseById,
   readExportDocuments,
@@ -34,6 +35,7 @@ import {
   readPackingReconciliation,
   readShipmentReadiness,
   readShipments,
+  readTraceability,
 } from "@/features/export/server/export-case-reader";
 import {
   acknowledgeBrokerAction,
@@ -43,10 +45,13 @@ import {
   createBrokerWorkspaceAction,
   createPackingUnitAction,
   createShipmentAction,
+  evaluateComplianceAction,
   prepareBrokerPackageAction,
   registerExportDocumentAction,
   rejectExportDocumentAction,
+  revalidateComplianceAction,
   resolveBrokerCorrectionAction,
+  satisfyComplianceRequirementAction,
   sendBrokerPackageAction,
   transitionShipmentAction,
   updateShipmentAction,
@@ -113,6 +118,8 @@ function normalizeTab(value: string | string[] | undefined): ExportDetailTab {
     case "packing":
     case "shipment":
     case "broker":
+    case "compliance":
+    case "traceability":
     case "activity":
     case "overview":
       return raw;
@@ -147,6 +154,8 @@ export default async function ExportCaseDetailPage({
     reconciliationResult,
     shipmentsResult,
     brokerResult,
+    complianceResult,
+    traceabilityResult,
   ] = await Promise.all([
     readExportCaseById(exportCaseId),
     readExportReadiness(exportCaseId),
@@ -156,6 +165,8 @@ export default async function ExportCaseDetailPage({
     readPackingReconciliation(exportCaseId),
     readShipments(exportCaseId),
     readBrokerWorkspace(exportCaseId),
+    readComplianceSummary(exportCaseId),
+    readTraceability(exportCaseId),
   ]);
 
   if (caseResult.status === "failure") {
@@ -202,6 +213,12 @@ export default async function ExportCaseDetailPage({
     shipmentsResult.status === "success" ? shipmentsResult.shipments : [];
   const brokerWorkspace =
     brokerResult.status === "success" ? brokerResult.workspace : null;
+  const compliance =
+    complianceResult.status === "success" ? complianceResult.compliance : null;
+  const traceability =
+    traceabilityResult.status === "success"
+      ? traceabilityResult.traceability
+      : null;
 
   const readinessEntries = await Promise.all(
     shipments.map(async (shipment) => {
@@ -307,6 +324,8 @@ export default async function ExportCaseDetailPage({
         shipments={shipments}
         shipmentReadinessById={shipmentReadinessById}
         brokerWorkspace={brokerWorkspace}
+        compliance={compliance}
+        traceability={traceability}
         initialTab={initialTab}
         actions={{
           registerDocument: registerExportDocumentAction,
@@ -325,6 +344,9 @@ export default async function ExportCaseDetailPage({
           acknowledgeBroker: acknowledgeBrokerAction,
           createBrokerCorrection: createBrokerCorrectionAction,
           resolveBrokerCorrection: resolveBrokerCorrectionAction,
+          evaluateCompliance: evaluateComplianceAction,
+          revalidateCompliance: revalidateComplianceAction,
+          satisfyComplianceRequirement: satisfyComplianceRequirementAction,
         }}
       />
     </main>

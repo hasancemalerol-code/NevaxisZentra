@@ -127,6 +127,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportBrokerHandoffPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -273,10 +285,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportBrokerHandoffPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportComplianceVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportCountryResearchVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
+        await EnsureExportDeDemoRulePackAsync(
+            dbContext, tenant.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
             seedTimestampUtc, cancellationToken);
@@ -1199,6 +1225,144 @@ internal sealed class DevelopmentPilotBootstrapService(
             ExportPermissionKeys.BrokerHandoff,
             DevelopmentPilotIds.ExportBrokerHandoffPermissionDefinitionId,
             cancellationToken);
+
+    private static Task EnsureExportComplianceReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.ComplianceRead,
+            DevelopmentPilotIds.ExportComplianceReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportComplianceManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.ComplianceManage,
+            DevelopmentPilotIds.ExportComplianceManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportComplianceVerifyPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.ComplianceVerify,
+            DevelopmentPilotIds.ExportComplianceVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportCountryResearchReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.CountryResearchRead,
+            DevelopmentPilotIds.ExportCountryResearchReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportCountryResearchManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.CountryResearchManage,
+            DevelopmentPilotIds.ExportCountryResearchManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportCountryResearchVerifyPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.CountryResearchVerify,
+            DevelopmentPilotIds.ExportCountryResearchVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static async Task EnsureExportDeDemoRulePackAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var exists = await dbContext.ExportCountryRulePacks
+            .IgnoreQueryFilters()
+            .AnyAsync(p => p.Id == DevelopmentPilotIds.ExportDeDemoRulePackId, cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        var actorSubjectId = DevelopmentPilotIds.IdentitySubjectId.ToString();
+        var rulePack = new ExportCountryRulePack
+        {
+            Id = DevelopmentPilotIds.ExportDeDemoRulePackId,
+            TenantId = tenantId,
+            FacilityId = null,
+            CountryCode = "DE",
+            Name = "DE Development Demo Rule Pack (NOT legal requirements)",
+            Status = ExportCountryRulePackStatus.Verified,
+            VersionNumber = 1,
+            EffectiveFrom = new DateOnly(2026, 1, 1),
+            EffectiveTo = null,
+            SourceTitle = "CrevaFactOS development fixture — demo workflow only",
+            SourceUrl = null,
+            SourcePublisher = "CrevaFactOS Development Pilot",
+            SourcePublicationDate = new DateOnly(2026, 8, 8),
+            SourceAccessedAtUtc = seedTimestampUtc,
+            SourceVersion = "demo-v1",
+            VerifiedAtUtc = seedTimestampUtc,
+            VerifiedBySubjectId = actorSubjectId,
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBySubjectId = actorSubjectId,
+            UpdatedAtUtc = seedTimestampUtc,
+            LastModifiedBySubjectId = actorSubjectId,
+            Version = 1,
+        };
+
+        var commercialInvoiceRule = new ExportCountryComplianceRule
+        {
+            Id = DevelopmentPilotIds.ExportDeDemoRuleCommercialInvoiceId,
+            TenantId = tenantId,
+            RulePackId = rulePack.Id,
+            RuleCode = "DE-DEMO-001",
+            Title = "Verified commercial invoice required (development demo)",
+            Description = "Development fixture only — NOT a real German legal requirement.",
+            RuleType = ExportComplianceRuleType.Document,
+            Severity = ExportComplianceSeverity.Blocking,
+            RequirementMode = ExportComplianceRequirementMode.Mandatory,
+            Blocking = true,
+            RequiredDocumentType = ExportDocumentType.CommercialInvoice,
+            SourceReference = "development:de-demo-rule-pack",
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBySubjectId = actorSubjectId,
+            Version = 1,
+        };
+
+        var originEvidenceRule = new ExportCountryComplianceRule
+        {
+            Id = DevelopmentPilotIds.ExportDeDemoRuleOriginEvidenceId,
+            TenantId = tenantId,
+            RulePackId = rulePack.Id,
+            RuleCode = "DE-DEMO-002",
+            Title = "Origin evidence required (development demo)",
+            Description = "Development fixture only — requires confirmed origin status, NOT legal customs approval.",
+            RuleType = ExportComplianceRuleType.Origin,
+            Severity = ExportComplianceSeverity.Blocking,
+            RequirementMode = ExportComplianceRequirementMode.Mandatory,
+            Blocking = true,
+            SourceReference = "development:de-demo-rule-pack",
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBySubjectId = actorSubjectId,
+            Version = 1,
+        };
+
+        dbContext.ExportCountryRulePacks.Add(rulePack);
+        dbContext.ExportCountryComplianceRules.Add(commercialInvoiceRule);
+        dbContext.ExportCountryComplianceRules.Add(originEvidenceRule);
+    }
 
     private static async Task EnsureExportPilotCaseAsync(
         CrevaFactOSDbContext dbContext,

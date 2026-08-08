@@ -35,6 +35,35 @@ internal sealed class ExportCaseEntityConfiguration : IEntityTypeConfiguration<E
             [ExportReadinessStatus.Ready] = "ready",
         };
 
+    private static readonly Dictionary<ExportHsCodeStatus, string> HsCodeStatusValues =
+        new()
+        {
+            [ExportHsCodeStatus.Unknown] = "unknown",
+            [ExportHsCodeStatus.Draft] = "draft",
+            [ExportHsCodeStatus.UserConfirmed] = "user-confirmed",
+            [ExportHsCodeStatus.BrokerConfirmed] = "broker-confirmed",
+            [ExportHsCodeStatus.ExternallyConfirmed] = "externally-confirmed",
+        };
+
+    private static readonly Dictionary<ExportOriginConfirmationStatus, string> OriginConfirmationStatusValues =
+        new()
+        {
+            [ExportOriginConfirmationStatus.Unknown] = "unknown",
+            [ExportOriginConfirmationStatus.Draft] = "draft",
+            [ExportOriginConfirmationStatus.UserConfirmed] = "user-confirmed",
+            [ExportOriginConfirmationStatus.BrokerConfirmed] = "broker-confirmed",
+            [ExportOriginConfirmationStatus.ExternallyConfirmed] = "externally-confirmed",
+        };
+
+    private static readonly Dictionary<ExportComplianceEvaluationResult, string> ComplianceStatusValues =
+        new()
+        {
+            [ExportComplianceEvaluationResult.Ready] = "ready",
+            [ExportComplianceEvaluationResult.Attention] = "attention",
+            [ExportComplianceEvaluationResult.Blocked] = "blocked",
+            [ExportComplianceEvaluationResult.UnableToEvaluate] = "unable-to-evaluate",
+        };
+
     public void Configure(EntityTypeBuilder<ExportCase> entity)
     {
         entity.ToTable("export_cases");
@@ -80,6 +109,32 @@ internal sealed class ExportCaseEntityConfiguration : IEntityTypeConfiguration<E
         entity.Property(e => e.PackingVerifiedAtUtc).HasColumnName("packing_verified_at_utc");
         entity.Property(e => e.PackingVerifiedBySubjectId)
             .HasColumnName("packing_verified_by_subject_id").HasMaxLength(200);
+        entity.Property(e => e.ProductReference).HasColumnName("product_reference").HasMaxLength(200);
+        entity.Property(e => e.ProductGroup).HasColumnName("product_group").HasMaxLength(100);
+        entity.Property(e => e.HsCode).HasColumnName("hs_code").HasMaxLength(20);
+        entity.Property(e => e.HsCodeStatus)
+            .HasColumnName("hs_code_status")
+            .HasConversion(
+                value => HsCodeStatusValues[value],
+                value => HsCodeStatusValues.First(p => p.Value == value).Key)
+            .HasMaxLength(25);
+        entity.Property(e => e.OriginConfirmationStatus)
+            .HasColumnName("origin_confirmation_status")
+            .HasConversion(
+                value => OriginConfirmationStatusValues[value],
+                value => OriginConfirmationStatusValues.First(p => p.Value == value).Key)
+            .HasMaxLength(25);
+        entity.Property(e => e.CurrentComplianceEvaluationId)
+            .HasColumnName("current_compliance_evaluation_id");
+        entity.Property(e => e.ComplianceStatus)
+            .HasColumnName("compliance_status")
+            .HasConversion(
+                value => ComplianceStatusValues[value],
+                value => ComplianceStatusValues.First(p => p.Value == value).Key)
+            .HasMaxLength(20);
+        entity.Property(e => e.ComplianceRevalidationRequired)
+            .HasColumnName("compliance_revalidation_required");
+        entity.Property(e => e.LinkedResearchCaseId).HasColumnName("linked_research_case_id");
         entity.Property(e => e.Version).HasColumnName("version").IsConcurrencyToken();
 
         entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.SourceOrderId })
@@ -127,5 +182,14 @@ internal sealed class ExportCaseEntityConfiguration : IEntityTypeConfiguration<E
         entity.ToTable(table => table.HasCheckConstraint(
             "ck_export_cases_destination_country",
             "destination_country_code ~ '^[A-Z]{2}$'"));
+        entity.ToTable(table => table.HasCheckConstraint(
+            "ck_export_cases_hs_code_status",
+            "hs_code_status IN ('unknown', 'draft', 'user-confirmed', 'broker-confirmed', 'externally-confirmed')"));
+        entity.ToTable(table => table.HasCheckConstraint(
+            "ck_export_cases_origin_confirmation_status",
+            "origin_confirmation_status IN ('unknown', 'draft', 'user-confirmed', 'broker-confirmed', 'externally-confirmed')"));
+        entity.ToTable(table => table.HasCheckConstraint(
+            "ck_export_cases_compliance_status",
+            "compliance_status IN ('ready', 'attention', 'blocked', 'unable-to-evaluate')"));
     }
 }

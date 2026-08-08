@@ -50,6 +50,18 @@ import {
   type ShipmentWriteSuccess,
 } from "./export-2l-api-contracts";
 import {
+  parseComplianceRequirementWriteSuccessApiResponse,
+  parseComplianceWriteSuccessApiResponse,
+  parseCountryKnowledgeListApiResponse,
+  parseCountryResearchDetailApiResponse,
+  parseCountryResearchListApiResponse,
+  parseExportComplianceSummaryApiResponse,
+  parseExportTraceabilityApiResponse,
+  parseKnowledgeWriteSuccessApiResponse,
+  parseResearchFindingWriteSuccessApiResponse,
+  parseResearchWriteSuccessApiResponse,
+} from "./export-3l-api-contracts";
+import {
   parseExportActivityListApiResponse,
   parseExportCaseDetailApiResponse,
   parseExportCaseListApiResponse,
@@ -885,5 +897,239 @@ export async function resolveExportBrokerCorrection(
   );
   return executePost(context, url, input, (body) =>
     mapParsed(parseBrokerCorrectionWriteSuccessApiResponse(body)),
+  );
+}
+
+// ─── EXPORT-3L — Compliance, research, knowledge, traceability ─────────────────
+
+function exportFacilityUrl(
+  context: ExportCaseRequestContext,
+  path: string,
+  extraParams?: Record<string, string>,
+): string {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value.trim()) {
+        params.set(key, value.trim());
+      }
+    }
+  }
+
+  return `${trimTrailingSlash(context.apiBaseUrl)}${path}?${params.toString()}`;
+}
+
+export async function getExportComplianceSummary(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+): Promise<
+  ExportCaseApiResult<import("../domain/export-3l").ExportComplianceSummary>
+> {
+  const url = caseFacilityUrl(context, exportCaseId, "/compliance");
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportComplianceSummaryApiResponse(body)),
+  );
+}
+
+export async function evaluateExportCompliance(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  input: import("../domain/export-3l").EvaluateComplianceInput,
+): Promise<
+  ExportCaseApiResult<
+    import("./export-3l-api-contracts").ComplianceWriteSuccess
+  >
+> {
+  const url = caseFacilityUrl(context, exportCaseId, "/compliance/evaluate");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseComplianceWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function revalidateExportCompliance(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<
+  ExportCaseApiResult<
+    import("./export-3l-api-contracts").ComplianceWriteSuccess
+  >
+> {
+  const url = caseFacilityUrl(context, exportCaseId, "/compliance/revalidate");
+  return executePost(context, url, { expectedCaseVersion }, (body) =>
+    mapParsed(parseComplianceWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function satisfyExportComplianceRequirement(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  requirementId: string,
+  input: import("../domain/export-3l").SatisfyComplianceRequirementInput,
+): Promise<
+  ExportCaseApiResult<
+    import("./export-3l-api-contracts").ComplianceRequirementWriteSuccess
+  >
+> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/compliance/requirements/${encodeURIComponent(requirementId.trim())}/satisfy`,
+  );
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseComplianceRequirementWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function getExportTraceability(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+): Promise<ExportCaseApiResult<import("../domain/export-3l").ExportTraceability>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/traceability");
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportTraceabilityApiResponse(body)),
+  );
+}
+
+export async function listCountryResearchCases(
+  context: ExportCaseRequestContext,
+  query?: { countryCode?: string; status?: string },
+): Promise<
+  ExportCaseApiResult<
+    import("../domain/export-3l").CountryResearchCaseSummary[]
+  >
+> {
+  const extra: Record<string, string> = {};
+  if (query?.countryCode?.trim()) extra.countryCode = query.countryCode.trim();
+  if (query?.status?.trim()) extra.status = query.status.trim();
+
+  const url = exportFacilityUrl(context, "/api/export/country-research", extra);
+  return executeGet(context, url, (body) =>
+    mapParsed(parseCountryResearchListApiResponse(body)),
+  );
+}
+
+export async function getCountryResearchCase(
+  context: ExportCaseRequestContext,
+  researchCaseId: string,
+): Promise<
+  ExportCaseApiResult<import("../domain/export-3l").CountryResearchDetail>
+> {
+  const url = exportFacilityUrl(
+    context,
+    `/api/export/country-research/${encodeURIComponent(researchCaseId.trim())}`,
+  );
+  return executeGet(context, url, (body) =>
+    mapParsed(parseCountryResearchDetailApiResponse(body)),
+  );
+}
+
+export async function createCountryResearchCase(
+  context: ExportCaseRequestContext,
+  input: import("../domain/export-3l").CreateResearchCaseInput,
+): Promise<
+  ExportCaseApiResult<import("./export-3l-api-contracts").ResearchWriteSuccess>
+> {
+  const url = exportFacilityUrl(context, "/api/export/country-research");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseResearchWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function addCountryResearchFinding(
+  context: ExportCaseRequestContext,
+  researchCaseId: string,
+  input: import("../domain/export-3l").AddResearchFindingInput,
+): Promise<
+  ExportCaseApiResult<
+    import("./export-3l-api-contracts").ResearchFindingWriteSuccess
+  >
+> {
+  const url = exportFacilityUrl(
+    context,
+    `/api/export/country-research/${encodeURIComponent(researchCaseId.trim())}/findings`,
+  );
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseResearchFindingWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function reviewCountryResearchCase(
+  context: ExportCaseRequestContext,
+  researchCaseId: string,
+  expectedVersion: number,
+): Promise<
+  ExportCaseApiResult<import("./export-3l-api-contracts").ResearchWriteSuccess>
+> {
+  const url = exportFacilityUrl(
+    context,
+    `/api/export/country-research/${encodeURIComponent(researchCaseId.trim())}/review`,
+  );
+  return executePost(context, url, { expectedVersion }, (body) =>
+    mapParsed(parseResearchWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function completeCountryResearchCase(
+  context: ExportCaseRequestContext,
+  researchCaseId: string,
+  expectedVersion: number,
+): Promise<
+  ExportCaseApiResult<import("./export-3l-api-contracts").ResearchWriteSuccess>
+> {
+  const url = exportFacilityUrl(
+    context,
+    `/api/export/country-research/${encodeURIComponent(researchCaseId.trim())}/complete`,
+  );
+  return executePost(context, url, { expectedVersion }, (body) =>
+    mapParsed(parseResearchWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function listCountryKnowledgeEntries(
+  context: ExportCaseRequestContext,
+  query?: { countryCode?: string; verificationStatus?: string },
+): Promise<
+  ExportCaseApiResult<import("../domain/export-3l").CountryKnowledgeEntry[]>
+> {
+  const extra: Record<string, string> = {};
+  if (query?.countryCode?.trim()) extra.countryCode = query.countryCode.trim();
+  if (query?.verificationStatus?.trim()) {
+    extra.verificationStatus = query.verificationStatus.trim();
+  }
+
+  const url = exportFacilityUrl(context, "/api/export/country-knowledge", extra);
+  return executeGet(context, url, (body) =>
+    mapParsed(parseCountryKnowledgeListApiResponse(body)),
+  );
+}
+
+export async function createCountryKnowledgeEntry(
+  context: ExportCaseRequestContext,
+  input: import("../domain/export-3l").CreateKnowledgeEntryInput,
+): Promise<
+  ExportCaseApiResult<import("./export-3l-api-contracts").KnowledgeWriteSuccess>
+> {
+  const url = exportFacilityUrl(context, "/api/export/country-knowledge");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseKnowledgeWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function verifyCountryKnowledgeEntry(
+  context: ExportCaseRequestContext,
+  knowledgeEntryId: string,
+  expectedVersion: number,
+): Promise<
+  ExportCaseApiResult<import("./export-3l-api-contracts").KnowledgeWriteSuccess>
+> {
+  const url = exportFacilityUrl(
+    context,
+    `/api/export/country-knowledge/${encodeURIComponent(knowledgeEntryId.trim())}/verify`,
+  );
+  return executePost(context, url, { expectedVersion }, (body) =>
+    mapParsed(parseKnowledgeWriteSuccessApiResponse(body)),
   );
 }

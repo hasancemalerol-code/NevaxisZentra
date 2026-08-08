@@ -165,6 +165,35 @@ public static class DevelopmentPilotIds
     public static readonly Guid ExportBrokerHandoffPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000036");
 
+    // Export 3L permission definitions (037–042)
+    public static readonly Guid ExportComplianceReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000037");
+
+    public static readonly Guid ExportComplianceManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000038");
+
+    public static readonly Guid ExportComplianceVerifyPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000039");
+
+    public static readonly Guid ExportCountryResearchReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000040");
+
+    public static readonly Guid ExportCountryResearchManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000041");
+
+    public static readonly Guid ExportCountryResearchVerifyPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000042");
+
+    // Export 3L development demo fixtures (NOT real legal requirements)
+    public static readonly Guid ExportDeDemoRulePackId =
+        Guid.Parse("bb000001-0058-4000-8000-000000000058");
+
+    public static readonly Guid ExportDeDemoRuleCommercialInvoiceId =
+        Guid.Parse("bb000001-0059-4000-8000-000000000059");
+
+    public static readonly Guid ExportDeDemoRuleOriginEvidenceId =
+        Guid.Parse("bb000001-005a-4000-8000-00000000005a");
+
     // Export 2L pilot fixtures
     public static readonly Guid ExportPilotPackingUnitId =
         Guid.Parse("bb000001-0055-4000-8000-000000000055");

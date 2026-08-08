@@ -78,6 +78,14 @@ public static class OutboxMessageTypes
     public const string ExportBrokerPackageSent = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBrokerPackageSent;
     public const string ExportBrokerWorkspaceAcknowledged = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBrokerWorkspaceAcknowledged;
 
+    // Export 3L
+    public const string ExportComplianceBlocked = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportComplianceBlocked;
+    public const string ExportComplianceReady = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportComplianceReady;
+    public const string ExportComplianceRevalidationRequired = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportComplianceRevalidationRequired;
+    public const string ExportCountryResearchCompleted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCountryResearchCompleted;
+    public const string ExportCountryRulePackVerified = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCountryRulePackVerified;
+    public const string ExportCountryKnowledgeUpdated = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCountryKnowledgeUpdated;
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -135,6 +143,12 @@ public static class OutboxMessageTypes
             ExportShipmentStatusChanged,
             ExportBrokerPackageSent,
             ExportBrokerWorkspaceAcknowledged,
+            ExportComplianceBlocked,
+            ExportComplianceReady,
+            ExportComplianceRevalidationRequired,
+            ExportCountryResearchCompleted,
+            ExportCountryRulePackVerified,
+            ExportCountryKnowledgeUpdated,
         ],
         StringComparer.Ordinal);
 }

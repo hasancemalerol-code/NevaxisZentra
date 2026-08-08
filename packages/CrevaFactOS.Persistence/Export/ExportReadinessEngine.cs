@@ -79,6 +79,11 @@ public static class ExportReadinessEngine
             list.Add(EvaluatePackingQuantityReconciled(ctx));
             list.Add(EvaluateShipmentTransportModeKnown(ctx));
             list.Add(EvaluateBrokerCorrectionsClear(ctx));
+
+            if (ctx.Compliance is not null)
+            {
+                list.Add(EvaluateCountryCompliance(ctx.Compliance));
+            }
         }
 
         return list;
@@ -168,6 +173,36 @@ public static class ExportReadinessEngine
             IsBlocking: true,
             IsSatisfied: satisfied,
             Status: satisfied ? "satisfied" : "has-blocking-corrections");
+    }
+
+    private static ExportRequirementEvaluation EvaluateCountryCompliance(
+        ExportComplianceOperationalContext compliance)
+    {
+        var revalidationBlocks = compliance.ComplianceRevalidationRequired;
+        var unable = compliance.ComplianceStatus == ExportComplianceEvaluationResult.UnableToEvaluate;
+        var blocked = compliance.ComplianceStatus == ExportComplianceEvaluationResult.Blocked
+            || compliance.HasBlockingComplianceRequirement;
+        var attention = compliance.ComplianceStatus == ExportComplianceEvaluationResult.Attention;
+
+        var isBlocking = unable || blocked || revalidationBlocks;
+        var satisfied = !isBlocking && !attention;
+
+        var status = revalidationBlocks
+            ? "revalidation-required"
+            : compliance.ComplianceStatus switch
+            {
+                ExportComplianceEvaluationResult.Ready => "ready",
+                ExportComplianceEvaluationResult.Attention => "attention",
+                ExportComplianceEvaluationResult.Blocked => "blocked",
+                _ => "unable-to-evaluate",
+            };
+
+        return new ExportRequirementEvaluation(
+            "country-compliance",
+            "Country compliance",
+            IsBlocking: isBlocking,
+            IsSatisfied: satisfied,
+            Status: status);
     }
 
     private static ExportRequirementEvaluation EvaluateSourceOrderLinked(ExportCase caseEntity)

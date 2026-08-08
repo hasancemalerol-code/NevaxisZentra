@@ -11,7 +11,8 @@ namespace CrevaFactOS.Persistence.Export;
 
 public sealed class ExportCaseWriteRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession)
+    TenantDatabaseSession tenantDatabaseSession,
+    IExportComplianceWriteRepository complianceWriteRepository)
     : IExportCaseWriteRepository
 {
     private static readonly Regex CountryCodePattern = new("^[A-Z]{2}$", RegexOptions.Compiled);
@@ -369,6 +370,9 @@ public sealed class ExportCaseWriteRepository(
 
                     if (!string.Equals(previousDestination, exportCase.DestinationCountryCode, StringComparison.Ordinal))
                     {
+                        await complianceWriteRepository.MarkDestinationChangeRevalidationAsync(
+                            context, exportCase, ct);
+
                         AppendActivity(
                             exportCase,
                             ExportActivityEventTypes.DestinationCountrySet,

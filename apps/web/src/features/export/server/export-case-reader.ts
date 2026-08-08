@@ -8,6 +8,13 @@ import type {
   ExportShipmentReadiness,
 } from "../domain/export-2l";
 import type {
+  CountryKnowledgeEntry,
+  CountryResearchCaseSummary,
+  CountryResearchDetail,
+  ExportComplianceSummary,
+  ExportTraceability,
+} from "../domain/export-3l";
+import type {
   ExportActivity,
   ExportCaseDetail,
   ExportCaseSummary,
@@ -18,15 +25,20 @@ import {
   getExportBrokerWorkspace,
   getExportCaseById,
   getExportCaseByOrder,
+  getExportComplianceSummary,
   getExportPacking,
   getExportPackingReconciliation,
   getExportReadiness,
   getExportShipment,
   getExportShipmentReadiness,
+  getExportTraceability,
+  getCountryResearchCase,
   listExportActivity,
   listExportCases,
   listExportDocuments,
   listExportShipments,
+  listCountryKnowledgeEntries,
+  listCountryResearchCases,
   type ExportCaseApiFailure,
 } from "./export-case-api-client";
 import {
@@ -92,6 +104,26 @@ export type ExportBrokerWorkspaceResult =
       status: "success";
       workspace: ExportBrokerWorkspace | null;
     }>
+  | ExportCaseReadFailure;
+
+export type ExportComplianceSummaryResult =
+  | Readonly<{ status: "success"; compliance: ExportComplianceSummary }>
+  | ExportCaseReadFailure;
+
+export type ExportTraceabilityResult =
+  | Readonly<{ status: "success"; traceability: ExportTraceability }>
+  | ExportCaseReadFailure;
+
+export type CountryResearchListResult =
+  | Readonly<{ status: "success"; cases: CountryResearchCaseSummary[] }>
+  | ExportCaseReadFailure;
+
+export type CountryResearchDetailResult =
+  | Readonly<{ status: "success"; detail: CountryResearchDetail }>
+  | ExportCaseReadFailure;
+
+export type CountryKnowledgeListResult =
+  | Readonly<{ status: "success"; entries: CountryKnowledgeEntry[] }>
   | ExportCaseReadFailure;
 
 type ResolvedContext =
@@ -544,4 +576,99 @@ export async function readBrokerWorkspace(
   }
 
   return { status: "success", workspace: result.value };
+}
+
+export async function readComplianceSummary(
+  exportCaseId: string,
+): Promise<ExportComplianceSummaryResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  const result = await getExportComplianceSummary(resolved.context, normalizedId);
+  if (result.status === "failure") return result;
+
+  return { status: "success", compliance: result.value };
+}
+
+export async function readTraceability(
+  exportCaseId: string,
+): Promise<ExportTraceabilityResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  const result = await getExportTraceability(resolved.context, normalizedId);
+  if (result.status === "failure") return result;
+
+  return { status: "success", traceability: result.value };
+}
+
+export async function readCountryResearchCases(query?: {
+  countryCode?: string;
+  status?: string;
+}): Promise<CountryResearchListResult> {
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  const result = await listCountryResearchCases(resolved.context, query);
+  if (result.status === "failure") return result;
+
+  return { status: "success", cases: result.value };
+}
+
+export async function readCountryResearchCase(
+  researchCaseId: string,
+): Promise<CountryResearchDetailResult> {
+  const normalizedId = researchCaseId.trim();
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "researchCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  const result = await getCountryResearchCase(resolved.context, normalizedId);
+  if (result.status === "failure") return result;
+
+  return { status: "success", detail: result.value };
+}
+
+export async function readCountryKnowledgeEntries(query?: {
+  countryCode?: string;
+  verificationStatus?: string;
+}): Promise<CountryKnowledgeListResult> {
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  const result = await listCountryKnowledgeEntries(resolved.context, query);
+  if (result.status === "failure") return result;
+
+  return { status: "success", entries: result.value };
 }
