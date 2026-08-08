@@ -62,6 +62,14 @@ public static class OutboxMessageTypes
     public const string ProductionExceptionAssigned = "production-order-exception-assigned";
     public const string ProductionExceptionUnassigned = "production-order-exception-unassigned";
 
+    // Export
+    public const string ExportCaseCreated = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCaseCreated;
+    public const string ExportDocumentRegistered = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportDocumentRegistered;
+    public const string ExportDocumentVerified = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportDocumentVerified;
+    public const string ExportReadinessChanged = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportReadinessChanged;
+    public const string ExportReady = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportReady;
+    public const string ExportBlocked = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBlocked;
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -107,6 +115,12 @@ public static class OutboxMessageTypes
             ProductionHandoverCreated,
             ProductionExceptionAssigned,
             ProductionExceptionUnassigned,
+            ExportCaseCreated,
+            ExportDocumentRegistered,
+            ExportDocumentVerified,
+            ExportReadinessChanged,
+            ExportReady,
+            ExportBlocked,
         ],
         StringComparer.Ordinal);
 }

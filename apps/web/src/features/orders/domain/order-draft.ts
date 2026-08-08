@@ -148,6 +148,12 @@ export type OrderDraft = Readonly<{
   issues: readonly OrderFieldIssue[];
   approval: OrderDraftApproval;
   transfer: OrderDraftTransfer;
+  /** Deterministic export signal for EXPORT-1L. Not inferred from free text. */
+  isExport: boolean;
+  /** ISO-3166 alpha-2 destination country when isExport is true. */
+  destinationCountryCode?: string;
+  /** ISO-3166 alpha-2 origin country when known. */
+  originCountryCode?: string;
 }>;
 
 export function hasBlockingOrderIssues(

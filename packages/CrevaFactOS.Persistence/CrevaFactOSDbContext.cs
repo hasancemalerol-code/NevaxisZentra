@@ -8,6 +8,7 @@ using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
+using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -78,6 +79,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ProductionOrderShiftAssignment> ProductionOrderShiftAssignments => Set<ProductionOrderShiftAssignment>();
     public DbSet<ProductionOperatorAssignment> ProductionOperatorAssignments => Set<ProductionOperatorAssignment>();
     public DbSet<ProductionShiftHandover> ProductionShiftHandovers => Set<ProductionShiftHandover>();
+
+    // Export
+    public DbSet<ExportCase> ExportCases => Set<ExportCase>();
+    public DbSet<ExportDocument> ExportDocuments => Set<ExportDocument>();
+    public DbSet<ExportCaseActivity> ExportCaseActivities => Set<ExportCaseActivity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -541,6 +547,25 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export
+        modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());
+        modelBuilder.Entity<ExportCase>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportDocumentEntityConfiguration());
+        modelBuilder.Entity<ExportDocument>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportCaseActivityEntityConfiguration());
+        modelBuilder.Entity<ExportCaseActivity>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

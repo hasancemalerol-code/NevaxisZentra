@@ -1,4 +1,5 @@
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Production;
@@ -108,6 +109,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             tenantRole.Id,
             seedTimestampUtc,
             cancellationToken);
+        await EnsureExportReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportDocumentManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportDocumentVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -236,6 +245,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureExecutionExceptionAssignPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
+            dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
+        await EnsureExportPilotCaseAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
@@ -1078,6 +1089,97 @@ internal sealed class DevelopmentPilotBootstrapService(
             ProductionExecutionPermissionKeys.ExceptionAssign,
             DevelopmentPilotIds.ExecutionExceptionAssignPermissionDefinitionId,
             cancellationToken);
+
+    private static Task EnsureExportReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.Read,
+            DevelopmentPilotIds.ExportReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportWritePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.Write,
+            DevelopmentPilotIds.ExportWritePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportDocumentManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.DocumentManage,
+            DevelopmentPilotIds.ExportDocumentManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportDocumentVerifyPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.DocumentVerify,
+            DevelopmentPilotIds.ExportDocumentVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static async Task EnsureExportPilotCaseAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var exists = await dbContext.ExportCases
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                c =>
+                    c.TenantId == tenantId
+                    && c.FacilityId == facilityId
+                    && c.SourceOrderId == DevelopmentPilotIds.ExportPilotSourceOrderId,
+                cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        var exportCase = new ExportCase
+        {
+            Id = DevelopmentPilotIds.ExportPilotCaseId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            SourceOrderId = DevelopmentPilotIds.ExportPilotSourceOrderId,
+            CaseNumber = "EXP-2026-000001",
+            SourceOrderReference = "PILOT-ORD-EXPORT-001",
+            CustomerName = "Nordic Components GmbH",
+            DestinationCountryCode = "DE",
+            OriginCountryCode = "TR",
+            IncotermCode = null,
+            Status = ExportCaseStatus.Open,
+            ReadinessStatus = ExportReadinessStatus.NotReady,
+            ReadinessPercent = 0,
+            BlockingIssueCount = 0,
+            MissingRequirementCount = 0,
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBySubjectId = DevelopmentPilotIds.IdentitySubjectId.ToString(),
+            UpdatedAtUtc = seedTimestampUtc,
+            LastModifiedBySubjectId = DevelopmentPilotIds.IdentitySubjectId.ToString(),
+            Version = 1,
+        };
+
+        var readiness = ExportReadinessEngine.Calculate(exportCase, []);
+        exportCase.ReadinessStatus = readiness.ReadinessStatus;
+        exportCase.ReadinessPercent = readiness.ReadinessPercent;
+        exportCase.BlockingIssueCount = readiness.BlockingIssueCount;
+        exportCase.MissingRequirementCount = readiness.MissingRequirementCount;
+        exportCase.Status = readiness.SuggestedCaseStatus;
+
+        dbContext.ExportCases.Add(exportCase);
+    }
 
     private static async Task EnsurePilotProductionShiftsAsync(
         CrevaFactOSDbContext dbContext,

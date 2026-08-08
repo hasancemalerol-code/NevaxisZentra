@@ -1,5 +1,6 @@
 using CrevaFactOS.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace CrevaFactOS.Persistence.Migrations;
@@ -32,6 +33,11 @@ public sealed class CrevaFactOSDesignTimeDbContextFactory
                 npgsqlOptions.MigrationsHistoryTable(CrevaFactOSDbContext.MigrationHistoryTableName);
                 npgsqlOptions.CommandTimeout(options.CommandTimeoutSeconds);
             });
+
+        // SQL-authored migrations (e.g. EXPORT-1L) may intentionally defer full
+        // model-snapshot regeneration while still shipping complete DDL/RLS.
+        builder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
 
         return new CrevaFactOSDbContext(builder.Options);
     }

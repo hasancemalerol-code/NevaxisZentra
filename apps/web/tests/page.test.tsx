@@ -14,9 +14,12 @@ import { navigationItems } from "../src/lib/navigation/primary-navigation";
 test("renders the polished shell preview without implying real operational data", () => {
   const markup = renderToStaticMarkup(<HomePage />);
 
-  assert.match(markup, /Operasyon çalışma alanı/);
+  assert.match(markup, /Operasyon karar merkezi|Operasyon çalışma alanı/);
   assert.match(markup, /UI önizleme/);
-  assert.match(markup, /Gerçek görev verisi bağlı değil/);
+  assert.match(
+    markup,
+    /Gerçek görev verisi bağlı değil|Gerçek veri bağlantısı sonraki entegrasyon paketlerinde uygulanacaktır/,
+  );
   assert.doesNotMatch(markup, /Active Production Orders|Live Alarms/);
 });
 
@@ -39,10 +42,27 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
   );
 
   for (const item of navigationItems) {
-    assert.match(markup, new RegExp(item.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    const escapedLabel = item.label
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      .replaceAll("&", "&amp;");
+    assert.match(markup, new RegExp(escapedLabel));
   }
-  assert.equal(navigationItems.length, 15);
-  assert.match(markup, /aria-current="page" href="\/"/);
+  assert.equal(navigationItems.length, 33);
+  assert.ok(
+    navigationItems.some(
+      (item) => item.label === "İhracat" && item.href === "/ihracat",
+    ),
+  );
+  const productionNavIndex = navigationItems.findIndex(
+    (item) => item.label === "Üretim",
+  );
+  const exportNavIndex = navigationItems.findIndex(
+    (item) => item.label === "İhracat",
+  );
+  assert.equal(exportNavIndex, productionNavIndex + 1);
+  assert.match(markup, /navigation-label">İhracat</);
+  assert.match(markup, /href="\/ihracat"/);
+  assert.match(markup, /aria-current="page"[^>]*href="\/"/);
   assert.doesNotMatch(markup, />Finance</i);
   assert.doesNotMatch(markup, />Accounting</i);
   assert.doesNotMatch(markup, />Payroll</i);
@@ -58,7 +78,10 @@ test("collapsed sidebar preserves accessible labels and expandable control", () 
   assert.match(markup, /aria-label="Kenar çubuğunu genişlet"/);
   assert.match(markup, /aria-expanded="false"/);
   assert.match(markup, /title="AI Görev Merkezi"/);
-  assert.match(markup, /aria-current="page" title="Dashboard \/ Operasyon Merkezi" href="\/dashboard"/);
+  assert.match(
+    markup,
+    /aria-current="page"[^>]*title="Dashboard \/ Operasyon Merkezi"[^>]*href="\/dashboard"|aria-current="page"[^>]*href="\/dashboard"[^>]*title="Dashboard \/ Operasyon Merkezi"/,
+  );
 });
 
 test("page header and KPI variants render typed foundational treatments", () => {

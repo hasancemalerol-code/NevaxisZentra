@@ -67,6 +67,14 @@ public static class AuditActions
     public const string ProductionExceptionAssign = "production.order.exception.assign";
     public const string ProductionExceptionUnassign = "production.order.exception.unassign";
 
+    // Export
+    public const string ExportCaseCreated = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportCaseCreated;
+    public const string ExportCaseUpdated = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportCaseUpdated;
+    public const string ExportDocumentRegistered = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportDocumentRegistered;
+    public const string ExportDocumentVerified = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportDocumentVerified;
+    public const string ExportDocumentRejected = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportDocumentRejected;
+    public const string ExportReadinessChanged = CrevaFactOS.Persistence.Export.ExportAuditActions.ExportReadinessChanged;
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         Authenticate,
@@ -115,5 +123,11 @@ public static class AuditActions
         ProductionHandoverCreate,
         ProductionExceptionAssign,
         ProductionExceptionUnassign,
+        ExportCaseCreated,
+        ExportCaseUpdated,
+        ExportDocumentRegistered,
+        ExportDocumentVerified,
+        ExportDocumentRejected,
+        ExportReadinessChanged,
     };
 }

@@ -70,6 +70,14 @@ public static class AuditEventTypes
     public const string ProductionExceptionAssigned = "production.order.exception.assigned";
     public const string ProductionExceptionUnassigned = "production.order.exception.unassigned";
 
+    // Export
+    public const string ExportCaseCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCaseCreated;
+    public const string ExportCaseUpdated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportCaseUpdated;
+    public const string ExportDocumentRegistered = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportDocumentRegistered;
+    public const string ExportDocumentVerified = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportDocumentVerified;
+    public const string ExportDocumentRejected = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportDocumentRejected;
+    public const string ExportReadinessChanged = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportReadinessChanged;
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -121,5 +129,11 @@ public static class AuditEventTypes
         ProductionHandoverCreated,
         ProductionExceptionAssigned,
         ProductionExceptionUnassigned,
+        ExportCaseCreated,
+        ExportCaseUpdated,
+        ExportDocumentRegistered,
+        ExportDocumentVerified,
+        ExportDocumentRejected,
+        ExportReadinessChanged,
     };
 }

@@ -3,7 +3,6 @@ import { OrderTransferCommandPanel } from "@/features/orders/components/order-tr
 import { OrderTransferReadinessPanel } from "@/features/orders/components/order-transfer-readiness-panel";
 import { OrderTransferTargetCard } from "@/features/orders/components/order-transfer-target-card";
 import {
-  getOrderTargetSystemDescription,
   getOrderTargetSystemLabel,
 } from "@/features/orders/presentation/order-target-system-labels";
 import { OrderDraftSourceEvidencePanel } from "@/features/orders/components/order-draft-source-evidence-panel";
@@ -55,6 +54,9 @@ import type {
   OrderIntakeSource,
   OrderMatchConfidence,
 } from "@/features/orders/domain/order-draft";
+import { OrderExportSummaryPanel } from "@/features/export/components/order-export-summary-panel";
+import { readExportCaseByOrder } from "@/features/export/server/export-case-reader";
+import { ensureExportCaseFromOrderAction } from "@/features/export/server/export-case-writer";
 
 type OrderDraftDetailPageProps = Readonly<{
   params: Promise<{
@@ -116,6 +118,16 @@ export default async function OrderDraftDetailPage({
       (issue) => issue.blocking,
     ).length;
 
+  const exportCaseResult =
+    orderDraft.isExport
+      ? await readExportCaseByOrder(orderDraft.id)
+      : null;
+
+  const exportSummary =
+    exportCaseResult?.status === "success"
+      ? exportCaseResult.exportCase
+      : null;
+
   return (
     <PageContent>
       <Link
@@ -145,6 +157,29 @@ export default async function OrderDraftDetailPage({
         preview
         title={orderDraft.title}
       />
+
+      {orderDraft.isExport && orderDraft.destinationCountryCode ? (
+        <OrderExportSummaryPanel
+          summary={exportSummary}
+          ensureInput={{
+            facilityId: "",
+            sourceOrderId: orderDraft.id,
+            sourceOrderReference:
+              orderDraft.id ===
+              "bb000001-0050-4000-8000-000000000050"
+                ? "PILOT-ORD-EXPORT-001"
+                : (orderDraft.sources[0]?.externalReferenceId ??
+                  orderDraft.id),
+            customerName:
+              orderDraft.customer.customerName ?? "—",
+            isExport: true,
+            destinationCountryCode:
+              orderDraft.destinationCountryCode,
+            originCountryCode: orderDraft.originCountryCode,
+          }}
+          onEnsure={ensureExportCaseFromOrderAction}
+        />
+      ) : null}
 
       <Section
         action={

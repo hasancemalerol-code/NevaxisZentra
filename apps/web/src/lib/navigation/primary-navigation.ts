@@ -17,6 +17,7 @@ import {
   PackageSearch,
   Settings,
   ShieldCheck,
+  Ship,
   ShoppingBasket,
   TriangleAlert,
   UsersRound,
@@ -76,6 +77,11 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Üretim",
         href: "/uretim",
         icon: Factory,
+      },
+      {
+        label: "İhracat",
+        href: "/ihracat",
+        icon: Ship,
       },
       {
         label: "Vardiyalar",

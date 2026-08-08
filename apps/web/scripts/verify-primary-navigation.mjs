@@ -29,13 +29,12 @@ function countOccurrences(value, searchValue) {
 const requiredUniqueValues = [
   'label: "Siparişler"',
   'href: "/siparisler"',
-  'icon: ShoppingBasket',
   'label: "Planlama"',
   'href: "/planlama"',
-  'icon: CalendarRange',
   'label: "Üretim"',
   'href: "/uretim"',
-  'icon: Factory',
+  'label: "İhracat"',
+  'href: "/ihracat"',
 ];
 
 for (const requiredValue of requiredUniqueValues) {
@@ -51,14 +50,18 @@ for (const requiredValue of requiredUniqueValues) {
   }
 }
 
+if (!source.includes("icon: Ship")) {
+  fail('İhracat must use icon: Ship.');
+}
+
 const factoryOperationsGroupPattern =
-  /label:\s*"Fabrika Operasyonları"\s*,\s*items:\s*\[\s*\{\s*label:\s*"Siparişler"\s*,\s*href:\s*"\/siparisler"\s*,\s*icon:\s*ShoppingBasket\s*,?\s*\}\s*,\s*\{\s*label:\s*"Planlama"\s*,\s*href:\s*"\/planlama"\s*,\s*icon:\s*CalendarRange\s*,?\s*\}\s*,\s*\{\s*label:\s*"Üretim"\s*,\s*href:\s*"\/uretim"\s*,\s*icon:\s*Factory\s*,?\s*\}/s;
+  /label:\s*"Fabrika operasyonları"\s*,\s*items:\s*\[\s*\{\s*label:\s*"Siparişler"\s*,\s*href:\s*"\/siparisler"\s*,\s*icon:\s*ShoppingBasket\s*,?\s*\}\s*,\s*\{\s*label:\s*"Planlama"\s*,\s*href:\s*"\/planlama"\s*,\s*icon:\s*CalendarRange\s*,?\s*\}\s*,\s*\{\s*label:\s*"Üretim"\s*,\s*href:\s*"\/uretim"\s*,\s*icon:\s*Factory\s*,?\s*\}\s*,\s*\{\s*label:\s*"İhracat"\s*,\s*href:\s*"\/ihracat"\s*,\s*icon:\s*Ship\s*,?\s*\}/s;
 
 if (!factoryOperationsGroupPattern.test(source)) {
   fail(
     [
-      '"Fabrika Operasyonları" group must begin with',
-      "Siparişler -> Planlama -> Üretim.",
+      '"Fabrika operasyonları" group must begin with',
+      "Siparişler -> Planlama -> Üretim -> İhracat.",
       "Labels, routes, icons, or canonical order changed.",
     ].join(" "),
   );
@@ -76,16 +79,24 @@ const productionIndex = source.indexOf(
   'label: "Üretim"',
 );
 
+const exportIndex = source.indexOf(
+  'label: "İhracat"',
+);
+
+const shiftsIndex = source.indexOf(
+  'label: "Vardiyalar"',
+);
+
 if (
   !(
-    ordersIndex <
-      planningIndex &&
-    planningIndex <
-      productionIndex
+    ordersIndex < planningIndex &&
+    planningIndex < productionIndex &&
+    productionIndex < exportIndex &&
+    exportIndex < shiftsIndex
   )
 ) {
   fail(
-    "Canonical order must be Siparişler -> Planlama -> Üretim.",
+    "Canonical order must be Siparişler -> Planlama -> Üretim -> İhracat -> Vardiyalar.",
   );
 }
 
@@ -93,5 +104,5 @@ console.log(
   "Primary navigation verification passed.",
 );
 console.log(
-  "Locked factory operations order: Siparişler -> Planlama -> Üretim.",
+  "Locked factory operations order: Siparişler -> Planlama -> Üretim -> İhracat.",
 );

@@ -128,4 +128,24 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid PilotShiftV3Id =
         Guid.Parse("bb000001-0042-4000-8000-000000000042");
+
+    // Export permission definitions
+    public static readonly Guid ExportReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000028");
+
+    public static readonly Guid ExportWritePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000029");
+
+    public static readonly Guid ExportDocumentManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000030");
+
+    public static readonly Guid ExportDocumentVerifyPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000031");
+
+    // Export pilot fixture — SourceOrderId only (no commercial Order table)
+    public static readonly Guid ExportPilotSourceOrderId =
+        Guid.Parse("bb000001-0050-4000-8000-000000000050");
+
+    public static readonly Guid ExportPilotCaseId =
+        Guid.Parse("bb000001-0051-4000-8000-000000000051");
 }
