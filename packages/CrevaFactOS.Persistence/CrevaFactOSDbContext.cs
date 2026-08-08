@@ -73,6 +73,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     // 4L — execution exceptions
     public DbSet<ProductionExecutionExceptionRecord> ProductionExecutionExceptions => Set<ProductionExecutionExceptionRecord>();
 
+    // 5L — shifts, operator assignments, handovers
+    public DbSet<ProductionShift> ProductionShifts => Set<ProductionShift>();
+    public DbSet<ProductionOrderShiftAssignment> ProductionOrderShiftAssignments => Set<ProductionOrderShiftAssignment>();
+    public DbSet<ProductionOperatorAssignment> ProductionOperatorAssignments => Set<ProductionOperatorAssignment>();
+    public DbSet<ProductionShiftHandover> ProductionShiftHandovers => Set<ProductionShiftHandover>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -510,6 +516,31 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && ex.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // 5L
+        modelBuilder.ApplyConfiguration(new ProductionShiftEntityConfiguration());
+        modelBuilder.Entity<ProductionShift>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionOrderShiftAssignmentEntityConfiguration());
+        modelBuilder.Entity<ProductionOrderShiftAssignment>().HasQueryFilter(sa =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && sa.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionOperatorAssignmentEntityConfiguration());
+        modelBuilder.Entity<ProductionOperatorAssignment>().HasQueryFilter(oa =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && oa.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionShiftHandoverEntityConfiguration());
+        modelBuilder.Entity<ProductionShiftHandover>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

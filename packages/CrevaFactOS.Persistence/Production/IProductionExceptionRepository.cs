@@ -27,4 +27,15 @@ public interface IProductionExceptionRepository
         Guid productionOrderId,
         int limit,
         CancellationToken cancellationToken = default);
+
+    // 5L: exception ownership routing
+    Task<ProductionExceptionWriteResult> AssignExceptionAsync(
+        ProductionOrderOperationContext context,
+        AssignExceptionCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<ProductionExceptionWriteResult> UnassignExceptionAsync(
+        ProductionOrderOperationContext context,
+        UnassignExceptionCommand command,
+        CancellationToken cancellationToken = default);
 }

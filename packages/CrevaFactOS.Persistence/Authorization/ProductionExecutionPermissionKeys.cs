@@ -15,4 +15,9 @@ public static class ProductionExecutionPermissionKeys
 
     // 4L
     public const string Exception = "production.execution.exception";
+
+    // 5L
+    public const string Assign = "production.execution.assign";
+    public const string Handover = "production.execution.handover";
+    public const string ExceptionAssign = "production.execution.exception.assign";
 }

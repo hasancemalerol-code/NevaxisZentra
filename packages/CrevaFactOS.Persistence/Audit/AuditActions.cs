@@ -52,6 +52,21 @@ public static class AuditActions
     public const string ProductionDowntimeRecover = "production.order.downtime.recover";
     public const string ProductionSetupRecover = "production.order.setup.recover";
 
+    // 5L — shift
+    public const string ProductionShiftAssign = "production.order.shift.assign";
+    public const string ProductionShiftReassign = "production.order.shift.reassign";
+
+    // 5L — operator
+    public const string ProductionOperatorAssign = "production.order.operator.assign";
+    public const string ProductionOperatorRelease = "production.order.operator.release";
+
+    // 5L — handover
+    public const string ProductionHandoverCreate = "production.order.handover.create";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssign = "production.order.exception.assign";
+    public const string ProductionExceptionUnassign = "production.order.exception.unassign";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         Authenticate,
@@ -93,5 +108,12 @@ public static class AuditActions
         ProductionExceptionResolve,
         ProductionDowntimeRecover,
         ProductionSetupRecover,
+        ProductionShiftAssign,
+        ProductionShiftReassign,
+        ProductionOperatorAssign,
+        ProductionOperatorRelease,
+        ProductionHandoverCreate,
+        ProductionExceptionAssign,
+        ProductionExceptionUnassign,
     };
 }

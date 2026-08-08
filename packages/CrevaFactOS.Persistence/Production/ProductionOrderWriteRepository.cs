@@ -5,14 +5,19 @@ using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CrevaFactOS.Persistence.Production;
 
 public sealed class ProductionOrderWriteRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession)
+    TenantDatabaseSession tenantDatabaseSession,
+    IOptions<ProductionExecutionPolicyOptions>? policyOptions = null)
     : IProductionOrderWriteRepository
 {
+    private ProductionExecutionPolicyOptions Policy =>
+        policyOptions?.Value ?? new ProductionExecutionPolicyOptions();
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -303,6 +308,39 @@ public sealed class ProductionOrderWriteRepository(
                         "An active setup session exists. Complete or recover it before starting production.");
                 }
 
+                // 5L: primary operator policy
+                if (Policy.RequirePrimaryOperatorForStart)
+                {
+                    var hasPrimary = await dbContext.ProductionOperatorAssignments
+                        .AnyAsync(oa => oa.TenantId == context.TenantId
+                            && oa.ProductionOrderId == order.Id
+                            && oa.AssignmentRole == ProductionOperatorRoles.PrimaryOperator
+                            && oa.ReleasedAtUtc == null, ct);
+
+                    if (!hasPrimary)
+                    {
+                        return ProductionOrderWriteResult.Fail(
+                            ProductionOrderFailureCodes.PrimaryOperatorRequired,
+                            "A primary operator must be assigned before starting production.");
+                    }
+                }
+
+                // 5L: shift policy
+                if (Policy.RequireShiftForStart)
+                {
+                    var hasShift = await dbContext.ProductionOrderShiftAssignments
+                        .AnyAsync(sa => sa.TenantId == context.TenantId
+                            && sa.ProductionOrderId == order.Id
+                            && sa.ReleasedAtUtc == null, ct);
+
+                    if (!hasShift)
+                    {
+                        return ProductionOrderWriteResult.Fail(
+                            ProductionOrderFailureCodes.ShiftRequired,
+                            "A shift must be assigned before starting production.");
+                    }
+                }
+
                 return null;
             },
             (order, now) =>
@@ -448,7 +486,7 @@ public sealed class ProductionOrderWriteRepository(
                     .AnyAsync(e => e.TenantId == context.TenantId
                         && e.ProductionOrderId == order.Id
                         && e.Severity == ProductionExceptionSeverities.Critical
-                        && ProductionExceptionStatuses.Unresolved.Contains(e.Status), ct);
+                        && (e.Status == ProductionExceptionStatuses.Open || e.Status == ProductionExceptionStatuses.Acknowledged), ct);
 
                 if (hasCriticalException)
                 {
@@ -488,6 +526,15 @@ public sealed class ProductionOrderWriteRepository(
             {
                 order.Status = ProductionOrderStatus.Completed;
                 order.ActualEndAtUtc = now;
+
+                // 5L: Clear denormalized resource fields atomically at completion.
+                // Active assignments are released below in the post-apply step.
+                order.CurrentShiftId = null;
+                order.CurrentShiftCode = null;
+                order.CurrentShiftStartAtUtc = null;
+                order.CurrentShiftEndAtUtc = null;
+                order.PrimaryOperatorSubjectId = null;
+                order.ActiveOperatorCount = 0;
             },
             () => shortFlag[0] ? ProductionAuditActions.ProductionOrderCompleteShort : ProductionAuditActions.ProductionOrderComplete,
             () => shortFlag[0] ? ProductionAuditEventTypes.ProductionOrderCompletedShort : ProductionAuditEventTypes.ProductionOrderCompleted,
@@ -626,6 +673,35 @@ public sealed class ProductionOrderWriteRepository(
                     var previousStatus = ProductionOrderValueConversions.ToStorage(order.Status);
 
                     applyTransition(order, now);
+
+                    // 5L: Release active shift/operator assignments atomically on completion.
+                    if (order.Status == ProductionOrderStatus.Completed)
+                    {
+                        var actorId = context.IdentitySubjectId.ToString();
+                        const string completionReleaseReason = "Production order completed.";
+
+                        var activeShiftAssignments = await dbContext.ProductionOrderShiftAssignments
+                            .Where(sa => sa.TenantId == context.TenantId && sa.ProductionOrderId == order.Id && sa.ReleasedAtUtc == null)
+                            .ToListAsync(ct);
+                        foreach (var sa in activeShiftAssignments)
+                        {
+                            sa.ReleasedAtUtc = now;
+                            sa.ReleasedBySubjectId = actorId;
+                            sa.ReleaseReason = completionReleaseReason;
+                            sa.Version++;
+                        }
+
+                        var activeOperatorAssignments = await dbContext.ProductionOperatorAssignments
+                            .Where(oa => oa.TenantId == context.TenantId && oa.ProductionOrderId == order.Id && oa.ReleasedAtUtc == null)
+                            .ToListAsync(ct);
+                        foreach (var oa in activeOperatorAssignments)
+                        {
+                            oa.ReleasedAtUtc = now;
+                            oa.ReleasedBySubjectId = actorId;
+                            oa.ReleaseReason = completionReleaseReason;
+                            oa.Version++;
+                        }
+                    }
 
                     order.LastModifiedBySubjectId = context.IdentitySubjectId.ToString();
                     order.Version += 1;

@@ -87,7 +87,10 @@ public sealed class ProductionOrderReadRepository(
                             o.Version,
                             o.UpdatedAtUtc,
                             o.TotalDowntimeSeconds,
-                            o.ManualCycleCount))
+                            o.ManualCycleCount,
+                            o.CurrentShiftCode,
+                            o.PrimaryOperatorSubjectId,
+                            o.ActiveOperatorCount))
                         .ToListAsync(ct);
 
                     return ProductionOrderListResult.Success(orders);
@@ -167,7 +170,14 @@ public sealed class ProductionOrderReadRepository(
                         order.TotalSetupSeconds,
                         order.ManualCycleCount,
                         order.TotalManualCycleDurationMilliseconds,
-                        order.LastCycleAtUtc));
+                        order.LastCycleAtUtc,
+                        order.CurrentShiftId,
+                        order.CurrentShiftCode,
+                        order.CurrentShiftStartAtUtc,
+                        order.CurrentShiftEndAtUtc,
+                        order.PrimaryOperatorSubjectId,
+                        order.ActiveOperatorCount,
+                        order.LastAssignmentAtUtc));
                 },
                 cancellationToken);
         }

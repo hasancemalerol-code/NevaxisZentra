@@ -50,4 +50,15 @@ public sealed class ProductionOrder : ITenantScopedEntity
 
     /// <summary>Timestamp of the most recently recorded manual cycle.</summary>
     public DateTimeOffset? LastCycleAtUtc { get; set; }
+
+    // ── Operational summary fields (5L) ─────────────────────────────────────
+    // Denormalized for cheap list + header rendering without joining assignments.
+
+    public Guid? CurrentShiftId { get; set; }
+    public string? CurrentShiftCode { get; set; }
+    public DateTimeOffset? CurrentShiftStartAtUtc { get; set; }
+    public DateTimeOffset? CurrentShiftEndAtUtc { get; set; }
+    public string? PrimaryOperatorSubjectId { get; set; }
+    public int ActiveOperatorCount { get; set; }
+    public DateTimeOffset? LastAssignmentAtUtc { get; set; }
 }

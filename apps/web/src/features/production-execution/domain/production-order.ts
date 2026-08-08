@@ -44,6 +44,14 @@ export type ProductionOrder = Readonly<{
   version: number;
   createdAtUtc: string;
   updatedAtUtc: string;
+  // 5L: shift/operator summary fields
+  currentShiftId?: string;
+  currentShiftCode?: string;
+  currentShiftStartAtUtc?: string;
+  currentShiftEndAtUtc?: string;
+  primaryOperatorSubjectId?: string;
+  activeOperatorCount?: number;
+  lastAssignmentAtUtc?: string;
 }>;
 
 export type ProductionOrderSummary = Readonly<{
@@ -66,6 +74,10 @@ export type ProductionOrderSummary = Readonly<{
   manualCycleCount?: number;
   version: number;
   updatedAtUtc: string;
+  // 5L: shift/operator summary fields
+  currentShiftCode?: string;
+  primaryOperatorSubjectId?: string;
+  activeOperatorCount?: number;
 }>;
 
 export const ACTIVE_PRODUCTION_ORDER_STATUSES: ReadonlySet<ProductionOrderStatus> =

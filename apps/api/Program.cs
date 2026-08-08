@@ -69,6 +69,7 @@ app.MapProductionPlanningWorkflowEndpoints();
 
 app.MapProductionExecutionReadEndpoints();
 app.MapProductionExecutionWriteEndpoints();
+app.MapProductionResourceExecutionReadEndpoints();
 
 app.MapHealthChecks(
     "/health/live",

@@ -55,6 +55,21 @@ public static class AuditEventTypes
     public const string ProductionDowntimeRecovered = "production.order.downtime.recovered";
     public const string ProductionSetupRecovered = "production.order.setup.recovered";
 
+    // 5L — shift
+    public const string ProductionShiftAssigned = "production.order.shift.assigned";
+    public const string ProductionShiftReassigned = "production.order.shift.reassigned";
+
+    // 5L — operator
+    public const string ProductionOperatorAssigned = "production.order.operator.assigned";
+    public const string ProductionOperatorReleased = "production.order.operator.released";
+
+    // 5L — handover
+    public const string ProductionHandoverCreated = "production.order.handover.created";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssigned = "production.order.exception.assigned";
+    public const string ProductionExceptionUnassigned = "production.order.exception.unassigned";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -99,5 +114,12 @@ public static class AuditEventTypes
         ProductionExceptionResolved,
         ProductionDowntimeRecovered,
         ProductionSetupRecovered,
+        ProductionShiftAssigned,
+        ProductionShiftReassigned,
+        ProductionOperatorAssigned,
+        ProductionOperatorReleased,
+        ProductionHandoverCreated,
+        ProductionExceptionAssigned,
+        ProductionExceptionUnassigned,
     };
 }

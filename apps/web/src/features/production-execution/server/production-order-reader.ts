@@ -14,6 +14,13 @@ import type {
   ProductionExecutionExceptionSummary,
   ProductionExecutionHealthSummary,
 } from "../domain/production-execution-exceptions";
+import type {
+  ShiftAssignmentSummary,
+  OperatorAssignmentSummary,
+  ShiftHandoverSummary,
+  ShiftExecutionSummary,
+  OperatorExecutionSummary,
+} from "../domain/production-execution-resources";
 import {
   getProductionOrderById,
   listProductionOrders,
@@ -24,6 +31,11 @@ import {
   getRuntimeSummary,
   listExceptions,
   getHealthSummary,
+  listShiftAssignments,
+  listOperatorAssignments,
+  listHandovers,
+  getShiftExecutionSummary,
+  getOperatorExecutionSummary,
   type ProductionOrderApiFailure,
 } from "./production-order-api-client";
 import type { ProductionExecutionEntry } from "../domain/production-execution-entry";
@@ -81,6 +93,27 @@ export type ProductionExceptionListResult =
 
 export type ProductionHealthSummaryResult =
   | Readonly<{ status: "success"; summary: ProductionExecutionHealthSummary }>
+  | ProductionOrderReadFailure;
+
+// 5L result types
+export type ShiftAssignmentListResult =
+  | Readonly<{ status: "success"; assignments: ShiftAssignmentSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type OperatorAssignmentListResult =
+  | Readonly<{ status: "success"; assignments: OperatorAssignmentSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type HandoverListResult =
+  | Readonly<{ status: "success"; handovers: ShiftHandoverSummary[] }>
+  | ProductionOrderReadFailure;
+
+export type ShiftExecutionSummaryResult =
+  | Readonly<{ status: "success"; summary: ShiftExecutionSummary }>
+  | ProductionOrderReadFailure;
+
+export type OperatorExecutionSummaryResult =
+  | Readonly<{ status: "success"; summary: OperatorExecutionSummary }>
   | ProductionOrderReadFailure;
 
 type ResolvedContext =
@@ -327,6 +360,77 @@ export async function readHealthSummary(
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getHealthSummary(context, normalizedId, context.facilityId);
+  if (result.status === "failure") return result;
+  return { status: "success", summary: result.value };
+}
+
+// ── 5L: Shift/Operator/Handover reads ─────────────────────────────────────────
+
+export async function readShiftAssignments(
+  productionOrderId: string,
+  limit?: number,
+): Promise<ShiftAssignmentListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listShiftAssignments(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", assignments: result.value };
+}
+
+export async function readOperatorAssignments(
+  productionOrderId: string,
+  limit?: number,
+): Promise<OperatorAssignmentListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listOperatorAssignments(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", assignments: result.value };
+}
+
+export async function readHandovers(
+  productionOrderId: string,
+  limit?: number,
+): Promise<HandoverListResult> {
+  const normalizedId = productionOrderId.trim();
+  if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await listHandovers(context, normalizedId, context.facilityId, limit);
+  if (result.status === "failure") return result;
+  return { status: "success", handovers: result.value };
+}
+
+export async function readShiftExecutionSummary(
+  shiftId: string,
+  date: string,
+): Promise<ShiftExecutionSummaryResult> {
+  const normalizedId = shiftId.trim();
+  if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "shiftId is required.", retryable: false };
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await getShiftExecutionSummary(context, normalizedId, context.facilityId, date);
+  if (result.status === "failure") return result;
+  return { status: "success", summary: result.value };
+}
+
+export async function readOperatorExecutionSummary(
+  subjectId: string,
+): Promise<OperatorExecutionSummaryResult> {
+  const normalizedId = subjectId.trim();
+  if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "subjectId is required.", retryable: false };
+  const resolved = resolveReadContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  const { context } = resolved;
+  const result = await getOperatorExecutionSummary(context, normalizedId, context.facilityId);
   if (result.status === "failure") return result;
   return { status: "success", summary: result.value };
 }

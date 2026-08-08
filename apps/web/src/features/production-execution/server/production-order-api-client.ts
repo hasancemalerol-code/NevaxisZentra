@@ -11,6 +11,13 @@ import type {
   ProductionExecutionExceptionSummary,
   ProductionExecutionHealthSummary,
 } from "../domain/production-execution-exceptions";
+import type {
+  ShiftAssignmentSummary,
+  OperatorAssignmentSummary,
+  ShiftHandoverSummary,
+  ShiftExecutionSummary,
+  OperatorExecutionSummary,
+} from "../domain/production-execution-resources";
 import {
   parseProductionOrderDetailApiResponse,
   parseProductionOrderListApiResponse,
@@ -25,6 +32,13 @@ import {
   parseExceptionListApiResponse,
   parseHealthSummaryApiResponse,
 } from "./production-execution-exceptions-api-contracts";
+import {
+  parseShiftAssignmentListApiResponse,
+  parseOperatorAssignmentListApiResponse,
+  parseHandoverListApiResponse,
+  parseShiftExecutionSummaryApiResponse,
+  parseOperatorExecutionSummaryApiResponse,
+} from "./production-execution-resources-api-contracts";
 import type { ProductionOrderRequestContext } from "./production-order-request-context";
 
 export type ProductionOrderApiFailure = Readonly<{
@@ -638,4 +652,186 @@ export async function recoverSetupSession(
   params.set("facilityId", context.facilityId.trim());
   const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/setups/${encodeURIComponent(setupId)}/recover?${params.toString()}`;
   return executePost(context, url, { expectedVersion, resolution });
+}
+
+// ── 5L: Shift Assignment ────────────────────────────────────────────────────────
+
+export async function assignShift(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  productionShiftId: string,
+  shiftDate: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/shift-assignment?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, productionShiftId, shiftDate });
+}
+
+export async function reassignShift(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  productionShiftId: string,
+  shiftDate: string,
+  reason: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/shift-assignment/reassign?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, productionShiftId, shiftDate, reason });
+}
+
+export async function listShiftAssignments(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ShiftAssignmentSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/shift-assignments?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseShiftAssignmentListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function getShiftExecutionSummary(
+  context: ProductionOrderRequestContext,
+  shiftId: string,
+  facilityId: string,
+  date: string,
+): Promise<ProductionOrderApiResult<ShiftExecutionSummary>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  params.set("date", date);
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/shifts/${encodeURIComponent(shiftId)}/execution-summary?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseShiftExecutionSummaryApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+// ── 5L: Operator Assignment ─────────────────────────────────────────────────────
+
+export async function assignOperator(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  subjectId: string,
+  assignmentRole: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/operators?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, subjectId, assignmentRole });
+}
+
+export async function releaseOperator(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  assignmentId: string,
+  expectedVersion: number,
+  reason: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/operators/${encodeURIComponent(assignmentId)}/release?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, reason });
+}
+
+export async function listOperatorAssignments(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<OperatorAssignmentSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/operators?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseOperatorAssignmentListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+export async function getOperatorExecutionSummary(
+  context: ProductionOrderRequestContext,
+  subjectId: string,
+  facilityId: string,
+): Promise<ProductionOrderApiResult<OperatorExecutionSummary>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/operators/${encodeURIComponent(subjectId)}/execution-summary?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseOperatorExecutionSummaryApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+// ── 5L: Shift Handover ──────────────────────────────────────────────────────────
+
+export async function createHandover(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  expectedVersion: number,
+  note: string,
+  openIssuesSummary?: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/shift-handovers?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, note, openIssuesSummary });
+}
+
+export async function listHandovers(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  facilityId: string,
+  limit?: number,
+): Promise<ProductionOrderApiResult<ShiftHandoverSummary[]>> {
+  const params = new URLSearchParams();
+  params.set("facilityId", facilityId.trim());
+  if (limit !== undefined) params.set("limit", String(limit));
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/shift-handovers?${params.toString()}`;
+  return executeGet(context, url, (body) => {
+    const parsed = parseHandoverListApiResponse(body);
+    if (parsed.status === "failure") return fail("invalid-response", parsed.message, false);
+    return { status: "success", value: parsed.value };
+  });
+}
+
+// ── 5L: Exception Routing ───────────────────────────────────────────────────────
+
+export async function assignException(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+  subjectId: string,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions/${encodeURIComponent(exceptionId)}/assign?${params.toString()}`;
+  return executePost(context, url, { expectedVersion, subjectId });
+}
+
+export async function unassignException(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderWriteResult> {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+  const url = `${trimTrailingSlash(context.apiBaseUrl)}/api/production/orders/${encodeURIComponent(productionOrderId.trim())}/exceptions/${encodeURIComponent(exceptionId)}/unassign?${params.toString()}`;
+  return executePost(context, url, { expectedVersion });
 }

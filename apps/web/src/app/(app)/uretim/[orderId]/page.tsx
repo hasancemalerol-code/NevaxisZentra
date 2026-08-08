@@ -21,6 +21,9 @@ import { ProductionCyclePanel } from "@/features/production-execution/components
 import { ProductionRuntimeAnalytics } from "@/features/production-execution/components/production-runtime-analytics";
 import { ProductionHealthPanel } from "@/features/production-execution/components/production-health-panel";
 import { ProductionExceptionPanel } from "@/features/production-execution/components/production-exception-panel";
+import { ProductionShiftPanel } from "@/features/production-execution/components/production-shift-panel";
+import { ProductionOperatorPanel } from "@/features/production-execution/components/production-operator-panel";
+import { ProductionHandoverPanel } from "@/features/production-execution/components/production-handover-panel";
 import { getProductionOrderStatusLabel } from "@/features/production-execution/domain/production-order";
 import {
   readProductionOrderById,
@@ -31,6 +34,9 @@ import {
   readRuntimeSummary,
   readExceptions,
   readHealthSummary,
+  readShiftAssignments,
+  readOperatorAssignments,
+  readHandovers,
 } from "@/features/production-execution/server/production-order-reader";
 import {
   completeProductionOrderAction,
@@ -49,6 +55,13 @@ import {
   resolveExceptionAction,
   recoverDowntimeAction,
   recoverSetupSessionAction,
+  assignShiftAction,
+  reassignShiftAction,
+  assignOperatorAction,
+  releaseOperatorAction,
+  createHandoverAction,
+  assignExceptionAction,
+  unassignExceptionAction,
 } from "@/features/production-execution/server/production-order-writer";
 import type { ProductionOrderStatus } from "@/features/production-execution/domain/production-order";
 
@@ -110,7 +123,7 @@ export default async function ProductionOrderDetailPage({
 }: ProductionOrderDetailPageProps) {
   const { orderId } = await params;
 
-  const [result, entriesResult, downtimesResult, setupsResult, cyclesResult, runtimeResult, exceptionsResult, healthResult] =
+  const [result, entriesResult, downtimesResult, setupsResult, cyclesResult, runtimeResult, exceptionsResult, healthResult, shiftAssignmentsResult, operatorAssignmentsResult, handoversResult] =
     await Promise.all([
       readProductionOrderById(orderId),
       readProductionEntries(orderId, 50),
@@ -120,6 +133,9 @@ export default async function ProductionOrderDetailPage({
       readRuntimeSummary(orderId),
       readExceptions(orderId, 30),
       readHealthSummary(orderId),
+      readShiftAssignments(orderId, 10),
+      readOperatorAssignments(orderId, 20),
+      readHandovers(orderId, 10),
     ]);
 
   if (result.status === "failure") {
@@ -176,6 +192,9 @@ export default async function ProductionOrderDetailPage({
   const activeSetup = runtimeSummary.activeSetup;
   const exceptions = exceptionsResult.status === "success" ? exceptionsResult.exceptions : [];
   const healthSummary = healthResult.status === "success" ? healthResult.summary : null;
+  const shiftAssignments = shiftAssignmentsResult.status === "success" ? shiftAssignmentsResult.assignments : [];
+  const operatorAssignments = operatorAssignmentsResult.status === "success" ? operatorAssignmentsResult.assignments : [];
+  const handovers = handoversResult.status === "success" ? handoversResult.handovers : [];
 
   return (
     <main className="production-order-detail-page">
@@ -216,6 +235,12 @@ export default async function ProductionOrderDetailPage({
           )}
           {healthSummary?.criticalExceptionCount !== undefined && healthSummary.criticalExceptionCount > 0 && (
             <Badge tone="danger">Kritik İstisna</Badge>
+          )}
+          {order.currentShiftCode && (
+            <Badge tone="information">{order.currentShiftCode}</Badge>
+          )}
+          {order.primaryOperatorSubjectId && (
+            <Badge tone="neutral">Ana Operatör Atandı</Badge>
           )}
         </div>
       </header>
@@ -282,7 +307,45 @@ export default async function ProductionOrderDetailPage({
         </section>
       )}
 
-      {/* 3b — Runtime analytics */}
+      {/* 3b — 5L: Shift + Operator + Handover panels */}
+      <section
+        className="production-order-detail-page__resources"
+        aria-label="Vardiya ve operatör"
+      >
+        <ProductionShiftPanel
+          orderId={order.id}
+          version={order.version}
+          status={order.status}
+          currentShiftCode={order.currentShiftCode}
+          currentShiftStartAtUtc={order.currentShiftStartAtUtc}
+          currentShiftEndAtUtc={order.currentShiftEndAtUtc}
+          recentAssignments={shiftAssignments}
+          onAssignShift={assignShiftAction}
+          onReassignShift={reassignShiftAction}
+        />
+
+        <ProductionOperatorPanel
+          orderId={order.id}
+          version={order.version}
+          status={order.status}
+          primaryOperatorSubjectId={order.primaryOperatorSubjectId}
+          activeOperatorCount={order.activeOperatorCount}
+          recentAssignments={operatorAssignments}
+          onAssignOperator={assignOperatorAction}
+          onReleaseOperator={releaseOperatorAction}
+        />
+
+        <ProductionHandoverPanel
+          orderId={order.id}
+          version={order.version}
+          status={order.status}
+          currentShiftCode={order.currentShiftCode}
+          handovers={handovers}
+          onCreateHandover={createHandoverAction}
+        />
+      </section>
+
+      {/* 3c — Runtime analytics */}
       <section
         className="production-order-detail-page__runtime"
         aria-label="Çalışma analitiği"
@@ -366,6 +429,8 @@ export default async function ProductionOrderDetailPage({
           onRaiseException={raiseExceptionAction}
           onAcknowledgeException={acknowledgeExceptionAction}
           onResolveException={resolveExceptionAction}
+          onAssignException={assignExceptionAction}
+          onUnassignException={unassignExceptionAction}
         />
       </section>
 

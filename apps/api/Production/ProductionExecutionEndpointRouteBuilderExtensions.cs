@@ -25,6 +25,18 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         // 4L read endpoints
         group.MapGet("/{productionOrderId:guid}/exceptions", ListExceptionsAsync);
         group.MapGet("/{productionOrderId:guid}/health-summary", GetHealthSummaryAsync);
+        // 5L read endpoints
+        group.MapGet("/{productionOrderId:guid}/shift-assignments", ListShiftAssignmentsAsync);
+        group.MapGet("/{productionOrderId:guid}/operators", ListOperatorAssignmentsAsync);
+        group.MapGet("/{productionOrderId:guid}/shift-handovers", ListHandoversAsync);
+        return endpoints;
+    }
+
+    public static IEndpointRouteBuilder MapProductionResourceExecutionReadEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/production").RequireAuthorization();
+        group.MapGet("/shifts/{shiftId:guid}/execution-summary", GetShiftExecutionSummaryAsync);
+        group.MapGet("/operators/{subjectId}/execution-summary", GetOperatorExecutionSummaryAsync);
         return endpoints;
     }
 
@@ -51,6 +63,14 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         group.MapPost("/orders/{productionOrderId:guid}/exceptions/{exceptionId:guid}/resolve", ResolveExceptionAsync);
         group.MapPost("/orders/{productionOrderId:guid}/downtimes/{downtimeId:guid}/recover", RecoverDowntimeAsync);
         group.MapPost("/orders/{productionOrderId:guid}/setups/{setupSessionId:guid}/recover", RecoverSetupSessionAsync);
+        // 5L write endpoints
+        group.MapPost("/orders/{productionOrderId:guid}/shift-assignment", AssignShiftAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/shift-assignment/reassign", ReassignShiftAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/operators", AssignOperatorAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/operators/{assignmentId:guid}/release", ReleaseOperatorAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/shift-handovers", CreateHandoverAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/exceptions/{exceptionId:guid}/assign", AssignExceptionAsync);
+        group.MapPost("/orders/{productionOrderId:guid}/exceptions/{exceptionId:guid}/unassign", UnassignExceptionAsync);
         return endpoints;
     }
 
@@ -110,7 +130,10 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.Version,
             o.UpdatedAtUtc,
             o.TotalDowntimeSeconds,
-            o.ManualCycleCount)).ToArray();
+            o.ManualCycleCount,
+            o.CurrentShiftCode,
+            o.PrimaryOperatorSubjectId,
+            o.ActiveOperatorCount)).ToArray();
 
         return TypedResults.Ok(dtos);
     }
@@ -202,7 +225,14 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             o.TotalSetupSeconds,
             o.ManualCycleCount,
             o.TotalManualCycleDurationMilliseconds,
-            o.LastCycleAtUtc));
+            o.LastCycleAtUtc,
+            o.CurrentShiftId,
+            o.CurrentShiftCode,
+            o.CurrentShiftStartAtUtc,
+            o.CurrentShiftEndAtUtc,
+            o.PrimaryOperatorSubjectId,
+            o.ActiveOperatorCount,
+            o.LastAssignmentAtUtc));
     }
 
     // ─────────────────────────── Write: Consume Handoff ───────────────────────────
@@ -837,7 +867,7 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         return TypedResults.Ok(result.Items!.Select(e => new ExceptionSummaryDto(
             e.Id, e.ExceptionType, e.Severity, e.Status, e.Message,
             e.RaisedAtUtc, e.RaisedBySubjectId, e.ResolvedAtUtc, e.ResolvedBySubjectId, e.ResolutionNote,
-            e.Version)).ToList());
+            e.Version, e.AssignedToSubjectId, e.AssignedAtUtc, e.AssignedBySubjectId)).ToList());
     }
 
     // ─────────────────────────── 4L: Health Summary ────────────────────────────
@@ -1020,6 +1050,321 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
             cancellationToken);
 
         return MapOperationsResult(result);
+    }
+
+    // ─────────────────────────── 5L: Shift Assignments ────────────────────────────
+
+    private static async Task<IResult> AssignShiftAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] AssignShiftApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionShiftRepository shiftRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Assign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await shiftRepository.AssignShiftAsync(context,
+            new AssignShiftCommand(productionOrderId, body.ExpectedVersion, body.ProductionShiftId, body.ShiftDate),
+            cancellationToken);
+
+        return MapAssignmentResult(result);
+    }
+
+    private static async Task<IResult> ReassignShiftAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ReassignShiftApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionShiftRepository shiftRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Assign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await shiftRepository.ReassignShiftAsync(context,
+            new ReassignShiftCommand(productionOrderId, body.ExpectedVersion, body.ProductionShiftId, body.ShiftDate, body.Reason?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapAssignmentResult(result);
+    }
+
+    private static async Task<IResult> ListShiftAssignmentsAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionShiftRepository shiftRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null) return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await shiftRepository.ListShiftAssignmentsAsync(context, productionOrderId, limit ?? 20, cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(result.Items!.Select(sa => new ShiftAssignmentDto(
+            sa.Id, sa.ProductionShiftId, sa.ShiftCode, sa.ShiftDate,
+            sa.ShiftStartAtUtc, sa.ShiftEndAtUtc,
+            sa.AssignedAtUtc, sa.AssignedBySubjectId,
+            sa.ReleasedAtUtc, sa.ReleasedBySubjectId, sa.ReleaseReason, sa.IsActive)).ToList());
+    }
+
+    private static async Task<IResult> GetShiftExecutionSummaryAsync(
+        Guid shiftId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? date,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionShiftRepository shiftRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", out var shiftDate))
+            return TypedResults.Problem(title: "date parameter must be yyyy-MM-dd.", statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidRequest));
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null) return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await shiftRepository.GetShiftExecutionSummaryAsync(context, shiftId, shiftDate, cancellationToken: cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var s = result.Summary!;
+        return TypedResults.Ok(new ShiftExecutionSummaryDto(s.ShiftId, s.ShiftCode, s.ShiftStartAtUtc, s.ShiftEndAtUtc,
+            s.ActiveOrderCount, s.CompletedOrderCount, s.GoodQuantity, s.ScrapQuantity,
+            s.DowntimeSeconds, s.SetupSeconds, s.ManualCycleCount, s.OpenExceptionCount, s.CriticalExceptionCount));
+    }
+
+    // ─────────────────────────── 5L: Operator Assignments ─────────────────────────
+
+    private static async Task<IResult> AssignOperatorAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] AssignOperatorApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperatorRepository operatorRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Assign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await operatorRepository.AssignOperatorAsync(context,
+            new AssignOperatorCommand(productionOrderId, body.ExpectedVersion, body.SubjectId?.Trim() ?? string.Empty, body.AssignmentRole?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapAssignmentResult(result);
+    }
+
+    private static async Task<IResult> ReleaseOperatorAsync(
+        Guid productionOrderId,
+        Guid assignmentId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] ReleaseOperatorApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperatorRepository operatorRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Assign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await operatorRepository.ReleaseOperatorAsync(context,
+            new ReleaseOperatorCommand(productionOrderId, assignmentId, body.ExpectedVersion, body.Reason?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapAssignmentResult(result);
+    }
+
+    private static async Task<IResult> ListOperatorAssignmentsAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperatorRepository operatorRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null) return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await operatorRepository.ListOperatorAssignmentsAsync(context, productionOrderId, limit ?? 20, cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(result.Items!.Select(oa => new OperatorAssignmentDto(
+            oa.Id, oa.SubjectId, oa.AssignmentRole,
+            oa.AssignedAtUtc, oa.AssignedBySubjectId,
+            oa.ReleasedAtUtc, oa.ReleasedBySubjectId, oa.ReleaseReason, oa.IsActive)).ToList());
+    }
+
+    private static async Task<IResult> GetOperatorExecutionSummaryAsync(
+        string subjectId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionOperatorRepository operatorRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null) return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await operatorRepository.GetOperatorExecutionSummaryAsync(context, subjectId, cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        var s = result.Summary!;
+        return TypedResults.Ok(new OperatorExecutionSummaryDto(
+            s.SubjectId, s.ActiveOrderCount, s.CompletedOrderCount, s.GoodQuantity, s.ScrapQuantity, s.AssignedExceptionCount, s.LastActivityAtUtc));
+    }
+
+    // ─────────────────────────── 5L: Handovers ────────────────────────────────────
+
+    private static async Task<IResult> CreateHandoverAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreateHandoverApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionHandoverRepository handoverRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.Handover,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await handoverRepository.CreateHandoverAsync(context,
+            new CreateHandoverCommand(productionOrderId, body.ExpectedVersion, body.Note?.Trim() ?? string.Empty, body.OpenIssuesSummary?.Trim()),
+            cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(new HandoverWriteSuccessDto(result.HandoverId!.Value));
+    }
+
+    private static async Task<IResult> ListHandoversAsync(
+        Guid productionOrderId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionHandoverRepository handoverRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ProductionExecutionPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null) return MapFacilityAccessFailure(accessResult);
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await handoverRepository.ListHandoversAsync(context, productionOrderId, limit ?? 10, cancellationToken);
+
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+
+        return TypedResults.Ok(result.Items!.Select(h => new HandoverDto(
+            h.Id, h.FromShiftAssignmentId, h.ToShiftAssignmentId,
+            h.Note, h.OpenIssuesSummary, h.CreatedAtUtc, h.CreatedBySubjectId)).ToList());
+    }
+
+    // ─────────────────────────── 5L: Exception Routing ───────────────────────────
+
+    private static async Task<IResult> AssignExceptionAsync(
+        Guid productionOrderId,
+        Guid exceptionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] AssignExceptionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.ExceptionAssign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await exceptionRepository.AssignExceptionAsync(context,
+            new AssignExceptionCommand(productionOrderId, exceptionId, body.ExpectedVersion, body.SubjectId?.Trim() ?? string.Empty),
+            cancellationToken);
+
+        return MapExceptionResult(result);
+    }
+
+    private static async Task<IResult> UnassignExceptionAsync(
+        Guid productionOrderId,
+        Guid exceptionId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] UnassignExceptionApiRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProductionExceptionRepository exceptionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ResolveWrite(
+            facilityId, ProductionExecutionPermissionKeys.ExceptionAssign,
+            facilityAccessResolver, correlationContext, cancellationToken);
+
+        if (context is null) return failResult!;
+
+        var result = await exceptionRepository.UnassignExceptionAsync(context,
+            new UnassignExceptionCommand(productionOrderId, exceptionId, body.ExpectedVersion),
+            cancellationToken);
+
+        return MapExceptionResult(result);
+    }
+
+    private static IResult MapAssignmentResult(ProductionAssignmentWriteResult result)
+    {
+        if (!result.Succeeded) return MapWriteFailure(result.FailureCode!, result.FailureReason);
+        return TypedResults.Ok(new AssignmentWriteSuccessDto(result.AssignmentId!.Value, result.OrderVersion!.Value));
     }
 
     private static IResult MapExceptionResult(ProductionExceptionWriteResult result)
@@ -1321,6 +1666,68 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidRequest)),
 
+            // 5L
+            ProductionOrderFailureCodes.ShiftNotFound => TypedResults.Problem(
+                title: "Shift not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ShiftNotFound)),
+            ProductionOrderFailureCodes.ShiftNotActive => TypedResults.Problem(
+                title: reason ?? "Shift is not active.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ShiftNotActive)),
+            ProductionOrderFailureCodes.ShiftAssignmentNotFound => TypedResults.Problem(
+                title: "Shift assignment not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ShiftAssignmentNotFound)),
+            ProductionOrderFailureCodes.ShiftAssignmentNotActive => TypedResults.Problem(
+                title: reason ?? "An active shift assignment already exists.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ShiftAssignmentExists)),
+            ProductionOrderFailureCodes.OperatorAssignmentNotFound => TypedResults.Problem(
+                title: "Operator assignment not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.OperatorAssignmentNotFound)),
+            ProductionOrderFailureCodes.OperatorAssignmentNotActive => TypedResults.Problem(
+                title: reason ?? "Operator assignment is not active.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.OperatorAssignmentNotActive)),
+            ProductionOrderFailureCodes.InvalidOperatorRole => TypedResults.Problem(
+                title: reason ?? "Invalid operator assignment role.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.InvalidOperatorRole)),
+            ProductionOrderFailureCodes.PrimaryOperatorRequired => TypedResults.Problem(
+                title: reason ?? "A primary operator is required before starting production.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.PrimaryOperatorRequired)),
+            ProductionOrderFailureCodes.ShiftRequired => TypedResults.Problem(
+                title: reason ?? "A shift assignment is required before starting production.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ShiftRequired)),
+            ProductionOrderFailureCodes.OperatorNotFacilityMember => TypedResults.Problem(
+                title: reason ?? "Target subject is not a member of this facility.",
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.OperatorNotFacilityMember)),
+            ProductionOrderFailureCodes.AssignmentTargetEmpty => TypedResults.Problem(
+                title: reason ?? "Assignment target identifier is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.AssignmentTargetEmpty)),
+            ProductionOrderFailureCodes.HandoverActiveShiftRequired => TypedResults.Problem(
+                title: reason ?? "An active shift assignment is required to create a handover.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.HandoverActiveShiftRequired)),
+            ProductionOrderFailureCodes.HandoverNoteRequired => TypedResults.Problem(
+                title: reason ?? "Handover note is required.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.HandoverNoteRequired)),
+            ProductionOrderFailureCodes.ExceptionNotAssigned => TypedResults.Problem(
+                title: reason ?? "Exception is not currently assigned.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.ExceptionNotAssigned)),
+            ProductionOrderFailureCodes.OrderAlreadyCompleted => TypedResults.Problem(
+                title: reason ?? "Operation not allowed on completed order.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(ProductionExecutionApiFailureCodes.OrderAlreadyCompleted)),
+
             _ => TypedResults.Problem(
                 title: "An unexpected error occurred.",
                 statusCode: StatusCodes.Status500InternalServerError,
@@ -1341,16 +1748,6 @@ public static class ProductionExecutionServiceCollectionExtensions
             return dbContext is null
                 ? new UnavailableProductionOrderReadRepository()
                 : new ProductionOrderReadRepository(
-                    dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
-        });
-
-        services.AddScoped<IProductionOrderWriteRepository>(serviceProvider =>
-        {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
-            return dbContext is null
-                ? new UnavailableProductionOrderWriteRepository()
-                : new ProductionOrderWriteRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
@@ -1387,6 +1784,53 @@ public static class ProductionExecutionServiceCollectionExtensions
         // 4L — execution options (development defaults; override in appsettings)
         services.AddOptions<ProductionExecutionOptions>()
             .BindConfiguration(ProductionExecutionOptions.SectionName);
+
+        // 5L — shift, operator, handover repositories
+        services.AddScoped<IProductionShiftRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionShiftRepository()
+                : new ProductionShiftRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionOperatorRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionOperatorRepository()
+                : new ProductionOperatorRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionHandoverRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionHandoverRepository()
+                : new ProductionHandoverRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        // 5L — execution policy options
+        services.AddOptions<ProductionExecutionPolicyOptions>()
+            .BindConfiguration(ProductionExecutionPolicyOptions.SectionName);
+
+        // Override ProductionOrderWriteRepository to inject policy options
+        services.AddScoped<IProductionOrderWriteRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionOrderWriteRepository()
+                : new ProductionOrderWriteRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetService<Microsoft.Extensions.Options.IOptions<ProductionExecutionPolicyOptions>>());
+        });
 
         return services;
     }

@@ -36,6 +36,21 @@ public static class ProductionAuditActions
     // 4L — recovery
     public const string ProductionDowntimeRecover = "production.order.downtime.recover";
     public const string ProductionSetupRecover = "production.order.setup.recover";
+
+    // 5L — shift assignment
+    public const string ProductionShiftAssign = "production.order.shift.assign";
+    public const string ProductionShiftReassign = "production.order.shift.reassign";
+
+    // 5L — operator assignment
+    public const string ProductionOperatorAssign = "production.order.operator.assign";
+    public const string ProductionOperatorRelease = "production.order.operator.release";
+
+    // 5L — handover
+    public const string ProductionHandoverCreate = "production.order.handover.create";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssign = "production.order.exception.assign";
+    public const string ProductionExceptionUnassign = "production.order.exception.unassign";
 }
 
 /// <summary>
@@ -74,6 +89,21 @@ public static class ProductionAuditEventTypes
     // 4L — recovery
     public const string ProductionDowntimeRecovered = "production.order.downtime.recovered";
     public const string ProductionSetupRecovered = "production.order.setup.recovered";
+
+    // 5L — shift assignment
+    public const string ProductionShiftAssigned = "production.order.shift.assigned";
+    public const string ProductionShiftReassigned = "production.order.shift.reassigned";
+
+    // 5L — operator assignment
+    public const string ProductionOperatorAssigned = "production.order.operator.assigned";
+    public const string ProductionOperatorReleased = "production.order.operator.released";
+
+    // 5L — handover
+    public const string ProductionHandoverCreated = "production.order.handover.created";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssigned = "production.order.exception.assigned";
+    public const string ProductionExceptionUnassigned = "production.order.exception.unassigned";
 }
 
 /// <summary>
@@ -112,4 +142,19 @@ public static class ProductionOutboxMessageTypes
     // 4L — recovery
     public const string ProductionDowntimeRecovered = "production-order-downtime-recovered";
     public const string ProductionSetupRecovered = "production-order-setup-recovered";
+
+    // 5L — shift assignment
+    public const string ProductionShiftAssigned = "production-order-shift-assigned";
+    public const string ProductionShiftReassigned = "production-order-shift-reassigned";
+
+    // 5L — operator assignment
+    public const string ProductionOperatorAssigned = "production-order-operator-assigned";
+    public const string ProductionOperatorReleased = "production-order-operator-released";
+
+    // 5L — handover
+    public const string ProductionHandoverCreated = "production-order-shift-handover-created";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssigned = "production-order-exception-assigned";
+    public const string ProductionExceptionUnassigned = "production-order-exception-unassigned";
 }

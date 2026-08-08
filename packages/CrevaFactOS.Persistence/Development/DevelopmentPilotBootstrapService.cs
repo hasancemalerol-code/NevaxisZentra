@@ -10,7 +10,8 @@ using Microsoft.Extensions.Options;
 namespace CrevaFactOS.Persistence.Development;
 
 internal sealed class DevelopmentPilotBootstrapService(
-    IOptions<DevelopmentPilotOptions> options)
+    IOptions<DevelopmentPilotOptions> options,
+    IOptions<PersistenceOptions> persistenceOptions)
     : IDevelopmentPilotBootstrapService
 {
     public async Task<DevelopmentPilotBootstrapResult> BootstrapAsync(
@@ -30,7 +31,7 @@ internal sealed class DevelopmentPilotBootstrapService(
         }
 
         var bootstrapContext =
-            DevelopmentPilotBootstrapDbContextFactory.Create();
+            DevelopmentPilotBootstrapDbContextFactory.Create(persistenceOptions.Value);
         await using var dbContext = bootstrapContext.DbContext;
 
         await using var transaction =
@@ -227,6 +228,15 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExecutionExceptionPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        // 5L: assign (supervisor-level), handover, exception.assign
+        await EnsureExecutionAssignPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionHandoverPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExecutionExceptionAssignPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsurePilotProductionShiftsAsync(
+            dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext, tenant.Id, operatorMembership.Id, operatorRole.Id,
             seedTimestampUtc, cancellationToken);
@@ -1041,6 +1051,74 @@ internal sealed class DevelopmentPilotBootstrapService(
             ProductionExecutionPermissionKeys.Exception,
             DevelopmentPilotIds.ExecutionExceptionPermissionDefinitionId,
             cancellationToken);
+
+    private static Task EnsureExecutionAssignPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Assign,
+            DevelopmentPilotIds.ExecutionAssignPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionHandoverPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.Handover,
+            DevelopmentPilotIds.ExecutionHandoverPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExecutionExceptionAssignPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionExecutionPermissionKeys.ExceptionAssign,
+            DevelopmentPilotIds.ExecutionExceptionAssignPermissionDefinitionId,
+            cancellationToken);
+
+    private static async Task EnsurePilotProductionShiftsAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var shiftDefinitions = new[]
+        {
+            (DevelopmentPilotIds.PilotShiftV1Id, "V1", "Gündüz Vardiyası", new TimeSpan(8, 0, 0), new TimeSpan(16, 0, 0), 1),
+            (DevelopmentPilotIds.PilotShiftV2Id, "V2", "Akşam Vardiyası", new TimeSpan(16, 0, 0), new TimeSpan(0, 0, 0), 2),
+            (DevelopmentPilotIds.PilotShiftV3Id, "V3", "Gece Vardiyası", new TimeSpan(0, 0, 0), new TimeSpan(8, 0, 0), 3),
+        };
+
+        foreach (var (id, code, name, start, end, sortOrder) in shiftDefinitions)
+        {
+            var exists = await dbContext.ProductionShifts
+                .IgnoreQueryFilters()
+                .AnyAsync(s => s.Id == id || (s.TenantId == tenantId && s.FacilityId == facilityId && s.Code == code), cancellationToken);
+
+            if (!exists)
+            {
+                dbContext.ProductionShifts.Add(new Production.ProductionShift
+                {
+                    Id = id,
+                    TenantId = tenantId,
+                    FacilityId = facilityId,
+                    Code = code,
+                    Name = name,
+                    StartLocalTime = start,
+                    EndLocalTime = end,
+                    IsActive = true,
+                    SortOrder = sortOrder,
+                    Version = 1,
+                    CreatedAtUtc = seedTimestampUtc,
+                    UpdatedAtUtc = seedTimestampUtc,
+                });
+            }
+        }
+    }
 
     private static async Task EnsureNamedPermissionAssignmentAsync(
         CrevaFactOSDbContext dbContext,

@@ -48,6 +48,23 @@ public static class ProductionExecutionApiFailureCodes
     public const string ProductionStateInconsistent = "production-state-inconsistent";
     public const string DowntimeNotActive = "downtime-not-active";
     public const string SetupSessionNotActive = "setup-session-not-active";
+
+    // 5L
+    public const string ShiftNotFound = "shift-not-found";
+    public const string ShiftNotActive = "shift-not-active";
+    public const string ShiftAssignmentExists = "shift-assignment-not-active";
+    public const string ShiftAssignmentNotFound = "shift-assignment-not-found";
+    public const string OperatorAssignmentNotFound = "operator-assignment-not-found";
+    public const string OperatorAssignmentNotActive = "operator-assignment-not-active";
+    public const string InvalidOperatorRole = "invalid-operator-role";
+    public const string PrimaryOperatorRequired = "production-primary-operator-required";
+    public const string ShiftRequired = "production-shift-required";
+    public const string OperatorNotFacilityMember = "operator-not-facility-member";
+    public const string AssignmentTargetEmpty = "assignment-target-empty";
+    public const string HandoverActiveShiftRequired = "handover-active-shift-required";
+    public const string HandoverNoteRequired = "handover-note-required";
+    public const string ExceptionNotAssigned = "exception-not-assigned";
+    public const string OrderAlreadyCompleted = "order-already-completed";
 }
 
 public sealed record QuantitySummaryDto(
@@ -79,7 +96,11 @@ public sealed record ProductionOrderSummaryDto(
     uint Version,
     DateTimeOffset UpdatedAtUtc,
     long TotalDowntimeSeconds,
-    int ManualCycleCount);
+    int ManualCycleCount,
+    // 5L
+    string? CurrentShiftCode = null,
+    string? PrimaryOperatorSubjectId = null,
+    int ActiveOperatorCount = 0);
 
 public sealed record ProductionOrderDetailDto(
     Guid Id,
@@ -108,7 +129,15 @@ public sealed record ProductionOrderDetailDto(
     long TotalSetupSeconds,
     int ManualCycleCount,
     long TotalManualCycleDurationMilliseconds,
-    DateTimeOffset? LastCycleAtUtc);
+    DateTimeOffset? LastCycleAtUtc,
+    // 5L
+    Guid? CurrentShiftId = null,
+    string? CurrentShiftCode = null,
+    DateTimeOffset? CurrentShiftStartAtUtc = null,
+    DateTimeOffset? CurrentShiftEndAtUtc = null,
+    string? PrimaryOperatorSubjectId = null,
+    int ActiveOperatorCount = 0,
+    DateTimeOffset? LastAssignmentAtUtc = null);
 
 public sealed record ProductionOrderWriteSuccessDto(
     Guid Id,
@@ -223,7 +252,11 @@ public sealed record ExceptionSummaryDto(
     DateTimeOffset? ResolvedAtUtc,
     string? ResolvedBySubjectId,
     string? ResolutionNote,
-    uint Version);
+    uint Version,
+    // 5L: ownership
+    string? AssignedToSubjectId = null,
+    DateTimeOffset? AssignedAtUtc = null,
+    string? AssignedBySubjectId = null);
 
 public sealed record ProductionExecutionHealthSummaryDto(
     string Status,
@@ -289,3 +322,101 @@ public sealed record RecordScrapApiRequest(
 public sealed record ReverseEntryApiRequest(
     uint ExpectedVersion,
     string Reason);
+
+// ── 5L ─────────────────────────────────────────────────────────────────────────
+
+
+public sealed record AssignShiftApiRequest(
+    uint ExpectedVersion,
+    Guid ProductionShiftId,
+    DateOnly ShiftDate);
+
+public sealed record ReassignShiftApiRequest(
+    uint ExpectedVersion,
+    Guid ProductionShiftId,
+    DateOnly ShiftDate,
+    string Reason);
+
+public sealed record AssignOperatorApiRequest(
+    uint ExpectedVersion,
+    string SubjectId,
+    string AssignmentRole);
+
+public sealed record ReleaseOperatorApiRequest(
+    uint ExpectedVersion,
+    string Reason);
+
+public sealed record CreateHandoverApiRequest(
+    uint ExpectedVersion,
+    string Note,
+    string? OpenIssuesSummary);
+
+public sealed record AssignExceptionApiRequest(
+    uint ExpectedVersion,
+    string SubjectId);
+
+public sealed record UnassignExceptionApiRequest(uint ExpectedVersion);
+
+public sealed record AssignmentWriteSuccessDto(
+    Guid AssignmentId,
+    uint OrderVersion);
+
+public sealed record HandoverWriteSuccessDto(Guid HandoverId);
+
+public sealed record ShiftAssignmentDto(
+    Guid Id,
+    Guid ProductionShiftId,
+    string ShiftCode,
+    DateOnly ShiftDate,
+    DateTimeOffset ShiftStartAtUtc,
+    DateTimeOffset ShiftEndAtUtc,
+    DateTimeOffset AssignedAtUtc,
+    string AssignedBySubjectId,
+    DateTimeOffset? ReleasedAtUtc,
+    string? ReleasedBySubjectId,
+    string? ReleaseReason,
+    bool IsActive);
+
+public sealed record OperatorAssignmentDto(
+    Guid Id,
+    string SubjectId,
+    string AssignmentRole,
+    DateTimeOffset AssignedAtUtc,
+    string AssignedBySubjectId,
+    DateTimeOffset? ReleasedAtUtc,
+    string? ReleasedBySubjectId,
+    string? ReleaseReason,
+    bool IsActive);
+
+public sealed record HandoverDto(
+    Guid Id,
+    Guid FromShiftAssignmentId,
+    Guid? ToShiftAssignmentId,
+    string Note,
+    string? OpenIssuesSummary,
+    DateTimeOffset CreatedAtUtc,
+    string CreatedBySubjectId);
+
+public sealed record ShiftExecutionSummaryDto(
+    Guid ShiftId,
+    string ShiftCode,
+    DateTimeOffset ShiftStartAtUtc,
+    DateTimeOffset ShiftEndAtUtc,
+    int ActiveOrderCount,
+    int CompletedOrderCount,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    long DowntimeSeconds,
+    long SetupSeconds,
+    int ManualCycleCount,
+    int OpenExceptionCount,
+    int CriticalExceptionCount);
+
+public sealed record OperatorExecutionSummaryDto(
+    string SubjectId,
+    int ActiveOrderCount,
+    int CompletedOrderCount,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    int AssignedExceptionCount,
+    DateTimeOffset? LastActivityAtUtc);

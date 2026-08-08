@@ -20,6 +20,13 @@ import {
   resolveException,
   recoverDowntime,
   recoverSetupSession,
+  assignShift,
+  reassignShift,
+  assignOperator,
+  releaseOperator,
+  createHandover,
+  assignException,
+  unassignException,
   type ProductionOrderWriteResult,
 } from "./production-order-api-client";
 import {
@@ -440,5 +447,136 @@ export async function recoverSetupSessionAction(
     return { status: "failure", code: "invalid-request", message: "Çözüm açıklaması zorunludur." };
   }
   const result = await recoverSetupSession(resolved.context, productionOrderId, setupId.trim(), expectedVersion, resolution.trim());
+  return mapWriteResult(result);
+}
+
+// ── 5L: Shift Assignment ────────────────────────────────────────────────────────
+
+export async function assignShiftAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  productionShiftId: string,
+  shiftDate: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!productionShiftId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Vardiya ID zorunludur." };
+  }
+  if (!shiftDate.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Vardiya tarihi zorunludur." };
+  }
+  const result = await assignShift(resolved.context, productionOrderId, expectedVersion, productionShiftId.trim(), shiftDate.trim());
+  return mapWriteResult(result);
+}
+
+export async function reassignShiftAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  productionShiftId: string,
+  shiftDate: string,
+  reason: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!productionShiftId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Vardiya ID zorunludur." };
+  }
+  if (!shiftDate.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Vardiya tarihi zorunludur." };
+  }
+  if (!reason.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Değişiklik nedeni zorunludur." };
+  }
+  const result = await reassignShift(resolved.context, productionOrderId, expectedVersion, productionShiftId.trim(), shiftDate.trim(), reason.trim());
+  return mapWriteResult(result);
+}
+
+// ── 5L: Operator Assignment ─────────────────────────────────────────────────────
+
+export async function assignOperatorAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  subjectId: string,
+  assignmentRole: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!subjectId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Operatör ID zorunludur." };
+  }
+  if (!assignmentRole.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Görev rolü zorunludur." };
+  }
+  const result = await assignOperator(resolved.context, productionOrderId, expectedVersion, subjectId.trim(), assignmentRole.trim());
+  return mapWriteResult(result);
+}
+
+export async function releaseOperatorAction(
+  productionOrderId: string,
+  assignmentId: string,
+  expectedVersion: number,
+  reason: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!assignmentId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Atama ID zorunludur." };
+  }
+  if (!reason.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Görevden çıkarma nedeni zorunludur." };
+  }
+  const result = await releaseOperator(resolved.context, productionOrderId, assignmentId.trim(), expectedVersion, reason.trim());
+  return mapWriteResult(result);
+}
+
+// ── 5L: Shift Handover ──────────────────────────────────────────────────────────
+
+export async function createHandoverAction(
+  productionOrderId: string,
+  expectedVersion: number,
+  note: string,
+  openIssuesSummary?: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!note.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Devir notu zorunludur." };
+  }
+  const result = await createHandover(resolved.context, productionOrderId, expectedVersion, note.trim(), openIssuesSummary?.trim());
+  return mapWriteResult(result);
+}
+
+// ── 5L: Exception Routing ───────────────────────────────────────────────────────
+
+export async function assignExceptionAction(
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+  subjectId: string,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!exceptionId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
+  }
+  if (!subjectId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "Operatör ID zorunludur." };
+  }
+  const result = await assignException(resolved.context, productionOrderId, exceptionId.trim(), expectedVersion, subjectId.trim());
+  return mapWriteResult(result);
+}
+
+export async function unassignExceptionAction(
+  productionOrderId: string,
+  exceptionId: string,
+  expectedVersion: number,
+): Promise<ProductionOrderActionResult> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+  if (!exceptionId.trim()) {
+    return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
+  }
+  const result = await unassignException(resolved.context, productionOrderId, exceptionId.trim(), expectedVersion);
   return mapWriteResult(result);
 }

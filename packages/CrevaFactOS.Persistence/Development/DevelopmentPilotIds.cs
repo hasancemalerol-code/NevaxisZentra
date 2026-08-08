@@ -108,4 +108,24 @@ public static class DevelopmentPilotIds
     // 4L — exception permission definition
     public static readonly Guid ExecutionExceptionPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000024");
+
+    // 5L — assignment/handover/exception.assign permission definitions
+    public static readonly Guid ExecutionAssignPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000025");
+
+    public static readonly Guid ExecutionHandoverPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000026");
+
+    public static readonly Guid ExecutionExceptionAssignPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000027");
+
+    // 5L — dev pilot shift used by bootstrap
+    public static readonly Guid PilotShiftV1Id =
+        Guid.Parse("bb000001-0040-4000-8000-000000000040");
+
+    public static readonly Guid PilotShiftV2Id =
+        Guid.Parse("bb000001-0041-4000-8000-000000000041");
+
+    public static readonly Guid PilotShiftV3Id =
+        Guid.Parse("bb000001-0042-4000-8000-000000000042");
 }

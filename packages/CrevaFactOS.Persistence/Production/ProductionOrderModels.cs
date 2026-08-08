@@ -81,6 +81,56 @@ public sealed record RecordManualCycleCommand(
     decimal? QuantityProduced,
     string? Comment);
 
+// ── 5L: Shift Assignment Commands ────────────────────────────────────────────
+
+public sealed record AssignShiftCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    Guid ProductionShiftId,
+    DateOnly ShiftDate);
+
+public sealed record ReassignShiftCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    Guid ProductionShiftId,
+    DateOnly ShiftDate,
+    string Reason);
+
+// ── 5L: Operator Assignment Commands ──────────────────────────────────────────
+
+public sealed record AssignOperatorCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    string SubjectId,
+    string AssignmentRole);
+
+public sealed record ReleaseOperatorCommand(
+    Guid ProductionOrderId,
+    Guid AssignmentId,
+    uint ExpectedVersion,
+    string Reason);
+
+// ── 5L: Handover Commands ─────────────────────────────────────────────────────
+
+public sealed record CreateHandoverCommand(
+    Guid ProductionOrderId,
+    uint ExpectedVersion,
+    string Note,
+    string? OpenIssuesSummary);
+
+// ── 5L: Exception Routing Commands ────────────────────────────────────────────
+
+public sealed record AssignExceptionCommand(
+    Guid ProductionOrderId,
+    Guid ExceptionId,
+    uint ExpectedVersion,
+    string SubjectId);
+
+public sealed record UnassignExceptionCommand(
+    Guid ProductionOrderId,
+    Guid ExceptionId,
+    uint ExpectedVersion);
+
 // ── 4L: Exception Commands ────────────────────────────────────────────────────
 
 public sealed record RaiseExceptionCommand(
@@ -185,7 +235,11 @@ public sealed record ExceptionReadModel(
     string? ResolvedBySubjectId,
     string? ResolutionNote,
     Guid CorrelationId,
-    uint Version);
+    uint Version,
+    // 5L: ownership fields
+    string? AssignedToSubjectId = null,
+    DateTimeOffset? AssignedAtUtc = null,
+    string? AssignedBySubjectId = null);
 
 // ── 4L: Health Summary Read Model ────────────────────────────────────────────
 
@@ -207,6 +261,125 @@ public sealed record ProductionExecutionHealthSummary(
     DateTimeOffset? LastOperationalActivityAtUtc,
     /// <summary>True when any signal requires operator attention (stale, critical exception, overrun).</summary>
     bool RequiresAttention);
+
+// ── 5L: Shift/Operator/Handover Read Models ───────────────────────────────────
+
+public sealed record ShiftAssignmentReadModel(
+    Guid Id,
+    Guid ProductionShiftId,
+    string ShiftCode,
+    DateOnly ShiftDate,
+    DateTimeOffset ShiftStartAtUtc,
+    DateTimeOffset ShiftEndAtUtc,
+    DateTimeOffset AssignedAtUtc,
+    string AssignedBySubjectId,
+    DateTimeOffset? ReleasedAtUtc,
+    string? ReleasedBySubjectId,
+    string? ReleaseReason,
+    bool IsActive);
+
+public sealed record OperatorAssignmentReadModel(
+    Guid Id,
+    string SubjectId,
+    string AssignmentRole,
+    DateTimeOffset AssignedAtUtc,
+    string AssignedBySubjectId,
+    DateTimeOffset? ReleasedAtUtc,
+    string? ReleasedBySubjectId,
+    string? ReleaseReason,
+    bool IsActive);
+
+public sealed record HandoverReadModel(
+    Guid Id,
+    Guid FromShiftAssignmentId,
+    Guid? ToShiftAssignmentId,
+    string Note,
+    string? OpenIssuesSummary,
+    DateTimeOffset CreatedAtUtc,
+    string CreatedBySubjectId);
+
+public sealed record ShiftExecutionSummary(
+    Guid ShiftId,
+    string ShiftCode,
+    DateTimeOffset ShiftStartAtUtc,
+    DateTimeOffset ShiftEndAtUtc,
+    int ActiveOrderCount,
+    int CompletedOrderCount,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    long DowntimeSeconds,
+    long SetupSeconds,
+    int ManualCycleCount,
+    int OpenExceptionCount,
+    int CriticalExceptionCount);
+
+public sealed record OperatorExecutionSummary(
+    string SubjectId,
+    int ActiveOrderCount,
+    int CompletedOrderCount,
+    decimal GoodQuantity,
+    decimal ScrapQuantity,
+    int AssignedExceptionCount,
+    DateTimeOffset? LastActivityAtUtc);
+
+// ── 5L: Write Result wrappers ──────────────────────────────────────────────────
+
+public sealed record ProductionAssignmentWriteResult
+{
+    public required bool Succeeded { get; init; }
+    public Guid? AssignmentId { get; init; }
+    public uint? OrderVersion { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionAssignmentWriteResult Success(Guid assignmentId, uint orderVersion) =>
+        new() { Succeeded = true, AssignmentId = assignmentId, OrderVersion = orderVersion };
+
+    public static ProductionAssignmentWriteResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record ProductionHandoverWriteResult
+{
+    public required bool Succeeded { get; init; }
+    public Guid? HandoverId { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ProductionHandoverWriteResult Success(Guid handoverId) =>
+        new() { Succeeded = true, HandoverId = handoverId };
+
+    public static ProductionHandoverWriteResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record ShiftExecutionSummaryResult
+{
+    public required bool Succeeded { get; init; }
+    public ShiftExecutionSummary? Summary { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static ShiftExecutionSummaryResult Success(ShiftExecutionSummary summary) =>
+        new() { Succeeded = true, Summary = summary };
+
+    public static ShiftExecutionSummaryResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
+
+public sealed record OperatorExecutionSummaryResult
+{
+    public required bool Succeeded { get; init; }
+    public OperatorExecutionSummary? Summary { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static OperatorExecutionSummaryResult Success(OperatorExecutionSummary summary) =>
+        new() { Succeeded = true, Summary = summary };
+
+    public static OperatorExecutionSummaryResult Fail(string failureCode, string reason) =>
+        new() { Succeeded = false, FailureCode = failureCode, FailureReason = reason };
+}
 
 // ── 3L: Write Result wrappers ─────────────────────────────────────────────────
 
@@ -291,6 +464,26 @@ public static class ProductionOrderFailureCodes
     public const string InvalidSetupType = "invalid-setup-type";
     public const string InvalidCycleDuration = "invalid-cycle-duration";
     public const string InvalidCycleQuantity = "invalid-cycle-quantity";
+
+    // 5L additions
+    public const string ShiftNotFound = "shift-not-found";
+    public const string ShiftNotActive = "shift-not-active";
+    public const string ShiftWrongFacility = "shift-wrong-facility";
+    public const string ShiftAssignmentNotFound = "shift-assignment-not-found";
+    public const string ShiftAssignmentNotActive = "shift-assignment-not-active";
+    public const string OperatorAssignmentNotFound = "operator-assignment-not-found";
+    public const string OperatorAssignmentNotActive = "operator-assignment-not-active";
+    public const string InvalidOperatorRole = "invalid-operator-role";
+    public const string PrimaryOperatorAlreadyAssigned = "primary-operator-already-assigned";
+    public const string PrimaryOperatorRequired = "production-primary-operator-required";
+    public const string ShiftRequired = "production-shift-required";
+    public const string OperatorNotFacilityMember = "operator-not-facility-member";
+    public const string AssignmentTargetEmpty = "assignment-target-empty";
+    public const string HandoverActiveShiftRequired = "handover-active-shift-required";
+    public const string HandoverNoteRequired = "handover-note-required";
+    public const string ExceptionAssignmentFailed = "exception-assignment-failed";
+    public const string ExceptionNotAssigned = "exception-not-assigned";
+    public const string OrderAlreadyCompleted = "order-already-completed";
 
     // 4L additions
     public const string ExceptionNotFound = "exception-not-found";
@@ -388,7 +581,15 @@ public sealed record ProductionOrderReadModel(
     long TotalSetupSeconds,
     int ManualCycleCount,
     long TotalManualCycleDurationMilliseconds,
-    DateTimeOffset? LastCycleAtUtc);
+    DateTimeOffset? LastCycleAtUtc,
+    // 5L: resource summary fields
+    Guid? CurrentShiftId = null,
+    string? CurrentShiftCode = null,
+    DateTimeOffset? CurrentShiftStartAtUtc = null,
+    DateTimeOffset? CurrentShiftEndAtUtc = null,
+    string? PrimaryOperatorSubjectId = null,
+    int ActiveOperatorCount = 0,
+    DateTimeOffset? LastAssignmentAtUtc = null);
 
 public sealed record ProductionOrderListReadModel(
     Guid Id,
@@ -409,7 +610,11 @@ public sealed record ProductionOrderListReadModel(
     uint Version,
     DateTimeOffset UpdatedAtUtc,
     long TotalDowntimeSeconds,
-    int ManualCycleCount);
+    int ManualCycleCount,
+    // 5L: cheap denormalized summary (no join)
+    string? CurrentShiftCode = null,
+    string? PrimaryOperatorSubjectId = null,
+    int ActiveOperatorCount = 0);
 
 public sealed record ProductionOrderWriteResult
 {

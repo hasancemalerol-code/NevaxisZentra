@@ -17,25 +17,32 @@ import {
   getExceptionStatusLabel,
 } from "../domain/production-execution-exceptions";
 import { formatUtcShort } from "../domain/production-execution-operations";
+import { getExceptionOwnershipLabel } from "../domain/production-execution-resources";
 import type {
   raiseExceptionAction,
   acknowledgeExceptionAction,
   resolveExceptionAction,
+  assignExceptionAction,
+  unassignExceptionAction,
 } from "../server/production-order-writer";
 
 type ExceptionPanelProps = Readonly<{
   orderId: string;
   version: number;
+  currentSubjectId?: string;
   exceptions: ProductionExecutionExceptionSummary[];
   onRaiseException: typeof raiseExceptionAction;
   onAcknowledgeException: typeof acknowledgeExceptionAction;
   onResolveException: typeof resolveExceptionAction;
+  onAssignException?: typeof assignExceptionAction;
+  onUnassignException?: typeof unassignExceptionAction;
 }>;
 
 type PanelState =
   | { kind: "idle" }
   | { kind: "raise-dialog" }
   | { kind: "resolve-dialog"; exceptionId: string }
+  | { kind: "assign-dialog"; exceptionId: string }
   | { kind: "pending"; action: string }
   | { kind: "error"; message: string };
 
@@ -48,10 +55,13 @@ function severityClass(severity: ProductionExceptionSeverity): string {
 export function ProductionExceptionPanel({
   orderId,
   version,
+  currentSubjectId,
   exceptions,
   onRaiseException,
   onAcknowledgeException,
   onResolveException,
+  onAssignException,
+  onUnassignException,
 }: ExceptionPanelProps) {
   const router = useRouter();
   const [panelState, setPanelState] = useState<PanelState>({ kind: "idle" });
@@ -59,6 +69,7 @@ export function ProductionExceptionPanel({
   const [severity, setSeverity] = useState<ProductionExceptionSeverity>("warning");
   const [message, setMessage] = useState("");
   const [resolutionNote, setResolutionNote] = useState("");
+  const [assignTargetId, setAssignTargetId] = useState("");
 
   const openExceptions = exceptions.filter((e) => e.status !== "resolved");
   const resolvedExceptions = exceptions.filter((e) => e.status === "resolved");
@@ -111,6 +122,39 @@ export function ProductionExceptionPanel({
       setPanelState({ kind: "error", message: "Bir hata oluştu." });
     }
   }, [orderId, version, resolutionNote, onResolveException, router]);
+
+  const handleAssignException = useCallback(async (exceptionId: string) => {
+    if (!assignTargetId.trim() || !onAssignException) return;
+    setPanelState({ kind: "pending", action: "İstisna atanıyor…" });
+    try {
+      const result = await onAssignException(orderId, exceptionId, version, assignTargetId.trim());
+      if (result.status === "failure") {
+        setPanelState({ kind: "error", message: result.message ?? "İstisna atanamadı." });
+      } else {
+        setPanelState({ kind: "idle" });
+        setAssignTargetId("");
+        router.refresh();
+      }
+    } catch {
+      setPanelState({ kind: "error", message: "Bir hata oluştu." });
+    }
+  }, [orderId, version, assignTargetId, onAssignException, router]);
+
+  const handleUnassignException = useCallback(async (exceptionId: string) => {
+    if (!onUnassignException) return;
+    setPanelState({ kind: "pending", action: "Atama kaldırılıyor…" });
+    try {
+      const result = await onUnassignException(orderId, exceptionId, version);
+      if (result.status === "failure") {
+        setPanelState({ kind: "error", message: result.message ?? "Atama kaldırılamadı." });
+      } else {
+        setPanelState({ kind: "idle" });
+        router.refresh();
+      }
+    } catch {
+      setPanelState({ kind: "error", message: "Bir hata oluştu." });
+    }
+  }, [orderId, version, onUnassignException, router]);
 
   const isPending = panelState.kind === "pending";
 
@@ -268,55 +312,121 @@ export function ProductionExceptionPanel({
         </div>
       )}
 
+      {panelState.kind === "assign-dialog" && (
+        <div className="workflow-action-dialog">
+          <div className="workflow-action-dialog__content">
+            <h3 className="workflow-action-dialog__title">İstisnayı Ata</h3>
+            <div className="workflow-action-dialog__field">
+              <label className="workflow-action-dialog__label" htmlFor="assign-target">
+                Operatör Subject ID <span style={{ color: "#bd2c36" }}>*</span>
+              </label>
+              <input
+                id="assign-target"
+                type="text"
+                className="workflow-action-dialog__input"
+                placeholder="Subject ID"
+                value={assignTargetId}
+                onChange={(e) => setAssignTargetId(e.target.value)}
+              />
+            </div>
+            <div className="workflow-action-dialog__footer">
+              <button
+                type="button"
+                className="button button-ghost button-medium"
+                onClick={() => { setPanelState({ kind: "idle" }); setAssignTargetId(""); }}
+              >
+                İptal
+              </button>
+              <button
+                type="button"
+                className="button button-medium"
+                onClick={() => handleAssignException(panelState.exceptionId)}
+                disabled={isPending || !assignTargetId.trim()}
+              >
+                Ata
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {openExceptions.length > 0 && (
         <ul className="exception-panel__list">
-          {openExceptions.map((ex) => (
-            <li key={ex.id} className={`exception-item ${severityClass(ex.severity)}`}>
-              <div className="exception-item__header">
-                <span className="exception-item__type">{getExceptionTypeLabel(ex.exceptionType)}</span>
-                <span className={`exception-item__severity exception-item__severity--${ex.severity}`}>
-                  {getExceptionSeverityLabel(ex.severity)}
-                </span>
-                <span className={`exception-item__status exception-item__status--${ex.status}`}>
-                  {getExceptionStatusLabel(ex.status)}
-                </span>
-              </div>
-
-              <p className="exception-item__message">{ex.message}</p>
-
-              <div className="exception-item__meta">
-                <span>{formatUtcShort(ex.raisedAtUtc)}</span>
-                <span className="exception-item__actor">{ex.raisedBySubjectId}</span>
-              </div>
-
-              {panelState.kind === "idle" && (
-                <div className="exception-item__actions">
-                  {ex.status === "open" && (
-                    <button
-                      type="button"
-                      className="button button-ghost button-medium"
-                      onClick={() => handleAcknowledge(ex.id)}
-                      disabled={isPending}
-                    >
-                      <Eye aria-hidden="true" />
-                      Gördüm
-                    </button>
-                  )}
-                  {(ex.status === "open" || ex.status === "acknowledged") && (
-                    <button
-                      type="button"
-                      className="button button-medium"
-                      onClick={() => { setResolutionNote(""); setPanelState({ kind: "resolve-dialog", exceptionId: ex.id }); }}
-                      disabled={isPending}
-                    >
-                      <CheckCircle2 aria-hidden="true" />
-                      Çözümle
-                    </button>
+          {openExceptions.map((ex) => {
+            const ownershipLabel = getExceptionOwnershipLabel(ex.status, ex.assignedToSubjectId, currentSubjectId);
+            return (
+              <li key={ex.id} className={`exception-item ${severityClass(ex.severity)}`}>
+                <div className="exception-item__header">
+                  <span className="exception-item__type">{getExceptionTypeLabel(ex.exceptionType)}</span>
+                  <span className={`exception-item__severity exception-item__severity--${ex.severity}`}>
+                    {getExceptionSeverityLabel(ex.severity)}
+                  </span>
+                  <span className={`exception-item__status exception-item__status--${ex.status}`}>
+                    {getExceptionStatusLabel(ex.status)}
+                  </span>
+                  {ex.assignedToSubjectId && (
+                    <span className={`exception-item__ownership exception-item__ownership--${ownershipLabel === "Bana Atandı" ? "mine" : "other"}`}>
+                      {ownershipLabel}
+                    </span>
                   )}
                 </div>
-              )}
-            </li>
-          ))}
+
+                <p className="exception-item__message">{ex.message}</p>
+
+                <div className="exception-item__meta">
+                  <span>{formatUtcShort(ex.raisedAtUtc)}</span>
+                  <span className="exception-item__actor">{ex.raisedBySubjectId}</span>
+                </div>
+
+                {panelState.kind === "idle" && (
+                  <div className="exception-item__actions">
+                    {ex.status === "open" && (
+                      <button
+                        type="button"
+                        className="button button-ghost button-medium"
+                        onClick={() => handleAcknowledge(ex.id)}
+                        disabled={isPending}
+                      >
+                        <Eye aria-hidden="true" />
+                        Gördüm
+                      </button>
+                    )}
+                    {(ex.status === "open" || ex.status === "acknowledged") && (
+                      <button
+                        type="button"
+                        className="button button-medium"
+                        onClick={() => { setResolutionNote(""); setPanelState({ kind: "resolve-dialog", exceptionId: ex.id }); }}
+                        disabled={isPending}
+                      >
+                        <CheckCircle2 aria-hidden="true" />
+                        Çözümle
+                      </button>
+                    )}
+                    {onAssignException && (ex.status === "open" || ex.status === "acknowledged") && (
+                      <button
+                        type="button"
+                        className="button button-ghost button-medium"
+                        onClick={() => { setAssignTargetId(currentSubjectId ?? ""); setPanelState({ kind: "assign-dialog", exceptionId: ex.id }); }}
+                        disabled={isPending}
+                      >
+                        {!ex.assignedToSubjectId ? "Bana Ata" : "Operatöre Ata"}
+                      </button>
+                    )}
+                    {onUnassignException && ex.assignedToSubjectId && ex.status !== "resolved" && (
+                      <button
+                        type="button"
+                        className="button button-ghost button-medium"
+                        onClick={() => handleUnassignException(ex.id)}
+                        disabled={isPending}
+                      >
+                        Atamayı Kaldır
+                      </button>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 

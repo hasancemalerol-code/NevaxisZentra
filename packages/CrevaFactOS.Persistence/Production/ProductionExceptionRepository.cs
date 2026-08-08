@@ -19,6 +19,8 @@ public sealed class UnavailableProductionExceptionRepository : IProductionExcept
     public Task<ProductionExceptionWriteResult> AcknowledgeExceptionAsync(ProductionOrderOperationContext context, AcknowledgeExceptionCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
     public Task<ProductionExceptionWriteResult> ResolveExceptionAsync(ProductionOrderOperationContext context, ResolveExceptionCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
     public Task<ProductionOperationsListResult<ExceptionReadModel>> ListExceptionsAsync(ProductionOrderOperationContext context, Guid productionOrderId, int limit, CancellationToken cancellationToken = default) => Task.FromResult(ProductionOperationsListResult.Fail<ExceptionReadModel>(ProductionOrderFailureCodes.SourceUnavailable, "Unavailable."));
+    public Task<ProductionExceptionWriteResult> AssignExceptionAsync(ProductionOrderOperationContext context, AssignExceptionCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
+    public Task<ProductionExceptionWriteResult> UnassignExceptionAsync(ProductionOrderOperationContext context, UnassignExceptionCommand command, CancellationToken cancellationToken = default) => Task.FromResult(Unavailable);
 }
 
 /// <summary>
@@ -560,35 +562,262 @@ public sealed class ProductionExceptionRepository(
 
         try
         {
-            var items = await dbContext.ProductionExecutionExceptions
-                .Where(e =>
-                    e.TenantId == context.TenantId
-                    && e.FacilityId == context.FacilityId
-                    && e.ProductionOrderId == productionOrderId)
-                .OrderByDescending(e => e.RaisedAtUtc)
-                .Take(safeLimit)
-                .Select(e => new ExceptionReadModel(
-                    e.Id,
-                    e.ExceptionType,
-                    e.Severity,
-                    e.Status,
-                    e.Message,
-                    e.RaisedAtUtc,
-                    e.RaisedBySubjectId,
-                    e.ResolvedAtUtc,
-                    e.ResolvedBySubjectId,
-                    e.ResolutionNote,
-                    e.CorrelationId,
-                    e.Version))
-                .ToListAsync(cancellationToken);
+            return await tenantDatabaseSession.ExecuteReadAsync(async ct =>
+            {
+                var items = await dbContext.ProductionExecutionExceptions
+                    .Where(e =>
+                        e.TenantId == context.TenantId
+                        && e.FacilityId == context.FacilityId
+                        && e.ProductionOrderId == productionOrderId)
+                    .OrderByDescending(e => e.RaisedAtUtc)
+                    .Take(safeLimit)
+                    .Select(e => new ExceptionReadModel(
+                        e.Id,
+                        e.ExceptionType,
+                        e.Severity,
+                        e.Status,
+                        e.Message,
+                        e.RaisedAtUtc,
+                        e.RaisedBySubjectId,
+                        e.ResolvedAtUtc,
+                        e.ResolvedBySubjectId,
+                        e.ResolutionNote,
+                        e.CorrelationId,
+                        e.Version,
+                        e.AssignedToSubjectId,
+                        e.AssignedAtUtc,
+                        e.AssignedBySubjectId))
+                    .ToListAsync(ct);
 
-            return ProductionOperationsListResult.Success<ExceptionReadModel>(items);
+                return ProductionOperationsListResult.Success<ExceptionReadModel>(items);
+            }, cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ProductionOperationsListResult.Fail<ExceptionReadModel>(
                 ProductionOrderFailureCodes.SourceUnavailable,
                 "Production exception service is unavailable.");
+        }
+    }
+
+    // ────────────────────────────── Assign ────────────────────────────────────
+
+    public async Task<ProductionExceptionWriteResult> AssignExceptionAsync(
+        ProductionOrderOperationContext context,
+        AssignExceptionCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(command);
+
+        if (string.IsNullOrWhiteSpace(command.SubjectId))
+            return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.AssignmentTargetEmpty, "SubjectId is required.");
+
+        try
+        {
+            return await tenantDatabaseSession.ExecuteWriteAsync(async ct =>
+            {
+                var order = await dbContext.ProductionOrders
+                    .SingleOrDefaultAsync(o => o.TenantId == context.TenantId && o.FacilityId == context.FacilityId && o.Id == command.ProductionOrderId, ct);
+
+                if (order is null)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.NotFound, "Production order not found.");
+
+                if (order.Version != command.ExpectedVersion)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ConcurrencyConflict, "Order was modified. Please reload.");
+
+                var exception = await dbContext.ProductionExecutionExceptions
+                    .SingleOrDefaultAsync(e => e.TenantId == context.TenantId && e.ProductionOrderId == command.ProductionOrderId && e.Id == command.ExceptionId, ct);
+
+                if (exception is null)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ExceptionNotFound, "Exception not found.");
+
+                if (exception.Status == ProductionExceptionStatuses.Resolved)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ExceptionAlreadyResolved, "Cannot assign a resolved exception.");
+
+                var now = DateTimeOffset.UtcNow;
+                var correlationId = context.CorrelationId ?? Guid.NewGuid();
+                var actorSubjectId = context.IdentitySubjectId.ToString();
+
+                exception.AssignedToSubjectId = command.SubjectId.Trim();
+                exception.AssignedAtUtc = now;
+                exception.AssignedBySubjectId = actorSubjectId;
+                exception.Version++;
+
+                order.LastModifiedBySubjectId = actorSubjectId;
+                order.Version++;
+                order.UpdatedAtUtc = now;
+
+                dbContext.AuditRecords.Add(new AuditRecord
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    IdentitySubjectId = context.IdentitySubjectId,
+                    TenantMembershipId = context.MembershipId,
+                    Action = ProductionAuditActions.ProductionExceptionAssign,
+                    EventType = ProductionAuditEventTypes.ProductionExceptionAssigned,
+                    ResourceType = "production.order",
+                    ResourceId = order.Id.ToString(),
+                    Outcome = AuditOutcome.Success,
+                    PermissionKey = context.PermissionKey,
+                    CorrelationId = correlationId,
+                    Source = AuditSource.Api,
+                    OccurredAtUtc = now,
+                    RecordedAtUtc = now,
+                    MetadataJson = JsonSerializer.Serialize(new
+                    {
+                        productionOrderId = order.Id.ToString(),
+                        exceptionId = exception.Id.ToString(),
+                        assignedToSubjectId = command.SubjectId,
+                    }, JsonOptions),
+                });
+
+                dbContext.OutboxMessages.Add(new OutboxMessage
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    MessageType = ProductionOutboxMessageTypes.ProductionExceptionAssigned,
+                    SchemaVersion = OutboxMessageTypes.SchemaVersion,
+                    AggregateType = "production-order",
+                    AggregateId = order.Id.ToString(),
+                    CorrelationId = correlationId,
+                    IdempotencyKey = $"{exception.Id}:{exception.Version}:{ProductionOutboxMessageTypes.ProductionExceptionAssigned}",
+                    PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+                    {
+                        ["tenantId"] = context.TenantId.ToString(),
+                        ["facilityId"] = context.FacilityId.ToString(),
+                        ["productionOrderId"] = order.Id.ToString(),
+                        ["exceptionId"] = exception.Id.ToString(),
+                        ["assignedToSubjectId"] = command.SubjectId,
+                        ["occurredAtUtc"] = now.ToString("O"),
+                    }),
+                    HeadersJson = "{}",
+                    Status = OutboxMessageStatus.Pending,
+                    OccurredAtUtc = now,
+                    RecordedAtUtc = now,
+                    AvailableAtUtc = now,
+                    AttemptCount = 0,
+                });
+
+                await dbContext.SaveChangesAsync(ct);
+                return ProductionExceptionWriteResult.Success(exception.Id, order.Version, exception.Version);
+            }, cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ConcurrencyConflict, "Concurrent modification.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.SourceUnavailable, "Service unavailable.");
+        }
+    }
+
+    // ────────────────────────────── Unassign ──────────────────────────────────
+
+    public async Task<ProductionExceptionWriteResult> UnassignExceptionAsync(
+        ProductionOrderOperationContext context,
+        UnassignExceptionCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(command);
+
+        try
+        {
+            return await tenantDatabaseSession.ExecuteWriteAsync(async ct =>
+            {
+                var order = await dbContext.ProductionOrders
+                    .SingleOrDefaultAsync(o => o.TenantId == context.TenantId && o.FacilityId == context.FacilityId && o.Id == command.ProductionOrderId, ct);
+
+                if (order is null)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.NotFound, "Production order not found.");
+
+                if (order.Version != command.ExpectedVersion)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ConcurrencyConflict, "Order was modified. Please reload.");
+
+                var exception = await dbContext.ProductionExecutionExceptions
+                    .SingleOrDefaultAsync(e => e.TenantId == context.TenantId && e.ProductionOrderId == command.ProductionOrderId && e.Id == command.ExceptionId, ct);
+
+                if (exception is null)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ExceptionNotFound, "Exception not found.");
+
+                if (exception.AssignedToSubjectId is null)
+                    return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ExceptionNotAssigned, "Exception is not currently assigned.");
+
+                var now = DateTimeOffset.UtcNow;
+                var correlationId = context.CorrelationId ?? Guid.NewGuid();
+                var actorSubjectId = context.IdentitySubjectId.ToString();
+
+                exception.AssignedToSubjectId = null;
+                exception.AssignedAtUtc = null;
+                exception.AssignedBySubjectId = null;
+                exception.Version++;
+
+                order.LastModifiedBySubjectId = actorSubjectId;
+                order.Version++;
+                order.UpdatedAtUtc = now;
+
+                dbContext.AuditRecords.Add(new AuditRecord
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    IdentitySubjectId = context.IdentitySubjectId,
+                    TenantMembershipId = context.MembershipId,
+                    Action = ProductionAuditActions.ProductionExceptionUnassign,
+                    EventType = ProductionAuditEventTypes.ProductionExceptionUnassigned,
+                    ResourceType = "production.order",
+                    ResourceId = order.Id.ToString(),
+                    Outcome = AuditOutcome.Success,
+                    PermissionKey = context.PermissionKey,
+                    CorrelationId = correlationId,
+                    Source = AuditSource.Api,
+                    OccurredAtUtc = now,
+                    RecordedAtUtc = now,
+                    MetadataJson = JsonSerializer.Serialize(new
+                    {
+                        productionOrderId = order.Id.ToString(),
+                        exceptionId = exception.Id.ToString(),
+                    }, JsonOptions),
+                });
+
+                dbContext.OutboxMessages.Add(new OutboxMessage
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    MessageType = ProductionOutboxMessageTypes.ProductionExceptionUnassigned,
+                    SchemaVersion = OutboxMessageTypes.SchemaVersion,
+                    AggregateType = "production-order",
+                    AggregateId = order.Id.ToString(),
+                    CorrelationId = correlationId,
+                    IdempotencyKey = $"{exception.Id}:{exception.Version}:{ProductionOutboxMessageTypes.ProductionExceptionUnassigned}",
+                    PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+                    {
+                        ["tenantId"] = context.TenantId.ToString(),
+                        ["facilityId"] = context.FacilityId.ToString(),
+                        ["productionOrderId"] = order.Id.ToString(),
+                        ["exceptionId"] = exception.Id.ToString(),
+                        ["occurredAtUtc"] = now.ToString("O"),
+                    }),
+                    HeadersJson = "{}",
+                    Status = OutboxMessageStatus.Pending,
+                    OccurredAtUtc = now,
+                    RecordedAtUtc = now,
+                    AvailableAtUtc = now,
+                    AttemptCount = 0,
+                });
+
+                await dbContext.SaveChangesAsync(ct);
+                return ProductionExceptionWriteResult.Success(exception.Id, order.Version, exception.Version);
+            }, cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.ConcurrencyConflict, "Concurrent modification.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ProductionExceptionWriteResult.Fail(ProductionOrderFailureCodes.SourceUnavailable, "Service unavailable.");
         }
     }
 }

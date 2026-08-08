@@ -47,6 +47,21 @@ public static class OutboxMessageTypes
     public const string ProductionDowntimeRecovered = "production-order-downtime-recovered";
     public const string ProductionSetupRecovered = "production-order-setup-recovered";
 
+    // 5L — shift
+    public const string ProductionShiftAssigned = "production-order-shift-assigned";
+    public const string ProductionShiftReassigned = "production-order-shift-reassigned";
+
+    // 5L — operator
+    public const string ProductionOperatorAssigned = "production-order-operator-assigned";
+    public const string ProductionOperatorReleased = "production-order-operator-released";
+
+    // 5L — handover
+    public const string ProductionHandoverCreated = "production-order-shift-handover-created";
+
+    // 5L — exception routing
+    public const string ProductionExceptionAssigned = "production-order-exception-assigned";
+    public const string ProductionExceptionUnassigned = "production-order-exception-unassigned";
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -85,6 +100,13 @@ public static class OutboxMessageTypes
             ProductionExceptionResolved,
             ProductionDowntimeRecovered,
             ProductionSetupRecovered,
+            ProductionShiftAssigned,
+            ProductionShiftReassigned,
+            ProductionOperatorAssigned,
+            ProductionOperatorReleased,
+            ProductionHandoverCreated,
+            ProductionExceptionAssigned,
+            ProductionExceptionUnassigned,
         ],
         StringComparer.Ordinal);
 }

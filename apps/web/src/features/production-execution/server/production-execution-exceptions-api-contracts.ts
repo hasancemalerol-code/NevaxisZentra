@@ -83,6 +83,9 @@ function parseExceptionSummary(
       resolvedBySubjectId: str(r["resolvedBySubjectId"]),
       resolutionNote: str(r["resolutionNote"]),
       version,
+      assignedToSubjectId: str(r["assignedToSubjectId"]),
+      assignedAtUtc: str(r["assignedAtUtc"]),
+      assignedBySubjectId: str(r["assignedBySubjectId"]),
     },
   };
 }

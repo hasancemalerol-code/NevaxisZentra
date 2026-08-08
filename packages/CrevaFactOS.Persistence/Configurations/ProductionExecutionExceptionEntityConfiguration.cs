@@ -27,6 +27,11 @@ public sealed class ProductionExecutionExceptionEntityConfiguration
         builder.Property(e => e.CorrelationId).HasColumnName("correlation_id");
         builder.Property(e => e.Version).HasColumnName("version");
 
+        // 5L: exception ownership columns
+        builder.Property(e => e.AssignedToSubjectId).HasColumnName("assigned_to_subject_id").HasMaxLength(200);
+        builder.Property(e => e.AssignedAtUtc).HasColumnName("assigned_at_utc");
+        builder.Property(e => e.AssignedBySubjectId).HasColumnName("assigned_by_subject_id").HasMaxLength(200);
+
         // Primary composite index for filtered exception queries
         builder.HasIndex(e => new { e.TenantId, e.FacilityId, e.ProductionOrderId, e.Status })
             .HasDatabaseName("ix_production_exceptions_order_status");

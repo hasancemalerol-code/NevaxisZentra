@@ -26,6 +26,10 @@ export type ProductionExecutionExceptionSummary = Readonly<{
   resolvedBySubjectId?: string;
   resolutionNote?: string;
   version: number;
+  // 5L: exception ownership
+  assignedToSubjectId?: string;
+  assignedAtUtc?: string;
+  assignedBySubjectId?: string;
 }>;
 
 // ── Health Summary ─────────────────────────────────────────────────────────────

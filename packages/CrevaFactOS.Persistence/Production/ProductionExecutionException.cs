@@ -46,6 +46,13 @@ public sealed class ProductionExecutionExceptionRecord : ITenantScopedEntity
 
     public Guid CorrelationId { get; set; }
     public uint Version { get; set; } = 1;
+
+    // ── 5L: Exception ownership ───────────────────────────────────────────────
+    // Populated when an exception is assigned to a specific operator for resolution.
+
+    public string? AssignedToSubjectId { get; set; }
+    public DateTimeOffset? AssignedAtUtc { get; set; }
+    public string? AssignedBySubjectId { get; set; }
 }
 
 /// <summary>

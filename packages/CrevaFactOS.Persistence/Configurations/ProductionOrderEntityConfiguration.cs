@@ -71,7 +71,7 @@ internal sealed class ProductionOrderEntityConfiguration
         entity.Property(o => o.LastModifiedBySubjectId)
             .HasColumnName("last_modified_by_subject_id")
             .HasMaxLength(200);
-        entity.Property(o => o.Version).HasColumnName("version");
+        entity.Property(o => o.Version).HasColumnName("version").IsConcurrencyToken();
         entity.Property(o => o.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(o => o.UpdatedAtUtc).HasColumnName("updated_at_utc");
         entity.Property(o => o.HistoryJson)
@@ -84,6 +84,15 @@ internal sealed class ProductionOrderEntityConfiguration
         entity.Property(o => o.ManualCycleCount).HasColumnName("manual_cycle_count");
         entity.Property(o => o.TotalManualCycleDurationMilliseconds).HasColumnName("total_manual_cycle_duration_ms");
         entity.Property(o => o.LastCycleAtUtc).HasColumnName("last_cycle_at_utc");
+
+        // 5L — resource summary fields (denormalized)
+        entity.Property(o => o.CurrentShiftId).HasColumnName("current_shift_id");
+        entity.Property(o => o.CurrentShiftCode).HasColumnName("current_shift_code").HasMaxLength(20);
+        entity.Property(o => o.CurrentShiftStartAtUtc).HasColumnName("current_shift_start_at_utc");
+        entity.Property(o => o.CurrentShiftEndAtUtc).HasColumnName("current_shift_end_at_utc");
+        entity.Property(o => o.PrimaryOperatorSubjectId).HasColumnName("primary_operator_subject_id").HasMaxLength(200);
+        entity.Property(o => o.ActiveOperatorCount).HasColumnName("active_operator_count");
+        entity.Property(o => o.LastAssignmentAtUtc).HasColumnName("last_assignment_at_utc");
 
         entity.HasIndex(o => o.ProductionPlanHandoffId).IsUnique();
         entity.HasIndex(o => new { o.TenantId, o.FacilityId, o.Status });

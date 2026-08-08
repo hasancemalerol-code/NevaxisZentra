@@ -108,6 +108,9 @@ export function parseProductionOrderSummaryApiResponse(
     manualCycleCount: isOptionalNumber(o.manualCycleCount) ? (o.manualCycleCount as number | undefined) ?? undefined : undefined,
     version: o.version,
     updatedAtUtc: o.updatedAtUtc,
+    currentShiftCode: isOptionalString(o.currentShiftCode) ? o.currentShiftCode ?? undefined : undefined,
+    primaryOperatorSubjectId: isOptionalString(o.primaryOperatorSubjectId) ? o.primaryOperatorSubjectId ?? undefined : undefined,
+    activeOperatorCount: isOptionalNumber(o.activeOperatorCount) ? (o.activeOperatorCount as number | undefined) ?? undefined : undefined,
   });
 }
 
@@ -191,5 +194,13 @@ export function parseProductionOrderDetailApiResponse(
     version: o.version,
     createdAtUtc: o.createdAtUtc,
     updatedAtUtc: o.updatedAtUtc,
+    // 5L: shift/operator summary
+    currentShiftId: isOptionalString(o.currentShiftId) ? o.currentShiftId ?? undefined : undefined,
+    currentShiftCode: isOptionalString(o.currentShiftCode) ? o.currentShiftCode ?? undefined : undefined,
+    currentShiftStartAtUtc: isOptionalString(o.currentShiftStartAtUtc) ? o.currentShiftStartAtUtc ?? undefined : undefined,
+    currentShiftEndAtUtc: isOptionalString(o.currentShiftEndAtUtc) ? o.currentShiftEndAtUtc ?? undefined : undefined,
+    primaryOperatorSubjectId: isOptionalString(o.primaryOperatorSubjectId) ? o.primaryOperatorSubjectId ?? undefined : undefined,
+    activeOperatorCount: isOptionalNumber(o.activeOperatorCount) ? (o.activeOperatorCount as number | undefined) ?? undefined : undefined,
+    lastAssignmentAtUtc: isOptionalString(o.lastAssignmentAtUtc) ? o.lastAssignmentAtUtc ?? undefined : undefined,
   });
 }
