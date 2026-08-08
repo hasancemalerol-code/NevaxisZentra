@@ -38,6 +38,11 @@ import {
   readTraceability,
 } from "@/features/export/server/export-case-reader";
 import {
+  readCurrentAiUsage,
+  readExportAiRecommendations,
+  readLatestExportAiRunDetail,
+} from "@/features/export/server/export-4l-reader";
+import {
   acknowledgeBrokerAction,
   addPackingItemAction,
   completePackingAction,
@@ -58,6 +63,14 @@ import {
   verifyExportDocumentAction,
   verifyPackingAction,
 } from "@/features/export/server/export-case-writer";
+import {
+  acceptExportAiRecommendationAction,
+  analyzeExportCaseAction,
+  dismissExportAiRecommendationAction,
+  explainExportReadinessAction,
+  rejectExportAiRecommendationAction,
+  suggestExportNextActionsAction,
+} from "@/features/export/server/export-4l-writer";
 
 type BadgeTone =
   | "neutral"
@@ -122,6 +135,7 @@ function normalizeTab(value: string | string[] | undefined): ExportDetailTab {
     case "traceability":
     case "activity":
     case "overview":
+    case "ai-copilot":
       return raw;
     default:
       return "overview";
@@ -156,6 +170,9 @@ export default async function ExportCaseDetailPage({
     brokerResult,
     complianceResult,
     traceabilityResult,
+    aiRunDetailResult,
+    aiRecommendationsResult,
+    aiUsageResult,
   ] = await Promise.all([
     readExportCaseById(exportCaseId),
     readExportReadiness(exportCaseId),
@@ -167,6 +184,9 @@ export default async function ExportCaseDetailPage({
     readBrokerWorkspace(exportCaseId),
     readComplianceSummary(exportCaseId),
     readTraceability(exportCaseId),
+    readLatestExportAiRunDetail(exportCaseId),
+    readExportAiRecommendations(exportCaseId),
+    readCurrentAiUsage(),
   ]);
 
   if (caseResult.status === "failure") {
@@ -219,6 +239,14 @@ export default async function ExportCaseDetailPage({
     traceabilityResult.status === "success"
       ? traceabilityResult.traceability
       : null;
+  const latestRunDetail =
+    aiRunDetailResult.status === "success" ? aiRunDetailResult.detail : null;
+  const aiRecommendations =
+    aiRecommendationsResult.status === "success"
+      ? aiRecommendationsResult.recommendations
+      : [];
+  const aiUsage =
+    aiUsageResult.status === "success" ? aiUsageResult.usage : null;
 
   const readinessEntries = await Promise.all(
     shipments.map(async (shipment) => {
@@ -326,6 +354,11 @@ export default async function ExportCaseDetailPage({
         brokerWorkspace={brokerWorkspace}
         compliance={compliance}
         traceability={traceability}
+        aiCopilot={{
+          latestRunDetail,
+          recommendations: aiRecommendations,
+          usage: aiUsage,
+        }}
         initialTab={initialTab}
         actions={{
           registerDocument: registerExportDocumentAction,
@@ -347,6 +380,12 @@ export default async function ExportCaseDetailPage({
           evaluateCompliance: evaluateComplianceAction,
           revalidateCompliance: revalidateComplianceAction,
           satisfyComplianceRequirement: satisfyComplianceRequirementAction,
+          analyzeExportCase: analyzeExportCaseAction,
+          explainExportReadiness: explainExportReadinessAction,
+          suggestExportNextActions: suggestExportNextActionsAction,
+          acceptAiRecommendation: acceptExportAiRecommendationAction,
+          rejectAiRecommendation: rejectExportAiRecommendationAction,
+          dismissAiRecommendation: dismissExportAiRecommendationAction,
         }}
       />
     </main>

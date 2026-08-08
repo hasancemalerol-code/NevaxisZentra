@@ -139,6 +139,12 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportCountryResearchVerifyPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiReviewPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -213,6 +219,10 @@ internal sealed class DevelopmentPilotBootstrapService(
             reviewerRole.Id,
             seedTimestampUtc,
             cancellationToken);
+        await EnsureExportAiReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiReviewPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -296,6 +306,12 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureExportCountryResearchManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportCountryResearchVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportAiReviewPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
@@ -1278,6 +1294,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ExportPermissionKeys.CountryResearchVerify,
             DevelopmentPilotIds.ExportCountryResearchVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportAiReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.AiRead,
+            DevelopmentPilotIds.ExportAiReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportAiRunPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.AiRun,
+            DevelopmentPilotIds.ExportAiRunPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportAiReviewPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.AiReview,
+            DevelopmentPilotIds.ExportAiReviewPermissionDefinitionId,
             cancellationToken);
 
     private static async Task EnsureExportDeDemoRulePackAsync(

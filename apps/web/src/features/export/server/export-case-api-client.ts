@@ -213,7 +213,7 @@ function mapHttpStatus(status: number, body: unknown): ExportCaseApiFailure {
   );
 }
 
-async function executeGet<T>(
+export async function executeGet<T>(
   context: ExportCaseRequestContext,
   url: string,
   parse: (body: unknown) => ExportCaseApiResult<T>,
@@ -246,7 +246,7 @@ async function executeGet<T>(
   return parse(body);
 }
 
-async function executePost<T>(
+export async function executePost<T>(
   context: ExportCaseRequestContext,
   url: string,
   requestBody: unknown,
@@ -318,7 +318,7 @@ async function executePut<T>(
   return parse(body);
 }
 
-function caseFacilityUrl(
+export function caseFacilityUrl(
   context: ExportCaseRequestContext,
   exportCaseId: string,
   suffix: string,
@@ -338,7 +338,7 @@ function caseFacilityUrl(
   return `${trimTrailingSlash(context.apiBaseUrl)}/api/export/cases/${encodeURIComponent(exportCaseId.trim())}${suffix}?${params.toString()}`;
 }
 
-function mapParsed<T>(
+export function mapParsed<T>(
   parsed: { status: "success"; value: T } | { status: "failure"; message: string },
 ): ExportCaseApiResult<T> {
   if (parsed.status === "failure") {
@@ -902,7 +902,7 @@ export async function resolveExportBrokerCorrection(
 
 // ─── EXPORT-3L — Compliance, research, knowledge, traceability ─────────────────
 
-function exportFacilityUrl(
+export function exportFacilityUrl(
   context: ExportCaseRequestContext,
   path: string,
   extraParams?: Record<string, string>,

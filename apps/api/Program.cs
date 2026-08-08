@@ -75,6 +75,7 @@ app.MapProductionResourceExecutionReadEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();
+app.MapExport4LEndpoints();
 
 app.MapHealthChecks(
     "/health/live",

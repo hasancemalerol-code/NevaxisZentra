@@ -45,6 +45,16 @@ public static class ExportAuditActions
     public const string ExportCountryKnowledgeCreated = "export.country.knowledge.created";
     public const string ExportCountryKnowledgeVerified = "export.country.knowledge.verified";
     public const string ExportCountryKnowledgeSuperseded = "export.country.knowledge.superseded";
+
+    // EXPORT-4L
+    public const string ExportAiAnalysisStarted = "export.ai.analysis.started";
+    public const string ExportAiAnalysisCompleted = "export.ai.analysis.completed";
+    public const string ExportAiAnalysisFailed = "export.ai.analysis.failed";
+    public const string ExportAiHighRiskFound = "export.ai.high-risk.found";
+    public const string ExportAiRecommendationReviewed = "export.ai.recommendation.reviewed";
+    public const string ExportAiRecommendationAccepted = "export.ai.recommendation.accepted";
+    public const string ExportAiRecommendationRejected = "export.ai.recommendation.rejected";
+    public const string ExportAiTaskRequested = "export.ai.task.requested";
 }
 
 /// <summary>
@@ -92,6 +102,16 @@ public static class ExportAuditEventTypes
     public const string ExportCountryKnowledgeCreated = "export.country.knowledge.created";
     public const string ExportCountryKnowledgeVerified = "export.country.knowledge.verified";
     public const string ExportCountryKnowledgeSuperseded = "export.country.knowledge.superseded";
+
+    // EXPORT-4L
+    public const string ExportAiAnalysisStarted = "export.ai.analysis.started";
+    public const string ExportAiAnalysisCompleted = "export.ai.analysis.completed";
+    public const string ExportAiAnalysisFailed = "export.ai.analysis.failed";
+    public const string ExportAiHighRiskFound = "export.ai.high-risk.found";
+    public const string ExportAiRecommendationReviewed = "export.ai.recommendation.reviewed";
+    public const string ExportAiRecommendationAccepted = "export.ai.recommendation.accepted";
+    public const string ExportAiRecommendationRejected = "export.ai.recommendation.rejected";
+    public const string ExportAiTaskRequested = "export.ai.task.requested";
 }
 
 /// <summary>Activity event types appended to export_case_activities (avoid spam).</summary>
@@ -131,4 +151,14 @@ public static class ExportActivityEventTypes
     public const string CountryResearchVerified = "country-research-verified";
     public const string CountryResearchLinked = "country-research-linked";
     public const string CountryRulePackUpdated = "country-rule-pack-updated";
+
+    // EXPORT-4L
+    public const string AiAnalysisStarted = "ai-analysis-started";
+    public const string AiAnalysisCompleted = "ai-analysis-completed";
+    public const string AiAnalysisFailed = "ai-analysis-failed";
+    public const string AiHighRiskFound = "ai-high-risk-found";
+    public const string AiRecommendationReviewed = "ai-recommendation-reviewed";
+    public const string AiRecommendationAccepted = "ai-recommendation-accepted";
+    public const string AiRecommendationRejected = "ai-recommendation-rejected";
+    public const string AiTaskRequested = "ai-task-requested";
 }

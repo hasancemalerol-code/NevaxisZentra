@@ -2,6 +2,7 @@ using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
@@ -1678,6 +1679,48 @@ public static class ExportServiceCollectionExtensions
             new ExportTraceabilityReadRepository(
                 serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        // EXPORT-4L — AI copilot
+        services.AddScoped<IExportAiReadRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableExportAiReadRepository()
+                : new ExportAiReadRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IExportAiWriteRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableExportAiWriteRepository()
+                : new ExportAiWriteRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<ExportAiContextBuilder>(),
+                    serviceProvider.GetRequiredService<IExportAiProvider>());
+        });
+
+        services.AddScoped<ExportAiContextBuilder>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>()
+                ?? throw new InvalidOperationException("Export AI persistence is disabled.");
+            return new ExportAiContextBuilder(dbContext);
+        });
+
+        services.AddScoped<IExportAiProvider, DeterministicExportAiProvider>();
+
+        services.AddScoped<IAiUsageMeteringService>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableAiUsageMeteringService()
+                : new AiUsageMeteringService(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
 
         return services;
     }

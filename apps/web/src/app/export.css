@@ -1766,7 +1766,8 @@
 .export-compliance-panel,
 .export-traceability-panel,
 .export-country-research-workspace,
-.export-country-knowledge-panel {
+.export-country-knowledge-panel,
+.export-ai-copilot-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1775,7 +1776,8 @@
 .export-compliance-panel__header,
 .export-traceability-panel__header,
 .export-country-research-workspace__header,
-.export-country-knowledge-panel__header {
+.export-country-knowledge-panel__header,
+.export-ai-copilot-panel__header {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -1785,7 +1787,8 @@
 .export-compliance-panel__header p,
 .export-traceability-panel__header p,
 .export-country-research-workspace__header p,
-.export-country-knowledge-panel__header p {
+.export-country-knowledge-panel__header p,
+.export-ai-copilot-panel__header p {
   margin: 0;
   color: #8491a4;
   font-size: 11px;
@@ -1795,7 +1798,8 @@
 
 .export-compliance-panel__summary,
 .export-traceability-panel__chain,
-.export-country-research-workspace__meta {
+.export-country-research-workspace__meta,
+.export-ai-copilot-panel__summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -1812,7 +1816,8 @@
 }
 
 .export-compliance-panel__actions,
-.export-country-research-workspace__actions {
+.export-country-research-workspace__actions,
+.export-ai-copilot-panel__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1821,7 +1826,9 @@
 .export-compliance-panel__actions button,
 .export-country-research-workspace__actions button,
 .export-country-knowledge-panel__form button,
-.export-country-research-workspace__form button {
+.export-country-research-workspace__form button,
+.export-ai-copilot-panel__actions button,
+.export-ai-copilot-panel__review-actions button {
   border: none;
   border-radius: 10px;
   padding: 10px 14px;
@@ -1832,7 +1839,8 @@
 }
 
 .export-compliance-panel__secondary,
-.export-country-research-workspace__secondary {
+.export-country-research-workspace__secondary,
+.export-ai-copilot-panel__secondary {
   background: #eef3ff !important;
   color: #155eef !important;
 }
@@ -1840,7 +1848,10 @@
 .export-compliance-panel__requirements ul,
 .export-country-research-workspace__findings ul,
 .export-country-knowledge-panel__list ul,
-.export-traceability-panel__chain ul {
+.export-traceability-panel__chain ul,
+.export-ai-copilot-panel__blockers ul,
+.export-ai-copilot-panel__risks ul,
+.export-ai-copilot-panel__recommendations ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1851,7 +1862,10 @@
 
 .export-compliance-panel__requirements li,
 .export-country-research-workspace__findings li,
-.export-country-knowledge-panel__list li {
+.export-country-knowledge-panel__list li,
+.export-ai-copilot-panel__blockers li,
+.export-ai-copilot-panel__risks li,
+.export-ai-copilot-panel__recommendations li {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -1881,7 +1895,8 @@
 
 .export-compliance-panel__feedback,
 .export-country-research-workspace__feedback,
-.export-country-knowledge-panel__feedback {
+.export-country-knowledge-panel__feedback,
+.export-ai-copilot-panel__feedback {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1892,14 +1907,16 @@
 
 .export-compliance-panel__feedback--error,
 .export-country-research-workspace__feedback--error,
-.export-country-knowledge-panel__feedback--error {
+.export-country-knowledge-panel__feedback--error,
+.export-ai-copilot-panel__feedback--error {
   background: #fff1f2;
   color: #be123c;
 }
 
 .export-compliance-panel__feedback--success,
 .export-country-research-workspace__feedback--success,
-.export-country-knowledge-panel__feedback--success {
+.export-country-knowledge-panel__feedback--success,
+.export-ai-copilot-panel__feedback--success {
   background: #ecfdf3;
   color: #027a48;
 }
@@ -1947,8 +1964,117 @@
 .export-traceability-panel__empty,
 .export-compliance-panel__empty,
 .export-country-research-workspace__empty,
-.export-country-knowledge-panel__empty {
+.export-country-knowledge-panel__empty,
+.export-ai-copilot-panel__empty {
   color: #8491a4;
+  font-size: 13px;
+}
+
+.export-ai-copilot-panel__header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.export-ai-copilot-panel__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.export-ai-copilot-panel__usage {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+}
+
+.export-ai-copilot-panel__usage strong {
+  display: block;
+  font-size: 18px;
+  color: #155eef;
+}
+
+.export-ai-copilot-panel__usage small {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.export-ai-copilot-panel__summary > article {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e4ebf5;
+}
+
+.export-ai-copilot-panel__summary strong {
+  display: block;
+}
+
+.export-ai-copilot-panel__summary small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.export-ai-copilot-panel__blockers h3,
+.export-ai-copilot-panel__risks h3,
+.export-ai-copilot-panel__recommendations h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.export-ai-copilot-panel__recommendations li {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.export-ai-copilot-panel__recommendation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.export-ai-copilot-panel__human-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.export-ai-copilot-panel__review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.export-country-research-workspace__assistant {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed #cfd8e6;
+  background: #fafbff;
+}
+
+.export-country-research-workspace__assistant p {
+  margin: 0 0 10px;
+  color: #64748b;
   font-size: 13px;
 }
 

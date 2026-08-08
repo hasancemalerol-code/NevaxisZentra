@@ -17,4 +17,7 @@ public static class ExportPermissionKeys
     public const string CountryResearchRead = "export.country-research.read";
     public const string CountryResearchManage = "export.country-research.manage";
     public const string CountryResearchVerify = "export.country-research.verify";
+    public const string AiRead = "export.ai.read";
+    public const string AiRun = "export.ai.run";
+    public const string AiReview = "export.ai.review";
 }

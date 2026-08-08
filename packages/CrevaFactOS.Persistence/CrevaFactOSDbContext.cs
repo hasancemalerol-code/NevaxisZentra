@@ -9,6 +9,7 @@ using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Export;
+using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -109,6 +110,15 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ExportCountryResearchCase> ExportCountryResearchCases => Set<ExportCountryResearchCase>();
     public DbSet<ExportCountryResearchFinding> ExportCountryResearchFindings => Set<ExportCountryResearchFinding>();
     public DbSet<ExportCountryKnowledgeEntry> ExportCountryKnowledgeEntries => Set<ExportCountryKnowledgeEntry>();
+
+    // Export 4L — AI copilot & recommendations
+    public DbSet<ExportAiContextSnapshot> ExportAiContextSnapshots => Set<ExportAiContextSnapshot>();
+    public DbSet<ExportAiAnalysisRun> ExportAiAnalysisRuns => Set<ExportAiAnalysisRun>();
+    public DbSet<ExportAiFinding> ExportAiFindings => Set<ExportAiFinding>();
+    public DbSet<ExportAiRecommendation> ExportAiRecommendations => Set<ExportAiRecommendation>();
+
+    // AI usage metering
+    public DbSet<AiUsageRecord> AiUsageRecords => Set<AiUsageRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -682,6 +692,37 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 4L — AI copilot & recommendations
+        modelBuilder.ApplyConfiguration(new ExportAiContextSnapshotEntityConfiguration());
+        modelBuilder.Entity<ExportAiContextSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportAiAnalysisRunEntityConfiguration());
+        modelBuilder.Entity<ExportAiAnalysisRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportAiFindingEntityConfiguration());
+        modelBuilder.Entity<ExportAiFinding>().HasQueryFilter(f =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && f.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportAiRecommendationEntityConfiguration());
+        modelBuilder.Entity<ExportAiRecommendation>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiUsageRecordEntityConfiguration());
+        modelBuilder.Entity<AiUsageRecord>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

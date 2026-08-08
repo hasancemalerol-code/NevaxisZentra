@@ -28,4 +28,10 @@ public static class ExportOutboxMessageTypes
     public const string ExportCountryResearchCompleted = "export-country-research-completed";
     public const string ExportCountryRulePackVerified = "export-country-rule-pack-verified";
     public const string ExportCountryKnowledgeUpdated = "export-country-knowledge-updated";
+
+    // EXPORT-4L
+    public const string ExportAiAnalysisCompleted = ExportAiOutboxMessageTypes.ExportAiAnalysisCompleted;
+    public const string ExportAiHighRiskFound = ExportAiOutboxMessageTypes.ExportAiHighRiskFound;
+    public const string ExportAiRecommendationAccepted = ExportAiOutboxMessageTypes.ExportAiRecommendationAccepted;
+    public const string ExportAiTaskRequested = ExportAiOutboxMessageTypes.ExportAiTaskRequested;
 }

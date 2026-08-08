@@ -86,6 +86,12 @@ public static class OutboxMessageTypes
     public const string ExportCountryRulePackVerified = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCountryRulePackVerified;
     public const string ExportCountryKnowledgeUpdated = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportCountryKnowledgeUpdated;
 
+    // Export 4L
+    public const string ExportAiAnalysisCompleted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiAnalysisCompleted;
+    public const string ExportAiHighRiskFound = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiHighRiskFound;
+    public const string ExportAiRecommendationAccepted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiRecommendationAccepted;
+    public const string ExportAiTaskRequested = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiTaskRequested;
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -149,6 +155,10 @@ public static class OutboxMessageTypes
             ExportCountryResearchCompleted,
             ExportCountryRulePackVerified,
             ExportCountryKnowledgeUpdated,
+            ExportAiAnalysisCompleted,
+            ExportAiHighRiskFound,
+            ExportAiRecommendationAccepted,
+            ExportAiTaskRequested,
         ],
         StringComparer.Ordinal);
 }

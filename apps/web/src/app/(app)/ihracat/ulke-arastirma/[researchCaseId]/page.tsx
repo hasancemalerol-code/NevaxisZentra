@@ -8,6 +8,10 @@ import {
   completeResearchCaseAction,
   reviewResearchCaseAction,
 } from "@/features/export/server/export-case-writer";
+import {
+  findResearchMissingSourcesAction,
+  summarizeResearchAction,
+} from "@/features/export/server/export-4l-writer";
 import { readCountryResearchCase } from "@/features/export/server/export-case-reader";
 
 type CountryResearchDetailPageProps = Readonly<{
@@ -48,6 +52,10 @@ export default async function CountryResearchDetailPage({
         onAddFinding={addResearchFindingAction}
         onReview={reviewResearchCaseAction}
         onComplete={completeResearchCaseAction}
+        researchAssistant={{
+          onSummarize: summarizeResearchAction,
+          onFindMissingSources: findResearchMissingSourcesAction,
+        }}
       />
     </main>
   );

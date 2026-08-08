@@ -18,6 +18,10 @@ import type {
   completeResearchCaseAction,
   reviewResearchCaseAction,
 } from "../server/export-case-writer";
+import type {
+  findResearchMissingSourcesAction,
+  summarizeResearchAction,
+} from "../server/export-4l-writer";
 
 type BadgeTone =
   | "neutral"
@@ -38,6 +42,10 @@ type ExportCountryResearchWorkspaceProps = Readonly<{
   onAddFinding: typeof addResearchFindingAction;
   onReview: typeof reviewResearchCaseAction;
   onComplete: typeof completeResearchCaseAction;
+  researchAssistant?: Readonly<{
+    onSummarize: typeof summarizeResearchAction;
+    onFindMissingSources: typeof findResearchMissingSourcesAction;
+  }>;
 }>;
 
 function researchTone(status: string): BadgeTone {
@@ -59,6 +67,7 @@ export function ExportCountryResearchWorkspace({
   onAddFinding,
   onReview,
   onComplete,
+  researchAssistant,
 }: ExportCountryResearchWorkspaceProps) {
   const router = useRouter();
   const { researchCase, findings } = detail;
@@ -134,6 +143,30 @@ export function ExportCountryResearchWorkspace({
     router.refresh();
   }, [onComplete, researchCase.id, researchCase.version, router]);
 
+  const handleSummarize = useCallback(async () => {
+    if (!researchAssistant) return;
+    setState({ kind: "pending", action: "summarize" });
+    const result = await researchAssistant.onSummarize(researchCase.id);
+    if (result.status === "failure") {
+      setState({ kind: "error", message: result.message });
+      return;
+    }
+    setState({ kind: "success", message: "Araştırma özeti oluşturuldu." });
+    router.refresh();
+  }, [researchAssistant, researchCase.id, router]);
+
+  const handleFindMissingSources = useCallback(async () => {
+    if (!researchAssistant) return;
+    setState({ kind: "pending", action: "missing-sources" });
+    const result = await researchAssistant.onFindMissingSources(researchCase.id);
+    if (result.status === "failure") {
+      setState({ kind: "error", message: result.message });
+      return;
+    }
+    setState({ kind: "success", message: "Eksik kaynak analizi tamamlandı." });
+    router.refresh();
+  }, [researchAssistant, researchCase.id, router]);
+
   return (
     <section className="export-country-research-workspace">
       <header className="export-country-research-workspace__header">
@@ -202,6 +235,30 @@ export function ExportCountryResearchWorkspace({
           Tamamla
         </button>
       </div>
+
+      {researchAssistant ? (
+        <aside className="export-country-research-workspace__assistant">
+          <h3>Araştırma asistanı</h3>
+          <p>Kaynak tabanlı özet ve eksik kaynak analizi</p>
+          <div className="export-country-research-workspace__actions">
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => void handleSummarize()}
+            >
+              Özetle
+            </button>
+            <button
+              type="button"
+              className="export-country-research-workspace__secondary"
+              disabled={isPending}
+              onClick={() => void handleFindMissingSources()}
+            >
+              Eksik kaynakları bul
+            </button>
+          </div>
+        </aside>
+      ) : null}
 
       <div className="export-country-research-workspace__findings">
         <h3>Bulgular ({findings.length})</h3>

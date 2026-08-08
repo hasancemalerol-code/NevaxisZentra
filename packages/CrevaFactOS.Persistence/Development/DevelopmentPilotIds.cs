@@ -184,6 +184,16 @@ public static class DevelopmentPilotIds
     public static readonly Guid ExportCountryResearchVerifyPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000042");
 
+    // Export 4L permission definitions (043–045)
+    public static readonly Guid ExportAiReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000043");
+
+    public static readonly Guid ExportAiRunPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000044");
+
+    public static readonly Guid ExportAiReviewPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000045");
+
     // Export 3L development demo fixtures (NOT real legal requirements)
     public static readonly Guid ExportDeDemoRulePackId =
         Guid.Parse("bb000001-0058-4000-8000-000000000058");

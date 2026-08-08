@@ -371,4 +371,101 @@ public static class ExportValueConversions
             ExportCountryKnowledgeAuthority.ManualEntry => "manual-entry",
             _ => throw new InvalidOperationException($"Unknown ExportCountryKnowledgeAuthority: {authority}"),
         };
+
+    public static string ToStorage(ExportHsCodeStatus status) =>
+        status switch
+        {
+            ExportHsCodeStatus.Unknown => "unknown",
+            ExportHsCodeStatus.Draft => "draft",
+            ExportHsCodeStatus.UserConfirmed => "user-confirmed",
+            ExportHsCodeStatus.BrokerConfirmed => "broker-confirmed",
+            ExportHsCodeStatus.ExternallyConfirmed => "externally-confirmed",
+            _ => throw new InvalidOperationException($"Unknown ExportHsCodeStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportOriginConfirmationStatus status) =>
+        status switch
+        {
+            ExportOriginConfirmationStatus.Unknown => "unknown",
+            ExportOriginConfirmationStatus.Draft => "draft",
+            ExportOriginConfirmationStatus.UserConfirmed => "user-confirmed",
+            ExportOriginConfirmationStatus.BrokerConfirmed => "broker-confirmed",
+            ExportOriginConfirmationStatus.ExternallyConfirmed => "externally-confirmed",
+            _ => throw new InvalidOperationException($"Unknown ExportOriginConfirmationStatus: {status}"),
+        };
+
+    // EXPORT-4L conversions
+    public static string ToStorage(ExportAiAnalysisRunType runType) =>
+        runType switch
+        {
+            ExportAiAnalysisRunType.CaseOverview => "case-overview",
+            ExportAiAnalysisRunType.ComplianceExplanation => "compliance-explanation",
+            ExportAiAnalysisRunType.ReadinessAnalysis => "readiness-analysis",
+            ExportAiAnalysisRunType.MissingDataAnalysis => "missing-data-analysis",
+            ExportAiAnalysisRunType.CountryResearchAssist => "country-research-assist",
+            ExportAiAnalysisRunType.NextActions => "next-actions",
+            ExportAiAnalysisRunType.DocumentGapAnalysis => "document-gap-analysis",
+            ExportAiAnalysisRunType.CrossModuleRiskAnalysis => "cross-module-risk-analysis",
+            _ => throw new InvalidOperationException($"Unknown ExportAiAnalysisRunType: {runType}"),
+        };
+
+    public static string ToStorage(ExportAiAnalysisRunStatus status) =>
+        status switch
+        {
+            ExportAiAnalysisRunStatus.Queued => "queued",
+            ExportAiAnalysisRunStatus.Running => "running",
+            ExportAiAnalysisRunStatus.Completed => "completed",
+            ExportAiAnalysisRunStatus.Failed => "failed",
+            ExportAiAnalysisRunStatus.Cancelled => "cancelled",
+            _ => throw new InvalidOperationException($"Unknown ExportAiAnalysisRunStatus: {status}"),
+        };
+
+    public static string ToStorage(ExportAiFindingCategory category) =>
+        category.ToString().ToLowerInvariant().Replace("countryresearch", "country-research").Replace("dataquality", "data-quality");
+
+    public static string ToStorage(ExportAiFindingSeverity severity) =>
+        severity switch
+        {
+            ExportAiFindingSeverity.Info => "info",
+            ExportAiFindingSeverity.Warning => "warning",
+            ExportAiFindingSeverity.Critical => "critical",
+            _ => throw new InvalidOperationException($"Unknown ExportAiFindingSeverity: {severity}"),
+        };
+
+    public static string ToStorage(ExportAiSourceType sourceType) =>
+        sourceType switch
+        {
+            ExportAiSourceType.VerifiedRule => "verified-rule",
+            ExportAiSourceType.VerifiedKnowledge => "verified-knowledge",
+            ExportAiSourceType.HistoricalObservation => "historical-observation",
+            ExportAiSourceType.BrokerInput => "broker-input",
+            ExportAiSourceType.OperationalData => "operational-data",
+            ExportAiSourceType.AiInterpretation => "ai-interpretation",
+            ExportAiSourceType.SystemDeterministic => "system-deterministic",
+            _ => throw new InvalidOperationException($"Unknown ExportAiSourceType: {sourceType}"),
+        };
+
+    public static string ToStorage(ExportAiRecommendationPriority priority) =>
+        priority.ToString().ToLowerInvariant();
+
+    public static string ToStorage(ExportAiRecommendationStatus status) =>
+        status.ToString().ToLowerInvariant();
+
+    public static string ToStorage(ExportAiProposedActionType actionType) =>
+        actionType switch
+        {
+            ExportAiProposedActionType.CreateTask => "create-task",
+            ExportAiProposedActionType.OpenDocument => "open-document",
+            ExportAiProposedActionType.OpenComplianceRequirement => "open-compliance-requirement",
+            ExportAiProposedActionType.OpenBrokerCorrection => "open-broker-correction",
+            ExportAiProposedActionType.OpenShipment => "open-shipment",
+            ExportAiProposedActionType.OpenProductionOrder => "open-production-order",
+            ExportAiProposedActionType.OpenPlanningRecord => "open-planning-record",
+            ExportAiProposedActionType.RequestHumanReview => "request-human-review",
+            ExportAiProposedActionType.DraftBrokerQuestion => "draft-broker-question",
+            _ => throw new InvalidOperationException($"Unknown ExportAiProposedActionType: {actionType}"),
+        };
+
+    public static string ToStorage(ExportAiReviewDecision decision) =>
+        decision.ToString().ToLowerInvariant();
 }

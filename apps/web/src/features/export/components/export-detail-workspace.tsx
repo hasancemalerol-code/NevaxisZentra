@@ -13,6 +13,7 @@ import type {
   ExportComplianceSummary,
   ExportTraceability,
 } from "../domain/export-3l";
+import type { ExportAiRunDetail, AiUsageSummary, ExportAiRecommendation } from "../domain/export-4l";
 import type {
   ExportActivity,
   ExportCaseDetail,
@@ -40,7 +41,16 @@ import type {
   revalidateComplianceAction,
   satisfyComplianceRequirementAction,
 } from "../server/export-case-writer";
+import type {
+  acceptExportAiRecommendationAction,
+  analyzeExportCaseAction,
+  dismissExportAiRecommendationAction,
+  explainExportReadinessAction,
+  rejectExportAiRecommendationAction,
+  suggestExportNextActionsAction,
+} from "../server/export-4l-writer";
 import { ExportActivityTimeline } from "./export-activity-timeline";
+import { ExportAiCopilotPanel } from "./export-ai-copilot-panel";
 import { ExportBrokerPanel } from "./export-broker-panel";
 import { ExportCompliancePanel } from "./export-compliance-panel";
 import { ExportDocumentsPanel } from "./export-documents-panel";
@@ -51,6 +61,7 @@ import { ExportTraceabilityPanel } from "./export-traceability-panel";
 
 export type ExportDetailTab =
   | "overview"
+  | "ai-copilot"
   | "documents"
   | "packing"
   | "shipment"
@@ -61,6 +72,7 @@ export type ExportDetailTab =
 
 const TABS: readonly { id: ExportDetailTab; label: string }[] = [
   { id: "overview", label: "Genel Bakış" },
+  { id: "ai-copilot", label: "AI Copilot" },
   { id: "documents", label: "Belgeler" },
   { id: "packing", label: "Paketleme" },
   { id: "shipment", label: "Sevkiyat" },
@@ -82,6 +94,11 @@ type ExportDetailWorkspaceProps = Readonly<{
   brokerWorkspace: ExportBrokerWorkspace | null;
   compliance: ExportComplianceSummary | null;
   traceability: ExportTraceability | null;
+  aiCopilot: Readonly<{
+    latestRunDetail: ExportAiRunDetail | null;
+    recommendations: readonly ExportAiRecommendation[];
+    usage: AiUsageSummary | null;
+  }>;
   initialTab?: ExportDetailTab;
   actions: Readonly<{
     registerDocument: typeof registerExportDocumentAction;
@@ -103,6 +120,12 @@ type ExportDetailWorkspaceProps = Readonly<{
     evaluateCompliance: typeof evaluateComplianceAction;
     revalidateCompliance: typeof revalidateComplianceAction;
     satisfyComplianceRequirement: typeof satisfyComplianceRequirementAction;
+    analyzeExportCase: typeof analyzeExportCaseAction;
+    explainExportReadiness: typeof explainExportReadinessAction;
+    suggestExportNextActions: typeof suggestExportNextActionsAction;
+    acceptAiRecommendation: typeof acceptExportAiRecommendationAction;
+    rejectAiRecommendation: typeof rejectExportAiRecommendationAction;
+    dismissAiRecommendation: typeof dismissExportAiRecommendationAction;
   }>;
 }>;
 
@@ -116,6 +139,7 @@ function normalizeTab(value: string | undefined): ExportDetailTab {
     case "traceability":
     case "activity":
     case "overview":
+    case "ai-copilot":
       return value;
     default:
       return "overview";
@@ -134,6 +158,7 @@ export function ExportDetailWorkspace({
   brokerWorkspace,
   compliance,
   traceability,
+  aiCopilot,
   initialTab,
   actions,
 }: ExportDetailWorkspaceProps) {
@@ -192,6 +217,21 @@ export function ExportDetailWorkspace({
               </span>
             </div>
           </section>
+        ) : null}
+
+        {tab === "ai-copilot" ? (
+          <ExportAiCopilotPanel
+            exportCaseId={exportCase.id}
+            latestRunDetail={aiCopilot.latestRunDetail}
+            recommendations={aiCopilot.recommendations}
+            usage={aiCopilot.usage}
+            onAnalyze={actions.analyzeExportCase}
+            onExplainReadiness={actions.explainExportReadiness}
+            onSuggestNextActions={actions.suggestExportNextActions}
+            onAcceptRecommendation={actions.acceptAiRecommendation}
+            onRejectRecommendation={actions.rejectAiRecommendation}
+            onDismissRecommendation={actions.dismissAiRecommendation}
+          />
         ) : null}
 
         {tab === "documents" ? (
