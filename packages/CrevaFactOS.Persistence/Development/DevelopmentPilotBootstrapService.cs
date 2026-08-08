@@ -277,6 +277,8 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureExecutionExceptionAssignPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         // Shared local web identity (production-pilot-operator) also drives /ihracat.
+        await EnsurePlanningReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportReadPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportWritePermissionAssignmentAsync(
