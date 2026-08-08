@@ -61,11 +61,16 @@ requireText(
 );
 
 requireText(detailPage, "readExportCaseById", "ihracat/[exportCaseId]/page.tsx");
-requireText(detailPage, "ExportReadinessPanel", "ihracat/[exportCaseId]/page.tsx");
-requireText(detailPage, "ExportDocumentsPanel", "ihracat/[exportCaseId]/page.tsx");
-requireText(detailPage, "ExportActivityTimeline", "ihracat/[exportCaseId]/page.tsx");
+requireText(detailPage, "ExportDetailWorkspace", "ihracat/[exportCaseId]/page.tsx");
 requireText(detailPage, 'href="/ihracat"', "ihracat/[exportCaseId]/page.tsx");
 requireText(detailPage, "/siparisler/", "ihracat/[exportCaseId]/page.tsx");
+
+const detailWorkspace = readRequiredFile(
+  "src/features/export/components/export-detail-workspace.tsx",
+);
+requireText(detailWorkspace, "ExportReadinessPanel", "export-detail-workspace");
+requireText(detailWorkspace, "ExportDocumentsPanel", "export-detail-workspace");
+requireText(detailWorkspace, "ExportActivityTimeline", "export-detail-workspace");
 
 requireText(caseCard, "/ihracat/${exportCase.id}", "export-case-card.tsx");
 

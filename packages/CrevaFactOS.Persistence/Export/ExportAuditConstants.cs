@@ -12,6 +12,22 @@ public static class ExportAuditActions
     public const string ExportDocumentVerified = "export.document.verified";
     public const string ExportDocumentRejected = "export.document.rejected";
     public const string ExportReadinessChanged = "export.readiness.changed";
+
+    // EXPORT-2L
+    public const string ExportPackingUnitCreated = "export.packing.unit.created";
+    public const string ExportPackingUnitUpdated = "export.packing.unit.updated";
+    public const string ExportPackingItemAdded = "export.packing.item.added";
+    public const string ExportPackingCompleted = "export.packing.completed";
+    public const string ExportPackingVerified = "export.packing.verified";
+    public const string ExportShipmentCreated = "export.shipment.created";
+    public const string ExportShipmentUpdated = "export.shipment.updated";
+    public const string ExportShipmentStatusChanged = "export.shipment.status.changed";
+    public const string ExportBrokerWorkspaceCreated = "export.broker.workspace.created";
+    public const string ExportBrokerPackagePrepared = "export.broker.package.prepared";
+    public const string ExportBrokerPackageSent = "export.broker.package.sent";
+    public const string ExportBrokerWorkspaceAcknowledged = "export.broker.workspace.acknowledged";
+    public const string ExportBrokerCorrectionCreated = "export.broker.correction.created";
+    public const string ExportBrokerCorrectionResolved = "export.broker.correction.resolved";
 }
 
 /// <summary>
@@ -26,6 +42,22 @@ public static class ExportAuditEventTypes
     public const string ExportDocumentVerified = "export.document.verified";
     public const string ExportDocumentRejected = "export.document.rejected";
     public const string ExportReadinessChanged = "export.readiness.changed";
+
+    // EXPORT-2L
+    public const string ExportPackingUnitCreated = "export.packing.unit.created";
+    public const string ExportPackingUnitUpdated = "export.packing.unit.updated";
+    public const string ExportPackingItemAdded = "export.packing.item.added";
+    public const string ExportPackingCompleted = "export.packing.completed";
+    public const string ExportPackingVerified = "export.packing.verified";
+    public const string ExportShipmentCreated = "export.shipment.created";
+    public const string ExportShipmentUpdated = "export.shipment.updated";
+    public const string ExportShipmentStatusChanged = "export.shipment.status.changed";
+    public const string ExportBrokerWorkspaceCreated = "export.broker.workspace.created";
+    public const string ExportBrokerPackagePrepared = "export.broker.package.prepared";
+    public const string ExportBrokerPackageSent = "export.broker.package.sent";
+    public const string ExportBrokerWorkspaceAcknowledged = "export.broker.workspace.acknowledged";
+    public const string ExportBrokerCorrectionCreated = "export.broker.correction.created";
+    public const string ExportBrokerCorrectionResolved = "export.broker.correction.resolved";
 }
 
 /// <summary>Activity event types appended to export_case_activities (avoid spam).</summary>
@@ -39,4 +71,20 @@ public static class ExportActivityEventTypes
     public const string ReadinessChanged = "readiness-changed";
     public const string ExportReady = "export-ready";
     public const string ExportBlocked = "export-blocked";
+
+    // EXPORT-2L
+    public const string PackingUnitCreated = "packing-unit-created";
+    public const string PackingUnitUpdated = "packing-unit-updated";
+    public const string PackingItemAdded = "packing-item-added";
+    public const string PackingCompleted = "packing-completed";
+    public const string PackingVerified = "packing-verified";
+    public const string ShipmentCreated = "shipment-created";
+    public const string ShipmentUpdated = "shipment-updated";
+    public const string ShipmentStatusChanged = "shipment-status-changed";
+    public const string BrokerWorkspaceCreated = "broker-workspace-created";
+    public const string BrokerPackagePrepared = "broker-package-prepared";
+    public const string BrokerPackageSent = "broker-package-sent";
+    public const string BrokerWorkspaceAcknowledged = "broker-workspace-acknowledged";
+    public const string BrokerCorrectionCreated = "broker-correction-created";
+    public const string BrokerCorrectionResolved = "broker-correction-resolved";
 }

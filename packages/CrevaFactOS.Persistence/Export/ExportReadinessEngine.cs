@@ -5,12 +5,13 @@ public static class ExportReadinessEngine
 {
     public static ExportReadinessCalculationResult Calculate(
         ExportCase caseEntity,
-        IReadOnlyList<ExportDocument> documents)
+        IReadOnlyList<ExportDocument> documents,
+        ExportOperationalReadinessContext? operationalContext = null)
     {
         ArgumentNullException.ThrowIfNull(caseEntity);
         ArgumentNullException.ThrowIfNull(documents);
 
-        var requirements = BuildRequirements(caseEntity, documents);
+        var requirements = BuildRequirements(caseEntity, documents, operationalContext);
         var totalCount = requirements.Count;
         var satisfiedCount = requirements.Count(r => r.IsSatisfied);
         var blockingUnsatisfied = requirements.Count(r => r.IsBlocking && !r.IsSatisfied);
@@ -52,9 +53,10 @@ public static class ExportReadinessEngine
 
     private static List<ExportRequirementEvaluation> BuildRequirements(
         ExportCase caseEntity,
-        IReadOnlyList<ExportDocument> documents)
+        IReadOnlyList<ExportDocument> documents,
+        ExportOperationalReadinessContext? ctx)
     {
-        var list = new List<ExportRequirementEvaluation>(5)
+        var list = new List<ExportRequirementEvaluation>(9)
         {
             EvaluateSourceOrderLinked(caseEntity),
             EvaluateDestinationCountry(caseEntity),
@@ -71,7 +73,101 @@ public static class ExportReadinessEngine
                 documents),
         };
 
+        if (ctx is not null)
+        {
+            list.Add(EvaluatePackingDataComplete(ctx));
+            list.Add(EvaluatePackingQuantityReconciled(ctx));
+            list.Add(EvaluateShipmentTransportModeKnown(ctx));
+            list.Add(EvaluateBrokerCorrectionsClear(ctx));
+        }
+
         return list;
+    }
+
+    private static ExportRequirementEvaluation EvaluatePackingDataComplete(
+        ExportOperationalReadinessContext ctx)
+    {
+        // Satisfied when packing status is Complete or Verified.
+        // If status is Draft and no signal that packing has started, allow skipping (treat as satisfied).
+        // If any packing activity exists (status != Draft), require Complete or Verified.
+        var packingStarted = ctx.PackingStatus != ExportPackingStatus.Draft;
+        var packingDone = ctx.PackingStatus is ExportPackingStatus.Complete or ExportPackingStatus.Verified;
+
+        var satisfied = !packingStarted || packingDone;
+        return new ExportRequirementEvaluation(
+            "packing-data-complete",
+            "Packing data complete",
+            IsBlocking: true,
+            IsSatisfied: satisfied,
+            Status: packingDone ? "satisfied" : (packingStarted ? "incomplete" : "not-started"));
+    }
+
+    private static ExportRequirementEvaluation EvaluatePackingQuantityReconciled(
+        ExportOperationalReadinessContext ctx)
+    {
+        var packingAttempted = ctx.PackingStatus != ExportPackingStatus.Draft;
+
+        var satisfied = ctx.ReconciliationStatus is
+            ExportPackingReconciliationStatus.Matched or
+            ExportPackingReconciliationStatus.UnableToValidate or
+            ExportPackingReconciliationStatus.NotStarted;
+
+        var isBlocking = packingAttempted
+            && ctx.ReconciliationStatus is
+                ExportPackingReconciliationStatus.Incomplete or
+                ExportPackingReconciliationStatus.Overpacked or
+                ExportPackingReconciliationStatus.Mismatch;
+
+        var requirementSatisfied = !isBlocking && satisfied;
+
+        return new ExportRequirementEvaluation(
+            "packing-quantity-reconciled",
+            "Packing quantity reconciled",
+            IsBlocking: isBlocking,
+            IsSatisfied: requirementSatisfied,
+            Status: ctx.ReconciliationStatus switch
+            {
+                ExportPackingReconciliationStatus.Matched => "matched",
+                ExportPackingReconciliationStatus.UnableToValidate => "unable-to-validate",
+                ExportPackingReconciliationStatus.Incomplete => "incomplete",
+                ExportPackingReconciliationStatus.Overpacked => "overpacked",
+                ExportPackingReconciliationStatus.Mismatch => "mismatch",
+                _ => "not-started",
+            });
+    }
+
+    private static ExportRequirementEvaluation EvaluateShipmentTransportModeKnown(
+        ExportOperationalReadinessContext ctx)
+    {
+        if (!ctx.HasShipment)
+        {
+            return new ExportRequirementEvaluation(
+                "shipment-transport-mode-known",
+                "Shipment transport mode known",
+                IsBlocking: false,
+                IsSatisfied: true,
+                Status: "not-applicable");
+        }
+
+        var hasModeString = !string.IsNullOrWhiteSpace(ctx.ShipmentTransportMode);
+        return new ExportRequirementEvaluation(
+            "shipment-transport-mode-known",
+            "Shipment transport mode known",
+            IsBlocking: false,
+            IsSatisfied: hasModeString,
+            Status: hasModeString ? "satisfied" : "missing");
+    }
+
+    private static ExportRequirementEvaluation EvaluateBrokerCorrectionsClear(
+        ExportOperationalReadinessContext ctx)
+    {
+        var satisfied = !ctx.HasOpenBlockingBrokerCorrection;
+        return new ExportRequirementEvaluation(
+            "broker-corrections-clear",
+            "Broker corrections clear",
+            IsBlocking: true,
+            IsSatisfied: satisfied,
+            Status: satisfied ? "satisfied" : "has-blocking-corrections");
     }
 
     private static ExportRequirementEvaluation EvaluateSourceOrderLinked(ExportCase caseEntity)

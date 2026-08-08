@@ -1,6 +1,13 @@
 import "./export-case-server-boundary";
 
 import type {
+  ExportBrokerWorkspace,
+  ExportPackingReconciliation,
+  ExportPackingWorkspace,
+  ExportShipment,
+  ExportShipmentReadiness,
+} from "../domain/export-2l";
+import type {
   ExportActivity,
   ExportCaseDetail,
   ExportCaseSummary,
@@ -8,12 +15,18 @@ import type {
   ExportReadiness,
 } from "../domain/export-case";
 import {
+  getExportBrokerWorkspace,
   getExportCaseById,
   getExportCaseByOrder,
+  getExportPacking,
+  getExportPackingReconciliation,
   getExportReadiness,
+  getExportShipment,
+  getExportShipmentReadiness,
   listExportActivity,
   listExportCases,
   listExportDocuments,
+  listExportShipments,
   type ExportCaseApiFailure,
 } from "./export-case-api-client";
 import {
@@ -49,6 +62,36 @@ export type ExportDocumentListResult =
 
 export type ExportActivityListResult =
   | Readonly<{ status: "success"; activities: ExportActivity[] }>
+  | ExportCaseReadFailure;
+
+export type ExportPackingResult =
+  | Readonly<{ status: "success"; packing: ExportPackingWorkspace }>
+  | ExportCaseReadFailure;
+
+export type ExportPackingReconciliationResult =
+  | Readonly<{
+      status: "success";
+      reconciliation: ExportPackingReconciliation;
+    }>
+  | ExportCaseReadFailure;
+
+export type ExportShipmentListResult =
+  | Readonly<{ status: "success"; shipments: ExportShipment[] }>
+  | ExportCaseReadFailure;
+
+export type ExportShipmentDetailResult =
+  | Readonly<{ status: "success"; shipment: ExportShipment }>
+  | ExportCaseReadFailure;
+
+export type ExportShipmentReadinessResult =
+  | Readonly<{ status: "success"; readiness: ExportShipmentReadiness }>
+  | ExportCaseReadFailure;
+
+export type ExportBrokerWorkspaceResult =
+  | Readonly<{
+      status: "success";
+      workspace: ExportBrokerWorkspace | null;
+    }>
   | ExportCaseReadFailure;
 
 type ResolvedContext =
@@ -301,4 +344,204 @@ export async function readExportActivity(
   }
 
   return { status: "success", activities: result.value };
+}
+
+function requireCaseId(exportCaseId: string): string | null {
+  const normalized = exportCaseId.trim();
+  return normalized || null;
+}
+
+export async function readPacking(
+  exportCaseId: string,
+): Promise<ExportPackingResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await getExportPacking(resolved.context, normalizedId);
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  return { status: "success", packing: result.value };
+}
+
+export async function readPackingReconciliation(
+  exportCaseId: string,
+  orderedQuantityTotal?: number,
+): Promise<ExportPackingReconciliationResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await getExportPackingReconciliation(
+    resolved.context,
+    normalizedId,
+    orderedQuantityTotal,
+  );
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  return { status: "success", reconciliation: result.value };
+}
+
+export async function readShipments(
+  exportCaseId: string,
+): Promise<ExportShipmentListResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await listExportShipments(resolved.context, normalizedId);
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  return { status: "success", shipments: result.value };
+}
+
+export async function readShipment(
+  exportCaseId: string,
+  shipmentId: string,
+): Promise<ExportShipmentDetailResult> {
+  const normalizedCaseId = requireCaseId(exportCaseId);
+  const normalizedShipmentId = shipmentId.trim();
+
+  if (!normalizedCaseId || !normalizedShipmentId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId and shipmentId are required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await getExportShipment(
+    resolved.context,
+    normalizedCaseId,
+    normalizedShipmentId,
+  );
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  return { status: "success", shipment: result.value };
+}
+
+export async function readShipmentReadiness(
+  exportCaseId: string,
+  shipmentId: string,
+): Promise<ExportShipmentReadinessResult> {
+  const normalizedCaseId = requireCaseId(exportCaseId);
+  const normalizedShipmentId = shipmentId.trim();
+
+  if (!normalizedCaseId || !normalizedShipmentId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId and shipmentId are required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await getExportShipmentReadiness(
+    resolved.context,
+    normalizedCaseId,
+    normalizedShipmentId,
+  );
+
+  if (result.status === "failure") {
+    return result;
+  }
+
+  return { status: "success", readiness: result.value };
+}
+
+export async function readBrokerWorkspace(
+  exportCaseId: string,
+): Promise<ExportBrokerWorkspaceResult> {
+  const normalizedId = requireCaseId(exportCaseId);
+
+  if (!normalizedId) {
+    return {
+      status: "failure",
+      code: "invalid-scope",
+      message: "exportCaseId is required.",
+      retryable: false,
+    };
+  }
+
+  const resolved = resolveReadContext();
+
+  if (resolved.kind === "failure") {
+    return resolved.failure;
+  }
+
+  const result = await getExportBrokerWorkspace(resolved.context, normalizedId);
+
+  if (result.status === "failure") {
+    if (result.code === "not-found") {
+      return { status: "success", workspace: null };
+    }
+
+    return result;
+  }
+
+  return { status: "success", workspace: result.value };
 }

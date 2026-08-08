@@ -11,9 +11,10 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ExportActivityTimeline } from "@/features/export/components/export-activity-timeline";
-import { ExportDocumentsPanel } from "@/features/export/components/export-documents-panel";
-import { ExportReadinessPanel } from "@/features/export/components/export-readiness-panel";
+import {
+  ExportDetailWorkspace,
+  type ExportDetailTab,
+} from "@/features/export/components/export-detail-workspace";
 import type {
   ExportCaseStatus,
   ExportReadinessStatus,
@@ -22,16 +23,35 @@ import {
   getExportCaseStatusLabel,
   getExportReadinessStatusLabel,
 } from "@/features/export/domain/export-case";
+import type { ExportShipmentReadiness } from "@/features/export/domain/export-2l";
 import {
+  readBrokerWorkspace,
   readExportActivity,
   readExportCaseById,
   readExportDocuments,
   readExportReadiness,
+  readPacking,
+  readPackingReconciliation,
+  readShipmentReadiness,
+  readShipments,
 } from "@/features/export/server/export-case-reader";
 import {
+  acknowledgeBrokerAction,
+  addPackingItemAction,
+  completePackingAction,
+  createBrokerCorrectionAction,
+  createBrokerWorkspaceAction,
+  createPackingUnitAction,
+  createShipmentAction,
+  prepareBrokerPackageAction,
   registerExportDocumentAction,
   rejectExportDocumentAction,
+  resolveBrokerCorrectionAction,
+  sendBrokerPackageAction,
+  transitionShipmentAction,
+  updateShipmentAction,
   verifyExportDocumentAction,
+  verifyPackingAction,
 } from "@/features/export/server/export-case-writer";
 
 type BadgeTone =
@@ -86,24 +106,57 @@ function formatUtcDate(iso: string | undefined): string {
   }
 }
 
+function normalizeTab(value: string | string[] | undefined): ExportDetailTab {
+  const raw = Array.isArray(value) ? value[0] : value;
+  switch (raw) {
+    case "documents":
+    case "packing":
+    case "shipment":
+    case "broker":
+    case "activity":
+    case "overview":
+      return raw;
+    default:
+      return "overview";
+  }
+}
+
 type ExportCaseDetailPageProps = Readonly<{
   params: Promise<{
     exportCaseId: string;
+  }>;
+  searchParams: Promise<{
+    tab?: string | string[];
   }>;
 }>;
 
 export default async function ExportCaseDetailPage({
   params,
+  searchParams,
 }: ExportCaseDetailPageProps) {
   const { exportCaseId } = await params;
+  const resolvedSearchParams = await searchParams;
+  const initialTab = normalizeTab(resolvedSearchParams.tab);
 
-  const [caseResult, readinessResult, documentsResult, activityResult] =
-    await Promise.all([
-      readExportCaseById(exportCaseId),
-      readExportReadiness(exportCaseId),
-      readExportDocuments(exportCaseId),
-      readExportActivity(exportCaseId),
-    ]);
+  const [
+    caseResult,
+    readinessResult,
+    documentsResult,
+    activityResult,
+    packingResult,
+    reconciliationResult,
+    shipmentsResult,
+    brokerResult,
+  ] = await Promise.all([
+    readExportCaseById(exportCaseId),
+    readExportReadiness(exportCaseId),
+    readExportDocuments(exportCaseId),
+    readExportActivity(exportCaseId),
+    readPacking(exportCaseId),
+    readPackingReconciliation(exportCaseId),
+    readShipments(exportCaseId),
+    readBrokerWorkspace(exportCaseId),
+  ]);
 
   if (caseResult.status === "failure") {
     if (caseResult.code === "not-found") {
@@ -139,6 +192,32 @@ export default async function ExportCaseDetailPage({
     documentsResult.status === "success" ? documentsResult.documents : [];
   const activities =
     activityResult.status === "success" ? activityResult.activities : [];
+  const packing =
+    packingResult.status === "success" ? packingResult.packing : null;
+  const reconciliation =
+    reconciliationResult.status === "success"
+      ? reconciliationResult.reconciliation
+      : null;
+  const shipments =
+    shipmentsResult.status === "success" ? shipmentsResult.shipments : [];
+  const brokerWorkspace =
+    brokerResult.status === "success" ? brokerResult.workspace : null;
+
+  const readinessEntries = await Promise.all(
+    shipments.map(async (shipment) => {
+      const result = await readShipmentReadiness(exportCaseId, shipment.id);
+      return result.status === "success"
+        ? ([shipment.id, result.readiness] as const)
+        : null;
+    }),
+  );
+
+  const shipmentReadinessById: Record<string, ExportShipmentReadiness> = {};
+  for (const entry of readinessEntries) {
+    if (entry) {
+      shipmentReadinessById[entry[0]] = entry[1];
+    }
+  }
 
   return (
     <main className="export-detail-page">
@@ -218,30 +297,36 @@ export default async function ExportCaseDetailPage({
         </Card>
       </section>
 
-      <section className="export-detail-page__content">
-        {readiness ? (
-          <ExportReadinessPanel readiness={readiness} />
-        ) : (
-          <div className="export-detail-page__context-card" role="status">
-            <p>HAZIRLIK</p>
-            <h2>Hazırlık verisi alınamadı</h2>
-            <span>
-              Dosya özeti yüklendi ancak hazırlık paneli şu an
-              görüntülenemiyor.
-            </span>
-          </div>
-        )}
-
-        <ExportDocumentsPanel
-          exportCaseId={exportCase.id}
-          documents={documents}
-          onRegister={registerExportDocumentAction}
-          onVerify={verifyExportDocumentAction}
-          onReject={rejectExportDocumentAction}
-        />
-      </section>
-
-      <ExportActivityTimeline activities={activities} />
+      <ExportDetailWorkspace
+        exportCase={exportCase}
+        readiness={readiness}
+        documents={documents}
+        activities={activities}
+        packing={packing}
+        reconciliation={reconciliation}
+        shipments={shipments}
+        shipmentReadinessById={shipmentReadinessById}
+        brokerWorkspace={brokerWorkspace}
+        initialTab={initialTab}
+        actions={{
+          registerDocument: registerExportDocumentAction,
+          verifyDocument: verifyExportDocumentAction,
+          rejectDocument: rejectExportDocumentAction,
+          createPackingUnit: createPackingUnitAction,
+          addPackingItem: addPackingItemAction,
+          completePacking: completePackingAction,
+          verifyPacking: verifyPackingAction,
+          createShipment: createShipmentAction,
+          updateShipment: updateShipmentAction,
+          transitionShipment: transitionShipmentAction,
+          createBrokerWorkspace: createBrokerWorkspaceAction,
+          prepareBrokerPackage: prepareBrokerPackageAction,
+          sendBrokerPackage: sendBrokerPackageAction,
+          acknowledgeBroker: acknowledgeBrokerAction,
+          createBrokerCorrection: createBrokerCorrectionAction,
+          resolveBrokerCorrection: resolveBrokerCorrectionAction,
+        }}
+      />
     </main>
   );
 }

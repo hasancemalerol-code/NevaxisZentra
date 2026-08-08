@@ -78,6 +78,22 @@ public static class AuditEventTypes
     public const string ExportDocumentRejected = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportDocumentRejected;
     public const string ExportReadinessChanged = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportReadinessChanged;
 
+    // Export 2L
+    public const string ExportPackingUnitCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportPackingUnitCreated;
+    public const string ExportPackingUnitUpdated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportPackingUnitUpdated;
+    public const string ExportPackingItemAdded = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportPackingItemAdded;
+    public const string ExportPackingCompleted = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportPackingCompleted;
+    public const string ExportPackingVerified = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportPackingVerified;
+    public const string ExportShipmentCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportShipmentCreated;
+    public const string ExportShipmentUpdated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportShipmentUpdated;
+    public const string ExportShipmentStatusChanged = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportShipmentStatusChanged;
+    public const string ExportBrokerWorkspaceCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerWorkspaceCreated;
+    public const string ExportBrokerPackagePrepared = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerPackagePrepared;
+    public const string ExportBrokerPackageSent = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerPackageSent;
+    public const string ExportBrokerWorkspaceAcknowledged = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerWorkspaceAcknowledged;
+    public const string ExportBrokerCorrectionCreated = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerCorrectionCreated;
+    public const string ExportBrokerCorrectionResolved = CrevaFactOS.Persistence.Export.ExportAuditEventTypes.ExportBrokerCorrectionResolved;
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AuthenticationSucceeded,
@@ -135,5 +151,19 @@ public static class AuditEventTypes
         ExportDocumentVerified,
         ExportDocumentRejected,
         ExportReadinessChanged,
+        ExportPackingUnitCreated,
+        ExportPackingUnitUpdated,
+        ExportPackingItemAdded,
+        ExportPackingCompleted,
+        ExportPackingVerified,
+        ExportShipmentCreated,
+        ExportShipmentUpdated,
+        ExportShipmentStatusChanged,
+        ExportBrokerWorkspaceCreated,
+        ExportBrokerPackagePrepared,
+        ExportBrokerPackageSent,
+        ExportBrokerWorkspaceAcknowledged,
+        ExportBrokerCorrectionCreated,
+        ExportBrokerCorrectionResolved,
     };
 }

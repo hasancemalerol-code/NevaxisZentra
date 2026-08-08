@@ -218,7 +218,10 @@ public sealed class ExportCaseReadRepository(
                             && d.ExportCaseId == exportCaseId)
                         .ToListAsync(ct);
 
-                    var calc = ExportReadinessEngine.Calculate(exportCase, documents);
+                    var helper = new ExportReadinessPersistence(dbContext);
+                    var operationalContext = await helper.BuildOperationalContextAsync(
+                        context, exportCase, documents, ct);
+                    var calc = ExportReadinessEngine.Calculate(exportCase, documents, operationalContext);
                     return ExportReadinessResult.Success(new ExportReadinessReadModel(
                         exportCase.Id,
                         ExportValueConversions.ToStorage(calc.ReadinessStatus),

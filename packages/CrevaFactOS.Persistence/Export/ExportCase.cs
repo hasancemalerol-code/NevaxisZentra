@@ -19,6 +19,11 @@ public sealed class ExportCase : ITenantScopedEntity
     public int ReadinessPercent { get; set; }
     public int BlockingIssueCount { get; set; }
     public int MissingRequirementCount { get; set; }
+    public ExportPackingStatus PackingStatus { get; set; } = ExportPackingStatus.Draft;
+    public DateTimeOffset? PackingCompletedAtUtc { get; set; }
+    public string? PackingCompletedBySubjectId { get; set; }
+    public DateTimeOffset? PackingVerifiedAtUtc { get; set; }
+    public string? PackingVerifiedBySubjectId { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public string CreatedBySubjectId { get; set; } = string.Empty;
     public DateTimeOffset UpdatedAtUtc { get; set; }

@@ -1,6 +1,23 @@
 import "./export-case-server-boundary";
 
 import type {
+  AddPackingItemInput,
+  CreateBrokerCorrectionInput,
+  CreateBrokerWorkspaceInput,
+  CreatePackingUnitInput,
+  CreateShipmentInput,
+  ExportBrokerWorkspace,
+  ExportPackingReconciliation,
+  ExportPackingWorkspace,
+  ExportShipment,
+  ExportShipmentReadiness,
+  PrepareBrokerPackageInput,
+  ResolveBrokerCorrectionInput,
+  TransitionShipmentInput,
+  UpdatePackingUnitInput,
+  UpdateShipmentInput,
+} from "../domain/export-2l";
+import type {
   EnsureExportCaseFromOrderInput,
   ExportActivity,
   ExportCaseDetail,
@@ -10,6 +27,28 @@ import type {
   ExportReadiness,
   RegisterExportDocumentInput,
 } from "../domain/export-case";
+import {
+  parseBrokerCorrectionWriteSuccessApiResponse,
+  parseBrokerPackageWriteSuccessApiResponse,
+  parseBrokerWorkspaceWriteSuccessApiResponse,
+  parseExportBrokerWorkspaceApiResponse,
+  parseExportPackingReconciliationApiResponse,
+  parseExportPackingWorkspaceApiResponse,
+  parseExportShipmentApiResponse,
+  parseExportShipmentListApiResponse,
+  parseExportShipmentReadinessApiResponse,
+  parsePackingItemWriteSuccessApiResponse,
+  parsePackingStatusWriteSuccessApiResponse,
+  parsePackingUnitWriteSuccessApiResponse,
+  parseShipmentWriteSuccessApiResponse,
+  type BrokerCorrectionWriteSuccess,
+  type BrokerPackageWriteSuccess,
+  type BrokerWorkspaceWriteSuccess,
+  type PackingItemWriteSuccess,
+  type PackingStatusWriteSuccess,
+  type PackingUnitWriteSuccess,
+  type ShipmentWriteSuccess,
+} from "./export-2l-api-contracts";
 import {
   parseExportActivityListApiResponse,
   parseExportCaseDetailApiResponse,
@@ -229,6 +268,72 @@ async function executePost<T>(
   }
 
   return parse(body);
+}
+
+async function executePut<T>(
+  context: ExportCaseRequestContext,
+  url: string,
+  requestBody: unknown,
+  parse: (body: unknown) => ExportCaseApiResult<T>,
+): Promise<ExportCaseApiResult<T>> {
+  if (!context.apiBaseUrl.trim()) {
+    return fail("configuration-error", "API base URL is not configured.", false);
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...context.requestHeaders,
+      },
+      body: JSON.stringify(requestBody),
+      cache: "no-store",
+    });
+  } catch {
+    return fail("source-unavailable", "The export service is unavailable.", true);
+  }
+
+  const body = await readResponseBody(response);
+
+  if (!response.ok) {
+    return mapHttpStatus(response.status, body);
+  }
+
+  return parse(body);
+}
+
+function caseFacilityUrl(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  suffix: string,
+  extraParams?: Record<string, string>,
+): string {
+  const params = new URLSearchParams();
+  params.set("facilityId", context.facilityId.trim());
+
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value.trim()) {
+        params.set(key, value.trim());
+      }
+    }
+  }
+
+  return `${trimTrailingSlash(context.apiBaseUrl)}/api/export/cases/${encodeURIComponent(exportCaseId.trim())}${suffix}?${params.toString()}`;
+}
+
+function mapParsed<T>(
+  parsed: { status: "success"; value: T } | { status: "failure"; message: string },
+): ExportCaseApiResult<T> {
+  if (parsed.status === "failure") {
+    return fail("invalid-response", `invalid-response ${parsed.message}`, false);
+  }
+
+  return { status: "success", value: parsed.value };
 }
 
 export async function listExportCases(
@@ -498,4 +603,287 @@ export async function listExportActivity(
 
     return { status: "success", value: parsed.value };
   });
+}
+
+// ─── EXPORT-2L — Packing ─────────────────────────────────────────────────────
+
+export async function getExportPacking(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+): Promise<ExportCaseApiResult<ExportPackingWorkspace>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/packing");
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportPackingWorkspaceApiResponse(body)),
+  );
+}
+
+export async function getExportPackingReconciliation(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  orderedQuantityTotal?: number,
+): Promise<ExportCaseApiResult<ExportPackingReconciliation>> {
+  const extra =
+    orderedQuantityTotal !== undefined
+      ? { orderedQuantityTotal: String(orderedQuantityTotal) }
+      : undefined;
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    "/packing/reconciliation",
+    extra,
+  );
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportPackingReconciliationApiResponse(body)),
+  );
+}
+
+export async function createExportPackingUnit(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  input: CreatePackingUnitInput,
+): Promise<ExportCaseApiResult<PackingUnitWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/packing/units");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parsePackingUnitWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function updateExportPackingUnit(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  packingUnitId: string,
+  input: UpdatePackingUnitInput,
+): Promise<ExportCaseApiResult<PackingUnitWriteSuccess>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/packing/units/${encodeURIComponent(packingUnitId.trim())}`,
+  );
+  return executePut(context, url, input, (body) =>
+    mapParsed(parsePackingUnitWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function addExportPackingItem(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  packingUnitId: string,
+  input: AddPackingItemInput,
+): Promise<ExportCaseApiResult<PackingItemWriteSuccess>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/packing/units/${encodeURIComponent(packingUnitId.trim())}/items`,
+  );
+  return executePost(context, url, input, (body) =>
+    mapParsed(parsePackingItemWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function completeExportPacking(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<ExportCaseApiResult<PackingStatusWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/packing/complete");
+  return executePost(context, url, { expectedCaseVersion }, (body) =>
+    mapParsed(parsePackingStatusWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function verifyExportPacking(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<ExportCaseApiResult<PackingStatusWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/packing/verify");
+  return executePost(context, url, { expectedCaseVersion }, (body) =>
+    mapParsed(parsePackingStatusWriteSuccessApiResponse(body)),
+  );
+}
+
+// ─── EXPORT-2L — Shipments ───────────────────────────────────────────────────
+
+export async function listExportShipments(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+): Promise<ExportCaseApiResult<ExportShipment[]>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/shipments");
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportShipmentListApiResponse(body)),
+  );
+}
+
+export async function getExportShipment(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  shipmentId: string,
+): Promise<ExportCaseApiResult<ExportShipment>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/shipments/${encodeURIComponent(shipmentId.trim())}`,
+  );
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportShipmentApiResponse(body)),
+  );
+}
+
+export async function getExportShipmentReadiness(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  shipmentId: string,
+): Promise<ExportCaseApiResult<ExportShipmentReadiness>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/shipments/${encodeURIComponent(shipmentId.trim())}/readiness`,
+  );
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportShipmentReadinessApiResponse(body)),
+  );
+}
+
+export async function createExportShipment(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  input: CreateShipmentInput,
+): Promise<ExportCaseApiResult<ShipmentWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/shipments");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseShipmentWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function updateExportShipment(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  shipmentId: string,
+  input: UpdateShipmentInput,
+): Promise<ExportCaseApiResult<ShipmentWriteSuccess>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/shipments/${encodeURIComponent(shipmentId.trim())}`,
+  );
+  return executePut(context, url, input, (body) =>
+    mapParsed(parseShipmentWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function transitionExportShipment(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  shipmentId: string,
+  input: TransitionShipmentInput,
+): Promise<ExportCaseApiResult<ShipmentWriteSuccess>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/shipments/${encodeURIComponent(shipmentId.trim())}/transition`,
+  );
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseShipmentWriteSuccessApiResponse(body)),
+  );
+}
+
+// ─── EXPORT-2L — Broker ──────────────────────────────────────────────────────
+
+export async function getExportBrokerWorkspace(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+): Promise<ExportCaseApiResult<ExportBrokerWorkspace>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker");
+  return executeGet(context, url, (body) =>
+    mapParsed(parseExportBrokerWorkspaceApiResponse(body)),
+  );
+}
+
+export async function createExportBrokerWorkspace(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  input: CreateBrokerWorkspaceInput,
+): Promise<ExportCaseApiResult<BrokerWorkspaceWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker");
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseBrokerWorkspaceWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function prepareExportBrokerPackage(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  workspaceId: string,
+  input: PrepareBrokerPackageInput,
+): Promise<ExportCaseApiResult<BrokerPackageWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker/package/prepare", {
+    workspaceId,
+  });
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseBrokerPackageWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function sendExportBrokerPackage(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  workspaceId: string,
+  expectedWorkspaceVersion: number,
+): Promise<ExportCaseApiResult<BrokerPackageWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker/package/send", {
+    workspaceId,
+  });
+  return executePost(context, url, { expectedWorkspaceVersion }, (body) =>
+    mapParsed(parseBrokerPackageWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function acknowledgeExportBroker(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  workspaceId: string,
+  expectedWorkspaceVersion: number,
+  brokerReference?: string,
+): Promise<ExportCaseApiResult<BrokerWorkspaceWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker/acknowledge", {
+    workspaceId,
+  });
+  return executePost(
+    context,
+    url,
+    { expectedWorkspaceVersion, brokerReference },
+    (body) => mapParsed(parseBrokerWorkspaceWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function createExportBrokerCorrection(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  workspaceId: string,
+  input: CreateBrokerCorrectionInput,
+): Promise<ExportCaseApiResult<BrokerCorrectionWriteSuccess>> {
+  const url = caseFacilityUrl(context, exportCaseId, "/broker/corrections", {
+    workspaceId,
+  });
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseBrokerCorrectionWriteSuccessApiResponse(body)),
+  );
+}
+
+export async function resolveExportBrokerCorrection(
+  context: ExportCaseRequestContext,
+  exportCaseId: string,
+  workspaceId: string,
+  correctionId: string,
+  input: ResolveBrokerCorrectionInput,
+): Promise<ExportCaseApiResult<BrokerCorrectionWriteSuccess>> {
+  const url = caseFacilityUrl(
+    context,
+    exportCaseId,
+    `/broker/corrections/${encodeURIComponent(correctionId.trim())}/resolve`,
+    { workspaceId },
+  );
+  return executePost(context, url, input, (body) =>
+    mapParsed(parseBrokerCorrectionWriteSuccessApiResponse(body)),
+  );
 }

@@ -3,15 +3,50 @@
 import "./export-case-server-boundary";
 
 import type {
+  AddPackingItemInput,
+  CreateBrokerCorrectionInput,
+  CreateBrokerWorkspaceInput,
+  CreatePackingUnitInput,
+  CreateShipmentInput,
+  PrepareBrokerPackageInput,
+  ResolveBrokerCorrectionInput,
+  TransitionShipmentInput,
+  UpdatePackingUnitInput,
+  UpdateShipmentInput,
+} from "../domain/export-2l";
+import type {
   EnsureExportCaseFromOrderInput,
   ExportCaseWriteSuccess,
   RegisterExportDocumentInput,
 } from "../domain/export-case";
+import type {
+  BrokerCorrectionWriteSuccess,
+  BrokerPackageWriteSuccess,
+  BrokerWorkspaceWriteSuccess,
+  PackingItemWriteSuccess,
+  PackingStatusWriteSuccess,
+  PackingUnitWriteSuccess,
+  ShipmentWriteSuccess,
+} from "./export-2l-api-contracts";
 import {
+  acknowledgeExportBroker,
+  addExportPackingItem,
+  completeExportPacking,
+  createExportBrokerCorrection,
+  createExportBrokerWorkspace,
+  createExportPackingUnit,
+  createExportShipment,
   ensureExportCaseFromOrder as ensureExportCaseFromOrderApi,
+  prepareExportBrokerPackage,
   registerExportDocument,
   rejectExportDocument,
+  resolveExportBrokerCorrection,
+  sendExportBrokerPackage,
+  transitionExportShipment,
+  updateExportPackingUnit,
+  updateExportShipment,
   verifyExportDocument,
+  verifyExportPacking,
   type ExportCaseApiResult,
 } from "./export-case-api-client";
 import type { ExportDocumentWriteSuccess } from "./export-case-api-contracts";
@@ -44,6 +79,17 @@ export type ExportDocumentActionResult =
       message: string;
       failureCode?: string;
     }>;
+
+export type ExportActionFailure = Readonly<{
+  status: "failure";
+  code: string;
+  message: string;
+  failureCode?: string;
+}>;
+
+export type Export2LActionResult<T> =
+  | Readonly<{ status: "success"; value: T }>
+  | ExportActionFailure;
 
 type ResolvedWriteContext =
   | Readonly<{ kind: "context"; context: ExportCaseRequestContext }>
@@ -321,4 +367,455 @@ export async function rejectExportDocumentAction(
   );
 
   return mapDocumentResult(result);
+}
+
+function map2LResult<T>(
+  result: ExportCaseApiResult<T>,
+): Export2LActionResult<T> {
+  if (result.status === "failure") {
+    return {
+      status: "failure",
+      code: result.code,
+      message: result.message,
+      failureCode: result.failureCode,
+    };
+  }
+
+  return { status: "success", value: result.value };
+}
+
+function invalidRequest(message: string): ExportActionFailure {
+  return { status: "failure", code: "invalid-request", message };
+}
+
+// ─── EXPORT-2L — Packing actions ─────────────────────────────────────────────
+
+export async function createPackingUnitAction(
+  exportCaseId: string,
+  input: CreatePackingUnitInput,
+): Promise<Export2LActionResult<PackingUnitWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!input.unitCode.trim() || !input.unitType.trim()) {
+    return invalidRequest("Birim kodu ve tipi zorunludur.");
+  }
+
+  const result = await createExportPackingUnit(
+    resolved.context,
+    exportCaseId.trim(),
+    {
+      ...input,
+      unitCode: input.unitCode.trim(),
+      unitType: input.unitType.trim(),
+      parentPackingUnitId: input.parentPackingUnitId?.trim() || undefined,
+      weightUnit: input.weightUnit?.trim() || undefined,
+      dimensionUnit: input.dimensionUnit?.trim() || undefined,
+      marksAndNumbers: input.marksAndNumbers?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function updatePackingUnitAction(
+  exportCaseId: string,
+  packingUnitId: string,
+  input: UpdatePackingUnitInput,
+): Promise<Export2LActionResult<PackingUnitWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !packingUnitId.trim()) {
+    return invalidRequest("Dosya ve paket birimi kimliği zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedVersion) || input.expectedVersion < 0) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await updateExportPackingUnit(
+    resolved.context,
+    exportCaseId.trim(),
+    packingUnitId.trim(),
+    input,
+  );
+
+  return map2LResult(result);
+}
+
+export async function addPackingItemAction(
+  exportCaseId: string,
+  packingUnitId: string,
+  input: AddPackingItemInput,
+): Promise<Export2LActionResult<PackingItemWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !packingUnitId.trim()) {
+    return invalidRequest("Dosya ve paket birimi kimliği zorunludur.");
+  }
+  if (
+    !input.productCode.trim() ||
+    !input.productName.trim() ||
+    !input.unitOfMeasure.trim()
+  ) {
+    return invalidRequest("Ürün kodu, adı ve ölçü birimi zorunludur.");
+  }
+  if (!Number.isFinite(input.quantity) || input.quantity <= 0) {
+    return invalidRequest("Miktar pozitif olmalıdır.");
+  }
+
+  const result = await addExportPackingItem(
+    resolved.context,
+    exportCaseId.trim(),
+    packingUnitId.trim(),
+    {
+      productCode: input.productCode.trim(),
+      productName: input.productName.trim(),
+      quantity: input.quantity,
+      unitOfMeasure: input.unitOfMeasure.trim(),
+      sourceOrderLineId: input.sourceOrderLineId?.trim() || undefined,
+      lotBatchReference: input.lotBatchReference?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function completePackingAction(
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<Export2LActionResult<PackingStatusWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!Number.isFinite(expectedCaseVersion) || expectedCaseVersion < 0) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await completeExportPacking(
+    resolved.context,
+    exportCaseId.trim(),
+    expectedCaseVersion,
+  );
+
+  return map2LResult(result);
+}
+
+export async function verifyPackingAction(
+  exportCaseId: string,
+  expectedCaseVersion: number,
+): Promise<Export2LActionResult<PackingStatusWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!Number.isFinite(expectedCaseVersion) || expectedCaseVersion < 0) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await verifyExportPacking(
+    resolved.context,
+    exportCaseId.trim(),
+    expectedCaseVersion,
+  );
+
+  return map2LResult(result);
+}
+
+// ─── EXPORT-2L — Shipment actions ────────────────────────────────────────────
+
+export async function createShipmentAction(
+  exportCaseId: string,
+  input: CreateShipmentInput,
+): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!input.shipmentReference.trim()) {
+    return invalidRequest("Sevkiyat referansı zorunludur.");
+  }
+  if (!input.destinationCountryCode.trim()) {
+    return invalidRequest("Hedef ülke kodu zorunludur.");
+  }
+
+  const result = await createExportShipment(
+    resolved.context,
+    exportCaseId.trim(),
+    {
+      ...input,
+      shipmentReference: input.shipmentReference.trim(),
+      destinationCountryCode: input.destinationCountryCode.trim().toUpperCase(),
+      transportMode: input.transportMode?.trim() || undefined,
+      incotermCode: input.incotermCode?.trim().toUpperCase() || undefined,
+      destinationCity: input.destinationCity?.trim() || undefined,
+      deliveryAddress: input.deliveryAddress?.trim() || undefined,
+      forwarderName: input.forwarderName?.trim() || undefined,
+      carrierName: input.carrierName?.trim() || undefined,
+      bookingReference: input.bookingReference?.trim() || undefined,
+      plannedPickupAtUtc: input.plannedPickupAtUtc?.trim() || undefined,
+      plannedDepartureAtUtc: input.plannedDepartureAtUtc?.trim() || undefined,
+      plannedArrivalAtUtc: input.plannedArrivalAtUtc?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function updateShipmentAction(
+  exportCaseId: string,
+  shipmentId: string,
+  input: UpdateShipmentInput,
+): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !shipmentId.trim()) {
+    return invalidRequest("Dosya ve sevkiyat kimliği zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedVersion) || input.expectedVersion < 0) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await updateExportShipment(
+    resolved.context,
+    exportCaseId.trim(),
+    shipmentId.trim(),
+    {
+      ...input,
+      destinationCountryCode: input.destinationCountryCode
+        ?.trim()
+        .toUpperCase(),
+      transportMode: input.transportMode?.trim() || undefined,
+      incotermCode: input.incotermCode?.trim().toUpperCase() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function transitionShipmentAction(
+  exportCaseId: string,
+  shipmentId: string,
+  input: TransitionShipmentInput,
+): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !shipmentId.trim()) {
+    return invalidRequest("Dosya ve sevkiyat kimliği zorunludur.");
+  }
+  if (!input.targetStatus.trim()) {
+    return invalidRequest("Hedef durum zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedVersion) || input.expectedVersion < 0) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await transitionExportShipment(
+    resolved.context,
+    exportCaseId.trim(),
+    shipmentId.trim(),
+    {
+      expectedVersion: input.expectedVersion,
+      targetStatus: input.targetStatus.trim(),
+      cancellationReason: input.cancellationReason?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+// ─── EXPORT-2L — Broker actions ──────────────────────────────────────────────
+
+export async function createBrokerWorkspaceAction(
+  exportCaseId: string,
+  input: CreateBrokerWorkspaceInput,
+): Promise<Export2LActionResult<BrokerWorkspaceWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim()) {
+    return invalidRequest("İhracat dosyası kimliği zorunludur.");
+  }
+  if (!input.brokerCompanyName.trim()) {
+    return invalidRequest("Broker şirket adı zorunludur.");
+  }
+
+  const result = await createExportBrokerWorkspace(
+    resolved.context,
+    exportCaseId.trim(),
+    {
+      shipmentId: input.shipmentId?.trim() || undefined,
+      brokerCompanyName: input.brokerCompanyName.trim(),
+      brokerContactName: input.brokerContactName?.trim() || undefined,
+      brokerEmail: input.brokerEmail?.trim() || undefined,
+      brokerPhone: input.brokerPhone?.trim() || undefined,
+      notes: input.notes?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function prepareBrokerPackageAction(
+  exportCaseId: string,
+  workspaceId: string,
+  input: PrepareBrokerPackageInput,
+): Promise<Export2LActionResult<BrokerPackageWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !workspaceId.trim()) {
+    return invalidRequest("Dosya ve workspace kimliği zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedWorkspaceVersion)) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await prepareExportBrokerPackage(
+    resolved.context,
+    exportCaseId.trim(),
+    workspaceId.trim(),
+    {
+      expectedWorkspaceVersion: input.expectedWorkspaceVersion,
+      documentIds: input.documentIds,
+      notes: input.notes?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function sendBrokerPackageAction(
+  exportCaseId: string,
+  workspaceId: string,
+  expectedWorkspaceVersion: number,
+): Promise<Export2LActionResult<BrokerPackageWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !workspaceId.trim()) {
+    return invalidRequest("Dosya ve workspace kimliği zorunludur.");
+  }
+  if (!Number.isFinite(expectedWorkspaceVersion)) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await sendExportBrokerPackage(
+    resolved.context,
+    exportCaseId.trim(),
+    workspaceId.trim(),
+    expectedWorkspaceVersion,
+  );
+
+  return map2LResult(result);
+}
+
+export async function acknowledgeBrokerAction(
+  exportCaseId: string,
+  workspaceId: string,
+  expectedWorkspaceVersion: number,
+  brokerReference?: string,
+): Promise<Export2LActionResult<BrokerWorkspaceWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !workspaceId.trim()) {
+    return invalidRequest("Dosya ve workspace kimliği zorunludur.");
+  }
+  if (!Number.isFinite(expectedWorkspaceVersion)) {
+    return invalidRequest("Beklenen sürüm geçersiz.");
+  }
+
+  const result = await acknowledgeExportBroker(
+    resolved.context,
+    exportCaseId.trim(),
+    workspaceId.trim(),
+    expectedWorkspaceVersion,
+    brokerReference?.trim() || undefined,
+  );
+
+  return map2LResult(result);
+}
+
+export async function createBrokerCorrectionAction(
+  exportCaseId: string,
+  workspaceId: string,
+  input: CreateBrokerCorrectionInput,
+): Promise<Export2LActionResult<BrokerCorrectionWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !workspaceId.trim()) {
+    return invalidRequest("Dosya ve workspace kimliği zorunludur.");
+  }
+  if (
+    !input.category.trim() ||
+    !input.title.trim() ||
+    !input.description.trim() ||
+    !input.severity.trim()
+  ) {
+    return invalidRequest("Kategori, başlık, açıklama ve önem zorunludur.");
+  }
+
+  const result = await createExportBrokerCorrection(
+    resolved.context,
+    exportCaseId.trim(),
+    workspaceId.trim(),
+    {
+      category: input.category.trim(),
+      title: input.title.trim(),
+      description: input.description.trim(),
+      severity: input.severity.trim(),
+      relatedDocumentId: input.relatedDocumentId?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
+}
+
+export async function resolveBrokerCorrectionAction(
+  exportCaseId: string,
+  workspaceId: string,
+  correctionId: string,
+  input: ResolveBrokerCorrectionInput,
+): Promise<Export2LActionResult<BrokerCorrectionWriteSuccess>> {
+  const resolved = resolveWriteContext();
+  if (resolved.kind === "failure") return resolved.failure;
+
+  if (!exportCaseId.trim() || !workspaceId.trim() || !correctionId.trim()) {
+    return invalidRequest("Dosya, workspace ve düzeltme kimliği zorunludur.");
+  }
+  if (!input.resolution.trim()) {
+    return invalidRequest("Çözüm durumu zorunludur.");
+  }
+  if (!Number.isFinite(input.expectedWorkspaceVersion)) {
+    return invalidRequest("Beklenen workspace sürümü zorunludur.");
+  }
+
+  const result = await resolveExportBrokerCorrection(
+    resolved.context,
+    exportCaseId.trim(),
+    workspaceId.trim(),
+    correctionId.trim(),
+    {
+      expectedWorkspaceVersion: input.expectedWorkspaceVersion,
+      resolution: input.resolution.trim(),
+      resolutionNote: input.resolutionNote?.trim() || undefined,
+    },
+  );
+
+  return map2LResult(result);
 }

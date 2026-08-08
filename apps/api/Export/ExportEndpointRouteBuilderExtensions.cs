@@ -23,6 +23,33 @@ public static class ExportEndpointRouteBuilderExtensions
         group.MapPost("/{exportCaseId:guid}/documents/{documentId:guid}/verify", VerifyExportDocumentAsync);
         group.MapPost("/{exportCaseId:guid}/documents/{documentId:guid}/reject", RejectExportDocumentAsync);
         group.MapGet("/{exportCaseId:guid}/activity", ListExportActivityAsync);
+
+        // EXPORT-2L — packing
+        group.MapGet("/{exportCaseId:guid}/packing", GetPackingAsync);
+        group.MapPost("/{exportCaseId:guid}/packing/units", CreatePackingUnitAsync);
+        group.MapPut("/{exportCaseId:guid}/packing/units/{packingUnitId:guid}", UpdatePackingUnitAsync);
+        group.MapPost("/{exportCaseId:guid}/packing/units/{packingUnitId:guid}/items", AddPackingItemAsync);
+        group.MapPost("/{exportCaseId:guid}/packing/complete", CompletePackingAsync);
+        group.MapPost("/{exportCaseId:guid}/packing/verify", VerifyPackingAsync);
+        group.MapGet("/{exportCaseId:guid}/packing/reconciliation", GetPackingReconciliationAsync);
+
+        // EXPORT-2L — shipments
+        group.MapGet("/{exportCaseId:guid}/shipments", ListShipmentsAsync);
+        group.MapPost("/{exportCaseId:guid}/shipments", CreateShipmentAsync);
+        group.MapGet("/{exportCaseId:guid}/shipments/{shipmentId:guid}", GetShipmentAsync);
+        group.MapPut("/{exportCaseId:guid}/shipments/{shipmentId:guid}", UpdateShipmentAsync);
+        group.MapPost("/{exportCaseId:guid}/shipments/{shipmentId:guid}/transition", TransitionShipmentAsync);
+        group.MapGet("/{exportCaseId:guid}/shipments/{shipmentId:guid}/readiness", GetShipmentReadinessAsync);
+
+        // EXPORT-2L — broker
+        group.MapGet("/{exportCaseId:guid}/broker", GetBrokerWorkspaceAsync);
+        group.MapPost("/{exportCaseId:guid}/broker", CreateBrokerWorkspaceAsync);
+        group.MapPost("/{exportCaseId:guid}/broker/package/prepare", PreparePackageAsync);
+        group.MapPost("/{exportCaseId:guid}/broker/package/send", SendPackageAsync);
+        group.MapPost("/{exportCaseId:guid}/broker/acknowledge", AcknowledgeBrokerAsync);
+        group.MapPost("/{exportCaseId:guid}/broker/corrections", CreateBrokerCorrectionAsync);
+        group.MapPost("/{exportCaseId:guid}/broker/corrections/{correctionId:guid}/resolve", ResolveBrokerCorrectionAsync);
+
         return endpoints;
     }
 
@@ -569,6 +596,852 @@ public static class ExportEndpointRouteBuilderExtensions
             o.CreatedAtUtc,
             o.UpdatedAtUtc);
 
+    // ─── EXPORT-2L — Packing handlers ────────────────────────────────────────────
+
+    private static async Task<IResult> GetPackingAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingReadRepository packingReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await packingReadRepository.GetPackingAsync(context, exportCaseId, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            if (result.NotFound)
+            {
+                return TypedResults.Problem(title: "Export case not found.", statusCode: StatusCodes.Status404NotFound, extensions: FailureExt(ExportApiFailureCodes.NotFound));
+            }
+
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Packing!);
+    }
+
+    private static async Task<IResult> GetPackingReconciliationAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] decimal? orderedQuantityTotal,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingReadRepository packingReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await packingReadRepository.GetReconciliationAsync(context, exportCaseId, orderedQuantityTotal, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            if (result.NotFound)
+            {
+                return TypedResults.Problem(title: "Export case not found.", statusCode: StatusCodes.Status404NotFound, extensions: FailureExt(ExportApiFailureCodes.NotFound));
+            }
+
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Reconciliation!);
+    }
+
+    private static async Task<IResult> CreatePackingUnitAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreatePackingUnitRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingWriteRepository packingWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.PackingManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new CreateExportPackingUnitCommand(
+            exportCaseId,
+            body.UnitCode,
+            body.UnitType,
+            body.ParentPackingUnitId,
+            body.GrossWeight,
+            body.NetWeight,
+            body.WeightUnit,
+            body.Length,
+            body.Width,
+            body.Height,
+            body.DimensionUnit,
+            body.MarksAndNumbers);
+
+        var result = await packingWriteRepository.CreateUnitAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { packingUnitId = result.PackingUnitId, unitVersion = result.UnitVersion, caseVersion = result.CaseVersion });
+    }
+
+    private static async Task<IResult> UpdatePackingUnitAsync(
+        Guid exportCaseId,
+        Guid packingUnitId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] UpdatePackingUnitRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingWriteRepository packingWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.PackingManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new UpdateExportPackingUnitCommand(
+            exportCaseId,
+            packingUnitId,
+            body.ExpectedVersion,
+            body.GrossWeight,
+            body.NetWeight,
+            body.WeightUnit,
+            body.Length,
+            body.Width,
+            body.Height,
+            body.DimensionUnit,
+            body.MarksAndNumbers);
+
+        var result = await packingWriteRepository.UpdateUnitAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { packingUnitId = result.PackingUnitId, unitVersion = result.UnitVersion, caseVersion = result.CaseVersion });
+    }
+
+    private static async Task<IResult> AddPackingItemAsync(
+        Guid exportCaseId,
+        Guid packingUnitId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] AddPackingItemRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingWriteRepository packingWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.PackingManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new AddExportPackingItemCommand(
+            exportCaseId,
+            packingUnitId,
+            body.ProductCode,
+            body.ProductName,
+            body.Quantity,
+            body.UnitOfMeasure,
+            body.SourceOrderLineId,
+            body.LotBatchReference);
+
+        var result = await packingWriteRepository.AddItemAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { itemId = result.ItemId, caseVersion = result.CaseVersion });
+    }
+
+    private static async Task<IResult> CompletePackingAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CompletePackingRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingWriteRepository packingWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.PackingManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new CompleteExportPackingCommand(exportCaseId, body.ExpectedCaseVersion);
+        var result = await packingWriteRepository.CompletePackingAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { caseVersion = result.CaseVersion, packingStatus = result.PackingStatus });
+    }
+
+    private static async Task<IResult> VerifyPackingAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] VerifyPackingRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportPackingWriteRepository packingWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.PackingVerify), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new VerifyExportPackingCommand(exportCaseId, body.ExpectedCaseVersion);
+        var result = await packingWriteRepository.VerifyPackingAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { caseVersion = result.CaseVersion, packingStatus = result.PackingStatus });
+    }
+
+    // ─── EXPORT-2L — Shipment handlers ───────────────────────────────────────────
+
+    private static async Task<IResult> ListShipmentsAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentReadRepository shipmentReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await shipmentReadRepository.ListAsync(context, exportCaseId, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Items!);
+    }
+
+    private static async Task<IResult> GetShipmentAsync(
+        Guid exportCaseId,
+        Guid shipmentId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentReadRepository shipmentReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await shipmentReadRepository.GetAsync(context, exportCaseId, shipmentId, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            if (result.NotFound)
+            {
+                return TypedResults.Problem(title: "Shipment not found.", statusCode: StatusCodes.Status404NotFound, extensions: FailureExt(ExportApiFailureCodes.NotFound));
+            }
+
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Shipment!);
+    }
+
+    private static async Task<IResult> GetShipmentReadinessAsync(
+        Guid exportCaseId,
+        Guid shipmentId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentReadRepository shipmentReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await shipmentReadRepository.GetReadinessAsync(context, exportCaseId, shipmentId, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            if (result.NotFound)
+            {
+                return TypedResults.Problem(title: "Shipment not found.", statusCode: StatusCodes.Status404NotFound, extensions: FailureExt(ExportApiFailureCodes.NotFound));
+            }
+
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Readiness!);
+    }
+
+    private static async Task<IResult> CreateShipmentAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreateShipmentRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentWriteRepository shipmentWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.ShipmentManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new CreateExportShipmentCommand(
+            exportCaseId,
+            body.ShipmentReference,
+            body.TransportMode,
+            body.IncotermCode,
+            body.DestinationCountryCode,
+            body.DestinationCity,
+            body.DeliveryAddress,
+            body.ForwarderName,
+            body.CarrierName,
+            body.PlannedPickupAtUtc,
+            body.PlannedDepartureAtUtc,
+            body.PlannedArrivalAtUtc,
+            body.BookingReference);
+
+        var result = await shipmentWriteRepository.CreateAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { shipmentId = result.ShipmentId, shipmentVersion = result.ShipmentVersion, status = result.ShipmentStatus });
+    }
+
+    private static async Task<IResult> UpdateShipmentAsync(
+        Guid exportCaseId,
+        Guid shipmentId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] UpdateShipmentRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentWriteRepository shipmentWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.ShipmentManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new UpdateExportShipmentCommand(
+            exportCaseId,
+            shipmentId,
+            body.ExpectedVersion,
+            body.TransportMode,
+            body.IncotermCode,
+            body.DestinationCountryCode,
+            body.DestinationCity,
+            body.DeliveryAddress,
+            body.ForwarderName,
+            body.CarrierName,
+            body.PlannedPickupAtUtc,
+            body.PlannedDepartureAtUtc,
+            body.PlannedArrivalAtUtc,
+            body.ActualPickupAtUtc,
+            body.ActualDepartureAtUtc,
+            body.ActualArrivalAtUtc,
+            body.BookingReference,
+            body.TrackingReference,
+            body.TotalGrossWeight,
+            body.TotalNetWeight,
+            body.TotalPackageCount);
+
+        var result = await shipmentWriteRepository.UpdateAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { shipmentId = result.ShipmentId, shipmentVersion = result.ShipmentVersion, status = result.ShipmentStatus });
+    }
+
+    private static async Task<IResult> TransitionShipmentAsync(
+        Guid exportCaseId,
+        Guid shipmentId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] TransitionShipmentRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportShipmentWriteRepository shipmentWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (!ExportValueConversions.TryShipmentStatusFromStorage(body.TargetStatus, out var targetStatus))
+        {
+            return TypedResults.Problem(
+                title: $"Unknown shipment status '{body.TargetStatus}'.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.ShipmentManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new TransitionExportShipmentCommand(
+            exportCaseId, shipmentId, body.ExpectedVersion, targetStatus, body.CancellationReason);
+
+        var result = await shipmentWriteRepository.TransitionAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { shipmentId = result.ShipmentId, shipmentVersion = result.ShipmentVersion, status = result.ShipmentStatus });
+    }
+
+    // ─── EXPORT-2L — Broker handlers ─────────────────────────────────────────────
+
+    private static async Task<IResult> GetBrokerWorkspaceAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerReadRepository brokerReadRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.Read), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var result = await brokerReadRepository.GetWorkspaceAsync(context, exportCaseId, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            if (result.NotFound)
+            {
+                return TypedResults.Problem(title: "No active broker workspace.", statusCode: StatusCodes.Status404NotFound, extensions: FailureExt(ExportApiFailureCodes.NotFound));
+            }
+
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(result.Workspace!);
+    }
+
+    private static async Task<IResult> CreateBrokerWorkspaceAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreateBrokerWorkspaceRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new CreateExportBrokerWorkspaceCommand(
+            exportCaseId,
+            body.ShipmentId,
+            body.BrokerCompanyName,
+            body.BrokerContactName,
+            body.BrokerEmail,
+            body.BrokerPhone,
+            body.Notes);
+
+        var result = await brokerWriteRepository.CreateWorkspaceAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { workspaceId = result.WorkspaceId, workspaceVersion = result.WorkspaceVersion, status = result.WorkspaceStatus });
+    }
+
+    private static async Task<IResult> PreparePackageAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] Guid? workspaceId,
+        [FromBody] PreparePackageRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (workspaceId is null || workspaceId == Guid.Empty)
+        {
+            return TypedResults.Problem(title: "workspaceId query parameter is required.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new PrepareExportBrokerPackageCommand(
+            exportCaseId, workspaceId.Value, body.ExpectedWorkspaceVersion, body.DocumentIds, body.Notes);
+
+        var result = await brokerWriteRepository.PreparePackageAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { packageVersionId = result.PackageVersionId, versionNumber = result.VersionNumber, workspaceVersion = result.WorkspaceVersion });
+    }
+
+    private static async Task<IResult> SendPackageAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] Guid? workspaceId,
+        [FromBody] SendPackageRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (workspaceId is null || workspaceId == Guid.Empty)
+        {
+            return TypedResults.Problem(title: "workspaceId query parameter is required.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerHandoff), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new SendExportBrokerPackageCommand(exportCaseId, workspaceId.Value, body.ExpectedWorkspaceVersion);
+        var result = await brokerWriteRepository.SendPackageAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { packageVersionId = result.PackageVersionId, versionNumber = result.VersionNumber, workspaceVersion = result.WorkspaceVersion });
+    }
+
+    private static async Task<IResult> AcknowledgeBrokerAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] Guid? workspaceId,
+        [FromBody] AcknowledgeBrokerRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (workspaceId is null || workspaceId == Guid.Empty)
+        {
+            return TypedResults.Problem(title: "workspaceId query parameter is required.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new AcknowledgeExportBrokerCommand(exportCaseId, workspaceId.Value, body.ExpectedWorkspaceVersion, body.BrokerReference);
+        var result = await brokerWriteRepository.AcknowledgeAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { workspaceId = result.WorkspaceId, workspaceVersion = result.WorkspaceVersion, status = result.WorkspaceStatus });
+    }
+
+    private static async Task<IResult> CreateBrokerCorrectionAsync(
+        Guid exportCaseId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] Guid? workspaceId,
+        [FromBody] CreateCorrectionRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (workspaceId is null || workspaceId == Guid.Empty)
+        {
+            return TypedResults.Problem(title: "workspaceId query parameter is required.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        if (!ExportValueConversions.TryCorrectionSeverityFromStorage(body.Severity, out var severity))
+        {
+            return TypedResults.Problem(title: $"Unknown severity '{body.Severity}'.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new CreateExportBrokerCorrectionCommand(
+            exportCaseId, workspaceId.Value, body.Category, body.Title, body.Description, severity, body.RelatedDocumentId);
+
+        var result = await brokerWriteRepository.CreateCorrectionAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { correctionId = result.CorrectionId });
+    }
+
+    private static async Task<IResult> ResolveBrokerCorrectionAsync(
+        Guid exportCaseId,
+        Guid correctionId,
+        [FromQuery] Guid? facilityId,
+        [FromQuery] Guid? workspaceId,
+        [FromBody] ResolveCorrectionRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        IExportBrokerWriteRepository brokerWriteRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return MapAccessDenied(FacilityAccessFailureCodes.FacilityMissing, "A facility identifier is required.");
+        }
+
+        if (workspaceId is null || workspaceId == Guid.Empty)
+        {
+            return TypedResults.Problem(title: "workspaceId query parameter is required.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, ExportPermissionKeys.BrokerManage), cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return MapFacilityAccessFailure(accessResult);
+        }
+
+        if (!ExportValueConversions.TryCorrectionStatusFromStorage(body.Resolution, out var resolution))
+        {
+            return TypedResults.Problem(title: $"Unknown resolution status '{body.Resolution}'.", statusCode: StatusCodes.Status400BadRequest, extensions: FailureExt(ExportApiFailureCodes.ValidationFailed));
+        }
+
+        var context = BuildContext(accessResult.Access, correlationContext);
+        var command = new ResolveExportBrokerCorrectionCommand(
+            exportCaseId,
+            workspaceId.Value,
+            correctionId,
+            body.ExpectedWorkspaceVersion,
+            resolution,
+            body.ResolutionNote);
+
+        var result = await brokerWriteRepository.ResolveCorrectionAsync(context, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new { correctionId = result.CorrectionId });
+    }
+
     private static ExportDocumentDto MapDocument(ExportDocumentReadModel d) =>
         new(
             d.Id,
@@ -727,6 +1600,37 @@ public static class ExportServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+
+        // EXPORT-2L repositories
+        services.AddScoped<IExportPackingReadRepository>(serviceProvider =>
+            new ExportPackingReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportPackingWriteRepository>(serviceProvider =>
+            new ExportPackingWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportShipmentReadRepository>(serviceProvider =>
+            new ExportShipmentReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportShipmentWriteRepository>(serviceProvider =>
+            new ExportShipmentWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportBrokerReadRepository>(serviceProvider =>
+            new ExportBrokerReadRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
+
+        services.AddScoped<IExportBrokerWriteRepository>(serviceProvider =>
+            new ExportBrokerWriteRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         return services;
     }

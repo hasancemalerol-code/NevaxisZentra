@@ -85,6 +85,19 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ExportDocument> ExportDocuments => Set<ExportDocument>();
     public DbSet<ExportCaseActivity> ExportCaseActivities => Set<ExportCaseActivity>();
 
+    // Export 2L — packing
+    public DbSet<ExportPackingUnit> ExportPackingUnits => Set<ExportPackingUnit>();
+    public DbSet<ExportPackingItem> ExportPackingItems => Set<ExportPackingItem>();
+
+    // Export 2L — shipment
+    public DbSet<ExportShipment> ExportShipments => Set<ExportShipment>();
+
+    // Export 2L — broker
+    public DbSet<ExportBrokerWorkspace> ExportBrokerWorkspaces => Set<ExportBrokerWorkspace>();
+    public DbSet<ExportBrokerPackageVersion> ExportBrokerPackageVersions => Set<ExportBrokerPackageVersion>();
+    public DbSet<ExportBrokerPackageDocument> ExportBrokerPackageDocuments => Set<ExportBrokerPackageDocument>();
+    public DbSet<ExportBrokerCorrection> ExportBrokerCorrections => Set<ExportBrokerCorrection>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -566,6 +579,47 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 2L — packing
+        modelBuilder.ApplyConfiguration(new ExportPackingUnitEntityConfiguration());
+        modelBuilder.Entity<ExportPackingUnit>().HasQueryFilter(u =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && u.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportPackingItemEntityConfiguration());
+        modelBuilder.Entity<ExportPackingItem>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 2L — shipment
+        modelBuilder.ApplyConfiguration(new ExportShipmentEntityConfiguration());
+        modelBuilder.Entity<ExportShipment>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Export 2L — broker
+        modelBuilder.ApplyConfiguration(new ExportBrokerWorkspaceEntityConfiguration());
+        modelBuilder.Entity<ExportBrokerWorkspace>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportBrokerPackageVersionEntityConfiguration());
+        modelBuilder.Entity<ExportBrokerPackageVersion>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ExportBrokerPackageDocumentEntityConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ExportBrokerCorrectionEntityConfiguration());
+        modelBuilder.Entity<ExportBrokerCorrection>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

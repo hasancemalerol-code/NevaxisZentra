@@ -70,6 +70,14 @@ public static class OutboxMessageTypes
     public const string ExportReady = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportReady;
     public const string ExportBlocked = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBlocked;
 
+    // Export 2L
+    public const string ExportPackingCompleted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportPackingCompleted;
+    public const string ExportPackingVerified = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportPackingVerified;
+    public const string ExportShipmentCreated = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportShipmentCreated;
+    public const string ExportShipmentStatusChanged = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportShipmentStatusChanged;
+    public const string ExportBrokerPackageSent = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBrokerPackageSent;
+    public const string ExportBrokerWorkspaceAcknowledged = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportBrokerWorkspaceAcknowledged;
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -121,6 +129,12 @@ public static class OutboxMessageTypes
             ExportReadinessChanged,
             ExportReady,
             ExportBlocked,
+            ExportPackingCompleted,
+            ExportPackingVerified,
+            ExportShipmentCreated,
+            ExportShipmentStatusChanged,
+            ExportBrokerPackageSent,
+            ExportBrokerWorkspaceAcknowledged,
         ],
         StringComparer.Ordinal);
 }

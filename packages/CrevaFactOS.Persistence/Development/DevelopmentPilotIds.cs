@@ -148,4 +148,30 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ExportPilotCaseId =
         Guid.Parse("bb000001-0051-4000-8000-000000000051");
+
+    // Export 2L permission definitions (032–036)
+    public static readonly Guid ExportPackingManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000032");
+
+    public static readonly Guid ExportPackingVerifyPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000033");
+
+    public static readonly Guid ExportShipmentManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000034");
+
+    public static readonly Guid ExportBrokerManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000035");
+
+    public static readonly Guid ExportBrokerHandoffPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000036");
+
+    // Export 2L pilot fixtures
+    public static readonly Guid ExportPilotPackingUnitId =
+        Guid.Parse("bb000001-0055-4000-8000-000000000055");
+
+    public static readonly Guid ExportPilotShipmentId =
+        Guid.Parse("bb000001-0056-4000-8000-000000000056");
+
+    public static readonly Guid ExportPilotBrokerWorkspaceId =
+        Guid.Parse("bb000001-0057-4000-8000-000000000057");
 }

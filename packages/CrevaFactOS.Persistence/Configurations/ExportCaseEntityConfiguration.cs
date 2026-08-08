@@ -8,6 +8,15 @@ namespace CrevaFactOS.Persistence.Configurations;
 
 internal sealed class ExportCaseEntityConfiguration : IEntityTypeConfiguration<ExportCase>
 {
+    private static readonly Dictionary<ExportPackingStatus, string> PackingStatusValues =
+        new()
+        {
+            [ExportPackingStatus.Draft] = "draft",
+            [ExportPackingStatus.Packing] = "packing",
+            [ExportPackingStatus.Complete] = "complete",
+            [ExportPackingStatus.Verified] = "verified",
+        };
+
     private static readonly Dictionary<ExportCaseStatus, string> CaseStatusValues =
         new()
         {
@@ -59,6 +68,18 @@ internal sealed class ExportCaseEntityConfiguration : IEntityTypeConfiguration<E
         entity.Property(e => e.CreatedBySubjectId).HasColumnName("created_by_subject_id").HasMaxLength(200);
         entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
         entity.Property(e => e.LastModifiedBySubjectId).HasColumnName("last_modified_by_subject_id").HasMaxLength(200);
+        entity.Property(e => e.PackingStatus)
+            .HasColumnName("packing_status")
+            .HasConversion(
+                value => PackingStatusValues[value],
+                value => PackingStatusValues.First(p => p.Value == value).Key)
+            .HasMaxLength(20);
+        entity.Property(e => e.PackingCompletedAtUtc).HasColumnName("packing_completed_at_utc");
+        entity.Property(e => e.PackingCompletedBySubjectId)
+            .HasColumnName("packing_completed_by_subject_id").HasMaxLength(200);
+        entity.Property(e => e.PackingVerifiedAtUtc).HasColumnName("packing_verified_at_utc");
+        entity.Property(e => e.PackingVerifiedBySubjectId)
+            .HasColumnName("packing_verified_by_subject_id").HasMaxLength(200);
         entity.Property(e => e.Version).HasColumnName("version").IsConcurrencyToken();
 
         entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.SourceOrderId })

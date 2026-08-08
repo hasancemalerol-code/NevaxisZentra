@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -1096,148 +1095,13 @@ public sealed class ExportCaseWriteRepository(
         bool emitInitial,
         CancellationToken cancellationToken)
     {
-        _ = cancellationToken;
-
-        var previousStatus = exportCase.ReadinessStatus;
-        var previousPercent = exportCase.ReadinessPercent;
-        var previousBlocking = exportCase.BlockingIssueCount;
-        var previousMissing = exportCase.MissingRequirementCount;
-
-        var calc = ExportReadinessEngine.Calculate(exportCase, documents);
-
-        exportCase.ReadinessStatus = calc.ReadinessStatus;
-        exportCase.ReadinessPercent = calc.ReadinessPercent;
-        exportCase.BlockingIssueCount = calc.BlockingIssueCount;
-        exportCase.MissingRequirementCount = calc.MissingRequirementCount;
-
-        if (exportCase.Status != ExportCaseStatus.Closed)
-        {
-            exportCase.Status = calc.SuggestedCaseStatus;
-        }
-
-        var readinessChanged =
-            emitInitial
-            || previousStatus != exportCase.ReadinessStatus
-            || previousPercent != exportCase.ReadinessPercent
-            || previousBlocking != exportCase.BlockingIssueCount
-            || previousMissing != exportCase.MissingRequirementCount;
-
-        if (!readinessChanged)
-        {
-            return;
-        }
-
-        AppendActivity(
-            exportCase,
-            ExportActivityEventTypes.ReadinessChanged,
-            "Readiness changed",
-            $"{ExportValueConversions.ToStorage(exportCase.ReadinessStatus)} ({exportCase.ReadinessPercent}%)",
-            now,
-            ExportActivitySourceType.System,
-            actorSubjectId,
-            correlationId,
-            "export.case",
-            exportCase.Id);
-
-        AddAudit(
-            context,
-            ExportAuditEventTypes.ExportReadinessChanged,
-            ExportAuditActions.ExportReadinessChanged,
-            "export.case",
-            exportCase.Id.ToString(),
-            correlationId,
-            now,
-            new
-            {
-                exportCaseId = exportCase.Id.ToString(),
-                readinessStatus = ExportValueConversions.ToStorage(exportCase.ReadinessStatus),
-                readinessPercent = exportCase.ReadinessPercent,
-                blockingIssueCount = exportCase.BlockingIssueCount,
-                missingRequirementCount = exportCase.MissingRequirementCount,
-                previousReadinessStatus = ExportValueConversions.ToStorage(previousStatus),
-            });
-
-        AddOutbox(
-            context.TenantId,
-            ExportOutboxMessageTypes.ExportReadinessChanged,
-            "export-case",
-            exportCase.Id.ToString(),
-            correlationId,
-            $"{exportCase.Id}:{exportCase.Version}:{ExportOutboxMessageTypes.ExportReadinessChanged}:{exportCase.ReadinessPercent}",
-            now,
-            new Dictionary<string, string?>
-            {
-                ["tenantId"] = context.TenantId.ToString(),
-                ["facilityId"] = context.FacilityId.ToString(),
-                ["exportCaseId"] = exportCase.Id.ToString(),
-                ["readinessStatus"] = ExportValueConversions.ToStorage(exportCase.ReadinessStatus),
-                ["readinessPercent"] = exportCase.ReadinessPercent.ToString(CultureInfo.InvariantCulture),
-                ["occurredAtUtc"] = now.ToString("O"),
-            });
-
-        if (exportCase.ReadinessStatus == ExportReadinessStatus.Ready
-            && (emitInitial || previousStatus != ExportReadinessStatus.Ready))
-        {
-            AppendActivity(
-                exportCase,
-                ExportActivityEventTypes.ExportReady,
-                "Export ready",
-                "All readiness requirements are satisfied.",
-                now,
-                ExportActivitySourceType.System,
-                actorSubjectId,
-                correlationId,
-                "export.case",
-                exportCase.Id);
-
-            AddOutbox(
-                context.TenantId,
-                ExportOutboxMessageTypes.ExportReady,
-                "export-case",
-                exportCase.Id.ToString(),
-                correlationId,
-                $"{exportCase.Id}:{exportCase.Version}:{ExportOutboxMessageTypes.ExportReady}",
-                now,
-                new Dictionary<string, string?>
-                {
-                    ["tenantId"] = context.TenantId.ToString(),
-                    ["facilityId"] = context.FacilityId.ToString(),
-                    ["exportCaseId"] = exportCase.Id.ToString(),
-                    ["occurredAtUtc"] = now.ToString("O"),
-                });
-        }
-        else if (exportCase.ReadinessStatus == ExportReadinessStatus.NotReady
-                 && (emitInitial || previousStatus != ExportReadinessStatus.NotReady))
-        {
-            AppendActivity(
-                exportCase,
-                ExportActivityEventTypes.ExportBlocked,
-                "Export blocked",
-                $"{exportCase.BlockingIssueCount} blocking issue(s).",
-                now,
-                ExportActivitySourceType.System,
-                actorSubjectId,
-                correlationId,
-                "export.case",
-                exportCase.Id);
-
-            AddOutbox(
-                context.TenantId,
-                ExportOutboxMessageTypes.ExportBlocked,
-                "export-case",
-                exportCase.Id.ToString(),
-                correlationId,
-                $"{exportCase.Id}:{exportCase.Version}:{ExportOutboxMessageTypes.ExportBlocked}",
-                now,
-                new Dictionary<string, string?>
-                {
-                    ["tenantId"] = context.TenantId.ToString(),
-                    ["facilityId"] = context.FacilityId.ToString(),
-                    ["exportCaseId"] = exportCase.Id.ToString(),
-                    ["blockingIssueCount"] = exportCase.BlockingIssueCount.ToString(CultureInfo.InvariantCulture),
-                    ["occurredAtUtc"] = now.ToString("O"),
-                });
-        }
+        var helper = new ExportReadinessPersistence(dbContext);
+        var operationalContext = await helper.BuildOperationalContextAsync(
+            context, exportCase, documents, cancellationToken);
+        await helper.RecalculateAndPersistAsync(
+            context, exportCase, documents,
+            correlationId, actorSubjectId, now,
+            emitInitial, operationalContext, cancellationToken);
     }
 
     private async Task<ExportCase?> FindBySourceOrderAsync(

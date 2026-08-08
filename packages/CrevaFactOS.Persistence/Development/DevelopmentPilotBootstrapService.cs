@@ -117,6 +117,16 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportDocumentVerifyPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportPackingManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportPackingVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportShipmentManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportBrokerManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportBrokerHandoffPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
             dbContext,
             tenant.Id,
@@ -243,6 +253,25 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureExecutionHandoverPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExecutionExceptionAssignPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        // Shared local web identity (production-pilot-operator) also drives /ihracat.
+        await EnsureExportReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportDocumentManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportDocumentVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportPackingManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportPackingVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportShipmentManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportBrokerManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExportBrokerHandoffPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
@@ -1124,6 +1153,51 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ExportPermissionKeys.DocumentVerify,
             DevelopmentPilotIds.ExportDocumentVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportPackingManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.PackingManage,
+            DevelopmentPilotIds.ExportPackingManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportPackingVerifyPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.PackingVerify,
+            DevelopmentPilotIds.ExportPackingVerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportShipmentManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.ShipmentManage,
+            DevelopmentPilotIds.ExportShipmentManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportBrokerManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.BrokerManage,
+            DevelopmentPilotIds.ExportBrokerManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExportBrokerHandoffPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ExportPermissionKeys.BrokerHandoff,
+            DevelopmentPilotIds.ExportBrokerHandoffPermissionDefinitionId,
             cancellationToken);
 
     private static async Task EnsureExportPilotCaseAsync(
