@@ -1,7 +1,9 @@
+import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
   FileStack,
+  Plus,
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
@@ -104,8 +106,21 @@ export default async function ExportCasesPage() {
   return (
     <main className="export-page">
       <header className="export-header">
-        <p>İHRACAT YÖNETİMİ</p>
-        <h1>İhracat</h1>
+        <div className="export-header__top">
+          <div className="export-header__intro">
+            <p>İHRACAT YÖNETİMİ</p>
+            <h1>İhracat</h1>
+          </div>
+          <div className="export-header__actions">
+            <Link
+              href="/ihracat/ulke-arastirma"
+              className="button button-primary button-medium"
+            >
+              <Plus aria-hidden="true" />
+              Yeni Ülke Araştır
+            </Link>
+          </div>
+        </div>
         <span>
           İhracat siparişleri, belge hazırlığı ve sevkiyat öncesi uygunluk takibi
         </span>

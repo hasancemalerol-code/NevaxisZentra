@@ -18,7 +18,40 @@
   gap: 8px;
 }
 
-.export-header p {
+.export-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.export-header__intro {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.export-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.export-header__actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-header__actions .button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.export-header p,
+.export-header__intro p {
   margin: 0;
   color: #155eef;
   font-size: 11px;
@@ -27,7 +60,8 @@
   text-transform: uppercase;
 }
 
-.export-header h1 {
+.export-header h1,
+.export-header__intro h1 {
   margin: 0;
   color: #10213c;
   font-size: 30px;
