@@ -289,11 +289,11 @@ export function ExportBrokerPanel({
     <section className="export-broker-panel">
       <div className="export-broker-panel__heading">
         <div>
-          <p>GÜMRÜK BROKER</p>
-          <h2>Broker çalışma alanı</h2>
+          <p>Gümrük Müşaviri Teslim</p>
+          <h2>Gümrük müşaviri paketi</h2>
           <span>
-            Paket hazırlama, gönderim ve düzeltme takibi. Operasyonel kayıt
-            amaçlıdır.
+            Paket hazırlama, teslim ve evrak düzeltme talebi takibi. Fabrika
+            tarafı handoff kaydıdır; broker operasyonu yönetilmez.
           </span>
         </div>
         {workspace ? (

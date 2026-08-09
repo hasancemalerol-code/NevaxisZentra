@@ -235,11 +235,11 @@ export function ExportShipmentPanel({
     <section className="export-shipment-panel">
       <div className="export-shipment-panel__heading">
         <div>
-          <p>SEVKİYAT</p>
-          <h2>Sevkiyat planı</h2>
+          <p>Lojistik Firmasına Teslim</p>
+          <h2>Sevkiyat / lojistik paketi</h2>
           <span>
-            Sevkiyat oluşturun, alanları güncelleyin ve durum geçişlerini
-            yönetin.
+            Pickup, kalkış ve hedef bilgileri fabrika handoff paketinin parçasıdır.
+            Taşıyıcı operasyonu CrevaFactOS dışında yürütülür.
           </span>
         </div>
       </div>

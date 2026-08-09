@@ -76,7 +76,7 @@ const TABS: readonly { id: ExportDetailTab; label: string }[] = [
   { id: "documents", label: "Belgeler" },
   { id: "packing", label: "Paketleme" },
   { id: "shipment", label: "Sevkiyat" },
-  { id: "broker", label: "Gümrük Broker" },
+  { id: "broker", label: "Gümrük Müşaviri" },
   { id: "compliance", label: "Uygunluk" },
   { id: "traceability", label: "İzlenebilirlik" },
   { id: "activity", label: "Aktivite" },
