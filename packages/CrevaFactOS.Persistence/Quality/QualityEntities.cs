@@ -53,6 +53,9 @@ public sealed class QualityInspection
     public Guid FacilityId { get; set; }
     public Guid ProductionOrderId { get; set; }
     public Guid QualityControlPlanId { get; set; }
+    public string? PlanCodeSnapshot { get; set; }
+    public string? PlanNameSnapshot { get; set; }
+    public string? PlanRevisionSnapshot { get; set; }
     public string InspectionNumber { get; set; } = string.Empty;
     public QualityInspectionStatus Status { get; set; } = QualityInspectionStatus.Draft;
     public DateTimeOffset? StartedAtUtc { get; set; }
@@ -79,6 +82,15 @@ public sealed class QualityInspectionResult
     public Guid FacilityId { get; set; }
     public Guid QualityInspectionId { get; set; }
     public Guid InspectionDefinitionId { get; set; }
+    public string? DefinitionCodeSnapshot { get; set; }
+    public string? DefinitionNameSnapshot { get; set; }
+    public string? InspectionTypeSnapshot { get; set; }
+    public string? UnitSnapshot { get; set; }
+    public decimal? NominalValueSnapshot { get; set; }
+    public decimal? LowerLimitSnapshot { get; set; }
+    public decimal? UpperLimitSnapshot { get; set; }
+    public bool? RequiredSnapshot { get; set; }
+    public bool? CriticalSnapshot { get; set; }
     public decimal? MeasuredNumericValue { get; set; }
     public string? MeasuredTextValue { get; set; }
     public bool? BooleanResult { get; set; }

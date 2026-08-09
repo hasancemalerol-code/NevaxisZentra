@@ -285,3 +285,198 @@ export function getQualityNcrSeverityTone(
       return "neutral";
   }
 }
+
+export type QualityReportingOverview = Readonly<{
+  totalInspectionCount: number;
+  openInspectionCount: number;
+  completedInspectionCount: number;
+  passedInspectionCount: number;
+  failedInspectionCount: number;
+  releasedInspectionCount: number;
+  rejectedInspectionCount: number;
+  openNcrCount: number;
+  criticalNcrCount: number;
+  activeHoldCount: number;
+  blockingProductionOrderCount: number;
+  openCorrectiveActionCount: number;
+  overdueCorrectiveActionCount: number;
+  firstPassYieldPercent?: number;
+  passRatePercent?: number;
+  releaseRatePercent?: number;
+}>;
+
+export type QualityTrendPeriod = Readonly<{
+  periodKey: string;
+  periodStartUtc: string;
+  inspectionCount: number;
+  passCount: number;
+  failCount: number;
+  ncrCount: number;
+  criticalNcrCount: number;
+  holdCount: number;
+}>;
+
+export type QualityFailureBreakdownItem = Readonly<{
+  dimension: string;
+  key: string;
+  label?: string;
+  count: number;
+}>;
+
+export type QualityNcrAnalytics = Readonly<{
+  openCount: number;
+  resolvedCount: number;
+  closedCount: number;
+  criticalCount: number;
+  majorCount: number;
+  minorCount: number;
+  averageAgeHours?: number;
+  averageResolutionHours?: number;
+  overdueCorrectiveActionCount: number;
+}>;
+
+export type QualityHoldAnalytics = Readonly<{
+  activeCount: number;
+  releasedCount: number;
+  affectedProductionOrderCount: number;
+  averageHoldDurationHours?: number;
+}>;
+
+export type QualityCorrectiveActionAnalytics = Readonly<{
+  openCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  overdueCount: number;
+  averageCompletionLeadTimeHours?: number;
+}>;
+
+export type QualityInspectionReportMeasurement = Readonly<{
+  definitionCode: string;
+  definitionName: string;
+  unit?: string;
+  nominalValue?: number;
+  lowerLimit?: number;
+  upperLimit?: number;
+  required: boolean;
+  critical: boolean;
+  measuredNumericValue?: number;
+  measuredTextValue?: string;
+  booleanResult?: boolean;
+  result: string;
+}>;
+
+export type QualityInspectionInternalSummary = Readonly<{
+  inspectionId: string;
+  inspectionNumber: string;
+  facilityReference: string;
+  productionOrderId: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  controlPlanId: string;
+  controlPlanCode: string;
+  controlPlanName: string;
+  controlPlanRevision: string;
+  inspectionDateUtc?: string;
+  inspectorSubjectId?: string;
+  overallResult: string;
+  releaseStatus: string;
+  measurements: readonly QualityInspectionReportMeasurement[];
+  hasBlockingHold: boolean;
+  openNcrCount: number;
+  blockingSummary?: string;
+}>;
+
+export type QualityReleaseIntelligence = Readonly<{
+  available: boolean;
+  inspectionStatus?: string;
+  overallResult?: string;
+  releaseStatus?: string;
+  blocking: boolean;
+  activeHoldCount: number;
+  openNcrCount: number;
+  criticalNcrCount: number;
+  incompleteCorrectiveActionCount: number;
+  readyForRelease: boolean;
+  reasonCodes: readonly string[];
+  reasonSummary?: string;
+}>;
+
+export type QualityExportReadiness = Readonly<{
+  qualityReleaseStatus?: string;
+  qualityBlocking: boolean;
+  qualityReady: boolean;
+  reason?: string;
+}>;
+
+export type QualityResultTraceabilityItem = Readonly<{
+  id: string;
+  definitionCode: string;
+  definitionName: string;
+  result: string;
+  recordedAtUtc: string;
+  recordedBySubjectId: string;
+}>;
+
+export type QualityInspectionTraceabilityItem = Readonly<{
+  id: string;
+  inspectionNumber: string;
+  status: string;
+  overallResult: string;
+  releaseStatus: string;
+  completedAtUtc?: string;
+  inspectorSubjectId?: string;
+  results: readonly QualityResultTraceabilityItem[];
+}>;
+
+export type QualityNcrTraceabilityItem = Readonly<{
+  id: string;
+  ncrNumber: string;
+  severity: string;
+  status: string;
+  dispositionType?: string;
+  holdStatus: string;
+  detectedAtUtc: string;
+  ownerSubjectId?: string;
+}>;
+
+export type QualityHoldTraceabilityItem = Readonly<{
+  id: string;
+  ncrId: string;
+  scope: string;
+  status: string;
+  reason: string;
+  placedAtUtc: string;
+  placedBySubjectId: string;
+  releasedAtUtc?: string;
+  releasedBySubjectId?: string;
+}>;
+
+export type QualityCorrectiveActionTraceabilityItem = Readonly<{
+  id: string;
+  ncrId: string;
+  title: string;
+  status: string;
+  dueAtUtc?: string;
+  completedAtUtc?: string;
+  ownerSubjectId?: string;
+}>;
+
+export type ProductionOrderTraceability = Readonly<{
+  productionOrderId: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  inspections: readonly QualityInspectionTraceabilityItem[];
+  nonconformances: readonly QualityNcrTraceabilityItem[];
+  holds: readonly QualityHoldTraceabilityItem[];
+  correctiveActions: readonly QualityCorrectiveActionTraceabilityItem[];
+}>;
+
+export type QualityReportingTrendPeriod = "day" | "week" | "month";
+
+export function formatQualityPercent(value?: number | null): string {
+  if (value === undefined || value === null) {
+    return "—";
+  }
+
+  return `${value.toFixed(1)}%`;
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   AlertTriangle,
+  BarChart3,
   CheckCircle2,
   ClipboardCheck,
   ClipboardList,
@@ -9,15 +10,25 @@ import {
   Plus,
   ShieldCheck,
   Timer,
+  TrendingUp,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { getQualityStatusLabel } from "@/features/quality-control/domain/quality-control";
-import { readQualityWorkspace } from "@/features/quality-control/server/quality-control-reader";
+import {
+  formatQualityPercent,
+  getQualityStatusLabel,
+} from "@/features/quality-control/domain/quality-control";
+import {
+  readQualityReportingOverview,
+  readQualityWorkspace,
+} from "@/features/quality-control/server/quality-control-reader";
 
 export default async function QualityControlPage() {
-  const result = await readQualityWorkspace();
+  const [result, reportingResult] = await Promise.all([
+    readQualityWorkspace(),
+    readQualityReportingOverview(),
+  ]);
 
   if (result.status === "failure") {
     return (
@@ -38,6 +49,8 @@ export default async function QualityControlPage() {
   }
 
   const { summary, plans, inspections } = result;
+  const reportingOverview =
+    reportingResult.status === "success" ? reportingResult.overview : null;
   const activeInspections = inspections.filter(
     (item) => item.status === "draft" || item.status === "in-progress",
   );
@@ -67,8 +80,38 @@ export default async function QualityControlPage() {
             <FileWarning aria-hidden="true" />
             Uygunsuzluk Raporları
           </Link>
+          <Link href="/kalite/raporlama" className="production-execution-header__link">
+            <BarChart3 aria-hidden="true" />
+            Kalite Raporları
+          </Link>
         </div>
       </header>
+
+      {reportingOverview ? (
+        <section className="production-execution-kpis" aria-label="Raporlama göstergeleri">
+          <Card className="production-execution-kpis__item--completed">
+            <TrendingUp aria-hidden="true" />
+            <div>
+              <span>İlk Geçiş Verimi</span>
+              <strong>{formatQualityPercent(reportingOverview.firstPassYieldPercent)}</strong>
+            </div>
+          </Card>
+          <Card className="production-execution-kpis__item--ready">
+            <BarChart3 aria-hidden="true" />
+            <div>
+              <span>Geçme Oranı</span>
+              <strong>{formatQualityPercent(reportingOverview.passRatePercent)}</strong>
+            </div>
+          </Card>
+          <Card className="production-execution-kpis__item--in-progress">
+            <ShieldCheck aria-hidden="true" />
+            <div>
+              <span>Serbest Bırakma Oranı</span>
+              <strong>{formatQualityPercent(reportingOverview.releaseRatePercent)}</strong>
+            </div>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="production-execution-kpis" aria-label="Kalite özeti">
         <Card className="production-execution-kpis__item--in-progress">

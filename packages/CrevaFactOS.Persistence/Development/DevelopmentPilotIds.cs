@@ -98,6 +98,19 @@ public static class DevelopmentPilotIds
     public static readonly Guid OperatorFacilityMembershipId =
         Guid.Parse("bb000001-0033-4000-8000-000000000033");
 
+    // Quality authz negative-test identity (development-only permission denial fixture)
+    public static readonly Guid QualityNegativeTestIdentitySubjectId =
+        Guid.Parse("bb000001-0070-4000-8000-000000000070");
+
+    public static readonly Guid QualityNegativeTestTenantMembershipId =
+        Guid.Parse("bb000001-0071-4000-8000-000000000071");
+
+    public static readonly Guid QualityNegativeTestTenantRoleId =
+        Guid.Parse("bb000001-0072-4000-8000-000000000072");
+
+    public static readonly Guid QualityNegativeTestFacilityMembershipId =
+        Guid.Parse("bb000001-0073-4000-8000-000000000073");
+
     // 3L — downtime + setup permission definitions
     public static readonly Guid ExecutionDowntimePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000022");

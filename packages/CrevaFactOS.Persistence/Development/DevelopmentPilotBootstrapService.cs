@@ -351,6 +351,28 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureOperatorFacilityMembershipAsync(
             dbContext, tenant.Id, facility.Id, operatorMembership.Id, seedTimestampUtc, cancellationToken);
 
+        // Development-only authz negative-test identity: facility member without quality.read.
+        var qualityNegativeTestIdentity = await EnsureQualityNegativeTestIdentitySubjectAsync(
+            dbContext, pilotOptions, seedTimestampUtc, cancellationToken);
+        var qualityNegativeTestMembership = await EnsureQualityNegativeTestTenantMembershipAsync(
+            dbContext, tenant.Id, qualityNegativeTestIdentity.Id, seedTimestampUtc, cancellationToken);
+        var qualityNegativeTestRole = await EnsureQualityNegativeTestTenantRoleAsync(
+            dbContext, tenant.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMembershipRoleAsync(
+            dbContext,
+            tenant.Id,
+            qualityNegativeTestMembership.Id,
+            qualityNegativeTestRole.Id,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsureQualityNegativeTestFacilityMembershipAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            qualityNegativeTestMembership.Id,
+            seedTimestampUtc,
+            cancellationToken);
+
         var productionPlanCount = 0;
         if (pilotOptions.ProductionPlanSeedEnabled)
         {
@@ -1791,6 +1813,148 @@ internal sealed class DevelopmentPilotBootstrapService(
         dbContext.FacilityMemberships.Add(new FacilityMembership
         {
             Id = DevelopmentPilotIds.OperatorFacilityMembershipId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            TenantMembershipId = tenantMembershipId,
+            Status = FacilityMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
+    }
+
+    private static async Task<IdentitySubject> EnsureQualityNegativeTestIdentitySubjectAsync(
+        CrevaFactOSDbContext dbContext,
+        DevelopmentPilotOptions pilotOptions,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string negativeTestSubject = "quality-negative-test-user";
+        var issuer = pilotOptions.DevelopmentIssuer.Trim();
+
+        var existing = await dbContext.IdentitySubjects
+            .SingleOrDefaultAsync(
+                i => i.ExternalIssuer == issuer && i.ExternalSubject == negativeTestSubject,
+                cancellationToken)
+            ?? await dbContext.IdentitySubjects
+                .SingleOrDefaultAsync(
+                    i => i.Id == DevelopmentPilotIds.QualityNegativeTestIdentitySubjectId,
+                    cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var identity = new IdentitySubject
+        {
+            Id = DevelopmentPilotIds.QualityNegativeTestIdentitySubjectId,
+            ExternalIssuer = issuer,
+            ExternalSubject = negativeTestSubject,
+            Status = IdentitySubjectStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.IdentitySubjects.Add(identity);
+        return identity;
+    }
+
+    private static async Task<TenantMembership> EnsureQualityNegativeTestTenantMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid identitySubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.TenantMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                m => m.TenantId == tenantId && m.IdentitySubjectId == identitySubjectId,
+                cancellationToken)
+            ?? await dbContext.TenantMemberships
+                .IgnoreQueryFilters()
+                .SingleOrDefaultAsync(
+                    m => m.TenantId == tenantId && m.Id == DevelopmentPilotIds.QualityNegativeTestTenantMembershipId,
+                    cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var membership = new TenantMembership
+        {
+            Id = DevelopmentPilotIds.QualityNegativeTestTenantMembershipId,
+            TenantId = tenantId,
+            IdentitySubjectId = identitySubjectId,
+            Status = TenantMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantMemberships.Add(membership);
+        return membership;
+    }
+
+    private static async Task<TenantRole> EnsureQualityNegativeTestTenantRoleAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        const string negativeTestRoleKey = "quality-authz-negative-test";
+
+        var existing = await dbContext.TenantRoles
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                r => r.TenantId == tenantId
+                    && (r.Key == negativeTestRoleKey
+                        || r.Id == DevelopmentPilotIds.QualityNegativeTestTenantRoleId),
+                cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var role = new TenantRole
+        {
+            Id = DevelopmentPilotIds.QualityNegativeTestTenantRoleId,
+            TenantId = tenantId,
+            Key = negativeTestRoleKey,
+            DisplayName = "Quality Authz Negative Test (dev only)",
+            Status = AuthorizationStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+        };
+
+        dbContext.TenantRoles.Add(role);
+        return role;
+    }
+
+    private static async Task EnsureQualityNegativeTestFacilityMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        Guid tenantMembershipId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.FacilityMemberships
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                membership =>
+                    membership.TenantId == tenantId
+                    && membership.FacilityId == facilityId
+                    && membership.TenantMembershipId == tenantMembershipId,
+                cancellationToken);
+
+        if (existing is not null)
+        {
+            return;
+        }
+
+        dbContext.FacilityMemberships.Add(new FacilityMembership
+        {
+            Id = DevelopmentPilotIds.QualityNegativeTestFacilityMembershipId,
             TenantId = tenantId,
             FacilityId = facilityId,
             TenantMembershipId = tenantMembershipId,

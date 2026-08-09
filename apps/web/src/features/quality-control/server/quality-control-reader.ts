@@ -1,24 +1,44 @@
 import "./quality-control-server-boundary";
 
 import {
+  getProductionOrderTraceability,
+  getQualityCorrectiveActionAnalytics,
+  getQualityHoldAnalytics,
+  getQualityInspectionInternalSummary,
+  getQualityNcrAnalytics,
+  getQualityReleaseIntelligence,
+  getQualityReportingOverview,
+  listQualityFailureBreakdown,
+  listQualityReportingTrends,
+  listQualityNcrs,
   getQualityControlPlan,
   getQualityInspection,
   getQualityNcr,
   getQualityWorkspaceSummary,
   listQualityControlPlans,
   listQualityInspections,
-  listQualityNcrs,
   type QualityNcrListFilters,
+  type QualityReportingFilters,
 } from "./quality-control-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 import type {
+  ProductionOrderTraceability,
   QualityControlPlanDetail,
   QualityControlPlanSummary,
+  QualityCorrectiveActionAnalytics,
+  QualityFailureBreakdownItem,
+  QualityHoldAnalytics,
   QualityInspectionDetail,
+  QualityInspectionInternalSummary,
   QualityInspectionSummary,
+  QualityNcrAnalytics,
   QualityNcrDetail,
   QualityNcrSummary,
+  QualityReleaseIntelligence,
+  QualityReportingOverview,
+  QualityReportingTrendPeriod,
+  QualityTrendPeriod,
   QualityWorkspaceSummary,
 } from "../domain/quality-control";
 
@@ -170,4 +190,188 @@ export async function readQualityNcrById(ncrId: string): Promise<QualityNcrDetai
   }
 
   return { status: "success", ncr: result.value };
+}
+
+async function resolveQualityReadContext() {
+  const configResult = parseProductionExecutionRuntimeConfig();
+  if (configResult.status !== "success") {
+    return { status: "failure" as const, message: configResult.message };
+  }
+
+  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message };
+  }
+
+  return { status: "success" as const, context: contextResult.context };
+}
+
+export type QualityReportingOverviewResult =
+  | Readonly<{ status: "success"; overview: QualityReportingOverview }>
+  | ReadFailure;
+
+export async function readQualityReportingOverview(
+  filters?: QualityReportingFilters,
+): Promise<QualityReportingOverviewResult> {
+  const contextResult = await resolveQualityReadContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await getQualityReportingOverview(contextResult.context, filters);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", overview: result.value };
+}
+
+export type QualityReportingPageResult =
+  | Readonly<{
+      status: "success";
+      overview: QualityReportingOverview;
+      trends: readonly QualityTrendPeriod[];
+      failures: readonly QualityFailureBreakdownItem[];
+      ncrAnalytics: QualityNcrAnalytics;
+      holdAnalytics: QualityHoldAnalytics;
+      correctiveActionAnalytics: QualityCorrectiveActionAnalytics;
+    }>
+  | ReadFailure;
+
+export async function readQualityReportingPage(
+  period: QualityReportingTrendPeriod = "week",
+  filters?: QualityReportingFilters,
+): Promise<QualityReportingPageResult> {
+  const contextResult = await resolveQualityReadContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const context = contextResult.context;
+  const [
+    overviewResult,
+    trendsResult,
+    failuresResult,
+    ncrAnalyticsResult,
+    holdAnalyticsResult,
+    correctiveActionAnalyticsResult,
+  ] = await Promise.all([
+    getQualityReportingOverview(context, filters),
+    listQualityReportingTrends(context, period, filters),
+    listQualityFailureBreakdown(context, filters),
+    getQualityNcrAnalytics(context, filters),
+    getQualityHoldAnalytics(context, filters),
+    getQualityCorrectiveActionAnalytics(context, filters),
+  ]);
+
+  if (overviewResult.status === "failure") {
+    return { status: "failure", message: overviewResult.message };
+  }
+
+  if (trendsResult.status === "failure") {
+    return { status: "failure", message: trendsResult.message };
+  }
+
+  if (failuresResult.status === "failure") {
+    return { status: "failure", message: failuresResult.message };
+  }
+
+  if (ncrAnalyticsResult.status === "failure") {
+    return { status: "failure", message: ncrAnalyticsResult.message };
+  }
+
+  if (holdAnalyticsResult.status === "failure") {
+    return { status: "failure", message: holdAnalyticsResult.message };
+  }
+
+  if (correctiveActionAnalyticsResult.status === "failure") {
+    return { status: "failure", message: correctiveActionAnalyticsResult.message };
+  }
+
+  return {
+    status: "success",
+    overview: overviewResult.value,
+    trends: trendsResult.value,
+    failures: failuresResult.value,
+    ncrAnalytics: ncrAnalyticsResult.value,
+    holdAnalytics: holdAnalyticsResult.value,
+    correctiveActionAnalytics: correctiveActionAnalyticsResult.value,
+  };
+}
+
+export type QualityInspectionSummaryResult =
+  | Readonly<{
+      status: "success";
+      summary: QualityInspectionInternalSummary;
+      releaseIntelligence: QualityReleaseIntelligence;
+    }>
+  | ReadFailure;
+
+export async function readInspectionSummary(
+  inspectionId: string,
+): Promise<QualityInspectionSummaryResult> {
+  const contextResult = await resolveQualityReadContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const context = contextResult.context;
+  const [summaryResult, intelligenceResult] = await Promise.all([
+    getQualityInspectionInternalSummary(context, inspectionId),
+    getQualityReleaseIntelligence(context, inspectionId),
+  ]);
+
+  if (summaryResult.status === "failure") {
+    return { status: "failure", message: summaryResult.message };
+  }
+
+  if (intelligenceResult.status === "failure") {
+    return { status: "failure", message: intelligenceResult.message };
+  }
+
+  return {
+    status: "success",
+    summary: summaryResult.value,
+    releaseIntelligence: intelligenceResult.value,
+  };
+}
+
+export type ProductionOrderTraceabilityResult =
+  | Readonly<{ status: "success"; traceability: ProductionOrderTraceability }>
+  | ReadFailure;
+
+export async function readProductionOrderTraceability(
+  productionOrderId: string,
+): Promise<ProductionOrderTraceabilityResult> {
+  const contextResult = await resolveQualityReadContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await getProductionOrderTraceability(contextResult.context, productionOrderId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", traceability: result.value };
+}
+
+export type QualityReleaseIntelligenceResult =
+  | Readonly<{ status: "success"; releaseIntelligence: QualityReleaseIntelligence }>
+  | ReadFailure;
+
+export async function readReleaseIntelligence(
+  inspectionId: string,
+): Promise<QualityReleaseIntelligenceResult> {
+  const contextResult = await resolveQualityReadContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await getQualityReleaseIntelligence(contextResult.context, inspectionId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", releaseIntelligence: result.value };
 }

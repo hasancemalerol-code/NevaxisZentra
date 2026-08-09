@@ -393,3 +393,335 @@ export function parseQualityWriteApiResponse(payload: unknown) {
     version: readNumber(record.version, "write.version"),
   };
 }
+
+function parseInspectionReportMeasurement(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid inspection measurement.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    definitionCode: readString(record.definitionCode, "measurement.definitionCode"),
+    definitionName: readString(record.definitionName, "measurement.definitionName"),
+    unit: readOptionalString(record.unit),
+    nominalValue: readOptionalNumber(record.nominalValue),
+    lowerLimit: readOptionalNumber(record.lowerLimit),
+    upperLimit: readOptionalNumber(record.upperLimit),
+    required: readBoolean(record.required, "measurement.required"),
+    critical: readBoolean(record.critical, "measurement.critical"),
+    measuredNumericValue: readOptionalNumber(record.measuredNumericValue),
+    measuredTextValue: readOptionalString(record.measuredTextValue),
+    booleanResult: typeof record.booleanResult === "boolean" ? record.booleanResult : undefined,
+    result: readString(record.result, "measurement.result"),
+  };
+}
+
+export function parseQualityReportingOverviewApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid reporting overview payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    totalInspectionCount: readNumber(record.totalInspectionCount, "totalInspectionCount"),
+    openInspectionCount: readNumber(record.openInspectionCount, "openInspectionCount"),
+    completedInspectionCount: readNumber(record.completedInspectionCount, "completedInspectionCount"),
+    passedInspectionCount: readNumber(record.passedInspectionCount, "passedInspectionCount"),
+    failedInspectionCount: readNumber(record.failedInspectionCount, "failedInspectionCount"),
+    releasedInspectionCount: readNumber(record.releasedInspectionCount, "releasedInspectionCount"),
+    rejectedInspectionCount: readNumber(record.rejectedInspectionCount, "rejectedInspectionCount"),
+    openNcrCount: readNumber(record.openNcrCount, "openNcrCount"),
+    criticalNcrCount: readNumber(record.criticalNcrCount, "criticalNcrCount"),
+    activeHoldCount: readNumber(record.activeHoldCount, "activeHoldCount"),
+    blockingProductionOrderCount: readNumber(
+      record.blockingProductionOrderCount,
+      "blockingProductionOrderCount",
+    ),
+    openCorrectiveActionCount: readNumber(record.openCorrectiveActionCount, "openCorrectiveActionCount"),
+    overdueCorrectiveActionCount: readNumber(
+      record.overdueCorrectiveActionCount,
+      "overdueCorrectiveActionCount",
+    ),
+    firstPassYieldPercent: readOptionalNumber(record.firstPassYieldPercent),
+    passRatePercent: readOptionalNumber(record.passRatePercent),
+    releaseRatePercent: readOptionalNumber(record.releaseRatePercent),
+  };
+}
+
+export function parseQualityTrendListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid trend list payload.");
+  }
+  return payload.map((item) => {
+    if (typeof item !== "object" || item === null) {
+      throw new Error("Invalid trend period.");
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      periodKey: readString(record.periodKey, "trend.periodKey"),
+      periodStartUtc: readString(record.periodStartUtc, "trend.periodStartUtc"),
+      inspectionCount: readNumber(record.inspectionCount, "trend.inspectionCount"),
+      passCount: readNumber(record.passCount, "trend.passCount"),
+      failCount: readNumber(record.failCount, "trend.failCount"),
+      ncrCount: readNumber(record.ncrCount, "trend.ncrCount"),
+      criticalNcrCount: readNumber(record.criticalNcrCount, "trend.criticalNcrCount"),
+      holdCount: readNumber(record.holdCount, "trend.holdCount"),
+    };
+  });
+}
+
+export function parseQualityFailureBreakdownApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid failure breakdown payload.");
+  }
+  return payload.map((item) => {
+    if (typeof item !== "object" || item === null) {
+      throw new Error("Invalid failure breakdown item.");
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      dimension: readString(record.dimension, "failure.dimension"),
+      key: readString(record.key, "failure.key"),
+      label: readOptionalString(record.label),
+      count: readNumber(record.count, "failure.count"),
+    };
+  });
+}
+
+export function parseQualityNcrAnalyticsApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid NCR analytics payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    openCount: readNumber(record.openCount, "ncrAnalytics.openCount"),
+    resolvedCount: readNumber(record.resolvedCount, "ncrAnalytics.resolvedCount"),
+    closedCount: readNumber(record.closedCount, "ncrAnalytics.closedCount"),
+    criticalCount: readNumber(record.criticalCount, "ncrAnalytics.criticalCount"),
+    majorCount: readNumber(record.majorCount, "ncrAnalytics.majorCount"),
+    minorCount: readNumber(record.minorCount, "ncrAnalytics.minorCount"),
+    averageAgeHours: readOptionalNumber(record.averageAgeHours),
+    averageResolutionHours: readOptionalNumber(record.averageResolutionHours),
+    overdueCorrectiveActionCount: readNumber(
+      record.overdueCorrectiveActionCount,
+      "ncrAnalytics.overdueCorrectiveActionCount",
+    ),
+  };
+}
+
+export function parseQualityHoldAnalyticsApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid hold analytics payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    activeCount: readNumber(record.activeCount, "holdAnalytics.activeCount"),
+    releasedCount: readNumber(record.releasedCount, "holdAnalytics.releasedCount"),
+    affectedProductionOrderCount: readNumber(
+      record.affectedProductionOrderCount,
+      "holdAnalytics.affectedProductionOrderCount",
+    ),
+    averageHoldDurationHours: readOptionalNumber(record.averageHoldDurationHours),
+  };
+}
+
+export function parseQualityCorrectiveActionAnalyticsApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid corrective action analytics payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    openCount: readNumber(record.openCount, "caAnalytics.openCount"),
+    inProgressCount: readNumber(record.inProgressCount, "caAnalytics.inProgressCount"),
+    completedCount: readNumber(record.completedCount, "caAnalytics.completedCount"),
+    overdueCount: readNumber(record.overdueCount, "caAnalytics.overdueCount"),
+    averageCompletionLeadTimeHours: readOptionalNumber(record.averageCompletionLeadTimeHours),
+  };
+}
+
+export function parseQualityInspectionReportListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid inspection report list payload.");
+  }
+  return payload.map(parseQualityInspectionInternalSummaryApiResponse);
+}
+
+export function parseQualityInspectionInternalSummaryApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid inspection summary payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const measurements = Array.isArray(record.measurements)
+    ? record.measurements.map(parseInspectionReportMeasurement)
+    : [];
+  return {
+    inspectionId: readString(record.inspectionId, "summary.inspectionId"),
+    inspectionNumber: readString(record.inspectionNumber, "summary.inspectionNumber"),
+    facilityReference: readString(record.facilityReference, "summary.facilityReference"),
+    productionOrderId: readString(record.productionOrderId, "summary.productionOrderId"),
+    productionOrderReference: readOptionalString(record.productionOrderReference),
+    productReference: readOptionalString(record.productReference),
+    controlPlanId: readString(record.controlPlanId, "summary.controlPlanId"),
+    controlPlanCode: readString(record.controlPlanCode, "summary.controlPlanCode"),
+    controlPlanName: readString(record.controlPlanName, "summary.controlPlanName"),
+    controlPlanRevision: readString(record.controlPlanRevision, "summary.controlPlanRevision"),
+    inspectionDateUtc: readOptionalString(record.inspectionDateUtc),
+    inspectorSubjectId: readOptionalString(record.inspectorSubjectId),
+    overallResult: readString(record.overallResult, "summary.overallResult"),
+    releaseStatus: readString(record.releaseStatus, "summary.releaseStatus"),
+    measurements,
+    hasBlockingHold: readBoolean(record.hasBlockingHold, "summary.hasBlockingHold"),
+    openNcrCount: readNumber(record.openNcrCount, "summary.openNcrCount"),
+    blockingSummary: readOptionalString(record.blockingSummary),
+  };
+}
+
+export function parseQualityReleaseIntelligenceApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid release intelligence payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const reasonCodes = Array.isArray(record.reasonCodes)
+    ? record.reasonCodes.map((item, index) => readString(item, `reasonCodes[${index}]`))
+    : [];
+  return {
+    available: readBoolean(record.available, "releaseIntelligence.available"),
+    inspectionStatus: readOptionalString(record.inspectionStatus),
+    overallResult: readOptionalString(record.overallResult),
+    releaseStatus: readOptionalString(record.releaseStatus),
+    blocking: readBoolean(record.blocking, "releaseIntelligence.blocking"),
+    activeHoldCount: readNumber(record.activeHoldCount, "releaseIntelligence.activeHoldCount"),
+    openNcrCount: readNumber(record.openNcrCount, "releaseIntelligence.openNcrCount"),
+    criticalNcrCount: readNumber(record.criticalNcrCount, "releaseIntelligence.criticalNcrCount"),
+    incompleteCorrectiveActionCount: readNumber(
+      record.incompleteCorrectiveActionCount,
+      "releaseIntelligence.incompleteCorrectiveActionCount",
+    ),
+    readyForRelease: readBoolean(record.readyForRelease, "releaseIntelligence.readyForRelease"),
+    reasonCodes,
+    reasonSummary: readOptionalString(record.reasonSummary),
+  };
+}
+
+export function parseQualityExportReadinessApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid export readiness payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    qualityReleaseStatus: readOptionalString(record.qualityReleaseStatus),
+    qualityBlocking: readBoolean(record.qualityBlocking, "exportReadiness.qualityBlocking"),
+    qualityReady: readBoolean(record.qualityReady, "exportReadiness.qualityReady"),
+    reason: readOptionalString(record.reason),
+  };
+}
+
+function parseResultTraceabilityItem(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid result traceability item.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "traceResult.id"),
+    definitionCode: readString(record.definitionCode, "traceResult.definitionCode"),
+    definitionName: readString(record.definitionName, "traceResult.definitionName"),
+    result: readString(record.result, "traceResult.result"),
+    recordedAtUtc: readString(record.recordedAtUtc, "traceResult.recordedAtUtc"),
+    recordedBySubjectId: readString(record.recordedBySubjectId, "traceResult.recordedBySubjectId"),
+  };
+}
+
+function parseInspectionTraceabilityItem(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid inspection traceability item.");
+  }
+  const record = value as Record<string, unknown>;
+  const results = Array.isArray(record.results)
+    ? record.results.map(parseResultTraceabilityItem)
+    : [];
+  return {
+    id: readString(record.id, "traceInspection.id"),
+    inspectionNumber: readString(record.inspectionNumber, "traceInspection.inspectionNumber"),
+    status: readString(record.status, "traceInspection.status"),
+    overallResult: readString(record.overallResult, "traceInspection.overallResult"),
+    releaseStatus: readString(record.releaseStatus, "traceInspection.releaseStatus"),
+    completedAtUtc: readOptionalString(record.completedAtUtc),
+    inspectorSubjectId: readOptionalString(record.inspectorSubjectId),
+    results,
+  };
+}
+
+function parseNcrTraceabilityItem(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid NCR traceability item.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "traceNcr.id"),
+    ncrNumber: readString(record.ncrNumber, "traceNcr.ncrNumber"),
+    severity: readString(record.severity, "traceNcr.severity"),
+    status: readString(record.status, "traceNcr.status"),
+    dispositionType: readOptionalString(record.dispositionType),
+    holdStatus: readString(record.holdStatus, "traceNcr.holdStatus"),
+    detectedAtUtc: readString(record.detectedAtUtc, "traceNcr.detectedAtUtc"),
+    ownerSubjectId: readOptionalString(record.ownerSubjectId),
+  };
+}
+
+function parseHoldTraceabilityItem(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid hold traceability item.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "traceHold.id"),
+    ncrId: readString(record.ncrId, "traceHold.ncrId"),
+    scope: readString(record.scope, "traceHold.scope"),
+    status: readString(record.status, "traceHold.status"),
+    reason: readString(record.reason, "traceHold.reason"),
+    placedAtUtc: readString(record.placedAtUtc, "traceHold.placedAtUtc"),
+    placedBySubjectId: readString(record.placedBySubjectId, "traceHold.placedBySubjectId"),
+    releasedAtUtc: readOptionalString(record.releasedAtUtc),
+    releasedBySubjectId: readOptionalString(record.releasedBySubjectId),
+  };
+}
+
+function parseCorrectiveActionTraceabilityItem(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid corrective action traceability item.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "traceAction.id"),
+    ncrId: readString(record.ncrId, "traceAction.ncrId"),
+    title: readString(record.title, "traceAction.title"),
+    status: readString(record.status, "traceAction.status"),
+    dueAtUtc: readOptionalString(record.dueAtUtc),
+    completedAtUtc: readOptionalString(record.completedAtUtc),
+    ownerSubjectId: readOptionalString(record.ownerSubjectId),
+  };
+}
+
+export function parseProductionOrderTraceabilityApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid production order traceability payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const inspections = Array.isArray(record.inspections)
+    ? record.inspections.map(parseInspectionTraceabilityItem)
+    : [];
+  const nonconformances = Array.isArray(record.nonconformances)
+    ? record.nonconformances.map(parseNcrTraceabilityItem)
+    : [];
+  const holds = Array.isArray(record.holds) ? record.holds.map(parseHoldTraceabilityItem) : [];
+  const correctiveActions = Array.isArray(record.correctiveActions)
+    ? record.correctiveActions.map(parseCorrectiveActionTraceabilityItem)
+    : [];
+  return {
+    productionOrderId: readString(record.productionOrderId, "traceability.productionOrderId"),
+    productionOrderReference: readOptionalString(record.productionOrderReference),
+    productReference: readOptionalString(record.productReference),
+    inspections,
+    nonconformances,
+    holds,
+    correctiveActions,
+  };
+}

@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Factory, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Factory, GitBranch, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { QualityInspectionActions } from "@/features/quality-control/components/quality-inspection-actions";
 import { QualityInspectionNcrLink } from "@/features/quality-control/components/quality-inspection-ncr-link";
+import { QualityTraceabilityPanel } from "@/features/quality-control/components/quality-traceability-panel";
 import { getQualityStatusLabel } from "@/features/quality-control/domain/quality-control";
-import { readQualityInspectionById } from "@/features/quality-control/server/quality-control-reader";
+import {
+  readProductionOrderTraceability,
+  readQualityInspectionById,
+} from "@/features/quality-control/server/quality-control-reader";
 import {
   completeQualityInspectionAction,
   createQualityNcrAction,
@@ -41,6 +45,10 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
     notFound();
   }
 
+  const traceabilityResult = await readProductionOrderTraceability(inspection.productionOrderId);
+  const traceability =
+    traceabilityResult.status === "success" ? traceabilityResult.traceability : null;
+
   return (
     <main className="production-execution-page">
       <header className="production-execution-header">
@@ -53,6 +61,15 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
         <span>
           {inspection.planCode} · {inspection.planName}
         </span>
+        <div className="production-execution-header__actions">
+          <Link
+            href={`/kalite/kontroller/${inspectionId}/ozet`}
+            className="production-execution-header__link"
+          >
+            <GitBranch aria-hidden="true" />
+            Kontrol Sonuç Özeti
+          </Link>
+        </div>
       </header>
 
       <section className="production-execution-grid">
@@ -148,6 +165,8 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
           onRelease={releaseQualityInspectionAction}
           onReject={rejectQualityInspectionAction}
         />
+
+        <QualityTraceabilityPanel traceability={traceability} />
       </section>
 
       <footer className="production-execution-footer-note">

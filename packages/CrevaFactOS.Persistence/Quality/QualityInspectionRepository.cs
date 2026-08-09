@@ -153,18 +153,21 @@ public sealed class QualityInspectionRepository(
                 .Select(def =>
                 {
                     var recorded = inspection.Results.SingleOrDefault(r => r.InspectionDefinitionId == def.Id);
+                    var useSnapshot = recorded?.DefinitionCodeSnapshot is not null;
                     return new QualityInspectionResultReadModel(
                         recorded?.Id ?? Guid.Empty,
                         def.Id,
-                        def.Code,
-                        def.Name,
-                        QualityValueConversions.ToStorage(def.InspectionType),
-                        def.Unit,
-                        def.NominalValue,
-                        def.LowerLimit,
-                        def.UpperLimit,
-                        def.Required,
-                        def.Critical,
+                        useSnapshot ? recorded!.DefinitionCodeSnapshot! : def.Code,
+                        useSnapshot ? recorded!.DefinitionNameSnapshot! : def.Name,
+                        useSnapshot
+                            ? recorded!.InspectionTypeSnapshot!
+                            : QualityValueConversions.ToStorage(def.InspectionType),
+                        useSnapshot ? recorded!.UnitSnapshot : def.Unit,
+                        useSnapshot ? recorded!.NominalValueSnapshot : def.NominalValue,
+                        useSnapshot ? recorded!.LowerLimitSnapshot : def.LowerLimit,
+                        useSnapshot ? recorded!.UpperLimitSnapshot : def.UpperLimit,
+                        useSnapshot ? recorded!.RequiredSnapshot ?? def.Required : def.Required,
+                        useSnapshot ? recorded!.CriticalSnapshot ?? def.Critical : def.Critical,
                         recorded?.MeasuredNumericValue,
                         recorded?.MeasuredTextValue,
                         recorded?.BooleanResult,
@@ -186,8 +189,9 @@ public sealed class QualityInspectionRepository(
                 inspection.ProductionOrderId,
                 production,
                 inspection.QualityControlPlanId,
-                plan.Code,
-                plan.Name,
+                inspection.PlanCodeSnapshot ?? plan.Code,
+                inspection.PlanNameSnapshot ?? plan.Name,
+                inspection.PlanRevisionSnapshot ?? plan.Revision,
                 inspection.InspectorSubjectId,
                 inspection.Notes,
                 inspection.ReleaseNote,
@@ -241,6 +245,9 @@ public sealed class QualityInspectionRepository(
                 FacilityId = context.FacilityId,
                 ProductionOrderId = command.ProductionOrderId,
                 QualityControlPlanId = plan.Id,
+                PlanCodeSnapshot = plan.Code,
+                PlanNameSnapshot = plan.Name,
+                PlanRevisionSnapshot = plan.Revision,
                 InspectionNumber = number,
                 Status = QualityInspectionStatus.Draft,
                 OverallResult = QualityInspectionOverallResult.Pending,
@@ -349,6 +356,22 @@ public sealed class QualityInspectionRepository(
             resultRow.RecordedAtUtc = now;
             resultRow.RecordedBySubjectId = context.IdentitySubjectId.ToString();
             resultRow.Source = "manual";
+            resultRow.DefinitionCodeSnapshot = definition.Code;
+            resultRow.DefinitionNameSnapshot = definition.Name;
+            resultRow.InspectionTypeSnapshot = QualityValueConversions.ToStorage(definition.InspectionType);
+            resultRow.UnitSnapshot = definition.Unit;
+            resultRow.NominalValueSnapshot = definition.NominalValue;
+            resultRow.LowerLimitSnapshot = definition.LowerLimit;
+            resultRow.UpperLimitSnapshot = definition.UpperLimit;
+            resultRow.RequiredSnapshot = definition.Required;
+            resultRow.CriticalSnapshot = definition.Critical;
+
+            if (string.IsNullOrEmpty(inspection.PlanCodeSnapshot))
+            {
+                inspection.PlanCodeSnapshot = plan.Code;
+                inspection.PlanNameSnapshot = plan.Name;
+                inspection.PlanRevisionSnapshot = plan.Revision;
+            }
 
             var recordedResults = await dbContext.QualityInspectionResults
                 .Where(r => r.QualityInspectionId == inspection.Id)

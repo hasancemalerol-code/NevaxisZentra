@@ -84,6 +84,9 @@ internal sealed class QualityInspectionEntityConfiguration : IEntityTypeConfigur
         entity.Property(i => i.FacilityId).HasColumnName("facility_id");
         entity.Property(i => i.ProductionOrderId).HasColumnName("production_order_id");
         entity.Property(i => i.QualityControlPlanId).HasColumnName("quality_control_plan_id");
+        entity.Property(i => i.PlanCodeSnapshot).HasColumnName("plan_code_snapshot").HasMaxLength(100);
+        entity.Property(i => i.PlanNameSnapshot).HasColumnName("plan_name_snapshot").HasMaxLength(200);
+        entity.Property(i => i.PlanRevisionSnapshot).HasColumnName("plan_revision_snapshot").HasMaxLength(50);
         entity.Property(i => i.InspectionNumber).HasColumnName("inspection_number").HasMaxLength(50);
         entity.Property(i => i.Status).HasColumnName("status").HasMaxLength(20)
             .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.InspectionStatusFromStorage(v));
@@ -130,6 +133,15 @@ internal sealed class QualityInspectionResultEntityConfiguration : IEntityTypeCo
         entity.Property(r => r.FacilityId).HasColumnName("facility_id");
         entity.Property(r => r.QualityInspectionId).HasColumnName("quality_inspection_id");
         entity.Property(r => r.InspectionDefinitionId).HasColumnName("inspection_definition_id");
+        entity.Property(r => r.DefinitionCodeSnapshot).HasColumnName("definition_code_snapshot").HasMaxLength(100);
+        entity.Property(r => r.DefinitionNameSnapshot).HasColumnName("definition_name_snapshot").HasMaxLength(200);
+        entity.Property(r => r.InspectionTypeSnapshot).HasColumnName("inspection_type_snapshot").HasMaxLength(20);
+        entity.Property(r => r.UnitSnapshot).HasColumnName("unit_snapshot").HasMaxLength(50);
+        entity.Property(r => r.NominalValueSnapshot).HasColumnName("nominal_value_snapshot");
+        entity.Property(r => r.LowerLimitSnapshot).HasColumnName("lower_limit_snapshot");
+        entity.Property(r => r.UpperLimitSnapshot).HasColumnName("upper_limit_snapshot");
+        entity.Property(r => r.RequiredSnapshot).HasColumnName("required_snapshot");
+        entity.Property(r => r.CriticalSnapshot).HasColumnName("critical_snapshot");
         entity.Property(r => r.MeasuredNumericValue).HasColumnName("measured_numeric_value");
         entity.Property(r => r.MeasuredTextValue).HasColumnName("measured_text_value").HasMaxLength(500);
         entity.Property(r => r.BooleanResult).HasColumnName("boolean_result");

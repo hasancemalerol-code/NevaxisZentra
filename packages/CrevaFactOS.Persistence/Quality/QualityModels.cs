@@ -177,6 +177,7 @@ public sealed record QualityInspectionDetailReadModel(
     Guid QualityControlPlanId,
     string PlanCode,
     string PlanName,
+    string PlanRevision,
     string? InspectorSubjectId,
     string? Notes,
     string? ReleaseNote,

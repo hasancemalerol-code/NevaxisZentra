@@ -31,6 +31,7 @@ public static class QualityEndpointRouteBuilderExtensions
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
 
         endpoints.MapQualityNcrEndpoints();
+        endpoints.MapQualityReportingEndpoints();
 
         return endpoints;
     }
@@ -571,6 +572,7 @@ internal static class QualityApiMapper
         qualityControlPlanId = model.QualityControlPlanId,
         planCode = model.PlanCode,
         planName = model.PlanName,
+        planRevision = model.PlanRevision,
         inspectorSubjectId = model.InspectorSubjectId,
         notes = model.Notes,
         releaseNote = model.ReleaseNote,
@@ -742,6 +744,37 @@ public static class QualityServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<IProductionOrderContextReader>(),
                     serviceProvider.GetRequiredService<IQualityReleaseGuard>());
+        });
+
+        services.AddScoped<IQualityReportingRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableQualityReportingRepository()
+                : new QualityReportingRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IQualityTraceabilityRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableQualityTraceabilityRepository()
+                : new QualityTraceabilityRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IQualityReportingRepository>());
+        });
+
+        services.AddScoped<IQualityReleaseIntelligenceReader>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableQualityReleaseIntelligenceReader()
+                : new QualityReleaseIntelligenceReader(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
         return services;

@@ -1,24 +1,46 @@
 import "./quality-control-server-boundary";
 
 import type {
+  ProductionOrderTraceability,
   ProductionQualitySignal,
   QualityControlPlanDetail,
   QualityControlPlanSummary,
+  QualityCorrectiveActionAnalytics,
+  QualityExportReadiness,
+  QualityFailureBreakdownItem,
+  QualityHoldAnalytics,
   QualityInspectionDetail,
+  QualityInspectionInternalSummary,
   QualityInspectionSummary,
+  QualityNcrAnalytics,
   QualityNcrDetail,
   QualityNcrSummary,
+  QualityReleaseIntelligence,
+  QualityReportingOverview,
+  QualityReportingTrendPeriod,
+  QualityTrendPeriod,
   QualityWorkspaceSummary,
 } from "../domain/quality-control";
 import {
   parseLinkedNonconformanceApiResponse,
+  parseProductionOrderTraceabilityApiResponse,
   parseProductionQualitySignalApiResponse,
   parseQualityControlPlanDetailApiResponse,
   parseQualityControlPlanListApiResponse,
+  parseQualityCorrectiveActionAnalyticsApiResponse,
+  parseQualityExportReadinessApiResponse,
+  parseQualityFailureBreakdownApiResponse,
+  parseQualityHoldAnalyticsApiResponse,
   parseQualityInspectionDetailApiResponse,
+  parseQualityInspectionInternalSummaryApiResponse,
   parseQualityInspectionListApiResponse,
+  parseQualityInspectionReportListApiResponse,
+  parseQualityNcrAnalyticsApiResponse,
   parseQualityNcrDetailApiResponse,
   parseQualityNcrListApiResponse,
+  parseQualityReleaseIntelligenceApiResponse,
+  parseQualityReportingOverviewApiResponse,
+  parseQualityTrendListApiResponse,
   parseQualityWorkspaceSummaryApiResponse,
   parseQualityWriteApiResponse,
 } from "./quality-control-api-contracts";
@@ -544,5 +566,166 @@ export function getLinkedNonconformanceForResult(
     context,
     `/api/quality/inspection-results/${resultId}/nonconformance`,
     parseLinkedNonconformanceApiResponse,
+  );
+}
+
+export type QualityReportingFilters = Readonly<{
+  dateFrom?: string;
+  dateTo?: string;
+  productReference?: string;
+  productionOrderId?: string;
+  controlPlanId?: string;
+  overallResult?: string;
+  releaseStatus?: string;
+  ncrSeverity?: string;
+  ncrStatus?: string;
+  limit?: number;
+  offset?: number;
+}>;
+
+function toReportingQuery(
+  filters?: QualityReportingFilters,
+): Record<string, string | undefined> {
+  return {
+    dateFrom: filters?.dateFrom,
+    dateTo: filters?.dateTo,
+    productReference: filters?.productReference,
+    productionOrderId: filters?.productionOrderId,
+    controlPlanId: filters?.controlPlanId,
+    overallResult: filters?.overallResult,
+    releaseStatus: filters?.releaseStatus,
+    ncrSeverity: filters?.ncrSeverity,
+    ncrStatus: filters?.ncrStatus,
+    limit: filters?.limit === undefined ? undefined : String(filters.limit),
+    offset: filters?.offset === undefined ? undefined : String(filters.offset),
+  };
+}
+
+export function getQualityReportingOverview(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<QualityReportingOverview>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/overview",
+    toReportingQuery(filters),
+    parseQualityReportingOverviewApiResponse,
+  );
+}
+
+export function listQualityReportingInspections(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<readonly QualityInspectionInternalSummary[]>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/inspections",
+    toReportingQuery(filters),
+    parseQualityInspectionReportListApiResponse,
+  );
+}
+
+export function getQualityNcrAnalytics(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<QualityNcrAnalytics>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/ncrs",
+    toReportingQuery(filters),
+    parseQualityNcrAnalyticsApiResponse,
+  );
+}
+
+export function getQualityHoldAnalytics(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<QualityHoldAnalytics>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/holds",
+    toReportingQuery(filters),
+    parseQualityHoldAnalyticsApiResponse,
+  );
+}
+
+export function getQualityCorrectiveActionAnalytics(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<QualityCorrectiveActionAnalytics>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/corrective-actions",
+    toReportingQuery(filters),
+    parseQualityCorrectiveActionAnalyticsApiResponse,
+  );
+}
+
+export function listQualityReportingTrends(
+  context: ProductionOrderRequestContext,
+  period: QualityReportingTrendPeriod,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<readonly QualityTrendPeriod[]>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/trends",
+    { ...toReportingQuery(filters), period },
+    parseQualityTrendListApiResponse,
+  );
+}
+
+export function listQualityFailureBreakdown(
+  context: ProductionOrderRequestContext,
+  filters?: QualityReportingFilters,
+): Promise<QualityApiResult<readonly QualityFailureBreakdownItem[]>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/reporting/failures",
+    toReportingQuery(filters),
+    parseQualityFailureBreakdownApiResponse,
+  );
+}
+
+export function getProductionOrderTraceability(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+): Promise<QualityApiResult<ProductionOrderTraceability>> {
+  return getJson(
+    context,
+    `/api/quality/traceability/production-orders/${productionOrderId}`,
+    parseProductionOrderTraceabilityApiResponse,
+  );
+}
+
+export function getQualityInspectionInternalSummary(
+  context: ProductionOrderRequestContext,
+  inspectionId: string,
+): Promise<QualityApiResult<QualityInspectionInternalSummary>> {
+  return getJson(
+    context,
+    `/api/quality/inspections/${inspectionId}/summary`,
+    parseQualityInspectionInternalSummaryApiResponse,
+  );
+}
+
+export function getQualityReleaseIntelligence(
+  context: ProductionOrderRequestContext,
+  inspectionId: string,
+): Promise<QualityApiResult<QualityReleaseIntelligence>> {
+  return getJson(
+    context,
+    `/api/quality/inspections/${inspectionId}/release-intelligence`,
+    parseQualityReleaseIntelligenceApiResponse,
+  );
+}
+
+export function getProductionOrderExportReadiness(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+): Promise<QualityApiResult<QualityExportReadiness>> {
+  return getJson(
+    context,
+    `/api/quality/production-orders/${productionOrderId}/export-readiness`,
+    parseQualityExportReadinessApiResponse,
   );
 }
