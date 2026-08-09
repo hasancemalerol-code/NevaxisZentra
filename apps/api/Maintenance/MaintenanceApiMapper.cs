@@ -252,4 +252,187 @@ internal static class MaintenanceApiMapper
         partUsages = model.PartUsages.Select(MapPartUsage).ToList(),
         costSummaries = model.CostSummaries.Select(MapCostSummary).ToList(),
     };
+
+    public static object MapReliabilityOverview(MaintenanceReliabilityOverviewReadModel model) => new
+    {
+        totalAssetsWithMaintenanceHistory = model.TotalAssetsWithMaintenanceHistory,
+        openRequests = model.OpenRequests,
+        openWorkOrders = model.OpenWorkOrders,
+        criticalOpenWorkOrders = model.CriticalOpenWorkOrders,
+        overduePreventiveCount = model.OverduePreventiveCount,
+        completedWorkOrdersPeriod = model.CompletedWorkOrdersPeriod,
+        faultCountPeriod = model.FaultCountPeriod,
+        repeatFaultCountPeriod = model.RepeatFaultCountPeriod,
+        averageRepairDurationMinutes = model.AverageRepairDurationMinutes,
+        medianRepairDurationMinutes = model.MedianRepairDurationMinutes,
+        preventiveCompletionRate = model.PreventiveCompletionRate,
+        assetsAtRiskCount = model.AssetsAtRiskCount,
+        period = new { dateFromUtc = model.Period.DateFromUtc, dateToUtc = model.Period.DateToUtc },
+        mttr = MapMttr(model.Mttr),
+        mtbf = MapMtbf(model.Mtbf),
+        costAnalytics = model.CostAnalytics is null ? null : MapCostAnalytics(model.CostAnalytics),
+    };
+
+    public static object MapReliabilityReport(MaintenanceReliabilityReportReadModel model) => new
+    {
+        period = new { dateFromUtc = model.Period.DateFromUtc, dateToUtc = model.Period.DateToUtc },
+        mttr = MapMttr(model.Mttr),
+        mtbf = MapMtbf(model.Mtbf),
+        repeatFailures = model.RepeatFailures.Select(MapRepeatFailure).ToList(),
+        preventiveCompliance = MapPreventiveCompliance(model.PreventiveCompliance),
+        backlogAging = MapBacklogAging(model.BacklogAging),
+        costAnalytics = model.CostAnalytics is null ? null : MapCostAnalytics(model.CostAnalytics),
+    };
+
+    public static object MapFailureBreakdownRow(MaintenanceFailureBreakdownRowReadModel model) => new
+    {
+        groupKey = model.GroupKey,
+        groupLabel = model.GroupLabel,
+        count = model.Count,
+        percentage = model.Percentage,
+        repeatCount = model.RepeatCount,
+        averageRepairMinutes = model.AverageRepairMinutes,
+    };
+
+    public static object MapAssetReliability(MaintenanceAssetReliabilityReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetType = model.AssetType,
+        assetName = model.AssetName,
+        totalFaults = model.TotalFaults,
+        faultsLast30Days = model.FaultsLast30Days,
+        faultsLast90Days = model.FaultsLast90Days,
+        repeatFaultCount = model.RepeatFaultCount,
+        completedCorrectiveWorkOrders = model.CompletedCorrectiveWorkOrders,
+        meanRepairMinutes = model.MeanRepairMinutes,
+        openWorkOrders = model.OpenWorkOrders,
+        criticalOpenWorkOrders = model.CriticalOpenWorkOrders,
+        overduePreventiveCount = model.OverduePreventiveCount,
+        preventiveComplianceRate = model.PreventiveComplianceRate,
+        lastFailureAtUtc = model.LastFailureAtUtc,
+        lastMaintenanceCompletedAtUtc = model.LastMaintenanceCompletedAtUtc,
+        conditionStatus = model.ConditionStatus,
+        conditionReasons = model.ConditionReasons,
+        mtbf = MapMtbf(model.Mtbf),
+        costAnalytics = model.CostAnalytics is null ? null : MapCostAnalytics(model.CostAnalytics),
+    };
+
+    public static object MapConditionSignal(MaintenanceConditionSignalReadModel model) => new
+    {
+        signalId = model.SignalId,
+        tenantId = model.TenantId,
+        facilityId = model.FacilityId,
+        assetType = model.AssetType,
+        assetReference = model.AssetReference,
+        signalType = model.SignalType,
+        severity = model.Severity,
+        observedAtUtc = model.ObservedAtUtc,
+        sourceType = model.SourceType,
+        sourceReference = model.SourceReference,
+        value = model.Value,
+        unit = model.Unit,
+        summary = model.Summary,
+        isVerified = model.IsVerified,
+        expiresAtUtc = model.ExpiresAtUtc,
+    };
+
+    public static object MapAssetCondition(MaintenanceAssetConditionReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        conditionStatus = model.ConditionStatus,
+        reasons = model.Reasons,
+        signals = model.Signals.Select(MapConditionSignal).ToList(),
+        updatedAtUtc = model.UpdatedAtUtc,
+    };
+
+    public static object MapRiskProjection(MaintenanceAssetRiskProjectionReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        conditionStatus = model.ConditionStatus,
+        blocking = model.Blocking,
+        primaryReason = model.PrimaryReason,
+        repeatFailureCount = model.RepeatFailureCount,
+        overduePreventiveCount = model.OverduePreventiveCount,
+        criticalOpenWorkOrderCount = model.CriticalOpenWorkOrderCount,
+        updatedAtUtc = model.UpdatedAtUtc,
+    };
+
+    private static object MapMttr(MaintenanceMttrReadModel model) => new
+    {
+        label = model.Label,
+        eligibleRepairCount = model.EligibleRepairCount,
+        excludedRepairCount = model.ExcludedRepairCount,
+        totalRepairMinutes = model.TotalRepairMinutes,
+        meanRepairMinutes = model.MeanRepairMinutes,
+        medianRepairMinutes = model.MedianRepairMinutes,
+        dataCompletenessStatus = model.DataCompletenessStatus,
+    };
+
+    private static object MapMtbf(MaintenanceMtbfReadModel model) => new
+    {
+        mtbfAvailable = model.MtbfAvailable,
+        mtbfHours = model.MtbfHours,
+        reason = model.Reason,
+    };
+
+    private static object MapPreventiveCompliance(MaintenancePreventiveComplianceReadModel model) => new
+    {
+        dueCount = model.DueCount,
+        completedOnTimeCount = model.CompletedOnTimeCount,
+        completedLateCount = model.CompletedLateCount,
+        overdueOpenCount = model.OverdueOpenCount,
+        skippedCount = model.SkippedCount,
+        preventiveCompletionRate = model.PreventiveCompletionRate,
+        onTimeCompletionRate = model.OnTimeCompletionRate,
+        ruleDescription = model.RuleDescription,
+    };
+
+    private static object MapBacklogAging(MaintenanceBacklogAgingReadModel model) => new
+    {
+        openRequests = MapAgingBuckets(model.OpenRequests),
+        openWorkOrders = MapAgingBuckets(model.OpenWorkOrders),
+        criticalOpenWorkOrders = MapAgingBuckets(model.CriticalOpenWorkOrders),
+        waitingWorkOrders = MapAgingBuckets(model.WaitingWorkOrders),
+    };
+
+    private static object MapAgingBuckets(MaintenanceAgingBucketsReadModel model) => new
+    {
+        day0To1 = model.Day0To1,
+        day2To3 = model.Day2To3,
+        day4To7 = model.Day4To7,
+        day8To14 = model.Day8To14,
+        day15Plus = model.Day15Plus,
+    };
+
+    private static object MapRepeatFailure(MaintenanceRepeatFailureReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetType = model.AssetType,
+        assetName = model.AssetName,
+        failureCategory = model.FailureCategory,
+        failureSignature = model.FailureSignature,
+        failureCount = model.FailureCount,
+        repeatCount = model.RepeatCount,
+        failuresLast30Days = model.FailuresLast30Days,
+        failuresLast90Days = model.FailuresLast90Days,
+        lastOccurrenceUtc = model.LastOccurrenceUtc,
+        daysSinceLastFailure = model.DaysSinceLastFailure,
+        openRelatedWorkOrderCount = model.OpenRelatedWorkOrderCount,
+        conditionStatus = model.ConditionStatus,
+    };
+
+    private static object MapCostAnalytics(MaintenanceCostAnalyticsReadModel model) => new
+    {
+        totalMaintenanceCost = model.TotalMaintenanceCost,
+        averageCostPerCompletedWorkOrder = model.AverageCostPerCompletedWorkOrder,
+        topCostAssets = model.TopCostAssets.Select(a => new
+        {
+            assetReference = a.AssetReference,
+            assetType = a.AssetType,
+            totalCost = a.TotalCost,
+        }).ToList(),
+        recordsWithCost = model.RecordsWithCost,
+        recordsWithoutCost = model.RecordsWithoutCost,
+        dataCompletenessStatus = model.DataCompletenessStatus,
+    };
 }

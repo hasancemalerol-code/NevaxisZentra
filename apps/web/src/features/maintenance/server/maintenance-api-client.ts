@@ -2,7 +2,11 @@ import "./maintenance-server-boundary";
 
 import type {
   MaintenanceAssetHistory,
+  MaintenanceAssetReliability,
   MaintenanceCostSummary,
+  MaintenanceFailureBreakdownRow,
+  MaintenanceReliabilityOverview,
+  MaintenanceReliabilityReport,
   MaintenanceRequestDetail,
   MaintenanceRequestSummary,
   MaintenancePartUsage,
@@ -17,8 +21,12 @@ import type {
 } from "../domain/maintenance";
 import {
   parseMaintenanceAssetHistoryApiResponse,
+  parseMaintenanceAssetReliabilityApiResponse,
   parseMaintenanceCostSummaryApiResponse,
+  parseMaintenanceFailureBreakdownApiResponse,
   parseMaintenancePartUsageListApiResponse,
+  parseMaintenanceReliabilityOverviewApiResponse,
+  parseMaintenanceReliabilityReportApiResponse,
   parseMaintenanceRequestDetailApiResponse,
   parseMaintenanceRequestListApiResponse,
   parseMaintenanceTimelineApiResponse,
@@ -410,5 +418,68 @@ export function createWorkOrderFromPreventiveDue(
     `/api/maintenance/preventive-dues/${dueId}/create-work-order`,
     body,
     parseMaintenanceWriteApiResponse,
+  );
+}
+
+export type MaintenanceReportingDateRange = Readonly<{
+  dateFromUtc: string;
+  dateToUtc: string;
+}>;
+
+export function getMaintenanceReliabilityOverview(
+  context: ProductionOrderRequestContext,
+  range: MaintenanceReportingDateRange,
+): Promise<MaintenanceApiResult<MaintenanceReliabilityOverview>> {
+  return getJsonWithQuery(
+    context,
+    "/api/maintenance/reporting/overview",
+    {
+      dateFrom: range.dateFromUtc,
+      dateTo: range.dateToUtc,
+    },
+    parseMaintenanceReliabilityOverviewApiResponse,
+  );
+}
+
+export function getMaintenanceReliabilityReport(
+  context: ProductionOrderRequestContext,
+  range: MaintenanceReportingDateRange,
+): Promise<MaintenanceApiResult<MaintenanceReliabilityReport>> {
+  return getJsonWithQuery(
+    context,
+    "/api/maintenance/reporting/reliability",
+    {
+      dateFrom: range.dateFromUtc,
+      dateTo: range.dateToUtc,
+    },
+    parseMaintenanceReliabilityReportApiResponse,
+  );
+}
+
+export function getMaintenanceFailureBreakdown(
+  context: ProductionOrderRequestContext,
+  range: MaintenanceReportingDateRange,
+  groupBy = "failure-category",
+): Promise<MaintenanceApiResult<readonly MaintenanceFailureBreakdownRow[]>> {
+  return getJsonWithQuery(
+    context,
+    "/api/maintenance/reporting/failures",
+    {
+      dateFrom: range.dateFromUtc,
+      dateTo: range.dateToUtc,
+      groupBy,
+    },
+    parseMaintenanceFailureBreakdownApiResponse,
+  );
+}
+
+export function getMaintenanceAssetReliability(
+  context: ProductionOrderRequestContext,
+  assetReference: string,
+): Promise<MaintenanceApiResult<MaintenanceAssetReliability>> {
+  return getJson(
+    context,
+    `/api/maintenance/assets/${encodeURIComponent(assetReference)}/reliability`,
+    parseMaintenanceAssetReliabilityApiResponse,
   );
 }

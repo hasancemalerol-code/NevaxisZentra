@@ -37,6 +37,7 @@ internal static class DevelopmentPilotMaintenanceSeed
             Status = MaintenanceRequestStatus.Open,
             Title = "Hidrolik basınç düşüşü",
             Description = "Pilot makine hidrolik basınç arızası — MAINTENANCE-1L geliştirme kaydı.",
+            FailureCategory = MaintenanceFailureCategory.Hydraulic,
             ReportedAtUtc = seedTimestampUtc,
             ReportedBySubjectId = createdBySubjectId,
             Source = "manual",

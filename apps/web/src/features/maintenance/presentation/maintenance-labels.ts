@@ -408,3 +408,64 @@ export function buildMaintenanceCriticalAlerts(input: Readonly<{
     })
     .slice(0, 8);
 }
+
+export function getMaintenanceConditionStatusLabel(status: string): string {
+  switch (status) {
+    case "normal":
+      return "Normal";
+    case "attention":
+      return "Dikkat";
+    case "warning":
+      return "Uyarı";
+    case "critical":
+      return "Kritik";
+    case "unknown":
+      return "Veri Yetersiz";
+    default:
+      return status;
+  }
+}
+
+export function getMaintenanceConditionStatusTone(
+  status: string,
+): "neutral" | "information" | "success" | "warning" | "danger" {
+  switch (status) {
+    case "normal":
+      return "success";
+    case "attention":
+      return "information";
+    case "warning":
+      return "warning";
+    case "critical":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+export function getMaintenanceFailureCategoryLabel(category: string): string {
+  switch (category) {
+    case "mechanical":
+      return "Mekanik";
+    case "electrical":
+      return "Elektrik";
+    case "hydraulic":
+      return "Hidrolik";
+    case "pneumatic":
+      return "Pnömatik";
+    case "cooling":
+      return "Soğutma";
+    case "heating":
+      return "Isıtma";
+    case "control":
+      return "Kontrol";
+    case "mold":
+      return "Kalıp";
+    case "robot":
+      return "Robot";
+    case "auxiliary":
+      return "Yardımcı";
+    default:
+      return "Diğer";
+  }
+}

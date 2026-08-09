@@ -31,6 +31,8 @@ internal sealed class MaintenanceRequestEntityConfiguration : IEntityTypeConfigu
         entity.Property(r => r.ReportedAtUtc).HasColumnName("reported_at_utc");
         entity.Property(r => r.ReportedBySubjectId).HasColumnName("reported_by_subject_id").HasMaxLength(200);
         entity.Property(r => r.Source).HasColumnName("source").HasMaxLength(50);
+        entity.Property(r => r.FailureCategory).HasColumnName("failure_category").HasMaxLength(30)
+            .HasConversion(v => Maintenance.MaintenanceValueConversions.ToStorage(v), v => Maintenance.MaintenanceValueConversions.FailureCategoryFromStorage(v));
         entity.Property(r => r.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(r => r.UpdatedAtUtc).HasColumnName("updated_at_utc");
         entity.Property(r => r.Version).HasColumnName("version").IsConcurrencyToken();

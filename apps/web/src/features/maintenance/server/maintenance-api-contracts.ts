@@ -404,3 +404,228 @@ export function parseMaintenanceAssetHistoryApiResponse(payload: unknown) {
       : [],
   };
 }
+
+function parseMttr(value: unknown): import("../domain/maintenance").MaintenanceMttrSummary {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid MTTR payload.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    label: readString(record.label, "mttr.label"),
+    eligibleRepairCount: readNumber(record.eligibleRepairCount, "mttr.eligibleRepairCount"),
+    excludedRepairCount: readNumber(record.excludedRepairCount, "mttr.excludedRepairCount"),
+    totalRepairMinutes: readNumber(record.totalRepairMinutes, "mttr.totalRepairMinutes"),
+    meanRepairMinutes: readOptionalNumber(record.meanRepairMinutes),
+    medianRepairMinutes: readOptionalNumber(record.medianRepairMinutes),
+    dataCompletenessStatus: readString(record.dataCompletenessStatus, "mttr.dataCompletenessStatus"),
+  };
+}
+
+function parseMtbf(value: unknown): import("../domain/maintenance").MaintenanceMtbfSummary {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid MTBF payload.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    mtbfAvailable: readBoolean(record.mtbfAvailable, "mtbf.mtbfAvailable"),
+    mtbfHours: readOptionalNumber(record.mtbfHours),
+    reason: readString(record.reason, "mtbf.reason"),
+  };
+}
+
+function parseCostAnalytics(value: unknown): import("../domain/maintenance").MaintenanceCostAnalytics {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid cost analytics payload.");
+  }
+  const record = value as Record<string, unknown>;
+  const topCostAssets = Array.isArray(record.topCostAssets)
+    ? record.topCostAssets.map((item) => {
+        if (typeof item !== "object" || item === null) {
+          throw new Error("Invalid top cost asset.");
+        }
+        const asset = item as Record<string, unknown>;
+        return {
+          assetReference: readString(asset.assetReference, "cost.assetReference"),
+          assetType: readString(asset.assetType, "cost.assetType"),
+          totalCost: readNumber(asset.totalCost, "cost.totalCost"),
+        };
+      })
+    : [];
+  return {
+    totalMaintenanceCost: readOptionalNumber(record.totalMaintenanceCost),
+    averageCostPerCompletedWorkOrder: readOptionalNumber(record.averageCostPerCompletedWorkOrder),
+    topCostAssets,
+    recordsWithCost: readNumber(record.recordsWithCost, "cost.recordsWithCost"),
+    recordsWithoutCost: readNumber(record.recordsWithoutCost, "cost.recordsWithoutCost"),
+    dataCompletenessStatus: readString(record.dataCompletenessStatus, "cost.dataCompletenessStatus"),
+  };
+}
+
+function parseAgingBuckets(value: unknown): import("../domain/maintenance").MaintenanceAgingBuckets {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid aging buckets payload.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    day0To1: readNumber(record.day0To1, "aging.day0To1"),
+    day2To3: readNumber(record.day2To3, "aging.day2To3"),
+    day4To7: readNumber(record.day4To7, "aging.day4To7"),
+    day8To14: readNumber(record.day8To14, "aging.day8To14"),
+    day15Plus: readNumber(record.day15Plus, "aging.day15Plus"),
+  };
+}
+
+export function parseMaintenanceReliabilityOverviewApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid reliability overview payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const period = record.period;
+  if (typeof period !== "object" || period === null) {
+    throw new Error("Invalid overview period.");
+  }
+  const periodRecord = period as Record<string, unknown>;
+  return {
+    totalAssetsWithMaintenanceHistory: readNumber(record.totalAssetsWithMaintenanceHistory, "totalAssetsWithMaintenanceHistory"),
+    openRequests: readNumber(record.openRequests, "openRequests"),
+    openWorkOrders: readNumber(record.openWorkOrders, "openWorkOrders"),
+    criticalOpenWorkOrders: readNumber(record.criticalOpenWorkOrders, "criticalOpenWorkOrders"),
+    overduePreventiveCount: readNumber(record.overduePreventiveCount, "overduePreventiveCount"),
+    completedWorkOrdersPeriod: readNumber(record.completedWorkOrdersPeriod, "completedWorkOrdersPeriod"),
+    faultCountPeriod: readNumber(record.faultCountPeriod, "faultCountPeriod"),
+    repeatFaultCountPeriod: readNumber(record.repeatFaultCountPeriod, "repeatFaultCountPeriod"),
+    averageRepairDurationMinutes: readOptionalNumber(record.averageRepairDurationMinutes),
+    medianRepairDurationMinutes: readOptionalNumber(record.medianRepairDurationMinutes),
+    preventiveCompletionRate: readOptionalNumber(record.preventiveCompletionRate),
+    assetsAtRiskCount: readNumber(record.assetsAtRiskCount, "assetsAtRiskCount"),
+    period: {
+      dateFromUtc: readString(periodRecord.dateFromUtc, "period.dateFromUtc"),
+      dateToUtc: readString(periodRecord.dateToUtc, "period.dateToUtc"),
+    },
+    mttr: parseMttr(record.mttr),
+    mtbf: parseMtbf(record.mtbf),
+    costAnalytics: record.costAnalytics ? parseCostAnalytics(record.costAnalytics) : undefined,
+  };
+}
+
+export function parseMaintenanceReliabilityReportApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid reliability report payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const period = record.period;
+  if (typeof period !== "object" || period === null) {
+    throw new Error("Invalid report period.");
+  }
+  const periodRecord = period as Record<string, unknown>;
+  const repeatFailures = Array.isArray(record.repeatFailures)
+    ? record.repeatFailures.map((item) => {
+        if (typeof item !== "object" || item === null) {
+          throw new Error("Invalid repeat failure row.");
+        }
+        const row = item as Record<string, unknown>;
+        return {
+          assetReference: readString(row.assetReference, "repeat.assetReference"),
+          assetType: readString(row.assetType, "repeat.assetType"),
+          assetName: readOptionalString(row.assetName),
+          failureCategory: readString(row.failureCategory, "repeat.failureCategory"),
+          failureSignature: readString(row.failureSignature, "repeat.failureSignature"),
+          failureCount: readNumber(row.failureCount, "repeat.failureCount"),
+          repeatCount: readNumber(row.repeatCount, "repeat.repeatCount"),
+          failuresLast30Days: readNumber(row.failuresLast30Days, "repeat.failuresLast30Days"),
+          failuresLast90Days: readNumber(row.failuresLast90Days, "repeat.failuresLast90Days"),
+          lastOccurrenceUtc: readOptionalString(row.lastOccurrenceUtc),
+          daysSinceLastFailure: readOptionalNumber(row.daysSinceLastFailure),
+          openRelatedWorkOrderCount: readNumber(row.openRelatedWorkOrderCount, "repeat.openRelatedWorkOrderCount"),
+          conditionStatus: readString(row.conditionStatus, "repeat.conditionStatus"),
+        };
+      })
+    : [];
+  const preventive = record.preventiveCompliance;
+  if (typeof preventive !== "object" || preventive === null) {
+    throw new Error("Invalid preventive compliance payload.");
+  }
+  const preventiveRecord = preventive as Record<string, unknown>;
+  const backlog = record.backlogAging;
+  if (typeof backlog !== "object" || backlog === null) {
+    throw new Error("Invalid backlog aging payload.");
+  }
+  const backlogRecord = backlog as Record<string, unknown>;
+  return {
+    period: {
+      dateFromUtc: readString(periodRecord.dateFromUtc, "period.dateFromUtc"),
+      dateToUtc: readString(periodRecord.dateToUtc, "period.dateToUtc"),
+    },
+    mttr: parseMttr(record.mttr),
+    mtbf: parseMtbf(record.mtbf),
+    repeatFailures,
+    preventiveCompliance: {
+      dueCount: readNumber(preventiveRecord.dueCount, "preventive.dueCount"),
+      completedOnTimeCount: readNumber(preventiveRecord.completedOnTimeCount, "preventive.completedOnTimeCount"),
+      completedLateCount: readNumber(preventiveRecord.completedLateCount, "preventive.completedLateCount"),
+      overdueOpenCount: readNumber(preventiveRecord.overdueOpenCount, "preventive.overdueOpenCount"),
+      skippedCount: readNumber(preventiveRecord.skippedCount, "preventive.skippedCount"),
+      preventiveCompletionRate: readOptionalNumber(preventiveRecord.preventiveCompletionRate),
+      onTimeCompletionRate: readOptionalNumber(preventiveRecord.onTimeCompletionRate),
+      ruleDescription: readString(preventiveRecord.ruleDescription, "preventive.ruleDescription"),
+    },
+    backlogAging: {
+      openRequests: parseAgingBuckets(backlogRecord.openRequests),
+      openWorkOrders: parseAgingBuckets(backlogRecord.openWorkOrders),
+      criticalOpenWorkOrders: parseAgingBuckets(backlogRecord.criticalOpenWorkOrders),
+      waitingWorkOrders: parseAgingBuckets(backlogRecord.waitingWorkOrders),
+    },
+    costAnalytics: record.costAnalytics ? parseCostAnalytics(record.costAnalytics) : undefined,
+  };
+}
+
+export function parseMaintenanceFailureBreakdownApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid failure breakdown payload.");
+  }
+  return payload.map((item) => {
+    if (typeof item !== "object" || item === null) {
+      throw new Error("Invalid failure breakdown row.");
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      groupKey: readString(record.groupKey, "breakdown.groupKey"),
+      groupLabel: readString(record.groupLabel, "breakdown.groupLabel"),
+      count: readNumber(record.count, "breakdown.count"),
+      percentage: readNumber(record.percentage, "breakdown.percentage"),
+      repeatCount: readNumber(record.repeatCount, "breakdown.repeatCount"),
+      averageRepairMinutes: readOptionalNumber(record.averageRepairMinutes),
+    };
+  });
+}
+
+export function parseMaintenanceAssetReliabilityApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid asset reliability payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const reasons = Array.isArray(record.conditionReasons)
+    ? record.conditionReasons.map((item) => readString(item, "conditionReason"))
+    : [];
+  return {
+    assetReference: readString(record.assetReference, "assetReference"),
+    assetType: readString(record.assetType, "assetType"),
+    assetName: readOptionalString(record.assetName),
+    totalFaults: readNumber(record.totalFaults, "totalFaults"),
+    faultsLast30Days: readNumber(record.faultsLast30Days, "faultsLast30Days"),
+    faultsLast90Days: readNumber(record.faultsLast90Days, "faultsLast90Days"),
+    repeatFaultCount: readNumber(record.repeatFaultCount, "repeatFaultCount"),
+    completedCorrectiveWorkOrders: readNumber(record.completedCorrectiveWorkOrders, "completedCorrectiveWorkOrders"),
+    meanRepairMinutes: readOptionalNumber(record.meanRepairMinutes),
+    openWorkOrders: readNumber(record.openWorkOrders, "openWorkOrders"),
+    criticalOpenWorkOrders: readNumber(record.criticalOpenWorkOrders, "criticalOpenWorkOrders"),
+    overduePreventiveCount: readNumber(record.overduePreventiveCount, "overduePreventiveCount"),
+    preventiveComplianceRate: readOptionalNumber(record.preventiveComplianceRate),
+    lastFailureAtUtc: readOptionalString(record.lastFailureAtUtc),
+    lastMaintenanceCompletedAtUtc: readOptionalString(record.lastMaintenanceCompletedAtUtc),
+    conditionStatus: readString(record.conditionStatus, "conditionStatus"),
+    conditionReasons: reasons,
+    mtbf: parseMtbf(record.mtbf),
+    costAnalytics: record.costAnalytics ? parseCostAnalytics(record.costAnalytics) : undefined,
+  };
+}

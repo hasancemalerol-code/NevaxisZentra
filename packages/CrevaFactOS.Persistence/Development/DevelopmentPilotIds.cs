@@ -256,6 +256,24 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaintenancePilotPreventivePlanId =
         Guid.Parse("bb000001-0082-4000-8000-000000000082");
 
+    public static readonly Guid MaintenancePilotReliabilityRequest2Id =
+        Guid.Parse("bb000001-0083-4000-8000-000000000083");
+
+    public static readonly Guid MaintenancePilotCorrectiveWoAId =
+        Guid.Parse("bb000001-0084-4000-8000-000000000084");
+
+    public static readonly Guid MaintenancePilotCorrectiveWoBId =
+        Guid.Parse("bb000001-0085-4000-8000-000000000085");
+
+    public static readonly Guid MaintenancePilotOverdueDueId =
+        Guid.Parse("bb000001-0086-4000-8000-000000000086");
+
+    public static readonly Guid MaintenancePilotCompletedDueOnTimeId =
+        Guid.Parse("bb000001-0087-4000-8000-000000000087");
+
+    public static readonly Guid MaintenancePilotCompletedDueLateId =
+        Guid.Parse("bb000001-0088-4000-8000-000000000088");
+
     // Development-only facility: exists in tenant but has no pilot operator/reviewer membership.
     public static readonly Guid UnauthorizedFacilityId =
         Guid.Parse("bb000001-0005-4000-8000-000000000099");

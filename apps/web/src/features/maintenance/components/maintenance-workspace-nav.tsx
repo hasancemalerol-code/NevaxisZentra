@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type MaintenanceWorkspaceNavProps = Readonly<{
-  active: "overview" | "work-orders" | "requests" | "preventive" | "planning";
+  active: "overview" | "work-orders" | "requests" | "preventive" | "planning" | "reporting";
 }>;
 
 const NAV_ITEMS = [
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     label: "Periyodik Bakım",
   },
   { id: "planning" as const, href: "/bakim/planlama", label: "Bakım Planlama" },
+  { id: "reporting" as const, href: "/bakim/raporlama", label: "Raporlama" },
 ];
 
 export function MaintenanceWorkspaceNav({ active }: MaintenanceWorkspaceNavProps) {

@@ -19,6 +19,7 @@ public sealed class MaintenanceRequest
     public DateTimeOffset ReportedAtUtc { get; set; }
     public string ReportedBySubjectId { get; set; } = string.Empty;
     public string Source { get; set; } = "manual";
+    public MaintenanceFailureCategory FailureCategory { get; set; } = MaintenanceFailureCategory.Other;
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
     public uint Version { get; set; } = 1;
@@ -124,6 +125,21 @@ public enum MaintenanceWorkOrderStatus
     Waiting,
     Completed,
     Cancelled,
+}
+
+public enum MaintenanceFailureCategory
+{
+    Mechanical,
+    Electrical,
+    Hydraulic,
+    Pneumatic,
+    Cooling,
+    Heating,
+    Control,
+    Mold,
+    Robot,
+    Auxiliary,
+    Other,
 }
 
 public enum MaintenanceResolutionCode

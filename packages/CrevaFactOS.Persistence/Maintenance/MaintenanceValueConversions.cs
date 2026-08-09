@@ -177,4 +177,34 @@ public static class MaintenanceValueConversions
         "cancelled" => PreventiveMaintenanceDueStatus.Cancelled,
         _ => PreventiveMaintenanceDueStatus.Due,
     };
+
+    public static string ToStorage(MaintenanceFailureCategory value) => value switch
+    {
+        MaintenanceFailureCategory.Mechanical => "mechanical",
+        MaintenanceFailureCategory.Electrical => "electrical",
+        MaintenanceFailureCategory.Hydraulic => "hydraulic",
+        MaintenanceFailureCategory.Pneumatic => "pneumatic",
+        MaintenanceFailureCategory.Cooling => "cooling",
+        MaintenanceFailureCategory.Heating => "heating",
+        MaintenanceFailureCategory.Control => "control",
+        MaintenanceFailureCategory.Mold => "mold",
+        MaintenanceFailureCategory.Robot => "robot",
+        MaintenanceFailureCategory.Auxiliary => "auxiliary",
+        _ => "other",
+    };
+
+    public static MaintenanceFailureCategory FailureCategoryFromStorage(string value) => value switch
+    {
+        "mechanical" => MaintenanceFailureCategory.Mechanical,
+        "electrical" => MaintenanceFailureCategory.Electrical,
+        "hydraulic" => MaintenanceFailureCategory.Hydraulic,
+        "pneumatic" => MaintenanceFailureCategory.Pneumatic,
+        "cooling" => MaintenanceFailureCategory.Cooling,
+        "heating" => MaintenanceFailureCategory.Heating,
+        "control" => MaintenanceFailureCategory.Control,
+        "mold" => MaintenanceFailureCategory.Mold,
+        "robot" => MaintenanceFailureCategory.Robot,
+        "auxiliary" => MaintenanceFailureCategory.Auxiliary,
+        _ => MaintenanceFailureCategory.Other,
+    };
 }

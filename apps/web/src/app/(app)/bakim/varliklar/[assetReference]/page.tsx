@@ -11,6 +11,8 @@ import {
   formatMaintenanceDate,
   formatMaintenanceDateTime,
   getMaintenanceAssetTypeLabel,
+  getMaintenanceConditionStatusLabel,
+  getMaintenanceConditionStatusTone,
   getMaintenancePriorityLabel,
   getMaintenancePriorityTone,
   getMaintenanceStatusLabel,
@@ -20,7 +22,7 @@ import {
   getPreventiveDueStatusLabel,
   getPreventiveDueStatusTone,
 } from "@/features/maintenance/presentation/maintenance-labels";
-import { readMaintenanceAssetHistory } from "@/features/maintenance/server/maintenance-reader";
+import { readMaintenanceAssetHistory, readMaintenanceAssetReliability } from "@/features/maintenance/server/maintenance-reader";
 
 type PageProps = Readonly<{
   params: Promise<{ assetReference: string }>;
@@ -29,7 +31,10 @@ type PageProps = Readonly<{
 export default async function MaintenanceAssetHistoryPage({ params }: PageProps) {
   const { assetReference: rawReference } = await params;
   const assetReference = decodeURIComponent(rawReference);
-  const result = await readMaintenanceAssetHistory(assetReference);
+  const [result, reliabilityResult] = await Promise.all([
+    readMaintenanceAssetHistory(assetReference),
+    readMaintenanceAssetReliability(assetReference),
+  ]);
 
   if (result.status === "failure") {
     return (
@@ -57,6 +62,7 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
   }
 
   const history = result.history;
+  const reliability = reliabilityResult.status === "success" ? reliabilityResult.reliability : null;
   if (!history.assetReference) {
     notFound();
   }
@@ -78,6 +84,69 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
       <MaintenanceWorkspaceNav active="overview" />
 
       <div className="maintenance-page-content">
+        {reliability ? (
+          <section className="maintenance-section maintenance-section--wide" aria-label="Güvenilirlik">
+            <header className="maintenance-section__header">
+              <h2>Güvenilirlik</h2>
+            </header>
+            <div className="maintenance-detail-grid">
+              <dl className="maintenance-report-metrics">
+                <div>
+                  <dt>Durum</dt>
+                  <dd>
+                    <Badge tone={getMaintenanceConditionStatusTone(reliability.conditionStatus)}>
+                      {getMaintenanceConditionStatusLabel(reliability.conditionStatus)}
+                    </Badge>
+                  </dd>
+                  {reliability.conditionReasons.map((reason) => (
+                    <small key={reason}>{reason}</small>
+                  ))}
+                </div>
+                <div>
+                  <dt>Arıza Sayısı</dt>
+                  <dd>{reliability.totalFaults}</dd>
+                  <small>Tekrar: {reliability.repeatFaultCount}</small>
+                </div>
+                <div>
+                  <dt>MTTR</dt>
+                  <dd>
+                    {reliability.meanRepairMinutes !== undefined
+                      ? `${Math.round(reliability.meanRepairMinutes)} dk`
+                      : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Periyodik Bakım Uyumu</dt>
+                  <dd>
+                    {reliability.preventiveComplianceRate !== undefined
+                      ? `%${reliability.preventiveComplianceRate.toFixed(1)}`
+                      : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Açık Bakım</dt>
+                  <dd>{reliability.openWorkOrders}</dd>
+                  <small>Kritik: {reliability.criticalOpenWorkOrders}</small>
+                </div>
+                <div>
+                  <dt>Son Arıza</dt>
+                  <dd>
+                    {reliability.lastFailureAtUtc
+                      ? formatMaintenanceDateTime(reliability.lastFailureAtUtc)
+                      : "—"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            {reliability.costAnalytics ? (
+              <p className="maintenance-report-period">
+                Bakım maliyeti: {formatMaintenanceCurrency(reliability.costAnalytics.totalMaintenanceCost)}{" "}
+                ({reliability.costAnalytics.dataCompletenessStatus})
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
         <section className="maintenance-section maintenance-section--wide" aria-label="Bakım Emirleri">
           <header className="maintenance-section__header">
             <h2>Bakım Emirleri</h2>

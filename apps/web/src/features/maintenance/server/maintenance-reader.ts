@@ -2,6 +2,10 @@ import "./maintenance-server-boundary";
 
 import {
   getMaintenanceAssetHistory,
+  getMaintenanceAssetReliability,
+  getMaintenanceFailureBreakdown,
+  getMaintenanceReliabilityOverview,
+  getMaintenanceReliabilityReport,
   getMaintenanceWorkOrder,
   getMaintenanceWorkOrderCostSummary,
   getMaintenanceWorkOrderTimeline,
@@ -17,8 +21,12 @@ import { parseProductionExecutionRuntimeConfig } from "../../production-executio
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 import type {
   MaintenanceAssetHistory,
+  MaintenanceAssetReliability,
   MaintenanceCostSummary,
+  MaintenanceFailureBreakdownRow,
   MaintenancePartUsage,
+  MaintenanceReliabilityOverview,
+  MaintenanceReliabilityReport,
   MaintenanceRequestSummary,
   MaintenanceTimelineEntry,
   MaintenanceWorkNote,
@@ -228,4 +236,95 @@ export async function readMaintenanceAssetHistory(
   }
 
   return { status: "success", history: result.value };
+}
+
+function buildDefaultReportingRange(): Readonly<{ dateFromUtc: string; dateToUtc: string }> {
+  const dateTo = new Date();
+  const dateFrom = new Date(dateTo);
+  dateFrom.setUTCDate(dateFrom.getUTCDate() - 90);
+  return {
+    dateFromUtc: dateFrom.toISOString(),
+    dateToUtc: dateTo.toISOString(),
+  };
+}
+
+async function resolveMaintenanceReadContext(): Promise<
+  | Readonly<{ status: "success"; context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
+  | ReadFailure
+> {
+  const configResult = parseProductionExecutionRuntimeConfig();
+  if (configResult.status !== "success") {
+    return { status: "failure", message: configResult.message };
+  }
+
+  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  return { status: "success", context: contextResult.context };
+}
+
+export type MaintenanceReportingResult =
+  | Readonly<{
+      status: "success";
+      overview: MaintenanceReliabilityOverview;
+      report: MaintenanceReliabilityReport;
+      failureBreakdown: readonly MaintenanceFailureBreakdownRow[];
+      range: Readonly<{ dateFromUtc: string; dateToUtc: string }>;
+    }>
+  | ReadFailure;
+
+export async function readMaintenanceReporting(): Promise<MaintenanceReportingResult> {
+  const contextResult = await resolveMaintenanceReadContext();
+  if (contextResult.status === "failure") {
+    return contextResult;
+  }
+
+  const range = buildDefaultReportingRange();
+  const [overviewResult, reportResult, breakdownResult] = await Promise.all([
+    getMaintenanceReliabilityOverview(contextResult.context, range),
+    getMaintenanceReliabilityReport(contextResult.context, range),
+    getMaintenanceFailureBreakdown(contextResult.context, range),
+  ]);
+
+  if (overviewResult.status === "failure") {
+    return { status: "failure", message: overviewResult.message };
+  }
+
+  if (reportResult.status === "failure") {
+    return { status: "failure", message: reportResult.message };
+  }
+
+  if (breakdownResult.status === "failure") {
+    return { status: "failure", message: breakdownResult.message };
+  }
+
+  return {
+    status: "success",
+    overview: overviewResult.value,
+    report: reportResult.value,
+    failureBreakdown: breakdownResult.value,
+    range,
+  };
+}
+
+export type MaintenanceAssetReliabilityResult =
+  | Readonly<{ status: "success"; reliability: MaintenanceAssetReliability }>
+  | ReadFailure;
+
+export async function readMaintenanceAssetReliability(
+  assetReference: string,
+): Promise<MaintenanceAssetReliabilityResult> {
+  const contextResult = await resolveMaintenanceReadContext();
+  if (contextResult.status === "failure") {
+    return contextResult;
+  }
+
+  const result = await getMaintenanceAssetReliability(contextResult.context, assetReference);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", reliability: result.value };
 }
