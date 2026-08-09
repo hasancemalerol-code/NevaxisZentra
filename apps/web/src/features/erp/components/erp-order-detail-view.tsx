@@ -7,12 +7,23 @@ import {
   getErpCoverageStatusLabel,
   getErpMappingStatusLabel,
   getErpOrderStatusLabel,
-  getErpProviderLabel,
   getErpReadinessBadgeLabel,
   getErpShortageStatusLabel,
   getErpShortageStatusTone,
-  getErpSourceFreshnessLabel,
 } from "../presentation/erp-labels";
+import {
+  ErpDataTable,
+  ErpDetailSection,
+  ErpEmptyState,
+  ErpFreshnessBadge,
+  ErpInfoBanner,
+  ErpMappingBadge,
+  ErpMetadataGrid,
+  ErpMetadataItem,
+  ErpPageHeader,
+  ErpProviderBadge,
+  ErpStatusBadge,
+} from "./erp-ui-primitives";
 import { ErpWorkspaceNav } from "./erp-workspace-nav";
 import "./erp-workspace.css";
 
@@ -21,74 +32,116 @@ type ErpOrderDetailViewProps = Readonly<{
   materialAvailability: ErpOrderMaterialAvailability | null;
 }>;
 
+function getOrderStatusTone(
+  status: string,
+): "ready" | "paused" | "critical" | "in-progress" | "neutral" {
+  switch (status) {
+    case "fulfilled":
+      return "ready";
+    case "cancelled":
+      return "critical";
+    case "partially-fulfilled":
+    case "confirmed":
+      return "in-progress";
+    default:
+      return "neutral";
+  }
+}
+
+function getReadinessTone(
+  ready: boolean,
+  blockingCodes: readonly string[],
+): "ready" | "paused" | "critical" | "in-progress" | "neutral" {
+  if (ready) {
+    return "ready";
+  }
+  if (blockingCodes.includes("mapping-conflict")) {
+    return "critical";
+  }
+  if (blockingCodes.includes("source-stale")) {
+    return "paused";
+  }
+  return "in-progress";
+}
+
 export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDetailViewProps) {
   const blockingCodes = order.readiness.blockingReasons.map((reason) => reason.code);
+  const customerMappingStatus = order.readiness.customerMapped ? "mapped" : "unmapped";
 
   return (
     <main className="production-execution-page erp-workspace-page">
-      <header className="erp-workspace-header production-execution-header">
-        <div className="erp-workspace-header__intro">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>{order.orderNumber}</h1>
-          <span>ERP sipariş özeti, müşteri/ürün eşleştirmesi ve operasyonel hazırlık.</span>
-        </div>
-      </header>
+      <ErpPageHeader
+        title={order.orderNumber}
+        description="ERP sipariş özeti, müşteri/ürün eşleştirmesi ve operasyonel hazırlık."
+      />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/siparisler" />
 
-      <section className="erp-section">
-        <div className="erp-section__header">
-          <h2>ERP Order Summary</h2>
-        </div>
-        <dl className="erp-detail-grid">
-          <div>
-            <dt>ERP Sipariş No</dt>
-            <dd>{order.orderNumber}</dd>
-          </div>
-          <div>
-            <dt>Müşteri (Harici)</dt>
-            <dd>{order.externalCustomerCode ?? order.externalCustomerId}</dd>
-          </div>
-          <div>
-            <dt>Durum</dt>
-            <dd>{getErpOrderStatusLabel(order.status)}</dd>
-          </div>
-          <div>
-            <dt>Sipariş Tarihi</dt>
-            <dd>{formatErpDateTime(order.orderDateUtc)}</dd>
-          </div>
-          <div>
-            <dt>Teslim Tarihi</dt>
-            <dd>{formatErpDateTime(order.requestedDeliveryDateUtc)}</dd>
-          </div>
-          <div>
-            <dt>Kaynak</dt>
-            <dd>
-              {getErpProviderLabel(order.provider)} ·{" "}
-              {getErpSourceFreshnessLabel(order.readiness.sourceFreshness)}
-            </dd>
-          </div>
-          <div>
-            <dt>Referans</dt>
-            <dd>{order.reference ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>Notlar</dt>
-            <dd>{order.notes ?? "—"}</dd>
-          </div>
-        </dl>
-      </section>
+      <ErpDetailSection title="Sipariş Özeti">
+        <ErpMetadataGrid>
+          <ErpMetadataItem label="ERP Sipariş No">{order.orderNumber}</ErpMetadataItem>
+          <ErpMetadataItem label="Durum">
+            <ErpStatusBadge
+              label={getErpOrderStatusLabel(order.status)}
+              tone={getOrderStatusTone(order.status)}
+            />
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Sipariş Tarihi">
+            {formatErpDateTime(order.orderDateUtc)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Teslim Tarihi">
+            {formatErpDateTime(order.requestedDeliveryDateUtc)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Para Birimi">{order.currencyCode ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="Referans">{order.reference ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="Notlar">{order.notes ?? "—"}</ErpMetadataItem>
+        </ErpMetadataGrid>
+      </ErpDetailSection>
 
-      <section className="erp-section">
-        <div className="erp-section__header">
-          <h2>Hazırlık Durumu</h2>
-        </div>
+      <ErpDetailSection title="ERP Kaynağı">
+        <ErpMetadataGrid>
+          <ErpMetadataItem label="Sağlayıcı">
+            <ErpProviderBadge provider={order.provider} />
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Güncellik">
+            <ErpFreshnessBadge freshness={order.readiness.sourceFreshness} />
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Harici Referans">
+            {order.externalCode ?? order.externalId}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Kaynak Sürümü">{order.sourceVersion ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="Kaynak Güncelleme">
+            {formatErpDateTime(order.sourceUpdatedAtUtc)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="İçe Aktarım">
+            {formatErpDateTime(order.importedAtUtc)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Son Güncelleme">
+            {formatErpDateTime(order.updatedAtUtc)}
+          </ErpMetadataItem>
+        </ErpMetadataGrid>
+      </ErpDetailSection>
+
+      <ErpDetailSection title="Müşteri Eşleştirmesi">
+        <ErpMetadataGrid>
+          <ErpMetadataItem label="Müşteri (Harici)">
+            {order.externalCustomerCode ?? order.externalCustomerId}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Eşleştirme Durumu">
+            <ErpMappingBadge
+              status={customerMappingStatus}
+              label={getErpMappingStatusLabel(customerMappingStatus)}
+            />
+          </ErpMetadataItem>
+        </ErpMetadataGrid>
+      </ErpDetailSection>
+
+      <ErpDetailSection title="Operasyonel Hazırlık">
         <p>
-          <span
-            className={`erp-badge erp-badge--${order.readiness.readyForOperationalUse ? "mapped" : "unmapped"}`}
-          >
-            {getErpReadinessBadgeLabel(order.readiness.readyForOperationalUse, blockingCodes)}
-          </span>
+          <ErpStatusBadge
+            label={getErpReadinessBadgeLabel(order.readiness.readyForOperationalUse, blockingCodes)}
+            tone={getReadinessTone(order.readiness.readyForOperationalUse, blockingCodes)}
+          />
         </p>
         {order.readiness.blockingReasons.length > 0 ? (
           <ul className="erp-blocking-list">
@@ -99,107 +152,109 @@ export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDeta
             ))}
           </ul>
         ) : (
-          <p className="erp-empty-inline">Engelleyici neden yok.</p>
+          <ErpEmptyState title="Engelleyici neden yok." />
         )}
-      </section>
+        {!order.readiness.allProductsMapped ? (
+          <ErpInfoBanner title="Ürün eşleştirmesi">
+            {order.readiness.missingProductMappings} satırda ürün eşleştirmesi eksik.
+          </ErpInfoBanner>
+        ) : null}
+      </ErpDetailSection>
 
-      <section className="erp-section">
-        <div className="erp-section__header">
-          <h2>Sipariş Satırları</h2>
-        </div>
-        <div className="erp-table-wrap">
-          <table className="erp-table">
+      <ErpDetailSection title="Sipariş Satırları">
+        <ErpDataTable>
+          <thead>
+            <tr>
+              <th>Satır</th>
+              <th>Ürün Kodu</th>
+              <th>Açıklama</th>
+              <th>Miktar</th>
+              <th>Ürün Eşleştirme</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.lines.map((line) => (
+              <tr key={line.id}>
+                <td>{line.lineNumber}</td>
+                <td>{line.externalProductCode ?? line.externalProductId}</td>
+                <td>{line.description ?? "—"}</td>
+                <td>
+                  {line.quantity} {line.unit}
+                </td>
+                <td>
+                  <ErpMappingBadge
+                    status={line.productMappingStatus}
+                    label={getErpMappingStatusLabel(line.productMappingStatus)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </ErpDataTable>
+      </ErpDetailSection>
+
+      <ErpDetailSection title="Malzeme Uygunluğu">
+        {materialAvailability?.freshnessNote ? (
+          <ErpInfoBanner>{materialAvailability.freshnessNote}</ErpInfoBanner>
+        ) : (
+          <ErpInfoBanner>ERP stok projeksiyonuna dayalı bilgi</ErpInfoBanner>
+        )}
+        {!materialAvailability || materialAvailability.lines.length === 0 ? (
+          <ErpEmptyState
+            title="Malzeme uygunluk verisi yok."
+            description="Stok senkronizasyonu tamamlandığında satır bazlı uygunluk burada görünür."
+          />
+        ) : (
+          <ErpDataTable className="erp-table--material-availability">
             <thead>
               <tr>
                 <th>Satır</th>
                 <th>Ürün Kodu</th>
-                <th>Açıklama</th>
-                <th>Miktar</th>
-                <th>Ürün Eşleştirme</th>
+                <th>Gerekli</th>
+                <th>Kullanılabilir</th>
+                <th>Eksik</th>
+                <th>Durum</th>
+                <th>Satın Alma Karşılama</th>
               </tr>
             </thead>
             <tbody>
-              {order.lines.map((line) => (
-                <tr key={line.id}>
-                  <td>{line.lineNumber}</td>
-                  <td>{line.externalProductCode ?? line.externalProductId}</td>
-                  <td>{line.description ?? "—"}</td>
-                  <td>
-                    {line.quantity} {line.unit}
-                  </td>
-                  <td>
-                    <span className={`erp-badge erp-badge--${line.productMappingStatus}`}>
-                      {getErpMappingStatusLabel(line.productMappingStatus)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              {materialAvailability.lines.map((line) => {
+                const tone = getErpShortageStatusTone(line.status);
 
-      <section className="erp-section">
-        <div className="erp-section__header">
-          <h2>Malzeme Uygunluğu</h2>
-          <p className="erp-material-availability-note">
-            {materialAvailability?.freshnessNote ?? "ERP stok projeksiyonuna dayalı bilgi"}
-          </p>
-        </div>
-        {!materialAvailability || materialAvailability.lines.length === 0 ? (
-          <p className="erp-empty-inline">Malzeme uygunluk verisi yok.</p>
-        ) : (
-          <div className="erp-table-wrap">
-            <table className="erp-table erp-table--material-availability">
-              <thead>
-                <tr>
-                  <th>Satır</th>
-                  <th>Ürün Kodu</th>
-                  <th>Gerekli</th>
-                  <th>Kullanılabilir</th>
-                  <th>Eksik</th>
-                  <th>Durum</th>
-                  <th>Satın Alma Karşılama</th>
-                </tr>
-              </thead>
-              <tbody>
-                {materialAvailability.lines.map((line) => {
-                  const tone = getErpShortageStatusTone(line.status);
-
-                  return (
-                    <tr key={line.externalLineId}>
-                      <td>{line.lineNumber}</td>
-                      <td>{line.externalProductCode ?? line.externalProductId}</td>
-                      <td>{formatErpQuantity(line.requiredQuantity)}</td>
-                      <td>{formatErpQuantity(line.availableQuantity)}</td>
-                      <td>{formatErpQuantity(line.shortageQuantity)}</td>
-                      <td>
-                        <span className={`erp-status erp-status--${tone}`}>
-                          {getErpShortageStatusLabel(line.status)}
+                return (
+                  <tr key={line.externalLineId}>
+                    <td>{line.lineNumber}</td>
+                    <td>{line.externalProductCode ?? line.externalProductId}</td>
+                    <td>{formatErpQuantity(line.requiredQuantity)}</td>
+                    <td>{formatErpQuantity(line.availableQuantity)}</td>
+                    <td>{formatErpQuantity(line.shortageQuantity)}</td>
+                    <td>
+                      <ErpStatusBadge
+                        label={getErpShortageStatusLabel(line.status)}
+                        tone={tone}
+                      />
+                    </td>
+                    <td>
+                      {line.purchaseCoverage ? (
+                        <span className="erp-coverage-detail">
+                          {getErpCoverageStatusLabel(line.purchaseCoverage.coverageStatus)}
+                          {" · "}
+                          {formatErpQuantity(line.purchaseCoverage.openPurchaseQuantity)}
+                          {line.purchaseCoverage.nearestExpectedDeliveryDateUtc
+                            ? ` · ${formatErpDateTime(line.purchaseCoverage.nearestExpectedDeliveryDateUtc)}`
+                            : ""}
                         </span>
-                      </td>
-                      <td>
-                        {line.purchaseCoverage ? (
-                          <span className="erp-coverage-detail">
-                            {getErpCoverageStatusLabel(line.purchaseCoverage.coverageStatus)}
-                            {" · "}
-                            {formatErpQuantity(line.purchaseCoverage.openPurchaseQuantity)}
-                            {line.purchaseCoverage.nearestExpectedDeliveryDateUtc
-                              ? ` · ${formatErpDateTime(line.purchaseCoverage.nearestExpectedDeliveryDateUtc)}`
-                              : ""}
-                          </span>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </ErpDataTable>
         )}
-      </section>
+      </ErpDetailSection>
 
       <p>
         <Link href="/erp-entegrasyonlari/siparisler">← Sipariş listesine dön</Link>

@@ -9,6 +9,7 @@ import type {
   rejectErpWritebackAction,
   submitErpWritebackAction,
 } from "../server/erp-writeback-actions";
+import { ErpInfoBanner, ErpReadonlyNotice, ErpSimulatorNotice } from "./erp-ui-primitives";
 
 export type ErpWritebackApprovalActionsProps = Readonly<{
   writebackId: string;
@@ -73,9 +74,9 @@ export function ErpWritebackApprovalActions({
 
   if (!hasActions && actionState.kind === "idle") {
     return (
-      <p className="erp-action-hint">
+      <ErpReadonlyNotice>
         Bu durum için kullanılabilir işlem yok. Kayıt salt okunur görüntülenir.
-      </p>
+      </ErpReadonlyNotice>
     );
   }
 
@@ -85,13 +86,15 @@ export function ErpWritebackApprovalActions({
         {showSubmit ? (
           <button
             type="button"
-            className="button button-primary button-small"
+            className="erp-action erp-action--primary"
             disabled={isPending}
             onClick={() =>
               executeAction("Onaya Gönder", () => onSubmit(writebackId, version))
             }
           >
-            {isPending ? "İşleniyor…" : "Onaya Gönder"}
+            {isPending && actionState.kind === "pending" && actionState.action === "Onaya Gönder"
+              ? "Gönderiliyor…"
+              : "Onaya Gönder"}
           </button>
         ) : null}
 
@@ -99,23 +102,27 @@ export function ErpWritebackApprovalActions({
           <>
             <button
               type="button"
-              className="button button-primary button-small"
+              className="erp-action erp-action--primary"
               disabled={isPending}
               onClick={() =>
                 executeAction("Onayla", () => onApprove(writebackId, version))
               }
             >
-              {isPending ? "İşleniyor…" : "Onayla"}
+              {isPending && actionState.kind === "pending" && actionState.action === "Onayla"
+                ? "Onaylanıyor…"
+                : "Onayla"}
             </button>
             <button
               type="button"
-              className="button button-destructive button-small"
+              className="erp-action"
               disabled={isPending}
               onClick={() =>
                 executeAction("Reddet", () => onReject(writebackId, version))
               }
             >
-              {isPending ? "İşleniyor…" : "Reddet"}
+              {isPending && actionState.kind === "pending" && actionState.action === "Reddet"
+                ? "Reddediliyor…"
+                : "Reddet"}
             </button>
           </>
         ) : null}
@@ -123,22 +130,24 @@ export function ErpWritebackApprovalActions({
         {showExecute ? (
           <button
             type="button"
-            className="button button-primary button-small"
+            className="erp-action erp-action--primary"
             disabled={isPending}
             onClick={() =>
               executeAction("Uygula", () => onExecute(writebackId, version))
             }
           >
-            {isPending ? "İşleniyor…" : "Uygula"}
+            {isPending && actionState.kind === "pending" && actionState.action === "Uygula"
+              ? "Uygulanıyor…"
+              : "Uygula"}
           </button>
         ) : null}
       </div>
 
       {actionState.kind === "error" ? (
-        <p className="erp-writeback-action-error" role="alert">
-          {actionState.message}
-        </p>
+        <ErpInfoBanner title="İşlem hatası">{actionState.message}</ErpInfoBanner>
       ) : null}
+
+      <ErpSimulatorNotice variant="writeback" />
     </div>
   );
 }

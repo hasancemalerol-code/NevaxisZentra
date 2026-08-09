@@ -177,9 +177,22 @@ export function getErpSourceFreshnessLabel(freshness: string): string {
     case "fresh":
       return "Güncel";
     case "stale":
-      return "Eski";
+      return "Güncel Değil";
     default:
       return "Bilinmiyor";
+  }
+}
+
+export function getErpSourceFreshnessTone(
+  freshness: string,
+): "ready" | "paused" | "critical" | "in-progress" {
+  switch (freshness) {
+    case "fresh":
+      return "ready";
+    case "stale":
+      return "paused";
+    default:
+      return "in-progress";
   }
 }
 
@@ -188,12 +201,29 @@ export function formatErpDateTime(iso?: string | null): string {
     return "—";
   }
 
-  return new Date(iso).toLocaleString("tr-TR", {
-    day: "2-digit",
+  const date = new Date(iso);
+  const datePart = date.toLocaleDateString("tr-TR", {
+    day: "numeric",
     month: "short",
     year: "numeric",
+  });
+  const timePart = date.toLocaleTimeString("tr-TR", {
     hour: "2-digit",
     minute: "2-digit",
+  });
+
+  return `${datePart}, ${timePart}`;
+}
+
+export function formatErpDate(iso?: string | null): string {
+  if (!iso) {
+    return "—";
+  }
+
+  return new Date(iso).toLocaleDateString("tr-TR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
 

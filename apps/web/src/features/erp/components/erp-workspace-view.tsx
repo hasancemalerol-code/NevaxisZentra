@@ -1,7 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import {
-  Activity,
   Cable,
   CheckCircle2,
   CircleGauge,
@@ -19,14 +17,38 @@ import type {
 } from "../domain/erp";
 import {
   formatErpDateTime,
-  getErpConnectionStatusLabel,
-  getErpConnectionStatusTone,
   getErpEntityTypeLabel,
   getErpProviderLabel,
   getErpSyncStatusLabel,
 } from "../presentation/erp-labels";
+import {
+  ErpConnectionCard,
+  ErpDataTable,
+  ErpEmptyState,
+  ErpFreshnessBadge,
+  ErpKpiCard,
+  ErpKpiGrid,
+  ErpPageHeader,
+  ErpSectionHeader,
+  ErpSimulatorNotice,
+  ErpStatusBadge,
+  ErpTableIdentifierCell,
+  ErpInfoBanner,
+  getErpFacilityDisplayLabel,
+} from "./erp-ui-primitives";
 import { ErpWorkspaceNav } from "./erp-workspace-nav";
 import "./erp-workspace.css";
+
+const SIMULATOR_CAPABILITIES = [
+  "customers.read",
+  "products.read",
+  "orders.read",
+  "warehouses.read",
+  "inventory.read",
+  "purchasing.read",
+  "production.read",
+  "documents.read",
+] as const;
 
 type ErpWorkspaceViewProps = Readonly<{
   summary: ErpWorkspaceSummary;
@@ -47,208 +69,205 @@ export function ErpWorkspaceView({
 }: ErpWorkspaceViewProps) {
   const recentSyncRuns = [...syncRuns]
     .sort((a, b) => b.startedAtUtc.localeCompare(a.startedAtUtc))
-    .slice(0, 8);
+    .slice(0, 12);
+
+  const latestByEntity = buildLatestSyncByEntity(syncRuns);
+  const isConnectionPage = activeHref === "/erp-entegrasyonlari/baglanti";
+  const isSyncPage = activeHref === "/erp-entegrasyonlari/senkronizasyonlar";
+  const isHealthPage = activeHref === "/erp-entegrasyonlari/saglik";
+  const isErrorPage = activeHref === "/erp-entegrasyonlari/hata-kuyrugu";
+
+  const pageTitle = isSyncPage
+    ? "Senkronizasyon Merkezi"
+    : isHealthPage
+      ? "Bağlantı Sağlığı"
+      : isErrorPage
+        ? "Entegrasyon Hata Kuyruğu"
+        : "ERP Bağlantıları";
+
+  const pageDescription = isSyncPage
+    ? "Veri senkronizasyon durumunu, son çalışmaları ve güncellik sinyallerini izleyin."
+    : isHealthPage
+      ? "ERP bağlantılarının sağlık durumu, gecikme ve son kontrol sonuçları."
+      : isErrorPage
+        ? "Senkronizasyon ve entegrasyon sırasında oluşan hataların özeti."
+        : "ERP bağlantılarınızı, veri senkronizasyonunu ve kontrollü ERP işlemlerini tek merkezden yönetin.";
 
   return (
     <main className="production-execution-page erp-workspace-page">
-      <header className="erp-workspace-header production-execution-header">
-        <div className="erp-workspace-header__intro">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>ERP Entegrasyonları</h1>
-          <span>
-            Bağlı ERP sistemlerinin bağlantı durumunu, veri senkronizasyonunu ve
-            kanonik kayıtlarını yönetin.
-          </span>
-          <p className="erp-simulator-note">
-            ERP-1L yalnızca ERP Simulator bağlantısını uygular. Logo / Mikro / Netsis
-            gerçek bağlantı değildir.
-          </p>
-        </div>
-      </header>
+      <ErpPageHeader
+        title={pageTitle}
+        description={pageDescription}
+        notice={<ErpSimulatorNotice />}
+      />
 
       <ErpWorkspaceNav activeHref={activeHref} />
 
-      <section className="erp-kpi-grid" aria-label="ERP özet göstergeleri">
-        <ErpKpi
-          label="Bağlantılar"
-          value={summary.connectionCount}
-          description="Tanımlı ERP bağlantısı"
-          icon={<Cable aria-hidden="true" />}
-        />
-        <ErpKpi
-          label="Sağlıklı"
-          value={summary.healthyCount}
-          description="Sağlık kontrolü başarılı"
-          icon={<CheckCircle2 aria-hidden="true" />}
-        />
-        <ErpKpi
-          label="Sorunlu"
-          value={summary.problematicCount}
-          description="Dikkat gerektiren bağlantı"
-          icon={<TriangleAlert aria-hidden="true" />}
-        />
-        <ErpKpi
-          label="Son Senkronizasyon"
-          value={formatErpDateTime(summary.lastSyncAtUtc)}
-          description="En son tamamlanan sync"
-          icon={<CircleGauge aria-hidden="true" />}
-        />
-        <ErpKpi
-          label="Müşteri Kayıtları"
-          value={summary.customerCount}
-          description="Kanonik ERP müşteri"
-          icon={<Users aria-hidden="true" />}
-        />
-        <ErpKpi
-          label="Ürün Kayıtları"
-          value={summary.productCount}
-          description="Kanonik ERP ürün"
-          icon={<Package aria-hidden="true" />}
-        />
-      </section>
+      {(isConnectionPage || isHealthPage) && (
+        <ErpKpiGrid>
+          <ErpKpiCard
+            label="ERP Bağlantıları"
+            value={summary.connectionCount}
+            description="Tanımlı bağlantı"
+            icon={<Cable aria-hidden="true" />}
+          />
+          <ErpKpiCard
+            label="Sağlıklı"
+            value={summary.healthyCount}
+            description="Sağlık kontrolü başarılı"
+            icon={<CheckCircle2 aria-hidden="true" />}
+            tone="success"
+          />
+          <ErpKpiCard
+            label="Dikkat Gerektiren"
+            value={summary.problematicCount}
+            description="İnceleme gereken bağlantı"
+            icon={<TriangleAlert aria-hidden="true" />}
+            tone="warning"
+          />
+          <ErpKpiCard
+            label="Son Senkronizasyon"
+            value={formatErpDateTime(summary.lastSyncAtUtc)}
+            description="En son tamamlanan senkronizasyon"
+            icon={<CircleGauge aria-hidden="true" />}
+            tone="info"
+          />
+          <ErpKpiCard
+            label="ERP Müşterileri"
+            value={summary.customerCount}
+            description="Kanonik müşteri kaydı"
+            icon={<Users aria-hidden="true" />}
+          />
+          <ErpKpiCard
+            label="ERP Ürünleri"
+            value={summary.productCount}
+            description="Kanonik ürün kaydı"
+            icon={<Package aria-hidden="true" />}
+          />
+        </ErpKpiGrid>
+      )}
 
-      <section className="erp-section" id="connection-health">
-        <div className="erp-section__header">
-          <h2>Connection Health</h2>
-          <p>Bağlantı durumu ve son sağlık kontrolü</p>
-        </div>
-        <div className="erp-table-wrap">
+      {(isConnectionPage || isHealthPage) && (
+        <section className="erp-section" id="baglanti-sagligi">
+          <ErpSectionHeader
+            title="Bağlantı Sağlığı"
+            description="Sağlayıcı, tesis ve operasyonel sağlık durumu"
+          />
           {connections.length === 0 ? (
-            <div className="erp-empty">Henüz ERP bağlantısı yok.</div>
+            <ErpEmptyState
+              title="Henüz ERP bağlantısı bulunmuyor."
+              description="Pilot ortamda ERP Simulator bağlantısı bootstrap ile oluşturulur."
+            />
           ) : (
-            <table className="erp-table">
-              <thead>
-                <tr>
-                  <th>Provider</th>
-                  <th>Durum</th>
-                  <th>Son Sağlık Kontrolü</th>
-                  <th>Gecikme</th>
-                  <th>Hata</th>
-                </tr>
-              </thead>
-              <tbody>
-                {connections.map((connection) => {
-                  const tone = getErpConnectionStatusTone(connection.status);
-                  return (
-                    <tr key={`health-${connection.id}`}>
-                      <td>
-                        {getErpProviderLabel(
-                          connection.provider,
-                          connection.providerDisplayName,
-                        )}
-                      </td>
-                      <td>
-                        <span className={`erp-status erp-status--${tone}`}>
-                          {getErpConnectionStatusLabel(connection.status)}
-                        </span>
-                      </td>
-                      <td>{formatErpDateTime(connection.lastHealthCheckAtUtc)}</td>
-                      <td>
-                        {connection.lastHealthLatencyMs == null
-                          ? "—"
-                          : `${connection.lastHealthLatencyMs} ms`}
-                      </td>
-                      <td>{connection.lastErrorMessage ?? "—"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="erp-connection-grid">
+              {connections.map((connection) => (
+                <ErpConnectionCard
+                  key={connection.id}
+                  provider={connection.provider}
+                  providerDisplayName={connection.providerDisplayName}
+                  name={connection.name}
+                  companyCode={connection.externalCompanyCode}
+                  facilityLabel={getErpFacilityDisplayLabel(connection.facilityId)}
+                  status={connection.status}
+                  latencyMs={connection.lastHealthLatencyMs}
+                  lastHealthCheck={formatErpDateTime(connection.lastHealthCheckAtUtc)}
+                  lastSuccessfulSync={formatErpDateTime(connection.lastSuccessfulSyncAtUtc)}
+                  capabilities={
+                    connection.provider === "simulator" ? SIMULATOR_CAPABILITIES : []
+                  }
+                  manageHref={`/erp-entegrasyonlari/baglanti#connection-${connection.id}`}
+                  syncHref="/erp-entegrasyonlari/senkronizasyonlar"
+                />
+              ))}
+            </div>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="erp-section" id="connections">
-        <div className="erp-section__header">
-          <h2>Connections</h2>
-          <p>Tenant / facility scoped ERP connection profiles</p>
-        </div>
-        <div className="erp-table-wrap">
-          {connections.length === 0 ? (
-            <div className="erp-empty">Bağlantı kaydı bulunamadı.</div>
-          ) : (
-            <table className="erp-table">
-              <thead>
-                <tr>
-                  <th>Provider</th>
-                  <th>Bağlantı Adı</th>
-                  <th>ERP Company</th>
-                  <th>Facility</th>
-                  <th>Status</th>
-                  <th>Son Başarılı Sync</th>
-                  <th>Son Health Check</th>
-                  <th>Aksiyonlar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {connections.map((connection) => {
-                  const tone = getErpConnectionStatusTone(connection.status);
-                  return (
-                    <tr key={connection.id}>
-                      <td>
-                        {getErpProviderLabel(
-                          connection.provider,
-                          connection.providerDisplayName,
-                        )}
-                      </td>
-                      <td>{connection.name}</td>
-                      <td>{connection.externalCompanyCode ?? "—"}</td>
-                      <td>
-                        <code>{connection.facilityId.slice(0, 8)}…</code>
-                      </td>
-                      <td>
-                        <span className={`erp-status erp-status--${tone}`}>
-                          {getErpConnectionStatusLabel(connection.status)}
+      {(isSyncPage || isConnectionPage) && (
+        <section className="erp-section" id="senkronizasyon-durumu">
+          <ErpSectionHeader
+            title="Senkronizasyon Durumu"
+            description="Varlık bazında son senkronizasyon ve güncellik özeti"
+            action={
+              <Link href="/erp-entegrasyonlari/senkronizasyonlar" className="erp-action erp-action--tertiary">
+                Tüm senkronizasyonlar
+              </Link>
+            }
+          />
+          <div className="erp-sync-entity-grid">
+            {["customers", "products", "orders", "warehouses", "inventory", "purchasing", "production", "documents"].map(
+              (entityType) => {
+                const latest = latestByEntity.get(entityType);
+                const statusTone =
+                  latest?.status === "completed"
+                    ? "ready"
+                    : latest?.status === "failed"
+                      ? "critical"
+                      : latest?.status === "completed-with-errors"
+                        ? "paused"
+                        : "in-progress";
+                return (
+                  <div key={entityType} className="erp-sync-entity-row">
+                    <div className="erp-sync-entity-row__title">
+                      <strong>{getErpEntityTypeLabel(entityType)}</strong>
+                      <ErpStatusBadge
+                        label={latest ? getErpSyncStatusLabel(latest.status) : "Henüz çalıştırılmadı"}
+                        tone={statusTone}
+                      />
+                    </div>
+                    <div className="erp-sync-entity-row__metrics">
+                      <span>
+                        <small>Son başarı</small>
+                        {formatErpDateTime(latest?.completedAtUtc)}
+                      </span>
+                      <span>
+                        <small>Güncellik</small>
+                        <ErpFreshnessBadge freshness={latest ? "fresh" : "unknown"} />
+                      </span>
+                      <span>
+                        <small>Okunan</small>
+                        {latest?.recordsRead ?? 0}
+                      </span>
+                      <span>
+                        <small>Değişen</small>
+                        {(latest?.recordsCreated ?? 0) + (latest?.recordsUpdated ?? 0)}
+                      </span>
+                      {(latest?.recordsFailed ?? 0) > 0 ? (
+                        <span className="erp-sync-entity-row__failed">
+                          <small>Hatalı</small>
+                          {latest?.recordsFailed}
                         </span>
-                      </td>
-                      <td>{formatErpDateTime(connection.lastSuccessfulSyncAtUtc)}</td>
-                      <td>{formatErpDateTime(connection.lastHealthCheckAtUtc)}</td>
-                      <td>
-                        <div className="erp-actions">
-                          <Link
-                            className="erp-action erp-action--primary"
-                            href={`/erp-entegrasyonlari/baglanti#connection-${connection.id}`}
-                          >
-                            Bağlantıyı Aç
-                          </Link>
-                          <span className="erp-action" title="API: health-check / sync">
-                            Sağlığı Kontrol Et
-                          </span>
-                          <span className="erp-action">Müşterileri Senkronize Et</span>
-                          <span className="erp-action">Ürünleri Senkronize Et</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </section>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              },
+            )}
+          </div>
+        </section>
+      )}
 
-      <section className="erp-section" id="sync-runs">
-        <div className="erp-section__header">
-          <h2>Recent Sync Runs</h2>
-          <p>Okunan / oluşturulan / güncellenen / atlanan / hatalı sayaçlar</p>
-        </div>
-        <div className="erp-table-wrap">
+      {(isSyncPage || isConnectionPage) && (
+        <section className="erp-section" id="son-senkronizasyonlar">
+          <ErpSectionHeader
+            title="Son Senkronizasyonlar"
+            description="Operasyonel senkronizasyon aktivitesi"
+          />
           {recentSyncRuns.length === 0 ? (
-            <div className="erp-empty">Henüz senkronizasyon çalışması yok.</div>
+            <ErpEmptyState title="Henüz senkronizasyon çalıştırılmamış." />
           ) : (
-            <table className="erp-table">
+            <ErpDataTable className="erp-table--sync-runs">
               <thead>
                 <tr>
-                  <th>Entity</th>
-                  <th>Started</th>
-                  <th>Completed</th>
-                  <th>Status</th>
-                  <th>Read</th>
-                  <th>Created</th>
-                  <th>Updated</th>
-                  <th>Skipped</th>
-                  <th>Failed</th>
-                  <th>Error</th>
+                  <th>Veri</th>
+                  <th>Başlangıç</th>
+                  <th>Tamamlanma</th>
+                  <th>Durum</th>
+                  <th>Okunan</th>
+                  <th>Değişen</th>
+                  <th>Atlanan</th>
+                  <th>Hatalı</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,131 +276,168 @@ export function ErpWorkspaceView({
                     <td>{getErpEntityTypeLabel(run.entityType)}</td>
                     <td>{formatErpDateTime(run.startedAtUtc)}</td>
                     <td>{formatErpDateTime(run.completedAtUtc)}</td>
-                    <td>{getErpSyncStatusLabel(run.status)}</td>
+                    <td>
+                      <ErpStatusBadge
+                        label={getErpSyncStatusLabel(run.status)}
+                        tone={
+                          run.status === "completed"
+                            ? "ready"
+                            : run.status === "failed"
+                              ? "critical"
+                              : "paused"
+                        }
+                      />
+                    </td>
                     <td>{run.recordsRead}</td>
-                    <td>{run.recordsCreated}</td>
-                    <td>{run.recordsUpdated}</td>
+                    <td>{run.recordsCreated + run.recordsUpdated}</td>
                     <td>{run.recordsSkipped}</td>
                     <td>{run.recordsFailed}</td>
-                    <td>{run.errorMessage ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ErpDataTable>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="erp-section" id="canonical-customers">
-        <div className="erp-section__header">
-          <h2>Canonical Customers</h2>
-          <p>Harici ERP müşteri projeksiyonları — salt okunur</p>
-        </div>
-        <div className="erp-table-wrap">
-          {customers.length === 0 ? (
-            <div className="erp-empty">Kanonik müşteri kaydı yok.</div>
+      {isErrorPage && (
+        <section className="erp-section">
+          <ErpSectionHeader
+            title="Entegrasyon Hataları"
+            description="Son senkronizasyonlardan kaynaklanan hata kayıtları"
+          />
+          {recentSyncRuns.filter((run) => run.errorMessage || run.recordsFailed > 0).length === 0 ? (
+            <ErpEmptyState title="Açık entegrasyon hatası bulunmuyor." />
           ) : (
-            <table className="erp-table">
+            <ErpDataTable>
               <thead>
                 <tr>
-                  <th>ERP Kodu</th>
-                  <th>Müşteri</th>
-                  <th>Vergi No</th>
-                  <th>Ülke</th>
+                  <th>Veri</th>
+                  <th>Başlangıç</th>
                   <th>Durum</th>
-                  <th>Kaynak</th>
-                  <th>Son Güncelleme</th>
+                  <th>Hatalı Kayıt</th>
+                  <th>Hata</th>
                 </tr>
               </thead>
               <tbody>
-                {customers.map((customer) => (
-                  <tr key={customer.id}>
-                    <td>{customer.externalCode ?? customer.externalId}</td>
-                    <td>{customer.name}</td>
-                    <td>{customer.taxNumber ?? "—"}</td>
-                    <td>{customer.countryCode ?? "—"}</td>
-                    <td>{customer.isActive ? "Aktif" : "Pasif"}</td>
-                    <td>{getErpProviderLabel(customer.provider)}</td>
-                    <td>{formatErpDateTime(customer.updatedAtUtc)}</td>
-                  </tr>
-                ))}
+                {recentSyncRuns
+                  .filter((run) => run.errorMessage || run.recordsFailed > 0)
+                  .map((run) => (
+                    <tr key={run.id}>
+                      <td>{getErpEntityTypeLabel(run.entityType)}</td>
+                      <td>{formatErpDateTime(run.startedAtUtc)}</td>
+                      <td>{getErpSyncStatusLabel(run.status)}</td>
+                      <td>{run.recordsFailed}</td>
+                      <td>{run.errorMessage ?? "—"}</td>
+                    </tr>
+                  ))}
               </tbody>
-            </table>
+            </ErpDataTable>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="erp-section" id="canonical-products">
-        <div className="erp-section__header">
-          <h2>Canonical Products</h2>
-          <p>Harici ERP ürün projeksiyonları — salt okunur</p>
-        </div>
-        <div className="erp-table-wrap">
-          {products.length === 0 ? (
-            <div className="erp-empty">Kanonik ürün kaydı yok.</div>
-          ) : (
-            <table className="erp-table">
-              <thead>
-                <tr>
-                  <th>ERP Kodu</th>
-                  <th>Ürün</th>
-                  <th>Birim</th>
-                  <th>Barkod</th>
-                  <th>Durum</th>
-                  <th>Kaynak</th>
-                  <th>Son Güncelleme</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>{product.externalCode ?? product.externalId}</td>
-                    <td>{product.name}</td>
-                    <td>{product.unit ?? "—"}</td>
-                    <td>{product.barcode ?? "—"}</td>
-                    <td>{product.isActive ? "Aktif" : "Pasif"}</td>
-                    <td>{getErpProviderLabel(product.provider)}</td>
-                    <td>{formatErpDateTime(product.updatedAtUtc)}</td>
+      {isConnectionPage && (
+        <>
+          <section className="erp-section" id="erp-musteriler">
+            <ErpSectionHeader
+              title="ERP Müşterileri"
+              description="Bağlı ERP sisteminden salt okunur olarak alınan kanonik müşteri kayıtları."
+            />
+            {customers.length === 0 ? (
+              <ErpEmptyState title="Henüz ERP müşterisi bulunmuyor." />
+            ) : (
+              <ErpDataTable>
+                <thead>
+                  <tr>
+                    <th>ERP Müşteri Kodu</th>
+                    <th>Müşteri</th>
+                    <th>Vergi No</th>
+                    <th>Ülke</th>
+                    <th>Durum</th>
+                    <th>Kaynak</th>
+                    <th>Güncellik</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </section>
+                </thead>
+                <tbody>
+                  {customers.map((customer) => (
+                    <tr key={customer.id}>
+                      <td>
+                        <ErpTableIdentifierCell
+                          primary={customer.externalCode ?? customer.externalId}
+                          secondary={customer.taxOffice ?? undefined}
+                        />
+                      </td>
+                      <td>{customer.name}</td>
+                      <td>{customer.taxNumber ?? "—"}</td>
+                      <td>{customer.countryCode ?? "—"}</td>
+                      <td>{customer.isActive ? "Aktif" : "Pasif"}</td>
+                      <td>{getErpProviderLabel(customer.provider)}</td>
+                      <td>{formatErpDateTime(customer.updatedAtUtc)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </ErpDataTable>
+            )}
+          </section>
+
+          <section className="erp-section" id="erp-urunler">
+            <ErpSectionHeader
+              title="ERP Ürünleri"
+              description="Bağlı ERP sisteminden salt okunur olarak alınan kanonik ürün kayıtları."
+            />
+            {products.length === 0 ? (
+              <ErpEmptyState title="Henüz ERP ürünü bulunmuyor." />
+            ) : (
+              <ErpDataTable>
+                <thead>
+                  <tr>
+                    <th>ERP Ürün Kodu</th>
+                    <th>Ürün</th>
+                    <th>Birim</th>
+                    <th>Barkod</th>
+                    <th>Durum</th>
+                    <th>Kaynak</th>
+                    <th>Güncellik</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.externalCode ?? product.externalId}</td>
+                      <td>{product.name}</td>
+                      <td>{product.unit ?? "—"}</td>
+                      <td>{product.barcode ?? "—"}</td>
+                      <td>{product.isActive ? "Aktif" : "Pasif"}</td>
+                      <td>{getErpProviderLabel(product.provider)}</td>
+                      <td>{formatErpDateTime(product.updatedAtUtc)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </ErpDataTable>
+            )}
+          </section>
+        </>
+      )}
 
       <section className="erp-section" aria-label="Kaynak notu">
-        <p className="erp-simulator-note">
-          <Activity aria-hidden="true" />
-          External ERP remains system of record. CrevaFactOS stores read-only
-          canonical projections only. No writeback in ERP-1L.
-        </p>
+        <ErpInfoBanner title="Salt okunur projeksiyon">
+          Harici ERP sistem kayıt sahibidir. CrevaFactOS yalnızca salt okunur kanonik projeksiyonları
+          saklar.
+        </ErpInfoBanner>
       </section>
     </main>
   );
 }
 
-function ErpKpi({
-  label,
-  value,
-  description,
-  icon,
-}: Readonly<{
-  label: string;
-  value: number | string;
-  description: string;
-  icon: ReactNode;
-}>) {
-  return (
-    <div className="erp-kpi">
-      <span className="erp-kpi__icon" aria-hidden="true">
-        {icon}
-      </span>
-      <div>
-        <span className="erp-kpi__label">{label}</span>
-        <strong className="erp-kpi__value">{value}</strong>
-        <small className="erp-kpi__desc">{description}</small>
-      </div>
-    </div>
-  );
+function buildLatestSyncByEntity(
+  syncRuns: readonly ErpSyncRun[],
+): Map<string, ErpSyncRun> {
+  const map = new Map<string, ErpSyncRun>();
+  for (const run of [...syncRuns].sort((a, b) => b.startedAtUtc.localeCompare(a.startedAtUtc))) {
+    if (!map.has(run.entityType) && run.status === "completed") {
+      map.set(run.entityType, run);
+    }
+  }
+  return map;
 }

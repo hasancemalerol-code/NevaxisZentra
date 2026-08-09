@@ -73,6 +73,7 @@ const documentsView = readRequired("apps/web/src/features/erp/components/erp-doc
 const documentDetail = readRequired("apps/web/src/features/erp/components/erp-document-detail-view.tsx");
 const writebacksView = readRequired("apps/web/src/features/erp/components/erp-writebacks-view.tsx");
 const writebackDetail = readRequired("apps/web/src/features/erp/components/erp-writeback-detail-view.tsx");
+const primitives = readRequired("apps/web/src/features/erp/components/erp-ui-primitives.tsx");
 const nav = readRequired("apps/web/src/features/erp/components/erp-workspace-nav.tsx");
 const css = readRequired("apps/web/src/features/erp/components/erp-workspace.css");
 const globals = readRequired("apps/web/src/app/globals.css");
@@ -101,8 +102,9 @@ requireText(documentsView, "ERP-4L yalnızca ERP Simulator", "documents simulato
 requireText(documentsView, "İçerik Mevcut", "content available KPI");
 requireText(documentDetail, "Belge Özeti", "document detail section");
 requireText(writebacksView, "Onaylı İşlemler", "writebacks title");
-requireText(writebacksView, "ERP Simulator — gerçek ERP işlemi değildir", "writebacks simulator warning");
-requireText(writebackDetail, "ERP Simulator — gerçek ERP işlemi değildir", "writeback detail simulator warning");
+requireText(writebacksView, "ErpSimulatorNotice", "writebacks simulator notice");
+requireText(primitives, "gerçek ERP işlemi değildir", "writeback simulator disclaimer text");
+requireText(writebackDetail, "ErpSimulatorNotice", "writeback detail simulator notice");
 requireText(nav, "/erp-entegrasyonlari/uretim", "uretim nav");
 requireText(nav, "/erp-entegrasyonlari/belgeler", "belgeler nav");
 requireText(nav, "/erp-entegrasyonlari/onayli-islemler", "onayli-islemler nav");

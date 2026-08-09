@@ -47,8 +47,8 @@ const sidebar = readRequired("apps/web/src/lib/navigation/primary-navigation.ts"
 requireText(ordersView, "ERP Siparişleri", "orders title");
 requireText(ordersView, "ERP Sipariş No", "orders table column");
 requireText(ordersView, "Hazırlık Durumu", "readiness column");
-requireText(ordersView, "Siparişi Aç", "order action");
-requireText(orderDetail, "Hazırlık Durumu", "order detail readiness");
+requireText(ordersView, "Aç", "order action");
+requireText(orderDetail, "Operasyonel Hazırlık", "order detail readiness");
 requireText(orderDetail, "Engelleyici neden", "blocking reasons");
 requireText(reconciliation, "Müşteri Eşleştirmeleri", "customer reconciliation section");
 requireText(reconciliation, "Ürün Eşleştirmeleri", "product reconciliation section");

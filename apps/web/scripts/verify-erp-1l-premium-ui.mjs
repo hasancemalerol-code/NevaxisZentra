@@ -35,45 +35,48 @@ function forbidText(source, forbidden, label) {
 console.log("Running ERP-1L premium UI verifier.");
 
 const view = readRequired("apps/web/src/features/erp/components/erp-workspace-view.tsx");
+const primitives = readRequired("apps/web/src/features/erp/components/erp-ui-primitives.tsx");
 const css = readRequired("apps/web/src/features/erp/components/erp-workspace.css");
 const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 const baglanti = readRequired("apps/web/src/app/(app)/erp-entegrasyonlari/baglanti/page.tsx");
 const globals = readRequired("apps/web/src/app/globals.css");
 
-requireText(view, "ERP Entegrasyonları", "workspace title");
+requireText(view, "ERP Bağlantıları", "workspace title");
 requireText(
   view,
-  "Bağlı ERP sistemlerinin bağlantı durumunu, veri senkronizasyonunu ve",
+  "ERP bağlantılarınızı, veri senkronizasyonunu ve kontrollü ERP işlemlerini",
   "workspace subtitle",
 );
-requireText(view, "Connection Health", "health section");
-requireText(view, "Connections", "connections section");
-requireText(view, "Recent Sync Runs", "sync section");
-requireText(view, "Canonical Customers", "customers section");
-requireText(view, "Canonical Products", "products section");
-requireText(view, "Bağlantılar", "KPI");
+requireText(view, "Bağlantı Sağlığı", "health section");
+requireText(view, "Son Senkronizasyonlar", "sync section");
+requireText(view, "ERP Müşterileri", "customers section");
+requireText(view, "ERP Ürünleri", "products section");
+requireText(view, "ERP Bağlantıları", "KPI");
 requireText(view, "Sağlıklı", "KPI");
-requireText(view, "Sorunlu", "KPI");
+requireText(view, "Dikkat Gerektiren", "KPI");
 requireText(view, "Son Senkronizasyon", "KPI");
-requireText(view, "Müşteri Kayıtları", "KPI");
-requireText(view, "Ürün Kayıtları", "KPI");
-requireText(view, "ERP Simulator", "simulator labeling");
-requireText(view, "Logo / Mikro / Netsis", "no misleading real vendor claim context");
-requireText(view, "gerçek bağlantı değildir", "no misleading real vendor claim");
+requireText(view, "ERP Müşterileri", "customer KPI");
+requireText(view, "ERP Ürünleri", "product KPI");
+requireText(primitives, "ERP Simulator — gerçek ERP bağlantısı değildir", "simulator labeling");
+requireText(primitives, "getErpFacilityDisplayLabel", "facility display helper");
 
-requireText(view, "ERP Kodu", "customer/product tables");
+requireText(view, "ERP Müşteri Kodu", "customer table");
 requireText(view, "Vergi No", "customer table");
 requireText(view, "Barkod", "product table");
-requireText(view, "Bağlantıyı Aç", "connection actions");
-requireText(view, "Sağlığı Kontrol Et", "connection actions");
-requireText(view, "Müşterileri Senkronize Et", "connection actions");
-requireText(view, "Ürünleri Senkronize Et", "connection actions");
+requireText(primitives, "Bağlantıyı Yönet", "connection primary action");
+requireText(primitives, "Sağlığı Kontrol Et", "connection secondary action");
+requireText(primitives, "Senkronizasyon Merkezi", "sync action routing");
 
 requireText(css, ".erp-workspace-page", "erp css");
 requireText(css, ".erp-kpi-grid", "erp css");
+requireText(css, ".erp-connection-card", "connection card styling");
 requireText(baglanti, "ErpWorkspacePage", "baglanti route");
 requireText(nav, "/erp-entegrasyonlari/baglanti", "existing ERP nav reused");
 
+forbidText(view, "Connection Health", "no English health heading");
+forbidText(view, "Recent Sync Runs", "no English sync heading");
+forbidText(view, "Canonical Customers", "no English customers heading");
+forbidText(view, "facilityId.slice", "no raw facility UUID");
 forbidText(view, "<select", "no raw browser controls");
 forbidText(view, "<input", "no raw browser controls");
 forbidText(globals, "erp-workspace", "globals.css must not change for ERP");

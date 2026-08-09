@@ -13,6 +13,7 @@ import {
   rejectErpWritebackAction,
   submitErpWritebackAction,
 } from "../server/erp-writeback-workflow-actions";
+import { ErpInfoBanner, ErpSimulatorNotice } from "./erp-ui-primitives";
 import "./erp-workspace.css";
 
 type ErpWritebackActionPanelProps = Readonly<{
@@ -63,16 +64,15 @@ export function ErpWritebackActionPanel({
   );
 
   if (!hasActions) {
-    return null;
+    return (
+      <ErpInfoBanner title="İşlem yok">
+        Bu durum ve yetki kombinasyonu için kullanılabilir aksiyon bulunmuyor.
+      </ErpInfoBanner>
+    );
   }
 
   return (
-    <section className="erp-section erp-writeback-actions" aria-label="Writeback işlemleri">
-      <div className="erp-section__header">
-        <h2>İşlemler</h2>
-        <p>Yetki ve duruma göre kullanılabilir aksiyonlar</p>
-      </div>
-
+    <div className="erp-writeback-actions" aria-label="Writeback işlemleri">
       {actionState.kind === "error" ? (
         <div className="erp-writeback-actions__error" role="alert">
           {actionState.message}
@@ -158,9 +158,7 @@ export function ErpWritebackActionPanel({
         </label>
       )}
 
-      <p className="erp-simulator-note erp-simulator-note--warning">
-        ERP Simulator — gerçek ERP işlemi değildir.
-      </p>
-    </section>
+      <ErpSimulatorNotice variant="writeback" />
+    </div>
   );
 }

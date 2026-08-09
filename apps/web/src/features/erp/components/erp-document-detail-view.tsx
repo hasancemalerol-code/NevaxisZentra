@@ -4,9 +4,17 @@ import type { CanonicalErpDocumentDetail } from "../domain/erp";
 import {
   formatErpDateTime,
   getErpDocumentTypeLabel,
-  getErpProviderLabel,
-  getErpSourceFreshnessLabel,
 } from "../presentation/erp-labels";
+import {
+  ErpDetailSection,
+  ErpEmptyState,
+  ErpFreshnessBadge,
+  ErpMetadataGrid,
+  ErpMetadataItem,
+  ErpPageHeader,
+  ErpProviderBadge,
+  ErpReadonlyNotice,
+} from "./erp-ui-primitives";
 import { ErpWorkspaceNav } from "./erp-workspace-nav";
 import "./erp-workspace.css";
 
@@ -15,80 +23,77 @@ type ErpDocumentDetailViewProps = Readonly<{
 }>;
 
 export function ErpDocumentDetailView({ document }: ErpDocumentDetailViewProps) {
+  const title = document.documentNumber ?? document.externalCode ?? document.externalId;
+
   return (
     <main className="production-execution-page erp-workspace-page">
-      <header className="erp-workspace-header production-execution-header">
-        <div className="erp-workspace-header__intro">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>{document.documentNumber ?? document.externalCode ?? document.externalId}</h1>
-          <span>ERP belge özeti — salt okunur.</span>
-        </div>
-      </header>
+      <ErpPageHeader
+        title={title}
+        description="ERP belge özeti — salt okunur."
+        notice={
+          <ErpReadonlyNotice>
+            Belge meta verisi ERP kaynağından görüntülenir; içerik indirme veya düzenleme bu ekranda
+            yapılamaz.
+          </ErpReadonlyNotice>
+        }
+      />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/belgeler" />
 
-      <section className="erp-section">
-        <div className="erp-section__header">
-          <h2>Belge Özeti</h2>
-        </div>
-        <dl className="erp-detail-grid">
-          <div>
-            <dt>Belge Türü</dt>
-            <dd>{getErpDocumentTypeLabel(document.documentType)}</dd>
-          </div>
-          <div>
-            <dt>Belge No</dt>
-            <dd>{document.documentNumber ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>Belge Tarihi</dt>
-            <dd>{formatErpDateTime(document.documentDateUtc)}</dd>
-          </div>
-          <div>
-            <dt>Durum</dt>
-            <dd>{document.status ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>İlişkili Varlık</dt>
-            <dd>
-              {document.relatedExternalEntityCode ??
-                document.relatedExternalEntityId ??
-                "—"}
-            </dd>
-          </div>
-          <div>
-            <dt>Varlık Türü</dt>
-            <dd>{document.relatedEntityType ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>Dosya Adı</dt>
-            <dd>{document.fileName ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>MIME Türü</dt>
-            <dd>{document.mimeType ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>İçerik</dt>
-            <dd>{document.contentAvailable ? "Mevcut" : "Yok"}</dd>
-          </div>
-          <div>
-            <dt>Harici Referans</dt>
-            <dd>{document.externalReference ?? document.externalCode ?? document.externalId}</dd>
-          </div>
-          <div>
-            <dt>Kaynak</dt>
-            <dd>
-              {getErpProviderLabel(document.provider)} ·{" "}
-              {getErpSourceFreshnessLabel(document.freshness)}
-            </dd>
-          </div>
-          <div>
-            <dt>Son Güncelleme</dt>
-            <dd>{formatErpDateTime(document.updatedAtUtc)}</dd>
-          </div>
-        </dl>
-      </section>
+      <ErpDetailSection title="Belge Özeti">
+        <ErpMetadataGrid>
+          <ErpMetadataItem label="Belge Türü">
+            {getErpDocumentTypeLabel(document.documentType)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Belge No">{document.documentNumber ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="Belge Tarihi">
+            {formatErpDateTime(document.documentDateUtc)}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Durum">{document.status ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="İlişkili Varlık">
+            {document.relatedExternalEntityCode ?? document.relatedExternalEntityId ?? "—"}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Varlık Türü">{document.relatedEntityType ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="Dosya Adı">{document.fileName ?? "—"}</ErpMetadataItem>
+          <ErpMetadataItem label="MIME Türü">{document.mimeType ?? "—"}</ErpMetadataItem>
+        </ErpMetadataGrid>
+      </ErpDetailSection>
+
+      <ErpDetailSection title="ERP Kaynağı">
+        <ErpMetadataGrid>
+          <ErpMetadataItem label="Sağlayıcı">
+            <ErpProviderBadge provider={document.provider} />
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Güncellik">
+            <ErpFreshnessBadge freshness={document.freshness} />
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Harici Referans">
+            {document.externalReference ?? document.externalCode ?? document.externalId}
+          </ErpMetadataItem>
+          <ErpMetadataItem label="Son Güncelleme">
+            {formatErpDateTime(document.updatedAtUtc)}
+          </ErpMetadataItem>
+        </ErpMetadataGrid>
+      </ErpDetailSection>
+
+      <ErpDetailSection title="Belge İçeriği">
+        {document.contentAvailable ? (
+          <ErpMetadataGrid>
+            <ErpMetadataItem label="Durum">İçerik mevcut</ErpMetadataItem>
+            {document.fileName ? (
+              <ErpMetadataItem label="Dosya">{document.fileName}</ErpMetadataItem>
+            ) : null}
+            {document.mimeType ? (
+              <ErpMetadataItem label="Biçim">{document.mimeType}</ErpMetadataItem>
+            ) : null}
+          </ErpMetadataGrid>
+        ) : (
+          <ErpEmptyState
+            title="Belge içeriği mevcut değil"
+            description="ERP kaynağı yalnızca belge meta verisini sağladı. Tam dosya içeriği senkronize edilmedi veya erişilebilir değil."
+          />
+        )}
+      </ErpDetailSection>
 
       <p>
         <Link href="/erp-entegrasyonlari/belgeler">← Belge listesine dön</Link>
