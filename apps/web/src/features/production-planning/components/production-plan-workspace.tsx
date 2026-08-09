@@ -9,16 +9,19 @@ import { Card } from "@/components/ui/card";
 
 import type { ProductionPlan } from "../domain/production-plan";
 import { hasBlockingProductionPlanRisks } from "../domain/production-plan";
+import type { PlanningLogisticsCardSummary } from "../presentation/production-plan-logistics-formatters";
 import { ProductionPlanCard } from "./production-plan-card";
 
 type ProductionPlanWorkspaceProps = Readonly<{
   productionPlans: readonly ProductionPlan[];
   totalCount?: number;
+  logisticsSummaries?: ReadonlyMap<string, PlanningLogisticsCardSummary>;
 }>;
 
 export function ProductionPlanWorkspace({
   productionPlans,
   totalCount = productionPlans.length,
+  logisticsSummaries,
 }: ProductionPlanWorkspaceProps) {
   const blockingPlanCount =
     productionPlans.filter(
@@ -82,6 +85,9 @@ export function ProductionPlanWorkspace({
             <ProductionPlanCard
               key={productionPlan.id}
               productionPlan={productionPlan}
+              logisticsSummary={logisticsSummaries?.get(
+                productionPlan.id,
+              )}
             />
           ),
         )}

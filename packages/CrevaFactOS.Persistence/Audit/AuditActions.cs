@@ -21,6 +21,8 @@ public static class AuditActions
     public const string ProductionPlanTransferFail = "production.plan.transfer.fail";
     public const string ProductionPlanTransferMarkUncertain = "production.plan.transfer.mark.uncertain";
     public const string ProductionPlanHandoffPrepare = "production.plan.handoff.prepare";
+    public const string PlanningLogisticsConstraintsEvaluate = "planning.logistics.constraints.evaluate";
+    public const string PlanningLogisticsRiskChange = "planning.logistics.risk.change";
     public const string ProductionOrderCreate = "production.order.create";
     public const string ProductionOrderStart = "production.order.start";
     public const string ProductionOrderPause = "production.order.pause";
@@ -129,6 +131,8 @@ public static class AuditActions
         ProductionPlanTransferFail,
         ProductionPlanTransferMarkUncertain,
         ProductionPlanHandoffPrepare,
+        PlanningLogisticsConstraintsEvaluate,
+        PlanningLogisticsRiskChange,
         ProductionOrderCreate,
         ProductionOrderStart,
         ProductionOrderPause,

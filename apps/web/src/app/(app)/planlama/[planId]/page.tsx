@@ -47,7 +47,11 @@ import {
   executeTransferAction,
 } from "@/features/production-planning/server/production-plan-transfer-actions";
 import { ProductionPlanHandoffPanel } from "@/features/production-planning/components/production-plan-handoff-panel";
+import { ProductionPlanLogisticsPanel } from "@/features/production-planning/components/production-plan-logistics-panel";
+import { deriveExportReadiness } from "@/features/production-planning/presentation/production-plan-logistics-formatters";
 import { prepareHandoffAction } from "@/features/production-planning/server/production-plan-handoff-actions";
+import { evaluatePlanningLogisticsAction } from "@/features/production-planning/server/production-plan-logistics-actions";
+import { readPlanningLogisticsEvaluation } from "@/features/production-planning/server/production-plan-logistics-reader";
 
 type ProductionPlanDetailPageProps =
   Readonly<{
@@ -115,6 +119,12 @@ export default async function ProductionPlanDetailPage({
   const isEditable =
     productionPlan.status === "draft" ||
     productionPlan.status === "needs-review";
+
+  const logisticsResult =
+    await readPlanningLogisticsEvaluation(
+      productionPlan.id,
+      { evaluateIfMissing: productionPlan.status === "scheduled" },
+    );
 
   return (
     <main className="production-plan-detail-page">
@@ -260,6 +270,32 @@ export default async function ProductionPlanDetailPage({
       <ProductionPlanRiskPanel
         viewModel={riskViewModel}
       />
+
+      {logisticsResult.status === "success" ? (
+        <ProductionPlanLogisticsPanel
+          planId={productionPlan.id}
+          evaluation={{
+            productionPlanId: logisticsResult.evaluation.productionPlanId,
+            exportCaseNumber: logisticsResult.evaluation.exportCaseNumber,
+            shipmentReference: logisticsResult.evaluation.shipmentReference,
+            pickupDeadlineUtc: logisticsResult.evaluation.pickupDeadlineUtc,
+            departureDeadlineUtc: logisticsResult.evaluation.departureDeadlineUtc,
+            latestProductionCompletionUtc:
+              logisticsResult.evaluation.latestProductionCompletionUtc,
+            plannedProductionCompletionUtc:
+              logisticsResult.evaluation.plannedProductionCompletionUtc,
+            slackMinutes: logisticsResult.evaluation.slackMinutes,
+            riskLevel: logisticsResult.evaluation.riskLevel,
+            blocking: logisticsResult.evaluation.blocking,
+            blockingReason: logisticsResult.evaluation.blockingReason,
+            evaluatedAtUtc: logisticsResult.evaluation.evaluatedAtUtc,
+            sourceVersion: logisticsResult.evaluation.sourceVersion,
+            linkageStatus: logisticsResult.evaluation.linkageStatus,
+            ...deriveExportReadiness(logisticsResult.evaluation),
+          }}
+          onEvaluate={evaluatePlanningLogisticsAction}
+        />
+      ) : null}
 
       <ProductionPlanWorkflowActions
         planId={productionPlan.id}

@@ -28,6 +28,8 @@ import {
   formatProductionPlanRiskCount,
   formatProductionPlanTimeWindow,
 } from "../presentation/production-plan-formatters";
+import type { PlanningLogisticsCardSummary } from "../presentation/production-plan-logistics-formatters";
+import { formatPlanningLogisticsRiskLabel } from "../presentation/production-plan-logistics-formatters";
 import {
   getProductionPlanConfidenceLabel,
   getProductionPlanOriginLabel,
@@ -37,6 +39,7 @@ import {
 
 type ProductionPlanCardProps = Readonly<{
   productionPlan: ProductionPlan;
+  logisticsSummary?: PlanningLogisticsCardSummary;
 }>;
 
 type BadgeTone =
@@ -161,6 +164,7 @@ function getHighestRiskSeverity(
 
 export function ProductionPlanCard({
   productionPlan,
+  logisticsSummary,
 }: ProductionPlanCardProps) {
   const highestPriority =
     resolveProductionPlanHighestPriority(
@@ -218,6 +222,21 @@ export function ProductionPlanCard({
               <Badge tone="ai">
                 <Sparkles aria-hidden="true" />
                 AI planı
+              </Badge>
+            ) : null}
+
+            {logisticsSummary ? (
+              <Badge
+                tone={
+                  logisticsSummary.riskLevel === "critical" ||
+                  logisticsSummary.riskLevel === "high"
+                    ? "danger"
+                    : logisticsSummary.riskLevel === "medium"
+                      ? "warning"
+                      : "information"
+                }
+              >
+                {logisticsSummary.indicatorLabel}
               </Badge>
             ) : null}
           </div>
@@ -376,6 +395,17 @@ export function ProductionPlanCard({
               {blockingRiskCount > 0
                 ? `${blockingRiskCount} engelleyici`
                 : highestRiskSeverity}
+            </Badge>
+          ) : null}
+
+          {logisticsSummary &&
+          (logisticsSummary.riskLevel === "high" ||
+            logisticsSummary.riskLevel === "critical") ? (
+            <Badge tone="danger">
+              Lojistik:{" "}
+              {formatPlanningLogisticsRiskLabel(
+                logisticsSummary.riskLevel,
+              )}
             </Badge>
           ) : null}
         </div>

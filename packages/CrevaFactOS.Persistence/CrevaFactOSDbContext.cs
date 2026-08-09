@@ -59,6 +59,9 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     public DbSet<ProductionPlanHandoff> ProductionPlanHandoffs => Set<ProductionPlanHandoff>();
 
+    public DbSet<PlanningLogisticsConstraintEvaluation> PlanningLogisticsConstraintEvaluations =>
+        Set<PlanningLogisticsConstraintEvaluation>();
+
     public DbSet<FacilityMembership> FacilityMemberships => Set<FacilityMembership>();
 
     public DbSet<ProductionOrder> ProductionOrders => Set<ProductionOrder>();
@@ -490,6 +493,7 @@ public sealed class CrevaFactOSDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ProductionPlanEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanTransferRequestEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionPlanHandoffEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new PlanningLogisticsConstraintEvaluationEntityConfiguration());
 
         modelBuilder.Entity<Facility>().HasQueryFilter(facility =>
             tenantContextAccessor != null
@@ -510,6 +514,11 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && handoff.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.Entity<PlanningLogisticsConstraintEvaluation>().HasQueryFilter(evaluation =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && evaluation.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new FacilityMembershipEntityConfiguration());
 

@@ -16,6 +16,8 @@ public static class OutboxMessageTypes
     public const string ProductionPlanTransferFailed = "production-plan-transfer-failed";
     public const string ProductionPlanTransferUncertain = "production-plan-transfer-uncertain";
     public const string ProductionPlanHandoffPrepared = "production-plan-handoff-prepared";
+    public const string PlanningLogisticsRiskHigh = "planning-logistics-risk-high";
+    public const string PlanningLogisticsDeadlineBreached = "planning-logistics-deadline-breached";
     public const string ProductionOrderCreated = "production-order-created";
     public const string ProductionOrderStarted = "production-order-started";
     public const string ProductionOrderPaused = "production-order-paused";
@@ -110,6 +112,8 @@ public static class OutboxMessageTypes
             ProductionPlanTransferFailed,
             ProductionPlanTransferUncertain,
             ProductionPlanHandoffPrepared,
+            PlanningLogisticsRiskHigh,
+            PlanningLogisticsDeadlineBreached,
             ProductionOrderCreated,
             ProductionOrderStarted,
             ProductionOrderPaused,

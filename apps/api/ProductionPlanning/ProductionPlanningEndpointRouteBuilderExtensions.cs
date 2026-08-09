@@ -831,6 +831,27 @@ public static class ProductionPlanningServiceCollectionExtensions
         });
         services.AddScoped<IProductionPlanHandoffService, ProductionPlanHandoffService>();
 
+        services.AddScoped<IPlanningLogisticsSourceReader>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailablePlanningLogisticsSourceReader()
+                : new PlanningLogisticsSourceReader(dbContext);
+        });
+        services.AddScoped<IPlanningMaterialInboundContextReader, UnavailablePlanningMaterialInboundContextReader>();
+        services.AddScoped<IPlanningLogisticsConstraintRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailablePlanningLogisticsConstraintRepository()
+                : new PlanningLogisticsConstraintRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IPlanningLogisticsSourceReader>(),
+                    serviceProvider.GetRequiredService<IPlanningMaterialInboundContextReader>());
+        });
+        services.AddScoped<IPlanningLogisticsService, PlanningLogisticsService>();
+
         return services;
     }
 }

@@ -113,7 +113,7 @@ internal static class DevelopmentPilotProductionPlanSeed
             seedTimestampUtc.AddDays(-5),
             seedTimestampUtc.AddHours(-6),
             """
-            [{"id":"demand-pilot-003","productId":"product-pom-wheel-55","productCode":"POM-WHEEL-55","productName":"POM dişli çark","requiredQuantity":9600,"unit":"adet","priority":"normal","orderReference":"ERP-PILOT-003","customerName":"Pilot OEM C","requestedDeliveryDate":"2026-08-22T16:00:00.000Z"}]
+            [{"id":"demand-pilot-003","productId":"product-pom-wheel-55","productCode":"POM-WHEEL-55","productName":"POM dişli çark","requiredQuantity":9600,"unit":"adet","priority":"normal","orderReference":"PILOT-ORD-EXPORT-001","customerName":"Nordic Components GmbH","requestedDeliveryDate":"2026-08-22T16:00:00.000Z"}]
             """,
             "[]",
             """

@@ -15,7 +15,13 @@ import {
   calculateProductionPlanSummary,
 } from "@/features/production-planning/application/production-plan-query";
 import { ProductionPlanFilteredWorkspace } from "@/features/production-planning/components/production-plan-filtered-workspace";
+import { ProductionPlanningLogisticsSection } from "@/features/production-planning/components/production-planning-logistics-section";
+import { deriveExportReadiness } from "@/features/production-planning/presentation/production-plan-logistics-formatters";
 import { readProductionPlanningWorkspace } from "@/features/production-planning/server/production-plan-reader";
+import {
+  readPlanningLogisticsEvaluation,
+  readPlanningLogisticsSummaries,
+} from "@/features/production-planning/server/production-plan-logistics-reader";
 
 export default async function ProductionPlanningPage() {
   const workspaceResult =
@@ -38,6 +44,33 @@ export default async function ProductionPlanningPage() {
     calculateProductionPlanSummary(
       productionPlans,
     );
+
+  const logisticsSummaries =
+    await readPlanningLogisticsSummaries(
+      productionPlans.map((plan) => plan.id),
+    );
+
+  const linkedLogisticsEvaluations = (
+    await Promise.all(
+      productionPlans.slice(0, 4).map(async (plan) => {
+        const result = await readPlanningLogisticsEvaluation(
+          plan.id,
+          { evaluateIfMissing: plan.status === "scheduled" },
+        );
+        return result.status === "success"
+          ? result.evaluation
+          : null;
+      }),
+    )
+  ).filter(
+    (
+      evaluation,
+    ): evaluation is NonNullable<typeof evaluation> =>
+      evaluation !== null && evaluation.linkageStatus === "linked",
+  ).map((evaluation) => ({
+    ...evaluation,
+    ...deriveExportReadiness(evaluation),
+  }));
 
   return (
     <main className="production-planning-page">
@@ -170,8 +203,28 @@ export default async function ProductionPlanningPage() {
         </Badge>
       </section>
 
+      <ProductionPlanningLogisticsSection
+        evaluations={linkedLogisticsEvaluations.map((evaluation) => ({
+          productionPlanId: evaluation.productionPlanId,
+          exportCaseNumber: evaluation.exportCaseNumber,
+          shipmentReference: evaluation.shipmentReference,
+          pickupDeadlineUtc: evaluation.pickupDeadlineUtc,
+          departureDeadlineUtc: evaluation.departureDeadlineUtc,
+          latestProductionCompletionUtc: evaluation.latestProductionCompletionUtc,
+          plannedProductionCompletionUtc: evaluation.plannedProductionCompletionUtc,
+          slackMinutes: evaluation.slackMinutes,
+          riskLevel: evaluation.riskLevel,
+          blocking: evaluation.blocking,
+          blockingReason: evaluation.blockingReason,
+          evaluatedAtUtc: evaluation.evaluatedAtUtc,
+          sourceVersion: evaluation.sourceVersion,
+          linkageStatus: evaluation.linkageStatus,
+        }))}
+      />
+
       <ProductionPlanFilteredWorkspace
         productionPlans={productionPlans}
+        logisticsSummaries={logisticsSummaries}
       />
     </main>
   );

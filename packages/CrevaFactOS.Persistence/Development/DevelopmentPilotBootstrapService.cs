@@ -7,6 +7,7 @@ using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace CrevaFactOS.Persistence.Development;
 
@@ -319,6 +320,8 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
+        await EnsureExportPilotShipmentAsync(
+            dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportDeDemoRulePackAsync(
             dbContext, tenant.Id, seedTimestampUtc, cancellationToken);
         await EnsureMembershipRoleAsync(
@@ -336,6 +339,11 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 pilotOptions.DevelopmentSubject,
                 seedTimestampUtc,
+                cancellationToken);
+            await EnsurePlanningLogisticsPilotLinkageAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
                 cancellationToken);
         }
 
@@ -1462,6 +1470,85 @@ internal sealed class DevelopmentPilotBootstrapService(
         exportCase.Status = readiness.SuggestedCaseStatus;
 
         dbContext.ExportCases.Add(exportCase);
+    }
+
+    private static async Task EnsureExportPilotShipmentAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var exists = await dbContext.ExportShipments
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                s => s.Id == DevelopmentPilotIds.ExportPilotShipmentId,
+                cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        dbContext.ExportShipments.Add(new ExportShipment
+        {
+            Id = DevelopmentPilotIds.ExportPilotShipmentId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            ExportCaseId = DevelopmentPilotIds.ExportPilotCaseId,
+            ShipmentReference = "SHP-2026-000001",
+            Status = ExportShipmentStatus.Preparing,
+            TransportMode = "road",
+            IncotermCode = "DAP",
+            DestinationCountryCode = "DE",
+            DestinationCity = "Hamburg",
+            ForwarderName = "Pilot Forwarder GmbH",
+            CarrierName = "Pilot Carrier Logistics",
+            PlannedPickupAtUtc = DateTimeOffset.Parse("2026-08-16T10:00:00.000Z", CultureInfo.InvariantCulture),
+            PlannedDepartureAtUtc = DateTimeOffset.Parse("2026-08-17T06:00:00.000Z", CultureInfo.InvariantCulture),
+            PlannedArrivalAtUtc = DateTimeOffset.Parse("2026-08-20T14:00:00.000Z", CultureInfo.InvariantCulture),
+            BookingReference = "BK-PILOT-001",
+            RouteSummary = "TR factory → DE Hamburg",
+            OriginLocation = "Pilot Facility TR",
+            PortOrAirport = "Ambarli",
+            ResponsibilityNotes = "Development pilot shipment — logistics source-of-truth in Export.",
+            TotalPackageCount = 12,
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBySubjectId = DevelopmentPilotIds.IdentitySubjectId.ToString(),
+            UpdatedAtUtc = seedTimestampUtc,
+            LastModifiedBySubjectId = DevelopmentPilotIds.IdentitySubjectId.ToString(),
+            Version = 1,
+        });
+    }
+
+    private static async Task EnsurePlanningLogisticsPilotLinkageAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        CancellationToken cancellationToken)
+    {
+        var scheduledPlan = await dbContext.ProductionPlans
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                p =>
+                    p.TenantId == tenantId
+                    && p.FacilityId == facilityId
+                    && p.Id == DevelopmentPilotIds.PlanScheduledId,
+                cancellationToken);
+
+        if (scheduledPlan is null)
+        {
+            return;
+        }
+
+        if (!scheduledPlan.DemandsJson.Contains("PILOT-ORD-EXPORT-001", StringComparison.Ordinal))
+        {
+            scheduledPlan.DemandsJson =
+                """
+                [{"id":"demand-pilot-003","productId":"product-pom-wheel-55","productCode":"POM-WHEEL-55","productName":"POM dişli çark","requiredQuantity":9600,"unit":"adet","priority":"normal","orderReference":"PILOT-ORD-EXPORT-001","customerName":"Nordic Components GmbH","requestedDeliveryDate":"2026-08-22T16:00:00.000Z"}]
+                """;
+            scheduledPlan.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        }
     }
 
     private static async Task EnsurePilotProductionShiftsAsync(

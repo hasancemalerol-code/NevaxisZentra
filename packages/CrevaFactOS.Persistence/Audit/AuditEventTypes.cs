@@ -24,6 +24,8 @@ public static class AuditEventTypes
     public const string ProductionPlanTransferFailed = "production.plan.transfer.failed";
     public const string ProductionPlanTransferUncertain = "production.plan.transfer.uncertain";
     public const string ProductionPlanHandoffPrepared = "production.plan.handoff.prepared";
+    public const string PlanningLogisticsConstraintsEvaluated = "planning.logistics.constraints.evaluated";
+    public const string PlanningLogisticsRiskChanged = "planning.logistics.risk.changed";
     public const string ProductionOrderCreated = "production.order.created";
     public const string ProductionOrderStarted = "production.order.started";
     public const string ProductionOrderPaused = "production.order.paused";
@@ -135,6 +137,8 @@ public static class AuditEventTypes
         ProductionPlanTransferFailed,
         ProductionPlanTransferUncertain,
         ProductionPlanHandoffPrepared,
+        PlanningLogisticsConstraintsEvaluated,
+        PlanningLogisticsRiskChanged,
         ProductionOrderCreated,
         ProductionOrderStarted,
         ProductionOrderPaused,

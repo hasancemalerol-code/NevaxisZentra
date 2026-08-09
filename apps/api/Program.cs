@@ -68,6 +68,7 @@ app.UseAuthorization();
 app.MapProductionPlanningReadEndpoints();
 app.MapProductionPlanningWriteEndpoints();
 app.MapProductionPlanningWorkflowEndpoints();
+app.MapProductionPlanningLogisticsEndpoints();
 
 app.MapProductionExecutionReadEndpoints();
 app.MapProductionExecutionWriteEndpoints();
