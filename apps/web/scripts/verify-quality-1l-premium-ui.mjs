@@ -35,28 +35,34 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 1L premium UI verifier.");
 
 const mainPage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
+const dashboardView = readRequired(
+  "apps/web/src/features/quality-control/components/quality-dashboard-view.tsx",
+);
+const mainUi = `${mainPage}\n${dashboardView}`;
 const planPage = readRequired("apps/web/src/app/(app)/kalite/planlar/yeni/page.tsx");
 const inspectionPage = readRequired("apps/web/src/app/(app)/kalite/kontroller/[inspectionId]/page.tsx");
 const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 
-requireText(mainPage, "production-execution-page", "kalite main page");
-requireText(mainPage, "production-execution-kpis", "kalite main page");
-requireText(mainPage, "İnceleme Bekleyenler", "kalite main page");
-requireText(mainPage, "Başarısız Kontroller", "kalite main page");
-requireText(mainPage, "Serbest Bırakılanlar", "kalite main page");
-requireText(mainPage, "Kontrol Planları", "kalite main page");
-requireText(mainPage, "Aktif Kontroller", "kalite main page");
-requireText(mainPage, "Son Kontroller", "kalite main page");
+requireText(mainUi, "production-execution-page", "kalite main page");
+requireText(mainUi, "production-execution-kpis", "kalite main page");
+requireText(mainUi, "İnceleme Bekleyenler", "kalite main page");
+requireText(mainUi, "Başarısız Kontroller", "kalite main page");
+requireText(mainUi, "Serbest Bırakılanlar", "kalite main page");
+requireText(mainUi, "Kontrol Planları", "kalite main page");
+requireText(mainUi, "Aktif Kontroller", "kalite main page");
+requireText(mainUi, "Son Kontroller", "kalite main page");
 
-requireText(planPage, "production-execution-page", "plan page");
+requireText(planPage, "QualityPageShell", "plan page");
 requireText(planPage, "Yeni Kontrol Planı", "plan page");
+requireText(planPage, "QualityPlanForm", "plan page");
 
-requireText(inspectionPage, "production-execution-page", "inspection page");
-requireText(inspectionPage, "Üretim bağlamı", "inspection page");
+requireText(inspectionPage, "QualityPageShell", "inspection page");
+requireText(inspectionPage, "Üretim Bağlamı", "inspection page");
 requireText(inspectionPage, "salt okunur", "inspection page");
+requireText(inspectionPage, "quality-table", "inspection page");
 
 requireText(nav, 'href: "/kalite"', "primary navigation");
 
-forbidText(mainPage, "globals.css", "kalite main page");
+forbidText(mainUi, "globals.css", "kalite main page");
 
 console.log("Quality 1L premium UI verification passed.");

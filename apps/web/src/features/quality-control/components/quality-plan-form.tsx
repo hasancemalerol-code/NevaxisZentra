@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { createQualityControlPlanAction } from "../server/quality-control-writer";
 
 export type QualityPlanFormProps = Readonly<{
@@ -16,7 +17,7 @@ export function QualityPlanForm({ onCreate }: QualityPlanFormProps) {
 
   return (
     <form
-      className="production-execution-panel"
+      className="quality-section quality-section--wide quality-form-stack"
       onSubmit={(event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -54,78 +55,104 @@ export function QualityPlanForm({ onCreate }: QualityPlanFormProps) {
         });
       }}
     >
-      <header>
-        <h2>Yeni Kontrol Planı</h2>
-      </header>
-
       {message ? (
-        <div role="alert" className="state-panel error-state">
+        <div role="alert" className="quality-error-panel">
           <p>{message}</p>
         </div>
       ) : null}
 
-      <label>
-        Kod
-        <input name="code" required defaultValue="QC-PLAN-NEW" />
-      </label>
-      <label>
-        Ad
-        <input name="name" required defaultValue="Yeni kalite planı" />
-      </label>
-      <label>
-        Ürün
-        <input name="productReference" placeholder="Ürün referansı" />
-      </label>
-      <label>
-        Operasyon
-        <input name="operationReference" placeholder="Operasyon referansı" />
-      </label>
-      <label>
-        Revizyon
-        <input name="revision" defaultValue="1" />
-      </label>
-      <label>
-        Durum
-        <select name="status" defaultValue="active">
-          <option value="draft">Taslak</option>
-          <option value="active">Aktif</option>
-        </select>
-      </label>
+      <section className="quality-form-section" aria-label="Plan bilgileri">
+        <h3>Plan Bilgileri</h3>
+        <div className="quality-form-grid">
+          <div className="quality-form-field">
+            <label htmlFor="code">Kod</label>
+            <input id="code" name="code" className="quality-form-input" required defaultValue="QC-PLAN-NEW" />
+          </div>
+          <div className="quality-form-field">
+            <label htmlFor="name">Ad</label>
+            <input id="name" name="name" className="quality-form-input" required defaultValue="Yeni kalite planı" />
+          </div>
+          <div className="quality-form-field">
+            <label htmlFor="revision">Revizyon</label>
+            <input id="revision" name="revision" className="quality-form-input" defaultValue="1" />
+          </div>
+          <div className="quality-form-field">
+            <label htmlFor="status">Durum</label>
+            <select id="status" name="status" className="quality-form-select" defaultValue="active">
+              <option value="draft">Taslak</option>
+              <option value="active">Aktif</option>
+            </select>
+          </div>
+        </div>
+      </section>
 
-      <fieldset>
-        <legend>İlk ölçüm tanımı</legend>
-        <label>
-          Kod
-          <input name="defCode" defaultValue="MEAS-001" />
-        </label>
-        <label>
-          Ad
-          <input name="defName" defaultValue="Boyut ölçümü" />
-        </label>
-        <label>
-          Birim
-          <input name="unit" defaultValue="mm" />
-        </label>
-        <label>
-          Nominal
-          <input name="nominal" type="number" step="0.001" defaultValue="10" />
-        </label>
-        <label>
-          Alt limit
-          <input name="lower" type="number" step="0.001" defaultValue="9.8" />
-        </label>
-        <label>
-          Üst limit
-          <input name="upper" type="number" step="0.001" defaultValue="10.2" />
-        </label>
-        <label>
-          <input name="critical" type="checkbox" /> Kritik
-        </label>
-      </fieldset>
+      <section className="quality-form-section" aria-label="Ürün operasyon">
+        <h3>Ürün / Operasyon</h3>
+        <div className="quality-form-grid">
+          <div className="quality-form-field">
+            <label htmlFor="productReference">Ürün</label>
+            <input id="productReference" name="productReference" className="quality-form-input" placeholder="Ürün referansı" />
+          </div>
+          <div className="quality-form-field">
+            <label htmlFor="operationReference">Operasyon</label>
+            <input id="operationReference" name="operationReference" className="quality-form-input" placeholder="Operasyon referansı" />
+          </div>
+        </div>
+      </section>
 
-      <button type="submit" className="production-execution-action-button" disabled={pending}>
-        Planı oluştur
-      </button>
+      <section className="quality-form-section" aria-label="Kontrol noktaları">
+        <h3>Kontrol Noktaları</h3>
+        <div className="quality-table-wrap">
+          <table className="quality-table">
+            <thead>
+              <tr>
+                <th>Kod</th>
+                <th>Ad</th>
+                <th>Tip</th>
+                <th>Birim</th>
+                <th>Nominal</th>
+                <th>Alt Limit</th>
+                <th>Üst Limit</th>
+                <th>Zorunlu</th>
+                <th>Kritik</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input name="defCode" className="quality-form-input" defaultValue="MEAS-001" />
+                </td>
+                <td>
+                  <input name="defName" className="quality-form-input" defaultValue="Boyut ölçümü" />
+                </td>
+                <td>Ölçüm</td>
+                <td>
+                  <input name="unit" className="quality-form-input" defaultValue="mm" />
+                </td>
+                <td>
+                  <input name="nominal" type="number" step="0.001" className="quality-form-input" defaultValue="10" />
+                </td>
+                <td>
+                  <input name="lower" type="number" step="0.001" className="quality-form-input" defaultValue="9.8" />
+                </td>
+                <td>
+                  <input name="upper" type="number" step="0.001" className="quality-form-input" defaultValue="10.2" />
+                </td>
+                <td>Evet</td>
+                <td>
+                  <input name="critical" type="checkbox" aria-label="Kritik" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div className="quality-form-actions">
+        <Button type="submit" variant="primary" disabled={pending}>
+          Planı Oluştur
+        </Button>
+      </div>
     </form>
   );
 }

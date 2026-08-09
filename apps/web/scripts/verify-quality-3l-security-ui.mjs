@@ -43,6 +43,10 @@ const writer = readRequired("apps/web/src/features/quality-control/server/qualit
 const reportingPage = readRequired("apps/web/src/app/(app)/kalite/raporlama/page.tsx");
 const summaryPage = readRequired("apps/web/src/app/(app)/kalite/kontroller/[inspectionId]/ozet/page.tsx");
 const mainPage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
+const dashboardView = readRequired(
+  "apps/web/src/features/quality-control/components/quality-dashboard-view.tsx",
+);
+const mainUi = `${mainPage}\n${dashboardView}`;
 const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 
 requireText(endpoints, "RequireAuthorization", "reporting endpoints");
@@ -70,16 +74,16 @@ forbidText(traceabilityRepo, "EmployeeScore", "QualityTraceabilityRepository");
 forbidText(writer, "readQualityReportingOverview", "quality-control writer");
 forbidText(writer, "readInspectionSummary", "quality-control writer");
 
-requireText(reportingPage, "production-execution-page", "reporting page");
+requireText(reportingPage, "QualityPageShell", "reporting page");
 requireText(reportingPage, "salt okunur", "reporting page");
-requireText(summaryPage, "production-execution-page", "summary page");
+requireText(summaryPage, "QualityPageShell", "summary page");
 requireText(summaryPage, "salt okunur", "summary page");
-requireText(mainPage, "Kalite Raporları", "kalite main page");
-requireText(mainPage, "/kalite/raporlama", "kalite main page");
+requireText(mainUi, "Kalite Raporları", "kalite main page");
+requireText(mainUi, "/kalite/raporlama", "kalite main page");
 
 requireText(nav, 'href: "/kalite"', "primary navigation");
 forbidText(nav, 'href: "/kalite/raporlama"', "primary navigation");
-forbidText(mainPage, "globals.css", "kalite main page");
+forbidText(mainUi, "globals.css", "kalite main page");
 forbidText(reportingPage, "globals.css", "reporting page");
 
 forbidText(reportingPage, "OpenAI", "reporting page");

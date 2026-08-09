@@ -1,19 +1,18 @@
-import Link from "next/link";
-
+import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
 import { QualityPlanForm } from "@/features/quality-control/components/quality-plan-form";
+import "@/features/quality-control/components/quality-workspace.css";
 import { createQualityControlPlanAction } from "@/features/quality-control/server/quality-control-writer";
 
 export default function NewQualityPlanPage() {
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <p>KALİTE KONTROL</p>
-        <h1>Yeni Kontrol Planı</h1>
-        <Link href="/kalite" className="production-execution-header__link">
-          Kalite ana sayfasına dön
-        </Link>
-      </header>
+    <QualityPageShell
+      backHref="/kalite"
+      backLabel="Kalite ana sayfası"
+      eyebrow="KALİTE KONTROL"
+      title="Yeni Kontrol Planı"
+      subtitle="Ürün ve operasyon için kalite kontrol planı tanımlayın."
+    >
       <QualityPlanForm onCreate={createQualityControlPlanAction} />
-    </main>
+    </QualityPageShell>
   );
 }

@@ -1,12 +1,18 @@
 import Link from "next/link";
-import { ArrowLeft, FileWarning, ShieldCheck } from "lucide-react";
+import { FileWarning, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { QualityNcrFilters } from "@/features/quality-control/components/quality-ncr-filters";
+import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
+import "@/features/quality-control/components/quality-workspace.css";
 import {
   getQualityNcrSeverityTone,
   getQualityStatusLabel,
 } from "@/features/quality-control/domain/quality-control";
+import {
+  formatQualityDateTime,
+  getQualityHoldLabel,
+} from "@/features/quality-control/presentation/quality-ui-labels";
 import { readQualityNcrList } from "@/features/quality-control/server/quality-control-reader";
 
 type PageProps = Readonly<{
@@ -32,122 +38,109 @@ export default async function QualityNcrListPage({ searchParams }: PageProps) {
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <div role="alert" className="state-panel error-state">
+      <QualityPageShell
+        backHref="/kalite"
+        backLabel="Kalite ana sayfası"
+        eyebrow="KALİTE KONTROL"
+        title="Uygunsuzluk Raporları"
+        nav="ncr"
+      >
+        <div role="alert" className="quality-error-panel">
           <ShieldCheck aria-hidden="true" />
-          <p>{result.message}</p>
+          <div>
+            <h3>NCR listesi yüklenemedi</h3>
+            <p>{result.message}</p>
+          </div>
         </div>
-      </main>
+      </QualityPageShell>
     );
   }
 
   const ncrs = [...result.ncrs].sort((a, b) => b.updatedAtUtc.localeCompare(a.updatedAtUtc));
 
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <Link href="/kalite" className="production-execution-header__link">
-          <ArrowLeft aria-hidden="true" />
-          Kalite ana sayfası
-        </Link>
-        <p>KALİTE KONTROL</p>
-        <h1>Uygunsuzluk Raporları</h1>
-        <span>Açık NCR, kalite blokesi ve düzeltici aksiyon durumlarını izleyin.</span>
-      </header>
+    <QualityPageShell
+      backHref="/kalite"
+      backLabel="Kalite ana sayfası"
+      eyebrow="KALİTE KONTROL"
+      title="Uygunsuzluk Raporları"
+      subtitle="Açık NCR, kalite blokesi ve düzeltici aksiyon durumlarını izleyin."
+      nav="ncr"
+      footer={
+        <footer className="quality-footer-note">
+          <FileWarning aria-hidden="true" />
+          Kalite blokesi üretim emri durumundan ayrı izlenir; üretim durumu salt okunurdur.
+        </footer>
+      }
+    >
+      <QualityNcrFilters
+        status={filters.status}
+        severity={filters.severity}
+        hold={filters.hold}
+        productionOrderId={filters.productionOrderId}
+      />
 
-      <Card className="production-execution-panel">
-        <header>
-          <h2>Filtreler</h2>
-        </header>
-        <form className="production-execution-form-row" method="get">
-          <select name="status" defaultValue={filters.status ?? ""}>
-            <option value="">Tüm durumlar</option>
-            <option value="open">Açık</option>
-            <option value="under-review">İncelemede</option>
-            <option value="action-required">Aksiyon gerekli</option>
-            <option value="resolved">Çözüldü</option>
-            <option value="closed">Kapatıldı</option>
-          </select>
-          <select name="severity" defaultValue={filters.severity ?? ""}>
-            <option value="">Tüm şiddetler</option>
-            <option value="minor">Minör</option>
-            <option value="major">Majör</option>
-            <option value="critical">Kritik</option>
-          </select>
-          <select name="hold" defaultValue={filters.hold ?? ""}>
-            <option value="">Tüm blokesi durumları</option>
-            <option value="active">Aktif blokesi</option>
-            <option value="none">Blokesi yok</option>
-          </select>
-          <input
-            name="productionOrderId"
-            type="text"
-            placeholder="Üretim emri ID"
-            defaultValue={filters.productionOrderId ?? ""}
-          />
-          <button type="submit" className="production-execution-action-button">
-            Uygula
-          </button>
-        </form>
-      </Card>
-
-      <Card className="production-execution-panel production-execution-panel--wide">
-        <header>
-          <h2>NCR listesi</h2>
+      <section className="quality-section quality-section--wide" aria-label="NCR listesi">
+        <header className="quality-section__header">
+          <h2>NCR Listesi</h2>
+          <span>{ncrs.length} kayıt</span>
         </header>
         {ncrs.length === 0 ? (
-          <p>Kayıt bulunamadı.</p>
+          <p className="quality-empty-state">Açık NCR bulunmuyor.</p>
         ) : (
-          <table className="production-execution-table">
-            <thead>
-              <tr>
-                <th>NCR No</th>
-                <th>Üretim emri</th>
-                <th>Ürün</th>
-                <th>Şiddet</th>
-                <th>Durum</th>
-                <th>Blokesi</th>
-                <th>Disposition</th>
-                <th>Sorumlu</th>
-                <th>Oluşturulma</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ncrs.map((ncr) => (
-                <tr key={ncr.id}>
-                  <td>
-                    <Link href={`/kalite/ncr/${ncr.id}`}>
-                      <strong>{ncr.ncrNumber}</strong>
-                    </Link>
-                    <span>{ncr.title}</span>
-                  </td>
-                  <td>{ncr.productionOrderReference ?? ncr.productionOrderId ?? "—"}</td>
-                  <td>{ncr.productReference ?? "—"}</td>
-                  <td>
-                    <Badge tone={getQualityNcrSeverityTone(ncr.severity)}>
-                      {getQualityStatusLabel(ncr.severity)}
-                    </Badge>
-                  </td>
-                  <td>{getQualityStatusLabel(ncr.status)}</td>
-                  <td>{getQualityStatusLabel(ncr.holdStatus)}</td>
-                  <td>
-                    {ncr.dispositionType
-                      ? getQualityStatusLabel(ncr.dispositionType)
-                      : getQualityStatusLabel(ncr.dispositionStatus)}
-                  </td>
-                  <td>{ncr.ownerSubjectId ?? "—"}</td>
-                  <td>{new Date(ncr.createdAtUtc).toLocaleString("tr-TR")}</td>
+          <div className="quality-table-wrap">
+            <table className="quality-table">
+              <thead>
+                <tr>
+                  <th>NCR No</th>
+                  <th>Üretim Emri</th>
+                  <th>Ürün</th>
+                  <th>Şiddet</th>
+                  <th>Durum</th>
+                  <th>Kalite Blokesi</th>
+                  <th>Disposition</th>
+                  <th>Sorumlu</th>
+                  <th>Oluşturulma</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {ncrs.map((ncr) => (
+                  <tr key={ncr.id}>
+                    <td>
+                      <div className="quality-table__identifier">
+                        <Link href={`/kalite/ncr/${ncr.id}`}>{ncr.ncrNumber}</Link>
+                        <small title={ncr.title}>{ncr.title}</small>
+                      </div>
+                    </td>
+                    <td className="quality-table__cell" title={ncr.productionOrderReference ?? ncr.productionOrderId ?? undefined}>
+                      {ncr.productionOrderReference ?? ncr.productionOrderId ?? "—"}
+                    </td>
+                    <td className="quality-table__cell" title={ncr.productReference ?? undefined}>
+                      {ncr.productReference ?? "—"}
+                    </td>
+                    <td>
+                      <Badge tone={getQualityNcrSeverityTone(ncr.severity)}>
+                        {getQualityStatusLabel(ncr.severity)}
+                      </Badge>
+                    </td>
+                    <td className="quality-table__cell">{getQualityStatusLabel(ncr.status)}</td>
+                    <td className="quality-table__cell">
+                      {getQualityHoldLabel(ncr.holdStatus, ncr.holdStatus === "active")}
+                    </td>
+                    <td className="quality-table__cell--wrap">
+                      {ncr.dispositionType
+                        ? getQualityStatusLabel(ncr.dispositionType)
+                        : getQualityStatusLabel(ncr.dispositionStatus)}
+                    </td>
+                    <td className="quality-table__cell">{ncr.ownerSubjectId ?? "—"}</td>
+                    <td className="quality-table__cell">{formatQualityDateTime(ncr.createdAtUtc)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
-
-      <footer className="production-execution-footer-note">
-        <FileWarning aria-hidden="true" />
-        Kalite blokesi üretim emri durumundan ayrı izlenir; üretim durumu salt okunurdur.
-      </footer>
-    </main>
+      </section>
+    </QualityPageShell>
   );
 }

@@ -56,6 +56,29 @@ export type QualityWorkspaceResult =
     }>
   | ReadFailure;
 
+export type QualityDashboardCorrectiveAction = Readonly<{
+  id: string;
+  title: string;
+  ncrId: string;
+  ncrNumber: string;
+  ownerSubjectId?: string;
+  dueAtUtc?: string;
+  status: string;
+}>;
+
+export type QualityDashboardResult =
+  | Readonly<{
+      status: "success";
+      summary: QualityWorkspaceSummary;
+      plans: readonly QualityControlPlanSummary[];
+      inspections: readonly QualityInspectionSummary[];
+      overview: QualityReportingOverview | null;
+      openNcrs: readonly QualityNcrSummary[];
+      activeHoldNcrs: readonly QualityNcrSummary[];
+      correctiveActions: readonly QualityDashboardCorrectiveAction[];
+    }>
+  | ReadFailure;
+
 export async function readQualityWorkspace(): Promise<QualityWorkspaceResult> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
@@ -91,6 +114,106 @@ export async function readQualityWorkspace(): Promise<QualityWorkspaceResult> {
     summary: summaryResult.value,
     plans: plansResult.value,
     inspections: inspectionsResult.value,
+  };
+}
+
+export async function readQualityDashboard(): Promise<QualityDashboardResult> {
+  const workspaceResult = await readQualityWorkspace();
+  if (workspaceResult.status === "failure") {
+    return workspaceResult;
+  }
+
+  const [reportingResult, ncrListResult, holdNcrListResult] = await Promise.all([
+    readQualityReportingOverview(),
+    readQualityNcrList(),
+    readQualityNcrList({ holdActive: true }),
+  ]);
+
+  const openNcrs =
+    ncrListResult.status === "success"
+      ? [...ncrListResult.ncrs]
+          .filter(
+            (ncr) =>
+              ncr.status === "open"
+              || ncr.status === "under-review"
+              || ncr.status === "action-required",
+          )
+          .sort((a, b) => b.updatedAtUtc.localeCompare(a.updatedAtUtc))
+          .slice(0, 5)
+      : [];
+
+  const activeHoldNcrs =
+    holdNcrListResult.status === "success"
+      ? [...holdNcrListResult.ncrs]
+          .sort((a, b) => b.updatedAtUtc.localeCompare(a.updatedAtUtc))
+          .slice(0, 5)
+      : [];
+
+  const correctiveActionCandidates =
+    ncrListResult.status === "success"
+      ? [...ncrListResult.ncrs]
+          .filter(
+            (ncr) =>
+              ncr.status === "action-required"
+              || ncr.status === "open"
+              || ncr.status === "under-review",
+          )
+          .sort((a, b) => b.updatedAtUtc.localeCompare(a.updatedAtUtc))
+          .slice(0, 5)
+      : [];
+
+  const correctiveActions: QualityDashboardCorrectiveAction[] = [];
+  if (correctiveActionCandidates.length > 0) {
+    const contextResult = await resolveQualityReadContext();
+    if (contextResult.status === "success") {
+      const detailResults = await Promise.all(
+        correctiveActionCandidates.map((ncr) =>
+          getQualityNcr(contextResult.context, ncr.id),
+        ),
+      );
+
+      for (const [index, detailResult] of detailResults.entries()) {
+        if (detailResult.status !== "success") {
+          continue;
+        }
+
+        const ncr = correctiveActionCandidates[index]!;
+        for (const action of detailResult.value.correctiveActions) {
+          if (
+            action.status === "open"
+            || action.status === "in-progress"
+            || action.status === "pending"
+          ) {
+            correctiveActions.push({
+              id: action.id,
+              title: action.title,
+              ncrId: ncr.id,
+              ncrNumber: ncr.ncrNumber,
+              ownerSubjectId: action.ownerSubjectId,
+              dueAtUtc: action.dueAtUtc,
+              status: action.status,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  correctiveActions.sort((a, b) => {
+    const aDue = a.dueAtUtc ? Date.parse(a.dueAtUtc) : Number.MAX_SAFE_INTEGER;
+    const bDue = b.dueAtUtc ? Date.parse(b.dueAtUtc) : Number.MAX_SAFE_INTEGER;
+    return aDue - bDue;
+  });
+
+  return {
+    status: "success",
+    summary: workspaceResult.summary,
+    plans: workspaceResult.plans,
+    inspections: workspaceResult.inspections,
+    overview: reportingResult.status === "success" ? reportingResult.overview : null,
+    openNcrs,
+    activeHoldNcrs,
+    correctiveActions: correctiveActions.slice(0, 5),
   };
 }
 

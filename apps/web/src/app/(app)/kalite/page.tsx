@@ -1,34 +1,10 @@
-import Link from "next/link";
-import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle2,
-  ClipboardCheck,
-  ClipboardList,
-  FileWarning,
-  Lock,
-  Plus,
-  ShieldCheck,
-  Timer,
-  TrendingUp,
-} from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import {
-  formatQualityPercent,
-  getQualityStatusLabel,
-} from "@/features/quality-control/domain/quality-control";
-import {
-  readQualityReportingOverview,
-  readQualityWorkspace,
-} from "@/features/quality-control/server/quality-control-reader";
+import { readQualityDashboard } from "@/features/quality-control/server/quality-control-reader";
+import { QualityDashboardView } from "@/features/quality-control/components/quality-dashboard-view";
 
 export default async function QualityControlPage() {
-  const [result, reportingResult] = await Promise.all([
-    readQualityWorkspace(),
-    readQualityReportingOverview(),
-  ]);
+  const result = await readQualityDashboard();
 
   if (result.status === "failure") {
     return (
@@ -48,193 +24,15 @@ export default async function QualityControlPage() {
     );
   }
 
-  const { summary, plans, inspections } = result;
-  const reportingOverview =
-    reportingResult.status === "success" ? reportingResult.overview : null;
-  const activeInspections = inspections.filter(
-    (item) => item.status === "draft" || item.status === "in-progress",
-  );
-  const recentInspections = [...inspections]
-    .sort((a, b) => b.updatedAtUtc.localeCompare(a.updatedAtUtc))
-    .slice(0, 8);
-
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <p>KALİTE KONTROL</p>
-        <h1>Kalite Kontrol</h1>
-        <span>
-          Kontrol planları, aktif incelemeler ve kalite serbest bırakma durumunu tek
-          operasyonel görünümde yönetin.
-        </span>
-        <div className="production-execution-header__actions">
-          <Link href="/kalite/planlar/yeni" className="production-execution-header__link">
-            <Plus aria-hidden="true" />
-            Yeni Kontrol Planı
-          </Link>
-          <Link href="/kalite/kontroller/yeni" className="production-execution-header__link">
-            <ClipboardCheck aria-hidden="true" />
-            Yeni Kalite Kontrolü
-          </Link>
-          <Link href="/kalite/ncr" className="production-execution-header__link">
-            <FileWarning aria-hidden="true" />
-            Uygunsuzluk Raporları
-          </Link>
-          <Link href="/kalite/raporlama" className="production-execution-header__link">
-            <BarChart3 aria-hidden="true" />
-            Kalite Raporları
-          </Link>
-        </div>
-      </header>
-
-      {reportingOverview ? (
-        <section className="production-execution-kpis" aria-label="Raporlama göstergeleri">
-          <Card className="production-execution-kpis__item--completed">
-            <TrendingUp aria-hidden="true" />
-            <div>
-              <span>İlk Geçiş Verimi</span>
-              <strong>{formatQualityPercent(reportingOverview.firstPassYieldPercent)}</strong>
-            </div>
-          </Card>
-          <Card className="production-execution-kpis__item--ready">
-            <BarChart3 aria-hidden="true" />
-            <div>
-              <span>Geçme Oranı</span>
-              <strong>{formatQualityPercent(reportingOverview.passRatePercent)}</strong>
-            </div>
-          </Card>
-          <Card className="production-execution-kpis__item--in-progress">
-            <ShieldCheck aria-hidden="true" />
-            <div>
-              <span>Serbest Bırakma Oranı</span>
-              <strong>{formatQualityPercent(reportingOverview.releaseRatePercent)}</strong>
-            </div>
-          </Card>
-        </section>
-      ) : null}
-
-      <section className="production-execution-kpis" aria-label="Kalite özeti">
-        <Card className="production-execution-kpis__item--in-progress">
-          <ClipboardList aria-hidden="true" />
-          <div>
-            <span>Açık Kontroller</span>
-            <strong>{summary.openInspectionCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--ready">
-          <AlertTriangle aria-hidden="true" />
-          <div>
-            <span>İnceleme Bekleyenler</span>
-            <strong>{summary.pendingReviewCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--paused">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <span>Başarısız Kontroller</span>
-            <strong>{summary.failedInspectionCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--completed">
-          <CheckCircle2 aria-hidden="true" />
-          <div>
-            <span>Serbest Bırakılanlar</span>
-            <strong>{summary.releasedInspectionCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--paused">
-          <FileWarning aria-hidden="true" />
-          <div>
-            <span>Açık NCR</span>
-            <strong>{summary.openNcrCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--in-progress">
-          <Lock aria-hidden="true" />
-          <div>
-            <span>Aktif Kalite Blokeleri</span>
-            <strong>{summary.activeHoldCount}</strong>
-          </div>
-        </Card>
-        <Card className="production-execution-kpis__item--ready">
-          <Timer aria-hidden="true" />
-          <div>
-            <span>Aksiyon Bekleyenler</span>
-            <strong>{summary.actionPendingCount}</strong>
-          </div>
-        </Card>
-      </section>
-
-      <section className="production-execution-grid">
-        <Card className="production-execution-panel">
-          <header>
-            <h2>Kontrol Planları</h2>
-          </header>
-          <ul className="production-execution-list">
-            {plans.map((plan) => (
-              <li key={plan.id}>
-                <div>
-                  <strong>{plan.code}</strong>
-                  <span>{plan.name}</span>
-                </div>
-                <Badge tone={plan.status === "active" ? "success" : "neutral"}>
-                  {getQualityStatusLabel(plan.status)}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card className="production-execution-panel">
-          <header>
-            <h2>Aktif Kontroller</h2>
-          </header>
-          <ul className="production-execution-list">
-            {activeInspections.length === 0 ? (
-              <li>Aktif kontrol yok.</li>
-            ) : (
-              activeInspections.map((inspection) => (
-                <li key={inspection.id}>
-                  <Link href={`/kalite/kontroller/${inspection.id}`}>
-                    <strong>{inspection.inspectionNumber}</strong>
-                    <span>{inspection.productionOrderReference ?? inspection.productionOrderId}</span>
-                  </Link>
-                  <Badge tone="information">{getQualityStatusLabel(inspection.status)}</Badge>
-                </li>
-              ))
-            )}
-          </ul>
-        </Card>
-
-        <Card className="production-execution-panel production-execution-panel--wide">
-          <header>
-            <h2>Son Kontroller</h2>
-          </header>
-          <ul className="production-execution-list">
-            {recentInspections.map((inspection) => (
-              <li key={inspection.id}>
-                <Link href={`/kalite/kontroller/${inspection.id}`}>
-                  <strong>{inspection.inspectionNumber}</strong>
-                  <span>
-                    {inspection.planCode} · {inspection.productReference ?? "—"}
-                  </span>
-                </Link>
-                <Badge
-                  tone={
-                    inspection.overallResult === "fail"
-                      ? "danger"
-                      : inspection.releaseStatus === "released"
-                        ? "success"
-                        : "neutral"
-                  }
-                >
-                  {getQualityStatusLabel(inspection.overallResult)}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </section>
-    </main>
+    <QualityDashboardView
+      summary={result.summary}
+      plans={result.plans}
+      inspections={result.inspections}
+      overview={result.overview}
+      openNcrs={result.openNcrs}
+      activeHoldNcrs={result.activeHoldNcrs}
+      correctiveActions={result.correctiveActions}
+    />
   );
 }

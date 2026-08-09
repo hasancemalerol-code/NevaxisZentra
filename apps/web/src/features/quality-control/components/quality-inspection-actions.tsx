@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { QualityInspectionDetail } from "../domain/quality-control";
 import type {
   completeQualityInspectionAction,
@@ -50,34 +51,39 @@ export function QualityInspectionActions({
   }
 
   return (
-    <section className="production-execution-panel" aria-label="Kalite kontrol işlemleri">
-      <header>
-        <h2>İşlemler</h2>
-        <p>Sürüm: {version}</p>
+    <section className="quality-section quality-section--wide quality-action-bar" aria-label="Kalite kontrol işlemleri">
+      <header className="quality-section__header">
+        <div>
+          <h2>İşlemler</h2>
+          <p>Sürüm: {version}</p>
+        </div>
       </header>
 
       {message ? (
-        <div role="alert" className="state-panel error-state">
+        <div role="alert" className="quality-error-panel">
           <p>{message}</p>
         </div>
       ) : null}
 
       {inspection.status === "draft" ? (
-        <button
-          type="button"
-          className="production-execution-action-button"
-          disabled={pending}
-          onClick={() => run(() => onStart(inspection.id, version))}
-        >
-          Kontrolü başlat
-        </button>
+        <div className="quality-form-actions">
+          <Button
+            type="button"
+            variant="primary"
+            disabled={pending}
+            onClick={() => run(() => onStart(inspection.id, version))}
+          >
+            Kontrolü Başlat
+          </Button>
+        </div>
       ) : null}
 
-      {inspection.status === "in-progress"
-        ? inspection.results.map((row) => (
+      {inspection.status === "in-progress" ? (
+        <div className="quality-measurement-list">
+          {inspection.results.map((row) => (
             <form
               key={row.inspectionDefinitionId}
-              className="production-execution-form-row"
+              className="quality-measurement-row"
               onSubmit={(event) => {
                 event.preventDefault();
                 const form = event.currentTarget;
@@ -106,59 +112,92 @@ export function QualityInspectionActions({
                 );
               }}
             >
-              <div>
-                <strong>{row.definitionCode}</strong> — {row.definitionName}
-                <p>
-                  Hedef: {row.nominalValue ?? "—"} {row.unit ?? ""} (
-                  {row.lowerLimit ?? "—"} – {row.upperLimit ?? "—"})
-                </p>
-                <p>Mevcut sonuç: {row.result}</p>
+              <div className="quality-measurement-row__info">
+                <strong>{row.definitionCode}</strong>
+                <span>{row.definitionName}</span>
+                <span>Mevcut sonuç: {row.result}</span>
+              </div>
+              <div className="quality-measurement-row__tolerance">
+                <span>
+                  Hedef: {row.nominalValue ?? "—"} {row.unit ?? ""}
+                </span>
+                <span>
+                  Tolerans: {row.lowerLimit ?? "—"} – {row.upperLimit ?? "—"}
+                </span>
               </div>
               {row.inspectionType === "measurement" ? (
-                <input name="numeric" type="number" step="0.001" placeholder="Ölçüm" />
+                <div className="quality-form-field">
+                  <label htmlFor={`numeric-${row.inspectionDefinitionId}`}>Ölçülen</label>
+                  <input
+                    id={`numeric-${row.inspectionDefinitionId}`}
+                    name="numeric"
+                    type="number"
+                    step="0.001"
+                    className="quality-form-input"
+                    placeholder="Ölçüm"
+                  />
+                </div>
               ) : (
-                <input name="text" type="text" placeholder="pass / fail / n/a" />
+                <div className="quality-form-field">
+                  <label htmlFor={`text-${row.inspectionDefinitionId}`}>Sonuç</label>
+                  <input
+                    id={`text-${row.inspectionDefinitionId}`}
+                    name="text"
+                    type="text"
+                    className="quality-form-input"
+                    placeholder="pass / fail / n/a"
+                  />
+                </div>
               )}
-              <input name="comment" type="text" placeholder="Yorum" />
-              <button type="submit" className="production-execution-action-button" disabled={pending}>
+              <div className="quality-form-field">
+                <label htmlFor={`comment-${row.inspectionDefinitionId}`}>Yorum</label>
+                <input
+                  id={`comment-${row.inspectionDefinitionId}`}
+                  name="comment"
+                  type="text"
+                  className="quality-form-input"
+                  placeholder="Yorum"
+                />
+              </div>
+              <Button type="submit" variant="secondary" size="small" disabled={pending}>
                 Kaydet
-              </button>
+              </Button>
             </form>
-          ))
-        : null}
-
-      {inspection.status === "in-progress" ? (
-        <button
-          type="button"
-          className="production-execution-action-button"
-          disabled={pending}
-          onClick={() => run(() => onComplete(inspection.id, version))}
-        >
-          Kontrolü tamamla
-        </button>
+          ))}
+        </div>
       ) : null}
 
-      {inspection.status === "completed" &&
-      inspection.releaseStatus === "ready-for-review" ? (
-        <div className="production-execution-form-row">
-          <button
+      {inspection.status === "in-progress" ? (
+        <div className="quality-form-actions">
+          <Button
             type="button"
-            className="production-execution-action-button"
+            variant="primary"
             disabled={pending}
-            onClick={() =>
-              run(() => onRelease(inspection.id, version, "Kalite serbest bırakma"))
-            }
+            onClick={() => run(() => onComplete(inspection.id, version))}
           >
-            Serbest bırak
-          </button>
-          <button
+            Kontrolü Tamamla
+          </Button>
+        </div>
+      ) : null}
+
+      {inspection.status === "completed" && inspection.releaseStatus === "ready-for-review" ? (
+        <div className="quality-action-bar__buttons">
+          <Button
             type="button"
-            className="production-execution-action-button production-execution-action-button--danger"
+            variant="primary"
+            disabled={pending}
+            onClick={() => run(() => onRelease(inspection.id, version, "Kalite serbest bırakma"))}
+          >
+            Serbest Bırak
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
             disabled={pending}
             onClick={() => run(() => onReject(inspection.id, version, "Kalite reddi"))}
           >
             Reddet
-          </button>
+          </Button>
         </div>
       ) : null}
     </section>

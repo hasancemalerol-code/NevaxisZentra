@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { QualityControlPlanSummary } from "../domain/quality-control";
 import type { ProductionOrderSummary } from "../../production-execution/domain/production-order";
 import type { createQualityInspectionAction } from "../server/quality-control-writer";
@@ -21,10 +22,12 @@ export function NewQualityInspectionForm({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
+  const selectedOrder = orders.find((order) => order.id === selectedOrderId);
 
   return (
     <form
-      className="production-execution-panel"
+      className="quality-section quality-section--wide quality-form-stack"
       onSubmit={(event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -45,47 +48,89 @@ export function NewQualityInspectionForm({
         });
       }}
     >
-      <header>
-        <h2>Üretim emri bağlantısı</h2>
-        <p>Üretim emri bilgileri salt okunurdur; kalite kaydı yalnızca referans bağlar.</p>
-      </header>
-
       {message ? (
-        <div role="alert" className="state-panel error-state">
+        <div role="alert" className="quality-error-panel">
           <p>{message}</p>
         </div>
       ) : null}
 
-      <label>
-        Üretim emri
-        <select name="productionOrderId" required defaultValue={orders[0]?.id ?? ""}>
-          {orders.map((order) => (
-            <option key={order.id} value={order.id}>
-              {order.referenceCode} · {order.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      <section className="quality-form-section" aria-label="Üretim emri">
+        <h3>Üretim Emri</h3>
+        <div className="quality-form-field">
+          <label htmlFor="productionOrderId">Üretim emri seçin</label>
+          <select
+            id="productionOrderId"
+            name="productionOrderId"
+            className="quality-form-select"
+            required
+            value={selectedOrderId}
+            onChange={(event) => setSelectedOrderId(event.target.value)}
+          >
+            {orders.map((order) => (
+              <option key={order.id} value={order.id}>
+                {order.referenceCode} · {order.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
 
-      <label>
-        Kontrol planı
-        <select name="qualityControlPlanId" required defaultValue={plans[0]?.id ?? ""}>
-          {plans.map((plan) => (
-            <option key={plan.id} value={plan.id}>
-              {plan.code} · {plan.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <section className="quality-form-section" aria-label="Üretim bağlamı">
+        <h3>Üretim Bağlamı</h3>
+        <dl className="quality-detail-dl">
+          <div>
+            <dt>Referans</dt>
+            <dd>{selectedOrder?.referenceCode ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Başlık</dt>
+            <dd>{selectedOrder?.title ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Durum</dt>
+            <dd>{selectedOrder?.status ?? "—"}</dd>
+          </div>
+        </dl>
+      </section>
 
-      <label>
-        Not
-        <textarea name="notes" rows={3} placeholder="Opsiyonel not" />
-      </label>
+      <section className="quality-form-section" aria-label="Kontrol planı">
+        <h3>Kontrol Planı</h3>
+        <div className="quality-form-field">
+          <label htmlFor="qualityControlPlanId">Plan seçin</label>
+          <select
+            id="qualityControlPlanId"
+            name="qualityControlPlanId"
+            className="quality-form-select"
+            required
+            defaultValue={plans[0]?.id ?? ""}
+          >
+            {plans.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.code} · {plan.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
 
-      <button type="submit" className="production-execution-action-button" disabled={pending}>
-        Kalite kontrolü oluştur
-      </button>
+      <section className="quality-form-section" aria-label="Not">
+        <div className="quality-form-field">
+          <label htmlFor="notes">Not</label>
+          <textarea
+            id="notes"
+            name="notes"
+            className="quality-form-textarea"
+            rows={3}
+            placeholder="Opsiyonel not"
+          />
+        </div>
+      </section>
+
+      <div className="quality-form-actions">
+        <Button type="submit" variant="primary" disabled={pending}>
+          Kontrolü Başlat
+        </Button>
+      </div>
     </form>
   );
 }

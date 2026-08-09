@@ -1,15 +1,29 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ClipboardCheck, ShieldCheck } from "lucide-react";
+import { ClipboardCheck, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { getQualityStatusLabel } from "@/features/quality-control/domain/quality-control";
+import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
+import "@/features/quality-control/components/quality-workspace.css";
+import {
+  getQualityOverallResultLabel,
+  getQualityReleaseStatusLabel,
+} from "@/features/quality-control/presentation/quality-dashboard-labels";
+import { formatQualityDateTime } from "@/features/quality-control/presentation/quality-ui-labels";
 import { readInspectionSummary } from "@/features/quality-control/server/quality-control-reader";
 
 type PageProps = Readonly<{
   params: Promise<{ inspectionId: string }>;
 }>;
+
+function getResultTone(result: string): "success" | "danger" | "neutral" {
+  if (result === "pass") {
+    return "success";
+  }
+  if (result === "fail") {
+    return "danger";
+  }
+  return "neutral";
+}
 
 export default async function QualityInspectionSummaryPage({ params }: PageProps) {
   const { inspectionId } = await params;
@@ -17,12 +31,20 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <div role="alert" className="state-panel error-state">
+      <QualityPageShell
+        backHref={`/kalite/kontroller/${inspectionId}`}
+        backLabel="Kontrol detayı"
+        eyebrow="KALİTE KONTROL"
+        title="Kontrol Sonuç Özeti"
+      >
+        <div role="alert" className="quality-error-panel">
           <ShieldCheck aria-hidden="true" />
-          <p>{result.message}</p>
+          <div>
+            <h3>Özet yüklenemedi</h3>
+            <p>{result.message}</p>
+          </div>
         </div>
-      </main>
+      </QualityPageShell>
     );
   }
 
@@ -32,138 +54,142 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
   }
 
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <Link
-          href={`/kalite/kontroller/${inspectionId}`}
-          className="production-execution-header__link"
-        >
-          <ArrowLeft aria-hidden="true" />
-          Kontrol detayı
-        </Link>
-        <p>KALİTE KONTROL</p>
-        <h1>Kontrol Sonuç Özeti</h1>
-        <span>
-          {summary.inspectionNumber} · {summary.controlPlanCode} rev. {summary.controlPlanRevision}
-        </span>
-      </header>
+    <QualityPageShell
+      backHref={`/kalite/kontroller/${inspectionId}`}
+      backLabel="Kontrol detayı"
+      eyebrow="KALİTE KONTROL"
+      title="Kontrol Sonuç Özeti"
+      subtitle={`${summary.inspectionNumber} · ${summary.controlPlanCode} rev. ${summary.controlPlanRevision}`}
+      footer={
+        <footer className="quality-footer-note">
+          <ClipboardCheck aria-hidden="true" />
+          Bu özet salt okunur raporlama görünümüdür; resmi sertifika değildir.
+        </footer>
+      }
+    >
+      <section className="quality-section" aria-label="Kalite kontrol özeti">
+        <header className="quality-section__header">
+          <h2>Kalite Kontrol Özeti</h2>
+        </header>
+        <dl className="quality-detail-dl">
+          <div>
+            <dt>Tesis Referansı</dt>
+            <dd>{summary.facilityReference}</dd>
+          </div>
+          <div>
+            <dt>Kontrol Tarihi</dt>
+            <dd>{formatQualityDateTime(summary.inspectionDateUtc)}</dd>
+          </div>
+          <div>
+            <dt>Denetçi</dt>
+            <dd>{summary.inspectorSubjectId ?? "—"}</dd>
+          </div>
+        </dl>
+      </section>
 
-      <section className="production-execution-grid">
-        <Card className="production-execution-panel">
-          <header>
-            <h2>Özet bilgiler</h2>
+      <div className="quality-detail-grid">
+        <section className="quality-section" aria-label="Üretim bilgileri">
+          <header className="quality-section__header">
+            <h2>Üretim Bilgileri</h2>
           </header>
-          <dl className="production-execution-details">
+          <dl className="quality-detail-dl">
             <div>
-              <dt>Tesis referansı</dt>
-              <dd>{summary.facilityReference}</dd>
-            </div>
-            <div>
-              <dt>Üretim emri</dt>
+              <dt>Üretim Emri</dt>
               <dd>{summary.productionOrderReference ?? summary.productionOrderId}</dd>
             </div>
             <div>
               <dt>Ürün</dt>
               <dd>{summary.productReference ?? "—"}</dd>
             </div>
+          </dl>
+        </section>
+
+        <section className="quality-section" aria-label="Kontrol planı">
+          <header className="quality-section__header">
+            <h2>Kontrol Planı</h2>
+          </header>
+          <dl className="quality-detail-dl">
             <div>
-              <dt>Kontrol planı</dt>
+              <dt>Plan</dt>
               <dd>
                 {summary.controlPlanCode} · {summary.controlPlanName}
               </dd>
             </div>
             <div>
-              <dt>Kontrol tarihi</dt>
-              <dd>
-                {summary.inspectionDateUtc
-                  ? new Date(summary.inspectionDateUtc).toLocaleString("tr-TR")
-                  : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt>Denetçi</dt>
-              <dd>{summary.inspectorSubjectId ?? "—"}</dd>
+              <dt>Revizyon</dt>
+              <dd>{summary.controlPlanRevision}</dd>
             </div>
           </dl>
-        </Card>
+        </section>
+      </div>
 
-        <Card className="production-execution-panel">
-          <header>
-            <h2>Sonuç durumu</h2>
-          </header>
-          <div className="production-execution-badges">
-            <Badge tone={summary.overallResult === "fail" ? "danger" : "success"}>
-              {getQualityStatusLabel(summary.overallResult)}
-            </Badge>
-            <Badge tone="neutral">{getQualityStatusLabel(summary.releaseStatus)}</Badge>
-            {summary.hasBlockingHold ? <Badge tone="warning">Bloklayıcı blokesi</Badge> : null}
-          </div>
-          <p>Açık NCR: {summary.openNcrCount}</p>
-          {summary.blockingSummary ? <p>{summary.blockingSummary}</p> : null}
-        </Card>
+      <section className="quality-section" aria-label="Genel sonuç">
+        <header className="quality-section__header">
+          <h2>Genel Sonuç</h2>
+        </header>
+        <div className="quality-badge-row">
+          <Badge tone={getResultTone(summary.overallResult)}>
+            {getQualityOverallResultLabel(summary.overallResult)}
+          </Badge>
+          <Badge tone="neutral">{getQualityReleaseStatusLabel(summary.releaseStatus)}</Badge>
+          {summary.hasBlockingHold ? <Badge tone="warning">Kalite Blokesi: Aktif</Badge> : null}
+        </div>
+        <p>Açık NCR: {summary.openNcrCount}</p>
+        {summary.blockingSummary ? <p>{summary.blockingSummary}</p> : null}
+      </section>
 
-        <Card className="production-execution-panel production-execution-panel--wide">
-          <header>
-            <h2>Serbest bırakma zekâsı</h2>
-          </header>
-          {!releaseIntelligence.available ? (
-            <p>Serbest bırakma değerlendirmesi kullanılamıyor.</p>
-          ) : (
-            <>
-              <div className="production-execution-badges">
-                <Badge tone={releaseIntelligence.blocking ? "danger" : "success"}>
-                  {releaseIntelligence.blocking ? "Bloklayıcı" : "Blok yok"}
-                </Badge>
-                <Badge tone={releaseIntelligence.readyForRelease ? "success" : "warning"}>
-                  {releaseIntelligence.readyForRelease
-                    ? "Serbest bırakmaya hazır"
-                    : "İnceleme gerekli"}
-                </Badge>
+      <section className="quality-section quality-section--wide" aria-label="Serbest bırakma">
+        <header className="quality-section__header">
+          <h2>Release Durumu</h2>
+        </header>
+        {!releaseIntelligence.available ? (
+          <p className="quality-empty-state">Serbest bırakma değerlendirmesi kullanılamıyor.</p>
+        ) : (
+          <>
+            <div className="quality-badge-row">
+              <Badge tone={releaseIntelligence.blocking ? "danger" : "success"}>
+                {releaseIntelligence.blocking ? "Bloklayıcı" : "Blok yok"}
+              </Badge>
+              <Badge tone={releaseIntelligence.readyForRelease ? "success" : "warning"}>
+                {releaseIntelligence.readyForRelease
+                  ? "Serbest bırakmaya hazır"
+                  : "İnceleme gerekli"}
+              </Badge>
+            </div>
+            <dl className="quality-detail-dl">
+              <div>
+                <dt>Aktif Blokesi</dt>
+                <dd>{releaseIntelligence.activeHoldCount}</dd>
               </div>
-              <dl className="production-execution-details">
-                <div>
-                  <dt>Aktif blokesi</dt>
-                  <dd>{releaseIntelligence.activeHoldCount}</dd>
-                </div>
-                <div>
-                  <dt>Açık NCR</dt>
-                  <dd>{releaseIntelligence.openNcrCount}</dd>
-                </div>
-                <div>
-                  <dt>Kritik NCR</dt>
-                  <dd>{releaseIntelligence.criticalNcrCount}</dd>
-                </div>
-                <div>
-                  <dt>Tamamlanmamış aksiyon</dt>
-                  <dd>{releaseIntelligence.incompleteCorrectiveActionCount}</dd>
-                </div>
-              </dl>
-              {releaseIntelligence.reasonSummary ? (
-                <p>{releaseIntelligence.reasonSummary}</p>
-              ) : null}
-              {releaseIntelligence.reasonCodes.length > 0 ? (
-                <div className="production-execution-badges">
-                  {releaseIntelligence.reasonCodes.map((code) => (
-                    <Badge key={code} tone="information">
-                      {code}
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </>
-          )}
-        </Card>
+              <div>
+                <dt>Açık NCR</dt>
+                <dd>{releaseIntelligence.openNcrCount}</dd>
+              </div>
+              <div>
+                <dt>Kritik NCR</dt>
+                <dd>{releaseIntelligence.criticalNcrCount}</dd>
+              </div>
+              <div>
+                <dt>Tamamlanmamış Aksiyon</dt>
+                <dd>{releaseIntelligence.incompleteCorrectiveActionCount}</dd>
+              </div>
+            </dl>
+            {releaseIntelligence.reasonSummary ? <p>{releaseIntelligence.reasonSummary}</p> : null}
+          </>
+        )}
+      </section>
 
-        <Card className="production-execution-panel production-execution-panel--wide">
-          <header>
-            <h2>Ölçüm özeti</h2>
-          </header>
-          <table className="production-execution-table">
+      <section className="quality-section quality-section--wide" aria-label="Ölçüm sonuçları">
+        <header className="quality-section__header">
+          <h2>Ölçüm Sonuçları</h2>
+        </header>
+        <div className="quality-table-wrap">
+          <table className="quality-table">
             <thead>
               <tr>
-                <th>Kontrol</th>
-                <th>Hedef / tolerans</th>
-                <th>Ölçüm</th>
+                <th>Kontrol Noktası</th>
+                <th>Hedef / Tolerans</th>
+                <th>Ölçülen</th>
                 <th>Sonuç</th>
               </tr>
             </thead>
@@ -171,31 +197,48 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
               {summary.measurements.map((row) => (
                 <tr key={`${row.definitionCode}-${row.definitionName}`}>
                   <td>
-                    <strong>{row.definitionCode}</strong>
-                    <span>{row.definitionName}</span>
+                    <div className="quality-table__identifier">
+                      <strong>{row.definitionCode}</strong>
+                      <small>{row.definitionName}</small>
+                    </div>
                   </td>
-                  <td>
+                  <td className="quality-table__cell--wrap">
                     {row.nominalValue ?? "—"} {row.unit ?? ""}
                     <br />
                     {row.lowerLimit ?? "—"} – {row.upperLimit ?? "—"}
                   </td>
-                  <td>
+                  <td className="quality-table__cell">
                     {row.measuredNumericValue ??
                       row.measuredTextValue ??
-                      (row.booleanResult === undefined ? "—" : row.booleanResult ? "Evet" : "Hayır")}
+                      (row.booleanResult === undefined
+                        ? "—"
+                        : row.booleanResult
+                          ? "Evet"
+                          : "Hayır")}
                   </td>
-                  <td>{getQualityStatusLabel(row.result)}</td>
+                  <td>
+                    <Badge tone={getResultTone(row.result)}>
+                      {getQualityOverallResultLabel(row.result)}
+                    </Badge>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </Card>
+        </div>
       </section>
 
-      <footer className="production-execution-footer-note">
-        <ClipboardCheck aria-hidden="true" />
-        Bu özet salt okunur raporlama görünümüdür; serbest bırakma kararı operasyon ekranından verilir.
-      </footer>
-    </main>
+      <section className="quality-section" aria-label="NCR hold özeti">
+        <header className="quality-section__header">
+          <h2>NCR / Hold Özeti</h2>
+        </header>
+        <p>Açık NCR: {summary.openNcrCount}</p>
+        {summary.hasBlockingHold ? (
+          <p>Kalite Blokesi: Aktif</p>
+        ) : (
+          <p className="quality-empty-state">Aktif kalite blokesi bulunmuyor.</p>
+        )}
+      </section>
+    </QualityPageShell>
   );
 }

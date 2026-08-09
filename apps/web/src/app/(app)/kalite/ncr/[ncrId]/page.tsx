@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Factory, ShieldCheck } from "lucide-react";
+import { Factory, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { QualityNcrActions } from "@/features/quality-control/components/quality-ncr-actions";
+import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
+import "@/features/quality-control/components/quality-workspace.css";
 import {
   getQualityNcrSeverityTone,
   getQualityStatusLabel,
 } from "@/features/quality-control/domain/quality-control";
+import {
+  formatQualityDateTime,
+  getCorrectiveActionStatusLabel,
+  getCorrectiveActionStatusTone,
+  getQualityHoldLabel,
+} from "@/features/quality-control/presentation/quality-ui-labels";
 import { readQualityNcrById } from "@/features/quality-control/server/quality-control-reader";
 import {
   closeQualityNcrAction,
@@ -31,12 +38,20 @@ export default async function QualityNcrDetailPage({ params }: PageProps) {
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <div role="alert" className="state-panel error-state">
+      <QualityPageShell
+        backHref="/kalite/ncr"
+        backLabel="NCR listesi"
+        eyebrow="KALİTE KONTROL"
+        title="Uygunsuzluk Detayı"
+      >
+        <div role="alert" className="quality-error-panel">
           <ShieldCheck aria-hidden="true" />
-          <p>{result.message}</p>
+          <div>
+            <h3>NCR yüklenemedi</h3>
+            <p>{result.message}</p>
+          </div>
         </div>
-      </main>
+      </QualityPageShell>
     );
   }
 
@@ -48,54 +63,68 @@ export default async function QualityNcrDetailPage({ params }: PageProps) {
   const holdActive = ncr.holdStatus === "active" || ncr.activeHold?.status === "active";
 
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <Link href="/kalite/ncr" className="production-execution-header__link">
-          <ArrowLeft aria-hidden="true" />
-          NCR listesi
-        </Link>
-        <p>KALİTE KONTROL</p>
-        <h1>{ncr.ncrNumber}</h1>
-        <span>{ncr.title}</span>
-      </header>
-
-      <section className="production-execution-grid">
-        <Card className="production-execution-panel">
-          <header>
-            <h2>NCR özeti</h2>
-          </header>
-          <div className="production-execution-badges">
-            <Badge tone={getQualityNcrSeverityTone(ncr.severity)}>
-              {getQualityStatusLabel(ncr.severity)}
-            </Badge>
-            <Badge tone="information">{getQualityStatusLabel(ncr.status)}</Badge>
-            <Badge tone={holdActive ? "danger" : "neutral"}>
-              Kalite Blokesi: {holdActive ? "Aktif" : getQualityStatusLabel(ncr.holdStatus)}
-            </Badge>
+    <QualityPageShell
+      backHref="/kalite/ncr"
+      backLabel="NCR listesi"
+      eyebrow="KALİTE KONTROL"
+      title={ncr.ncrNumber}
+      subtitle={ncr.title}
+      footer={
+        <footer className="quality-footer-note">
+          <Factory aria-hidden="true" />
+          Kalite blokesi üretim emri durumunu doğrudan değiştirmez; sinyal salt okunur bağlamda sunulur.
+        </footer>
+      }
+    >
+      <section className="quality-section" aria-label="NCR özeti">
+        <header className="quality-section__header">
+          <h2>NCR Özeti</h2>
+        </header>
+        <div className="quality-badge-row">
+          <Badge tone={getQualityNcrSeverityTone(ncr.severity)}>
+            {getQualityStatusLabel(ncr.severity)}
+          </Badge>
+          <Badge tone="information">{getQualityStatusLabel(ncr.status)}</Badge>
+          <Badge tone={holdActive ? "danger" : "neutral"}>
+            Kalite Blokesi: {getQualityHoldLabel(ncr.holdStatus, holdActive)}
+          </Badge>
+        </div>
+        <p>{ncr.description}</p>
+        <dl className="quality-detail-dl">
+          <div>
+            <dt>Üretim Emri</dt>
+            <dd>{ncr.productionContext?.referenceCode ?? ncr.productionOrderId ?? "—"}</dd>
           </div>
-          <p>{ncr.description}</p>
-          <dl className="production-execution-details">
-            <div>
-              <dt>Kategori</dt>
-              <dd>{ncr.category ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>Tespit eden</dt>
-              <dd>{ncr.detectedBySubjectId}</dd>
-            </div>
-            <div>
-              <dt>Sorumlu</dt>
-              <dd>{ncr.ownerSubjectId ?? "—"}</dd>
-            </div>
-          </dl>
-        </Card>
+          <div>
+            <dt>Ürün</dt>
+            <dd>{ncr.productReference ?? ncr.productionContext?.productReference ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Oluşturulma</dt>
+            <dd>{formatQualityDateTime(ncr.createdAtUtc)}</dd>
+          </div>
+          <div>
+            <dt>Sorumlu</dt>
+            <dd>{ncr.ownerSubjectId ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Tespit Eden</dt>
+            <dd>{ncr.detectedBySubjectId}</dd>
+          </div>
+          <div>
+            <dt>Kategori</dt>
+            <dd>{ncr.category ?? "—"}</dd>
+          </div>
+        </dl>
+      </section>
 
-        <Card className="production-execution-panel">
-          <header>
-            <h2>Üretim bağlamı</h2>
+      <div className="quality-detail-grid">
+        <section className="quality-section" aria-label="Bağlı üretim">
+          <header className="quality-section__header">
+            <h2>Bağlı Üretim</h2>
           </header>
           {ncr.productionContext ? (
-            <dl className="production-execution-details">
+            <dl className="quality-detail-dl">
               <div>
                 <dt>Emir</dt>
                 <dd>{ncr.productionContext.referenceCode}</dd>
@@ -105,71 +134,124 @@ export default async function QualityNcrDetailPage({ params }: PageProps) {
                 <dd>{ncr.productionContext.productReference ?? "—"}</dd>
               </div>
               <div>
-                <dt>Üretim durumu</dt>
+                <dt>Üretim Durumu</dt>
                 <dd>{ncr.productionContext.status}</dd>
               </div>
             </dl>
           ) : (
-            <p>Bağlı üretim emri yok.</p>
+            <p className="quality-empty-state">Bağlı üretim emri yok.</p>
           )}
+        </section>
+
+        <section className="quality-section" aria-label="Bağlı kalite kontrolü">
+          <header className="quality-section__header">
+            <h2>Bağlı Kalite Kontrolü</h2>
+          </header>
           {ncr.qualityInspectionNumber ? (
             <p>
-              Bağlı kontrol:{" "}
               <Link href={`/kalite/kontroller/${ncr.qualityInspectionId}`}>
                 {ncr.qualityInspectionNumber}
               </Link>
             </p>
-          ) : null}
-        </Card>
+          ) : (
+            <p className="quality-empty-state">Bağlı kalite kontrolü yok.</p>
+          )}
+        </section>
 
-        <Card className="production-execution-panel">
-          <header>
+        <section
+          className={`quality-section ${holdActive ? "quality-hold-panel" : ""}`}
+          aria-label="Kalite blokesi"
+        >
+          <header className="quality-section__header">
+            <h2 className={holdActive ? "quality-hold-panel__title" : undefined}>
+              Kalite Blokesi
+            </h2>
+          </header>
+          {holdActive && ncr.activeHold ? (
+            <dl className="quality-detail-dl">
+              <div>
+                <dt>Durum</dt>
+                <dd>Kalite Blokesi: Aktif</dd>
+              </div>
+              <div>
+                <dt>Neden</dt>
+                <dd>{ncr.activeHold.reason}</dd>
+              </div>
+              <div>
+                <dt>Koyan</dt>
+                <dd>{ncr.activeHold.placedBySubjectId}</dd>
+              </div>
+              <div>
+                <dt>Koyulma</dt>
+                <dd>{formatQualityDateTime(ncr.activeHold.placedAtUtc)}</dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="quality-empty-state">Aktif kalite blokesi bulunmuyor.</p>
+          )}
+        </section>
+
+        <section className="quality-section" aria-label="Disposition">
+          <header className="quality-section__header">
             <h2>Disposition</h2>
           </header>
-          <p>Durum: {getQualityStatusLabel(ncr.dispositionStatus)}</p>
-          <p>
-            Karar:{" "}
-            {ncr.dispositionType ? getQualityStatusLabel(ncr.dispositionType) : "—"}
-          </p>
-          <p>{ncr.dispositionNote ?? "—"}</p>
-        </Card>
+          <dl className="quality-detail-dl">
+            <div>
+              <dt>Durum</dt>
+              <dd>{getQualityStatusLabel(ncr.dispositionStatus)}</dd>
+            </div>
+            <div>
+              <dt>Karar</dt>
+              <dd>
+                {ncr.dispositionType ? getQualityStatusLabel(ncr.dispositionType) : "Bekliyor"}
+              </dd>
+            </div>
+          </dl>
+          <p>{ncr.dispositionNote ?? "Disposition notu yok."}</p>
+        </section>
+      </div>
 
-        <Card className="production-execution-panel production-execution-panel--wide">
-          <header>
-            <h2>Düzeltici aksiyonlar</h2>
-          </header>
-          {ncr.correctiveActions.length === 0 ? (
-            <p>Düzeltici aksiyon yok.</p>
-          ) : (
-            <ul className="production-execution-list">
-              {ncr.correctiveActions.map((action) => (
-                <li key={action.id}>
+      <section className="quality-section quality-section--wide" aria-label="Düzeltici aksiyonlar">
+        <header className="quality-section__header">
+          <h2>Düzeltici Aksiyonlar</h2>
+        </header>
+        {ncr.correctiveActions.length === 0 ? (
+          <p className="quality-empty-state">Düzeltici aksiyon bulunmuyor.</p>
+        ) : (
+          <ul className="quality-ca-list">
+            {ncr.correctiveActions.map((action) => (
+              <li key={action.id} className="quality-ca-item">
+                <div className="quality-ca-item__body">
                   <strong>{action.title}</strong>
                   <span>{action.description}</span>
-                  <Badge tone="neutral">{getQualityStatusLabel(action.status)}</Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-
-        <QualityNcrActions
-          ncr={ncr}
-          onPlaceHold={placeQualityHoldAction}
-          onReleaseHold={releaseQualityHoldAction}
-          onDecideDisposition={decideQualityDispositionAction}
-          onCreateCorrectiveAction={createQualityCorrectiveActionAction}
-          onStartCorrectiveAction={startQualityCorrectiveActionAction}
-          onCompleteCorrectiveAction={completeQualityCorrectiveActionAction}
-          onResolve={resolveQualityNcrAction}
-          onClose={closeQualityNcrAction}
-        />
+                  <div className="quality-ca-item__meta">
+                    <span>Sorumlu: {action.ownerSubjectId ?? "—"}</span>
+                    <span>Termin: {formatQualityDateTime(action.dueAtUtc)}</span>
+                    {action.completionNote ? (
+                      <span>Not: {action.completionNote}</span>
+                    ) : null}
+                  </div>
+                </div>
+                <Badge tone={getCorrectiveActionStatusTone(action)}>
+                  {getCorrectiveActionStatusLabel(action)}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
-      <footer className="production-execution-footer-note">
-        <Factory aria-hidden="true" />
-        Kalite blokesi üretim emri durumunu doğrudan değiştirmez; sinyal salt okunur bağlamda sunulur.
-      </footer>
-    </main>
+      <QualityNcrActions
+        ncr={ncr}
+        onPlaceHold={placeQualityHoldAction}
+        onReleaseHold={releaseQualityHoldAction}
+        onDecideDisposition={decideQualityDispositionAction}
+        onCreateCorrectiveAction={createQualityCorrectiveActionAction}
+        onStartCorrectiveAction={startQualityCorrectiveActionAction}
+        onCompleteCorrectiveAction={completeQualityCorrectiveActionAction}
+        onResolve={resolveQualityNcrAction}
+        onClose={closeQualityNcrAction}
+      />
+    </QualityPageShell>
   );
 }

@@ -35,6 +35,10 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 2L premium UI verifier.");
 
 const mainPage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
+const dashboardView = readRequired(
+  "apps/web/src/features/quality-control/components/quality-dashboard-view.tsx",
+);
+const mainUi = `${mainPage}\n${dashboardView}`;
 const ncrListPage = readRequired("apps/web/src/app/(app)/kalite/ncr/page.tsx");
 const ncrDetailPage = readRequired("apps/web/src/app/(app)/kalite/ncr/[ncrId]/page.tsx");
 const inspectionPage = readRequired("apps/web/src/app/(app)/kalite/kontroller/[inspectionId]/page.tsx");
@@ -44,27 +48,28 @@ const inspectionNcrLink = readRequired(
 const ncrActions = readRequired("apps/web/src/features/quality-control/components/quality-ncr-actions.tsx");
 const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 
-requireText(mainPage, "production-execution-page", "kalite main page");
-requireText(mainPage, "production-execution-kpis", "kalite main page");
-requireText(mainPage, "Açık NCR", "kalite main page");
-requireText(mainPage, "Aktif Kalite Blokeleri", "kalite main page");
-requireText(mainPage, "Aksiyon Bekleyenler", "kalite main page");
-requireText(mainPage, "/kalite/ncr", "kalite main page");
+requireText(mainUi, "production-execution-page", "kalite main page");
+requireText(mainUi, "production-execution-kpis", "kalite main page");
+requireText(mainUi, "Açık NCR", "kalite main page");
+requireText(mainUi, "Aktif Kalite Blokeleri", "kalite main page");
+requireText(mainUi, "Aksiyon Bekleyenler", "kalite main page");
+requireText(mainUi, "/kalite/ncr", "kalite main page");
 
-requireText(ncrListPage, "production-execution-page", "NCR list page");
+requireText(ncrListPage, "QualityPageShell", "NCR list page");
 requireText(ncrListPage, "Uygunsuzluk Raporları", "NCR list page");
-requireText(ncrListPage, "production-execution-table", "NCR list page");
+requireText(ncrListPage, "QualityNcrFilters", "NCR list page");
+requireText(ncrListPage, "quality-table", "NCR list page");
 
-requireText(ncrDetailPage, "production-execution-page", "NCR detail page");
+requireText(ncrDetailPage, "QualityPageShell", "NCR detail page");
 requireText(ncrDetailPage, "Kalite Blokesi", "NCR detail page");
 requireText(ncrDetailPage, "QualityNcrActions", "NCR detail page");
-requireText(ncrDetailPage, "Üretim bağlamı", "NCR detail page");
+requireText(ncrDetailPage, "Bağlı Üretim", "NCR detail page");
 
 requireText(inspectionPage, "QualityInspectionNcrLink", "inspection page");
 requireText(inspectionNcrLink, "NCR Oluştur", "quality-inspection-ncr-link");
 
-requireText(ncrActions, "Hold Koy", "quality-ncr-actions");
-requireText(ncrActions, "Hold Kaldır", "quality-ncr-actions");
+requireText(ncrActions, "Kalite Blokesi Koy", "quality-ncr-actions");
+requireText(ncrActions, "Blokeyi Kaldır", "quality-ncr-actions");
 requireText(ncrActions, "Disposition Belirle", "quality-ncr-actions");
 requireText(ncrActions, "Düzeltici Aksiyon Ekle", "quality-ncr-actions");
 requireText(ncrActions, "Çöz", "quality-ncr-actions");
@@ -72,6 +77,6 @@ requireText(ncrActions, "Kapat", "quality-ncr-actions");
 
 requireText(nav, 'href: "/kalite"', "primary navigation");
 forbidText(nav, 'href: "/kalite/ncr"', "primary navigation");
-forbidText(mainPage, "globals.css", "kalite main page");
+forbidText(mainUi, "globals.css", "kalite main page");
 
 console.log("Quality 2L premium UI verification passed.");

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { LinkedNonconformanceSummary, QualityInspectionDetail } from "../domain/quality-control";
 import type { createQualityNcrAction } from "../server/quality-control-writer";
 
@@ -53,39 +54,35 @@ export function QualityInspectionNcrLink({
 
   if (hasLinkedNcr) {
     return (
-      <div className="production-execution-form-row">
-        <strong>Bağlı NCR</strong>
-        <ul className="production-execution-list">
-          {linkedNonconformances.map((linked) => (
-            <li key={linked.id}>
-              <Link href={`/kalite/ncr/${linked.id}`}>{linked.ncrNumber}</Link>
+      <ul className="quality-ca-list">
+        {linkedNonconformances.map((linked) => (
+          <li key={linked.id} className="quality-ca-item">
+            <div className="quality-ca-item__body">
+              <Link href={`/kalite/ncr/${linked.id}`}>
+                <strong>{linked.ncrNumber}</strong>
+              </Link>
               <span>{linked.status}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     );
   }
 
   if (failedResults.length === 0 && inspection.overallResult !== "fail") {
-    return null;
+    return <p className="quality-empty-state">Bağlı NCR bulunmuyor.</p>;
   }
 
   return (
-    <div className="production-execution-form-row">
+    <div className="quality-form-stack">
       {message ? (
-        <div role="alert" className="state-panel error-state">
+        <div role="alert" className="quality-error-panel">
           <p>{message}</p>
         </div>
       ) : null}
-      <button
-        type="button"
-        className="production-execution-action-button"
-        disabled={pending}
-        onClick={() => void createFromInspection()}
-      >
+      <Button type="button" variant="secondary" disabled={pending} onClick={() => void createFromInspection()}>
         NCR Oluştur
-      </button>
+      </Button>
     </div>
   );
 }

@@ -2,14 +2,11 @@ import Link from "next/link";
 import {
   ClipboardCheck,
   FileWarning,
-  GitBranch,
   Lock,
   Timer,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-
 import type { ProductionOrderTraceability } from "../domain/quality-control";
 import { getQualityStatusLabel } from "../domain/quality-control";
 
@@ -108,68 +105,68 @@ function timelineLabel(kind: TimelineEntry["kind"]): string {
 export function QualityTraceabilityPanel({ traceability }: QualityTraceabilityPanelProps) {
   if (!traceability) {
     return (
-      <Card className="production-execution-panel production-execution-panel--wide">
-        <header>
-          <GitBranch aria-hidden="true" />
-          <h2>Kalite izlenebilirliği</h2>
+      <section className="quality-section quality-section--wide" aria-label="Kalite izlenebilirliği">
+        <header className="quality-section__header">
+          <h2>Kalite İzlenebilirliği</h2>
         </header>
-        <p>Üretim emri için izlenebilirlik verisi alınamadı.</p>
-      </Card>
+        <p className="quality-empty-state">Üretim emri için izlenebilirlik verisi alınamadı.</p>
+      </section>
     );
   }
 
   const timeline = buildTimeline(traceability);
 
   return (
-    <Card className="production-execution-panel production-execution-panel--wide">
-      <header>
+    <section className="quality-section quality-section--wide" aria-label="Kalite izlenebilirliği">
+      <header className="quality-section__header">
         <div>
-          <p>İZLENEBİLİRLİK</p>
-          <h2>Kalite izlenebilirliği</h2>
-          <span>
+          <h2>Kalite İzlenebilirliği</h2>
+          <p>
             {traceability.productionOrderReference ?? traceability.productionOrderId} ·{" "}
             {traceability.productReference ?? "—"}
-          </span>
+          </p>
         </div>
         <Badge tone="information">{timeline.length} olay</Badge>
       </header>
 
-      <div className="production-execution-grid">
-        <dl className="production-execution-details">
-          <div>
-            <dt>Kontroller</dt>
-            <dd>{traceability.inspections.length}</dd>
-          </div>
-          <div>
-            <dt>NCR</dt>
-            <dd>{traceability.nonconformances.length}</dd>
-          </div>
-          <div>
-            <dt>Blokesi</dt>
-            <dd>{traceability.holds.length}</dd>
-          </div>
-          <div>
-            <dt>Düzeltici aksiyon</dt>
-            <dd>{traceability.correctiveActions.length}</dd>
-          </div>
-        </dl>
-      </div>
+      <dl className="quality-detail-dl">
+        <div>
+          <dt>Kontroller</dt>
+          <dd>{traceability.inspections.length}</dd>
+        </div>
+        <div>
+          <dt>NCR</dt>
+          <dd>{traceability.nonconformances.length}</dd>
+        </div>
+        <div>
+          <dt>Blokesi</dt>
+          <dd>{traceability.holds.length}</dd>
+        </div>
+        <div>
+          <dt>Düzeltici Aksiyon</dt>
+          <dd>{traceability.correctiveActions.length}</dd>
+        </div>
+      </dl>
 
-      <ul className="production-execution-list" aria-label="Kalite izlenebilirlik zaman çizelgesi">
+      <ul className="quality-ca-list" aria-label="Kalite izlenebilirlik zaman çizelgesi">
         {timeline.length === 0 ? (
-          <li>Kayıt yok.</li>
+          <li className="quality-empty-state">Kayıt yok.</li>
         ) : (
           timeline.map((entry) => {
             const Icon = timelineIcon(entry.kind);
             const content = (
               <>
-                <Icon aria-hidden="true" />
-                <div>
+                <span className="quality-dashboard-kpi__icon" aria-hidden="true">
+                  <Icon />
+                </span>
+                <div className="quality-ca-item__body">
                   <strong>{entry.title}</strong>
                   <span>
                     {timelineLabel(entry.kind)} · {entry.subtitle}
                   </span>
-                  <em>{new Date(entry.timestamp).toLocaleString("tr-TR")}</em>
+                  <div className="quality-ca-item__meta">
+                    <span>{new Date(entry.timestamp).toLocaleString("tr-TR")}</span>
+                  </div>
                 </div>
                 <Badge tone={entry.status === "fail" || entry.status === "critical" ? "danger" : "neutral"}>
                   {getQualityStatusLabel(entry.status)}
@@ -178,13 +175,13 @@ export function QualityTraceabilityPanel({ traceability }: QualityTraceabilityPa
             );
 
             return (
-              <li key={entry.id}>
+              <li key={entry.id} className="quality-ca-item">
                 {entry.href ? <Link href={entry.href}>{content}</Link> : content}
               </li>
             );
           })
         )}
       </ul>
-    </Card>
+    </section>
   );
 }
