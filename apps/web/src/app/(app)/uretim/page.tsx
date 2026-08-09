@@ -1,4 +1,6 @@
+import Link from "next/link";
 import {
+  BarChart3,
   CheckCircle2,
   Factory,
   Package,
@@ -66,6 +68,11 @@ export default async function ProductionExecutionPage() {
           Planlamadan üretime aktarılan emirleri izleyin, yürütün ve
           operasyonel ilerlemeyi yönetin.
         </span>
+
+        <Link href="/uretim/raporlama" className="production-execution-header__link">
+          <BarChart3 aria-hidden="true" />
+          Operasyonel Raporlama
+        </Link>
       </header>
 
       <section className="production-execution-kpis" aria-label="Özet istatistikler">

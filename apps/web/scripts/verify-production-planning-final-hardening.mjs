@@ -177,16 +177,25 @@ forbidText(workflowRepository, "aiSchedule", "ProductionPlanWorkflowRepository.c
 forbidText(transferRepository, "aiTransfer", "ProductionPlanTransferRepository.cs");
 forbidText(handoffRepository, "aiHandoff", "ProductionPlanHandoffRepository.cs");
 
-// ── No Production Module Dependency ──
+// ── No separate Production application package ──
 
-// 13. Production module package does not exist
 forbidFile(
   resolveProjectPath("packages/CrevaFactOS.Production"),
   "packages/CrevaFactOS.Production",
 );
 
-// 14. No production execution table in db context
-forbidText(dbContext, "ProductionOrders", "CrevaFactOSDbContext.cs");
+// ── Planning / Production ownership boundary ──
+
+// 14. Planning repositories must not mutate Production execution truth directly.
+forbidText(workflowRepository, "ProductionOrders", "ProductionPlanWorkflowRepository.cs");
+forbidText(writeRepository, "ProductionOrders", "ProductionPlanWriteRepository.cs");
+forbidText(transferRepository, "ProductionOrders", "ProductionPlanTransferRepository.cs");
+forbidText(handoffRepository, "ProductionOrders.Update", "ProductionPlanHandoffRepository.cs");
+forbidText(handoffRepository, "dbContext.ProductionOrders", "ProductionPlanHandoffRepository.cs");
+requireText(handoffRepository, "ProductionPlanHandoff", "ProductionPlanHandoffRepository.cs");
+
+// Persistence may expose ProductionOrders for read/reporting in the shared DbContext.
+requireText(dbContext, "ProductionOrders", "CrevaFactOSDbContext.cs");
 forbidText(dbContext, "MachineCommands", "CrevaFactOSDbContext.cs");
 
 // ── Server Boundary ──
@@ -237,6 +246,7 @@ console.log(
     "atomic transactions,",
     "AI decision boundary,",
     "no Production module dependency,",
+    "Planning must not mutate ProductionOrders directly,",
     "preview write blocked,",
     "no client actor passthrough,",
     "transfer recovery metadata,",

@@ -779,6 +779,14 @@ public sealed class ProductionOrderWriteRepository(
                 ProductionOrderFailureCodes.ConcurrencyConflict,
                 "The production order was modified by another user. Please reload and try again.");
         }
+        catch (DbUpdateException dbEx) when (IsUniqueViolation(dbEx))
+        {
+            // Concurrent lifecycle writes with the same expectedVersion can collide on the
+            // outbox idempotency key before EF surfaces a row-version conflict.
+            return ProductionOrderWriteResult.Fail(
+                ProductionOrderFailureCodes.ConcurrencyConflict,
+                "The production order was modified by another user. Please reload and try again.");
+        }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ProductionOrderWriteResult.Fail(

@@ -1832,6 +1832,25 @@ public static class ProductionExecutionServiceCollectionExtensions
                     serviceProvider.GetService<Microsoft.Extensions.Options.IOptions<ProductionExecutionPolicyOptions>>());
         });
 
+        services.AddScoped<IProductionPlanningLogisticsSignalReader>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionPlanningLogisticsSignalReader()
+                : new ProductionPlanningLogisticsSignalReader(dbContext);
+        });
+
+        services.AddScoped<IProductionReportingRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionReportingRepository()
+                : new ProductionReportingRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IProductionPlanningLogisticsSignalReader>());
+        });
+
         return services;
     }
 }

@@ -73,6 +73,7 @@ app.MapProductionPlanningLogisticsEndpoints();
 app.MapProductionExecutionReadEndpoints();
 app.MapProductionExecutionWriteEndpoints();
 app.MapProductionResourceExecutionReadEndpoints();
+app.MapProductionReportingEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();
