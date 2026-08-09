@@ -52,8 +52,14 @@ requireText(dashboardView, "Yeni Bakım Emri", "dashboard view");
 requireText(dashboardView, "Periyodik Bakım Planı", "dashboard view");
 requireText(dashboardView, "Aktif Bakım İşleri", "dashboard view");
 requireText(dashboardView, "Kritik Arıza ve Bakım Uyarıları", "dashboard view");
-requireText(dashboardView, "Bakım Emrini Aç", "dashboard view");
-requireText(dashboardView, "Bakım Emrine Dönüştür", "dashboard view");
+requireText(dashboardView, "MaintenanceTableIdentifierCell", "dashboard view — structured identifier cell");
+requireText(dashboardView, "MaintenanceTableActionGroup", "dashboard view — dedicated action group");
+requireText(dashboardView, "MaintenanceTableActionLink", "dashboard view — separated action link");
+requireText(dashboardView, "workOrder.workOrderNumber", "dashboard view — work order identifier");
+requireText(dashboardView, "title=\"Bakım Emrine Dönüştür\"", "dashboard view — convert action semantics");
+
+forbidText(dashboardView, "Bakım Emrini Aç", "dashboard view — legacy concatenated action label");
+forbidText(dashboardView, 'className="maintenance-table__action"', "dashboard view — legacy inline action markup");
 
 requireText(kpiUi, "Açık Arızalar", "KPI");
 requireText(kpiUi, "Açık Bakım Emirleri", "KPI");

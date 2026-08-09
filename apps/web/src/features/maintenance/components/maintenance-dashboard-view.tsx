@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   CalendarClock,
+  CheckCircle2,
   ClipboardList,
   Clock,
   Settings,
@@ -19,7 +20,6 @@ import type {
 import {
   buildMaintenanceCriticalAlerts,
   formatMaintenanceAge,
-  getMaintenanceAssetTypeLabel,
   getMaintenanceIntervalLabel,
   getMaintenancePriorityLabel,
   getMaintenancePriorityTone,
@@ -31,6 +31,14 @@ import {
   isOverduePreventivePlan,
 } from "../presentation/maintenance-labels";
 import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
+import {
+  MaintenanceAssetCell,
+  MaintenanceEmptyState,
+  MaintenanceSectionHeader,
+  MaintenanceTableActionGroup,
+  MaintenanceTableActionLink,
+  MaintenanceTableIdentifierCell,
+} from "./maintenance-table-primitives";
 import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 import "./maintenance-workspace.css";
 
@@ -170,14 +178,26 @@ export function MaintenanceDashboardView({
 
       <section className="maintenance-dashboard-priority">
         <Card className="production-execution-panel" id="aktif-bakim-isleri">
-          <header className="maintenance-dashboard-section__header">
-            <h2>Aktif Bakım İşleri</h2>
-          </header>
+          <MaintenanceSectionHeader title="Aktif Bakım İşleri" />
           {activeWorkOrders.length === 0 ? (
-            <p className="maintenance-dashboard-empty">Aktif bakım emri bulunmuyor.</p>
+            <MaintenanceEmptyState
+              icon={<ClipboardList aria-hidden="true" size={18} />}
+              title="Aktif bakım emri bulunmuyor"
+              description="Şu anda devam eden veya planlanmış bakım emri yok."
+            />
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
+              <table className="maintenance-table maintenance-table--compact maintenance-table--work-orders">
+                <colgroup>
+                  <col className="maintenance-table__col--order" />
+                  <col className="maintenance-table__col--asset" />
+                  <col className="maintenance-table__col--type" />
+                  <col className="maintenance-table__col--priority" />
+                  <col className="maintenance-table__col--status" />
+                  <col className="maintenance-table__col--technician" />
+                  <col className="maintenance-table__col--date" />
+                  <col className="maintenance-table__col--actions" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Emir No</th>
@@ -187,31 +207,29 @@ export function MaintenanceDashboardView({
                     <th>Durum</th>
                     <th>Teknisyen</th>
                     <th>Plan</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody>
                   {activeWorkOrders.map((workOrder) => (
                     <tr key={workOrder.id}>
                       <td>
-                        <Link href={`/bakim/emirler/${workOrder.id}`}>
-                          <strong>{workOrder.workOrderNumber}</strong>
-                        </Link>
-                        <Link
-                          className="maintenance-table__action"
+                        <MaintenanceTableIdentifierCell
                           href={`/bakim/emirler/${workOrder.id}`}
-                        >
-                          Bakım Emrini Aç
-                        </Link>
+                          primary={<strong>{workOrder.workOrderNumber}</strong>}
+                        />
                       </td>
                       <td>
-                        <span className="maintenance-table__cell">
-                          {workOrder.assetReference}
-                        </span>
-                        {workOrder.assetName ? (
-                          <small>{workOrder.assetName}</small>
-                        ) : null}
+                        <MaintenanceAssetCell
+                          assetReference={workOrder.assetReference}
+                          assetType={workOrder.assetType}
+                          assetName={workOrder.assetName}
+                          href={`/bakim/varliklar/${encodeURIComponent(workOrder.assetReference)}`}
+                        />
                       </td>
-                      <td>{getMaintenanceTypeLabel(workOrder.type)}</td>
+                      <td className="maintenance-table__cell--compact">
+                        {getMaintenanceTypeLabel(workOrder.type)}
+                      </td>
                       <td>
                         <Badge tone={getMaintenancePriorityTone(workOrder.priority)}>
                           {getMaintenancePriorityLabel(workOrder.priority)}
@@ -222,8 +240,19 @@ export function MaintenanceDashboardView({
                           {getMaintenanceStatusLabel(workOrder.status)}
                         </Badge>
                       </td>
-                      <td>{workOrder.assignedTechnicianSubjectId ?? "—"}</td>
-                      <td>{formatDate(workOrder.plannedStartUtc)}</td>
+                      <td className="maintenance-table__cell--compact">
+                        {workOrder.assignedTechnicianSubjectId ?? "—"}
+                      </td>
+                      <td className="maintenance-table__cell--compact">
+                        {formatDate(workOrder.plannedStartUtc)}
+                      </td>
+                      <td>
+                        <MaintenanceTableActionGroup>
+                          <MaintenanceTableActionLink href={`/bakim/emirler/${workOrder.id}`}>
+                            Aç
+                          </MaintenanceTableActionLink>
+                        </MaintenanceTableActionGroup>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -232,12 +261,14 @@ export function MaintenanceDashboardView({
           )}
         </Card>
 
-        <Card className="production-execution-panel">
-          <header className="maintenance-dashboard-section__header">
-            <h2>Kritik Arıza ve Bakım Uyarıları</h2>
-          </header>
+        <Card className="production-execution-panel maintenance-dashboard-alerts-panel">
+          <MaintenanceSectionHeader title="Kritik Arıza ve Bakım Uyarıları" />
           {alerts.length === 0 ? (
-            <p className="maintenance-dashboard-empty">Kritik uyarı bulunmuyor.</p>
+            <MaintenanceEmptyState
+              icon={<CheckCircle2 aria-hidden="true" size={18} />}
+              title="Kritik bakım uyarısı yok"
+              description="Şu anda acil müdahale gerektiren kayıt bulunmuyor."
+            />
           ) : (
             <ul className="maintenance-alert-list">
               {alerts.map((alert) => (
@@ -258,7 +289,7 @@ export function MaintenanceDashboardView({
                     </span>
                     <Badge tone={alert.tone}>{alert.statusLabel}</Badge>
                   </div>
-                  <Link href={alert.href}>Detay</Link>
+                  <MaintenanceTableActionLink href={alert.href}>Detay</MaintenanceTableActionLink>
                 </li>
               ))}
             </ul>
@@ -268,15 +299,30 @@ export function MaintenanceDashboardView({
 
       <section className="maintenance-dashboard-section" id="ariza-kayitlari">
         <Card className="production-execution-panel production-execution-panel--wide">
-          <header className="maintenance-dashboard-section__header">
-            <h2>Arıza Kayıtları</h2>
-            <Link href="/bakim/arizalar/yeni">Yeni Arıza Kaydı</Link>
-          </header>
+          <MaintenanceSectionHeader
+            title="Arıza Kayıtları"
+            actionHref="/bakim/arizalar/yeni"
+            actionLabel="Yeni Arıza Kaydı"
+          />
           {openRequests.length === 0 ? (
-            <p className="maintenance-dashboard-empty">Açık arıza kaydı bulunmuyor.</p>
+            <MaintenanceEmptyState
+              icon={<AlertTriangle aria-hidden="true" size={18} />}
+              title="Açık arıza kaydı bulunmuyor"
+              description="Yeni bir arıza kaydı oluşturarak süreci başlatabilirsiniz."
+            />
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
+              <table className="maintenance-table maintenance-table--compact maintenance-table--requests">
+                <colgroup>
+                  <col className="maintenance-table__col--order" />
+                  <col className="maintenance-table__col--asset" />
+                  <col className="maintenance-table__col--title" />
+                  <col className="maintenance-table__col--type" />
+                  <col className="maintenance-table__col--priority" />
+                  <col className="maintenance-table__col--status" />
+                  <col className="maintenance-table__col--age" />
+                  <col className="maintenance-table__col--actions-wide" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Kayıt No</th>
@@ -293,30 +339,48 @@ export function MaintenanceDashboardView({
                   {openRequests.map((request) => (
                     <tr key={request.id}>
                       <td>
-                        <strong>{request.requestNumber}</strong>
+                        <MaintenanceTableIdentifierCell
+                          href={`/bakim/arizalar/${request.id}`}
+                          primary={<strong>{request.requestNumber}</strong>}
+                        />
                       </td>
                       <td>
-                        <span className="maintenance-table__cell">
-                          {request.assetReference}
-                        </span>
-                        <small>{getMaintenanceAssetTypeLabel(request.assetType)}</small>
+                        <MaintenanceAssetCell
+                          assetReference={request.assetReference}
+                          assetType={request.assetType}
+                          assetName={request.assetName}
+                          href={`/bakim/varliklar/${encodeURIComponent(request.assetReference)}`}
+                        />
                       </td>
                       <td className="maintenance-table__cell--wrap">{request.title}</td>
-                      <td>{getMaintenanceTypeLabel(request.type)}</td>
+                      <td className="maintenance-table__cell--compact">
+                        {getMaintenanceTypeLabel(request.type)}
+                      </td>
                       <td>
                         <Badge tone={getMaintenancePriorityTone(request.priority)}>
                           {getMaintenancePriorityLabel(request.priority)}
                         </Badge>
                       </td>
-                      <td>{getMaintenanceStatusLabel(request.status)}</td>
-                      <td>{formatMaintenanceAge(request.reportedAtUtc)}</td>
-                      <td className="maintenance-table__actions">
-                        <Link href={`/bakim/arizalar/${request.id}`}>İncele</Link>
-                        {(request.status === "open" || request.status === "triaged") ? (
-                          <Link href={`/bakim/arizalar/${request.id}?convert=1`}>
-                            Bakım Emrine Dönüştür
-                          </Link>
-                        ) : null}
+                      <td>
+                        <Badge tone="neutral">{getMaintenanceStatusLabel(request.status)}</Badge>
+                      </td>
+                      <td className="maintenance-table__cell--compact">
+                        {formatMaintenanceAge(request.reportedAtUtc)}
+                      </td>
+                      <td>
+                        <MaintenanceTableActionGroup>
+                          <MaintenanceTableActionLink href={`/bakim/arizalar/${request.id}`}>
+                            İncele
+                          </MaintenanceTableActionLink>
+                          {request.status === "open" || request.status === "triaged" ? (
+                            <MaintenanceTableActionLink
+                              href={`/bakim/arizalar/${request.id}?convert=1`}
+                              title="Bakım Emrine Dönüştür"
+                            >
+                              Dönüştür
+                            </MaintenanceTableActionLink>
+                          ) : null}
+                        </MaintenanceTableActionGroup>
                       </td>
                     </tr>
                   ))}
@@ -329,15 +393,28 @@ export function MaintenanceDashboardView({
 
       <section className="maintenance-dashboard-section" id="periyodik-bakim-planlari">
         <Card className="production-execution-panel production-execution-panel--wide">
-          <header className="maintenance-dashboard-section__header">
-            <h2>Periyodik Bakım Planları</h2>
-            <Link href="/bakim/planlar/yeni">Yeni Plan</Link>
-          </header>
+          <MaintenanceSectionHeader
+            title="Periyodik Bakım Planları"
+            actionHref="/bakim/planlar/yeni"
+            actionLabel="Yeni Plan"
+          />
           {activePlans.length === 0 ? (
-            <p className="maintenance-dashboard-empty">Aktif periyodik bakım planı bulunmuyor.</p>
+            <MaintenanceEmptyState
+              icon={<CalendarClock aria-hidden="true" size={18} />}
+              title="Aktif periyodik bakım planı bulunmuyor"
+              description="Periyodik bakım planı ekleyerek vadeleri otomatik izleyin."
+            />
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
+              <table className="maintenance-table maintenance-table--compact maintenance-table--preventive">
+                <colgroup>
+                  <col className="maintenance-table__col--code" />
+                  <col className="maintenance-table__col--plan" />
+                  <col className="maintenance-table__col--asset" />
+                  <col className="maintenance-table__col--interval" />
+                  <col className="maintenance-table__col--date" />
+                  <col className="maintenance-table__col--status" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Kod</th>
@@ -352,17 +429,21 @@ export function MaintenanceDashboardView({
                   {activePlans.map((plan) => (
                     <tr
                       key={plan.id}
-                      className={isOverduePreventivePlan(plan) ? "maintenance-table__row--urgent" : undefined}
+                      className={
+                        isOverduePreventivePlan(plan) ? "maintenance-table__row--urgent" : undefined
+                      }
                     >
                       <td>
-                        <strong>{plan.code}</strong>
+                        <MaintenanceTableIdentifierCell primary={<strong>{plan.code}</strong>} />
                       </td>
-                      <td>{plan.name}</td>
+                      <td className="maintenance-table__cell--wrap">{plan.name}</td>
                       <td>
-                        <span className="maintenance-table__cell">{plan.assetReference}</span>
-                        <small>{getMaintenanceAssetTypeLabel(plan.assetType)}</small>
+                        <MaintenanceAssetCell
+                          assetReference={plan.assetReference}
+                          assetType={plan.assetType}
+                        />
                       </td>
-                      <td>
+                      <td className="maintenance-table__cell--compact">
                         {getMaintenanceIntervalLabel(plan.intervalType, plan.intervalValue)}
                       </td>
                       <td>
@@ -374,7 +455,9 @@ export function MaintenanceDashboardView({
                           "—"
                         )}
                       </td>
-                      <td>{getMaintenanceStatusLabel(plan.status)}</td>
+                      <td>
+                        <Badge tone="neutral">{getMaintenanceStatusLabel(plan.status)}</Badge>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
