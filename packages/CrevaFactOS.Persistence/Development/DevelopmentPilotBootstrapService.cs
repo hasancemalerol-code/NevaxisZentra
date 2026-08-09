@@ -160,6 +160,11 @@ internal sealed class DevelopmentPilotBootstrapService(
             pilotOptions,
             seedTimestampUtc,
             cancellationToken);
+        await EnsureUnauthorizedFacilityAsync(
+            dbContext,
+            tenant.Id,
+            seedTimestampUtc,
+            cancellationToken);
         await EnsureFacilityMembershipAsync(
             dbContext,
             tenant.Id,
@@ -899,6 +904,37 @@ internal sealed class DevelopmentPilotBootstrapService(
 
         dbContext.Facilities.Add(facility);
         return facility;
+    }
+
+    private static async Task EnsureUnauthorizedFacilityAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existingFacility = await dbContext.Facilities
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                facility => facility.Id == DevelopmentPilotIds.UnauthorizedFacilityId,
+                cancellationToken);
+
+        if (existingFacility is not null)
+        {
+            return;
+        }
+
+        dbContext.Facilities.Add(new Facility
+        {
+            Id = DevelopmentPilotIds.UnauthorizedFacilityId,
+            TenantId = tenantId,
+            Code = "pilot-facility-unauthorized",
+            Name = "Pilot Unauthorized Facility",
+            Status = FacilityStatus.Active,
+            TimeZoneId = "UTC",
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
     }
 
     private static async Task EnsureFacilityMembershipAsync(

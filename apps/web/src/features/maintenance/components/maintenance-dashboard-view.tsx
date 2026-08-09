@@ -31,6 +31,7 @@ import {
   isOverduePreventivePlan,
 } from "../presentation/maintenance-labels";
 import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
+import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 import "./maintenance-workspace.css";
 
 type MaintenanceDashboardViewProps = Readonly<{
@@ -113,6 +114,8 @@ export function MaintenanceDashboardView({
           </Link>
         </div>
       </header>
+
+      <MaintenanceWorkspaceNav active="overview" />
 
       <section
         className="production-execution-kpis maintenance-dashboard-kpis"

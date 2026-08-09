@@ -130,6 +130,14 @@ internal static class MaintenanceEndpointHelpers
                 title: reason ?? "Completion note is required.",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: FailureExt(MaintenanceApiFailureCodes.CompletionNoteRequired)),
+            MaintenanceFailureCodes.DuplicateDue => TypedResults.Problem(
+                title: reason ?? "An open preventive due already exists.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaintenanceApiFailureCodes.ConcurrencyConflict)),
+            MaintenanceFailureCodes.WorkOrderClosed => TypedResults.Problem(
+                title: reason ?? "Work order is closed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaintenanceApiFailureCodes.InvalidTransition)),
             MaintenanceFailureCodes.SourceUnavailable => TypedResults.Problem(
                 title: reason ?? "Maintenance service is unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable,

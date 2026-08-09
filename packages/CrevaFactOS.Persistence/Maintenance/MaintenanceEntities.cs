@@ -36,6 +36,10 @@ public sealed class MaintenanceWorkOrder
     public string AssetReference { get; set; } = string.Empty;
     public string? AssetName { get; set; }
     public Guid? ProductionOrderId { get; set; }
+    public Guid? PreventivePlanId { get; set; }
+    public Guid? PreventiveDueId { get; set; }
+    public decimal? ExternalServiceCost { get; set; }
+    public decimal? OtherCost { get; set; }
     public MaintenanceWorkOrderType Type { get; set; } = MaintenanceWorkOrderType.Corrective;
     public MaintenancePriority Priority { get; set; } = MaintenancePriority.Normal;
     public MaintenanceWorkOrderStatus Status { get; set; } = MaintenanceWorkOrderStatus.Draft;
@@ -144,4 +148,75 @@ public enum PreventivePlanStatus
 {
     Active,
     Inactive,
+}
+
+public sealed class MaintenanceWorkNote
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid WorkOrderId { get; set; }
+    public MaintenanceWorkNoteType NoteType { get; set; } = MaintenanceWorkNoteType.General;
+    public string Text { get; set; } = string.Empty;
+    public bool IsImportant { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public string CreatedBySubjectId { get; set; } = string.Empty;
+
+    public MaintenanceWorkOrder? WorkOrder { get; set; }
+}
+
+public sealed class PreventiveMaintenanceDue
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid PreventivePlanId { get; set; }
+    public string AssetType { get; set; } = string.Empty;
+    public string AssetReference { get; set; } = string.Empty;
+    public DateTimeOffset DueAtUtc { get; set; }
+    public PreventiveMaintenanceDueStatus Status { get; set; } = PreventiveMaintenanceDueStatus.Due;
+    public DateTimeOffset GeneratedAtUtc { get; set; }
+    public Guid? WorkOrderId { get; set; }
+    public DateTimeOffset? CompletedAtUtc { get; set; }
+    public uint Version { get; set; } = 1;
+
+    public PreventiveMaintenancePlan? PreventivePlan { get; set; }
+}
+
+public sealed class MaintenancePartUsage
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid WorkOrderId { get; set; }
+    public string PartReference { get; set; } = string.Empty;
+    public string? PartName { get; set; }
+    public decimal Quantity { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public string? SourceSystem { get; set; }
+    public string? SourceReference { get; set; }
+    public decimal? EstimatedUnitCost { get; set; }
+    public decimal? ActualUnitCost { get; set; }
+    public DateTimeOffset RecordedAtUtc { get; set; }
+    public string RecordedBySubjectId { get; set; } = string.Empty;
+
+    public MaintenanceWorkOrder? WorkOrder { get; set; }
+}
+
+public enum MaintenanceWorkNoteType
+{
+    General,
+    Diagnosis,
+    Action,
+    Observation,
+    Handover,
+}
+
+public enum PreventiveMaintenanceDueStatus
+{
+    Due,
+    WorkOrderCreated,
+    Completed,
+    Skipped,
+    Cancelled,
 }

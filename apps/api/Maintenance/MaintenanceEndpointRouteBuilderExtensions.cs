@@ -38,6 +38,8 @@ public static class MaintenanceEndpointRouteBuilderExtensions
 
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
 
+        group.MapMaintenanceExecutionEndpoints();
+
         return endpoints;
     }
 
@@ -742,6 +744,8 @@ public static class MaintenanceServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+
+        services.AddCrevaFactOSMaintenanceExecution();
 
         return services;
     }

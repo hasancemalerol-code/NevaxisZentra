@@ -3,6 +3,14 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Factory, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  MaintenanceWorkOrderCostSummaryPanel,
+  MaintenanceWorkOrderNotesPanel,
+  MaintenanceWorkOrderPartsPanel,
+  MaintenanceWorkOrderPreventiveSourcePanel,
+  MaintenanceWorkOrderTimelinePanel,
+} from "@/features/maintenance/components/maintenance-work-order-execution-panels";
+import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import {
   formatMaintenanceAge,
@@ -14,7 +22,14 @@ import {
   getMaintenanceTypeLabel,
   getMaintenanceWorkOrderStatusTone,
 } from "@/features/maintenance/presentation/maintenance-labels";
-import { readMaintenanceWorkOrderDetail } from "@/features/maintenance/server/maintenance-reader";
+import {
+  readMaintenanceWorkOrderDetail,
+  readMaintenanceWorkOrderExecution,
+} from "@/features/maintenance/server/maintenance-reader";
+import {
+  createMaintenancePartUsageAction,
+  createMaintenanceWorkNoteAction,
+} from "@/features/maintenance/server/maintenance-writer";
 
 type PageProps = Readonly<{
   params: Promise<{ id: string }>;
@@ -36,7 +51,10 @@ function formatDateTime(iso?: string): string {
 
 export default async function MaintenanceWorkOrderDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const result = await readMaintenanceWorkOrderDetail(id);
+  const [result, executionResult] = await Promise.all([
+    readMaintenanceWorkOrderDetail(id),
+    readMaintenanceWorkOrderExecution(id),
+  ]);
 
   if (result.status === "failure") {
     return (
@@ -51,6 +69,7 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
             <h1>Bakım Emri Detayı</h1>
           </div>
         </header>
+        <MaintenanceWorkspaceNav active="work-orders" />
         <div role="alert" className="maintenance-error-panel">
           <Wrench aria-hidden="true" />
           <div>
@@ -67,6 +86,16 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
     notFound();
   }
 
+  const execution =
+    executionResult.status === "success"
+      ? executionResult
+      : {
+          notes: [],
+          parts: [],
+          timeline: [],
+          costSummary: null,
+        };
+
   return (
     <main className="production-execution-page maintenance-page">
       <header className="maintenance-page-header production-execution-header">
@@ -80,6 +109,8 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
           <span>{workOrder.title}</span>
         </div>
       </header>
+
+      <MaintenanceWorkspaceNav active="work-orders" />
 
       <div className="maintenance-page-content">
         <section className="maintenance-section" aria-label="Bakım Emri Özeti">
@@ -127,6 +158,9 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
           <section className="maintenance-section" aria-label="Varlık">
             <header className="maintenance-section__header">
               <h2>Varlık</h2>
+              <Link href={`/bakim/varliklar/${encodeURIComponent(workOrder.assetReference)}`}>
+                Geçmişi Gör
+              </Link>
             </header>
             <dl className="maintenance-detail-dl">
               <div>
@@ -224,6 +258,8 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
             </dl>
           </section>
 
+          <MaintenanceWorkOrderPreventiveSourcePanel workOrder={workOrder} />
+
           <section className="maintenance-section maintenance-section--wide" aria-label="Çözüm/Tamamlama">
             <header className="maintenance-section__header">
               <h2>Çözüm/Tamamlama</h2>
@@ -247,6 +283,25 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
               </div>
             </dl>
           </section>
+
+          <MaintenanceWorkOrderCostSummaryPanel
+            costSummary={execution.costSummary}
+            workOrder={workOrder}
+          />
+
+          <MaintenanceWorkOrderNotesPanel
+            workOrderId={workOrder.id}
+            notes={execution.notes}
+            onCreateNote={createMaintenanceWorkNoteAction}
+          />
+
+          <MaintenanceWorkOrderPartsPanel
+            workOrderId={workOrder.id}
+            parts={execution.parts}
+            onCreatePart={createMaintenancePartUsageAction}
+          />
+
+          <MaintenanceWorkOrderTimelinePanel timeline={execution.timeline} />
 
           <section className="maintenance-section maintenance-section--wide" aria-label="Aktivite">
             <header className="maintenance-section__header">

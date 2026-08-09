@@ -13,6 +13,10 @@ public static class MaintenanceAuditActions
     public const string WorkOrderCancelled = "maintenance.workorder.cancelled";
     public const string PreventivePlanCreated = "maintenance.preventiveplan.created";
     public const string PreventivePlanUpdated = "maintenance.preventiveplan.updated";
+    public const string WorkNoteCreated = "maintenance.worknote.created";
+    public const string PreventiveDueGenerated = "maintenance.preventive.due.generated";
+    public const string PreventiveDueWorkOrderCreated = "maintenance.preventive.due.workordercreated";
+    public const string PartUsageRecorded = "maintenance.partusage.recorded";
 }
 
 public static class MaintenanceAuditEventTypes
@@ -28,6 +32,10 @@ public static class MaintenanceAuditEventTypes
     public const string WorkOrderCancelled = "maintenance.workorder.cancelled";
     public const string PreventivePlanCreated = "maintenance.preventiveplan.created";
     public const string PreventivePlanUpdated = "maintenance.preventiveplan.updated";
+    public const string WorkNoteCreated = "maintenance.worknote.created";
+    public const string PreventiveDueGenerated = "maintenance.preventive.due.generated";
+    public const string PreventiveDueWorkOrderCreated = "maintenance.preventive.due.workordercreated";
+    public const string PartUsageRecorded = "maintenance.partusage.recorded";
 }
 
 public static class MaintenanceOutboxMessageTypes
@@ -37,4 +45,8 @@ public static class MaintenanceOutboxMessageTypes
     public const string WorkOrderStarted = "maintenance-work-order-started";
     public const string WorkOrderCompleted = "maintenance-work-order-completed";
     public const string PreventiveDueChanged = "maintenance-preventive-due-changed";
+    public const string WorkNoteCreated = "maintenance-worknote-created";
+    public const string PreventiveDueGenerated = "maintenance-preventive-due-generated";
+    public const string PreventiveWorkOrderCreated = "maintenance-preventive-workorder-created";
+    public const string PartUsageRecorded = "maintenance-partusage-recorded";
 }

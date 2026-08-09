@@ -159,7 +159,16 @@ public sealed class MaintenanceWorkOrderRepository(
             var activity = await MaintenanceRepositorySupport.LoadActivityAsync(
                 dbContext, context, "maintenance.workorder", workOrder.Id, ct);
 
-            return MapDetail(workOrder, requestNumber, orderRef, orderStatus, activity);
+            string? planCode = null;
+            if (workOrder.PreventivePlanId.HasValue)
+            {
+                planCode = await dbContext.PreventiveMaintenancePlans.AsNoTracking()
+                    .Where(p => p.Id == workOrder.PreventivePlanId.Value)
+                    .Select(p => p.Code)
+                    .SingleOrDefaultAsync(ct);
+            }
+
+            return MapDetail(workOrder, requestNumber, orderRef, orderStatus, planCode, activity);
         }, cancellationToken);
 
     public Task<MaintenanceWriteResult> CreateAsync(
@@ -479,6 +488,23 @@ public sealed class MaintenanceWorkOrderRepository(
                         new { workOrderId = workOrder.Id.ToString(), workOrderNumber = workOrder.WorkOrderNumber });
                 }
 
+                if (auditAction == MaintenanceAuditActions.WorkOrderCompleted && workOrder.PreventiveDueId.HasValue)
+                {
+                    var due = await dbContext.PreventiveMaintenanceDues
+                        .SingleOrDefaultAsync(
+                            d => d.TenantId == context.TenantId
+                                && d.FacilityId == context.FacilityId
+                                && d.Id == workOrder.PreventiveDueId.Value,
+                            ct);
+
+                    if (due is not null && due.Status == PreventiveMaintenanceDueStatus.WorkOrderCreated)
+                    {
+                        due.Status = PreventiveMaintenanceDueStatus.Completed;
+                        due.CompletedAtUtc = now;
+                        due.Version++;
+                    }
+                }
+
                 await dbContext.SaveChangesAsync(ct);
                 return MaintenanceWriteResult.Success(workOrder.Id, workOrder.Version);
             },
@@ -513,6 +539,7 @@ public sealed class MaintenanceWorkOrderRepository(
         string? requestNumber,
         string? orderRef,
         string? orderStatus,
+        string? planCode,
         IReadOnlyList<MaintenanceActivityReadModel> activity) =>
         new(
             workOrder.Id,
@@ -526,6 +553,11 @@ public sealed class MaintenanceWorkOrderRepository(
             workOrder.ProductionOrderId,
             orderRef,
             orderStatus,
+            workOrder.PreventivePlanId,
+            planCode,
+            workOrder.PreventiveDueId,
+            workOrder.ExternalServiceCost,
+            workOrder.OtherCost,
             MaintenanceValueConversions.ToStorage(workOrder.Type),
             MaintenanceValueConversions.ToStorage(workOrder.Priority),
             MaintenanceValueConversions.ToStorage(workOrder.Status),

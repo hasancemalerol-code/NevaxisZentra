@@ -256,6 +256,10 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaintenancePilotPreventivePlanId =
         Guid.Parse("bb000001-0082-4000-8000-000000000082");
 
+    // Development-only facility: exists in tenant but has no pilot operator/reviewer membership.
+    public static readonly Guid UnauthorizedFacilityId =
+        Guid.Parse("bb000001-0005-4000-8000-000000000099");
+
     // Export 3L development demo fixtures (NOT real legal requirements)
     public static readonly Guid ExportDeDemoRulePackId =
         Guid.Parse("bb000001-0058-4000-8000-000000000058");

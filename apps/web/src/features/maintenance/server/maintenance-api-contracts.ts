@@ -16,6 +16,20 @@ function readNumber(value: unknown, field: string): number {
   return value;
 }
 
+function readOptionalNumber(value: unknown): number | undefined {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return undefined;
+  }
+  return value;
+}
+
+function readBoolean(value: unknown, field: string): boolean {
+  if (typeof value !== "boolean") {
+    throw new Error(`Invalid boolean for ${field}.`);
+  }
+  return value;
+}
+
 function parseActivity(value: unknown) {
   if (typeof value !== "object" || value === null) {
     throw new Error("Invalid maintenance activity.");
@@ -158,6 +172,11 @@ export function parseMaintenanceWorkOrderDetailApiResponse(payload: unknown) {
     productionOrderId: readOptionalString(record.productionOrderId),
     productionOrderReference: readOptionalString(record.productionOrderReference),
     productionOrderStatus: readOptionalString(record.productionOrderStatus),
+    preventivePlanId: readOptionalString(record.preventivePlanId),
+    preventivePlanCode: readOptionalString(record.preventivePlanCode),
+    preventiveDueId: readOptionalString(record.preventiveDueId),
+    externalServiceCost: readOptionalNumber(record.externalServiceCost),
+    otherCost: readOptionalNumber(record.otherCost),
     type: readString(record.type, "workOrder.type"),
     priority: readString(record.priority, "workOrder.priority"),
     status: readString(record.status, "workOrder.status"),
@@ -212,5 +231,176 @@ export function parseMaintenanceWriteApiResponse(payload: unknown) {
   return {
     id: readString(record.id, "write.id"),
     version: readNumber(record.version, "write.version"),
+  };
+}
+
+function parseWorkNote(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid maintenance work note.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "note.id"),
+    workOrderId: readString(record.workOrderId, "note.workOrderId"),
+    noteType: readString(record.noteType, "note.noteType"),
+    text: readString(record.text, "note.text"),
+    isImportant: readBoolean(record.isImportant, "note.isImportant"),
+    createdAtUtc: readString(record.createdAtUtc, "note.createdAtUtc"),
+    createdBySubjectId: readString(record.createdBySubjectId, "note.createdBySubjectId"),
+  };
+}
+
+export function parseMaintenanceWorkNoteListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid maintenance work note list payload.");
+  }
+  return payload.map(parseWorkNote);
+}
+
+function parseTimelineEntry(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid maintenance timeline entry.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    entryType: readString(record.entryType, "timeline.entryType"),
+    title: readString(record.title, "timeline.title"),
+    detail: readOptionalString(record.detail),
+    occurredAtUtc: readString(record.occurredAtUtc, "timeline.occurredAtUtc"),
+    actorSubjectId: readOptionalString(record.actorSubjectId),
+  };
+}
+
+export function parseMaintenanceTimelineApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid maintenance timeline payload.");
+  }
+  return payload.map(parseTimelineEntry);
+}
+
+function parsePartUsage(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid maintenance part usage.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "part.id"),
+    workOrderId: readString(record.workOrderId, "part.workOrderId"),
+    partReference: readString(record.partReference, "part.partReference"),
+    partName: readOptionalString(record.partName),
+    quantity: readNumber(record.quantity, "part.quantity"),
+    unit: readString(record.unit, "part.unit"),
+    sourceSystem: readOptionalString(record.sourceSystem),
+    sourceReference: readOptionalString(record.sourceReference),
+    estimatedUnitCost: readOptionalNumber(record.estimatedUnitCost),
+    actualUnitCost: readOptionalNumber(record.actualUnitCost),
+    estimatedLineCost: readOptionalNumber(record.estimatedLineCost),
+    actualLineCost: readOptionalNumber(record.actualLineCost),
+    recordedAtUtc: readString(record.recordedAtUtc, "part.recordedAtUtc"),
+    recordedBySubjectId: readString(record.recordedBySubjectId, "part.recordedBySubjectId"),
+  };
+}
+
+export function parseMaintenancePartUsageListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid maintenance part usage list payload.");
+  }
+  return payload.map(parsePartUsage);
+}
+
+export function parseMaintenanceCostSummaryApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid maintenance cost summary payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    workOrderId: readString(record.workOrderId, "cost.workOrderId"),
+    estimatedPartsCost: readOptionalNumber(record.estimatedPartsCost),
+    actualPartsCost: readOptionalNumber(record.actualPartsCost),
+    externalServiceCost: readOptionalNumber(record.externalServiceCost),
+    otherCost: readOptionalNumber(record.otherCost),
+    totalMaintenanceCost: readOptionalNumber(record.totalMaintenanceCost),
+  };
+}
+
+function parsePreventiveDueSummary(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid preventive maintenance due summary.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "due.id"),
+    preventivePlanId: readString(record.preventivePlanId, "due.preventivePlanId"),
+    preventivePlanCode: readOptionalString(record.preventivePlanCode),
+    preventivePlanName: readOptionalString(record.preventivePlanName),
+    assetType: readString(record.assetType, "due.assetType"),
+    assetReference: readString(record.assetReference, "due.assetReference"),
+    dueAtUtc: readString(record.dueAtUtc, "due.dueAtUtc"),
+    status: readString(record.status, "due.status"),
+    generatedAtUtc: readString(record.generatedAtUtc, "due.generatedAtUtc"),
+    workOrderId: readOptionalString(record.workOrderId),
+    workOrderNumber: readOptionalString(record.workOrderNumber),
+    completedAtUtc: readOptionalString(record.completedAtUtc),
+    version: readNumber(record.version, "due.version"),
+  };
+}
+
+export function parsePreventiveMaintenanceDueListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid preventive maintenance due list payload.");
+  }
+  return payload.map(parsePreventiveDueSummary);
+}
+
+export function parsePreventiveMaintenanceDueDetailApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid preventive maintenance due detail payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    id: readString(record.id, "due.id"),
+    preventivePlanId: readString(record.preventivePlanId, "due.preventivePlanId"),
+    preventivePlanCode: readString(record.preventivePlanCode, "due.preventivePlanCode"),
+    preventivePlanName: readString(record.preventivePlanName, "due.preventivePlanName"),
+    assetType: readString(record.assetType, "due.assetType"),
+    assetReference: readString(record.assetReference, "due.assetReference"),
+    dueAtUtc: readString(record.dueAtUtc, "due.dueAtUtc"),
+    status: readString(record.status, "due.status"),
+    generatedAtUtc: readString(record.generatedAtUtc, "due.generatedAtUtc"),
+    workOrderId: readOptionalString(record.workOrderId),
+    workOrderNumber: readOptionalString(record.workOrderNumber),
+    completedAtUtc: readOptionalString(record.completedAtUtc),
+    version: readNumber(record.version, "due.version"),
+  };
+}
+
+export function parseMaintenanceAssetHistoryApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid maintenance asset history payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    assetReference: readString(record.assetReference, "history.assetReference"),
+    requests: Array.isArray(record.requests)
+      ? parseMaintenanceRequestListApiResponse(record.requests)
+      : [],
+    workOrders: Array.isArray(record.workOrders)
+      ? parseMaintenanceWorkOrderListApiResponse(record.workOrders)
+      : [],
+    preventivePlans: Array.isArray(record.preventivePlans)
+      ? parsePreventiveMaintenancePlanListApiResponse(record.preventivePlans)
+      : [],
+    preventiveDues: Array.isArray(record.preventiveDues)
+      ? parsePreventiveMaintenanceDueListApiResponse(record.preventiveDues)
+      : [],
+    workNotes: Array.isArray(record.workNotes)
+      ? parseMaintenanceWorkNoteListApiResponse(record.workNotes)
+      : [],
+    partUsages: Array.isArray(record.partUsages)
+      ? parseMaintenancePartUsageListApiResponse(record.partUsages)
+      : [],
+    costSummaries: Array.isArray(record.costSummaries)
+      ? record.costSummaries.map((item) => parseMaintenanceCostSummaryApiResponse(item))
+      : [],
   };
 }

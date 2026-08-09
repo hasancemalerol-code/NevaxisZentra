@@ -18,6 +18,8 @@ public static class MaintenanceFailureCodes
     public const string ProductionOrderNotFound = "production-order-not-found";
     public const string SourceUnavailable = "source-unavailable";
     public const string CompletionNoteRequired = "completion-note-required";
+    public const string DuplicateDue = "duplicate-due";
+    public const string WorkOrderClosed = "work-order-closed";
 }
 
 public sealed class MaintenanceWriteResult
@@ -196,6 +198,11 @@ public sealed record MaintenanceWorkOrderDetailReadModel(
     Guid? ProductionOrderId,
     string? ProductionOrderReference,
     string? ProductionOrderStatus,
+    Guid? PreventivePlanId,
+    string? PreventivePlanCode,
+    Guid? PreventiveDueId,
+    decimal? ExternalServiceCost,
+    decimal? OtherCost,
     string Type,
     string Priority,
     string Status,
@@ -259,3 +266,100 @@ public sealed record MaintenanceActivityReadModel(
     DateTimeOffset OccurredAtUtc,
     string? ActorSubjectId,
     string Summary);
+
+public sealed record CreateMaintenanceWorkNoteCommand(
+    Guid WorkOrderId,
+    string NoteType,
+    string Text,
+    bool IsImportant);
+
+public sealed record CreateMaintenancePartUsageCommand(
+    Guid WorkOrderId,
+    string PartReference,
+    string? PartName,
+    decimal Quantity,
+    string Unit,
+    string? SourceSystem,
+    string? SourceReference,
+    decimal? EstimatedUnitCost,
+    decimal? ActualUnitCost);
+
+public sealed record MaintenanceWorkNoteReadModel(
+    Guid Id,
+    Guid WorkOrderId,
+    string NoteType,
+    string Text,
+    bool IsImportant,
+    DateTimeOffset CreatedAtUtc,
+    string CreatedBySubjectId);
+
+public sealed record MaintenanceTimelineEntryReadModel(
+    string EntryType,
+    string Title,
+    string? Detail,
+    DateTimeOffset OccurredAtUtc,
+    string? ActorSubjectId);
+
+public sealed record PreventiveMaintenanceDueSummaryReadModel(
+    Guid Id,
+    Guid PreventivePlanId,
+    string? PreventivePlanCode,
+    string? PreventivePlanName,
+    string AssetType,
+    string AssetReference,
+    DateTimeOffset DueAtUtc,
+    string Status,
+    DateTimeOffset GeneratedAtUtc,
+    Guid? WorkOrderId,
+    string? WorkOrderNumber,
+    DateTimeOffset? CompletedAtUtc,
+    uint Version);
+
+public sealed record PreventiveMaintenanceDueDetailReadModel(
+    Guid Id,
+    Guid PreventivePlanId,
+    string PreventivePlanCode,
+    string PreventivePlanName,
+    string AssetType,
+    string AssetReference,
+    DateTimeOffset DueAtUtc,
+    string Status,
+    DateTimeOffset GeneratedAtUtc,
+    Guid? WorkOrderId,
+    string? WorkOrderNumber,
+    DateTimeOffset? CompletedAtUtc,
+    uint Version);
+
+public sealed record MaintenancePartUsageReadModel(
+    Guid Id,
+    Guid WorkOrderId,
+    string PartReference,
+    string? PartName,
+    decimal Quantity,
+    string Unit,
+    string? SourceSystem,
+    string? SourceReference,
+    decimal? EstimatedUnitCost,
+    decimal? ActualUnitCost,
+    decimal? EstimatedLineCost,
+    decimal? ActualLineCost,
+    DateTimeOffset RecordedAtUtc,
+    string RecordedBySubjectId);
+
+public sealed record MaintenanceCostSummaryReadModel(
+    Guid WorkOrderId,
+    decimal? EstimatedPartsCost,
+    decimal? ActualPartsCost,
+    decimal? ExternalServiceCost,
+    decimal? OtherCost,
+    decimal? TotalMaintenanceCost);
+
+public sealed record MaintenanceAssetHistoryReadModel(
+    string AssetReference,
+    IReadOnlyList<MaintenanceRequestSummaryReadModel> Requests,
+    IReadOnlyList<MaintenanceWorkOrderSummaryReadModel> WorkOrders,
+    IReadOnlyList<PreventiveMaintenancePlanSummaryReadModel> PreventivePlans,
+    IReadOnlyList<PreventiveMaintenanceDueSummaryReadModel> PreventiveDues,
+    IReadOnlyList<MaintenanceWorkNoteReadModel> WorkNotes,
+    IReadOnlyList<MaintenancePartUsageReadModel> PartUsages,
+    IReadOnlyList<MaintenanceCostSummaryReadModel> CostSummaries);

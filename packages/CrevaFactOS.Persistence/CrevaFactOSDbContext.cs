@@ -95,10 +95,13 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
     public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
 
-    // Maintenance — requests, work orders, preventive plans
+    // Maintenance — requests, work orders, preventive plans, execution
     public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
     public DbSet<MaintenanceWorkOrder> MaintenanceWorkOrders => Set<MaintenanceWorkOrder>();
     public DbSet<PreventiveMaintenancePlan> PreventiveMaintenancePlans => Set<PreventiveMaintenancePlan>();
+    public DbSet<MaintenanceWorkNote> MaintenanceWorkNotes => Set<MaintenanceWorkNote>();
+    public DbSet<PreventiveMaintenanceDue> PreventiveMaintenanceDues => Set<PreventiveMaintenanceDue>();
+    public DbSet<MaintenancePartUsage> MaintenancePartUsages => Set<MaintenancePartUsage>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -666,6 +669,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new PreventiveMaintenancePlanEntityConfiguration());
         modelBuilder.Entity<PreventiveMaintenancePlan>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceWorkNoteEntityConfiguration());
+        modelBuilder.Entity<MaintenanceWorkNote>().HasQueryFilter(n =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && n.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PreventiveMaintenanceDueEntityConfiguration());
+        modelBuilder.Entity<PreventiveMaintenanceDue>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePartUsageEntityConfiguration());
+        modelBuilder.Entity<MaintenancePartUsage>().HasQueryFilter(p =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);

@@ -81,6 +81,11 @@ internal static class MaintenanceApiMapper
         productionOrderId = model.ProductionOrderId,
         productionOrderReference = model.ProductionOrderReference,
         productionOrderStatus = model.ProductionOrderStatus,
+        preventivePlanId = model.PreventivePlanId,
+        preventivePlanCode = model.PreventivePlanCode,
+        preventiveDueId = model.PreventiveDueId,
+        externalServiceCost = model.ExternalServiceCost,
+        otherCost = model.OtherCost,
         type = model.Type,
         priority = model.Priority,
         status = model.Status,
@@ -152,5 +157,99 @@ internal static class MaintenanceApiMapper
         occurredAtUtc = model.OccurredAtUtc,
         actorSubjectId = model.ActorSubjectId,
         summary = model.Summary,
+    };
+
+    public static object MapWorkNote(MaintenanceWorkNoteReadModel model) => new
+    {
+        id = model.Id,
+        workOrderId = model.WorkOrderId,
+        noteType = model.NoteType,
+        text = model.Text,
+        isImportant = model.IsImportant,
+        createdAtUtc = model.CreatedAtUtc,
+        createdBySubjectId = model.CreatedBySubjectId,
+    };
+
+    public static object MapTimelineEntry(MaintenanceTimelineEntryReadModel model) => new
+    {
+        entryType = model.EntryType,
+        title = model.Title,
+        detail = model.Detail,
+        occurredAtUtc = model.OccurredAtUtc,
+        actorSubjectId = model.ActorSubjectId,
+    };
+
+    public static object MapPartUsage(MaintenancePartUsageReadModel model) => new
+    {
+        id = model.Id,
+        workOrderId = model.WorkOrderId,
+        partReference = model.PartReference,
+        partName = model.PartName,
+        quantity = model.Quantity,
+        unit = model.Unit,
+        sourceSystem = model.SourceSystem,
+        sourceReference = model.SourceReference,
+        estimatedUnitCost = model.EstimatedUnitCost,
+        actualUnitCost = model.ActualUnitCost,
+        estimatedLineCost = model.EstimatedLineCost,
+        actualLineCost = model.ActualLineCost,
+        recordedAtUtc = model.RecordedAtUtc,
+        recordedBySubjectId = model.RecordedBySubjectId,
+    };
+
+    public static object MapCostSummary(MaintenanceCostSummaryReadModel model) => new
+    {
+        workOrderId = model.WorkOrderId,
+        estimatedPartsCost = model.EstimatedPartsCost,
+        actualPartsCost = model.ActualPartsCost,
+        externalServiceCost = model.ExternalServiceCost,
+        otherCost = model.OtherCost,
+        totalMaintenanceCost = model.TotalMaintenanceCost,
+    };
+
+    public static object MapPreventiveDueSummary(PreventiveMaintenanceDueSummaryReadModel model) => new
+    {
+        id = model.Id,
+        preventivePlanId = model.PreventivePlanId,
+        preventivePlanCode = model.PreventivePlanCode,
+        preventivePlanName = model.PreventivePlanName,
+        assetType = model.AssetType,
+        assetReference = model.AssetReference,
+        dueAtUtc = model.DueAtUtc,
+        status = model.Status,
+        generatedAtUtc = model.GeneratedAtUtc,
+        workOrderId = model.WorkOrderId,
+        workOrderNumber = model.WorkOrderNumber,
+        completedAtUtc = model.CompletedAtUtc,
+        version = model.Version,
+    };
+
+    public static object MapPreventiveDueDetail(PreventiveMaintenanceDueDetailReadModel model) => new
+    {
+        id = model.Id,
+        preventivePlanId = model.PreventivePlanId,
+        preventivePlanCode = model.PreventivePlanCode,
+        preventivePlanName = model.PreventivePlanName,
+        assetType = model.AssetType,
+        assetReference = model.AssetReference,
+        dueAtUtc = model.DueAtUtc,
+        status = model.Status,
+        generatedAtUtc = model.GeneratedAtUtc,
+        workOrderId = model.WorkOrderId,
+        workOrderNumber = model.WorkOrderNumber,
+        completedAtUtc = model.CompletedAtUtc,
+        version = model.Version,
+    };
+
+    public static object MapAssetHistory(MaintenanceAssetHistoryReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        requests = model.Requests.Select(MapRequestSummary).ToList(),
+        workOrders = model.WorkOrders.Select(MapWorkOrderSummary).ToList(),
+        preventivePlans = model.PreventivePlans.Select(MapPreventivePlanSummary).ToList(),
+        preventiveDues = model.PreventiveDues.Select(MapPreventiveDueSummary).ToList(),
+        workNotes = model.WorkNotes.Select(MapWorkNote).ToList(),
+        partUsages = model.PartUsages.Select(MapPartUsage).ToList(),
+        costSummaries = model.CostSummaries.Select(MapCostSummary).ToList(),
     };
 }

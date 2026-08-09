@@ -1,6 +1,7 @@
 import type {
   MaintenanceRequestSummary,
   MaintenanceWorkOrderSummary,
+  PreventiveMaintenanceDueSummary,
   PreventiveMaintenancePlanSummary,
 } from "../domain/maintenance";
 
@@ -119,6 +120,120 @@ export function getMaintenanceIntervalLabel(intervalType: string, intervalValue:
     default:
       return `${intervalValue} ${intervalType}`;
   }
+}
+
+export function getMaintenanceWorkNoteTypeLabel(noteType: string): string {
+  switch (noteType) {
+    case "diagnosis":
+      return "Teşhis";
+    case "action":
+      return "İşlem";
+    case "observation":
+      return "Gözlem";
+    case "handover":
+      return "Devir";
+    case "general":
+      return "Genel";
+    default:
+      return noteType;
+  }
+}
+
+export function getPreventiveDueStatusLabel(status: string): string {
+  switch (status) {
+    case "due":
+      return "Vadesi Geldi";
+    case "work-order-created":
+      return "Emir Oluşturuldu";
+    case "completed":
+      return "Tamamlandı";
+    case "skipped":
+      return "Atlandı";
+    case "cancelled":
+      return "İptal";
+    default:
+      return status;
+  }
+}
+
+export function getPreventiveDueStatusTone(
+  status: string,
+): "neutral" | "information" | "danger" | "success" {
+  switch (status) {
+    case "due":
+      return "information";
+    case "work-order-created":
+      return "information";
+    case "completed":
+      return "success";
+    case "cancelled":
+    case "skipped":
+      return "neutral";
+    default:
+      return "neutral";
+  }
+}
+
+export function isOpenPreventiveDue(status: string): boolean {
+  return status === "due" || status === "work-order-created";
+}
+
+export function isOverduePreventiveDue(
+  due: Pick<PreventiveMaintenanceDueSummary, "dueAtUtc" | "status">,
+): boolean {
+  if (due.status !== "due") {
+    return false;
+  }
+
+  return Date.parse(due.dueAtUtc) < Date.now();
+}
+
+export function isUpcomingPreventiveDue(
+  due: Pick<PreventiveMaintenanceDueSummary, "dueAtUtc" | "status">,
+): boolean {
+  if (due.status !== "due") {
+    return false;
+  }
+
+  return Date.parse(due.dueAtUtc) >= Date.now();
+}
+
+export function formatMaintenanceCurrency(value?: number | null): string {
+  if (value === undefined || value === null) {
+    return "—";
+  }
+
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function formatMaintenanceDate(iso?: string): string {
+  if (!iso) {
+    return "—";
+  }
+
+  return new Date(iso).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function formatMaintenanceDateTime(iso?: string): string {
+  if (!iso) {
+    return "—";
+  }
+
+  return new Date(iso).toLocaleString("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function formatMaintenanceAge(isoTimestamp: string): string {
@@ -269,7 +384,7 @@ export function buildMaintenanceCriticalAlerts(input: Readonly<{
         statusLabel: plan.nextDueAtUtc
           ? new Date(plan.nextDueAtUtc).toLocaleDateString("tr-TR")
           : "—",
-        href: `/bakim`,
+        href: `/bakim/planlama#gecikenler`,
         tone: "information",
       });
     }

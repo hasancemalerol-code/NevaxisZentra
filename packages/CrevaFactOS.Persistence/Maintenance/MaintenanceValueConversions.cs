@@ -141,4 +141,40 @@ public static class MaintenanceValueConversions
 
     public static PreventivePlanStatus PlanStatusFromStorage(string value) =>
         value == "inactive" ? PreventivePlanStatus.Inactive : PreventivePlanStatus.Active;
+
+    public static string ToStorage(MaintenanceWorkNoteType value) => value switch
+    {
+        MaintenanceWorkNoteType.Diagnosis => "diagnosis",
+        MaintenanceWorkNoteType.Action => "action",
+        MaintenanceWorkNoteType.Observation => "observation",
+        MaintenanceWorkNoteType.Handover => "handover",
+        _ => "general",
+    };
+
+    public static MaintenanceWorkNoteType WorkNoteTypeFromStorage(string value) => value switch
+    {
+        "diagnosis" => MaintenanceWorkNoteType.Diagnosis,
+        "action" => MaintenanceWorkNoteType.Action,
+        "observation" => MaintenanceWorkNoteType.Observation,
+        "handover" => MaintenanceWorkNoteType.Handover,
+        _ => MaintenanceWorkNoteType.General,
+    };
+
+    public static string ToStorage(PreventiveMaintenanceDueStatus value) => value switch
+    {
+        PreventiveMaintenanceDueStatus.WorkOrderCreated => "work-order-created",
+        PreventiveMaintenanceDueStatus.Completed => "completed",
+        PreventiveMaintenanceDueStatus.Skipped => "skipped",
+        PreventiveMaintenanceDueStatus.Cancelled => "cancelled",
+        _ => "due",
+    };
+
+    public static PreventiveMaintenanceDueStatus DueStatusFromStorage(string value) => value switch
+    {
+        "work-order-created" => PreventiveMaintenanceDueStatus.WorkOrderCreated,
+        "completed" => PreventiveMaintenanceDueStatus.Completed,
+        "skipped" => PreventiveMaintenanceDueStatus.Skipped,
+        "cancelled" => PreventiveMaintenanceDueStatus.Cancelled,
+        _ => PreventiveMaintenanceDueStatus.Due,
+    };
 }
