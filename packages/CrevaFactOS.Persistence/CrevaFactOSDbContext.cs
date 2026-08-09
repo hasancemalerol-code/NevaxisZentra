@@ -10,6 +10,7 @@ using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.AiUsage;
+using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -83,6 +84,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ProductionOrderShiftAssignment> ProductionOrderShiftAssignments => Set<ProductionOrderShiftAssignment>();
     public DbSet<ProductionOperatorAssignment> ProductionOperatorAssignments => Set<ProductionOperatorAssignment>();
     public DbSet<ProductionShiftHandover> ProductionShiftHandovers => Set<ProductionShiftHandover>();
+
+    // Quality — control plans, inspections, results
+    public DbSet<QualityControlPlan> QualityControlPlans => Set<QualityControlPlan>();
+    public DbSet<QualityInspectionDefinition> QualityInspectionDefinitions => Set<QualityInspectionDefinition>();
+    public DbSet<QualityInspection> QualityInspections => Set<QualityInspection>();
+    public DbSet<QualityInspectionResult> QualityInspectionResults => Set<QualityInspectionResult>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -591,6 +598,31 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Quality
+        modelBuilder.ApplyConfiguration(new QualityControlPlanEntityConfiguration());
+        modelBuilder.Entity<QualityControlPlan>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityInspectionDefinitionEntityConfiguration());
+        modelBuilder.Entity<QualityInspectionDefinition>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityInspectionEntityConfiguration());
+        modelBuilder.Entity<QualityInspection>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityInspectionResultEntityConfiguration());
+        modelBuilder.Entity<QualityInspectionResult>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

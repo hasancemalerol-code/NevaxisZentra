@@ -5,6 +5,7 @@ using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.Production;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
+using CrevaFactOS.Persistence.Quality;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -316,6 +317,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureExportAiReviewPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityInspectPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityReleasePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -344,6 +357,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 dbContext,
                 tenant.Id,
                 facility.Id,
+                cancellationToken);
+            await DevelopmentPilotQualitySeed.EnsureQualityPilotControlPlanAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
                 cancellationToken);
         }
 
@@ -1810,4 +1830,40 @@ internal sealed class DevelopmentPilotBootstrapService(
 
         return seededCount;
     }
+
+    private static Task EnsureQualityReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Read,
+            DevelopmentPilotIds.QualityReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Manage,
+            DevelopmentPilotIds.QualityManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityInspectPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Inspect,
+            DevelopmentPilotIds.QualityInspectPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityReleasePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Release,
+            DevelopmentPilotIds.QualityReleasePermissionDefinitionId,
+            cancellationToken);
 }

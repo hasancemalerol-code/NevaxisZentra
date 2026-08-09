@@ -194,6 +194,26 @@ public static class DevelopmentPilotIds
     public static readonly Guid ExportAiReviewPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000045");
 
+    // Quality permission definitions (046–049)
+    public static readonly Guid QualityReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000046");
+
+    public static readonly Guid QualityManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000047");
+
+    public static readonly Guid QualityInspectPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000048");
+
+    public static readonly Guid QualityReleasePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000049");
+
+    // Quality pilot fixture
+    public static readonly Guid QualityPilotControlPlanId =
+        Guid.Parse("bb000001-0060-4000-8000-000000000060");
+
+    public static readonly Guid QualityPilotInspectionDefinitionId =
+        Guid.Parse("bb000001-0061-4000-8000-000000000061");
+
     // Export 3L development demo fixtures (NOT real legal requirements)
     public static readonly Guid ExportDeDemoRulePackId =
         Guid.Parse("bb000001-0058-4000-8000-000000000058");
