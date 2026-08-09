@@ -236,6 +236,26 @@ public static class DevelopmentPilotIds
     public static readonly Guid QualityPilotInspectionDefinitionId =
         Guid.Parse("bb000001-0061-4000-8000-000000000061");
 
+    // Maintenance permission definitions (053–055)
+    public static readonly Guid MaintenanceReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000053");
+
+    public static readonly Guid MaintenanceManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000054");
+
+    public static readonly Guid MaintenanceExecutePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000055");
+
+    // Maintenance pilot fixtures
+    public static readonly Guid MaintenancePilotRequestId =
+        Guid.Parse("bb000001-0080-4000-8000-000000000080");
+
+    public static readonly Guid MaintenancePilotWorkOrderId =
+        Guid.Parse("bb000001-0081-4000-8000-000000000081");
+
+    public static readonly Guid MaintenancePilotPreventivePlanId =
+        Guid.Parse("bb000001-0082-4000-8000-000000000082");
+
     // Export 3L development demo fixtures (NOT real legal requirements)
     public static readonly Guid ExportDeDemoRulePackId =
         Guid.Parse("bb000001-0058-4000-8000-000000000058");

@@ -337,6 +337,16 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureQualityDispositionPermissionAssignmentAsync(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaintenanceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaintenanceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaintenanceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaintenanceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaintenanceExecutePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -389,6 +399,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 cancellationToken);
             await DevelopmentPilotQualitySeed.EnsureQualityPilotControlPlanAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotMaintenanceSeed.EnsureMaintenancePilotDataAsync(
                 dbContext,
                 tenant.Id,
                 facility.Id,
@@ -2064,5 +2081,32 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             QualityPermissionKeys.Disposition,
             DevelopmentPilotIds.QualityDispositionPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMaintenanceReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MaintenancePermissionKeys.Read,
+            DevelopmentPilotIds.MaintenanceReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMaintenanceManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MaintenancePermissionKeys.Manage,
+            DevelopmentPilotIds.MaintenanceManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMaintenanceExecutePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MaintenancePermissionKeys.Execute,
+            DevelopmentPilotIds.MaintenanceExecutePermissionDefinitionId,
             cancellationToken);
 }

@@ -11,6 +11,7 @@ using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Quality;
+using CrevaFactOS.Persistence.Maintenance;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -93,6 +94,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityNonconformance> QualityNonconformances => Set<QualityNonconformance>();
     public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
     public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
+
+    // Maintenance — requests, work orders, preventive plans
+    public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
+    public DbSet<MaintenanceWorkOrder> MaintenanceWorkOrders => Set<MaintenanceWorkOrder>();
+    public DbSet<PreventiveMaintenancePlan> PreventiveMaintenancePlans => Set<PreventiveMaintenancePlan>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -644,6 +650,25 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Maintenance
+        modelBuilder.ApplyConfiguration(new MaintenanceRequestEntityConfiguration());
+        modelBuilder.Entity<MaintenanceRequest>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceWorkOrderEntityConfiguration());
+        modelBuilder.Entity<MaintenanceWorkOrder>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PreventiveMaintenancePlanEntityConfiguration());
+        modelBuilder.Entity<PreventiveMaintenancePlan>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());
