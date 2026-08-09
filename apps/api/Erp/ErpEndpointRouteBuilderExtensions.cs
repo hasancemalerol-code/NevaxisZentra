@@ -24,6 +24,8 @@ public static class ErpEndpointRouteBuilderExtensions
         group.MapPost("/connections/{connectionId:guid}/sync/warehouses", SyncWarehousesAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/inventory", SyncInventoryAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/purchasing", SyncPurchasingAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/production", SyncProductionAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/documents", SyncDocumentsAsync);
 
         group.MapGet("/sync-runs", ListSyncRunsAsync);
         group.MapGet("/sync-runs/{syncRunId:guid}", GetSyncRunAsync);
@@ -41,6 +43,17 @@ public static class ErpEndpointRouteBuilderExtensions
         group.MapGet("/inventory/availability", ListInventoryAvailabilityAsync);
         group.MapGet("/purchase-orders", ListPurchaseOrdersAsync);
         group.MapGet("/purchase-orders/{purchaseOrderId:guid}", GetPurchaseOrderAsync);
+        group.MapGet("/production-orders", ListProductionOrdersAsync);
+        group.MapGet("/production-orders/{productionOrderId:guid}", GetProductionOrderAsync);
+        group.MapGet("/documents", ListDocumentsAsync);
+        group.MapGet("/documents/{documentId:guid}", GetDocumentAsync);
+        group.MapGet("/writebacks", ListWritebacksAsync);
+        group.MapGet("/writebacks/{writebackId:guid}", GetWritebackAsync);
+        group.MapPost("/writebacks", CreateWritebackAsync);
+        group.MapPost("/writebacks/{writebackId:guid}/submit", SubmitWritebackAsync);
+        group.MapPost("/writebacks/{writebackId:guid}/approve", ApproveWritebackAsync);
+        group.MapPost("/writebacks/{writebackId:guid}/reject", RejectWritebackAsync);
+        group.MapPost("/writebacks/{writebackId:guid}/execute", ExecuteWritebackAsync);
         group.MapGet("/sync-reliability", ListSyncReliabilityAsync);
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
 
@@ -106,6 +119,31 @@ public static class ErpEndpointRouteBuilderExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+
+        services.AddScoped<IErpProductionRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableErpProductionRepository()
+                : new ErpProductionRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IErpAdapterResolver>());
+        });
+
+        services.AddScoped<IErpWritebackRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableErpWritebackRepository()
+                : new ErpWritebackRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IErpWritebackAdapterResolver>());
+        });
+
+        services.AddSingleton<IErpWritebackAdapter, SimulatorWritebackAdapter>();
+        services.AddSingleton<IErpWritebackAdapterResolver, ErpWritebackAdapterResolver>();
 
         return services;
     }
@@ -403,6 +441,52 @@ public static class ErpEndpointRouteBuilderExtensions
         return ErpEndpointHelpers.MapSyncResult(result);
     }
 
+    private static async Task<IResult> SyncProductionAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await productionRepository.SyncProductionAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
+    private static async Task<IResult> SyncDocumentsAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await productionRepository.SyncDocumentsAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
     private static async Task<IResult> ListSyncRunsAsync(
         Guid? facilityId,
         Guid? connectionProfileId,
@@ -455,6 +539,7 @@ public static class ErpEndpointRouteBuilderExtensions
         IFacilityAccessResolver facilityAccessResolver,
         IErpSyncRepository syncRepository,
         IErpInventoryRepository inventoryRepository,
+        IErpProductionRepository productionRepository,
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
@@ -492,6 +577,10 @@ public static class ErpEndpointRouteBuilderExtensions
             ErpSyncEntityTypes.Inventory => await inventoryRepository.SyncInventoryAsync(
                 context, existing.ConnectionProfileId, existing.Id, cancellationToken),
             ErpSyncEntityTypes.Purchasing => await inventoryRepository.SyncPurchasingAsync(
+                context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            ErpSyncEntityTypes.Production => await productionRepository.SyncProductionAsync(
+                context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            ErpSyncEntityTypes.Documents => await productionRepository.SyncDocumentsAsync(
                 context, existing.ConnectionProfileId, existing.Id, cancellationToken),
             _ => ErpSyncResult.Fail(ErpFailureCodes.ValidationFailed, "Unsupported entity type for retry."),
         };
@@ -774,6 +863,295 @@ public static class ErpEndpointRouteBuilderExtensions
         return TypedResults.Ok(row);
     }
 
+    private static async Task<IResult> ListProductionOrdersAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? status,
+        string? productExternalId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await productionRepository.ListProductionOrdersAsync(
+            context, connectionProfileId, status, productExternalId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetProductionOrderAsync(
+        Guid productionOrderId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await productionRepository.GetProductionOrderAsync(context, productionOrderId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Production order not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListDocumentsAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? documentType,
+        string? relatedEntityType,
+        string? relatedExternalEntityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await productionRepository.ListDocumentsAsync(
+            context,
+            connectionProfileId,
+            documentType,
+            relatedEntityType,
+            relatedExternalEntityId,
+            cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetDocumentAsync(
+        Guid documentId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpProductionRepository productionRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await productionRepository.GetDocumentAsync(context, documentId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Document not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListWritebacksAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await writebackRepository.ListWritebacksAsync(context, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetWritebackAsync(
+        Guid writebackId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await writebackRepository.GetWritebackAsync(context, writebackId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Writeback request not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> CreateWritebackAsync(
+        CreateErpWritebackRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.WritebackRequest,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await writebackRepository.CreateWritebackAsync(
+            context,
+            new CreateErpWritebackCommand(
+                request.ConnectionProfileId,
+                request.CommandType,
+                request.PayloadJson,
+                request.IdempotencyKey,
+                request.TargetEntityType,
+                request.TargetExternalId),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: true);
+    }
+
+    private static async Task<IResult> SubmitWritebackAsync(
+        Guid writebackId,
+        SubmitErpWritebackRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.WritebackRequest,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await writebackRepository.SubmitWritebackAsync(
+            context,
+            new SubmitErpWritebackCommand(writebackId, request.ExpectedVersion),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> ApproveWritebackAsync(
+        Guid writebackId,
+        ApproveErpWritebackRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.WritebackApprove,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await writebackRepository.ApproveWritebackAsync(
+            context,
+            new ApproveErpWritebackCommand(writebackId, request.ExpectedVersion, request.Comment),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> RejectWritebackAsync(
+        Guid writebackId,
+        RejectErpWritebackRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.WritebackApprove,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await writebackRepository.RejectWritebackAsync(
+            context,
+            new RejectErpWritebackCommand(writebackId, request.ExpectedVersion, request.Comment),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> ExecuteWritebackAsync(
+        Guid writebackId,
+        ExecuteErpWritebackRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpWritebackRepository writebackRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.WritebackExecute,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await writebackRepository.ExecuteWritebackAsync(
+            context,
+            new ExecuteErpWritebackCommand(writebackId, request.ExpectedVersion),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
     private static async Task<IResult> ListSyncReliabilityAsync(
         Guid? facilityId,
         Guid? connectionProfileId,
@@ -1032,5 +1410,32 @@ internal sealed record ConfirmErpMappingRequest(
     uint ExpectedVersion);
 
 internal sealed record IgnoreErpMappingRequest(
+    Guid FacilityId,
+    uint ExpectedVersion);
+
+internal sealed record CreateErpWritebackRequest(
+    Guid FacilityId,
+    Guid ConnectionProfileId,
+    string CommandType,
+    string PayloadJson,
+    string IdempotencyKey,
+    string? TargetEntityType,
+    string? TargetExternalId);
+
+internal sealed record SubmitErpWritebackRequest(
+    Guid FacilityId,
+    uint ExpectedVersion);
+
+internal sealed record ApproveErpWritebackRequest(
+    Guid FacilityId,
+    uint ExpectedVersion,
+    string? Comment);
+
+internal sealed record RejectErpWritebackRequest(
+    Guid FacilityId,
+    uint ExpectedVersion,
+    string? Comment);
+
+internal sealed record ExecuteErpWritebackRequest(
     Guid FacilityId,
     uint ExpectedVersion);

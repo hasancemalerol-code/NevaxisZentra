@@ -94,6 +94,14 @@ export function getErpEntityTypeLabel(entityType: string): string {
     return "Satın Alma";
   }
 
+  if (entityType === "production") {
+    return "Üretim";
+  }
+
+  if (entityType === "documents") {
+    return "Belgeler";
+  }
+
   return entityType;
 }
 
@@ -261,4 +269,125 @@ export function formatErpQuantity(value: number | null | undefined, unit?: strin
   });
 
   return unit ? `${formatted} ${unit}` : formatted;
+}
+
+export function getErpProductionOrderStatusLabel(status: string): string {
+  switch (status) {
+    case "planned":
+      return "Planlandı";
+    case "released":
+      return "Serbest Bırakıldı";
+    case "in-progress":
+      return "Devam Ediyor";
+    case "completed":
+      return "Tamamlandı";
+    case "cancelled":
+      return "İptal";
+    case "closed":
+      return "Kapalı";
+    default:
+      return status;
+  }
+}
+
+export function getErpProductionOrderStatusTone(
+  status: string,
+): "ready" | "paused" | "critical" | "in-progress" {
+  switch (status) {
+    case "completed":
+    case "closed":
+      return "ready";
+    case "in-progress":
+    case "released":
+      return "in-progress";
+    case "cancelled":
+      return "critical";
+    default:
+      return "paused";
+  }
+}
+
+export function getErpDocumentTypeLabel(documentType: string): string {
+  switch (documentType) {
+    case "sales-order":
+      return "Satış Siparişi";
+    case "purchase-order":
+      return "Satın Alma";
+    case "delivery-note":
+      return "İrsaliye";
+    case "invoice":
+      return "Fatura";
+    case "production-order":
+      return "Üretim Emri";
+    case "quality-document":
+      return "Kalite Belgesi";
+    case "generic":
+      return "Genel";
+    default:
+      return documentType;
+  }
+}
+
+export function getErpWritebackStatusLabel(status: string): string {
+  switch (status) {
+    case "draft":
+      return "Taslak";
+    case "pending-approval":
+      return "Onay Bekliyor";
+    case "approved":
+      return "Onaylandı";
+    case "rejected":
+      return "Reddedildi";
+    case "executing":
+      return "Uygulanıyor";
+    case "succeeded":
+      return "Başarılı";
+    case "failed":
+      return "Başarısız";
+    case "blocked":
+      return "Engellendi";
+    case "superseded":
+      return "Geçersiz Kılındı";
+    default:
+      return status;
+  }
+}
+
+export function getErpWritebackStatusTone(
+  status: string,
+): "ready" | "paused" | "critical" | "in-progress" {
+  switch (status) {
+    case "succeeded":
+    case "approved":
+      return "ready";
+    case "pending-approval":
+    case "executing":
+      return "in-progress";
+    case "failed":
+    case "rejected":
+    case "blocked":
+      return "critical";
+    default:
+      return "paused";
+  }
+}
+
+export function getErpWritebackCommandTypeLabel(commandType: string): string {
+  switch (commandType) {
+    case "sales-order.create-draft":
+      return "Satış Siparişi Taslağı";
+    default:
+      return commandType;
+  }
+}
+
+export function getErpWritebackDecisionLabel(decision: string): string {
+  switch (decision) {
+    case "approved":
+      return "Onaylandı";
+    case "rejected":
+      return "Reddedildi";
+    default:
+      return decision;
+  }
 }

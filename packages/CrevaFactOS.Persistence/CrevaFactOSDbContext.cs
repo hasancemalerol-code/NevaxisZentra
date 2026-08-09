@@ -116,6 +116,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<CanonicalErpInventoryBalance> CanonicalErpInventoryBalances => Set<CanonicalErpInventoryBalance>();
     public DbSet<CanonicalErpPurchaseOrder> CanonicalErpPurchaseOrders => Set<CanonicalErpPurchaseOrder>();
     public DbSet<CanonicalErpPurchaseOrderLine> CanonicalErpPurchaseOrderLines => Set<CanonicalErpPurchaseOrderLine>();
+    public DbSet<CanonicalErpProductionOrder> CanonicalErpProductionOrders => Set<CanonicalErpProductionOrder>();
+    public DbSet<CanonicalErpDocument> CanonicalErpDocuments => Set<CanonicalErpDocument>();
+    public DbSet<ErpWritebackRequest> ErpWritebackRequests => Set<ErpWritebackRequest>();
+    public DbSet<ErpWritebackApproval> ErpWritebackApprovals => Set<ErpWritebackApproval>();
     public DbSet<ErpEntityMapping> ErpEntityMappings => Set<ErpEntityMapping>();
 
     // Export
@@ -778,6 +782,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpProductionOrderEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpProductionOrder>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpDocumentEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpDocument>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ErpWritebackRequestEntityConfiguration());
+        modelBuilder.Entity<ErpWritebackRequest>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ErpWritebackApprovalEntityConfiguration());
+        modelBuilder.Entity<ErpWritebackApproval>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

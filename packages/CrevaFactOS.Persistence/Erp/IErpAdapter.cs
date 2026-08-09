@@ -38,6 +38,14 @@ public interface IErpAdapter
     Task<IReadOnlyList<ErpExternalPurchaseOrderRecord>> ReadPurchaseOrdersAsync(
         ErpAdapterConnectionContext connection,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ErpExternalProductionOrderRecord>> ReadProductionOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ErpExternalDocumentRecord>> ReadDocumentsAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record ErpAdapterConnectionContext(
@@ -164,6 +172,44 @@ public sealed record ErpExternalPurchaseOrderLineRecord(
     string Unit,
     DateTimeOffset? ExpectedDeliveryDateUtc,
     string? SourceVersion);
+
+public sealed record ErpExternalProductionOrderRecord(
+    string ExternalId,
+    string? ExternalCode,
+    string ProductionOrderNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? ProductDescription,
+    decimal PlannedQuantity,
+    decimal? CompletedQuantity,
+    decimal? ScrapQuantity,
+    string Unit,
+    string Status,
+    DateTimeOffset? PlannedStartUtc,
+    DateTimeOffset? PlannedEndUtc,
+    DateTimeOffset? ActualStartUtc,
+    DateTimeOffset? ActualEndUtc,
+    string? ExternalSalesOrderId,
+    string? ExternalSalesOrderCode,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc);
+
+public sealed record ErpExternalDocumentRecord(
+    string ExternalId,
+    string? ExternalCode,
+    string DocumentType,
+    string? DocumentNumber,
+    DateTimeOffset? DocumentDateUtc,
+    string? Status,
+    string? RelatedEntityType,
+    string? RelatedExternalEntityId,
+    string? RelatedExternalEntityCode,
+    string? FileName,
+    string? MimeType,
+    bool ContentAvailable,
+    string? ExternalReference,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc);
 
 public interface IErpAdapterResolver
 {

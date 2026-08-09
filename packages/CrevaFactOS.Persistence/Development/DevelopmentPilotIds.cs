@@ -284,6 +284,15 @@ public static class DevelopmentPilotIds
     public static readonly Guid ErpSyncPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000058");
 
+    public static readonly Guid ErpWritebackRequestPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000059");
+
+    public static readonly Guid ErpWritebackApprovePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000060");
+
+    public static readonly Guid ErpWritebackExecutePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000061");
+
     // ERP pilot fixture
     public static readonly Guid ErpPilotSimulatorConnectionId =
         Guid.Parse("bb000001-0090-4000-8000-000000000090");

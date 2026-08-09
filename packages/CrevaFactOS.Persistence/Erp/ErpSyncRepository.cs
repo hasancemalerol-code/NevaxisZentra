@@ -134,6 +134,10 @@ public sealed class ErpSyncRepository(
                 ErpSyncResult.Fail(
                     ErpFailureCodes.ValidationFailed,
                     "Retry for this entity type must be routed through inventory sync."),
+            ErpSyncEntityTypes.Production or ErpSyncEntityTypes.Documents =>
+                ErpSyncResult.Fail(
+                    ErpFailureCodes.ValidationFailed,
+                    "Retry for this entity type must be routed through production sync."),
             _ => ErpSyncResult.Fail(ErpFailureCodes.ValidationFailed, "Unsupported entity type for retry."),
         };
     }

@@ -48,7 +48,7 @@ requireText(adapterContract, "interface IErpAdapter", "IErpAdapter");
 requireText(entities, "ErpCapabilities", "ErpEntities");
 requireText(entities, "CustomersRead = \"customers.read\"", "ErpCapabilities");
 requireText(entities, "ProductsRead = \"products.read\"", "ErpCapabilities");
-requireText(entities, "Writeback = \"writeback\"", "future writeback capability reserved");
+requireText(entities, "SalesOrdersWriteDraft = \"sales-orders.write-draft\"", "explicit writeback capability");
 requireText(adapterContract, "IReadOnlySet<string> Capabilities", "capability contract on adapter");
 
 requireText(adapters, "class SimulatorErpAdapter", "simulator adapter");
@@ -72,7 +72,9 @@ requireText(syncRepo, "ExternalId == record.ExternalId", "external identity key"
 forbidText(adapterContract, "WriteCustomer", "IErpAdapter");
 forbidText(adapterContract, "WriteProduct", "IErpAdapter");
 forbidText(adapterContract, "PostDocument", "IErpAdapter");
-forbidText(endpoints, "writeback", "erp endpoints");
+requireText(endpoints, "MapPost(\"/writebacks", "HITL writeback endpoints");
+requireText(endpoints, "/approve", "HITL approval endpoint");
+requireText(endpoints, "/execute", "HITL execute endpoint");
 forbidText(syncRepo, "ProductionOrders", "erp sync must not mutate Production");
 forbidText(syncRepo, "QuantityOnHand", "ErpSyncRepository must not mutate stock quantities");
 forbidText(syncRepo, "Accounting", "erp sync must not mutate accounting");

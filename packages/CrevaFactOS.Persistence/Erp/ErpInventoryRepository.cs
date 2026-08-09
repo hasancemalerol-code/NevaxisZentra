@@ -90,6 +90,8 @@ public sealed class ErpInventoryRepository(
         ErpSyncEntityTypes.Warehouses,
         ErpSyncEntityTypes.Inventory,
         ErpSyncEntityTypes.Purchasing,
+        ErpSyncEntityTypes.Production,
+        ErpSyncEntityTypes.Documents,
     ];
 
     public Task<ErpSyncResult> SyncWarehousesAsync(

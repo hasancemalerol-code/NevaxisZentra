@@ -2,10 +2,14 @@ import "./erp-server-boundary";
 
 import type {
   CanonicalErpCustomer,
+  CanonicalErpDocumentDetail,
+  CanonicalErpDocumentSummary,
   CanonicalErpInventoryBalance,
   CanonicalErpOrderDetail,
   CanonicalErpOrderSummary,
   CanonicalErpProduct,
+  CanonicalErpProductionOrderDetail,
+  CanonicalErpProductionOrderSummary,
   CanonicalErpPurchaseOrderDetail,
   CanonicalErpPurchaseOrderSummary,
   CanonicalErpWarehouse,
@@ -16,14 +20,21 @@ import type {
   ErpProductReconciliation,
   ErpSyncReliability,
   ErpSyncRun,
+  ErpWriteSuccess,
+  ErpWritebackDetail,
+  ErpWritebackSummary,
   ErpWorkspaceSummary,
 } from "../domain/erp";
 import {
   parseCanonicalErpCustomerListApiResponse,
+  parseCanonicalErpDocumentDetailApiResponse,
+  parseCanonicalErpDocumentListApiResponse,
   parseCanonicalErpInventoryBalanceListApiResponse,
   parseCanonicalErpOrderDetailApiResponse,
   parseCanonicalErpOrderListApiResponse,
   parseCanonicalErpProductListApiResponse,
+  parseCanonicalErpProductionOrderDetailApiResponse,
+  parseCanonicalErpProductionOrderListApiResponse,
   parseCanonicalErpPurchaseOrderDetailApiResponse,
   parseCanonicalErpPurchaseOrderListApiResponse,
   parseCanonicalErpWarehouseListApiResponse,
@@ -34,6 +45,9 @@ import {
   parseErpProductReconciliationListApiResponse,
   parseErpSyncReliabilityListApiResponse,
   parseErpSyncRunListApiResponse,
+  parseErpWriteSuccessApiResponse,
+  parseErpWritebackDetailApiResponse,
+  parseErpWritebackListApiResponse,
   parseErpWorkspaceSummaryApiResponse,
 } from "./erp-api-contracts";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -46,7 +60,8 @@ export type ErpApiFailure = Readonly<{
     | "permission-denied"
     | "configuration-error"
     | "invalid-request"
-    | "invalid-response";
+    | "invalid-response"
+    | "concurrency-conflict";
   message: string;
   retryable: boolean;
 }>;
@@ -107,6 +122,72 @@ async function getJson<T>(
         status: "failure",
         code: "source-unavailable",
         message: `ERP request failed (${response.status}).`,
+        retryable: response.status >= 500,
+      };
+    }
+
+    const payload: unknown = await response.json();
+    return { status: "success", value: parser(payload) };
+  } catch {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: "ERP API is unavailable.",
+      retryable: true,
+    };
+  }
+}
+
+async function postJson<T>(
+  context: ProductionOrderRequestContext,
+  path: string,
+  body: unknown,
+  parser: (payload: unknown) => T,
+): Promise<ErpApiResult<T>> {
+  try {
+    const response = await fetch(buildUrl(context, path), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...context.requestHeaders,
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    if (response.status === 401) {
+      return {
+        status: "failure",
+        code: "unauthenticated",
+        message: "Authentication required.",
+        retryable: false,
+      };
+    }
+
+    if (response.status === 403) {
+      return {
+        status: "failure",
+        code: "permission-denied",
+        message: "Authorization denied.",
+        retryable: false,
+      };
+    }
+
+    if (response.status === 409) {
+      return {
+        status: "failure",
+        code: "concurrency-conflict",
+        message: "Concurrent modification detected.",
+        retryable: false,
+      };
+    }
+
+    if (!response.ok) {
+      return {
+        status: "failure",
+        code: "source-unavailable",
+        message: `ERP write failed (${response.status}).`,
         retryable: response.status >= 500,
       };
     }
@@ -243,5 +324,114 @@ export function getErpOrderMaterialAvailability(
     context,
     `/api/erp/orders/${orderId}/material-availability`,
     parseErpOrderMaterialAvailabilityApiResponse,
+  );
+}
+
+export function listErpProductionOrders(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpProductionOrderSummary[]>> {
+  return getJson(
+    context,
+    "/api/erp/production-orders",
+    parseCanonicalErpProductionOrderListApiResponse,
+  );
+}
+
+export function getErpProductionOrder(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+): Promise<ErpApiResult<CanonicalErpProductionOrderDetail>> {
+  return getJson(
+    context,
+    `/api/erp/production-orders/${productionOrderId}`,
+    parseCanonicalErpProductionOrderDetailApiResponse,
+  );
+}
+
+export function listErpDocuments(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpDocumentSummary[]>> {
+  return getJson(context, "/api/erp/documents", parseCanonicalErpDocumentListApiResponse);
+}
+
+export function getErpDocument(
+  context: ProductionOrderRequestContext,
+  documentId: string,
+): Promise<ErpApiResult<CanonicalErpDocumentDetail>> {
+  return getJson(
+    context,
+    `/api/erp/documents/${documentId}`,
+    parseCanonicalErpDocumentDetailApiResponse,
+  );
+}
+
+export function listErpWritebacks(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly ErpWritebackSummary[]>> {
+  return getJson(context, "/api/erp/writebacks", parseErpWritebackListApiResponse);
+}
+
+export function getErpWriteback(
+  context: ProductionOrderRequestContext,
+  writebackId: string,
+): Promise<ErpApiResult<ErpWritebackDetail>> {
+  return getJson(
+    context,
+    `/api/erp/writebacks/${writebackId}`,
+    parseErpWritebackDetailApiResponse,
+  );
+}
+
+export function submitErpWriteback(
+  context: ProductionOrderRequestContext,
+  writebackId: string,
+  expectedVersion: number,
+): Promise<ErpApiResult<ErpWriteSuccess>> {
+  return postJson(
+    context,
+    `/api/erp/writebacks/${writebackId}/submit`,
+    { facilityId: context.facilityId, expectedVersion },
+    parseErpWriteSuccessApiResponse,
+  );
+}
+
+export function approveErpWriteback(
+  context: ProductionOrderRequestContext,
+  writebackId: string,
+  expectedVersion: number,
+  comment?: string,
+): Promise<ErpApiResult<ErpWriteSuccess>> {
+  return postJson(
+    context,
+    `/api/erp/writebacks/${writebackId}/approve`,
+    { facilityId: context.facilityId, expectedVersion, comment: comment ?? null },
+    parseErpWriteSuccessApiResponse,
+  );
+}
+
+export function rejectErpWriteback(
+  context: ProductionOrderRequestContext,
+  writebackId: string,
+  expectedVersion: number,
+  comment?: string,
+): Promise<ErpApiResult<ErpWriteSuccess>> {
+  return postJson(
+    context,
+    `/api/erp/writebacks/${writebackId}/reject`,
+    { facilityId: context.facilityId, expectedVersion, comment: comment ?? null },
+    parseErpWriteSuccessApiResponse,
+  );
+}
+
+export function executeErpWriteback(
+  context: ProductionOrderRequestContext,
+  writebackId: string,
+  expectedVersion: number,
+): Promise<ErpApiResult<ErpWriteSuccess>> {
+  return postJson(
+    context,
+    `/api/erp/writebacks/${writebackId}/execute`,
+    { facilityId: context.facilityId, expectedVersion },
+    parseErpWriteSuccessApiResponse,
   );
 }

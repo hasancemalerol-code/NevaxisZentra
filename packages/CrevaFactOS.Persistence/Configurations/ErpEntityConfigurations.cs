@@ -404,18 +404,163 @@ internal sealed class CanonicalErpPurchaseOrderLineEntityConfiguration
         entity.Property(e => e.Unit).HasColumnName("unit").HasMaxLength(30);
         entity.Property(e => e.ExpectedDeliveryDateUtc).HasColumnName("expected_delivery_date_utc");
         entity.Property(e => e.SourceVersion).HasColumnName("source_version").HasMaxLength(100);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class CanonicalErpProductionOrderEntityConfiguration
+    : IEntityTypeConfiguration<CanonicalErpProductionOrder>
+{
+    public void Configure(EntityTypeBuilder<CanonicalErpProductionOrder> entity)
+    {
+        entity.ToTable("erp_production_orders");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.ConnectionProfileId).HasColumnName("connection_profile_id");
+        entity.Property(e => e.Provider).HasColumnName("provider").HasMaxLength(30);
+        entity.Property(e => e.ExternalId).HasColumnName("external_id").HasMaxLength(100);
+        entity.Property(e => e.ExternalCode).HasColumnName("external_code").HasMaxLength(100);
+        entity.Property(e => e.ProductionOrderNumber).HasColumnName("production_order_number").HasMaxLength(100);
+        entity.Property(e => e.ExternalProductId).HasColumnName("external_product_id").HasMaxLength(100);
+        entity.Property(e => e.ExternalProductCode).HasColumnName("external_product_code").HasMaxLength(100);
+        entity.Property(e => e.ProductDescription).HasColumnName("product_description").HasMaxLength(500);
+        entity.Property(e => e.PlannedQuantity).HasColumnName("planned_quantity").HasPrecision(18, 4);
+        entity.Property(e => e.CompletedQuantity).HasColumnName("completed_quantity").HasPrecision(18, 4);
+        entity.Property(e => e.ScrapQuantity).HasColumnName("scrap_quantity").HasPrecision(18, 4);
+        entity.Property(e => e.Unit).HasColumnName("unit").HasMaxLength(30);
+        entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(40);
+        entity.Property(e => e.PlannedStartUtc).HasColumnName("planned_start_utc");
+        entity.Property(e => e.PlannedEndUtc).HasColumnName("planned_end_utc");
+        entity.Property(e => e.ActualStartUtc).HasColumnName("actual_start_utc");
+        entity.Property(e => e.ActualEndUtc).HasColumnName("actual_end_utc");
+        entity.Property(e => e.ExternalSalesOrderId).HasColumnName("external_sales_order_id").HasMaxLength(100);
+        entity.Property(e => e.ExternalSalesOrderCode).HasColumnName("external_sales_order_code").HasMaxLength(100);
+        entity.Property(e => e.SourceVersion).HasColumnName("source_version").HasMaxLength(100);
+        entity.Property(e => e.SourceUpdatedAtUtc).HasColumnName("source_updated_at_utc");
+        entity.Property(e => e.ImportedAtUtc).HasColumnName("imported_at_utc");
+        entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.ConnectionProfileId, e.ExternalId }).IsUnique();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class CanonicalErpDocumentEntityConfiguration : IEntityTypeConfiguration<CanonicalErpDocument>
+{
+    public void Configure(EntityTypeBuilder<CanonicalErpDocument> entity)
+    {
+        entity.ToTable("erp_documents");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.ConnectionProfileId).HasColumnName("connection_profile_id");
+        entity.Property(e => e.Provider).HasColumnName("provider").HasMaxLength(30);
+        entity.Property(e => e.ExternalId).HasColumnName("external_id").HasMaxLength(100);
+        entity.Property(e => e.ExternalCode).HasColumnName("external_code").HasMaxLength(100);
+        entity.Property(e => e.DocumentType).HasColumnName("document_type").HasMaxLength(40);
+        entity.Property(e => e.DocumentNumber).HasColumnName("document_number").HasMaxLength(100);
+        entity.Property(e => e.DocumentDateUtc).HasColumnName("document_date_utc");
+        entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(40);
+        entity.Property(e => e.RelatedEntityType).HasColumnName("related_entity_type").HasMaxLength(30);
+        entity.Property(e => e.RelatedExternalEntityId).HasColumnName("related_external_entity_id").HasMaxLength(100);
+        entity.Property(e => e.RelatedExternalEntityCode).HasColumnName("related_external_entity_code").HasMaxLength(100);
+        entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(300);
+        entity.Property(e => e.MimeType).HasColumnName("mime_type").HasMaxLength(100);
+        entity.Property(e => e.ContentAvailable).HasColumnName("content_available");
+        entity.Property(e => e.ExternalReference).HasColumnName("external_reference").HasMaxLength(200);
+        entity.Property(e => e.SourceVersion).HasColumnName("source_version").HasMaxLength(100);
+        entity.Property(e => e.SourceUpdatedAtUtc).HasColumnName("source_updated_at_utc");
+        entity.Property(e => e.ImportedAtUtc).HasColumnName("imported_at_utc");
+        entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.ConnectionProfileId, e.ExternalId }).IsUnique();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class ErpWritebackRequestEntityConfiguration : IEntityTypeConfiguration<ErpWritebackRequest>
+{
+    public void Configure(EntityTypeBuilder<ErpWritebackRequest> entity)
+    {
+        entity.ToTable("erp_writeback_requests");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.ConnectionProfileId).HasColumnName("connection_profile_id");
+        entity.Property(e => e.Provider).HasColumnName("provider").HasMaxLength(30);
+        entity.Property(e => e.CommandType).HasColumnName("command_type").HasMaxLength(100);
+        entity.Property(e => e.TargetEntityType).HasColumnName("target_entity_type").HasMaxLength(30);
+        entity.Property(e => e.TargetExternalId).HasColumnName("target_external_id").HasMaxLength(100);
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").HasColumnType("jsonb");
+        entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").HasMaxLength(64);
+        entity.Property(e => e.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(500);
+        entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(40);
+        entity.Property(e => e.RequestedBySubjectId).HasColumnName("requested_by_subject_id").HasMaxLength(200);
+        entity.Property(e => e.RequestedAtUtc).HasColumnName("requested_at_utc");
+        entity.Property(e => e.SubmittedAtUtc).HasColumnName("submitted_at_utc");
+        entity.Property(e => e.ApprovedPayloadHash).HasColumnName("approved_payload_hash").HasMaxLength(64);
+        entity.Property(e => e.ApprovedVersion).HasColumnName("approved_version");
+        entity.Property(e => e.ExecutedAtUtc).HasColumnName("executed_at_utc");
+        entity.Property(e => e.ExternalExecutionReference).HasColumnName("external_execution_reference").HasMaxLength(200);
+        entity.Property(e => e.LastErrorCode).HasColumnName("last_error_code").HasMaxLength(100);
+        entity.Property(e => e.LastErrorMessage).HasColumnName("last_error_message").HasMaxLength(500);
+        entity.Property(e => e.Version).HasColumnName("version").IsConcurrencyToken();
         entity.HasIndex(e => new
         {
             e.TenantId,
             e.FacilityId,
             e.ConnectionProfileId,
-            e.PurchaseOrderId,
-            e.ExternalLineId,
+            e.CommandType,
+            e.IdempotencyKey,
         }).IsUnique();
         entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
         entity.HasOne<Facility>().WithMany()
             .HasForeignKey(e => new { e.TenantId, e.FacilityId })
             .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<ErpConnectionProfile>().WithMany()
+            .HasForeignKey(e => e.ConnectionProfileId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class ErpWritebackApprovalEntityConfiguration : IEntityTypeConfiguration<ErpWritebackApproval>
+{
+    public void Configure(EntityTypeBuilder<ErpWritebackApproval> entity)
+    {
+        entity.ToTable("erp_writeback_approvals");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.WritebackRequestId).HasColumnName("writeback_request_id");
+        entity.Property(e => e.Decision).HasColumnName("decision").HasMaxLength(30);
+        entity.Property(e => e.DecidedBySubjectId).HasColumnName("decided_by_subject_id").HasMaxLength(200);
+        entity.Property(e => e.DecidedAtUtc).HasColumnName("decided_at_utc");
+        entity.Property(e => e.RequestVersion).HasColumnName("request_version");
+        entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").HasMaxLength(64);
+        entity.Property(e => e.Comment).HasColumnName("comment").HasMaxLength(1000);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.WritebackRequestId, e.DecidedAtUtc });
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(e => e.WritebackRequest).WithMany(r => r.Approvals)
+            .HasForeignKey(e => e.WritebackRequestId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

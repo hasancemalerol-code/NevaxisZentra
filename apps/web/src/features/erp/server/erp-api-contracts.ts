@@ -796,3 +796,328 @@ export function parseErpOrderMaterialAvailabilityApiResponse(
     }),
   };
 }
+
+function parseProductionOrderFromRow(row: Record<string, unknown>) {
+  const id = asString(row.id);
+  const connectionProfileId = asString(row.connectionProfileId);
+  const provider = asString(row.provider);
+  const externalId = asString(row.externalId);
+  const productionOrderNumber = asString(row.productionOrderNumber);
+  const externalProductId = asString(row.externalProductId);
+  const unit = asString(row.unit);
+  const status = asString(row.status);
+  const importedAtUtc = asString(row.importedAtUtc);
+  const updatedAtUtc = asString(row.updatedAtUtc);
+
+  if (
+    !id ||
+    !connectionProfileId ||
+    !provider ||
+    !externalId ||
+    !productionOrderNumber ||
+    !externalProductId ||
+    !unit ||
+    !status ||
+    !importedAtUtc ||
+    !updatedAtUtc
+  ) {
+    throw new Error("ERP production order response is missing required fields.");
+  }
+
+  return {
+    id,
+    connectionProfileId,
+    provider,
+    externalId,
+    externalCode: asString(row.externalCode),
+    productionOrderNumber,
+    externalProductId,
+    externalProductCode: asString(row.externalProductCode),
+    productDescription: asString(row.productDescription),
+    plannedQuantity: asNumber(row.plannedQuantity) ?? 0,
+    completedQuantity: asNumber(row.completedQuantity),
+    scrapQuantity: asNumber(row.scrapQuantity),
+    unit,
+    status,
+    plannedStartUtc: asString(row.plannedStartUtc),
+    plannedEndUtc: asString(row.plannedEndUtc),
+    actualStartUtc: asString(row.actualStartUtc),
+    actualEndUtc: asString(row.actualEndUtc),
+    externalSalesOrderId: asString(row.externalSalesOrderId),
+    externalSalesOrderCode: asString(row.externalSalesOrderCode),
+    sourceVersion: asString(row.sourceVersion),
+    sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+    importedAtUtc,
+    updatedAtUtc,
+    freshness: asString(row.freshness) ?? "unknown",
+  };
+}
+
+export function parseCanonicalErpProductionOrderListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpProductionOrderSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP production order list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP production order row.");
+    }
+
+    return parseProductionOrderFromRow(row);
+  });
+}
+
+export function parseCanonicalErpProductionOrderDetailApiResponse(
+  payload: unknown,
+): import("../domain/erp").CanonicalErpProductionOrderDetail {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP production order detail response.");
+  }
+
+  return parseProductionOrderFromRow(row);
+}
+
+function parseDocumentFromRow(row: Record<string, unknown>) {
+  const id = asString(row.id);
+  const connectionProfileId = asString(row.connectionProfileId);
+  const provider = asString(row.provider);
+  const externalId = asString(row.externalId);
+  const documentType = asString(row.documentType);
+  const importedAtUtc = asString(row.importedAtUtc);
+  const updatedAtUtc = asString(row.updatedAtUtc);
+
+  if (
+    !id ||
+    !connectionProfileId ||
+    !provider ||
+    !externalId ||
+    !documentType ||
+    !importedAtUtc ||
+    !updatedAtUtc
+  ) {
+    throw new Error("ERP document response is missing required fields.");
+  }
+
+  return {
+    id,
+    connectionProfileId,
+    provider,
+    externalId,
+    externalCode: asString(row.externalCode),
+    documentType,
+    documentNumber: asString(row.documentNumber),
+    documentDateUtc: asString(row.documentDateUtc),
+    status: asString(row.status),
+    relatedEntityType: asString(row.relatedEntityType),
+    relatedExternalEntityId: asString(row.relatedExternalEntityId),
+    relatedExternalEntityCode: asString(row.relatedExternalEntityCode),
+    fileName: asString(row.fileName),
+    mimeType: asString(row.mimeType),
+    contentAvailable: asBoolean(row.contentAvailable) ?? false,
+    externalReference: asString(row.externalReference),
+    sourceVersion: asString(row.sourceVersion),
+    sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+    importedAtUtc,
+    updatedAtUtc,
+    freshness: asString(row.freshness) ?? "unknown",
+  };
+}
+
+export function parseCanonicalErpDocumentListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpDocumentSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP document list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP document row.");
+    }
+
+    return parseDocumentFromRow(row);
+  });
+}
+
+export function parseCanonicalErpDocumentDetailApiResponse(
+  payload: unknown,
+): import("../domain/erp").CanonicalErpDocumentDetail {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP document detail response.");
+  }
+
+  return parseDocumentFromRow(row);
+}
+
+function parseWritebackLineSummary(payload: unknown): import("../domain/erp").ErpWritebackLineSummary {
+  const row = asRecord(payload);
+  const productExternalId = asString(row?.productExternalId);
+  const unit = asString(row?.unit);
+
+  if (!productExternalId || !unit) {
+    throw new Error("ERP writeback line summary is missing required fields.");
+  }
+
+  return {
+    productExternalId,
+    quantity: asNumber(row?.quantity) ?? 0,
+    unit,
+  };
+}
+
+function parseWritebackPayloadSummary(payload: unknown): import("../domain/erp").ErpWritebackPayloadSummary {
+  const row = asRecord(payload);
+
+  return {
+    customerExternalId: asString(row?.customerExternalId),
+    orderReference: asString(row?.orderReference),
+    requestedDeliveryDateUtc: asString(row?.requestedDeliveryDateUtc),
+    lineCount: asNumber(row?.lineCount) ?? 0,
+    lines: Array.isArray(row?.lines) ? row.lines.map(parseWritebackLineSummary) : [],
+  };
+}
+
+function parseWritebackSummaryFromRow(row: Record<string, unknown>) {
+  const id = asString(row.id);
+  const connectionProfileId = asString(row.connectionProfileId);
+  const provider = asString(row.provider);
+  const commandType = asString(row.commandType);
+  const status = asString(row.status);
+  const requestedBySubjectId = asString(row.requestedBySubjectId);
+  const requestedAtUtc = asString(row.requestedAtUtc);
+  const version = asNumber(row.version);
+
+  if (
+    !id ||
+    !connectionProfileId ||
+    !provider ||
+    !commandType ||
+    !status ||
+    !requestedBySubjectId ||
+    !requestedAtUtc ||
+    version === null
+  ) {
+    throw new Error("ERP writeback response is missing required fields.");
+  }
+
+  return {
+    id,
+    connectionProfileId,
+    provider,
+    commandType,
+    status,
+    requestedBySubjectId,
+    requestedAtUtc,
+    submittedAtUtc: asString(row.submittedAtUtc),
+    latestApprovalDecision: asString(row.latestApprovalDecision),
+    latestApproverSubjectId: asString(row.latestApproverSubjectId),
+    latestApprovalAtUtc: asString(row.latestApprovalAtUtc),
+    externalExecutionReference: asString(row.externalExecutionReference),
+    lastErrorCode: asString(row.lastErrorCode),
+    customerExternalId: asString(row.customerExternalId),
+    orderReference: asString(row.orderReference),
+    lineCount: asNumber(row.lineCount) ?? 0,
+    version,
+  };
+}
+
+export function parseErpWritebackListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").ErpWritebackSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP writeback list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP writeback row.");
+    }
+
+    return parseWritebackSummaryFromRow(row);
+  });
+}
+
+export function parseErpWritebackDetailApiResponse(
+  payload: unknown,
+): import("../domain/erp").ErpWritebackDetail {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP writeback detail response.");
+  }
+
+  const summary = parseWritebackSummaryFromRow(row);
+  const payloadHash = asString(row.payloadHash);
+  const idempotencyKey = asString(row.idempotencyKey);
+  const version = asNumber(row.version);
+
+  if (!payloadHash || !idempotencyKey || version === null) {
+    throw new Error("ERP writeback detail response is missing required fields.");
+  }
+
+  const approvals = Array.isArray(row.approvals) ? row.approvals : [];
+
+  return {
+    ...summary,
+    targetEntityType: asString(row.targetEntityType),
+    targetExternalId: asString(row.targetExternalId),
+    payloadHash,
+    idempotencyKey,
+    approvedPayloadHash: asString(row.approvedPayloadHash),
+    approvedVersion: asNumber(row.approvedVersion),
+    executedAtUtc: asString(row.executedAtUtc),
+    lastErrorMessage: asString(row.lastErrorMessage),
+    version,
+    payloadSummary: parseWritebackPayloadSummary(row.payloadSummary),
+    approvals: approvals.map((item) => {
+      const approval = asRecord(item);
+      const approvalId = asString(approval?.id);
+      const decision = asString(approval?.decision);
+      const decidedBySubjectId = asString(approval?.decidedBySubjectId);
+      const decidedAtUtc = asString(approval?.decidedAtUtc);
+      const payloadHashValue = asString(approval?.payloadHash);
+      const requestVersion = asNumber(approval?.requestVersion);
+
+      if (
+        !approvalId ||
+        !decision ||
+        !decidedBySubjectId ||
+        !decidedAtUtc ||
+        !payloadHashValue ||
+        requestVersion === null
+      ) {
+        throw new Error("ERP writeback approval response is missing required fields.");
+      }
+
+      return {
+        id: approvalId,
+        decision,
+        decidedBySubjectId,
+        decidedAtUtc,
+        requestVersion,
+        payloadHash: payloadHashValue,
+        comment: asString(approval?.comment),
+      };
+    }),
+  };
+}
+
+export function parseErpWriteSuccessApiResponse(
+  payload: unknown,
+): import("../domain/erp").ErpWriteSuccess {
+  const row = asRecord(payload);
+  const id = asString(row?.entityId) ?? asString(row?.id);
+  const version = asNumber(row?.version);
+
+  if (!id || version === null) {
+    throw new Error("Invalid ERP write success response.");
+  }
+
+  return { id, version };
+}

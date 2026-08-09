@@ -352,6 +352,133 @@
   min-width: 900px;
 }
 
+.erp-table--production {
+  min-width: 980px;
+}
+
+.erp-table--documents {
+  min-width: 1020px;
+}
+
+.erp-table--writeback {
+  min-width: 960px;
+}
+
+.erp-content-unavailable {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border: 1px dashed #cfd8e3;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #243652;
+}
+
+.erp-content-unavailable svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  color: #6b7c8f;
+}
+
+.erp-content-unavailable h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #12263a;
+}
+
+.erp-content-unavailable p {
+  margin: 0;
+  font-size: 13px;
+  color: #5b6b7c;
+}
+
+.erp-writeback-approval-section {
+  padding: 16px;
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.erp-writeback-approval-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.erp-writeback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.erp-writeback-action-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.erp-kpi-grid--production {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.erp-kpi-grid--documents {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.erp-table--writebacks {
+  min-width: 1080px;
+}
+
+.erp-table--writeback-approvals {
+  min-width: 720px;
+}
+
+.erp-readonly-notice {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #243652;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.erp-simulator-note--warning {
+  background: #fff6e5;
+  color: #9a6700;
+}
+
+.erp-writeback-actions__error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fdecec;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.erp-writeback-actions__comment {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.erp-writeback-actions__comment span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5b6b7c;
+}
+
+.erp-writeback-actions .erp-action {
+  cursor: pointer;
+}
+
+.erp-writeback-actions .erp-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 1200px) {
   .erp-kpi-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

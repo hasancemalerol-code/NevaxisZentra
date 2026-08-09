@@ -439,3 +439,192 @@ export type ErpInventoryWorkspaceSnapshot = Readonly<{
   insufficientStockCount: number;
   openPurchaseOrderCount: number;
 }>;
+
+export type ErpProductionOrderStatus =
+  | "planned"
+  | "released"
+  | "in-progress"
+  | "completed"
+  | "cancelled"
+  | "closed"
+  | "unknown";
+
+export type CanonicalErpProductionOrderSummary = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalId: string;
+  externalCode: string | null;
+  productionOrderNumber: string;
+  externalProductId: string;
+  externalProductCode: string | null;
+  productDescription: string | null;
+  plannedQuantity: number;
+  completedQuantity: number | null;
+  scrapQuantity: number | null;
+  unit: string;
+  status: ErpProductionOrderStatus | string;
+  plannedStartUtc: string | null;
+  plannedEndUtc: string | null;
+  actualStartUtc: string | null;
+  actualEndUtc: string | null;
+  externalSalesOrderId: string | null;
+  externalSalesOrderCode: string | null;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  freshness: ErpSourceFreshness | string;
+}>;
+
+export type CanonicalErpProductionOrderDetail = CanonicalErpProductionOrderSummary;
+
+export type ErpProductionWorkspaceSnapshot = Readonly<{
+  productionOrderCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  freshRecordCount: number;
+  staleRecordCount: number;
+}>;
+
+export type CanonicalErpDocumentSummary = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalId: string;
+  externalCode: string | null;
+  documentType: string;
+  documentNumber: string | null;
+  documentDateUtc: string | null;
+  status: string | null;
+  relatedEntityType: string | null;
+  relatedExternalEntityId: string | null;
+  relatedExternalEntityCode: string | null;
+  fileName: string | null;
+  mimeType: string | null;
+  contentAvailable: boolean;
+  externalReference: string | null;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  freshness: ErpSourceFreshness | string;
+}>;
+
+export type CanonicalErpDocumentDetail = CanonicalErpDocumentSummary;
+
+export type ErpDocumentsWorkspaceSnapshot = Readonly<{
+  documentCount: number;
+  contentAvailableCount: number;
+  freshRecordCount: number;
+  staleRecordCount: number;
+}>;
+
+export type ErpWritebackStatus =
+  | "draft"
+  | "pending-approval"
+  | "approved"
+  | "rejected"
+  | "executing"
+  | "succeeded"
+  | "failed"
+  | "blocked"
+  | "superseded";
+
+export type ErpWritebackLineSummary = Readonly<{
+  productExternalId: string;
+  quantity: number;
+  unit: string;
+}>;
+
+export type ErpWritebackPayloadSummary = Readonly<{
+  customerExternalId: string | null;
+  orderReference: string | null;
+  requestedDeliveryDateUtc: string | null;
+  lineCount: number;
+  lines: readonly ErpWritebackLineSummary[];
+}>;
+
+export type ErpWritebackApproval = Readonly<{
+  id: string;
+  decision: string;
+  decidedBySubjectId: string;
+  decidedAtUtc: string;
+  requestVersion: number;
+  payloadHash: string;
+  comment: string | null;
+}>;
+
+export type ErpWritebackSummary = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  commandType: string;
+  status: ErpWritebackStatus | string;
+  requestedBySubjectId: string;
+  requestedAtUtc: string;
+  submittedAtUtc: string | null;
+  latestApprovalDecision: string | null;
+  latestApproverSubjectId: string | null;
+  latestApprovalAtUtc: string | null;
+  externalExecutionReference: string | null;
+  lastErrorCode: string | null;
+  customerExternalId: string | null;
+  orderReference: string | null;
+  lineCount: number;
+  version: number;
+}>;
+
+export type ErpWritebackDetail = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  commandType: string;
+  targetEntityType: string | null;
+  targetExternalId: string | null;
+  status: ErpWritebackStatus | string;
+  payloadHash: string;
+  idempotencyKey: string;
+  requestedBySubjectId: string;
+  requestedAtUtc: string;
+  submittedAtUtc: string | null;
+  approvedPayloadHash: string | null;
+  approvedVersion: number | null;
+  executedAtUtc: string | null;
+  externalExecutionReference: string | null;
+  lastErrorCode: string | null;
+  lastErrorMessage: string | null;
+  version: number;
+  payloadSummary: ErpWritebackPayloadSummary;
+  approvals: readonly ErpWritebackApproval[];
+}>;
+
+export type ErpWriteSuccess = Readonly<{
+  id: string;
+  version: number;
+}>;
+
+export type ErpWritebackPermissions = Readonly<{
+  canRequest: boolean;
+  canApprove: boolean;
+  canExecute: boolean;
+}>;
+
+export type ErpWritebackAvailableActions = Readonly<{
+  canSubmit: boolean;
+  canApprove: boolean;
+  canReject: boolean;
+  canExecute: boolean;
+}>;
+
+export function resolveErpWritebackAvailableActions(
+  status: string,
+  permissions: ErpWritebackPermissions,
+): ErpWritebackAvailableActions {
+  return {
+    canSubmit: permissions.canRequest && status === "draft",
+    canApprove: permissions.canApprove && status === "pending-approval",
+    canReject: permissions.canApprove && status === "pending-approval",
+    canExecute: permissions.canExecute && status === "approved",
+  };
+}

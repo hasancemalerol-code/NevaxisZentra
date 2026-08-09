@@ -18,6 +18,9 @@ public static class ErpFailureCodes
     public const string CapabilityUnsupported = "erp.capability-unsupported";
     public const string ProviderUnsupported = "erp.provider-unsupported";
     public const string SourceUnavailable = "erp.source-unavailable";
+    public const string WritebackNotApproved = "erp.writeback-not-approved";
+    public const string WritebackBlocked = "erp.writeback-blocked";
+    public const string WritebackAlreadyExecuted = "erp.writeback-already-executed";
 }
 
 public sealed class ErpWriteResult
@@ -467,3 +470,132 @@ public sealed record ErpOrderMaterialAvailabilityReadModel(
     string OrderNumber,
     string FreshnessNote,
     IReadOnlyList<ErpMaterialAvailabilityLineReadModel> Lines);
+
+public sealed record CanonicalErpProductionOrderReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string ProductionOrderNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? ProductDescription,
+    decimal PlannedQuantity,
+    decimal? CompletedQuantity,
+    decimal? ScrapQuantity,
+    string Unit,
+    string Status,
+    DateTimeOffset? PlannedStartUtc,
+    DateTimeOffset? PlannedEndUtc,
+    DateTimeOffset? ActualStartUtc,
+    DateTimeOffset? ActualEndUtc,
+    string? ExternalSalesOrderId,
+    string? ExternalSalesOrderCode,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    string Freshness);
+
+public sealed record CanonicalErpDocumentReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string DocumentType,
+    string? DocumentNumber,
+    DateTimeOffset? DocumentDateUtc,
+    string? Status,
+    string? RelatedEntityType,
+    string? RelatedExternalEntityId,
+    string? RelatedExternalEntityCode,
+    string? FileName,
+    string? MimeType,
+    bool ContentAvailable,
+    string? ExternalReference,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    string Freshness);
+
+public sealed record CreateErpWritebackCommand(
+    Guid ConnectionProfileId,
+    string CommandType,
+    string PayloadJson,
+    string IdempotencyKey,
+    string? TargetEntityType = null,
+    string? TargetExternalId = null);
+
+public sealed record SubmitErpWritebackCommand(Guid WritebackId, uint ExpectedVersion);
+
+public sealed record ApproveErpWritebackCommand(Guid WritebackId, uint ExpectedVersion, string? Comment = null);
+
+public sealed record RejectErpWritebackCommand(Guid WritebackId, uint ExpectedVersion, string? Comment = null);
+
+public sealed record ExecuteErpWritebackCommand(Guid WritebackId, uint ExpectedVersion);
+
+public sealed record ErpWritebackLineSummaryReadModel(
+    string ProductExternalId,
+    decimal Quantity,
+    string Unit);
+
+public sealed record ErpWritebackPayloadSummaryReadModel(
+    string? CustomerExternalId,
+    string? OrderReference,
+    DateTimeOffset? RequestedDeliveryDateUtc,
+    int LineCount,
+    IReadOnlyList<ErpWritebackLineSummaryReadModel> Lines);
+
+public sealed record ErpWritebackApprovalReadModel(
+    Guid Id,
+    string Decision,
+    string DecidedBySubjectId,
+    DateTimeOffset DecidedAtUtc,
+    uint RequestVersion,
+    string PayloadHash,
+    string? Comment);
+
+public sealed record ErpWritebackSummaryReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string CommandType,
+    string Status,
+    string RequestedBySubjectId,
+    DateTimeOffset RequestedAtUtc,
+    DateTimeOffset? SubmittedAtUtc,
+    string? LatestApprovalDecision,
+    string? LatestApproverSubjectId,
+    DateTimeOffset? LatestApprovalAtUtc,
+    string? ExternalExecutionReference,
+    string? LastErrorCode,
+    string? CustomerExternalId,
+    string? OrderReference,
+    int LineCount,
+    uint Version);
+
+public sealed record ErpWritebackDetailReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string CommandType,
+    string? TargetEntityType,
+    string? TargetExternalId,
+    string Status,
+    string PayloadHash,
+    string IdempotencyKey,
+    string RequestedBySubjectId,
+    DateTimeOffset RequestedAtUtc,
+    DateTimeOffset? SubmittedAtUtc,
+    string? ApprovedPayloadHash,
+    uint? ApprovedVersion,
+    DateTimeOffset? ExecutedAtUtc,
+    string? ExternalExecutionReference,
+    string? LastErrorCode,
+    string? LastErrorMessage,
+    uint Version,
+    ErpWritebackPayloadSummaryReadModel PayloadSummary,
+    IReadOnlyList<ErpWritebackApprovalReadModel> Approvals);

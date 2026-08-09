@@ -323,6 +323,8 @@ public static class ErpSyncEntityTypes
     public const string Warehouses = "warehouses";
     public const string Inventory = "inventory";
     public const string Purchasing = "purchasing";
+    public const string Production = "production";
+    public const string Documents = "documents";
 }
 
 public static class ErpMappingStatuses
@@ -395,9 +397,165 @@ public static class ErpCapabilities
     public const string WarehousesRead = "warehouses.read";
     public const string InventoryRead = "inventory.read";
     public const string PurchasingRead = "purchasing.read";
-
-    // Future only
     public const string ProductionRead = "production.read";
     public const string DocumentsRead = "documents.read";
-    public const string Writeback = "writeback";
+    public const string SalesOrdersWriteDraft = "sales-orders.write-draft";
+}
+
+/// <summary>
+/// External ERP production order projection. Does not create or mutate internal Production orders.
+/// </summary>
+public sealed class CanonicalErpProductionOrder
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalId { get; set; } = string.Empty;
+    public string? ExternalCode { get; set; }
+    public string ProductionOrderNumber { get; set; } = string.Empty;
+    public string ExternalProductId { get; set; } = string.Empty;
+    public string? ExternalProductCode { get; set; }
+    public string? ProductDescription { get; set; }
+    public decimal PlannedQuantity { get; set; }
+    public decimal? CompletedQuantity { get; set; }
+    public decimal? ScrapQuantity { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public string Status { get; set; } = ErpProductionOrderStatuses.Unknown;
+    public DateTimeOffset? PlannedStartUtc { get; set; }
+    public DateTimeOffset? PlannedEndUtc { get; set; }
+    public DateTimeOffset? ActualStartUtc { get; set; }
+    public DateTimeOffset? ActualEndUtc { get; set; }
+    public string? ExternalSalesOrderId { get; set; }
+    public string? ExternalSalesOrderCode { get; set; }
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// External ERP document metadata projection. Not an official document ledger.
+/// </summary>
+public sealed class CanonicalErpDocument
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalId { get; set; } = string.Empty;
+    public string? ExternalCode { get; set; }
+    public string DocumentType { get; set; } = ErpDocumentTypes.Generic;
+    public string? DocumentNumber { get; set; }
+    public DateTimeOffset? DocumentDateUtc { get; set; }
+    public string? Status { get; set; }
+    public string? RelatedEntityType { get; set; }
+    public string? RelatedExternalEntityId { get; set; }
+    public string? RelatedExternalEntityCode { get; set; }
+    public string? FileName { get; set; }
+    public string? MimeType { get; set; }
+    public bool ContentAvailable { get; set; }
+    public string? ExternalReference { get; set; }
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Human-in-the-loop ERP writeback orchestration request. Not an ERP SoR record.
+/// </summary>
+public sealed class ErpWritebackRequest
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string CommandType { get; set; } = string.Empty;
+    public string? TargetEntityType { get; set; }
+    public string? TargetExternalId { get; set; }
+    public string PayloadJson { get; set; } = "{}";
+    public string PayloadHash { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string Status { get; set; } = ErpWritebackStatuses.Draft;
+    public string RequestedBySubjectId { get; set; } = string.Empty;
+    public DateTimeOffset RequestedAtUtc { get; set; }
+    public DateTimeOffset? SubmittedAtUtc { get; set; }
+    public string? ApprovedPayloadHash { get; set; }
+    public uint? ApprovedVersion { get; set; }
+    public DateTimeOffset? ExecutedAtUtc { get; set; }
+    public string? ExternalExecutionReference { get; set; }
+    public string? LastErrorCode { get; set; }
+    public string? LastErrorMessage { get; set; }
+    public uint Version { get; set; } = 1;
+
+    public ICollection<ErpWritebackApproval> Approvals { get; set; } = new List<ErpWritebackApproval>();
+}
+
+/// <summary>
+/// Append-only human approval record for ERP writeback requests.
+/// </summary>
+public sealed class ErpWritebackApproval
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid WritebackRequestId { get; set; }
+    public string Decision { get; set; } = string.Empty;
+    public string DecidedBySubjectId { get; set; } = string.Empty;
+    public DateTimeOffset DecidedAtUtc { get; set; }
+    public uint RequestVersion { get; set; }
+    public string PayloadHash { get; set; } = string.Empty;
+    public string? Comment { get; set; }
+
+    public ErpWritebackRequest? WritebackRequest { get; set; }
+}
+
+public static class ErpProductionOrderStatuses
+{
+    public const string Planned = "planned";
+    public const string Released = "released";
+    public const string InProgress = "in-progress";
+    public const string Completed = "completed";
+    public const string Cancelled = "cancelled";
+    public const string Closed = "closed";
+    public const string Unknown = "unknown";
+}
+
+public static class ErpDocumentTypes
+{
+    public const string SalesOrder = "sales-order";
+    public const string PurchaseOrder = "purchase-order";
+    public const string DeliveryNote = "delivery-note";
+    public const string Invoice = "invoice";
+    public const string ProductionOrder = "production-order";
+    public const string QualityDocument = "quality-document";
+    public const string Generic = "generic";
+}
+
+public static class ErpWritebackStatuses
+{
+    public const string Draft = "draft";
+    public const string PendingApproval = "pending-approval";
+    public const string Approved = "approved";
+    public const string Rejected = "rejected";
+    public const string Executing = "executing";
+    public const string Succeeded = "succeeded";
+    public const string Failed = "failed";
+    public const string Blocked = "blocked";
+    public const string Superseded = "superseded";
+}
+
+public static class ErpWritebackDecisions
+{
+    public const string Approved = "approved";
+    public const string Rejected = "rejected";
+}
+
+public static class ErpWritebackCommandTypes
+{
+    public const string SalesOrderCreateDraft = "sales-order.create-draft";
 }
