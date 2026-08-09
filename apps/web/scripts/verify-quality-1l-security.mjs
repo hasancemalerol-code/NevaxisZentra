@@ -35,6 +35,7 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 1L security verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityEndpointRouteBuilderExtensions.cs");
+const endpointHelpers = readRequired("apps/api/Quality/QualityEndpointHelpers.cs");
 const migration = readRequired(
   "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
 );
@@ -42,10 +43,10 @@ const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization
 
 requireText(endpoints, "RequireAuthorization", "quality endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "quality endpoints");
-requireText(endpoints, "Status401Unauthorized", "quality endpoints");
-requireText(endpoints, "Status403Forbidden", "quality endpoints");
-requireText(endpoints, "ConcurrencyConflict", "quality endpoints");
-requireText(endpoints, "QualityPermissionKeys.Read", "quality endpoints");
+requireText(endpointHelpers, "Status401Unauthorized", "quality endpoint helpers");
+requireText(endpointHelpers, "Status403Forbidden", "quality endpoint helpers");
+requireText(endpointHelpers, "ConcurrencyConflict", "quality endpoint helpers");
+requireText(endpointHelpers, "QualityPermissionKeys.Read", "quality endpoint helpers");
 requireText(endpoints, "QualityPermissionKeys.Manage", "quality endpoints");
 requireText(endpoints, "QualityPermissionKeys.Inspect", "quality endpoints");
 requireText(endpoints, "QualityPermissionKeys.Release", "quality endpoints");

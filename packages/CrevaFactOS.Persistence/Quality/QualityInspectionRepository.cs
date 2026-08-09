@@ -55,7 +55,8 @@ public interface IQualityInspectionRepository
 public sealed class QualityInspectionRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
-    IProductionOrderContextReader productionOrderContextReader) : IQualityInspectionRepository
+    IProductionOrderContextReader productionOrderContextReader,
+    IQualityReleaseGuard qualityReleaseGuard) : IQualityInspectionRepository
 {
     public async Task<QualityWorkspaceSummaryReadModel> GetWorkspaceSummaryAsync(
         QualityOperationContext context,
@@ -72,7 +73,10 @@ public sealed class QualityInspectionRepository(
             inspections.Count(i => i.Status == QualityInspectionStatus.InProgress || i.Status == QualityInspectionStatus.Draft),
             inspections.Count(i => i.ReleaseStatus == QualityInspectionReleaseStatus.ReadyForReview),
             inspections.Count(i => i.OverallResult == QualityInspectionOverallResult.Fail),
-            inspections.Count(i => i.ReleaseStatus == QualityInspectionReleaseStatus.Released));
+            inspections.Count(i => i.ReleaseStatus == QualityInspectionReleaseStatus.Released),
+            0,
+            0,
+            0);
     }
 
     public async Task<IReadOnlyList<QualityInspectionSummaryReadModel>> ListAsync(
@@ -191,7 +195,8 @@ public sealed class QualityInspectionRepository(
                 inspection.CompletedAtUtc,
                 inspection.ReleasedAtUtc,
                 inspection.Version,
-                results);
+                results,
+                []);
         }, cancellationToken);
 
     public Task<QualityWriteResult> CreateAsync(
@@ -535,6 +540,18 @@ public sealed class QualityInspectionRepository(
                 }
             }
 
+            if (released)
+            {
+                var blocking = await qualityReleaseGuard.CheckInspectionReleaseAsync(
+                    context, inspection.ProductionOrderId, ct);
+                if (blocking.IsBlocked)
+                {
+                    return QualityWriteResult.Fail(
+                        QualityFailureCodes.BlockingQualityHold,
+                        blocking.Reason ?? "Quality hold blocks release.");
+                }
+            }
+
             var now = DateTimeOffset.UtcNow;
             inspection.ReleaseStatus = released
                 ? QualityInspectionReleaseStatus.Released
@@ -687,7 +704,7 @@ public sealed class UnavailableQualityInspectionRepository : IQualityInspectionR
     public Task<QualityWorkspaceSummaryReadModel> GetWorkspaceSummaryAsync(
         QualityOperationContext context,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(new QualityWorkspaceSummaryReadModel(0, 0, 0, 0));
+        Task.FromResult(new QualityWorkspaceSummaryReadModel(0, 0, 0, 0, 0, 0, 0));
 
     public Task<IReadOnlyList<QualityInspectionSummaryReadModel>> ListAsync(
         QualityOperationContext context,

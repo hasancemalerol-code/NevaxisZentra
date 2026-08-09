@@ -3,9 +3,12 @@ import "./quality-control-server-boundary";
 import {
   getQualityControlPlan,
   getQualityInspection,
+  getQualityNcr,
   getQualityWorkspaceSummary,
   listQualityControlPlans,
   listQualityInspections,
+  listQualityNcrs,
+  type QualityNcrListFilters,
 } from "./quality-control-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -14,6 +17,8 @@ import type {
   QualityControlPlanSummary,
   QualityInspectionDetail,
   QualityInspectionSummary,
+  QualityNcrDetail,
+  QualityNcrSummary,
   QualityWorkspaceSummary,
 } from "../domain/quality-control";
 
@@ -117,4 +122,52 @@ export async function readQualityControlPlanById(
   }
 
   return { status: "success", plan: result.value };
+}
+
+export type QualityNcrListResult =
+  | Readonly<{ status: "success"; ncrs: readonly QualityNcrSummary[] }>
+  | ReadFailure;
+
+export async function readQualityNcrList(
+  filters?: QualityNcrListFilters,
+): Promise<QualityNcrListResult> {
+  const configResult = parseProductionExecutionRuntimeConfig();
+  if (configResult.status !== "success") {
+    return { status: "failure", message: configResult.message };
+  }
+
+  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await listQualityNcrs(contextResult.context, filters);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", ncrs: result.value };
+}
+
+export type QualityNcrDetailResult =
+  | Readonly<{ status: "success"; ncr: QualityNcrDetail }>
+  | ReadFailure;
+
+export async function readQualityNcrById(ncrId: string): Promise<QualityNcrDetailResult> {
+  const configResult = parseProductionExecutionRuntimeConfig();
+  if (configResult.status !== "success") {
+    return { status: "failure", message: configResult.message };
+  }
+
+  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await getQualityNcr(contextResult.context, ncrId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  return { status: "success", ncr: result.value };
 }

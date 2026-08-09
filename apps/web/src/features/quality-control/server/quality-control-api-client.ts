@@ -1,17 +1,24 @@
 import "./quality-control-server-boundary";
 
 import type {
+  ProductionQualitySignal,
   QualityControlPlanDetail,
   QualityControlPlanSummary,
   QualityInspectionDetail,
   QualityInspectionSummary,
+  QualityNcrDetail,
+  QualityNcrSummary,
   QualityWorkspaceSummary,
 } from "../domain/quality-control";
 import {
+  parseLinkedNonconformanceApiResponse,
+  parseProductionQualitySignalApiResponse,
   parseQualityControlPlanDetailApiResponse,
   parseQualityControlPlanListApiResponse,
   parseQualityInspectionDetailApiResponse,
   parseQualityInspectionListApiResponse,
+  parseQualityNcrDetailApiResponse,
+  parseQualityNcrListApiResponse,
   parseQualityWorkspaceSummaryApiResponse,
   parseQualityWriteApiResponse,
 } from "./quality-control-api-contracts";
@@ -38,19 +45,28 @@ export type QualityApiResult<T> =
 function buildUrl(
   context: ProductionOrderRequestContext,
   path: string,
+  query?: Record<string, string | undefined>,
 ): string {
   const url = new URL(`${context.apiBaseUrl}${path}`);
   url.searchParams.set("facilityId", context.facilityId);
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined && value !== "") {
+        url.searchParams.set(key, value);
+      }
+    }
+  }
   return url.toString();
 }
 
-async function getJson<T>(
+async function getJsonWithQuery<T>(
   context: ProductionOrderRequestContext,
   path: string,
+  query: Record<string, string | undefined> | undefined,
   parser: (payload: unknown) => T,
 ): Promise<QualityApiResult<T>> {
   try {
-    const response = await fetch(buildUrl(context, path), {
+    const response = await fetch(buildUrl(context, path, query), {
       headers: context.requestHeaders,
       cache: "no-store",
     });
@@ -92,6 +108,14 @@ async function getJson<T>(
       retryable: true,
     };
   }
+}
+
+async function getJson<T>(
+  context: ProductionOrderRequestContext,
+  path: string,
+  parser: (payload: unknown) => T,
+): Promise<QualityApiResult<T>> {
+  return getJsonWithQuery(context, path, undefined, parser);
 }
 
 async function postJson<T>(
@@ -347,5 +371,178 @@ export function updateQualityControlPlan(
     `/api/quality/control-plans/${planId}`,
     body,
     parseQualityWriteApiResponse,
+  );
+}
+
+export type QualityNcrListFilters = Readonly<{
+  status?: string;
+  severity?: string;
+  holdActive?: boolean;
+  productionOrderId?: string;
+}>;
+
+export function listQualityNcrs(
+  context: ProductionOrderRequestContext,
+  filters?: QualityNcrListFilters,
+): Promise<QualityApiResult<readonly QualityNcrSummary[]>> {
+  return getJsonWithQuery(
+    context,
+    "/api/quality/ncrs",
+    {
+      status: filters?.status,
+      severity: filters?.severity,
+      holdActive:
+        filters?.holdActive === undefined ? undefined : String(filters.holdActive),
+      productionOrderId: filters?.productionOrderId,
+    },
+    parseQualityNcrListApiResponse,
+  );
+}
+
+export function getQualityNcr(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+): Promise<QualityApiResult<QualityNcrDetail>> {
+  return getJson(context, `/api/quality/ncrs/${ncrId}`, parseQualityNcrDetailApiResponse);
+}
+
+export function createQualityNcr(
+  context: ProductionOrderRequestContext,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(context, "/api/quality/ncrs", body, parseQualityWriteApiResponse);
+}
+
+export function updateQualityNcr(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return putJson(context, `/api/quality/ncrs/${ncrId}`, body, parseQualityWriteApiResponse);
+}
+
+export function resolveQualityNcr(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/resolve`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function closeQualityNcr(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/close`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function placeQualityHold(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/hold`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function releaseQualityHold(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/hold/release`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function decideQualityDisposition(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/disposition`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function createQualityCorrectiveAction(
+  context: ProductionOrderRequestContext,
+  ncrId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/ncrs/${ncrId}/corrective-actions`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function startQualityCorrectiveAction(
+  context: ProductionOrderRequestContext,
+  actionId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/corrective-actions/${actionId}/start`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function completeQualityCorrectiveAction(
+  context: ProductionOrderRequestContext,
+  actionId: string,
+  body: unknown,
+): Promise<QualityApiResult<{ id: string; version: number }>> {
+  return postJson(
+    context,
+    `/api/quality/corrective-actions/${actionId}/complete`,
+    body,
+    parseQualityWriteApiResponse,
+  );
+}
+
+export function getProductionQualitySignal(
+  context: ProductionOrderRequestContext,
+  productionOrderId: string,
+): Promise<QualityApiResult<ProductionQualitySignal>> {
+  return getJson(
+    context,
+    `/api/quality/production-orders/${productionOrderId}/signal`,
+    parseProductionQualitySignalApiResponse,
+  );
+}
+
+export function getLinkedNonconformanceForResult(
+  context: ProductionOrderRequestContext,
+  resultId: string,
+): Promise<QualityApiResult<{ id: string; ncrNumber: string; status: string }>> {
+  return getJson(
+    context,
+    `/api/quality/inspection-results/${resultId}/nonconformance`,
+    parseLinkedNonconformanceApiResponse,
   );
 }

@@ -48,6 +48,61 @@ public enum QualityInspectionItemResult
     NotApplicable,
 }
 
+public enum QualityNcrStatus
+{
+    Open,
+    UnderReview,
+    ActionRequired,
+    Resolved,
+    Closed,
+    Cancelled,
+}
+
+public enum QualityNcrSeverity
+{
+    Minor,
+    Major,
+    Critical,
+}
+
+public enum QualityNcrDispositionStatus
+{
+    Pending,
+    Decided,
+}
+
+public enum QualityNcrDispositionType
+{
+    UseAsIs,
+    Rework,
+    Scrap,
+    ReturnToSupplier,
+    SortOrScreen,
+    Pending,
+}
+
+public enum QualityNcrHoldStatus
+{
+    None,
+    Active,
+    Released,
+}
+
+public enum QualityHoldRecordStatus
+{
+    Active,
+    Released,
+    Cancelled,
+}
+
+public enum QualityCorrectiveActionStatus
+{
+    Open,
+    InProgress,
+    Completed,
+    Cancelled,
+}
+
 public static class QualityValueConversions
 {
     private static readonly Dictionary<QualityControlPlanStatus, string> PlanStatuses = new()
@@ -98,6 +153,61 @@ public static class QualityValueConversions
         [QualityInspectionItemResult.NotApplicable] = "not-applicable",
     };
 
+    private static readonly Dictionary<QualityNcrStatus, string> NcrStatuses = new()
+    {
+        [QualityNcrStatus.Open] = "open",
+        [QualityNcrStatus.UnderReview] = "under-review",
+        [QualityNcrStatus.ActionRequired] = "action-required",
+        [QualityNcrStatus.Resolved] = "resolved",
+        [QualityNcrStatus.Closed] = "closed",
+        [QualityNcrStatus.Cancelled] = "cancelled",
+    };
+
+    private static readonly Dictionary<QualityNcrSeverity, string> NcrSeverities = new()
+    {
+        [QualityNcrSeverity.Minor] = "minor",
+        [QualityNcrSeverity.Major] = "major",
+        [QualityNcrSeverity.Critical] = "critical",
+    };
+
+    private static readonly Dictionary<QualityNcrDispositionStatus, string> DispositionStatuses = new()
+    {
+        [QualityNcrDispositionStatus.Pending] = "pending",
+        [QualityNcrDispositionStatus.Decided] = "decided",
+    };
+
+    private static readonly Dictionary<QualityNcrDispositionType, string> DispositionTypes = new()
+    {
+        [QualityNcrDispositionType.UseAsIs] = "use-as-is",
+        [QualityNcrDispositionType.Rework] = "rework",
+        [QualityNcrDispositionType.Scrap] = "scrap",
+        [QualityNcrDispositionType.ReturnToSupplier] = "return-to-supplier",
+        [QualityNcrDispositionType.SortOrScreen] = "sort-or-screen",
+        [QualityNcrDispositionType.Pending] = "pending",
+    };
+
+    private static readonly Dictionary<QualityNcrHoldStatus, string> NcrHoldStatuses = new()
+    {
+        [QualityNcrHoldStatus.None] = "none",
+        [QualityNcrHoldStatus.Active] = "active",
+        [QualityNcrHoldStatus.Released] = "released",
+    };
+
+    private static readonly Dictionary<QualityHoldRecordStatus, string> HoldRecordStatuses = new()
+    {
+        [QualityHoldRecordStatus.Active] = "active",
+        [QualityHoldRecordStatus.Released] = "released",
+        [QualityHoldRecordStatus.Cancelled] = "cancelled",
+    };
+
+    private static readonly Dictionary<QualityCorrectiveActionStatus, string> CorrectiveActionStatuses = new()
+    {
+        [QualityCorrectiveActionStatus.Open] = "open",
+        [QualityCorrectiveActionStatus.InProgress] = "in-progress",
+        [QualityCorrectiveActionStatus.Completed] = "completed",
+        [QualityCorrectiveActionStatus.Cancelled] = "cancelled",
+    };
+
     public static string ToStorage(QualityControlPlanStatus value) => PlanStatuses[value];
     public static QualityControlPlanStatus PlanStatusFromStorage(string value) =>
         PlanStatuses.First(p => p.Value == value).Key;
@@ -121,4 +231,32 @@ public static class QualityValueConversions
     public static string ToStorage(QualityInspectionItemResult value) => ItemResults[value];
     public static QualityInspectionItemResult ItemResultFromStorage(string value) =>
         ItemResults.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityNcrStatus value) => NcrStatuses[value];
+    public static QualityNcrStatus NcrStatusFromStorage(string value) =>
+        NcrStatuses.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityNcrSeverity value) => NcrSeverities[value];
+    public static QualityNcrSeverity NcrSeverityFromStorage(string value) =>
+        NcrSeverities.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityNcrDispositionStatus value) => DispositionStatuses[value];
+    public static QualityNcrDispositionStatus DispositionStatusFromStorage(string value) =>
+        DispositionStatuses.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityNcrDispositionType value) => DispositionTypes[value];
+    public static QualityNcrDispositionType DispositionTypeFromStorage(string value) =>
+        DispositionTypes.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityNcrHoldStatus value) => NcrHoldStatuses[value];
+    public static QualityNcrHoldStatus NcrHoldStatusFromStorage(string value) =>
+        NcrHoldStatuses.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityHoldRecordStatus value) => HoldRecordStatuses[value];
+    public static QualityHoldRecordStatus HoldRecordStatusFromStorage(string value) =>
+        HoldRecordStatuses.First(p => p.Value == value).Key;
+
+    public static string ToStorage(QualityCorrectiveActionStatus value) => CorrectiveActionStatuses[value];
+    public static QualityCorrectiveActionStatus CorrectiveActionStatusFromStorage(string value) =>
+        CorrectiveActionStatuses.First(p => p.Value == value).Key;
 }

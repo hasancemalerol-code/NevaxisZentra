@@ -4,8 +4,11 @@ import {
   CheckCircle2,
   ClipboardCheck,
   ClipboardList,
+  FileWarning,
+  Lock,
   Plus,
   ShieldCheck,
+  Timer,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +63,10 @@ export default async function QualityControlPage() {
             <ClipboardCheck aria-hidden="true" />
             Yeni Kalite Kontrolü
           </Link>
+          <Link href="/kalite/ncr" className="production-execution-header__link">
+            <FileWarning aria-hidden="true" />
+            Uygunsuzluk Raporları
+          </Link>
         </div>
       </header>
 
@@ -90,6 +97,27 @@ export default async function QualityControlPage() {
           <div>
             <span>Serbest Bırakılanlar</span>
             <strong>{summary.releasedInspectionCount}</strong>
+          </div>
+        </Card>
+        <Card className="production-execution-kpis__item--paused">
+          <FileWarning aria-hidden="true" />
+          <div>
+            <span>Açık NCR</span>
+            <strong>{summary.openNcrCount}</strong>
+          </div>
+        </Card>
+        <Card className="production-execution-kpis__item--in-progress">
+          <Lock aria-hidden="true" />
+          <div>
+            <span>Aktif Kalite Blokeleri</span>
+            <strong>{summary.activeHoldCount}</strong>
+          </div>
+        </Card>
+        <Card className="production-execution-kpis__item--ready">
+          <Timer aria-hidden="true" />
+          <div>
+            <span>Aksiyon Bekleyenler</span>
+            <strong>{summary.actionPendingCount}</strong>
           </div>
         </Card>
       </section>

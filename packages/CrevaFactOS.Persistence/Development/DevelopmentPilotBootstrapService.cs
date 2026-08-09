@@ -329,6 +329,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureQualityReleasePermissionAssignmentAsync(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityNcrManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityHoldPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityHoldPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureQualityDispositionPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -1865,5 +1873,32 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             QualityPermissionKeys.Release,
             DevelopmentPilotIds.QualityReleasePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityNcrManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.NcrManage,
+            DevelopmentPilotIds.QualityNcrManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityHoldPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Hold,
+            DevelopmentPilotIds.QualityHoldPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureQualityDispositionPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            QualityPermissionKeys.Disposition,
+            DevelopmentPilotIds.QualityDispositionPermissionDefinitionId,
             cancellationToken);
 }

@@ -90,6 +90,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityInspectionDefinition> QualityInspectionDefinitions => Set<QualityInspectionDefinition>();
     public DbSet<QualityInspection> QualityInspections => Set<QualityInspection>();
     public DbSet<QualityInspectionResult> QualityInspectionResults => Set<QualityInspectionResult>();
+    public DbSet<QualityNonconformance> QualityNonconformances => Set<QualityNonconformance>();
+    public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
+    public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -623,6 +626,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityNonconformanceEntityConfiguration());
+        modelBuilder.Entity<QualityNonconformance>().HasQueryFilter(n =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && n.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityHoldEntityConfiguration());
+        modelBuilder.Entity<QualityHold>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityCorrectiveActionEntityConfiguration());
+        modelBuilder.Entity<QualityCorrectiveAction>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

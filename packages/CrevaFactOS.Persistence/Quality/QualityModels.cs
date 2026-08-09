@@ -19,6 +19,7 @@ public static class QualityFailureCodes
     public const string PlanNotActive = "plan-not-active";
     public const string ReleaseNotAllowed = "release-not-allowed";
     public const string SourceUnavailable = "source-unavailable";
+    public const string BlockingQualityHold = "blocking-quality-hold";
 }
 
 public sealed class QualityWriteResult
@@ -183,7 +184,8 @@ public sealed record QualityInspectionDetailReadModel(
     DateTimeOffset? CompletedAtUtc,
     DateTimeOffset? ReleasedAtUtc,
     uint Version,
-    IReadOnlyList<QualityInspectionResultReadModel> Results);
+    IReadOnlyList<QualityInspectionResultReadModel> Results,
+    IReadOnlyList<LinkedNonconformanceReadModel> LinkedNonconformances);
 
 public sealed record QualityInspectionResultReadModel(
     Guid Id,
@@ -209,4 +211,7 @@ public sealed record QualityWorkspaceSummaryReadModel(
     int OpenInspectionCount,
     int PendingReviewCount,
     int FailedInspectionCount,
-    int ReleasedInspectionCount);
+    int ReleasedInspectionCount,
+    int OpenNcrCount,
+    int ActiveHoldCount,
+    int ActionPendingCount);

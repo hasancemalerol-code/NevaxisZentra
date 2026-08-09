@@ -30,6 +30,8 @@ public static class QualityEndpointRouteBuilderExtensions
 
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
 
+        endpoints.MapQualityNcrEndpoints();
+
         return endpoints;
     }
 
@@ -42,7 +44,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveReadAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
 
         if (context is null)
@@ -62,7 +64,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveReadAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
 
         if (context is null)
@@ -76,7 +78,7 @@ public static class QualityEndpointRouteBuilderExtensions
             return TypedResults.Problem(
                 title: "Quality control plan not found.",
                 statusCode: StatusCodes.Status404NotFound,
-                extensions: FailureExt(QualityApiFailureCodes.NotFound));
+                extensions: QualityEndpointHelpers.FailureExt(QualityApiFailureCodes.NotFound));
         }
 
         return TypedResults.Ok(QualityApiMapper.MapPlanDetail(plan));
@@ -90,7 +92,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Manage,
             facilityAccessResolver,
@@ -116,7 +118,7 @@ public static class QualityEndpointRouteBuilderExtensions
                 MapDefinitionInputs(body.InspectionDefinitions)),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: true);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: true);
     }
 
     private static async Task<IResult> UpdateControlPlanAsync(
@@ -128,7 +130,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Manage,
             facilityAccessResolver,
@@ -156,7 +158,7 @@ public static class QualityEndpointRouteBuilderExtensions
                 MapDefinitionInputs(body.InspectionDefinitions)),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     // ─────────────────────────── Inspections ───────────────────────────
@@ -168,7 +170,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveReadAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
 
         if (context is null)
@@ -185,10 +187,11 @@ public static class QualityEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IQualityInspectionRepository inspectionRepository,
+        IQualityNonconformanceRepository ncrRepository,
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveReadAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
 
         if (context is null)
@@ -202,10 +205,21 @@ public static class QualityEndpointRouteBuilderExtensions
             return TypedResults.Problem(
                 title: "Quality inspection not found.",
                 statusCode: StatusCodes.Status404NotFound,
-                extensions: FailureExt(QualityApiFailureCodes.NotFound));
+                extensions: QualityEndpointHelpers.FailureExt(QualityApiFailureCodes.NotFound));
         }
 
-        return TypedResults.Ok(QualityApiMapper.MapInspectionDetail(inspection));
+        var linked = new List<LinkedNonconformanceReadModel>();
+        foreach (var result in inspection.Results.Where(r => r.Id != Guid.Empty))
+        {
+            var ncr = await ncrRepository.FindByInspectionResultAsync(context, result.Id, cancellationToken);
+            if (ncr is not null)
+            {
+                linked.Add(ncr);
+            }
+        }
+
+        var enriched = inspection with { LinkedNonconformances = linked };
+        return TypedResults.Ok(QualityApiMapper.MapInspectionDetail(enriched));
     }
 
     private static async Task<IResult> CreateInspectionAsync(
@@ -216,7 +230,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Inspect,
             facilityAccessResolver,
@@ -236,7 +250,7 @@ public static class QualityEndpointRouteBuilderExtensions
                 body.Notes),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: true);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: true);
     }
 
     private static async Task<IResult> StartInspectionAsync(
@@ -248,7 +262,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Inspect,
             facilityAccessResolver,
@@ -265,7 +279,7 @@ public static class QualityEndpointRouteBuilderExtensions
             new QualityInspectionLifecycleCommand(inspectionId, body.ExpectedVersion, body.Note),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     private static async Task<IResult> RecordInspectionResultAsync(
@@ -277,7 +291,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Inspect,
             facilityAccessResolver,
@@ -294,7 +308,7 @@ public static class QualityEndpointRouteBuilderExtensions
             return TypedResults.Problem(
                 title: "ExpectedVersion is required.",
                 statusCode: StatusCodes.Status400BadRequest,
-                extensions: FailureExt(QualityApiFailureCodes.InvalidScope));
+                extensions: QualityEndpointHelpers.FailureExt(QualityApiFailureCodes.InvalidScope));
         }
 
         var result = await inspectionRepository.RecordResultAsync(
@@ -309,7 +323,7 @@ public static class QualityEndpointRouteBuilderExtensions
                 body.Comment),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     private static async Task<IResult> CompleteInspectionAsync(
@@ -321,7 +335,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Inspect,
             facilityAccessResolver,
@@ -338,7 +352,7 @@ public static class QualityEndpointRouteBuilderExtensions
             new QualityInspectionLifecycleCommand(inspectionId, body.ExpectedVersion, body.Note),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     private static async Task<IResult> ReleaseInspectionAsync(
@@ -350,7 +364,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Release,
             facilityAccessResolver,
@@ -367,7 +381,7 @@ public static class QualityEndpointRouteBuilderExtensions
             new QualityInspectionLifecycleCommand(inspectionId, body.ExpectedVersion, body.Note),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     private static async Task<IResult> RejectInspectionAsync(
@@ -379,7 +393,7 @@ public static class QualityEndpointRouteBuilderExtensions
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveWriteAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveWriteAccessAsync(
             facilityId,
             QualityPermissionKeys.Release,
             facilityAccessResolver,
@@ -396,7 +410,7 @@ public static class QualityEndpointRouteBuilderExtensions
             new QualityInspectionLifecycleCommand(inspectionId, body.ExpectedVersion, body.Note),
             cancellationToken);
 
-        return MapWriteResult(result, isCreate: false);
+        return QualityEndpointHelpers.MapWriteResult(result, isCreate: false);
     }
 
     // ─────────────────────────── Workspace ───────────────────────────
@@ -405,10 +419,11 @@ public static class QualityEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IQualityInspectionRepository inspectionRepository,
+        IQualityNonconformanceRepository ncrRepository,
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
-        var (context, failResult) = await ResolveReadAccessAsync(
+        var (context, failResult) = await QualityEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
 
         if (context is null)
@@ -417,72 +432,11 @@ public static class QualityEndpointRouteBuilderExtensions
         }
 
         var summary = await inspectionRepository.GetWorkspaceSummaryAsync(context, cancellationToken);
-        return TypedResults.Ok(QualityApiMapper.MapWorkspaceSummary(summary));
+        var extension = await ncrRepository.GetWorkspaceExtensionAsync(context, cancellationToken);
+        return TypedResults.Ok(QualityApiMapper.MapWorkspaceSummary(summary, extension));
     }
 
     // ─────────────────────────── Helpers ───────────────────────────
-
-    private static async Task<(QualityOperationContext? Context, IResult? Failure)> ResolveReadAccessAsync(
-        Guid? facilityId,
-        IFacilityAccessResolver facilityAccessResolver,
-        CorrelationContext correlationContext,
-        CancellationToken cancellationToken)
-    {
-        if (facilityId is null || facilityId == Guid.Empty)
-        {
-            return (null, MapAccessDenied(
-                FacilityAccessFailureCodes.FacilityMissing,
-                "A facility identifier is required."));
-        }
-
-        var accessResult = await facilityAccessResolver.ResolveAsync(
-            new FacilityAccessRequest(facilityId.Value, QualityPermissionKeys.Read),
-            cancellationToken);
-
-        if (!accessResult.Succeeded || accessResult.Access is null)
-        {
-            return (null, MapFacilityAccessFailure(accessResult));
-        }
-
-        return (BuildContext(accessResult.Access, correlationContext), null);
-    }
-
-    private static async Task<(QualityOperationContext? Context, IResult? Failure)> ResolveWriteAccessAsync(
-        Guid? facilityId,
-        string permissionKey,
-        IFacilityAccessResolver facilityAccessResolver,
-        CorrelationContext correlationContext,
-        CancellationToken cancellationToken)
-    {
-        if (facilityId is null || facilityId == Guid.Empty)
-        {
-            return (null, MapAccessDenied(
-                FacilityAccessFailureCodes.FacilityMissing,
-                "A facility identifier is required."));
-        }
-
-        var accessResult = await facilityAccessResolver.ResolveAsync(
-            new FacilityAccessRequest(facilityId.Value, permissionKey),
-            cancellationToken);
-
-        if (!accessResult.Succeeded || accessResult.Access is null)
-        {
-            return (null, MapFacilityAccessFailure(accessResult));
-        }
-
-        return (BuildContext(accessResult.Access, correlationContext), null);
-    }
-
-    private static QualityOperationContext BuildContext(
-        FacilityAccessContext access,
-        CorrelationContext correlationContext) =>
-        new(
-            access.TenantId,
-            access.FacilityId,
-            access.MembershipId,
-            access.IdentitySubjectId,
-            access.PermissionKey,
-            correlationContext.IsAvailable ? correlationContext.CorrelationId : null);
 
     private static List<QualityInspectionDefinitionInput> MapDefinitionInputs(
         IReadOnlyList<InspectionDefinitionApiInput>? definitions) =>
@@ -501,113 +455,6 @@ public static class QualityEndpointRouteBuilderExtensions
                 d.Critical,
                 d.Instruction))
             .ToList();
-
-    private static IResult MapWriteResult(QualityWriteResult result, bool isCreate)
-    {
-        if (!result.Succeeded)
-        {
-            return MapQualityFailure(result.FailureCode!, result.FailureReason);
-        }
-
-        var dto = new QualityWriteSuccessDto(result.EntityId!.Value, result.Version!.Value);
-
-        return isCreate
-            ? TypedResults.Created((string?)null, dto)
-            : TypedResults.Ok(dto);
-    }
-
-    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapQualityFailure(string failureCode, string? reason) =>
-        failureCode switch
-        {
-            QualityFailureCodes.InvalidScope => TypedResults.Problem(
-                title: reason ?? "Invalid scope.",
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: FailureExt(QualityApiFailureCodes.InvalidScope)),
-            QualityFailureCodes.NotFound => TypedResults.Problem(
-                title: reason ?? "Resource not found.",
-                statusCode: StatusCodes.Status404NotFound,
-                extensions: FailureExt(QualityApiFailureCodes.NotFound)),
-            QualityFailureCodes.ProductionOrderNotFound => TypedResults.Problem(
-                title: reason ?? "Production order not found.",
-                statusCode: StatusCodes.Status404NotFound,
-                extensions: FailureExt(QualityApiFailureCodes.ProductionOrderNotFound)),
-            QualityFailureCodes.ConcurrencyConflict => TypedResults.Problem(
-                title: reason ?? "The record was modified by another user.",
-                statusCode: StatusCodes.Status409Conflict,
-                extensions: FailureExt(QualityApiFailureCodes.ConcurrencyConflict)),
-            QualityFailureCodes.InvalidTransition => TypedResults.Problem(
-                title: reason ?? "This transition is not allowed.",
-                statusCode: StatusCodes.Status409Conflict,
-                extensions: FailureExt(QualityApiFailureCodes.InvalidTransition)),
-            QualityFailureCodes.PlanNotActive => TypedResults.Problem(
-                title: reason ?? "Quality control plan is not active.",
-                statusCode: StatusCodes.Status409Conflict,
-                extensions: FailureExt(QualityApiFailureCodes.PlanNotActive)),
-            QualityFailureCodes.ReleaseNotAllowed => TypedResults.Problem(
-                title: reason ?? "Release is not allowed.",
-                statusCode: StatusCodes.Status409Conflict,
-                extensions: FailureExt(QualityApiFailureCodes.ReleaseNotAllowed)),
-            QualityFailureCodes.ValidationFailed => TypedResults.Problem(
-                title: reason ?? "Validation failed.",
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: FailureExt(QualityApiFailureCodes.ValidationFailed)),
-            QualityFailureCodes.SourceUnavailable => TypedResults.Problem(
-                title: reason ?? "Quality service is unavailable.",
-                statusCode: StatusCodes.Status503ServiceUnavailable,
-                extensions: FailureExt(QualityApiFailureCodes.SourceUnavailable)),
-            _ => TypedResults.Problem(
-                title: reason ?? "An unexpected error occurred.",
-                statusCode: StatusCodes.Status500InternalServerError,
-                extensions: FailureExt(QualityApiFailureCodes.UnexpectedError)),
-        };
-
-    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapFacilityAccessFailure(FacilityAccessResolutionResult accessResult) =>
-        accessResult.FailureCode switch
-        {
-            FacilityAccessFailureCodes.Unauthenticated => TypedResults.Problem(
-                title: "Authentication required.",
-                statusCode: StatusCodes.Status401Unauthorized,
-                extensions: FailureExt(QualityApiFailureCodes.Unauthenticated)),
-            FacilityAccessFailureCodes.TenantContextMissing
-                or FacilityAccessFailureCodes.MembershipMissing => TypedResults.Problem(
-                    title: "Authorization denied.",
-                    statusCode: StatusCodes.Status403Forbidden,
-                    extensions: FailureExt(QualityApiFailureCodes.MembershipMissing)),
-            FacilityAccessFailureCodes.FacilityMissing => TypedResults.Problem(
-                title: "Invalid request.",
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: FailureExt(QualityApiFailureCodes.InvalidRequest)),
-            FacilityAccessFailureCodes.FacilityAccessDenied => TypedResults.Problem(
-                title: "Authorization denied.",
-                statusCode: StatusCodes.Status403Forbidden,
-                extensions: FailureExt(QualityApiFailureCodes.FacilityAccessDenied)),
-            FacilityAccessFailureCodes.PermissionDenied => TypedResults.Problem(
-                title: "Authorization denied.",
-                statusCode: StatusCodes.Status403Forbidden,
-                extensions: FailureExt(QualityApiFailureCodes.PermissionDenied)),
-            FacilityAccessFailureCodes.SourceUnavailable => TypedResults.Problem(
-                title: "Service unavailable.",
-                statusCode: StatusCodes.Status503ServiceUnavailable,
-                extensions: FailureExt(QualityApiFailureCodes.SourceUnavailable)),
-            _ => TypedResults.Problem(
-                title: "Unexpected error.",
-                statusCode: StatusCodes.Status500InternalServerError,
-                extensions: FailureExt(QualityApiFailureCodes.UnexpectedError)),
-        };
-
-    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapAccessDenied(string facilityFailureCode, string message) =>
-        facilityFailureCode == FacilityAccessFailureCodes.FacilityMissing
-            ? TypedResults.Problem(
-                title: message,
-                statusCode: StatusCodes.Status400BadRequest,
-                extensions: FailureExt(QualityApiFailureCodes.InvalidRequest))
-            : TypedResults.Problem(
-                title: "Authorization denied.",
-                statusCode: StatusCodes.Status403Forbidden,
-                extensions: FailureExt(QualityApiFailureCodes.FacilityAccessDenied));
-
-    private static Dictionary<string, object?> FailureExt(string failureCode) =>
-        new() { ["failureCode"] = failureCode };
 }
 
 internal static class QualityApiFailureCodes
@@ -627,6 +474,9 @@ internal static class QualityApiFailureCodes
     public const string FacilityAccessDenied = "quality.facility-access-denied";
     public const string PermissionDenied = "quality.permission-denied";
     public const string UnexpectedError = "quality.unexpected-error";
+    public const string BlockingQualityHold = "quality.blocking-quality-hold";
+    public const string DuplicateNonconformance = "quality.duplicate-nonconformance";
+    public const string CloseNotAllowed = "quality.close-not-allowed";
 }
 
 internal static class QualityApiMapper
@@ -749,14 +599,25 @@ internal static class QualityApiMapper
             recordedAtUtc = r.RecordedAtUtc,
             recordedBySubjectId = r.RecordedBySubjectId,
         }).ToList(),
+        linkedNonconformances = model.LinkedNonconformances.Select(n => new
+        {
+            id = n.Id,
+            ncrNumber = n.NcrNumber,
+            status = n.Status,
+        }).ToList(),
     };
 
-    public static object MapWorkspaceSummary(QualityWorkspaceSummaryReadModel model) => new
+    public static object MapWorkspaceSummary(
+        QualityWorkspaceSummaryReadModel model,
+        QualityNcrWorkspaceExtensionReadModel extension) => new
     {
         openInspectionCount = model.OpenInspectionCount,
         pendingReviewCount = model.PendingReviewCount,
         failedInspectionCount = model.FailedInspectionCount,
         releasedInspectionCount = model.ReleasedInspectionCount,
+        openNcrCount = extension.OpenNcrCount,
+        activeHoldCount = extension.ActiveHoldCount,
+        actionPendingCount = extension.ActionPendingCount,
     };
 }
 
@@ -840,6 +701,37 @@ public static class QualityServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
+        services.AddScoped<IQualityReleaseGuard>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableQualityReleaseGuard()
+                : new QualityReleaseGuard(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionQualitySignalReader>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionQualitySignalReader()
+                : new ProductionQualitySignalReader(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IQualityNonconformanceRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableQualityNonconformanceRepository()
+                : new QualityNonconformanceRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IProductionOrderContextReader>());
+        });
+
         services.AddScoped<IQualityInspectionRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
@@ -848,7 +740,8 @@ public static class QualityServiceCollectionExtensions
                 : new QualityInspectionRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
-                    serviceProvider.GetRequiredService<IProductionOrderContextReader>());
+                    serviceProvider.GetRequiredService<IProductionOrderContextReader>(),
+                    serviceProvider.GetRequiredService<IQualityReleaseGuard>());
         });
 
         return services;

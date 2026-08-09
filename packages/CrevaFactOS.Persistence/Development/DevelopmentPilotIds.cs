@@ -207,6 +207,15 @@ public static class DevelopmentPilotIds
     public static readonly Guid QualityReleasePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000049");
 
+    public static readonly Guid QualityNcrManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000050");
+
+    public static readonly Guid QualityHoldPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000051");
+
+    public static readonly Guid QualityDispositionPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000052");
+
     // Quality pilot fixture
     public static readonly Guid QualityPilotControlPlanId =
         Guid.Parse("bb000001-0060-4000-8000-000000000060");

@@ -147,3 +147,114 @@ internal sealed class QualityInspectionResultEntityConfiguration : IEntityTypeCo
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class QualityNonconformanceEntityConfiguration : IEntityTypeConfiguration<Quality.QualityNonconformance>
+{
+    public void Configure(EntityTypeBuilder<Quality.QualityNonconformance> entity)
+    {
+        entity.ToTable("quality_nonconformances");
+        entity.HasKey(n => n.Id);
+        entity.Property(n => n.Id).HasColumnName("id");
+        entity.Property(n => n.TenantId).HasColumnName("tenant_id");
+        entity.Property(n => n.FacilityId).HasColumnName("facility_id");
+        entity.Property(n => n.NcrNumber).HasColumnName("ncr_number").HasMaxLength(50);
+        entity.Property(n => n.ProductionOrderId).HasColumnName("production_order_id");
+        entity.Property(n => n.QualityInspectionId).HasColumnName("quality_inspection_id");
+        entity.Property(n => n.QualityInspectionResultId).HasColumnName("quality_inspection_result_id");
+        entity.Property(n => n.ProductReference).HasColumnName("product_reference").HasMaxLength(200);
+        entity.Property(n => n.OperationReference).HasColumnName("operation_reference").HasMaxLength(200);
+        entity.Property(n => n.Title).HasColumnName("title").HasMaxLength(200);
+        entity.Property(n => n.Description).HasColumnName("description").HasMaxLength(4000);
+        entity.Property(n => n.Category).HasColumnName("category").HasMaxLength(100);
+        entity.Property(n => n.Severity).HasColumnName("severity").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.NcrSeverityFromStorage(v));
+        entity.Property(n => n.Status).HasColumnName("status").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.NcrStatusFromStorage(v));
+        entity.Property(n => n.DetectedAtUtc).HasColumnName("detected_at_utc");
+        entity.Property(n => n.DetectedBySubjectId).HasColumnName("detected_by_subject_id").HasMaxLength(200);
+        entity.Property(n => n.OwnerSubjectId).HasColumnName("owner_subject_id").HasMaxLength(200);
+        entity.Property(n => n.DispositionStatus).HasColumnName("disposition_status").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.DispositionStatusFromStorage(v));
+        entity.Property(n => n.DispositionType).HasColumnName("disposition_type").HasMaxLength(30)
+            .HasConversion(
+                v => v.HasValue ? Quality.QualityValueConversions.ToStorage(v.Value) : null,
+                v => v == null ? null : Quality.QualityValueConversions.DispositionTypeFromStorage(v));
+        entity.Property(n => n.DispositionNote).HasColumnName("disposition_note").HasMaxLength(2000);
+        entity.Property(n => n.DispositionDecidedBySubjectId).HasColumnName("disposition_decided_by_subject_id").HasMaxLength(200);
+        entity.Property(n => n.DispositionDecidedAtUtc).HasColumnName("disposition_decided_at_utc");
+        entity.Property(n => n.HoldStatus).HasColumnName("hold_status").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.NcrHoldStatusFromStorage(v));
+        entity.Property(n => n.ClosedAtUtc).HasColumnName("closed_at_utc");
+        entity.Property(n => n.ClosedBySubjectId).HasColumnName("closed_by_subject_id").HasMaxLength(200);
+        entity.Property(n => n.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(n => n.UpdatedAtUtc).HasColumnName("updated_at_utc");
+        entity.Property(n => n.Version).HasColumnName("version").IsConcurrencyToken();
+
+        entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.NcrNumber }).IsUnique();
+        entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.QualityInspectionResultId })
+            .IsUnique()
+            .HasFilter("quality_inspection_result_id IS NOT NULL");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(n => n.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(n => new { n.TenantId, n.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class QualityHoldEntityConfiguration : IEntityTypeConfiguration<Quality.QualityHold>
+{
+    public void Configure(EntityTypeBuilder<Quality.QualityHold> entity)
+    {
+        entity.ToTable("quality_holds");
+        entity.HasKey(h => h.Id);
+        entity.Property(h => h.Id).HasColumnName("id");
+        entity.Property(h => h.TenantId).HasColumnName("tenant_id");
+        entity.Property(h => h.FacilityId).HasColumnName("facility_id");
+        entity.Property(h => h.NcrId).HasColumnName("ncr_id");
+        entity.Property(h => h.ProductionOrderId).HasColumnName("production_order_id");
+        entity.Property(h => h.Scope).HasColumnName("scope").HasMaxLength(50);
+        entity.Property(h => h.Status).HasColumnName("status").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.HoldRecordStatusFromStorage(v));
+        entity.Property(h => h.Reason).HasColumnName("reason").HasMaxLength(2000);
+        entity.Property(h => h.PlacedAtUtc).HasColumnName("placed_at_utc");
+        entity.Property(h => h.PlacedBySubjectId).HasColumnName("placed_by_subject_id").HasMaxLength(200);
+        entity.Property(h => h.ReleasedAtUtc).HasColumnName("released_at_utc");
+        entity.Property(h => h.ReleasedBySubjectId).HasColumnName("released_by_subject_id").HasMaxLength(200);
+        entity.Property(h => h.ReleaseReason).HasColumnName("release_reason").HasMaxLength(2000);
+        entity.Property(h => h.Version).HasColumnName("version").IsConcurrencyToken();
+
+        entity.HasOne(h => h.Nonconformance).WithMany(n => n.Holds)
+            .HasForeignKey(h => h.NcrId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class QualityCorrectiveActionEntityConfiguration : IEntityTypeConfiguration<Quality.QualityCorrectiveAction>
+{
+    public void Configure(EntityTypeBuilder<Quality.QualityCorrectiveAction> entity)
+    {
+        entity.ToTable("quality_corrective_actions");
+        entity.HasKey(a => a.Id);
+        entity.Property(a => a.Id).HasColumnName("id");
+        entity.Property(a => a.TenantId).HasColumnName("tenant_id");
+        entity.Property(a => a.FacilityId).HasColumnName("facility_id");
+        entity.Property(a => a.NcrId).HasColumnName("ncr_id");
+        entity.Property(a => a.Title).HasColumnName("title").HasMaxLength(200);
+        entity.Property(a => a.Description).HasColumnName("description").HasMaxLength(2000);
+        entity.Property(a => a.OwnerSubjectId).HasColumnName("owner_subject_id").HasMaxLength(200);
+        entity.Property(a => a.Status).HasColumnName("status").HasMaxLength(20)
+            .HasConversion(v => Quality.QualityValueConversions.ToStorage(v), v => Quality.QualityValueConversions.CorrectiveActionStatusFromStorage(v));
+        entity.Property(a => a.DueAtUtc).HasColumnName("due_at_utc");
+        entity.Property(a => a.CompletedAtUtc).HasColumnName("completed_at_utc");
+        entity.Property(a => a.CompletedBySubjectId).HasColumnName("completed_by_subject_id").HasMaxLength(200);
+        entity.Property(a => a.CompletionNote).HasColumnName("completion_note").HasMaxLength(2000);
+        entity.Property(a => a.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(a => a.UpdatedAtUtc).HasColumnName("updated_at_utc");
+        entity.Property(a => a.Version).HasColumnName("version").IsConcurrencyToken();
+
+        entity.HasOne(a => a.Nonconformance).WithMany(n => n.CorrectiveActions)
+            .HasForeignKey(a => a.NcrId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}

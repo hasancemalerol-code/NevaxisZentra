@@ -60,6 +60,9 @@ export function parseQualityWorkspaceSummaryApiResponse(payload: unknown) {
     pendingReviewCount: readNumber(record.pendingReviewCount, "pendingReviewCount"),
     failedInspectionCount: readNumber(record.failedInspectionCount, "failedInspectionCount"),
     releasedInspectionCount: readNumber(record.releasedInspectionCount, "releasedInspectionCount"),
+    openNcrCount: readNumber(record.openNcrCount, "openNcrCount"),
+    activeHoldCount: readNumber(record.activeHoldCount, "activeHoldCount"),
+    actionPendingCount: readNumber(record.actionPendingCount, "actionPendingCount"),
   };
 }
 
@@ -173,6 +176,20 @@ export function parseQualityInspectionDetailApiResponse(payload: unknown) {
       })
     : [];
 
+  const linkedNonconformances = Array.isArray(record.linkedNonconformances)
+    ? record.linkedNonconformances.map((item) => {
+        if (typeof item !== "object" || item === null) {
+          throw new Error("Invalid linked nonconformance.");
+        }
+        const row = item as Record<string, unknown>;
+        return {
+          id: readString(row.id, "linkedNcr.id"),
+          ncrNumber: readString(row.ncrNumber, "linkedNcr.ncrNumber"),
+          status: readString(row.status, "linkedNcr.status"),
+        };
+      })
+    : [];
+
   return {
     id: readString(record.id, "inspection.id"),
     inspectionNumber: readString(record.inspectionNumber, "inspection.inspectionNumber"),
@@ -198,6 +215,171 @@ export function parseQualityInspectionDetailApiResponse(payload: unknown) {
     releaseNote: readOptionalString(record.releaseNote),
     version: readNumber(record.version, "inspection.version"),
     results,
+    linkedNonconformances,
+  };
+}
+
+function parseProductionContext(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid production context.");
+  }
+  const production = value as Record<string, unknown>;
+  return {
+    productionOrderId: readString(production.productionOrderId, "production.productionOrderId"),
+    referenceCode: readString(production.referenceCode, "production.referenceCode"),
+    productReference: readOptionalString(production.productReference),
+    status: readString(production.status, "production.status"),
+    plannedQuantity: readOptionalNumber(production.plannedQuantity),
+    goodQuantity: readNumber(production.goodQuantity, "production.goodQuantity"),
+    scrapQuantity: readNumber(production.scrapQuantity, "production.scrapQuantity"),
+    available: readBoolean(production.available, "production.available"),
+  };
+}
+
+function parseHold(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid hold payload.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "hold.id"),
+    scope: readString(record.scope, "hold.scope"),
+    status: readString(record.status, "hold.status"),
+    reason: readString(record.reason, "hold.reason"),
+    placedAtUtc: readString(record.placedAtUtc, "hold.placedAtUtc"),
+    placedBySubjectId: readString(record.placedBySubjectId, "hold.placedBySubjectId"),
+    releasedAtUtc: readOptionalString(record.releasedAtUtc),
+    releasedBySubjectId: readOptionalString(record.releasedBySubjectId),
+    releaseReason: readOptionalString(record.releaseReason),
+    version: readNumber(record.version, "hold.version"),
+  };
+}
+
+function parseCorrectiveAction(value: unknown) {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid corrective action payload.");
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    id: readString(record.id, "action.id"),
+    title: readString(record.title, "action.title"),
+    description: readString(record.description, "action.description"),
+    status: readString(record.status, "action.status"),
+    ownerSubjectId: readOptionalString(record.ownerSubjectId),
+    dueAtUtc: readOptionalString(record.dueAtUtc),
+    completedAtUtc: readOptionalString(record.completedAtUtc),
+    completionNote: readOptionalString(record.completionNote),
+    version: readNumber(record.version, "action.version"),
+    updatedAtUtc: readString(record.updatedAtUtc, "action.updatedAtUtc"),
+  };
+}
+
+export function parseQualityNcrListApiResponse(payload: unknown) {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid NCR list payload.");
+  }
+  return payload.map((item) => {
+    if (typeof item !== "object" || item === null) {
+      throw new Error("Invalid NCR summary.");
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      id: readString(record.id, "ncr.id"),
+      ncrNumber: readString(record.ncrNumber, "ncr.ncrNumber"),
+      title: readString(record.title, "ncr.title"),
+      severity: readString(record.severity, "ncr.severity"),
+      status: readString(record.status, "ncr.status"),
+      holdStatus: readString(record.holdStatus, "ncr.holdStatus"),
+      dispositionStatus: readString(record.dispositionStatus, "ncr.dispositionStatus"),
+      dispositionType: readOptionalString(record.dispositionType),
+      productionOrderId: readOptionalString(record.productionOrderId),
+      productionOrderReference: readOptionalString(record.productionOrderReference),
+      productReference: readOptionalString(record.productReference),
+      ownerSubjectId: readOptionalString(record.ownerSubjectId),
+      detectedAtUtc: readString(record.detectedAtUtc, "ncr.detectedAtUtc"),
+      createdAtUtc: readString(record.createdAtUtc, "ncr.createdAtUtc"),
+      version: readNumber(record.version, "ncr.version"),
+      updatedAtUtc: readString(record.updatedAtUtc, "ncr.updatedAtUtc"),
+    };
+  });
+}
+
+export function parseQualityNcrDetailApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid NCR detail payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  const productionContext =
+    record.productionContext === null || record.productionContext === undefined
+      ? undefined
+      : parseProductionContext(record.productionContext);
+  const activeHold =
+    record.activeHold === null || record.activeHold === undefined
+      ? undefined
+      : parseHold(record.activeHold);
+  const correctiveActions = Array.isArray(record.correctiveActions)
+    ? record.correctiveActions.map(parseCorrectiveAction)
+    : [];
+
+  return {
+    id: readString(record.id, "ncr.id"),
+    ncrNumber: readString(record.ncrNumber, "ncr.ncrNumber"),
+    title: readString(record.title, "ncr.title"),
+    description: readString(record.description, "ncr.description"),
+    category: readOptionalString(record.category),
+    severity: readString(record.severity, "ncr.severity"),
+    status: readString(record.status, "ncr.status"),
+    holdStatus: readString(record.holdStatus, "ncr.holdStatus"),
+    dispositionStatus: readString(record.dispositionStatus, "ncr.dispositionStatus"),
+    dispositionType: readOptionalString(record.dispositionType),
+    dispositionNote: readOptionalString(record.dispositionNote),
+    dispositionDecidedBySubjectId: readOptionalString(record.dispositionDecidedBySubjectId),
+    dispositionDecidedAtUtc: readOptionalString(record.dispositionDecidedAtUtc),
+    productionOrderId: readOptionalString(record.productionOrderId),
+    productionContext,
+    qualityInspectionId: readOptionalString(record.qualityInspectionId),
+    qualityInspectionNumber: readOptionalString(record.qualityInspectionNumber),
+    qualityInspectionResultId: readOptionalString(record.qualityInspectionResultId),
+    productReference: readOptionalString(record.productReference),
+    operationReference: readOptionalString(record.operationReference),
+    detectedBySubjectId: readString(record.detectedBySubjectId, "ncr.detectedBySubjectId"),
+    ownerSubjectId: readOptionalString(record.ownerSubjectId),
+    detectedAtUtc: readString(record.detectedAtUtc, "ncr.detectedAtUtc"),
+    closedAtUtc: readOptionalString(record.closedAtUtc),
+    closedBySubjectId: readOptionalString(record.closedBySubjectId),
+    version: readNumber(record.version, "ncr.version"),
+    createdAtUtc: readString(record.createdAtUtc, "ncr.createdAtUtc"),
+    updatedAtUtc: readString(record.updatedAtUtc, "ncr.updatedAtUtc"),
+    activeHold,
+    correctiveActions,
+  };
+}
+
+export function parseProductionQualitySignalApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid production quality signal payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    available: readBoolean(record.available, "signal.available"),
+    qualityHoldActive: readBoolean(record.qualityHoldActive, "signal.qualityHoldActive"),
+    blocking: readBoolean(record.blocking, "signal.blocking"),
+    openNcrCount: readNumber(record.openNcrCount, "signal.openNcrCount"),
+    criticalNcrCount: readNumber(record.criticalNcrCount, "signal.criticalNcrCount"),
+    releaseStatus: readOptionalString(record.releaseStatus),
+    reason: readOptionalString(record.reason),
+  };
+}
+
+export function parseLinkedNonconformanceApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid linked nonconformance payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    id: readString(record.id, "linkedNcr.id"),
+    ncrNumber: readString(record.ncrNumber, "linkedNcr.ncrNumber"),
+    status: readString(record.status, "linkedNcr.status"),
   };
 }
 

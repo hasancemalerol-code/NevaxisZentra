@@ -87,6 +87,12 @@ export type QualityInspectionResultRow = Readonly<{
   comment?: string;
 }>;
 
+export type LinkedNonconformanceSummary = Readonly<{
+  id: string;
+  ncrNumber: string;
+  status: string;
+}>;
+
 export type QualityInspectionDetail = Readonly<{
   id: string;
   inspectionNumber: string;
@@ -103,6 +109,7 @@ export type QualityInspectionDetail = Readonly<{
   releaseNote?: string;
   version: number;
   results: readonly QualityInspectionResultRow[];
+  linkedNonconformances: readonly LinkedNonconformanceSummary[];
 }>;
 
 export type QualityWorkspaceSummary = Readonly<{
@@ -110,6 +117,97 @@ export type QualityWorkspaceSummary = Readonly<{
   pendingReviewCount: number;
   failedInspectionCount: number;
   releasedInspectionCount: number;
+  openNcrCount: number;
+  activeHoldCount: number;
+  actionPendingCount: number;
+}>;
+
+export type QualityNcrSummary = Readonly<{
+  id: string;
+  ncrNumber: string;
+  title: string;
+  severity: string;
+  status: string;
+  holdStatus: string;
+  dispositionStatus: string;
+  dispositionType?: string;
+  productionOrderId?: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  ownerSubjectId?: string;
+  detectedAtUtc: string;
+  createdAtUtc: string;
+  version: number;
+  updatedAtUtc: string;
+}>;
+
+export type QualityHoldDetail = Readonly<{
+  id: string;
+  scope: string;
+  status: string;
+  reason: string;
+  placedAtUtc: string;
+  placedBySubjectId: string;
+  releasedAtUtc?: string;
+  releasedBySubjectId?: string;
+  releaseReason?: string;
+  version: number;
+}>;
+
+export type QualityCorrectiveActionDetail = Readonly<{
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  ownerSubjectId?: string;
+  dueAtUtc?: string;
+  completedAtUtc?: string;
+  completionNote?: string;
+  version: number;
+  updatedAtUtc: string;
+}>;
+
+export type QualityNcrDetail = Readonly<{
+  id: string;
+  ncrNumber: string;
+  title: string;
+  description: string;
+  category?: string;
+  severity: string;
+  status: string;
+  holdStatus: string;
+  dispositionStatus: string;
+  dispositionType?: string;
+  dispositionNote?: string;
+  dispositionDecidedBySubjectId?: string;
+  dispositionDecidedAtUtc?: string;
+  productionOrderId?: string;
+  productionContext?: ProductionOrderQualityContext;
+  qualityInspectionId?: string;
+  qualityInspectionNumber?: string;
+  qualityInspectionResultId?: string;
+  productReference?: string;
+  operationReference?: string;
+  detectedBySubjectId: string;
+  ownerSubjectId?: string;
+  detectedAtUtc: string;
+  closedAtUtc?: string;
+  closedBySubjectId?: string;
+  version: number;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  activeHold?: QualityHoldDetail;
+  correctiveActions: readonly QualityCorrectiveActionDetail[];
+}>;
+
+export type ProductionQualitySignal = Readonly<{
+  available: boolean;
+  qualityHoldActive: boolean;
+  blocking: boolean;
+  openNcrCount: number;
+  criticalNcrCount: number;
+  releaseStatus?: string;
+  reason?: string;
 }>;
 
 export function getQualityStatusLabel(status: string): string {
@@ -134,7 +232,56 @@ export function getQualityStatusLabel(status: string): string {
       return "Başarısız";
     case "pending":
       return "Bekliyor";
+    case "open":
+      return "Açık";
+    case "under-review":
+      return "İncelemede";
+    case "action-required":
+      return "Aksiyon gerekli";
+    case "resolved":
+      return "Çözüldü";
+    case "closed":
+      return "Kapatıldı";
+    case "cancelled":
+      return "İptal";
+    case "minor":
+      return "Minör";
+    case "major":
+      return "Majör";
+    case "critical":
+      return "Kritik";
+    case "none":
+      return "Yok";
+    case "active":
+      return "Aktif";
+    case "released":
+      return "Serbest";
+    case "decided":
+      return "Karar verildi";
+    case "use-as-is":
+      return "Olduğu gibi kullan";
+    case "rework":
+      return "Yeniden işle";
+    case "scrap":
+      return "Hurda";
+    case "return-to-supplier":
+      return "Tedarikçiye iade";
+    case "sort-or-screen":
+      return "Ayıkla / ele";
     default:
       return status;
+  }
+}
+
+export function getQualityNcrSeverityTone(
+  severity: string,
+): "neutral" | "information" | "danger" | "success" {
+  switch (severity) {
+    case "critical":
+      return "danger";
+    case "major":
+      return "information";
+    default:
+      return "neutral";
   }
 }

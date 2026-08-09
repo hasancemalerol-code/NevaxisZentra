@@ -5,10 +5,12 @@ import { ArrowLeft, Factory, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { QualityInspectionActions } from "@/features/quality-control/components/quality-inspection-actions";
+import { QualityInspectionNcrLink } from "@/features/quality-control/components/quality-inspection-ncr-link";
 import { getQualityStatusLabel } from "@/features/quality-control/domain/quality-control";
 import { readQualityInspectionById } from "@/features/quality-control/server/quality-control-reader";
 import {
   completeQualityInspectionAction,
+  createQualityNcrAction,
   recordQualityResultAction,
   releaseQualityInspectionAction,
   rejectQualityInspectionAction,
@@ -125,6 +127,17 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
               ))}
             </tbody>
           </table>
+        </Card>
+
+        <Card className="production-execution-panel">
+          <header>
+            <h2>Uygunsuzluk</h2>
+          </header>
+          <QualityInspectionNcrLink
+            inspection={inspection}
+            linkedNonconformances={inspection.linkedNonconformances}
+            onCreateNcr={createQualityNcrAction}
+          />
         </Card>
 
         <QualityInspectionActions
