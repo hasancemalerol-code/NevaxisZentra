@@ -92,12 +92,12 @@ requireText(reader, "readReleaseIntelligence", "quality-control reader");
 
 requireText(traceabilityPanel, "QualityTraceabilityPanel", "traceability panel");
 requireText(traceabilityPanel, "Kalite izlenebilirliği", "traceability panel");
-requireText(traceabilityPanel, "production-execution-list", "traceability panel");
+requireText(traceabilityPanel, "quality-ca-list", "traceability panel");
 
-requireText(summaryPage, "Kontrol Sonuç Özeti", "summary page");
+requireText(summaryPage, "Kalite Kontrol Özeti", "summary page");
 requireText(summaryPage, "readInspectionSummary", "summary page");
-requireText(summaryPage, "Serbest bırakma zekâsı", "summary page");
-requireText(summaryPage, "production-execution-table", "summary page");
+requireText(summaryPage, "Release Durumu", "summary page");
+requireText(summaryPage, "quality-table", "summary page");
 
 requireText(inspectionPage, "QualityTraceabilityPanel", "inspection page");
 requireText(inspectionPage, "/ozet", "inspection page");

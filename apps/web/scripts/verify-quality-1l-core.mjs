@@ -43,6 +43,10 @@ const migration = readRequired(
   "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
 );
 const kalitePage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
+const dashboardView = readRequired(
+  "apps/web/src/features/quality-control/components/quality-dashboard-view.tsx",
+);
+const kaliteUi = `${kalitePage}\n${dashboardView}`;
 
 requireText(endpoints, "MapGroup(\"/api/quality\")", "quality endpoints");
 requireText(endpoints, "/control-plans", "quality endpoints");
@@ -73,8 +77,8 @@ requireText(migration, "quality_inspection_definitions", "migration");
 requireText(migration, "quality_inspections", "migration");
 requireText(migration, "quality_inspection_results", "migration");
 
-requireText(kalitePage, "Kalite Kontrol", "kalite page");
-requireText(kalitePage, "Açık Kontroller", "kalite page");
-requireText(kalitePage, "Yeni Kontrol Planı", "kalite page");
+requireText(kaliteUi, "Kalite Kontrol", "kalite page");
+requireText(kaliteUi, "Açık Kontroller", "kalite page");
+requireText(kaliteUi, "Yeni Kontrol Planı", "kalite page");
 
 console.log("Quality 1L core verification passed.");

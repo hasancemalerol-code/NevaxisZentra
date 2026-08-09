@@ -114,15 +114,15 @@ requireText(writer, "decideQualityDispositionAction", "quality-control writer");
 requireText(writer, "resolveQualityNcrAction", "quality-control writer");
 requireText(writer, "closeQualityNcrAction", "quality-control writer");
 
-requireText(ncrActions, "Hold Koy", "quality-ncr-actions");
-requireText(ncrActions, "Hold Kaldır", "quality-ncr-actions");
+requireText(ncrActions, "Kalite Blokesi Koy", "quality-ncr-actions");
+requireText(ncrActions, "Blokeyi Kaldır", "quality-ncr-actions");
 requireText(ncrActions, "Disposition Belirle", "quality-ncr-actions");
 requireText(ncrActions, "Düzeltici Aksiyon Ekle", "quality-ncr-actions");
 requireText(ncrActions, "Çöz", "quality-ncr-actions");
 requireText(ncrActions, "Kapat", "quality-ncr-actions");
 
 requireText(ncrListPage, "Uygunsuzluk Raporları", "NCR list page");
-requireText(ncrListPage, "production-execution-page", "NCR list page");
+requireText(ncrListPage, "QualityPageShell", "NCR list page");
 requireText(ncrDetailPage, "Kalite Blokesi", "NCR detail page");
 requireText(inspectionPage, "QualityInspectionNcrLink", "inspection page");
 requireText(inspectionNcrLink, "NCR Oluştur", "quality-inspection-ncr-link");

@@ -42,6 +42,10 @@ const client = readRequired("apps/web/src/features/quality-control/server/qualit
 const reader = readRequired("apps/web/src/features/quality-control/server/quality-control-reader.ts");
 const reportingPage = readRequired("apps/web/src/app/(app)/kalite/raporlama/page.tsx");
 const mainPage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
+const dashboardView = readRequired(
+  "apps/web/src/features/quality-control/components/quality-dashboard-view.tsx",
+);
+const mainUi = `${mainPage}\n${dashboardView}`;
 
 requireText(endpoints, "/reporting/overview", "reporting endpoints");
 requireText(endpoints, "/reporting/inspections", "reporting endpoints");
@@ -87,17 +91,17 @@ forbidText(reportingClientSection, 'method: "DELETE"', "api client reporting sec
 requireText(reader, "readQualityReportingOverview", "quality-control reader");
 requireText(reader, "readQualityReportingPage", "quality-control reader");
 
-requireText(reportingPage, "production-execution-page", "reporting page");
+requireText(reportingPage, "QualityPageShell", "reporting page");
 requireText(reportingPage, "Kalite Raporları", "reporting page");
-requireText(reportingPage, "production-execution-kpis", "reporting page");
-requireText(reportingPage, "production-execution-table", "reporting page");
+requireText(reportingPage, "QualityPageShell", "reporting page");
+requireText(reportingPage, "quality-reporting-kpis", "reporting page");
+requireText(reportingPage, "quality-table", "reporting page");
 requireText(reportingPage, "Başarısızlık dağılımı", "reporting page");
 requireText(reportingPage, "readQualityReportingPage", "reporting page");
 forbidText(reportingPage, "chart", "reporting page");
 
-requireText(mainPage, "/kalite/raporlama", "kalite main page");
-requireText(mainPage, "Kalite Raporları", "kalite main page");
-requireText(mainPage, "readQualityReportingOverview", "kalite main page");
+requireText(mainUi, "/kalite/raporlama", "kalite main page");
+requireText(mainUi, "Kalite Raporları", "kalite main page");
 
 forbidText(reportingRepo, "OpenAI", "QualityReportingRepository");
 forbidText(reportingPage, "OpenAI", "reporting page");
