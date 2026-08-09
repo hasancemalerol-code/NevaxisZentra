@@ -74,8 +74,14 @@ forbidText(adapterContract, "WriteProduct", "IErpAdapter");
 forbidText(adapterContract, "PostDocument", "IErpAdapter");
 forbidText(endpoints, "writeback", "erp endpoints");
 forbidText(syncRepo, "ProductionOrders", "erp sync must not mutate Production");
-forbidText(syncRepo, "Inventory", "erp sync must not mutate stock");
+forbidText(syncRepo, "QuantityOnHand", "ErpSyncRepository must not mutate stock quantities");
 forbidText(syncRepo, "Accounting", "erp sync must not mutate accounting");
+
+if (existsSync(resolve(projectRoot, "packages/CrevaFactOS.Persistence/Erp/ErpInventoryRepository.cs"))) {
+  const inventoryRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpInventoryRepository.cs");
+  forbidText(inventoryRepo, "StockMovement", "inventory projection must not create stock ledger");
+  forbidText(inventoryRepo, "WriteInventory", "no inventory writeback");
+}
 
 forbidText(adapters, "Logo.Tiger", "no vendor-specific leakage in adapters file beyond provider key");
 forbidText(syncRepo, "Logo.", "no Logo leakage outside adapter");

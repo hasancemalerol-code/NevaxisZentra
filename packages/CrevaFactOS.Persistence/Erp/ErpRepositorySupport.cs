@@ -3,6 +3,7 @@ using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace CrevaFactOS.Persistence.Erp;
 
@@ -90,6 +91,12 @@ internal static class ErpRepositorySupport
                 ErpFailureCodes.ConcurrencyConflict,
                 "The record was modified by another user. Please reload and try again.");
         }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            return ErpWriteResult.Fail(
+                ErpFailureCodes.ConcurrencyConflict,
+                "The record was modified by another user. Please reload and try again.");
+        }
         catch (Exception) when (!cancellationToken.IsCancellationRequested)
         {
             return ErpWriteResult.Fail(ErpFailureCodes.SourceUnavailable, "ERP integration service is unavailable.");
@@ -112,6 +119,12 @@ internal static class ErpRepositorySupport
             return await tenantDatabaseSession.ExecuteWriteAsync(action, cancellationToken);
         }
         catch (DbUpdateConcurrencyException)
+        {
+            return ErpSyncResult.Fail(
+                ErpFailureCodes.ConcurrencyConflict,
+                "A concurrent ERP sync conflict occurred.");
+        }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
         {
             return ErpSyncResult.Fail(
                 ErpFailureCodes.ConcurrencyConflict,
@@ -168,4 +181,8 @@ internal static class ErpRepositorySupport
             || lower.Contains("token=")
             || lower.Contains("connectionstring");
     }
+
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation }
+        || ex.InnerException?.Message.Contains("23505", StringComparison.OrdinalIgnoreCase) == true;
 }

@@ -26,6 +26,18 @@ public interface IErpAdapter
     Task<IReadOnlyList<ErpExternalOrderRecord>> ReadOrdersAsync(
         ErpAdapterConnectionContext connection,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ErpExternalWarehouseRecord>> ReadWarehousesAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ErpExternalInventoryBalanceRecord>> ReadInventoryAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ErpExternalPurchaseOrderRecord>> ReadPurchaseOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record ErpAdapterConnectionContext(
@@ -102,6 +114,55 @@ public sealed record ErpExternalOrderLineRecord(
     decimal Quantity,
     string Unit,
     DateTimeOffset? RequestedDeliveryDateUtc,
+    string? SourceVersion);
+
+public sealed record ErpExternalWarehouseRecord(
+    string ExternalId,
+    string? ExternalCode,
+    string Name,
+    bool IsActive,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc);
+
+public sealed record ErpExternalInventoryBalanceRecord(
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string ExternalWarehouseId,
+    string? ExternalWarehouseCode,
+    decimal QuantityOnHand,
+    decimal? QuantityAvailable,
+    decimal? QuantityReserved,
+    decimal? QuantityOnOrder,
+    string Unit,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc);
+
+public sealed record ErpExternalPurchaseOrderRecord(
+    string ExternalId,
+    string? ExternalCode,
+    string PurchaseOrderNumber,
+    string? ExternalSupplierId,
+    string? ExternalSupplierCode,
+    string? SupplierName,
+    DateTimeOffset OrderDateUtc,
+    DateTimeOffset? ExpectedDeliveryDateUtc,
+    string Status,
+    string? CurrencyCode,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    IReadOnlyList<ErpExternalPurchaseOrderLineRecord> Lines);
+
+public sealed record ErpExternalPurchaseOrderLineRecord(
+    string ExternalLineId,
+    int LineNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? Description,
+    decimal OrderedQuantity,
+    decimal? ReceivedQuantity,
+    decimal? OpenQuantity,
+    string Unit,
+    DateTimeOffset? ExpectedDeliveryDateUtc,
     string? SourceVersion);
 
 public interface IErpAdapterResolver

@@ -130,6 +130,10 @@ public sealed class ErpSyncRepository(
                 context, existing.ConnectionProfileId, existing.Id, cancellationToken),
             ErpSyncEntityTypes.Orders => await SyncOrdersAsync(
                 context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            ErpSyncEntityTypes.Warehouses or ErpSyncEntityTypes.Inventory or ErpSyncEntityTypes.Purchasing =>
+                ErpSyncResult.Fail(
+                    ErpFailureCodes.ValidationFailed,
+                    "Retry for this entity type must be routed through inventory sync."),
             _ => ErpSyncResult.Fail(ErpFailureCodes.ValidationFailed, "Unsupported entity type for retry."),
         };
     }

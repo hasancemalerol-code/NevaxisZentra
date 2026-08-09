@@ -21,6 +21,9 @@ public static class ErpEndpointRouteBuilderExtensions
         group.MapPost("/connections/{connectionId:guid}/sync/customers", SyncCustomersAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/products", SyncProductsAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/orders", SyncOrdersAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/warehouses", SyncWarehousesAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/inventory", SyncInventoryAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/purchasing", SyncPurchasingAsync);
 
         group.MapGet("/sync-runs", ListSyncRunsAsync);
         group.MapGet("/sync-runs/{syncRunId:guid}", GetSyncRunAsync);
@@ -31,6 +34,14 @@ public static class ErpEndpointRouteBuilderExtensions
         group.MapGet("/orders", ListOrdersAsync);
         group.MapGet("/orders/{orderId:guid}", GetOrderAsync);
         group.MapGet("/orders/{orderId:guid}/readiness", GetOrderReadinessAsync);
+        group.MapGet("/orders/{orderId:guid}/material-availability", GetOrderMaterialAvailabilityAsync);
+        group.MapGet("/warehouses", ListWarehousesAsync);
+        group.MapGet("/warehouses/{warehouseId:guid}", GetWarehouseAsync);
+        group.MapGet("/inventory", ListInventoryAsync);
+        group.MapGet("/inventory/availability", ListInventoryAvailabilityAsync);
+        group.MapGet("/purchase-orders", ListPurchaseOrdersAsync);
+        group.MapGet("/purchase-orders/{purchaseOrderId:guid}", GetPurchaseOrderAsync);
+        group.MapGet("/sync-reliability", ListSyncReliabilityAsync);
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
 
         group.MapGet("/mappings", ListMappingsAsync);
@@ -59,6 +70,17 @@ public static class ErpEndpointRouteBuilderExtensions
             return dbContext is null
                 ? new UnavailableErpConnectionRepository()
                 : new ErpConnectionRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IErpAdapterResolver>());
+        });
+
+        services.AddScoped<IErpInventoryRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableErpInventoryRepository()
+                : new ErpInventoryRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<IErpAdapterResolver>());
@@ -312,6 +334,75 @@ public static class ErpEndpointRouteBuilderExtensions
         return ErpEndpointHelpers.MapSyncResult(result);
     }
 
+    private static async Task<IResult> SyncWarehousesAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await inventoryRepository.SyncWarehousesAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
+    private static async Task<IResult> SyncInventoryAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await inventoryRepository.SyncInventoryAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
+    private static async Task<IResult> SyncPurchasingAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await inventoryRepository.SyncPurchasingAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
     private static async Task<IResult> ListSyncRunsAsync(
         Guid? facilityId,
         Guid? connectionProfileId,
@@ -363,6 +454,7 @@ public static class ErpEndpointRouteBuilderExtensions
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IErpSyncRepository syncRepository,
+        IErpInventoryRepository inventoryRepository,
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
@@ -377,7 +469,33 @@ public static class ErpEndpointRouteBuilderExtensions
             return failResult!;
         }
 
-        var result = await syncRepository.RetrySyncRunAsync(context, syncRunId, cancellationToken);
+        var existing = await syncRepository.GetSyncRunAsync(context, syncRunId, cancellationToken);
+        if (existing is null)
+        {
+            return ErpEndpointHelpers.MapSyncResult(
+                ErpSyncResult.Fail(ErpFailureCodes.NotFound, "Sync run not found."));
+        }
+
+        if (existing.Status is not (ErpSyncRunStatuses.Failed or ErpSyncRunStatuses.CompletedWithErrors))
+        {
+            return ErpEndpointHelpers.MapSyncResult(ErpSyncResult.Fail(
+                ErpFailureCodes.ValidationFailed,
+                "Only failed or completed-with-errors sync runs can be retried."));
+        }
+
+        var result = existing.EntityType switch
+        {
+            ErpSyncEntityTypes.Customers or ErpSyncEntityTypes.Products or ErpSyncEntityTypes.Orders =>
+                await syncRepository.RetrySyncRunAsync(context, syncRunId, cancellationToken),
+            ErpSyncEntityTypes.Warehouses => await inventoryRepository.SyncWarehousesAsync(
+                context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            ErpSyncEntityTypes.Inventory => await inventoryRepository.SyncInventoryAsync(
+                context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            ErpSyncEntityTypes.Purchasing => await inventoryRepository.SyncPurchasingAsync(
+                context, existing.ConnectionProfileId, existing.Id, cancellationToken),
+            _ => ErpSyncResult.Fail(ErpFailureCodes.ValidationFailed, "Unsupported entity type for retry."),
+        };
+
         return ErpEndpointHelpers.MapSyncResult(result);
     }
 
@@ -491,6 +609,188 @@ public static class ErpEndpointRouteBuilderExtensions
         }
 
         return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> GetOrderMaterialAvailabilityAsync(
+        Guid orderId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await inventoryRepository.GetOrderMaterialAvailabilityAsync(context, orderId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Order not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListWarehousesAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await inventoryRepository.ListWarehousesAsync(context, connectionProfileId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetWarehouseAsync(
+        Guid warehouseId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await inventoryRepository.GetWarehouseAsync(context, warehouseId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Warehouse not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListInventoryAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? productExternalId,
+        string? warehouseExternalId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await inventoryRepository.ListInventoryBalancesAsync(
+            context, connectionProfileId, productExternalId, warehouseExternalId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListInventoryAvailabilityAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? productExternalId,
+        string? warehouseExternalId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await inventoryRepository.ListInventoryAvailabilityAsync(
+            context, connectionProfileId, productExternalId, warehouseExternalId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListPurchaseOrdersAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await inventoryRepository.ListPurchaseOrdersAsync(context, connectionProfileId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetPurchaseOrderAsync(
+        Guid purchaseOrderId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await inventoryRepository.GetPurchaseOrderAsync(context, purchaseOrderId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Purchase order not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListSyncReliabilityAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpInventoryRepository inventoryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await inventoryRepository.ListSyncReliabilityAsync(context, connectionProfileId, cancellationToken);
+        return TypedResults.Ok(rows);
     }
 
     private static async Task<IResult> ListMappingsAsync(

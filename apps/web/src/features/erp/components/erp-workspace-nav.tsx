@@ -4,6 +4,8 @@ const NAV_ITEMS = [
   { href: "/erp-entegrasyonlari/baglanti", label: "Bağlantı" },
   { href: "/erp-entegrasyonlari/senkronizasyonlar", label: "Senkronizasyon" },
   { href: "/erp-entegrasyonlari/siparisler", label: "Siparişler" },
+  { href: "/erp-entegrasyonlari/stok", label: "Stok & Depolar" },
+  { href: "/erp-entegrasyonlari/satin-alma", label: "Satın Alma" },
   { href: "/erp-entegrasyonlari/eslestirme", label: "Eşleştirme" },
   { href: "/erp-entegrasyonlari/hata-kuyrugu", label: "Hata Kuyruğu" },
   { href: "/erp-entegrasyonlari/saglik", label: "Entegrasyon Sağlığı" },

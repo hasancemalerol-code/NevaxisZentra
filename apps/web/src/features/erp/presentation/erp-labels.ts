@@ -82,6 +82,18 @@ export function getErpEntityTypeLabel(entityType: string): string {
     return "Siparişler";
   }
 
+  if (entityType === "warehouses") {
+    return "Depolar";
+  }
+
+  if (entityType === "inventory") {
+    return "Stok";
+  }
+
+  if (entityType === "purchasing") {
+    return "Satın Alma";
+  }
+
   return entityType;
 }
 
@@ -175,4 +187,78 @@ export function formatErpDateTime(iso?: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+export function getErpPurchaseOrderStatusLabel(status: string): string {
+  switch (status) {
+    case "open":
+      return "Açık";
+    case "partially-received":
+      return "Kısmi Teslim";
+    case "received":
+      return "Teslim Alındı";
+    case "cancelled":
+      return "İptal";
+    case "closed":
+      return "Kapalı";
+    default:
+      return status;
+  }
+}
+
+export function getErpShortageStatusLabel(status: string): string {
+  switch (status) {
+    case "sufficient":
+      return "Yeterli";
+    case "insufficient":
+      return "Yetersiz";
+    case "stale-source":
+      return "Kaynak Eski";
+    case "unknown":
+      return "Bilinmiyor";
+    default:
+      return status;
+  }
+}
+
+export function getErpShortageStatusTone(
+  status: string,
+): "ready" | "paused" | "critical" | "in-progress" {
+  switch (status) {
+    case "sufficient":
+      return "ready";
+    case "insufficient":
+      return "critical";
+    case "stale-source":
+      return "paused";
+    default:
+      return "in-progress";
+  }
+}
+
+export function getErpCoverageStatusLabel(status: string): string {
+  switch (status) {
+    case "covered":
+      return "Karşılanıyor";
+    case "partially-covered":
+      return "Kısmi Karşılama";
+    case "not-covered":
+      return "Karşılanmıyor";
+    case "unknown":
+      return "Bilinmiyor";
+    default:
+      return status;
+  }
+}
+
+export function formatErpQuantity(value: number | null | undefined, unit?: string | null): string {
+  if (value == null) {
+    return "—";
+  }
+
+  const formatted = value.toLocaleString("tr-TR", {
+    maximumFractionDigits: 2,
+  });
+
+  return unit ? `${formatted} ${unit}` : formatted;
 }

@@ -253,3 +253,189 @@ export type ErpProductReconciliation = Readonly<{
   updatedAtUtc: string;
   mappingVersion: number | null;
 }>;
+
+export type ErpPurchaseOrderStatus =
+  | "open"
+  | "partially-received"
+  | "received"
+  | "cancelled"
+  | "closed"
+  | "unknown";
+
+export type ErpShortageStatus =
+  | "sufficient"
+  | "insufficient"
+  | "unknown"
+  | "stale-source";
+
+export type ErpCoverageStatus =
+  | "covered"
+  | "partially-covered"
+  | "not-covered"
+  | "unknown";
+
+export type CanonicalErpWarehouse = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalId: string;
+  externalCode: string | null;
+  name: string;
+  isActive: boolean;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  freshness: ErpSourceFreshness | string;
+}>;
+
+export type CanonicalErpInventoryBalance = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalProductId: string;
+  externalProductCode: string | null;
+  productName: string | null;
+  externalWarehouseId: string;
+  externalWarehouseCode: string | null;
+  warehouseName: string | null;
+  quantityOnHand: number;
+  quantityAvailable: number | null;
+  quantityReserved: number | null;
+  quantityOnOrder: number | null;
+  unit: string;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  freshness: ErpSourceFreshness | string;
+}>;
+
+export type ErpInventoryWarehouseBreakdown = Readonly<{
+  externalWarehouseId: string;
+  externalWarehouseCode: string | null;
+  warehouseName: string | null;
+  onHand: number;
+  available: number | null;
+  reserved: number | null;
+  onOrder: number | null;
+}>;
+
+export type ErpInventoryAvailability = Readonly<{
+  externalProductId: string;
+  externalProductCode: string | null;
+  productName: string | null;
+  totalOnHand: number;
+  totalAvailable: number | null;
+  warehouseBreakdown: readonly ErpInventoryWarehouseBreakdown[];
+  freshness: ErpSourceFreshness | string;
+  lastSuccessfulSyncAtUtc: string | null;
+}>;
+
+export type CanonicalErpPurchaseOrderSummary = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalId: string;
+  externalCode: string | null;
+  purchaseOrderNumber: string;
+  externalSupplierId: string | null;
+  externalSupplierCode: string | null;
+  supplierName: string | null;
+  orderDateUtc: string;
+  expectedDeliveryDateUtc: string | null;
+  status: ErpPurchaseOrderStatus | string;
+  currencyCode: string | null;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  lineCount: number;
+  openLineCount: number;
+  freshness: ErpSourceFreshness | string;
+}>;
+
+export type CanonicalErpPurchaseOrderLine = Readonly<{
+  id: string;
+  externalLineId: string;
+  lineNumber: number;
+  externalProductId: string;
+  externalProductCode: string | null;
+  description: string | null;
+  orderedQuantity: number;
+  receivedQuantity: number | null;
+  openQuantity: number | null;
+  unit: string;
+  expectedDeliveryDateUtc: string | null;
+  sourceVersion: string | null;
+}>;
+
+export type CanonicalErpPurchaseOrderDetail = Readonly<{
+  id: string;
+  connectionProfileId: string;
+  provider: string;
+  externalId: string;
+  externalCode: string | null;
+  purchaseOrderNumber: string;
+  externalSupplierId: string | null;
+  externalSupplierCode: string | null;
+  supplierName: string | null;
+  orderDateUtc: string;
+  expectedDeliveryDateUtc: string | null;
+  status: ErpPurchaseOrderStatus | string;
+  currencyCode: string | null;
+  sourceVersion: string | null;
+  sourceUpdatedAtUtc: string | null;
+  importedAtUtc: string;
+  updatedAtUtc: string;
+  freshness: ErpSourceFreshness | string;
+  lines: readonly CanonicalErpPurchaseOrderLine[];
+}>;
+
+export type ErpSyncReliability = Readonly<{
+  entityType: string;
+  lastSuccessfulSyncAtUtc: string | null;
+  lastFailedSyncAtUtc: string | null;
+  lastRunStatus: string | null;
+  lastRecordsRead: number;
+  lastRecordsFailed: number;
+  consecutiveFailures: number;
+  freshnessStatus: ErpSourceFreshness | string;
+  currentErrorCode: string | null;
+  currentErrorMessage: string | null;
+}>;
+
+export type ErpPurchaseCoverage = Readonly<{
+  openPurchaseQuantity: number;
+  nearestExpectedDeliveryDateUtc: string | null;
+  coverageStatus: ErpCoverageStatus | string;
+}>;
+
+export type ErpMaterialAvailabilityLine = Readonly<{
+  externalLineId: string;
+  lineNumber: number;
+  externalProductId: string;
+  externalProductCode: string | null;
+  description: string | null;
+  requiredQuantity: number;
+  availableQuantity: number | null;
+  shortageQuantity: number | null;
+  status: ErpShortageStatus | string;
+  purchaseCoverage: ErpPurchaseCoverage | null;
+}>;
+
+export type ErpOrderMaterialAvailability = Readonly<{
+  orderId: string;
+  orderNumber: string;
+  freshnessNote: string;
+  lines: readonly ErpMaterialAvailabilityLine[];
+}>;
+
+export type ErpInventoryWorkspaceSnapshot = Readonly<{
+  warehouseCount: number;
+  inventoryRecordCount: number;
+  freshRecordCount: number;
+  staleRecordCount: number;
+  insufficientStockCount: number;
+  openPurchaseOrderCount: number;
+}>;

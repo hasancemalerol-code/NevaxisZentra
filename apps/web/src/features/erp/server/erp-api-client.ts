@@ -2,23 +2,37 @@ import "./erp-server-boundary";
 
 import type {
   CanonicalErpCustomer,
+  CanonicalErpInventoryBalance,
   CanonicalErpOrderDetail,
   CanonicalErpOrderSummary,
   CanonicalErpProduct,
+  CanonicalErpPurchaseOrderDetail,
+  CanonicalErpPurchaseOrderSummary,
+  CanonicalErpWarehouse,
   ErpConnection,
   ErpCustomerReconciliation,
+  ErpInventoryAvailability,
+  ErpOrderMaterialAvailability,
   ErpProductReconciliation,
+  ErpSyncReliability,
   ErpSyncRun,
   ErpWorkspaceSummary,
 } from "../domain/erp";
 import {
   parseCanonicalErpCustomerListApiResponse,
+  parseCanonicalErpInventoryBalanceListApiResponse,
   parseCanonicalErpOrderDetailApiResponse,
   parseCanonicalErpOrderListApiResponse,
   parseCanonicalErpProductListApiResponse,
+  parseCanonicalErpPurchaseOrderDetailApiResponse,
+  parseCanonicalErpPurchaseOrderListApiResponse,
+  parseCanonicalErpWarehouseListApiResponse,
   parseErpConnectionListApiResponse,
   parseErpCustomerReconciliationListApiResponse,
+  parseErpInventoryAvailabilityListApiResponse,
+  parseErpOrderMaterialAvailabilityApiResponse,
   parseErpProductReconciliationListApiResponse,
+  parseErpSyncReliabilityListApiResponse,
   parseErpSyncRunListApiResponse,
   parseErpWorkspaceSummaryApiResponse,
 } from "./erp-api-contracts";
@@ -169,5 +183,65 @@ export function listErpProductReconciliation(
     context,
     "/api/erp/reconciliation/products",
     parseErpProductReconciliationListApiResponse,
+  );
+}
+
+export function listErpWarehouses(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpWarehouse[]>> {
+  return getJson(context, "/api/erp/warehouses", parseCanonicalErpWarehouseListApiResponse);
+}
+
+export function listErpInventoryBalances(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpInventoryBalance[]>> {
+  return getJson(context, "/api/erp/inventory", parseCanonicalErpInventoryBalanceListApiResponse);
+}
+
+export function listErpInventoryAvailability(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly ErpInventoryAvailability[]>> {
+  return getJson(
+    context,
+    "/api/erp/inventory/availability",
+    parseErpInventoryAvailabilityListApiResponse,
+  );
+}
+
+export function listErpPurchaseOrders(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpPurchaseOrderSummary[]>> {
+  return getJson(
+    context,
+    "/api/erp/purchase-orders",
+    parseCanonicalErpPurchaseOrderListApiResponse,
+  );
+}
+
+export function getErpPurchaseOrder(
+  context: ProductionOrderRequestContext,
+  purchaseOrderId: string,
+): Promise<ErpApiResult<CanonicalErpPurchaseOrderDetail>> {
+  return getJson(
+    context,
+    `/api/erp/purchase-orders/${purchaseOrderId}`,
+    parseCanonicalErpPurchaseOrderDetailApiResponse,
+  );
+}
+
+export function listErpSyncReliability(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly ErpSyncReliability[]>> {
+  return getJson(context, "/api/erp/sync-reliability", parseErpSyncReliabilityListApiResponse);
+}
+
+export function getErpOrderMaterialAvailability(
+  context: ProductionOrderRequestContext,
+  orderId: string,
+): Promise<ErpApiResult<ErpOrderMaterialAvailability>> {
+  return getJson(
+    context,
+    `/api/erp/orders/${orderId}/material-availability`,
+    parseErpOrderMaterialAvailabilityApiResponse,
   );
 }

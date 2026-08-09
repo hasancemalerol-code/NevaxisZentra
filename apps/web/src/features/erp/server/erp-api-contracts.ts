@@ -449,3 +449,350 @@ export function parseErpProductReconciliationListApiResponse(
     };
   });
 }
+
+function parseWarehouseBreakdown(payload: unknown): import("../domain/erp").ErpInventoryWarehouseBreakdown {
+  const row = asRecord(payload);
+  const externalWarehouseId = asString(row?.externalWarehouseId);
+
+  if (!externalWarehouseId) {
+    throw new Error("ERP inventory warehouse breakdown is missing externalWarehouseId.");
+  }
+
+  return {
+    externalWarehouseId,
+    externalWarehouseCode: asString(row?.externalWarehouseCode),
+    warehouseName: asString(row?.warehouseName),
+    onHand: asNumber(row?.onHand) ?? 0,
+    available: asNumber(row?.available),
+    reserved: asNumber(row?.reserved),
+    onOrder: asNumber(row?.onOrder),
+  };
+}
+
+export function parseCanonicalErpWarehouseListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpWarehouse[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP warehouse list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP warehouse row.");
+    }
+
+    const id = asString(row.id);
+    const connectionProfileId = asString(row.connectionProfileId);
+    const provider = asString(row.provider);
+    const externalId = asString(row.externalId);
+    const name = asString(row.name);
+    const importedAtUtc = asString(row.importedAtUtc);
+    const updatedAtUtc = asString(row.updatedAtUtc);
+
+    if (!id || !connectionProfileId || !provider || !externalId || !name || !importedAtUtc || !updatedAtUtc) {
+      throw new Error("ERP warehouse response is missing required fields.");
+    }
+
+    return {
+      id,
+      connectionProfileId,
+      provider,
+      externalId,
+      externalCode: asString(row.externalCode),
+      name,
+      isActive: asBoolean(row.isActive) ?? true,
+      sourceVersion: asString(row.sourceVersion),
+      sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+      importedAtUtc,
+      updatedAtUtc,
+      freshness: asString(row.freshness) ?? "unknown",
+    };
+  });
+}
+
+export function parseCanonicalErpInventoryBalanceListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpInventoryBalance[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP inventory balance list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP inventory balance row.");
+    }
+
+    const id = asString(row.id);
+    const connectionProfileId = asString(row.connectionProfileId);
+    const provider = asString(row.provider);
+    const externalProductId = asString(row.externalProductId);
+    const externalWarehouseId = asString(row.externalWarehouseId);
+    const unit = asString(row.unit);
+    const importedAtUtc = asString(row.importedAtUtc);
+    const updatedAtUtc = asString(row.updatedAtUtc);
+
+    if (
+      !id ||
+      !connectionProfileId ||
+      !provider ||
+      !externalProductId ||
+      !externalWarehouseId ||
+      !unit ||
+      !importedAtUtc ||
+      !updatedAtUtc
+    ) {
+      throw new Error("ERP inventory balance response is missing required fields.");
+    }
+
+    return {
+      id,
+      connectionProfileId,
+      provider,
+      externalProductId,
+      externalProductCode: asString(row.externalProductCode),
+      productName: asString(row.productName),
+      externalWarehouseId,
+      externalWarehouseCode: asString(row.externalWarehouseCode),
+      warehouseName: asString(row.warehouseName),
+      quantityOnHand: asNumber(row.quantityOnHand) ?? 0,
+      quantityAvailable: asNumber(row.quantityAvailable),
+      quantityReserved: asNumber(row.quantityReserved),
+      quantityOnOrder: asNumber(row.quantityOnOrder),
+      unit,
+      sourceVersion: asString(row.sourceVersion),
+      sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+      importedAtUtc,
+      updatedAtUtc,
+      freshness: asString(row.freshness) ?? "unknown",
+    };
+  });
+}
+
+export function parseErpInventoryAvailabilityListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").ErpInventoryAvailability[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP inventory availability list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    const externalProductId = asString(row?.externalProductId);
+
+    if (!externalProductId) {
+      throw new Error("ERP inventory availability response is missing externalProductId.");
+    }
+
+    return {
+      externalProductId,
+      externalProductCode: asString(row?.externalProductCode),
+      productName: asString(row?.productName),
+      totalOnHand: asNumber(row?.totalOnHand) ?? 0,
+      totalAvailable: asNumber(row?.totalAvailable),
+      warehouseBreakdown: Array.isArray(row?.warehouseBreakdown)
+        ? row.warehouseBreakdown.map(parseWarehouseBreakdown)
+        : [],
+      freshness: asString(row?.freshness) ?? "unknown",
+      lastSuccessfulSyncAtUtc: asString(row?.lastSuccessfulSyncAtUtc),
+    };
+  });
+}
+
+function parsePurchaseOrderSummaryFromRow(row: Record<string, unknown>) {
+  const id = asString(row.id);
+  const connectionProfileId = asString(row.connectionProfileId);
+  const provider = asString(row.provider);
+  const externalId = asString(row.externalId);
+  const purchaseOrderNumber = asString(row.purchaseOrderNumber);
+  const orderDateUtc = asString(row.orderDateUtc);
+  const status = asString(row.status);
+  const importedAtUtc = asString(row.importedAtUtc);
+  const updatedAtUtc = asString(row.updatedAtUtc);
+
+  if (
+    !id ||
+    !connectionProfileId ||
+    !provider ||
+    !externalId ||
+    !purchaseOrderNumber ||
+    !orderDateUtc ||
+    !status ||
+    !importedAtUtc ||
+    !updatedAtUtc
+  ) {
+    throw new Error("ERP purchase order response is missing required fields.");
+  }
+
+  return {
+    id,
+    connectionProfileId,
+    provider,
+    externalId,
+    externalCode: asString(row.externalCode),
+    purchaseOrderNumber,
+    externalSupplierId: asString(row.externalSupplierId),
+    externalSupplierCode: asString(row.externalSupplierCode),
+    supplierName: asString(row.supplierName),
+    orderDateUtc,
+    expectedDeliveryDateUtc: asString(row.expectedDeliveryDateUtc),
+    status,
+    currencyCode: asString(row.currencyCode),
+    sourceVersion: asString(row.sourceVersion),
+    sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+    importedAtUtc,
+    updatedAtUtc,
+    lineCount: asNumber(row.lineCount) ?? 0,
+    openLineCount: asNumber(row.openLineCount) ?? 0,
+    freshness: asString(row.freshness) ?? "unknown",
+  };
+}
+
+export function parseCanonicalErpPurchaseOrderListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpPurchaseOrderSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP purchase order list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP purchase order row.");
+    }
+
+    return parsePurchaseOrderSummaryFromRow(row);
+  });
+}
+
+export function parseCanonicalErpPurchaseOrderDetailApiResponse(
+  payload: unknown,
+): import("../domain/erp").CanonicalErpPurchaseOrderDetail {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP purchase order detail response.");
+  }
+
+  const summary = parsePurchaseOrderSummaryFromRow(row);
+  const lines = Array.isArray(row.lines) ? row.lines : [];
+
+  return {
+    ...summary,
+    lines: lines.map((lineItem) => {
+      const line = asRecord(lineItem);
+      const lineId = asString(line?.id);
+      const externalLineId = asString(line?.externalLineId);
+      const externalProductId = asString(line?.externalProductId);
+      const unit = asString(line?.unit);
+
+      if (!lineId || !externalLineId || !externalProductId || !unit) {
+        throw new Error("ERP purchase order line response is missing required fields.");
+      }
+
+      return {
+        id: lineId,
+        externalLineId,
+        lineNumber: asNumber(line?.lineNumber) ?? 0,
+        externalProductId,
+        externalProductCode: asString(line?.externalProductCode),
+        description: asString(line?.description),
+        orderedQuantity: asNumber(line?.orderedQuantity) ?? 0,
+        receivedQuantity: asNumber(line?.receivedQuantity),
+        openQuantity: asNumber(line?.openQuantity),
+        unit,
+        expectedDeliveryDateUtc: asString(line?.expectedDeliveryDateUtc),
+        sourceVersion: asString(line?.sourceVersion),
+      };
+    }),
+  };
+}
+
+export function parseErpSyncReliabilityListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").ErpSyncReliability[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP sync reliability list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    const entityType = asString(row?.entityType);
+
+    if (!entityType) {
+      throw new Error("ERP sync reliability response is missing entityType.");
+    }
+
+    return {
+      entityType,
+      lastSuccessfulSyncAtUtc: asString(row?.lastSuccessfulSyncAtUtc),
+      lastFailedSyncAtUtc: asString(row?.lastFailedSyncAtUtc),
+      lastRunStatus: asString(row?.lastRunStatus),
+      lastRecordsRead: asNumber(row?.lastRecordsRead) ?? 0,
+      lastRecordsFailed: asNumber(row?.lastRecordsFailed) ?? 0,
+      consecutiveFailures: asNumber(row?.consecutiveFailures) ?? 0,
+      freshnessStatus: asString(row?.freshnessStatus) ?? "unknown",
+      currentErrorCode: asString(row?.currentErrorCode),
+      currentErrorMessage: asString(row?.currentErrorMessage),
+    };
+  });
+}
+
+function parsePurchaseCoverage(payload: unknown): import("../domain/erp").ErpPurchaseCoverage | null {
+  const row = asRecord(payload);
+  if (!row) {
+    return null;
+  }
+
+  return {
+    openPurchaseQuantity: asNumber(row.openPurchaseQuantity) ?? 0,
+    nearestExpectedDeliveryDateUtc: asString(row.nearestExpectedDeliveryDate),
+    coverageStatus: asString(row.coverageStatus) ?? "unknown",
+  };
+}
+
+export function parseErpOrderMaterialAvailabilityApiResponse(
+  payload: unknown,
+): import("../domain/erp").ErpOrderMaterialAvailability {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP order material availability response.");
+  }
+
+  const orderId = asString(row.orderId);
+  const orderNumber = asString(row.orderNumber);
+  const freshnessNote = asString(row.freshnessNote);
+  const lines = Array.isArray(row.lines) ? row.lines : [];
+
+  if (!orderId || !orderNumber || !freshnessNote) {
+    throw new Error("ERP order material availability response is missing required fields.");
+  }
+
+  return {
+    orderId,
+    orderNumber,
+    freshnessNote,
+    lines: lines.map((lineItem) => {
+      const line = asRecord(lineItem);
+      const externalLineId = asString(line?.externalLineId);
+      const externalProductId = asString(line?.externalProductId);
+
+      if (!externalLineId || !externalProductId) {
+        throw new Error("ERP material availability line response is missing required fields.");
+      }
+
+      return {
+        externalLineId,
+        lineNumber: asNumber(line?.lineNumber) ?? 0,
+        externalProductId,
+        externalProductCode: asString(line?.externalProductCode),
+        description: asString(line?.description),
+        requiredQuantity: asNumber(line?.requiredQuantity) ?? 0,
+        availableQuantity: asNumber(line?.availableQuantity),
+        shortageQuantity: asNumber(line?.shortageQuantity),
+        status: asString(line?.status) ?? "unknown",
+        purchaseCoverage: parsePurchaseCoverage(line?.purchaseCoverage),
+      };
+    }),
+  };
+}

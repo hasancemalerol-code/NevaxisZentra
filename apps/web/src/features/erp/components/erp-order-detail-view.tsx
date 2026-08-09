@@ -1,12 +1,16 @@
 import Link from "next/link";
 
-import type { CanonicalErpOrderDetail } from "../domain/erp";
+import type { CanonicalErpOrderDetail, ErpOrderMaterialAvailability } from "../domain/erp";
 import {
   formatErpDateTime,
+  formatErpQuantity,
+  getErpCoverageStatusLabel,
   getErpMappingStatusLabel,
   getErpOrderStatusLabel,
   getErpProviderLabel,
   getErpReadinessBadgeLabel,
+  getErpShortageStatusLabel,
+  getErpShortageStatusTone,
   getErpSourceFreshnessLabel,
 } from "../presentation/erp-labels";
 import { ErpWorkspaceNav } from "./erp-workspace-nav";
@@ -14,9 +18,10 @@ import "./erp-workspace.css";
 
 type ErpOrderDetailViewProps = Readonly<{
   order: CanonicalErpOrderDetail;
+  materialAvailability: ErpOrderMaterialAvailability | null;
 }>;
 
-export function ErpOrderDetailView({ order }: ErpOrderDetailViewProps) {
+export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDetailViewProps) {
   const blockingCodes = order.readiness.blockingReasons.map((reason) => reason.code);
 
   return (
@@ -132,6 +137,68 @@ export function ErpOrderDetailView({ order }: ErpOrderDetailViewProps) {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="erp-section">
+        <div className="erp-section__header">
+          <h2>Malzeme Uygunluğu</h2>
+          <p className="erp-material-availability-note">
+            {materialAvailability?.freshnessNote ?? "ERP stok projeksiyonuna dayalı bilgi"}
+          </p>
+        </div>
+        {!materialAvailability || materialAvailability.lines.length === 0 ? (
+          <p className="erp-empty-inline">Malzeme uygunluk verisi yok.</p>
+        ) : (
+          <div className="erp-table-wrap">
+            <table className="erp-table erp-table--material-availability">
+              <thead>
+                <tr>
+                  <th>Satır</th>
+                  <th>Ürün Kodu</th>
+                  <th>Gerekli</th>
+                  <th>Kullanılabilir</th>
+                  <th>Eksik</th>
+                  <th>Durum</th>
+                  <th>Satın Alma Karşılama</th>
+                </tr>
+              </thead>
+              <tbody>
+                {materialAvailability.lines.map((line) => {
+                  const tone = getErpShortageStatusTone(line.status);
+
+                  return (
+                    <tr key={line.externalLineId}>
+                      <td>{line.lineNumber}</td>
+                      <td>{line.externalProductCode ?? line.externalProductId}</td>
+                      <td>{formatErpQuantity(line.requiredQuantity)}</td>
+                      <td>{formatErpQuantity(line.availableQuantity)}</td>
+                      <td>{formatErpQuantity(line.shortageQuantity)}</td>
+                      <td>
+                        <span className={`erp-status erp-status--${tone}`}>
+                          {getErpShortageStatusLabel(line.status)}
+                        </span>
+                      </td>
+                      <td>
+                        {line.purchaseCoverage ? (
+                          <span className="erp-coverage-detail">
+                            {getErpCoverageStatusLabel(line.purchaseCoverage.coverageStatus)}
+                            {" · "}
+                            {formatErpQuantity(line.purchaseCoverage.openPurchaseQuantity)}
+                            {line.purchaseCoverage.nearestExpectedDeliveryDateUtc
+                              ? ` · ${formatErpDateTime(line.purchaseCoverage.nearestExpectedDeliveryDateUtc)}`
+                              : ""}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <p>

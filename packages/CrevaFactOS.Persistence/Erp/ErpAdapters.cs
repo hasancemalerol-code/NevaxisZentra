@@ -3,7 +3,8 @@ namespace CrevaFactOS.Persistence.Erp;
 /// <summary>
 /// In-process development ERP Simulator. Deterministic stable IDs.
 /// Future second-PC handoff: HTTP/JSON over the same IErpAdapter contract
-/// (CheckHealth / ReadCustomers / ReadProducts / ReadOrders) without changing domain consumers.
+/// (CheckHealth / ReadCustomers / ReadProducts / ReadOrders / ReadWarehouses /
+/// ReadInventory / ReadPurchaseOrders) without changing domain consumers.
 /// </summary>
 public sealed class SimulatorErpAdapter : IErpAdapter
 {
@@ -16,6 +17,9 @@ public sealed class SimulatorErpAdapter : IErpAdapter
         ErpCapabilities.CustomersRead,
         ErpCapabilities.ProductsRead,
         ErpCapabilities.OrdersRead,
+        ErpCapabilities.WarehousesRead,
+        ErpCapabilities.InventoryRead,
+        ErpCapabilities.PurchasingRead,
     };
 
     public Task<ErpAdapterHealthResult> CheckHealthAsync(
@@ -159,6 +163,119 @@ public sealed class SimulatorErpAdapter : IErpAdapter
         return Task.FromResult(orders);
     }
 
+    public Task<IReadOnlyList<ErpExternalWarehouseRecord>> ReadWarehousesAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureCapability(ErpCapabilities.WarehousesRead);
+
+        IReadOnlyList<ErpExternalWarehouseRecord> warehouses =
+        [
+            new(
+                ExternalId: "ERP-WH-001",
+                ExternalCode: "ERP-WH-001",
+                Name: "Hammadde Deposu",
+                IsActive: true,
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 5, 8, 0, 0, TimeSpan.Zero)),
+            new(
+                ExternalId: "ERP-WH-002",
+                ExternalCode: "ERP-WH-002",
+                Name: "Mamül Deposu",
+                IsActive: true,
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 5, 8, 0, 0, TimeSpan.Zero)),
+        ];
+
+        return Task.FromResult(warehouses);
+    }
+
+    public Task<IReadOnlyList<ErpExternalInventoryBalanceRecord>> ReadInventoryAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureCapability(ErpCapabilities.InventoryRead);
+
+        if (string.Equals(connection.ExternalCompanyCode, "SIM-INVENTORY-FAIL", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Simulator inventory read intentionally failed.");
+        }
+
+        IReadOnlyList<ErpExternalInventoryBalanceRecord> balances =
+        [
+            new(
+                ExternalProductId: "ERP-PRD-001",
+                ExternalProductCode: "ERP-PRD-001",
+                ExternalWarehouseId: "ERP-WH-001",
+                ExternalWarehouseCode: "ERP-WH-001",
+                QuantityOnHand: 15000m,
+                QuantityAvailable: 12000m,
+                QuantityReserved: null,
+                QuantityOnOrder: null,
+                Unit: "AD",
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 5, 8, 0, 0, TimeSpan.Zero)),
+            new(
+                ExternalProductId: "ERP-PRD-002",
+                ExternalProductCode: "ERP-PRD-002",
+                ExternalWarehouseId: "ERP-WH-001",
+                ExternalWarehouseCode: "ERP-WH-001",
+                QuantityOnHand: 3000m,
+                QuantityAvailable: 2500m,
+                QuantityReserved: null,
+                QuantityOnOrder: null,
+                Unit: "AD",
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 5, 8, 0, 0, TimeSpan.Zero)),
+        ];
+
+        return Task.FromResult(balances);
+    }
+
+    public Task<IReadOnlyList<ErpExternalPurchaseOrderRecord>> ReadPurchaseOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureCapability(ErpCapabilities.PurchasingRead);
+
+        IReadOnlyList<ErpExternalPurchaseOrderRecord> orders =
+        [
+            new(
+                ExternalId: "ERP-PO-001",
+                ExternalCode: "ERP-PO-001",
+                PurchaseOrderNumber: "ERP-PO-001",
+                ExternalSupplierId: "SUP-001",
+                ExternalSupplierCode: "SUP-001",
+                SupplierName: "Resin Supplier",
+                OrderDateUtc: new DateTimeOffset(2026, 8, 2, 8, 0, 0, TimeSpan.Zero),
+                ExpectedDeliveryDateUtc: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero),
+                Status: ErpPurchaseOrderStatuses.Open,
+                CurrencyCode: "TRY",
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 2, 8, 0, 0, TimeSpan.Zero),
+                Lines:
+                [
+                    new(
+                        ExternalLineId: "ERP-PO-001-L1",
+                        LineNumber: 1,
+                        ExternalProductId: "ERP-PRD-002",
+                        ExternalProductCode: "ERP-PRD-002",
+                        Description: "HDPE CONTAINER",
+                        OrderedQuantity: 5000m,
+                        ReceivedQuantity: 0m,
+                        OpenQuantity: 5000m,
+                        Unit: "AD",
+                        ExpectedDeliveryDateUtc: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero),
+                        SourceVersion: "1"),
+                ]),
+        ];
+
+        return Task.FromResult(orders);
+    }
+
     private void EnsureCapability(string capability)
     {
         if (!Capabilities.Contains(capability))
@@ -208,7 +325,7 @@ public abstract class UnsupportedErpAdapterBase : IErpAdapter
             Status: ErpConnectionStatuses.Unavailable,
             LatencyMs: null,
             ErrorCode: "erp.adapter.not-implemented",
-            ErrorMessage: $"{ProviderKey} adapter is not implemented in ERP-2L.",
+            ErrorMessage: $"{ProviderKey} adapter is not implemented in ERP-3L.",
             CheckedAtUtc: DateTimeOffset.UtcNow));
     }
 
@@ -228,7 +345,25 @@ public abstract class UnsupportedErpAdapterBase : IErpAdapter
         ErpAdapterConnectionContext connection,
         CancellationToken cancellationToken = default) =>
         Task.FromException<IReadOnlyList<ErpExternalOrderRecord>>(
-            new NotSupportedException($"{ProviderKey} orders.read is not implemented in ERP-2L."));
+            new NotSupportedException($"{ProviderKey} orders.read is not implemented in ERP-3L."));
+
+    public Task<IReadOnlyList<ErpExternalWarehouseRecord>> ReadWarehousesAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<IReadOnlyList<ErpExternalWarehouseRecord>>(
+            new NotSupportedException($"{ProviderKey} warehouses.read is not implemented in ERP-3L."));
+
+    public Task<IReadOnlyList<ErpExternalInventoryBalanceRecord>> ReadInventoryAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<IReadOnlyList<ErpExternalInventoryBalanceRecord>>(
+            new NotSupportedException($"{ProviderKey} inventory.read is not implemented in ERP-3L."));
+
+    public Task<IReadOnlyList<ErpExternalPurchaseOrderRecord>> ReadPurchaseOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<IReadOnlyList<ErpExternalPurchaseOrderRecord>>(
+            new NotSupportedException($"{ProviderKey} purchasing.read is not implemented in ERP-3L."));
 }
 
 public sealed class ErpAdapterResolver : IErpAdapterResolver

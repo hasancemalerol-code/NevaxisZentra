@@ -112,6 +112,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<CanonicalErpProduct> CanonicalErpProducts => Set<CanonicalErpProduct>();
     public DbSet<CanonicalErpOrder> CanonicalErpOrders => Set<CanonicalErpOrder>();
     public DbSet<CanonicalErpOrderLine> CanonicalErpOrderLines => Set<CanonicalErpOrderLine>();
+    public DbSet<CanonicalErpWarehouse> CanonicalErpWarehouses => Set<CanonicalErpWarehouse>();
+    public DbSet<CanonicalErpInventoryBalance> CanonicalErpInventoryBalances => Set<CanonicalErpInventoryBalance>();
+    public DbSet<CanonicalErpPurchaseOrder> CanonicalErpPurchaseOrders => Set<CanonicalErpPurchaseOrder>();
+    public DbSet<CanonicalErpPurchaseOrderLine> CanonicalErpPurchaseOrderLines => Set<CanonicalErpPurchaseOrderLine>();
     public DbSet<ErpEntityMapping> ErpEntityMappings => Set<ErpEntityMapping>();
 
     // Export
@@ -750,6 +754,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpWarehouseEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpWarehouse>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpInventoryBalanceEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpInventoryBalance>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpPurchaseOrderEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpPurchaseOrder>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpPurchaseOrderLineEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpPurchaseOrderLine>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

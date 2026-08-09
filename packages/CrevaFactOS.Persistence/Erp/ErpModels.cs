@@ -321,3 +321,149 @@ public sealed record ErpProductReconciliationReadModel(
 public sealed record ConfirmErpMappingCommand(Guid MappingId, Guid TargetEntityId, uint ExpectedVersion);
 public sealed record IgnoreErpMappingCommand(Guid MappingId, uint ExpectedVersion);
 public sealed record RemapErpMappingCommand(Guid MappingId, Guid TargetEntityId, uint ExpectedVersion);
+
+public sealed record CanonicalErpWarehouseReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string Name,
+    bool IsActive,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    string Freshness);
+
+public sealed record CanonicalErpInventoryBalanceReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? ProductName,
+    string ExternalWarehouseId,
+    string? ExternalWarehouseCode,
+    string? WarehouseName,
+    decimal QuantityOnHand,
+    decimal? QuantityAvailable,
+    decimal? QuantityReserved,
+    decimal? QuantityOnOrder,
+    string Unit,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    string Freshness);
+
+public sealed record ErpInventoryWarehouseBreakdownReadModel(
+    string ExternalWarehouseId,
+    string? ExternalWarehouseCode,
+    string? WarehouseName,
+    decimal OnHand,
+    decimal? Available,
+    decimal? Reserved,
+    decimal? OnOrder);
+
+public sealed record ErpInventoryAvailabilityReadModel(
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? ProductName,
+    decimal TotalOnHand,
+    decimal? TotalAvailable,
+    IReadOnlyList<ErpInventoryWarehouseBreakdownReadModel> WarehouseBreakdown,
+    string Freshness,
+    DateTimeOffset? LastSuccessfulSyncAtUtc);
+
+public sealed record CanonicalErpPurchaseOrderSummaryReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string PurchaseOrderNumber,
+    string? ExternalSupplierId,
+    string? ExternalSupplierCode,
+    string? SupplierName,
+    DateTimeOffset OrderDateUtc,
+    DateTimeOffset? ExpectedDeliveryDateUtc,
+    string Status,
+    string? CurrencyCode,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    int LineCount,
+    int OpenLineCount,
+    string Freshness);
+
+public sealed record CanonicalErpPurchaseOrderLineReadModel(
+    Guid Id,
+    string ExternalLineId,
+    int LineNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? Description,
+    decimal OrderedQuantity,
+    decimal? ReceivedQuantity,
+    decimal? OpenQuantity,
+    string Unit,
+    DateTimeOffset? ExpectedDeliveryDateUtc,
+    string? SourceVersion);
+
+public sealed record CanonicalErpPurchaseOrderDetailReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string PurchaseOrderNumber,
+    string? ExternalSupplierId,
+    string? ExternalSupplierCode,
+    string? SupplierName,
+    DateTimeOffset OrderDateUtc,
+    DateTimeOffset? ExpectedDeliveryDateUtc,
+    string Status,
+    string? CurrencyCode,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    string Freshness,
+    IReadOnlyList<CanonicalErpPurchaseOrderLineReadModel> Lines);
+
+public sealed record ErpSyncReliabilityReadModel(
+    string EntityType,
+    DateTimeOffset? LastSuccessfulSyncAtUtc,
+    DateTimeOffset? LastFailedSyncAtUtc,
+    string? LastRunStatus,
+    int LastRecordsRead,
+    int LastRecordsFailed,
+    int ConsecutiveFailures,
+    string FreshnessStatus,
+    string? CurrentErrorCode,
+    string? CurrentErrorMessage);
+
+public sealed record ErpPurchaseCoverageReadModel(
+    decimal OpenPurchaseQuantity,
+    DateTimeOffset? NearestExpectedDeliveryDate,
+    string CoverageStatus);
+
+public sealed record ErpMaterialAvailabilityLineReadModel(
+    string ExternalLineId,
+    int LineNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? Description,
+    decimal RequiredQuantity,
+    decimal? AvailableQuantity,
+    decimal? ShortageQuantity,
+    string Status,
+    ErpPurchaseCoverageReadModel? PurchaseCoverage);
+
+public sealed record ErpOrderMaterialAvailabilityReadModel(
+    Guid OrderId,
+    string OrderNumber,
+    string FreshnessNote,
+    IReadOnlyList<ErpMaterialAvailabilityLineReadModel> Lines);

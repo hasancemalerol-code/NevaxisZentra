@@ -164,6 +164,102 @@ public sealed class CanonicalErpOrderLine
 }
 
 /// <summary>
+/// External ERP warehouse projection. Does not replace CrevaFactOS warehouse SoR.
+/// </summary>
+public sealed class CanonicalErpWarehouse
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalId { get; set; } = string.Empty;
+    public string? ExternalCode { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// External ERP inventory balance projection. Quantities are ERP source values only.
+/// </summary>
+public sealed class CanonicalErpInventoryBalance
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalProductId { get; set; } = string.Empty;
+    public string? ExternalProductCode { get; set; }
+    public string ExternalWarehouseId { get; set; } = string.Empty;
+    public string? ExternalWarehouseCode { get; set; }
+    public decimal QuantityOnHand { get; set; }
+    public decimal? QuantityAvailable { get; set; }
+    public decimal? QuantityReserved { get; set; }
+    public decimal? QuantityOnOrder { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// External ERP purchase order projection. No purchasing writeback.
+/// </summary>
+public sealed class CanonicalErpPurchaseOrder
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalId { get; set; } = string.Empty;
+    public string? ExternalCode { get; set; }
+    public string PurchaseOrderNumber { get; set; } = string.Empty;
+    public string? ExternalSupplierId { get; set; }
+    public string? ExternalSupplierCode { get; set; }
+    public string? SupplierName { get; set; }
+    public DateTimeOffset OrderDateUtc { get; set; }
+    public DateTimeOffset? ExpectedDeliveryDateUtc { get; set; }
+    public string Status { get; set; } = ErpPurchaseOrderStatuses.Unknown;
+    public string? CurrencyCode { get; set; }
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+
+    public ICollection<CanonicalErpPurchaseOrderLine> Lines { get; set; } =
+        new List<CanonicalErpPurchaseOrderLine>();
+}
+
+public sealed class CanonicalErpPurchaseOrderLine
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public Guid PurchaseOrderId { get; set; }
+    public string ExternalLineId { get; set; } = string.Empty;
+    public int LineNumber { get; set; }
+    public string ExternalProductId { get; set; } = string.Empty;
+    public string? ExternalProductCode { get; set; }
+    public string? Description { get; set; }
+    public decimal OrderedQuantity { get; set; }
+    public decimal? ReceivedQuantity { get; set; }
+    public decimal? OpenQuantity { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public DateTimeOffset? ExpectedDeliveryDateUtc { get; set; }
+    public string? SourceVersion { get; set; }
+
+    public CanonicalErpPurchaseOrder? PurchaseOrder { get; set; }
+}
+
+/// <summary>
 /// External-to-internal mapping. CanonicalEntityId links the ERP projection;
 /// InternalEntityId is the human-confirmed operational reference (no auto-create).
 /// </summary>
@@ -224,6 +320,9 @@ public static class ErpSyncEntityTypes
     public const string Customers = "customers";
     public const string Products = "products";
     public const string Orders = "orders";
+    public const string Warehouses = "warehouses";
+    public const string Inventory = "inventory";
+    public const string Purchasing = "purchasing";
 }
 
 public static class ErpMappingStatuses
@@ -262,15 +361,42 @@ public static class ErpReadinessBlockingCodes
     public const string InvalidQuantity = "invalid-quantity";
 }
 
+public static class ErpPurchaseOrderStatuses
+{
+    public const string Open = "open";
+    public const string PartiallyReceived = "partially-received";
+    public const string Received = "received";
+    public const string Cancelled = "cancelled";
+    public const string Closed = "closed";
+    public const string Unknown = "unknown";
+}
+
+public static class ErpShortageStatuses
+{
+    public const string Sufficient = "sufficient";
+    public const string Insufficient = "insufficient";
+    public const string Unknown = "unknown";
+    public const string StaleSource = "stale-source";
+}
+
+public static class ErpCoverageStatuses
+{
+    public const string Covered = "covered";
+    public const string PartiallyCovered = "partially-covered";
+    public const string NotCovered = "not-covered";
+    public const string Unknown = "unknown";
+}
+
 public static class ErpCapabilities
 {
     public const string CustomersRead = "customers.read";
     public const string ProductsRead = "products.read";
     public const string OrdersRead = "orders.read";
-
-    // Future only
+    public const string WarehousesRead = "warehouses.read";
     public const string InventoryRead = "inventory.read";
     public const string PurchasingRead = "purchasing.read";
+
+    // Future only
     public const string ProductionRead = "production.read";
     public const string DocumentsRead = "documents.read";
     public const string Writeback = "writeback";

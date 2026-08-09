@@ -1,9 +1,13 @@
 import "./erp-server-boundary";
 
-import { getErpOrder, listErpOrders } from "./erp-api-client";
+import { getErpOrder, getErpOrderMaterialAvailability, listErpOrders } from "./erp-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
-import type { CanonicalErpOrderDetail, CanonicalErpOrderSummary } from "../domain/erp";
+import type {
+  CanonicalErpOrderDetail,
+  CanonicalErpOrderSummary,
+  ErpOrderMaterialAvailability,
+} from "../domain/erp";
 
 type ReadFailure = Readonly<{
   status: "failure";
@@ -15,7 +19,11 @@ export type ErpOrdersResult =
   | ReadFailure;
 
 export type ErpOrderDetailResult =
-  | Readonly<{ status: "success"; order: CanonicalErpOrderDetail }>
+  | Readonly<{
+      status: "success";
+      order: CanonicalErpOrderDetail;
+      materialAvailability: ErpOrderMaterialAvailability | null;
+    }>
   | ReadFailure;
 
 export async function readErpOrders(): Promise<ErpOrdersResult> {
@@ -48,10 +56,21 @@ export async function readErpOrderDetail(orderId: string): Promise<ErpOrderDetai
     return { status: "failure", message: contextResult.message };
   }
 
-  const orderResult = await getErpOrder(contextResult.context, orderId);
+  const [orderResult, materialAvailabilityResult] = await Promise.all([
+    getErpOrder(contextResult.context, orderId),
+    getErpOrderMaterialAvailability(contextResult.context, orderId),
+  ]);
+
   if (orderResult.status === "failure") {
     return { status: "failure", message: orderResult.message };
   }
 
-  return { status: "success", order: orderResult.value };
+  const materialAvailability =
+    materialAvailabilityResult.status === "success" ? materialAvailabilityResult.value : null;
+
+  return {
+    status: "success",
+    order: orderResult.value,
+    materialAvailability,
+  };
 }

@@ -29,5 +29,5 @@ export default async function ErpOrderDetailPage({ params }: ErpOrderDetailPageP
     );
   }
 
-  return <ErpOrderDetailView order={result.order} />;
+  return <ErpOrderDetailView order={result.order} materialAvailability={result.materialAvailability} />;
 }
