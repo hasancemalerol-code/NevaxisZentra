@@ -352,6 +352,16 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMaintenanceExecutePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureErpReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureErpReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureErpReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureErpManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureErpSyncPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -422,6 +432,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 tenant.Id,
                 facility.Id,
                 operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotErpSeed.EnsureErpSimulatorConnectionAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
                 seedTimestampUtc,
                 cancellationToken);
         }
@@ -2151,5 +2167,32 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             MaintenancePermissionKeys.Execute,
             DevelopmentPilotIds.MaintenanceExecutePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureErpReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ErpPermissionKeys.Read,
+            DevelopmentPilotIds.ErpReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureErpManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ErpPermissionKeys.Manage,
+            DevelopmentPilotIds.ErpManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureErpSyncPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ErpPermissionKeys.Sync,
+            DevelopmentPilotIds.ErpSyncPermissionDefinitionId,
             cancellationToken);
 }

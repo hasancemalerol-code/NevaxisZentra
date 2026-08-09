@@ -274,6 +274,20 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaintenancePilotCompletedDueLateId =
         Guid.Parse("bb000001-0088-4000-8000-000000000088");
 
+    // ERP permission definitions (056–058)
+    public static readonly Guid ErpReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000056");
+
+    public static readonly Guid ErpManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000057");
+
+    public static readonly Guid ErpSyncPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000058");
+
+    // ERP pilot fixture
+    public static readonly Guid ErpPilotSimulatorConnectionId =
+        Guid.Parse("bb000001-0090-4000-8000-000000000090");
+
     // Development-only facility: exists in tenant but has no pilot operator/reviewer membership.
     public static readonly Guid UnauthorizedFacilityId =
         Guid.Parse("bb000001-0005-4000-8000-000000000099");

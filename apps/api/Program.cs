@@ -17,6 +17,7 @@ using CrevaFactOS.Api.Production;
 using CrevaFactOS.Api.ProductionPlanning;
 using CrevaFactOS.Api.Maintenance;
 using CrevaFactOS.Api.Quality;
+using CrevaFactOS.Api.Erp;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
@@ -41,6 +42,7 @@ builder.Services.AddCrevaFactOSProductionExecution();
 builder.Services.AddCrevaFactOSQuality();
 builder.Services.AddCrevaFactOSMaintenance();
 builder.Services.AddCrevaFactOSExport();
+builder.Services.AddCrevaFactOSErp();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -81,6 +83,7 @@ app.MapProductionReportingEndpoints();
 
 app.MapQualityEndpoints();
 app.MapMaintenanceEndpoints();
+app.MapErpEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();

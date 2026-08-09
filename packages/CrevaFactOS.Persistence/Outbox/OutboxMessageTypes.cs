@@ -94,6 +94,11 @@ public static class OutboxMessageTypes
     public const string ExportAiRecommendationAccepted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiRecommendationAccepted;
     public const string ExportAiTaskRequested = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiTaskRequested;
 
+    // ERP-1L
+    public const string ErpConnectionCreated = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.ConnectionCreated;
+    public const string ErpSyncCompleted = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncCompleted;
+    public const string ErpSyncFailed = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncFailed;
+
     public const int SchemaVersion = 1;
 
     public static readonly HashSet<string> All = new(
@@ -163,6 +168,9 @@ public static class OutboxMessageTypes
             ExportAiHighRiskFound,
             ExportAiRecommendationAccepted,
             ExportAiTaskRequested,
+            ErpConnectionCreated,
+            ErpSyncCompleted,
+            ErpSyncFailed,
         ],
         StringComparer.Ordinal);
 }

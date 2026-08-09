@@ -12,6 +12,7 @@ using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Maintenance;
+using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -102,6 +103,14 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaintenanceWorkNote> MaintenanceWorkNotes => Set<MaintenanceWorkNote>();
     public DbSet<PreventiveMaintenanceDue> PreventiveMaintenanceDues => Set<PreventiveMaintenanceDue>();
     public DbSet<MaintenancePartUsage> MaintenancePartUsages => Set<MaintenancePartUsage>();
+
+    // ERP integration foundation
+    public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
+    public DbSet<ErpSyncRun> ErpSyncRuns => Set<ErpSyncRun>();
+    public DbSet<ErpIntegrationError> ErpIntegrationErrors => Set<ErpIntegrationError>();
+    public DbSet<CanonicalErpCustomer> CanonicalErpCustomers => Set<CanonicalErpCustomer>();
+    public DbSet<CanonicalErpProduct> CanonicalErpProducts => Set<CanonicalErpProduct>();
+    public DbSet<ErpEntityMapping> ErpEntityMappings => Set<ErpEntityMapping>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -690,6 +699,43 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // ERP integration foundation
+        modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());
+        modelBuilder.Entity<ErpConnectionProfile>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ErpSyncRunEntityConfiguration());
+        modelBuilder.Entity<ErpSyncRun>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ErpIntegrationErrorEntityConfiguration());
+        modelBuilder.Entity<ErpIntegrationError>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpCustomerEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpCustomer>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpProductEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpProduct>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ErpEntityMappingEntityConfiguration());
+        modelBuilder.Entity<ErpEntityMapping>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());
