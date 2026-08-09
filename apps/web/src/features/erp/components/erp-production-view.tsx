@@ -35,7 +35,7 @@ type ErpProductionViewProps = Readonly<{
 
 export function ErpProductionView({ snapshot, productionOrders }: ErpProductionViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Üretim"
         description="ERP kaynaklı salt okunur üretim projeksiyonu."

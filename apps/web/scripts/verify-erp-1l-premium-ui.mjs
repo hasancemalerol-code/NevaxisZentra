@@ -41,10 +41,10 @@ const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 const baglanti = readRequired("apps/web/src/app/(app)/erp-entegrasyonlari/baglanti/page.tsx");
 const globals = readRequired("apps/web/src/app/globals.css");
 
-requireText(view, "ERP Bağlantıları", "workspace title");
+requireText(view, "ERP Entegrasyonları", "workspace title");
 requireText(
   view,
-  "ERP bağlantılarınızı, veri senkronizasyonunu ve kontrollü ERP işlemlerini",
+  "ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini",
   "workspace subtitle",
 );
 requireText(view, "Bağlantı Sağlığı", "health section");

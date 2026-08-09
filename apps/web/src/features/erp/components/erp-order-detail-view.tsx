@@ -16,6 +16,7 @@ import {
   ErpDetailSection,
   ErpEmptyState,
   ErpFreshnessBadge,
+  ErpHeaderStatusContext,
   ErpInfoBanner,
   ErpMappingBadge,
   ErpMetadataGrid,
@@ -67,12 +68,22 @@ function getReadinessTone(
 export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDetailViewProps) {
   const blockingCodes = order.readiness.blockingReasons.map((reason) => reason.code);
   const customerMappingStatus = order.readiness.customerMapped ? "mapped" : "unmapped";
+  const readinessTone = getReadinessTone(order.readiness.readyForOperationalUse, blockingCodes);
+  const headerReadinessTone =
+    readinessTone === "neutral" ? "in-progress" : readinessTone;
 
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={order.orderNumber}
-        description="ERP sipariş özeti, müşteri/ürün eşleştirmesi ve operasyonel hazırlık."
+        description={`${order.externalCustomerCode ?? order.externalCustomerId} · ERP sipariş özeti ve operasyonel hazırlık`}
+        aside={
+          <ErpHeaderStatusContext
+            healthLabel={getErpReadinessBadgeLabel(order.readiness.readyForOperationalUse, blockingCodes)}
+            healthTone={headerReadinessTone}
+            syncLabel={`Güncellik: ${formatErpDateTime(order.updatedAtUtc)}`}
+          />
+        }
       />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/siparisler" />

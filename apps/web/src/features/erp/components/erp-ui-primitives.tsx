@@ -12,23 +12,47 @@ import {
 /* ── Page shell ── */
 
 type ErpPageHeaderProps = Readonly<{
+  eyebrow?: string;
   title: string;
   description: string;
   aside?: ReactNode;
   notice?: ReactNode;
 }>;
 
-export function ErpPageHeader({ title, description, aside, notice }: ErpPageHeaderProps) {
+export function ErpPageHeader({
+  eyebrow = "ERP ENTEGRASYONLARI",
+  title,
+  description,
+  aside,
+  notice,
+}: ErpPageHeaderProps) {
   return (
-    <header className="erp-workspace-header production-execution-header">
+    <header className="erp-workspace-header erp-workspace-header--executive production-execution-header">
       <div className="erp-workspace-header__intro">
-        <p className="erp-page-eyebrow">ERP ENTEGRASYONLARI</p>
+        <p className="erp-page-eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         <span className="erp-page-description">{description}</span>
         {notice}
       </div>
       {aside ? <div className="erp-workspace-header__aside">{aside}</div> : null}
     </header>
+  );
+}
+
+export function ErpHeaderStatusContext({
+  healthLabel,
+  healthTone,
+  syncLabel,
+}: Readonly<{
+  healthLabel: string;
+  healthTone: "ready" | "paused" | "critical" | "in-progress";
+  syncLabel: string;
+}>) {
+  return (
+    <div className="erp-header-status">
+      <ErpStatusBadge label={healthLabel} tone={healthTone} />
+      <span className="erp-header-status__sync">{syncLabel}</span>
+    </div>
   );
 }
 
@@ -58,6 +82,7 @@ type ErpKpiCardProps = Readonly<{
   description?: string;
   icon?: ReactNode;
   tone?: "neutral" | "success" | "warning" | "danger" | "info";
+  timestamp?: { date: string; time: string };
 }>;
 
 export function ErpKpiCard({
@@ -66,6 +91,7 @@ export function ErpKpiCard({
   description,
   icon,
   tone = "neutral",
+  timestamp,
 }: ErpKpiCardProps) {
   return (
     <div className={`erp-kpi erp-kpi--${tone}`}>
@@ -76,7 +102,14 @@ export function ErpKpiCard({
       ) : null}
       <div className="erp-kpi__body">
         <span className="erp-kpi__label">{label}</span>
-        <strong className="erp-kpi__value">{value}</strong>
+        {timestamp ? (
+          <span className="erp-kpi__value-stack">
+            <strong className="erp-kpi__value">{timestamp.date}</strong>
+            {timestamp.time ? <span className="erp-kpi__value-time">{timestamp.time}</span> : null}
+          </span>
+        ) : (
+          <strong className="erp-kpi__value">{value}</strong>
+        )}
         {description ? <small className="erp-kpi__desc">{description}</small> : null}
       </div>
     </div>
@@ -121,9 +154,10 @@ type ErpProviderBadgeProps = Readonly<{
 
 export function ErpProviderBadge({ provider, displayName }: ErpProviderBadgeProps) {
   const isSimulator = provider === "simulator";
+  const primaryLabel = isSimulator ? "ERP Simulator" : getErpProviderLabel(provider, displayName);
   return (
     <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}`}>
-      <strong>{getErpProviderLabel(provider, displayName)}</strong>
+      <strong>{primaryLabel}</strong>
       {isSimulator ? <small>Geliştirme / Test</small> : null}
     </span>
   );
@@ -350,13 +384,20 @@ export function ErpConnectionCard({
   const isSimulator = provider === "simulator";
 
   return (
-    <article className="erp-connection-card">
-      <div className="erp-connection-card__header">
-        <ErpProviderBadge provider={provider} displayName={providerDisplayName} />
-        <ErpHealthIndicator status={status} />
+    <article className="erp-connection-card erp-connection-card--compact">
+      <div className="erp-connection-card__top">
+        <div className="erp-connection-card__identity">
+          <ErpProviderBadge provider={provider} displayName={providerDisplayName} />
+          <h3 className="erp-connection-card__name">{name}</h3>
+        </div>
+        <div className="erp-connection-card__top-actions">
+          <ErpHealthIndicator status={status} />
+          <Link href={manageHref} className="erp-action erp-action--primary">
+            Bağlantıyı Yönet
+          </Link>
+        </div>
       </div>
-      <h3 className="erp-connection-card__name">{name}</h3>
-      <dl className="erp-connection-card__meta">
+      <dl className="erp-connection-card__meta erp-connection-card__meta--compact">
         <div>
           <dt>ERP Şirketi</dt>
           <dd>{companyCode ?? "—"}</dd>
@@ -373,37 +414,40 @@ export function ErpConnectionCard({
           <dt>Son Sağlık Kontrolü</dt>
           <dd>{lastHealthCheck}</dd>
         </div>
-        <div>
+        <div className="erp-connection-card__meta-span">
           <dt>Son Başarılı Senkronizasyon</dt>
           <dd>{lastSuccessfulSync}</dd>
         </div>
       </dl>
-      {capabilities.length > 0 ? (
-        <div className="erp-capability-chips" aria-label="Desteklenen yetenekler">
-          {capabilities.map((cap) => (
-            <span key={cap} className="erp-capability-chip">
-              {CAPABILITY_LABELS[cap] ?? cap}
+      <div className="erp-connection-card__footer">
+        {capabilities.length > 0 ? (
+          <div className="erp-capability-chips erp-capability-chips--compact" aria-label="Desteklenen yetenekler">
+            {capabilities.map((cap) => (
+              <span key={cap} className="erp-capability-chip">
+                {CAPABILITY_LABELS[cap] ?? cap}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {isSimulator ? (
+          <p className="erp-connection-card__disclaimer" role="note">
+            ERP Simulator — gerçek ERP bağlantısı değildir.
+          </p>
+        ) : null}
+        <div className="erp-connection-card__actions">
+          {healthHref ? (
+            <Link href={healthHref} className="erp-action erp-action--secondary">
+              Sağlığı Kontrol Et
+            </Link>
+          ) : (
+            <span className="erp-action erp-action--secondary" title="Sağlık kontrolü API üzerinden">
+              Sağlığı Kontrol Et
             </span>
-          ))}
-        </div>
-      ) : null}
-      {isSimulator ? <ErpSimulatorNotice /> : null}
-      <div className="erp-connection-card__actions">
-        <Link href={manageHref} className="erp-action erp-action--primary">
-          Bağlantıyı Yönet
-        </Link>
-        {healthHref ? (
-          <Link href={healthHref} className="erp-action erp-action--secondary">
-            Sağlığı Kontrol Et
+          )}
+          <Link href={syncHref} className="erp-action erp-action--tertiary">
+            Senkronizasyon Merkezi
           </Link>
-        ) : (
-          <span className="erp-action erp-action--secondary" title="Sağlık kontrolü API üzerinden">
-            Sağlığı Kontrol Et
-          </span>
-        )}
-        <Link href={syncHref} className="erp-action erp-action--tertiary">
-          Senkronizasyon Merkezi
-        </Link>
+        </div>
       </div>
     </article>
   );

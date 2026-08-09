@@ -17,6 +17,9 @@ import type {
 } from "../domain/erp";
 import {
   formatErpDateTime,
+  formatErpKpiTimestamp,
+  getErpConnectionStatusLabel,
+  getErpConnectionStatusTone,
   getErpEntityTypeLabel,
   getErpProviderLabel,
   getErpSyncStatusLabel,
@@ -26,11 +29,11 @@ import {
   ErpDataTable,
   ErpEmptyState,
   ErpFreshnessBadge,
+  ErpHeaderStatusContext,
   ErpKpiCard,
   ErpKpiGrid,
   ErpPageHeader,
   ErpSectionHeader,
-  ErpSimulatorNotice,
   ErpStatusBadge,
   ErpTableIdentifierCell,
   ErpInfoBanner,
@@ -77,28 +80,43 @@ export function ErpWorkspaceView({
   const isHealthPage = activeHref === "/erp-entegrasyonlari/saglik";
   const isErrorPage = activeHref === "/erp-entegrasyonlari/hata-kuyrugu";
 
-  const pageTitle = isSyncPage
-    ? "Senkronizasyon Merkezi"
-    : isHealthPage
-      ? "Bağlantı Sağlığı"
-      : isErrorPage
-        ? "Entegrasyon Hata Kuyruğu"
-        : "ERP Bağlantıları";
+  const pageTitle = isConnectionPage
+    ? "ERP Entegrasyonları"
+    : isSyncPage
+      ? "Senkronizasyon Merkezi"
+      : isHealthPage
+        ? "Bağlantı Sağlığı"
+        : isErrorPage
+          ? "Entegrasyon Hata Kuyruğu"
+          : "ERP Entegrasyonları";
 
-  const pageDescription = isSyncPage
-    ? "Veri senkronizasyon durumunu, son çalışmaları ve güncellik sinyallerini izleyin."
-    : isHealthPage
-      ? "ERP bağlantılarının sağlık durumu, gecikme ve son kontrol sonuçları."
-      : isErrorPage
-        ? "Senkronizasyon ve entegrasyon sırasında oluşan hataların özeti."
-        : "ERP bağlantılarınızı, veri senkronizasyonunu ve kontrollü ERP işlemlerini tek merkezden yönetin.";
+  const pageDescription = isConnectionPage
+    ? "ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini tek merkezden yönetin."
+    : isSyncPage
+      ? "Veri senkronizasyon durumunu, son çalışmaları ve güncellik sinyallerini izleyin."
+      : isHealthPage
+        ? "ERP bağlantılarının sağlık durumu, gecikme ve son kontrol sonuçları."
+        : isErrorPage
+          ? "Senkronizasyon ve entegrasyon sırasında oluşan hataların özeti."
+          : "ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini tek merkezden yönetin.";
+
+  const primaryConnection = connections[0];
+  const headerHealthStatus = primaryConnection?.status ?? (summary.healthyCount > 0 ? "healthy" : "configured");
 
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={pageTitle}
         description={pageDescription}
-        notice={<ErpSimulatorNotice />}
+        aside={
+          isConnectionPage ? (
+            <ErpHeaderStatusContext
+              healthLabel={getErpConnectionStatusLabel(headerHealthStatus)}
+              healthTone={getErpConnectionStatusTone(headerHealthStatus)}
+              syncLabel={`Son senkronizasyon: ${formatErpDateTime(summary.lastSyncAtUtc)}`}
+            />
+          ) : undefined
+        }
       />
 
       <ErpWorkspaceNav activeHref={activeHref} />
@@ -121,13 +139,14 @@ export function ErpWorkspaceView({
           <ErpKpiCard
             label="Dikkat Gerektiren"
             value={summary.problematicCount}
-            description="İnceleme gereken bağlantı"
+            description={summary.problematicCount > 0 ? "İnceleme gereken bağlantı" : "Açık uyarı yok"}
             icon={<TriangleAlert aria-hidden="true" />}
-            tone="warning"
+            tone={summary.problematicCount > 0 ? "warning" : "neutral"}
           />
           <ErpKpiCard
             label="Son Senkronizasyon"
-            value={formatErpDateTime(summary.lastSyncAtUtc)}
+            value=""
+            timestamp={formatErpKpiTimestamp(summary.lastSyncAtUtc)}
             description="En son tamamlanan senkronizasyon"
             icon={<CircleGauge aria-hidden="true" />}
             tone="info"
@@ -148,10 +167,10 @@ export function ErpWorkspaceView({
       )}
 
       {(isConnectionPage || isHealthPage) && (
-        <section className="erp-section" id="baglanti-sagligi">
+        <section className="erp-section erp-section--compact" id="baglanti-sagligi">
           <ErpSectionHeader
             title="Bağlantı Sağlığı"
-            description="Sağlayıcı, tesis ve operasyonel sağlık durumu"
+            description="Bağlantıların erişilebilirliği ve son kontrol durumu"
           />
           {connections.length === 0 ? (
             <ErpEmptyState
@@ -420,10 +439,9 @@ export function ErpWorkspaceView({
         </>
       )}
 
-      <section className="erp-section" aria-label="Kaynak notu">
+      <section className="erp-section erp-section--compact" aria-label="Kaynak notu">
         <ErpInfoBanner title="Salt okunur projeksiyon">
-          Harici ERP sistem kayıt sahibidir. CrevaFactOS yalnızca salt okunur kanonik projeksiyonları
-          saklar.
+          Harici ERP sistem kayıt sahibidir. CrevaFactOS yalnızca salt okunur kanonik projeksiyonları saklar.
         </ErpInfoBanner>
       </section>
     </main>

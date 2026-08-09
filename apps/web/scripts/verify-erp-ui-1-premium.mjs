@@ -105,10 +105,11 @@ requireText(workspace, "ERP Müşterileri", "customers section");
 requireText(workspace, "ERP Ürünleri", "products section");
 requireText(workspace, "getErpFacilityDisplayLabel", "no raw facility UUID");
 
-requireText(nav, "Genel", "nav grouping");
-requireText(nav, "Gelen Veri", "nav grouping");
-requireText(nav, "Operasyonel Görünürlük", "nav grouping");
+requireText(nav, "erp-workspace-nav--compact", "compact nav architecture");
+requireText(nav, "Bağlantı", "connection nav item");
 requireText(nav, "Onaylı İşlemler", "writeback nav");
+requireText(nav, "Entegrasyon Sağlığı", "health nav item");
+forbidText(nav, "NAV_GROUPS", "no stacked category-block nav");
 
 requireText(labels, "Güncel Değil", "freshness stale label");
 requireText(css, ".erp-freshness", "freshness styling distinct from health");

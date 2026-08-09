@@ -39,7 +39,7 @@ function getReadinessBadgeClass(ready: boolean, blockingCodes: readonly string[]
 
 export function ErpOrdersView({ orders }: ErpOrdersViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="ERP Siparişleri"
         description="Harici ERP sisteminden içe aktarılan kanonik sipariş kayıtları, eşleştirme durumu ve operasyonel hazırlık."

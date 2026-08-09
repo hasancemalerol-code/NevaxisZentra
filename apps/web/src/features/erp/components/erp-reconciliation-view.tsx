@@ -39,7 +39,7 @@ const PRODUCT_FILTER_CHIPS = [
 
 export function ErpReconciliationView({ customers, products }: ErpReconciliationViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Eşleştirme"
         description="Harici ERP müşteri ve ürün kayıtlarının CrevaFactOS operasyonel referanslarıyla eşleştirilmesi. Otomatik onay yoktur."

@@ -54,7 +54,7 @@ export function ErpInventoryView({
   );
 
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Stok & Depolar"
         description="Harici ERP depo ve stok projeksiyonları — salt okunur görünüm. Stok hareketi veya ERP yazma işlemi yoktur."

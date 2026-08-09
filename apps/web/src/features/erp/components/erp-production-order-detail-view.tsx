@@ -28,7 +28,7 @@ export function ErpProductionOrderDetailView({
   productionOrder,
 }: ErpProductionOrderDetailViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--readonly">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense erp-workspace-page--readonly">
       <ErpPageHeader
         title={productionOrder.productionOrderNumber}
         description="ERP kaynaklı salt okunur üretim projeksiyonu"

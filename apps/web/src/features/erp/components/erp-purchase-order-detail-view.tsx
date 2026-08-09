@@ -42,7 +42,7 @@ function getPurchaseOrderStatusTone(
 
 export function ErpPurchaseOrderDetailView({ purchaseOrder }: ErpPurchaseOrderDetailViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={purchaseOrder.purchaseOrderNumber}
         description="ERP satın alma siparişi özeti — salt okunur."

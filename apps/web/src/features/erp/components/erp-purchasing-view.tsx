@@ -26,7 +26,7 @@ type ErpPurchasingViewProps = Readonly<{
 
 export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Satın Alma"
         description="Harici ERP satın alma siparişi projeksiyonları — salt okunur. Onay veya mal kabul işlemi yoktur."

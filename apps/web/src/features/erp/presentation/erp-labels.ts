@@ -215,6 +215,25 @@ export function formatErpDateTime(iso?: string | null): string {
   return `${datePart}, ${timePart}`;
 }
 
+export function formatErpKpiTimestamp(iso?: string | null): { date: string; time: string } {
+  if (!iso) {
+    return { date: "—", time: "" };
+  }
+
+  const date = new Date(iso);
+  return {
+    date: date.toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    time: date.toLocaleTimeString("tr-TR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
+}
+
 export function formatErpDate(iso?: string | null): string {
   if (!iso) {
     return "—";

@@ -26,7 +26,7 @@ type ErpWritebacksViewProps = Readonly<{
 
 export function ErpWritebacksView({ writebacks }: ErpWritebacksViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Onaylı İşlemler"
         description="ERP writeback istekleri — onay ve uygulama akışı. Maker-checker ile kontrollü ERP yazma."

@@ -29,7 +29,7 @@ type ErpDocumentsViewProps = Readonly<{
 
 export function ErpDocumentsView({ snapshot, documents }: ErpDocumentsViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Belgeler"
         description="Harici ERP belge projeksiyonları — salt okunur görünüm. Belge indirme veya ERP yazma işlemi yoktur."

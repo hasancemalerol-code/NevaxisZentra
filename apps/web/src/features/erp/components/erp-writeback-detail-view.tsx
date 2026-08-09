@@ -36,7 +36,7 @@ export function ErpWritebackDetailView({ writeback, permissions }: ErpWritebackD
   const isSimulator = writeback.provider === "simulator";
 
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={getErpWritebackCommandTypeLabel(writeback.commandType)}
         description="Onaylı ERP writeback isteği detayı."
