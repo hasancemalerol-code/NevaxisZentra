@@ -195,7 +195,8 @@ requireText(entities, "ProductionRead = \"production.read\"", "production.read")
 requireText(entities, "DocumentsRead = \"documents.read\"", "documents.read");
 requireText(entities, "SalesOrdersWriteDraft = \"sales-orders.write-draft\"", "simulator writeback capability");
 requireText(adapters, "class SimulatorErpAdapter", "simulator adapter");
-requireText(adapters, "class LogoErpAdapterPlaceholder", "logo placeholder");
+const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+requireText(logoAdapter, "class LogoErpAdapter", "logo adapter");
 requireText(adapters, "class MikroErpAdapterPlaceholder", "mikro placeholder");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "netsis placeholder");
 requireText(adapterContract, "interface IErpAdapter", "IErpAdapter");

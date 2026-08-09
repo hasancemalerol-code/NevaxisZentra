@@ -21,6 +21,8 @@ import {
   getErpConnectionStatusLabel,
   getErpConnectionStatusTone,
   getErpEntityTypeLabel,
+  getErpLogoCapabilities,
+  getErpLogoSetupGuidance,
   getErpProviderLabel,
   getErpSyncStatusLabel,
 } from "../presentation/erp-labels";
@@ -192,8 +194,15 @@ export function ErpWorkspaceView({
                   lastHealthCheck={formatErpDateTime(connection.lastHealthCheckAtUtc)}
                   lastSuccessfulSync={formatErpDateTime(connection.lastSuccessfulSyncAtUtc)}
                   capabilities={
-                    connection.provider === "simulator" ? SIMULATOR_CAPABILITIES : []
+                    connection.provider === "simulator"
+                      ? SIMULATOR_CAPABILITIES
+                      : connection.provider === "logo"
+                        ? getErpLogoCapabilities()
+                        : []
                   }
+                  connectionMode={connection.connectionMode}
+                  hasCredentialReference={connection.hasCredentialReference}
+                  lastErrorCode={connection.lastErrorCode}
                   manageHref={`/erp-entegrasyonlari/baglanti#connection-${connection.id}`}
                   syncHref="/erp-entegrasyonlari/senkronizasyonlar"
                 />
@@ -438,6 +447,14 @@ export function ErpWorkspaceView({
           </section>
         </>
       )}
+
+      {isConnectionPage && connections.some((connection) => connection.provider === "logo") ? (
+        <section className="erp-section erp-section--compact">
+          <ErpInfoBanner title="Logo kurulum yönlendirmesi">
+            {getErpLogoSetupGuidance()}
+          </ErpInfoBanner>
+        </section>
+      ) : null}
 
       <section className="erp-section erp-section--compact" aria-label="Kaynak notu">
         <ErpInfoBanner title="Salt okunur projeksiyon">

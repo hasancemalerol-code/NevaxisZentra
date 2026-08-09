@@ -3,6 +3,7 @@ using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Erp;
+using CrevaFactOS.Persistence.Erp.Logo;
 using CrevaFactOS.Persistence.Tenancy;
 
 namespace CrevaFactOS.Api.Erp;
@@ -71,8 +72,15 @@ public static class ErpEndpointRouteBuilderExtensions
 
     public static IServiceCollection AddCrevaFactOSErp(this IServiceCollection services)
     {
+        services.AddSingleton<LogoReadTransportOptions>();
+        services.AddSingleton<LogoReadTransportTestFixture>();
+        services.AddSingleton<LogoUnconfiguredReadTransport>();
+        services.AddHttpClient<LogoBridgeReadTransport>();
+        services.AddSingleton<ILogoCredentialResolver, ConfigurationLogoCredentialResolver>();
+        services.AddSingleton<LogoTransportResolver>();
+
         services.AddSingleton<IErpAdapter, SimulatorErpAdapter>();
-        services.AddSingleton<IErpAdapter, LogoErpAdapterPlaceholder>();
+        services.AddSingleton<IErpAdapter, LogoErpAdapter>();
         services.AddSingleton<IErpAdapter, MikroErpAdapterPlaceholder>();
         services.AddSingleton<IErpAdapter, NetsisErpAdapterPlaceholder>();
         services.AddSingleton<IErpAdapterResolver, ErpAdapterResolver>();
@@ -1376,9 +1384,12 @@ public static class ErpEndpointRouteBuilderExtensions
         c.UpdatedAtUtc,
         c.Version,
         hasCredentialReference = !string.IsNullOrWhiteSpace(c.CredentialReference),
-        providerDisplayName = c.Provider == ErpProviderKeys.Simulator
-            ? SimulatorErpAdapter.DisplayName
-            : c.Provider,
+        providerDisplayName = c.Provider switch
+        {
+            ErpProviderKeys.Simulator => SimulatorErpAdapter.DisplayName,
+            ErpProviderKeys.Logo => LogoErpAdapter.DisplayName,
+            _ => c.Provider,
+        },
     };
 }
 

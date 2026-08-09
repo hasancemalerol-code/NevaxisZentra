@@ -276,7 +276,8 @@ public sealed class ErpConnectionRepository(
                     health.LatencyMs,
                     health.ErrorCode,
                     health.ErrorMessage,
-                    profile.Version);
+                    profile.Version,
+                    health.IntegrationMetadata);
 
                 return ErpWriteResult.Success(profile.Id, profile.Version);
             },

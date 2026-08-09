@@ -124,9 +124,10 @@ for (const repo of [syncRepo, inventoryRepo, productionRepo, mappingRepo, writeb
   forbidText(repo, "Netsis.", "no Netsis leakage outside adapter");
 }
 
-requireText(adapters, "class LogoErpAdapterPlaceholder", "Logo placeholder");
 requireText(adapters, "class MikroErpAdapterPlaceholder", "Mikro placeholder");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis placeholder");
+const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 forbidText(adapters, "fallback to simulator", "no simulator fallback");
 forbidText(writebackRepo, "Resolve(profile.Provider) ?? Resolve(\"simulator\")", "no simulator fallback");
 

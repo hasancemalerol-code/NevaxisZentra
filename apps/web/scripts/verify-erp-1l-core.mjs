@@ -56,9 +56,10 @@ requireText(adapters, "ERP-CUST-001", "simulator customer id");
 requireText(adapters, "ABC Plastik Sanayi A.Ş.", "simulator customer name");
 requireText(adapters, "ERP-PRD-001", "simulator product");
 requireText(adapters, "PP CAP 32", "simulator product name");
-requireText(adapters, "class LogoErpAdapterPlaceholder", "Logo readiness");
 requireText(adapters, "class MikroErpAdapterPlaceholder", "Mikro readiness");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis readiness");
+const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 
 requireText(entities, "class CanonicalErpCustomer", "canonical customer");
 requireText(entities, "class CanonicalErpProduct", "canonical product");

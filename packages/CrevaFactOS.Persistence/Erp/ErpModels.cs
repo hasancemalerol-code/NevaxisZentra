@@ -111,7 +111,8 @@ public sealed record ErpHealthCheckReadModel(
     int? LatencyMs,
     string? ErrorCode,
     string? ErrorMessage,
-    uint Version);
+    uint Version,
+    IReadOnlyDictionary<string, string>? IntegrationMetadata = null);
 
 public sealed record ErpSyncRunSummaryReadModel(
     Guid Id,

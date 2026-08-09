@@ -1,12 +1,14 @@
 import type { ErpConnectionStatus, ErpSyncRunStatus } from "../domain/erp";
 
+const LOGO_CAPABILITIES = ["customers.read", "products.read"] as const;
+
 export function getErpProviderLabel(provider: string, displayName?: string): string {
   if (provider === "simulator") {
     return displayName ?? "ERP Simulator";
   }
 
   if (provider === "logo") {
-    return "Logo (hazır değil)";
+    return displayName ?? "Logo";
   }
 
   if (provider === "mikro") {
@@ -18,6 +20,63 @@ export function getErpProviderLabel(provider: string, displayName?: string): str
   }
 
   return provider;
+}
+
+export function getErpLogoCapabilities(): readonly string[] {
+  return LOGO_CAPABILITIES;
+}
+
+export function getErpLogoConnectionStateLabel(input: {
+  status: ErpConnectionStatus | string;
+  hasCredentialReference: boolean;
+  connectionMode: string;
+  lastErrorCode?: string | null;
+}): string {
+  if (input.lastErrorCode === "logo.authentication.failed" || (!input.hasCredentialReference && input.connectionMode === "api")) {
+    return "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "healthy") {
+    return "Sağlıklı";
+  }
+
+  if (input.status === "configured" || input.status === "draft") {
+    return input.hasCredentialReference ? "Kurulum Bekliyor" : "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "degraded") {
+    return "Bağlantı Doğrulandı";
+  }
+
+  if (input.status === "unavailable") {
+    return "Bağlantı Kurulamadı";
+  }
+
+  return getErpConnectionStatusLabel(input.status);
+}
+
+export function getErpLogoAdapterReadyLabel(): string {
+  return "Adapter Hazır";
+}
+
+export function getErpLogoLiveValidatedLabel(isLiveValidated: boolean): string | null {
+  return isLiveValidated ? "Gerçek Logo Bağlantısı Doğrulandı" : null;
+}
+
+export function getErpLogoTransportLabel(connectionMode: string, hasTestFixtureCredential: boolean): string {
+  if (hasTestFixtureCredential) {
+    return "Test Transport";
+  }
+
+  if (connectionMode === "api") {
+    return "Logo Bridge (HTTP)";
+  }
+
+  return "Yapılandırılmadı";
+}
+
+export function getErpLogoSetupGuidance(): string {
+  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Logo Bridge yapılandırılmalıdır.";
 }
 
 export function getErpConnectionStatusLabel(status: ErpConnectionStatus | string): string {

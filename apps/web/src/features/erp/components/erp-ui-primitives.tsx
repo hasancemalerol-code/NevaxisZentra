@@ -4,6 +4,10 @@ import type { ReactNode } from "react";
 import {
   getErpConnectionStatusLabel,
   getErpConnectionStatusTone,
+  getErpLogoAdapterReadyLabel,
+  getErpLogoConnectionStateLabel,
+  getErpLogoLiveValidatedLabel,
+  getErpLogoTransportLabel,
   getErpProviderLabel,
   getErpSourceFreshnessLabel,
   getErpSourceFreshnessTone,
@@ -154,11 +158,13 @@ type ErpProviderBadgeProps = Readonly<{
 
 export function ErpProviderBadge({ provider, displayName }: ErpProviderBadgeProps) {
   const isSimulator = provider === "simulator";
+  const isLogo = provider === "logo";
   const primaryLabel = isSimulator ? "ERP Simulator" : getErpProviderLabel(provider, displayName);
   return (
-    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}`}>
+    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}`}>
       <strong>{primaryLabel}</strong>
       {isSimulator ? <small>Geliştirme / Test</small> : null}
+      {isLogo ? <small>{getErpLogoAdapterReadyLabel()}</small> : null}
     </span>
   );
 }
@@ -184,13 +190,14 @@ export function ErpMappingBadge({ status, label }: ErpMappingBadgeProps) {
 
 type ErpHealthIndicatorProps = Readonly<{
   status: string;
+  labelOverride?: string;
 }>;
 
-export function ErpHealthIndicator({ status }: ErpHealthIndicatorProps) {
+export function ErpHealthIndicator({ status, labelOverride }: ErpHealthIndicatorProps) {
   const tone = getErpConnectionStatusTone(status);
   return (
     <span className={`erp-health erp-health--${tone}`}>
-      {getErpConnectionStatusLabel(status)}
+      {labelOverride ?? getErpConnectionStatusLabel(status)}
     </span>
   );
 }
@@ -346,6 +353,9 @@ type ErpConnectionCardProps = Readonly<{
   companyCode: string | null;
   facilityLabel: string;
   status: string;
+  connectionMode?: string;
+  hasCredentialReference?: boolean;
+  lastErrorCode?: string | null;
   latencyMs: number | null;
   lastHealthCheck: string;
   lastSuccessfulSync: string;
@@ -373,6 +383,9 @@ export function ErpConnectionCard({
   companyCode,
   facilityLabel,
   status,
+  connectionMode = "api",
+  hasCredentialReference = false,
+  lastErrorCode = null,
   latencyMs,
   lastHealthCheck,
   lastSuccessfulSync,
@@ -382,6 +395,19 @@ export function ErpConnectionCard({
   syncHref,
 }: ErpConnectionCardProps) {
   const isSimulator = provider === "simulator";
+  const isLogo = provider === "logo";
+  const isTestTransport = isLogo && name.toLowerCase().includes("test transport");
+  const logoStateLabel = isLogo
+    ? getErpLogoConnectionStateLabel({
+        status,
+        hasCredentialReference,
+        connectionMode,
+        lastErrorCode,
+      })
+    : undefined;
+  const liveValidatedLabel = isLogo && status === "healthy" && !isTestTransport
+    ? getErpLogoLiveValidatedLabel(true)
+    : null;
 
   return (
     <article className="erp-connection-card erp-connection-card--compact">
@@ -391,7 +417,7 @@ export function ErpConnectionCard({
           <h3 className="erp-connection-card__name">{name}</h3>
         </div>
         <div className="erp-connection-card__top-actions">
-          <ErpHealthIndicator status={status} />
+          <ErpHealthIndicator status={status} labelOverride={logoStateLabel} />
           <Link href={manageHref} className="erp-action erp-action--primary">
             Bağlantıyı Yönet
           </Link>
@@ -402,6 +428,18 @@ export function ErpConnectionCard({
           <dt>ERP Şirketi</dt>
           <dd>{companyCode ?? "—"}</dd>
         </div>
+        {isLogo ? (
+          <>
+            <div>
+              <dt>Bağlantı Yöntemi</dt>
+              <dd>{getErpLogoTransportLabel(connectionMode, isTestTransport)}</dd>
+            </div>
+            <div>
+              <dt>Logo Ürünü</dt>
+              <dd>{isTestTransport ? "Logo Test Fixture" : "—"}</dd>
+            </div>
+          </>
+        ) : null}
         <div>
           <dt>Tesis</dt>
           <dd>{facilityLabel}</dd>
@@ -429,9 +467,19 @@ export function ErpConnectionCard({
             ))}
           </div>
         ) : null}
+        {liveValidatedLabel ? (
+          <p className="erp-connection-card__badge-note" role="status">
+            {liveValidatedLabel}
+          </p>
+        ) : null}
         {isSimulator ? (
           <p className="erp-connection-card__disclaimer" role="note">
             ERP Simulator — gerçek ERP bağlantısı değildir.
+          </p>
+        ) : null}
+        {isTestTransport ? (
+          <p className="erp-connection-card__disclaimer" role="note">
+            Logo test transport — gerçek Logo doğrulaması değildir.
           </p>
         ) : null}
         <div className="erp-connection-card__actions">

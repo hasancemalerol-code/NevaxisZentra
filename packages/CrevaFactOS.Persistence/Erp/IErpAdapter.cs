@@ -63,7 +63,8 @@ public sealed record ErpAdapterHealthResult(
     int? LatencyMs,
     string? ErrorCode,
     string? ErrorMessage,
-    DateTimeOffset CheckedAtUtc);
+    DateTimeOffset CheckedAtUtc,
+    IReadOnlyDictionary<string, string>? IntegrationMetadata = null);
 
 /// <summary>
 /// Canonical external customer shape produced by adapters after vendor normalization.
