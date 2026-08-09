@@ -94,10 +94,13 @@ public static class OutboxMessageTypes
     public const string ExportAiRecommendationAccepted = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiRecommendationAccepted;
     public const string ExportAiTaskRequested = CrevaFactOS.Persistence.Export.ExportOutboxMessageTypes.ExportAiTaskRequested;
 
-    // ERP-1L
+    // ERP-1L / ERP-2L
     public const string ErpConnectionCreated = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.ConnectionCreated;
     public const string ErpSyncCompleted = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncCompleted;
     public const string ErpSyncFailed = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncFailed;
+    public const string ErpMappingConfirmed = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.MappingConfirmed;
+    public const string ErpSyncOrdersCompleted = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncOrdersCompleted;
+    public const string ErpSyncOrdersFailed = CrevaFactOS.Persistence.Erp.ErpOutboxMessageTypes.SyncOrdersFailed;
 
     public const int SchemaVersion = 1;
 
@@ -171,6 +174,9 @@ public static class OutboxMessageTypes
             ErpConnectionCreated,
             ErpSyncCompleted,
             ErpSyncFailed,
+            ErpMappingConfirmed,
+            ErpSyncOrdersCompleted,
+            ErpSyncOrdersFailed,
         ],
         StringComparer.Ordinal);
 }

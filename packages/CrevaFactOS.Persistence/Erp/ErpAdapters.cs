@@ -3,7 +3,7 @@ namespace CrevaFactOS.Persistence.Erp;
 /// <summary>
 /// In-process development ERP Simulator. Deterministic stable IDs.
 /// Future second-PC handoff: HTTP/JSON over the same IErpAdapter contract
-/// (CheckHealth / ReadCustomers / ReadProducts) without changing domain consumers.
+/// (CheckHealth / ReadCustomers / ReadProducts / ReadOrders) without changing domain consumers.
 /// </summary>
 public sealed class SimulatorErpAdapter : IErpAdapter
 {
@@ -15,6 +15,7 @@ public sealed class SimulatorErpAdapter : IErpAdapter
     {
         ErpCapabilities.CustomersRead,
         ErpCapabilities.ProductsRead,
+        ErpCapabilities.OrdersRead,
     };
 
     public Task<ErpAdapterHealthResult> CheckHealthAsync(
@@ -107,6 +108,57 @@ public sealed class SimulatorErpAdapter : IErpAdapter
         return Task.FromResult(products);
     }
 
+    public Task<IReadOnlyList<ErpExternalOrderRecord>> ReadOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureCapability(ErpCapabilities.OrdersRead);
+
+        IReadOnlyList<ErpExternalOrderRecord> orders =
+        [
+            new(
+                ExternalId: "ERP-ORD-001",
+                ExternalCode: "ERP-ORD-001",
+                OrderNumber: "ERP-ORD-001",
+                ExternalCustomerId: "ERP-CUST-001",
+                ExternalCustomerCode: "ERP-CUST-001",
+                OrderDateUtc: new DateTimeOffset(2026, 8, 1, 8, 0, 0, TimeSpan.Zero),
+                RequestedDeliveryDateUtc: new DateTimeOffset(2026, 8, 15, 0, 0, 0, TimeSpan.Zero),
+                CurrencyCode: "TRY",
+                Status: ErpOrderStatuses.Open,
+                Reference: "SIM-REF-001",
+                Notes: "Development ERP Simulator order",
+                SourceVersion: "1",
+                SourceUpdatedAtUtc: new DateTimeOffset(2026, 8, 1, 8, 0, 0, TimeSpan.Zero),
+                Lines:
+                [
+                    new(
+                        ExternalLineId: "ERP-ORD-001-L1",
+                        LineNumber: 1,
+                        ExternalProductId: "ERP-PRD-001",
+                        ExternalProductCode: "ERP-PRD-001",
+                        Description: "PP CAP 32",
+                        Quantity: 10000m,
+                        Unit: "AD",
+                        RequestedDeliveryDateUtc: new DateTimeOffset(2026, 8, 15, 0, 0, 0, TimeSpan.Zero),
+                        SourceVersion: "1"),
+                    new(
+                        ExternalLineId: "ERP-ORD-001-L2",
+                        LineNumber: 2,
+                        ExternalProductId: "ERP-PRD-002",
+                        ExternalProductCode: "ERP-PRD-002",
+                        Description: "HDPE CONTAINER",
+                        Quantity: 5000m,
+                        Unit: "AD",
+                        RequestedDeliveryDateUtc: new DateTimeOffset(2026, 8, 15, 0, 0, 0, TimeSpan.Zero),
+                        SourceVersion: "1"),
+                ]),
+        ];
+
+        return Task.FromResult(orders);
+    }
+
     private void EnsureCapability(string capability)
     {
         if (!Capabilities.Contains(capability))
@@ -156,7 +208,7 @@ public abstract class UnsupportedErpAdapterBase : IErpAdapter
             Status: ErpConnectionStatuses.Unavailable,
             LatencyMs: null,
             ErrorCode: "erp.adapter.not-implemented",
-            ErrorMessage: $"{ProviderKey} adapter is not implemented in ERP-1L.",
+            ErrorMessage: $"{ProviderKey} adapter is not implemented in ERP-2L.",
             CheckedAtUtc: DateTimeOffset.UtcNow));
     }
 
@@ -164,13 +216,19 @@ public abstract class UnsupportedErpAdapterBase : IErpAdapter
         ErpAdapterConnectionContext connection,
         CancellationToken cancellationToken = default) =>
         Task.FromException<IReadOnlyList<ErpExternalCustomerRecord>>(
-            new NotSupportedException($"{ProviderKey} customers.read is not implemented in ERP-1L."));
+            new NotSupportedException($"{ProviderKey} customers.read is not implemented in ERP-2L."));
 
     public Task<IReadOnlyList<ErpExternalProductRecord>> ReadProductsAsync(
         ErpAdapterConnectionContext connection,
         CancellationToken cancellationToken = default) =>
         Task.FromException<IReadOnlyList<ErpExternalProductRecord>>(
-            new NotSupportedException($"{ProviderKey} products.read is not implemented in ERP-1L."));
+            new NotSupportedException($"{ProviderKey} products.read is not implemented in ERP-2L."));
+
+    public Task<IReadOnlyList<ErpExternalOrderRecord>> ReadOrdersAsync(
+        ErpAdapterConnectionContext connection,
+        CancellationToken cancellationToken = default) =>
+        Task.FromException<IReadOnlyList<ErpExternalOrderRecord>>(
+            new NotSupportedException($"{ProviderKey} orders.read is not implemented in ERP-2L."));
 }
 
 public sealed class ErpAdapterResolver : IErpAdapterResolver

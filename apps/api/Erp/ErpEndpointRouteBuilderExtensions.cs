@@ -20,6 +20,7 @@ public static class ErpEndpointRouteBuilderExtensions
         group.MapPost("/connections/{connectionId:guid}/health-check", HealthCheckAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/customers", SyncCustomersAsync);
         group.MapPost("/connections/{connectionId:guid}/sync/products", SyncProductsAsync);
+        group.MapPost("/connections/{connectionId:guid}/sync/orders", SyncOrdersAsync);
 
         group.MapGet("/sync-runs", ListSyncRunsAsync);
         group.MapGet("/sync-runs/{syncRunId:guid}", GetSyncRunAsync);
@@ -27,7 +28,19 @@ public static class ErpEndpointRouteBuilderExtensions
 
         group.MapGet("/customers", ListCustomersAsync);
         group.MapGet("/products", ListProductsAsync);
+        group.MapGet("/orders", ListOrdersAsync);
+        group.MapGet("/orders/{orderId:guid}", GetOrderAsync);
+        group.MapGet("/orders/{orderId:guid}/readiness", GetOrderReadinessAsync);
         group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
+
+        group.MapGet("/mappings", ListMappingsAsync);
+        group.MapGet("/mappings/{mappingId:guid}", GetMappingAsync);
+        group.MapPost("/mappings/{mappingId:guid}/confirm", ConfirmMappingAsync);
+        group.MapPost("/mappings/{mappingId:guid}/ignore", IgnoreMappingAsync);
+        group.MapPost("/mappings/{mappingId:guid}/remap", RemapMappingAsync);
+
+        group.MapGet("/reconciliation/customers", ListCustomerReconciliationAsync);
+        group.MapGet("/reconciliation/products", ListProductReconciliationAsync);
 
         return endpoints;
     }
@@ -60,6 +73,16 @@ public static class ErpEndpointRouteBuilderExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<IErpAdapterResolver>());
+        });
+
+        services.AddScoped<IErpMappingRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableErpMappingRepository()
+                : new ErpMappingRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
         return services;
@@ -266,6 +289,29 @@ public static class ErpEndpointRouteBuilderExtensions
         return ErpEndpointHelpers.MapSyncResult(result);
     }
 
+    private static async Task<IResult> SyncOrdersAsync(
+        Guid connectionId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpSyncRepository syncRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            facilityId,
+            ErpPermissionKeys.Sync,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await syncRepository.SyncOrdersAsync(context, connectionId, null, cancellationToken);
+        return ErpEndpointHelpers.MapSyncResult(result);
+    }
+
     private static async Task<IResult> ListSyncRunsAsync(
         Guid? facilityId,
         Guid? connectionProfileId,
@@ -373,6 +419,246 @@ public static class ErpEndpointRouteBuilderExtensions
         return TypedResults.Ok(rows);
     }
 
+    private static async Task<IResult> ListOrdersAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? status,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpSyncRepository syncRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await syncRepository.ListOrdersAsync(context, connectionProfileId, status, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetOrderAsync(
+        Guid orderId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpSyncRepository syncRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await syncRepository.GetOrderAsync(context, orderId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Order not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> GetOrderReadinessAsync(
+        Guid orderId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpSyncRepository syncRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await syncRepository.GetOrderReadinessAsync(context, orderId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Order not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ListMappingsAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        string? entityType,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await mappingRepository.ListMappingsAsync(context, connectionProfileId, entityType, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetMappingAsync(
+        Guid mappingId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var row = await mappingRepository.GetMappingAsync(context, mappingId, cancellationToken);
+        if (row is null)
+        {
+            return TypedResults.Problem(
+                title: "Mapping not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: ErpEndpointHelpers.FailureExt(ErpApiFailureCodes.NotFound));
+        }
+
+        return TypedResults.Ok(row);
+    }
+
+    private static async Task<IResult> ConfirmMappingAsync(
+        Guid mappingId,
+        ConfirmErpMappingRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.Manage,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await mappingRepository.ConfirmAsync(
+            context,
+            new ConfirmErpMappingCommand(mappingId, request.TargetEntityId, request.ExpectedVersion),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> IgnoreMappingAsync(
+        Guid mappingId,
+        IgnoreErpMappingRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.Manage,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await mappingRepository.IgnoreAsync(
+            context,
+            new IgnoreErpMappingCommand(mappingId, request.ExpectedVersion),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> RemapMappingAsync(
+        Guid mappingId,
+        ConfirmErpMappingRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveWriteAccessAsync(
+            request.FacilityId,
+            ErpPermissionKeys.Manage,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var result = await mappingRepository.RemapAsync(
+            context,
+            new RemapErpMappingCommand(mappingId, request.TargetEntityId, request.ExpectedVersion),
+            cancellationToken);
+
+        return ErpEndpointHelpers.MapWriteResult(result, isCreate: false);
+    }
+
+    private static async Task<IResult> ListCustomerReconciliationAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await mappingRepository.ListCustomerReconciliationAsync(context, connectionProfileId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListProductReconciliationAsync(
+        Guid? facilityId,
+        Guid? connectionProfileId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IErpMappingRepository mappingRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ErpEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null)
+        {
+            return failResult!;
+        }
+
+        var rows = await mappingRepository.ListProductReconciliationAsync(context, connectionProfileId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
     private static async Task<IResult> GetWorkspaceSummaryAsync(
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
@@ -439,3 +725,12 @@ internal sealed record UpdateErpConnectionRequest(
     string ConnectionMode,
     string? CredentialReference,
     string Status);
+
+internal sealed record ConfirmErpMappingRequest(
+    Guid FacilityId,
+    Guid TargetEntityId,
+    uint ExpectedVersion);
+
+internal sealed record IgnoreErpMappingRequest(
+    Guid FacilityId,
+    uint ExpectedVersion);

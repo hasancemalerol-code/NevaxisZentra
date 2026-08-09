@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 const NAV_ITEMS = [
-  { href: "/erp-entegrasyonlari/baglanti", label: "ERP Bağlantısı" },
-  { href: "/erp-entegrasyonlari/veri-eslestirme", label: "Veri Eşleştirme" },
-  { href: "/erp-entegrasyonlari/senkronizasyonlar", label: "Senkronizasyonlar" },
+  { href: "/erp-entegrasyonlari/baglanti", label: "Bağlantı" },
+  { href: "/erp-entegrasyonlari/senkronizasyonlar", label: "Senkronizasyon" },
+  { href: "/erp-entegrasyonlari/siparisler", label: "Siparişler" },
+  { href: "/erp-entegrasyonlari/eslestirme", label: "Eşleştirme" },
   { href: "/erp-entegrasyonlari/hata-kuyrugu", label: "Hata Kuyruğu" },
   { href: "/erp-entegrasyonlari/saglik", label: "Entegrasyon Sağlığı" },
 ] as const;

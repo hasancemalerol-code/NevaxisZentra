@@ -110,6 +110,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ErpIntegrationError> ErpIntegrationErrors => Set<ErpIntegrationError>();
     public DbSet<CanonicalErpCustomer> CanonicalErpCustomers => Set<CanonicalErpCustomer>();
     public DbSet<CanonicalErpProduct> CanonicalErpProducts => Set<CanonicalErpProduct>();
+    public DbSet<CanonicalErpOrder> CanonicalErpOrders => Set<CanonicalErpOrder>();
+    public DbSet<CanonicalErpOrderLine> CanonicalErpOrderLines => Set<CanonicalErpOrderLine>();
     public DbSet<ErpEntityMapping> ErpEntityMappings => Set<ErpEntityMapping>();
 
     // Export
@@ -730,6 +732,18 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpOrderEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpOrder>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalErpOrderLineEntityConfiguration());
+        modelBuilder.Entity<CanonicalErpOrderLine>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new ErpEntityMappingEntityConfiguration());
         modelBuilder.Entity<ErpEntityMapping>().HasQueryFilter(m =>

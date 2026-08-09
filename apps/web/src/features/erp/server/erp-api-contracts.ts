@@ -232,5 +232,220 @@ export function parseErpWorkspaceSummaryApiResponse(payload: unknown): ErpWorksp
     lastSyncAtUtc: asString(row.lastSyncAtUtc),
     customerCount: asNumber(row.customerCount) ?? 0,
     productCount: asNumber(row.productCount) ?? 0,
+    orderCount: asNumber(row.orderCount) ?? 0,
   };
+}
+
+export function parseCanonicalErpOrderListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").CanonicalErpOrderSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP order list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP order row.");
+    }
+
+    const id = asString(row.id);
+    const connectionProfileId = asString(row.connectionProfileId);
+    const provider = asString(row.provider);
+    const externalId = asString(row.externalId);
+    const orderNumber = asString(row.orderNumber);
+    const externalCustomerId = asString(row.externalCustomerId);
+    const orderDateUtc = asString(row.orderDateUtc);
+    const status = asString(row.status);
+    const importedAtUtc = asString(row.importedAtUtc);
+    const updatedAtUtc = asString(row.updatedAtUtc);
+
+    if (
+      !id ||
+      !connectionProfileId ||
+      !provider ||
+      !externalId ||
+      !orderNumber ||
+      !externalCustomerId ||
+      !orderDateUtc ||
+      !status ||
+      !importedAtUtc ||
+      !updatedAtUtc
+    ) {
+      throw new Error("ERP order response is missing required fields.");
+    }
+
+    return {
+      id,
+      connectionProfileId,
+      provider,
+      externalId,
+      externalCode: asString(row.externalCode),
+      orderNumber,
+      externalCustomerId,
+      externalCustomerCode: asString(row.externalCustomerCode),
+      orderDateUtc,
+      requestedDeliveryDateUtc: asString(row.requestedDeliveryDateUtc),
+      currencyCode: asString(row.currencyCode),
+      status,
+      reference: asString(row.reference),
+      sourceVersion: asString(row.sourceVersion),
+      sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+      importedAtUtc,
+      updatedAtUtc,
+      lineCount: asNumber(row.lineCount) ?? 0,
+      customerMappingStatus: asString(row.customerMappingStatus) ?? "unmapped",
+      readyForOperationalUse: asBoolean(row.readyForOperationalUse) ?? false,
+      sourceFreshness: asString(row.sourceFreshness) ?? "unknown",
+    };
+  });
+}
+
+export function parseCanonicalErpOrderDetailApiResponse(
+  payload: unknown,
+): import("../domain/erp").CanonicalErpOrderDetail {
+  const row = asRecord(payload);
+  if (!row) {
+    throw new Error("Invalid ERP order detail response.");
+  }
+
+  const summary = parseCanonicalErpOrderListApiResponse([payload])[0];
+  const readinessRow = asRecord(row.readiness);
+  const lines = Array.isArray(row.lines) ? row.lines : [];
+
+  return {
+    ...summary,
+    notes: asString(row.notes),
+    lines: lines.map((lineItem) => {
+      const line = asRecord(lineItem);
+      const lineId = asString(line?.id);
+      const externalLineId = asString(line?.externalLineId);
+      const externalProductId = asString(line?.externalProductId);
+      const unit = asString(line?.unit);
+
+      if (!lineId || !externalLineId || !externalProductId || !unit) {
+        throw new Error("ERP order line response is missing required fields.");
+      }
+
+      return {
+        id: lineId,
+        externalLineId,
+        lineNumber: asNumber(line?.lineNumber) ?? 0,
+        externalProductId,
+        externalProductCode: asString(line?.externalProductCode),
+        description: asString(line?.description),
+        quantity: asNumber(line?.quantity) ?? 0,
+        unit,
+        requestedDeliveryDateUtc: asString(line?.requestedDeliveryDateUtc),
+        sourceVersion: asString(line?.sourceVersion),
+        productMappingStatus: asString(line?.productMappingStatus) ?? "unmapped",
+        mappedInternalProductId: asString(line?.mappedInternalProductId),
+      };
+    }),
+    readiness: {
+      orderId: asString(readinessRow?.orderId) ?? summary.id,
+      customerMapped: asBoolean(readinessRow?.customerMapped) ?? false,
+      allProductsMapped: asBoolean(readinessRow?.allProductsMapped) ?? false,
+      missingProductMappings: asNumber(readinessRow?.missingProductMappings) ?? 0,
+      sourceFreshness: asString(readinessRow?.sourceFreshness) ?? "unknown",
+      readyForOperationalUse: asBoolean(readinessRow?.readyForOperationalUse) ?? false,
+      blockingReasons: Array.isArray(readinessRow?.blockingReasons)
+        ? readinessRow.blockingReasons.map((reason) => {
+            const r = asRecord(reason);
+            return {
+              code: asString(r?.code) ?? "unknown",
+              message: asString(r?.message) ?? "",
+            };
+          })
+        : [],
+    },
+  };
+}
+
+function parseReconciliationBase(row: Record<string, unknown>) {
+  const connectionProfileId = asString(row.connectionProfileId);
+  const provider = asString(row.provider);
+  const externalId = asString(row.externalId);
+  const name = asString(row.name);
+  const updatedAtUtc = asString(row.updatedAtUtc);
+  const mappingStatus = asString(row.mappingStatus);
+
+  if (!connectionProfileId || !provider || !externalId || !name || !updatedAtUtc || !mappingStatus) {
+    throw new Error("ERP reconciliation response is missing required fields.");
+  }
+
+  return {
+    connectionProfileId,
+    provider,
+    externalId,
+    externalCode: asString(row.externalCode),
+    name,
+    mappingStatus,
+    mappingId: asString(row.mappingId),
+    mappedInternalEntityId: asString(row.mappedInternalEntityId),
+    suggestedInternalEntityId: asString(row.suggestedInternalEntityId),
+    suggestedReason: asString(row.suggestedReason),
+    sourceVersion: asString(row.sourceVersion),
+    sourceUpdatedAtUtc: asString(row.sourceUpdatedAtUtc),
+    updatedAtUtc,
+    mappingVersion: asNumber(row.mappingVersion),
+  };
+}
+
+export function parseErpCustomerReconciliationListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").ErpCustomerReconciliation[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP customer reconciliation list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP customer reconciliation row.");
+    }
+
+    const canonicalCustomerId = asString(row.canonicalCustomerId);
+    const taxNumber = asString(row.taxNumber);
+    const base = parseReconciliationBase({ ...row, name: asString(row.name) ?? "" });
+
+    if (!canonicalCustomerId) {
+      throw new Error("ERP customer reconciliation response is missing canonicalCustomerId.");
+    }
+
+    return {
+      canonicalCustomerId,
+      taxNumber,
+      ...base,
+    };
+  });
+}
+
+export function parseErpProductReconciliationListApiResponse(
+  payload: unknown,
+): readonly import("../domain/erp").ErpProductReconciliation[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Invalid ERP product reconciliation list response.");
+  }
+
+  return payload.map((item) => {
+    const row = asRecord(item);
+    if (!row) {
+      throw new Error("Invalid ERP product reconciliation row.");
+    }
+
+    const canonicalProductId = asString(row.canonicalProductId);
+    const base = parseReconciliationBase({ ...row, name: asString(row.name) ?? "" });
+
+    if (!canonicalProductId) {
+      throw new Error("ERP product reconciliation response is missing canonicalProductId.");
+    }
+
+    return {
+      canonicalProductId,
+      unit: asString(row.unit),
+      barcode: asString(row.barcode),
+      ...base,
+    };
+  });
 }

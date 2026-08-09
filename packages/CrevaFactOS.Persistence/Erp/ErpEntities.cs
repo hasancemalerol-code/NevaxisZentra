@@ -115,8 +115,57 @@ public sealed class CanonicalErpProduct
 }
 
 /// <summary>
-/// Lightweight external-to-canonical mapping foundation (unmapped/mapped/ignored).
-/// No AI matching in ERP-1L.
+/// External ERP order projection. Not a ProductionOrder / SalesOrder SoR.
+/// </summary>
+public sealed class CanonicalErpOrder
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public string Provider { get; set; } = string.Empty;
+    public string ExternalId { get; set; } = string.Empty;
+    public string? ExternalCode { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
+    public string ExternalCustomerId { get; set; } = string.Empty;
+    public string? ExternalCustomerCode { get; set; }
+    public DateTimeOffset OrderDateUtc { get; set; }
+    public DateTimeOffset? RequestedDeliveryDateUtc { get; set; }
+    public string? CurrencyCode { get; set; }
+    public string Status { get; set; } = ErpOrderStatuses.Unknown;
+    public string? Reference { get; set; }
+    public string? Notes { get; set; }
+    public string? SourceVersion { get; set; }
+    public DateTimeOffset? SourceUpdatedAtUtc { get; set; }
+    public DateTimeOffset ImportedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+
+    public ICollection<CanonicalErpOrderLine> Lines { get; set; } = new List<CanonicalErpOrderLine>();
+}
+
+public sealed class CanonicalErpOrderLine
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConnectionProfileId { get; set; }
+    public Guid OrderId { get; set; }
+    public string ExternalLineId { get; set; } = string.Empty;
+    public int LineNumber { get; set; }
+    public string ExternalProductId { get; set; } = string.Empty;
+    public string? ExternalProductCode { get; set; }
+    public string? Description { get; set; }
+    public decimal Quantity { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public DateTimeOffset? RequestedDeliveryDateUtc { get; set; }
+    public string? SourceVersion { get; set; }
+
+    public CanonicalErpOrder? Order { get; set; }
+}
+
+/// <summary>
+/// External-to-internal mapping. CanonicalEntityId links the ERP projection;
+/// InternalEntityId is the human-confirmed operational reference (no auto-create).
 /// </summary>
 public sealed class ErpEntityMapping
 {
@@ -127,9 +176,13 @@ public sealed class ErpEntityMapping
     public string EntityType { get; set; } = string.Empty;
     public string ExternalId { get; set; } = string.Empty;
     public Guid? CanonicalEntityId { get; set; }
+    public Guid? InternalEntityId { get; set; }
+    public Guid? SuggestedInternalEntityId { get; set; }
+    public string? SuggestedReason { get; set; }
     public string Status { get; set; } = ErpMappingStatuses.Unmapped;
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
+    public uint Version { get; set; } = 1;
 }
 
 public static class ErpProviderKeys
@@ -170,22 +223,52 @@ public static class ErpSyncEntityTypes
 {
     public const string Customers = "customers";
     public const string Products = "products";
+    public const string Orders = "orders";
 }
 
 public static class ErpMappingStatuses
 {
     public const string Unmapped = "unmapped";
+    public const string Suggested = "suggested";
     public const string Mapped = "mapped";
     public const string Ignored = "ignored";
+    public const string Conflict = "conflict";
+}
+
+public static class ErpOrderStatuses
+{
+    public const string Open = "open";
+    public const string Confirmed = "confirmed";
+    public const string PartiallyFulfilled = "partially-fulfilled";
+    public const string Fulfilled = "fulfilled";
+    public const string Cancelled = "cancelled";
+    public const string Unknown = "unknown";
+}
+
+public static class ErpSourceFreshness
+{
+    public const string Fresh = "fresh";
+    public const string Stale = "stale";
+    public const string Unknown = "unknown";
+}
+
+public static class ErpReadinessBlockingCodes
+{
+    public const string CustomerUnmapped = "customer-unmapped";
+    public const string ProductUnmapped = "product-unmapped";
+    public const string MappingConflict = "mapping-conflict";
+    public const string SourceStale = "source-stale";
+    public const string MissingProductReference = "missing-product-reference";
+    public const string InvalidQuantity = "invalid-quantity";
 }
 
 public static class ErpCapabilities
 {
     public const string CustomersRead = "customers.read";
     public const string ProductsRead = "products.read";
-
-    // Future only — not implemented in ERP-1L
     public const string OrdersRead = "orders.read";
+
+    // Future only
     public const string InventoryRead = "inventory.read";
     public const string PurchasingRead = "purchasing.read";
     public const string ProductionRead = "production.read";

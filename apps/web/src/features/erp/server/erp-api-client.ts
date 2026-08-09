@@ -2,15 +2,23 @@ import "./erp-server-boundary";
 
 import type {
   CanonicalErpCustomer,
+  CanonicalErpOrderDetail,
+  CanonicalErpOrderSummary,
   CanonicalErpProduct,
   ErpConnection,
+  ErpCustomerReconciliation,
+  ErpProductReconciliation,
   ErpSyncRun,
   ErpWorkspaceSummary,
 } from "../domain/erp";
 import {
   parseCanonicalErpCustomerListApiResponse,
+  parseCanonicalErpOrderDetailApiResponse,
+  parseCanonicalErpOrderListApiResponse,
   parseCanonicalErpProductListApiResponse,
   parseErpConnectionListApiResponse,
+  parseErpCustomerReconciliationListApiResponse,
+  parseErpProductReconciliationListApiResponse,
   parseErpSyncRunListApiResponse,
   parseErpWorkspaceSummaryApiResponse,
 } from "./erp-api-contracts";
@@ -129,4 +137,37 @@ export function getErpWorkspaceSummary(
   context: ProductionOrderRequestContext,
 ): Promise<ErpApiResult<ErpWorkspaceSummary>> {
   return getJson(context, "/api/erp/workspace-summary", parseErpWorkspaceSummaryApiResponse);
+}
+
+export function listErpOrders(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly CanonicalErpOrderSummary[]>> {
+  return getJson(context, "/api/erp/orders", parseCanonicalErpOrderListApiResponse);
+}
+
+export function getErpOrder(
+  context: ProductionOrderRequestContext,
+  orderId: string,
+): Promise<ErpApiResult<CanonicalErpOrderDetail>> {
+  return getJson(context, `/api/erp/orders/${orderId}`, parseCanonicalErpOrderDetailApiResponse);
+}
+
+export function listErpCustomerReconciliation(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly ErpCustomerReconciliation[]>> {
+  return getJson(
+    context,
+    "/api/erp/reconciliation/customers",
+    parseErpCustomerReconciliationListApiResponse,
+  );
+}
+
+export function listErpProductReconciliation(
+  context: ProductionOrderRequestContext,
+): Promise<ErpApiResult<readonly ErpProductReconciliation[]>> {
+  return getJson(
+    context,
+    "/api/erp/reconciliation/products",
+    parseErpProductReconciliationListApiResponse,
+  );
 }

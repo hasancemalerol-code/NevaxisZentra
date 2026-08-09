@@ -173,7 +173,8 @@ public sealed record ErpWorkspaceSummaryReadModel(
     int ProblematicCount,
     DateTimeOffset? LastSyncAtUtc,
     int CustomerCount,
-    int ProductCount);
+    int ProductCount,
+    int OrderCount);
 
 public sealed record CreateErpConnectionCommand(
     string Provider,
@@ -195,3 +196,128 @@ public sealed record UpdateErpConnectionCommand(
     string ConnectionMode,
     string? CredentialReference,
     string Status);
+
+public sealed record CanonicalErpOrderLineReadModel(
+    Guid Id,
+    string ExternalLineId,
+    int LineNumber,
+    string ExternalProductId,
+    string? ExternalProductCode,
+    string? Description,
+    decimal Quantity,
+    string Unit,
+    DateTimeOffset? RequestedDeliveryDateUtc,
+    string? SourceVersion,
+    string ProductMappingStatus,
+    Guid? MappedInternalProductId);
+
+public sealed record CanonicalErpOrderSummaryReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string OrderNumber,
+    string ExternalCustomerId,
+    string? ExternalCustomerCode,
+    DateTimeOffset OrderDateUtc,
+    DateTimeOffset? RequestedDeliveryDateUtc,
+    string? CurrencyCode,
+    string Status,
+    string? Reference,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    int LineCount,
+    string CustomerMappingStatus,
+    bool ReadyForOperationalUse,
+    string SourceFreshness);
+
+public sealed record CanonicalErpOrderDetailReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string OrderNumber,
+    string ExternalCustomerId,
+    string? ExternalCustomerCode,
+    DateTimeOffset OrderDateUtc,
+    DateTimeOffset? RequestedDeliveryDateUtc,
+    string? CurrencyCode,
+    string Status,
+    string? Reference,
+    string? Notes,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset ImportedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    IReadOnlyList<CanonicalErpOrderLineReadModel> Lines,
+    ErpOrderReadinessReadModel Readiness);
+
+public sealed record ErpOrderReadinessReadModel(
+    Guid OrderId,
+    bool CustomerMapped,
+    bool AllProductsMapped,
+    int MissingProductMappings,
+    string SourceFreshness,
+    bool ReadyForOperationalUse,
+    IReadOnlyList<ErpReadinessBlockingReason> BlockingReasons);
+
+public sealed record ErpReadinessBlockingReason(string Code, string Message);
+
+public sealed record ErpMappingReadModel(
+    Guid Id,
+    Guid ConnectionProfileId,
+    string EntityType,
+    string ExternalId,
+    Guid? CanonicalEntityId,
+    Guid? InternalEntityId,
+    Guid? SuggestedInternalEntityId,
+    string? SuggestedReason,
+    string Status,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    uint Version);
+
+public sealed record ErpCustomerReconciliationReadModel(
+    Guid CanonicalCustomerId,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string Name,
+    string? TaxNumber,
+    string MappingStatus,
+    Guid? MappingId,
+    Guid? MappedInternalEntityId,
+    Guid? SuggestedInternalEntityId,
+    string? SuggestedReason,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    uint? MappingVersion);
+
+public sealed record ErpProductReconciliationReadModel(
+    Guid CanonicalProductId,
+    Guid ConnectionProfileId,
+    string Provider,
+    string ExternalId,
+    string? ExternalCode,
+    string Name,
+    string? Unit,
+    string? Barcode,
+    string MappingStatus,
+    Guid? MappingId,
+    Guid? MappedInternalEntityId,
+    Guid? SuggestedInternalEntityId,
+    string? SuggestedReason,
+    string? SourceVersion,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    uint? MappingVersion);
+
+public sealed record ConfirmErpMappingCommand(Guid MappingId, Guid TargetEntityId, uint ExpectedVersion);
+public sealed record IgnoreErpMappingCommand(Guid MappingId, uint ExpectedVersion);
+public sealed record RemapErpMappingCommand(Guid MappingId, Guid TargetEntityId, uint ExpectedVersion);

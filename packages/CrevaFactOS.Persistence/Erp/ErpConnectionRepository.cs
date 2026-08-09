@@ -305,6 +305,9 @@ public sealed class ErpConnectionRepository(
             var productCount = await dbContext.CanonicalErpProducts.AsNoTracking()
                 .CountAsync(c => c.TenantId == context.TenantId && c.FacilityId == context.FacilityId, ct);
 
+            var orderCount = await dbContext.CanonicalErpOrders.AsNoTracking()
+                .CountAsync(c => c.TenantId == context.TenantId && c.FacilityId == context.FacilityId, ct);
+
             var lastSync = await dbContext.ErpSyncRuns.AsNoTracking()
                 .Where(s => s.TenantId == context.TenantId
                     && s.FacilityId == context.FacilityId
@@ -325,7 +328,8 @@ public sealed class ErpConnectionRepository(
                 problematic,
                 lastSync ?? connections.MaxBy(c => c.LastSuccessfulSyncAtUtc)?.LastSuccessfulSyncAtUtc,
                 customerCount,
-                productCount);
+                productCount,
+                orderCount);
         }, cancellationToken);
 
     private static string? ValidateCommand(
@@ -428,5 +432,5 @@ public sealed class UnavailableErpConnectionRepository : IErpConnectionRepositor
     public Task<ErpWorkspaceSummaryReadModel> GetWorkspaceSummaryAsync(
         ErpOperationContext context,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(new ErpWorkspaceSummaryReadModel(0, 0, 0, null, 0, 0));
+        Task.FromResult(new ErpWorkspaceSummaryReadModel(0, 0, 0, null, 0, 0, 0));
 }
