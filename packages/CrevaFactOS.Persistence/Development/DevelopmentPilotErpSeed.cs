@@ -1,6 +1,7 @@
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Erp.Logo;
 using CrevaFactOS.Persistence.Erp.Mikro;
+using CrevaFactOS.Persistence.Erp.Netsis;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Development;
@@ -109,6 +110,43 @@ internal static class DevelopmentPilotErpSeed
             BaseEndpoint = null,
             ConnectionMode = ErpConnectionModes.Api,
             CredentialReference = MikroCredentialReferences.TestFixture,
+            Status = ErpConnectionStatuses.Configured,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public static async Task EnsureErpNetsisTestConnectionAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.ErpConnectionProfiles
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == DevelopmentPilotIds.ErpPilotNetsisTestConnectionId, cancellationToken);
+
+        if (existing)
+        {
+            return;
+        }
+
+        dbContext.ErpConnectionProfiles.Add(new ErpConnectionProfile
+        {
+            Id = DevelopmentPilotIds.ErpPilotNetsisTestConnectionId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            Provider = ErpProviderKeys.Netsis,
+            Name = "Development Netsis Test Transport",
+            ExternalCompanyId = NetsisReadTransportTestFixture.FixtureCompanyId,
+            ExternalCompanyCode = NetsisReadTransportTestFixture.FixtureCompanyCode,
+            BaseEndpoint = null,
+            ConnectionMode = ErpConnectionModes.Api,
+            CredentialReference = NetsisCredentialReferences.TestFixture,
             Status = ErpConnectionStatuses.Configured,
             CreatedAtUtc = seedTimestampUtc,
             UpdatedAtUtc = seedTimestampUtc,

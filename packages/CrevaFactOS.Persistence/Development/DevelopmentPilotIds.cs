@@ -303,6 +303,9 @@ public static class DevelopmentPilotIds
     public static readonly Guid ErpPilotMikroTestConnectionId =
         Guid.Parse("bb000001-0092-4000-8000-000000000092");
 
+    public static readonly Guid ErpPilotNetsisTestConnectionId =
+        Guid.Parse("bb000001-0093-4000-8000-000000000093");
+
     // Development-only facility: exists in tenant but has no pilot operator/reviewer membership.
     public static readonly Guid UnauthorizedFacilityId =
         Guid.Parse("bb000001-0005-4000-8000-000000000099");

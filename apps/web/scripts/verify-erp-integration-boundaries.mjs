@@ -127,7 +127,9 @@ for (const repo of [syncRepo, inventoryRepo, productionRepo, mappingRepo, writeb
 const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
 requireText(mikroAdapter, "class MikroErpAdapter", "Mikro adapter");
 forbidText(adapters, "class MikroErpAdapterPlaceholder", "Mikro placeholder removed");
-requireText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis placeholder");
+const netsisAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+requireText(netsisAdapter, "class NetsisErpAdapter", "Netsis adapter implemented");
+forbidText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis placeholder removed");
 const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 forbidText(adapters, "fallback to simulator", "no simulator fallback");

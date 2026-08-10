@@ -58,7 +58,8 @@ requireText(adapters, "ERP-PRD-001", "simulator product");
 requireText(adapters, "PP CAP 32", "simulator product name");
 const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
 requireText(mikroAdapter, "class MikroErpAdapter", "Mikro adapter");
-requireText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis readiness");
+const netsisAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+requireText(netsisAdapter, "class NetsisErpAdapter", "Netsis adapter implemented");
 const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 

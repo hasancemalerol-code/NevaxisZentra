@@ -462,6 +462,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotErpSeed.EnsureErpNetsisTestConnectionAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

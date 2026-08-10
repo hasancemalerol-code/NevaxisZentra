@@ -25,6 +25,8 @@ import {
   getErpLogoSetupGuidance,
   getErpMikroCapabilities,
   getErpMikroSetupGuidance,
+  getErpNetsisCapabilities,
+  getErpNetsisSetupGuidance,
   getErpProviderLabel,
   getErpSyncStatusLabel,
 } from "../presentation/erp-labels";
@@ -202,6 +204,8 @@ export function ErpWorkspaceView({
                         ? getErpLogoCapabilities()
                         : connection.provider === "mikro"
                           ? getErpMikroCapabilities()
+                          : connection.provider === "netsis"
+                            ? getErpNetsisCapabilities()
                           : []
                   }
                   connectionMode={connection.connectionMode}
@@ -460,6 +464,13 @@ export function ErpWorkspaceView({
         </section>
       ) : null}
 
+      {isConnectionPage && connections.some((connection) => connection.provider === "netsis") ? (
+        <section className="erp-section" aria-label="Netsis kurulum yönlendirmesi">
+          <ErpInfoBanner title="Netsis kurulum yönlendirmesi">
+            {getErpNetsisSetupGuidance()}
+          </ErpInfoBanner>
+        </section>
+      ) : null}
       {isConnectionPage && connections.some((connection) => connection.provider === "mikro") ? (
         <section className="erp-section erp-section--compact">
           <ErpInfoBanner title="Mikro kurulum yönlendirmesi">

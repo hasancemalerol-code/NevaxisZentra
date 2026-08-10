@@ -12,6 +12,9 @@ import {
   getErpMikroConnectionStateLabel,
   getErpMikroLiveValidatedLabel,
   getErpMikroTransportLabel,
+  getErpNetsisAdapterReadyLabel,
+  getErpNetsisConnectionStateLabel,
+  getErpNetsisLiveValidatedLabel,
   getErpProviderLabel,
   getErpSourceFreshnessLabel,
   getErpSourceFreshnessTone,
@@ -164,13 +167,15 @@ export function ErpProviderBadge({ provider, displayName }: ErpProviderBadgeProp
   const isSimulator = provider === "simulator";
   const isLogo = provider === "logo";
   const isMikro = provider === "mikro";
+  const isNetsis = provider === "netsis";
   const primaryLabel = isSimulator ? "ERP Simulator" : getErpProviderLabel(provider, displayName);
   return (
-    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}${isMikro ? " erp-provider-badge--mikro" : ""}`}>
+    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}${isMikro ? " erp-provider-badge--mikro" : ""}${isNetsis ? " erp-provider-badge--netsis" : ""}`}>
       <strong>{primaryLabel}</strong>
       {isSimulator ? <small>Geliştirme / Test</small> : null}
       {isLogo ? <small>{getErpLogoAdapterReadyLabel()}</small> : null}
       {isMikro ? <small>{getErpMikroAdapterReadyLabel()}</small> : null}
+      {isNetsis ? <small>{getErpNetsisAdapterReadyLabel()}</small> : null}
     </span>
   );
 }
@@ -403,7 +408,8 @@ export function ErpConnectionCard({
   const isSimulator = provider === "simulator";
   const isLogo = provider === "logo";
   const isMikro = provider === "mikro";
-  const isTestTransport = (isLogo || isMikro) && name.toLowerCase().includes("test transport");
+  const isNetsis = provider === "netsis";
+  const isTestTransport = (isLogo || isMikro || isNetsis) && name.toLowerCase().includes("test transport");
   const logoStateLabel = isLogo
     ? getErpLogoConnectionStateLabel({
         status,
@@ -420,11 +426,21 @@ export function ErpConnectionCard({
         lastErrorCode,
       })
     : undefined;
+  const netsisStateLabel = isNetsis
+    ? getErpNetsisConnectionStateLabel({
+        status,
+        hasCredentialReference,
+        connectionMode,
+        lastErrorCode,
+      })
+    : undefined;
   const liveValidatedLabel = isLogo && status === "healthy" && !isTestTransport
     ? getErpLogoLiveValidatedLabel(true)
     : isMikro && status === "healthy" && !isTestTransport
       ? getErpMikroLiveValidatedLabel(true)
-      : null;
+      : isNetsis && status === "healthy" && !isTestTransport
+        ? getErpNetsisLiveValidatedLabel(true)
+        : null;
 
   return (
     <article className="erp-connection-card erp-connection-card--compact">
@@ -434,7 +450,7 @@ export function ErpConnectionCard({
           <h3 className="erp-connection-card__name">{name}</h3>
         </div>
         <div className="erp-connection-card__top-actions">
-          <ErpHealthIndicator status={status} labelOverride={logoStateLabel ?? mikroStateLabel} />
+          <ErpHealthIndicator status={status} labelOverride={logoStateLabel ?? mikroStateLabel ?? netsisStateLabel} />
           <Link href={manageHref} className="erp-action erp-action--primary">
             Bağlantıyı Yönet
           </Link>
@@ -522,6 +538,11 @@ export function ErpConnectionCard({
         {isTestTransport && isMikro ? (
           <p className="erp-connection-card__disclaimer" role="note">
             Test bağlantısı — gerçek Mikro ERP bağlantısı değildir.
+          </p>
+        ) : null}
+        {isTestTransport && isNetsis ? (
+          <p className="erp-connection-card__disclaimer" role="note">
+            Test bağlantısı — gerçek Netsis ERP bağlantısı değildir.
           </p>
         ) : null}
         <div className="erp-connection-card__actions">

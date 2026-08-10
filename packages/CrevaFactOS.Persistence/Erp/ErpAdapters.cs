@@ -561,13 +561,6 @@ public sealed class SimulatorWritebackAdapter : IErpWritebackAdapter
     }
 }
 
-/// <summary>
-/// Placeholder Netsis adapter — contract readiness only. No real Netsis SDK/connection.
-/// </summary>
-public sealed class NetsisErpAdapterPlaceholder : UnsupportedErpAdapterBase
-{
-    public override string ProviderKey => ErpProviderKeys.Netsis;
-}
 
 public abstract class UnsupportedErpAdapterBase : IErpAdapter
 {

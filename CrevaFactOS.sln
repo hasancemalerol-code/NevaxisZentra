@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrevaFactOS.LogoBridge", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrevaFactOS.MikroBridge", "tools\CrevaFactOS.MikroBridge\CrevaFactOS.MikroBridge.csproj", "{4D08889C-2A55-494E-AEF7-136E1F3291E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrevaFactOS.NetsisBridge", "tools\CrevaFactOS.NetsisBridge\CrevaFactOS.NetsisBridge.csproj", "{5E19990D-3B66-5A5F-BF08-247F2G4302F9}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{809F86A1-1C4C-B159-0CD4-DF9D33D876CE}"
 EndProject
 Global
@@ -171,6 +173,18 @@ Global
 		{4D08889C-2A55-494E-AEF7-136E1F3291E8}.Release|x64.Build.0 = Release|Any CPU
 		{4D08889C-2A55-494E-AEF7-136E1F3291E8}.Release|x86.ActiveCfg = Release|Any CPU
 		{4D08889C-2A55-494E-AEF7-136E1F3291E8}.Release|x86.Build.0 = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|x64.Build.0 = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -178,5 +192,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3C97778B-1944-483D-9DE6-025D0E2180D7} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{4D08889C-2A55-494E-AEF7-136E1F3291E8} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{5E19990D-3B66-5A5F-BF08-247F2G4302F9} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

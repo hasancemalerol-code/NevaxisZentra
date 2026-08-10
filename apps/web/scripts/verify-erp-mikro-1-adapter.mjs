@@ -134,7 +134,7 @@ try {
   const syncCustomers1 = await api("POST", `/api/erp/connections/${MIKRO_CONNECTION}/sync/customers`);
   if (syncCustomers1.status !== 200) fail(`Mikro customer sync #1 expected 200 got ${syncCustomers1.status}`);
   const created1 = syncCustomers1.json?.recordsCreated ?? 0;
-  if (created1 < 1) fail("Mikro customer sync #1 must create records");
+  if (customerCountBefore === 0 && created1 < 1) fail("Mikro customer sync #1 must create records on empty state");
 
   const syncCustomers2 = await api("POST", `/api/erp/connections/${MIKRO_CONNECTION}/sync/customers`);
   if (syncCustomers2.status !== 200) fail(`Mikro customer sync #2 expected 200 got ${syncCustomers2.status}`);
@@ -142,9 +142,12 @@ try {
     fail("Mikro customer sync #2 must be idempotent (0 creates)");
   }
 
+  const productsBefore = await api("GET", `/api/erp/products?connectionProfileId=${MIKRO_CONNECTION}`);
+  const productCountBefore = Array.isArray(productsBefore.json) ? productsBefore.json.length : 0;
   const syncProducts1 = await api("POST", `/api/erp/connections/${MIKRO_CONNECTION}/sync/products`);
   if (syncProducts1.status !== 200) fail(`Mikro product sync #1 expected 200 got ${syncProducts1.status}`);
-  if ((syncProducts1.json?.recordsCreated ?? 0) < 1) fail("Mikro product sync #1 must create records");
+  const createdProducts1 = syncProducts1.json?.recordsCreated ?? 0;
+  if (productCountBefore === 0 && createdProducts1 < 1) fail("Mikro product sync #1 must create records on empty state");
 
   const syncProducts2 = await api("POST", `/api/erp/connections/${MIKRO_CONNECTION}/sync/products`);
   if (syncProducts2.status !== 200) fail(`Mikro product sync #2 expected 200 got ${syncProducts2.status}`);

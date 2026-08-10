@@ -5,6 +5,7 @@ using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Erp.Logo;
 using CrevaFactOS.Persistence.Erp.Mikro;
+using CrevaFactOS.Persistence.Erp.Netsis;
 using CrevaFactOS.Persistence.Tenancy;
 
 namespace CrevaFactOS.Api.Erp;
@@ -87,10 +88,17 @@ public static class ErpEndpointRouteBuilderExtensions
         services.AddSingleton<IMikroCredentialResolver, ConfigurationMikroCredentialResolver>();
         services.AddSingleton<MikroTransportResolver>();
 
+        services.AddSingleton<NetsisReadTransportOptions>();
+        services.AddSingleton<NetsisReadTransportTestFixture>();
+        services.AddSingleton<NetsisUnconfiguredReadTransport>();
+        services.AddHttpClient<NetsisBridgeReadTransport>();
+        services.AddSingleton<INetsisCredentialResolver, ConfigurationNetsisCredentialResolver>();
+        services.AddSingleton<NetsisTransportResolver>();
+
         services.AddSingleton<IErpAdapter, SimulatorErpAdapter>();
         services.AddSingleton<IErpAdapter, LogoErpAdapter>();
         services.AddSingleton<IErpAdapter, MikroErpAdapter>();
-        services.AddSingleton<IErpAdapter, NetsisErpAdapterPlaceholder>();
+        services.AddSingleton<IErpAdapter, NetsisErpAdapter>();
         services.AddSingleton<IErpAdapterResolver, ErpAdapterResolver>();
 
         services.AddScoped<IErpConnectionRepository>(serviceProvider =>

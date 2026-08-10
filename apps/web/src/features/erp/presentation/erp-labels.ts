@@ -2,6 +2,7 @@ import type { ErpConnectionStatus, ErpSyncRunStatus } from "../domain/erp";
 
 const LOGO_CAPABILITIES = ["customers.read", "products.read"] as const;
 const MIKRO_CAPABILITIES = ["customers.read", "products.read"] as const;
+const NETSIS_CAPABILITIES = ["customers.read", "products.read"] as const;
 
 export function getErpProviderLabel(provider: string, displayName?: string): string {
   if (provider === "simulator") {
@@ -17,7 +18,7 @@ export function getErpProviderLabel(provider: string, displayName?: string): str
   }
 
   if (provider === "netsis") {
-    return "Netsis (hazır değil)";
+    return displayName ?? "Netsis";
   }
 
   return provider;
@@ -29,6 +30,63 @@ export function getErpLogoCapabilities(): readonly string[] {
 
 export function getErpMikroCapabilities(): readonly string[] {
   return MIKRO_CAPABILITIES;
+}
+
+export function getErpNetsisCapabilities(): readonly string[] {
+  return NETSIS_CAPABILITIES;
+}
+
+export function getErpNetsisConnectionStateLabel(input: {
+  status: ErpConnectionStatus | string;
+  hasCredentialReference: boolean;
+  connectionMode: string;
+  lastErrorCode?: string | null;
+}): string {
+  if (input.lastErrorCode === "netsis.authentication.failed" || (!input.hasCredentialReference && input.connectionMode === "api")) {
+    return "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "healthy") {
+    return "Sağlıklı";
+  }
+
+  if (input.status === "configured" || input.status === "draft") {
+    return input.hasCredentialReference ? "Kurulum Bekliyor" : "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "degraded") {
+    return "Bağlantı Doğrulandı";
+  }
+
+  if (input.status === "unavailable") {
+    return "Bağlantı Kurulamadı";
+  }
+
+  return getErpConnectionStatusLabel(input.status);
+}
+
+export function getErpNetsisAdapterReadyLabel(): string {
+  return "Adapter Hazır";
+}
+
+export function getErpNetsisLiveValidatedLabel(isLiveValidated: boolean): string | null {
+  return isLiveValidated ? "Gerçek Netsis Bağlantısı Doğrulandı" : null;
+}
+
+export function getErpNetsisTransportLabel(connectionMode: string, hasTestFixtureCredential: boolean): string {
+  if (hasTestFixtureCredential) {
+    return "Test Transport";
+  }
+
+  if (connectionMode === "api") {
+    return "Netsis Bridge (HTTP)";
+  }
+
+  return "Yapılandırılmadı";
+}
+
+export function getErpNetsisSetupGuidance(): string {
+  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Netsis Bridge yapılandırılmalıdır.";
 }
 
 export function getErpMikroConnectionStateLabel(input: {
