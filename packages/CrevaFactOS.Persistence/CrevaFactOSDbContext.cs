@@ -13,6 +13,7 @@ using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Maintenance;
 using CrevaFactOS.Persistence.Erp;
+using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -103,6 +104,13 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaintenanceWorkNote> MaintenanceWorkNotes => Set<MaintenanceWorkNote>();
     public DbSet<PreventiveMaintenanceDue> PreventiveMaintenanceDues => Set<PreventiveMaintenanceDue>();
     public DbSet<MaintenancePartUsage> MaintenancePartUsages => Set<MaintenancePartUsage>();
+
+    // Edge Gateway foundation
+    public DbSet<EdgeGateway> EdgeGateways => Set<EdgeGateway>();
+    public DbSet<MachineRegistry> MachineRegistries => Set<MachineRegistry>();
+    public DbSet<MachineGatewayAssignment> MachineGatewayAssignments => Set<MachineGatewayAssignment>();
+    public DbSet<MachineEvent> MachineEvents => Set<MachineEvent>();
+    public DbSet<MachineRuntime> MachineRuntimes => Set<MachineRuntime>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -709,6 +717,37 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Edge Gateway foundation
+        modelBuilder.ApplyConfiguration(new EdgeGatewayEntityConfiguration());
+        modelBuilder.Entity<EdgeGateway>().HasQueryFilter(g =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && g.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineRegistryEntityConfiguration());
+        modelBuilder.Entity<MachineRegistry>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineGatewayAssignmentEntityConfiguration());
+        modelBuilder.Entity<MachineGatewayAssignment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineEventEntityConfiguration());
+        modelBuilder.Entity<MachineEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineRuntimeEntityConfiguration());
+        modelBuilder.Entity<MachineRuntime>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());

@@ -1,0 +1,299 @@
+/* Edge Gateway workspace — follows ERP workspace rhythm */
+
+.edge-workspace-page {
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+}
+
+.edge-workspace-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-bottom: 4px;
+}
+
+.edge-workspace-header h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+  line-height: 1.15;
+  color: #12263a;
+}
+
+.edge-header__intro {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.edge-header__subtitle {
+  font-size: 13px;
+  color: #5b6b7c;
+  line-height: 1.4;
+}
+
+/* KPI grid */
+.edge-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .edge-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.edge-kpi {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.edge-kpi__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #155eef;
+  flex: 0 0 auto;
+}
+
+.edge-kpi__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.edge-kpi__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #5b6b7c;
+  text-transform: uppercase;
+}
+
+.edge-kpi__value {
+  display: block;
+  margin-top: 2px;
+  font-size: 18px;
+  line-height: 1.15;
+  color: #12263a;
+  font-weight: 600;
+}
+
+/* Gateway/machine cards */
+.edge-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.edge-card {
+  padding: 14px 16px;
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edge-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.edge-card__code {
+  font-size: 13px;
+  font-weight: 700;
+  color: #12263a;
+  letter-spacing: 0.02em;
+}
+
+.edge-card__name {
+  font-size: 13px;
+  color: #3d4f5f;
+  margin: 0;
+}
+
+.edge-card__meta {
+  font-size: 11px;
+  color: #7a8fa0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Status badges */
+.edge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.edge-status--online {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.edge-status--offline {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.edge-status--degraded {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.edge-status--disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.edge-status--unknown {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.machine-status--running {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.machine-status--idle {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.machine-status--stopped {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.machine-status--fault {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.machine-status--maintenance {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.machine-status--unknown {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Capabilities list */
+.edge-capabilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edge-capabilities li {
+  font-size: 13px;
+  color: #3d4f5f;
+  padding-left: 1.2em;
+  position: relative;
+}
+
+.edge-capabilities li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #155eef;
+  font-weight: 700;
+}
+
+/* Simulator disclaimer */
+.edge-simulator-disclaimer {
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #78350f;
+  line-height: 1.5;
+}
+
+/* Events list */
+.edge-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edge-event-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.edge-event-row--duplicate {
+  opacity: 0.6;
+  background: #fef2f2;
+}
+
+.edge-event-row--out-of-order {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.edge-event__seq {
+  font-family: monospace;
+  font-size: 11px;
+  color: #64748b;
+  min-width: 48px;
+}
+
+.edge-event__kind {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.edge-event__time {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.edge-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #12263a;
+  letter-spacing: 0.01em;
+  margin: 0 0 8px 0;
+}

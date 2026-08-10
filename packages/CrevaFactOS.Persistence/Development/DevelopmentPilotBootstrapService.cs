@@ -372,6 +372,20 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureErpWritebackExecutePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeIngestPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEdgeIngestPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -463,6 +477,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotErpSeed.EnsureErpNetsisTestConnectionAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotEdgeSeed.EnsureEdgeSimulatorGatewayAsync(
                 dbContext,
                 tenant.Id,
                 facility.Id,
@@ -2249,5 +2269,32 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ErpPermissionKeys.WritebackExecute,
             DevelopmentPilotIds.ErpWritebackExecutePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureEdgeReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            EdgePermissionKeys.Read,
+            DevelopmentPilotIds.EdgeReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureEdgeManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            EdgePermissionKeys.Manage,
+            DevelopmentPilotIds.EdgeManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureEdgeIngestPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            EdgePermissionKeys.Ingest,
+            DevelopmentPilotIds.EdgeIngestPermissionDefinitionId,
             cancellationToken);
 }
