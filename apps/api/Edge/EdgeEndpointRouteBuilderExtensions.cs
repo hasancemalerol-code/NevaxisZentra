@@ -62,6 +62,46 @@ public static class EdgeServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
+        services.AddScoped<IEdgeDowntimeIngestionService>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableEdgeDowntimeIngestionService()
+                : new EdgeDowntimeIngestionService(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IEdgeAlarmIngestionService>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableEdgeAlarmIngestionService()
+                : new EdgeAlarmIngestionService(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IEdgeSetupIngestionService>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableEdgeSetupIngestionService()
+                : new EdgeSetupIngestionService(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IEdgeScrapIngestionService>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableEdgeScrapIngestionService()
+                : new EdgeScrapIngestionService(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
         services.AddSingleton<IEdgeGatewayAdapter, EdgeSimulatorAdapter>();
         services.AddSingleton<IEdgeGatewayAdapterResolver, EdgeGatewayAdapterResolver>();
 
@@ -98,11 +138,27 @@ public static class EdgeEndpointRouteBuilderExtensions
         group.MapGet("/machines/{machineId:guid}/signals", GetSignalProjectionAsync);
         group.MapGet("/machines/{machineId:guid}/state-transitions", ListStateTransitionsAsync);
 
+        // EDGE-3 operational observation reads
+        group.MapGet("/machines/{machineId:guid}/downtime", ListDowntimeAsync);
+        group.MapGet("/machines/{machineId:guid}/alarms", ListAlarmHistoryAsync);
+        group.MapGet("/machines/{machineId:guid}/alarms/active", ListActiveAlarmsAsync);
+        group.MapGet("/machines/{machineId:guid}/setups", ListSetupsAsync);
+        group.MapGet("/machines/{machineId:guid}/scrap-observations", ListScrapObservationsAsync);
+        group.MapGet("/machines/{machineId:guid}/operational-summary", GetOperationalSummaryAsync);
+
         // Development-only ingestion endpoints (simulator integration)
         var devGroup = endpoints.MapGroup("/api/edge/dev").RequireAuthorization();
         devGroup.MapPost("/telemetry", DevIngestTelemetryAsync);
         devGroup.MapPost("/cycle", DevIngestCycleAsync);
         devGroup.MapPost("/counter", DevIngestCounterAsync);
+        // EDGE-3 development-only operational ingestion
+        devGroup.MapPost("/downtime/start", DevIngestDowntimeStartAsync);
+        devGroup.MapPost("/downtime/end", DevIngestDowntimeEndAsync);
+        devGroup.MapPost("/alarm/raise", DevIngestAlarmRaiseAsync);
+        devGroup.MapPost("/alarm/clear", DevIngestAlarmClearAsync);
+        devGroup.MapPost("/setup/start", DevIngestSetupStartAsync);
+        devGroup.MapPost("/setup/complete", DevIngestSetupCompleteAsync);
+        devGroup.MapPost("/scrap", DevIngestScrapAsync);
 
         return endpoints;
     }
@@ -458,6 +514,300 @@ public static class EdgeEndpointRouteBuilderExtensions
             new TelemetryIngestResponseDto(true, false, false, result.ObservationId,
                 result.CounterResetSuspected ? EdgeFailureCodes.CounterResetSuspected : null, null));
     }
+
+    // ── EDGE-3 read handlers ──────────────────────────────────────────────
+
+    private static async Task<IResult> ListDowntimeAsync(
+        Guid machineId,
+        Guid? facilityId,
+        int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var rows = await edgeQueryRepository.ListDowntimeEpisodesAsync(
+            context, machineId, limit ?? 50, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListAlarmHistoryAsync(
+        Guid machineId,
+        Guid? facilityId,
+        int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var rows = await edgeQueryRepository.ListAlarmHistoryAsync(
+            context, machineId, limit ?? 50, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListActiveAlarmsAsync(
+        Guid machineId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var rows = await edgeQueryRepository.ListActiveAlarmsAsync(context, machineId, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListSetupsAsync(
+        Guid machineId,
+        Guid? facilityId,
+        int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var rows = await edgeQueryRepository.ListSetupEpisodesAsync(
+            context, machineId, limit ?? 50, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> ListScrapObservationsAsync(
+        Guid machineId,
+        Guid? facilityId,
+        int? limit,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var rows = await edgeQueryRepository.ListScrapObservationsAsync(
+            context, machineId, limit ?? 50, cancellationToken);
+        return TypedResults.Ok(rows);
+    }
+
+    private static async Task<IResult> GetOperationalSummaryAsync(
+        Guid machineId,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeQueryRepository edgeQueryRepository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var summary = await edgeQueryRepository.GetOperationalSummaryAsync(context, machineId, cancellationToken);
+        return TypedResults.Ok(summary);
+    }
+
+    // ── EDGE-3 development-only ingestion handlers ────────────────────────
+
+    private static async Task<IResult> DevIngestDowntimeStartAsync(
+        DowntimeStartIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeDowntimeIngestionService downtimeService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await downtimeService.IngestDowntimeStartAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Downtime start ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestDowntimeEndAsync(
+        DowntimeEndIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeDowntimeIngestionService downtimeService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await downtimeService.IngestDowntimeEndAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Downtime end ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestAlarmRaiseAsync(
+        AlarmRaiseIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeAlarmIngestionService alarmService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await alarmService.IngestAlarmRaisedAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Alarm raise ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestAlarmClearAsync(
+        AlarmClearIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeAlarmIngestionService alarmService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await alarmService.IngestAlarmClearedAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Alarm clear ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestSetupStartAsync(
+        SetupStartIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeSetupIngestionService setupService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await setupService.IngestSetupStartedAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Setup start ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestSetupCompleteAsync(
+        SetupCompleteIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeSetupIngestionService setupService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await setupService.IngestSetupCompletedAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Setup complete ingestion failed.");
+    }
+
+    private static async Task<IResult> DevIngestScrapAsync(
+        ScrapIngestRequest request,
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IEdgeScrapIngestionService scrapService,
+        CorrelationContext correlationContext,
+        IWebHostEnvironment env,
+        CancellationToken cancellationToken)
+    {
+        if (!env.IsDevelopment())
+            return TypedResults.Problem(
+                title: "Dev ingestion endpoint is not available outside Development environment.",
+                statusCode: StatusCodes.Status403Forbidden,
+                extensions: EdgeEndpointHelpers.FailureExt(EdgeApiFailureCodes.UnexpectedError));
+
+        var (context, failResult) = await EdgeEndpointHelpers.ResolveIngestAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await scrapService.IngestScrapObservedAsync(context, request, cancellationToken);
+        return MapOperationalResult(result, "Scrap observation ingestion failed.");
+    }
+
+    private static IResult MapOperationalResult(OperationalIngestResult result, string defaultTitle)
+    {
+        if (result.IsDuplicate)
+            return TypedResults.Ok(new OperationalIngestResponseDto(
+                false, true, false, false, result.ObservationId, result.EpisodeId,
+                result.IsMicroStop, result.DurationMs, null, null));
+
+        if (result.IsUnmatched)
+            return TypedResults.Ok(new OperationalIngestResponseDto(
+                false, false, result.IsOutOfOrder, true, result.ObservationId, result.EpisodeId,
+                result.IsMicroStop, result.DurationMs, result.FailureCode, result.FailureReason));
+
+        if (!result.Accepted)
+            return TypedResults.Problem(
+                title: result.FailureReason ?? defaultTitle,
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                extensions: EdgeEndpointHelpers.FailureExt(result.FailureCode ?? EdgeApiFailureCodes.UnexpectedError));
+
+        return TypedResults.Created(
+            (string?)null,
+            new OperationalIngestResponseDto(
+                true, false, result.IsOutOfOrder, false, result.ObservationId, result.EpisodeId,
+                result.IsMicroStop, result.DurationMs, null, null));
+    }
 }
 
 internal sealed record EdgeIngestResponseDto(
@@ -473,3 +823,15 @@ internal sealed record TelemetryIngestResponseDto(
     Guid? Id,
     string? WarningCode,
     string? WarningReason);
+
+internal sealed record OperationalIngestResponseDto(
+    bool Accepted,
+    bool IsDuplicate,
+    bool IsOutOfOrder,
+    bool IsUnmatched,
+    Guid? ObservationId,
+    Guid? EpisodeId,
+    bool? IsMicroStop,
+    long? DurationMs,
+    string? FailureCode,
+    string? FailureReason);

@@ -26,6 +26,18 @@ public static class EdgeFailureCodes
     public const string CycleDuplicate = "edge.cycle.duplicate";
     public const string CounterInvalid = "edge.counter.invalid";
     public const string CounterResetSuspected = "edge.counter.reset-suspected";
+    // EDGE-3 operational observation failure codes
+    public const string DowntimeInvalid = "edge.downtime.invalid";
+    public const string DowntimeDuplicate = "edge.downtime.duplicate";
+    public const string DowntimeUnmatchedEnd = "edge.downtime.unmatched-end";
+    public const string AlarmInvalid = "edge.alarm.invalid";
+    public const string AlarmDuplicate = "edge.alarm.duplicate";
+    public const string AlarmUnmatchedClear = "edge.alarm.unmatched-clear";
+    public const string SetupInvalid = "edge.setup.invalid";
+    public const string SetupDuplicate = "edge.setup.duplicate";
+    public const string SetupUnmatchedComplete = "edge.setup.unmatched-complete";
+    public const string ScrapInvalid = "edge.scrap.invalid";
+    public const string ScrapDuplicate = "edge.scrap.duplicate";
 }
 
 // ---------- Read models ----------
@@ -224,7 +236,127 @@ public sealed record MachineSignalProjectionReadModel(
     long? LatestCounter,
     string Quality,
     DateTimeOffset? LastTelemetryAtUtc,
+    bool IsInObservedDowntime,
+    DateTimeOffset? CurrentDowntimeStartedAtUtc,
+    long? ObservedDowntimeDurationMs,
+    int ActiveAlarmCount,
+    string? HighestAlarmSeverity,
+    bool IsInObservedSetup,
+    DateTimeOffset? ObservedSetupStartedAtUtc,
+    long ObservedScrapCount,
+    double ObservedScrapQuantity,
+    DateTimeOffset? LastObservedScrapAtUtc,
     DateTimeOffset UpdatedAtUtc);
+
+// ============================================================
+// EDGE-3: Downtime / Alarm / Setup / Scrap read models
+// ============================================================
+
+public sealed record DowntimeEpisodeReadModel(
+    Guid Id,
+    Guid MachineId,
+    string? ExternalEpisodeId,
+    DateTimeOffset StartedAtSourceUtc,
+    DateTimeOffset? EndedAtSourceUtc,
+    long? DurationMs,
+    string? ReasonCode,
+    string? ReasonCategory,
+    string? ReasonText,
+    bool IsMicroStop,
+    string Quality,
+    bool IsClosed,
+    bool IsOutOfOrder,
+    long? StartSourceSequence,
+    long? EndSourceSequence);
+
+public sealed record ActiveAlarmReadModel(
+    Guid Id,
+    Guid MachineId,
+    string AlarmIdentity,
+    string ExternalAlarmCode,
+    string? AlarmText,
+    string Severity,
+    DateTimeOffset RaisedAtSourceUtc,
+    long? SourceSequence,
+    string Quality);
+
+public sealed record AlarmObservationReadModel(
+    Guid Id,
+    Guid MachineId,
+    string AlarmIdentity,
+    string ExternalAlarmCode,
+    string? AlarmText,
+    string Severity,
+    string EventKind,
+    DateTimeOffset SourceTimestampUtc,
+    DateTimeOffset ReceivedAtUtc,
+    long? SourceSequence,
+    string Quality,
+    bool IsDuplicate,
+    bool IsOutOfOrder,
+    bool IsUnmatchedClear);
+
+public sealed record AlarmProjectionReadModel(
+    Guid MachineId,
+    int ActiveAlarmCount,
+    string? HighestSeverity,
+    string? LatestAlarmCode,
+    string? LatestAlarmText,
+    DateTimeOffset? LatestRaisedAtUtc,
+    DateTimeOffset UpdatedAtUtc);
+
+public sealed record SetupEpisodeReadModel(
+    Guid Id,
+    Guid MachineId,
+    string? ExternalEpisodeId,
+    string? SetupType,
+    string? FromReference,
+    string? ToReference,
+    DateTimeOffset StartedAtSourceUtc,
+    DateTimeOffset? CompletedAtSourceUtc,
+    long? DurationMs,
+    string Quality,
+    bool IsClosed,
+    bool IsOutOfOrder,
+    long? StartSourceSequence,
+    long? CompleteSourceSequence);
+
+public sealed record ScrapObservationReadModel(
+    Guid Id,
+    Guid MachineId,
+    string ExternalObservationId,
+    double Quantity,
+    string Unit,
+    string? ReasonCode,
+    string? ReasonCategory,
+    string? ReasonText,
+    string Quality,
+    DateTimeOffset SourceTimestampUtc,
+    DateTimeOffset ReceivedAtUtc,
+    long? SourceSequence,
+    bool IsDuplicate,
+    bool IsOutOfOrder);
+
+public sealed record MachineOperationalSummaryReadModel(
+    Guid MachineId,
+    bool IsInObservedDowntime,
+    DateTimeOffset? CurrentDowntimeStartedAtUtc,
+    long? ObservedDowntimeDurationMs,
+    long ObservedDowntimeCount,
+    long ObservedDowntimeTotalDurationMs,
+    long ObservedMicroStopCount,
+    int ActiveAlarmCount,
+    string? HighestAlarmSeverity,
+    int AlarmHistoryCount,
+    int CriticalAlarmCount,
+    bool IsInObservedSetup,
+    DateTimeOffset? ObservedSetupStartedAtUtc,
+    long ObservedSetupCount,
+    long ObservedSetupTotalDurationMs,
+    long ObservedScrapCount,
+    double ObservedScrapQuantity,
+    DateTimeOffset? LastObservedScrapAtUtc,
+    DateTimeOffset? UpdatedAtUtc);
 
 // ============================================================
 // EDGE-2: Ingestion request/result types
@@ -316,4 +448,135 @@ public sealed record CounterIngestResult
 
     public static CounterIngestResult Success(Guid observationId, bool resetSuspected) =>
         new() { Accepted = true, CounterResetSuspected = resetSuspected, ObservationId = observationId };
+}
+
+// ============================================================
+// EDGE-3: Ingestion request/result types
+// ============================================================
+
+public sealed record DowntimeStartIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string? ExternalEpisodeId,
+    string? ReasonCode,
+    string? ReasonCategory,
+    string? ReasonText,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record DowntimeEndIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string? ExternalEpisodeId,
+    string? ReasonCode,
+    string? ReasonCategory,
+    string? ReasonText,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record AlarmRaiseIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string AlarmIdentity,
+    string ExternalAlarmCode,
+    string? AlarmText,
+    string Severity,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record AlarmClearIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string AlarmIdentity,
+    string? ExternalAlarmCode,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record SetupStartIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string? ExternalEpisodeId,
+    string? SetupType,
+    string? FromReference,
+    string? ToReference,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record SetupCompleteIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string? ExternalEpisodeId,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record ScrapIngestRequest(
+    Guid MachineId,
+    Guid GatewayId,
+    string ExternalObservationId,
+    double Quantity,
+    string Unit,
+    string? ReasonCode,
+    string? ReasonCategory,
+    string? ReasonText,
+    string Quality,
+    string? Transport,
+    DateTimeOffset SourceTimestampUtc,
+    long? SourceSequence,
+    string IdempotencyKey);
+
+public sealed record OperationalIngestResult
+{
+    public bool Accepted { get; init; }
+    public bool IsDuplicate { get; init; }
+    public bool IsOutOfOrder { get; init; }
+    public bool IsUnmatched { get; init; }
+    public Guid? ObservationId { get; init; }
+    public Guid? EpisodeId { get; init; }
+    public bool? IsMicroStop { get; init; }
+    public long? DurationMs { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+
+    public static OperationalIngestResult Duplicate(Guid existingId) =>
+        new() { Accepted = false, IsDuplicate = true, ObservationId = existingId };
+
+    public static OperationalIngestResult Failure(string code, string? reason = null) =>
+        new() { Accepted = false, FailureCode = code, FailureReason = reason };
+
+    public static OperationalIngestResult Unmatched(string code, Guid? observationId = null, string? reason = null) =>
+        new() { Accepted = false, IsUnmatched = true, ObservationId = observationId, FailureCode = code, FailureReason = reason };
+
+    public static OperationalIngestResult Success(
+        Guid observationId,
+        bool outOfOrder,
+        Guid? episodeId = null,
+        bool? isMicroStop = null,
+        long? durationMs = null) =>
+        new()
+        {
+            Accepted = true,
+            IsOutOfOrder = outOfOrder,
+            ObservationId = observationId,
+            EpisodeId = episodeId,
+            IsMicroStop = isMicroStop,
+            DurationMs = durationMs,
+        };
 }

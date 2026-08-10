@@ -34,6 +34,34 @@ export const MACHINE_EVENT_KIND_LABELS: Record<string, string> = {
   // EDGE-2 canonical typed signals
   "cycle-completed": "Çevrim Tamamlandı (Gözlenen)",
   "counter-observed": "Sayaç Gözlemi",
+  // EDGE-3 operational observations
+  "machine.downtime.started": "Gözlenen Duruş Başladı",
+  "machine.downtime.ended": "Gözlenen Duruş Bitti",
+  "machine.alarm.raised": "Alarm Yükseltildi",
+  "machine.alarm.cleared": "Alarm Temizlendi",
+  "machine.setup.started": "Gözlenen Setup Başladı",
+  "machine.setup.completed": "Gözlenen Setup Tamamlandı",
+  "machine.scrap.observed": "Makineden Gözlenen Fire",
+};
+
+export const ALARM_SEVERITY_LABELS: Record<string, string> = {
+  info: "Bilgi",
+  warning: "Uyarı",
+  error: "Hata",
+  critical: "Kritik",
+  unknown: "Bilinmiyor",
+};
+
+export const DOWNTIME_REASON_CATEGORY_LABELS: Record<string, string> = {
+  unknown: "Bilinmiyor",
+  machine: "Makine",
+  material: "Malzeme",
+  operator: "Operatör",
+  quality: "Kalite",
+  setup: "Setup",
+  external: "Dış",
+  planned: "Planlı",
+  other: "Diğer",
 };
 
 export const TELEMETRY_QUALITY_LABELS: Record<string, string> = {
@@ -154,6 +182,29 @@ export function getConnectivityLabel(connectivity: string): string {
   return CONNECTIVITY_LABELS[connectivity] ?? connectivity;
 }
 
+export function getAlarmSeverityLabel(severity: string): string {
+  return ALARM_SEVERITY_LABELS[severity] ?? severity;
+}
+
+export function getAlarmSeverityClass(severity: string): string {
+  switch (severity) {
+    case "info":
+      return "alarm-severity--info";
+    case "warning":
+      return "alarm-severity--warning";
+    case "error":
+      return "alarm-severity--error";
+    case "critical":
+      return "alarm-severity--critical";
+    default:
+      return "alarm-severity--unknown";
+  }
+}
+
+export function getDowntimeReasonCategoryLabel(category: string): string {
+  return DOWNTIME_REASON_CATEGORY_LABELS[category] ?? category;
+}
+
 export function formatDurationMs(ms: number | null | undefined): string {
   if (ms == null) return "—";
   if (ms < 1000) return `${ms} ms`;
@@ -185,4 +236,12 @@ export const EDGE_CAPABILITIES = [
   "Çoğaltma güvenli sayaç (yinelenen çevrim ObservedCycleCount'u artırmaz)",
   "Sıra dışı güvenli projeksiyonlar (en son sıra gerilemez)",
   "Üretim mutasyonu YOK — EDGE sadece gözlem sahibidir",
+  // EDGE-3
+  "Gözlenen duruş (machine.downtime.started / ended) — resmi üretim duruşu DEĞİLDİR",
+  "Gözlenen mikro-duruş tespiti (eşik tabanlı, observed-only)",
+  "Alarm gözlemi (machine.alarm.raised / cleared) — kök neden analizi YOK",
+  "Gözlenen setup / değişim (machine.setup.started / completed)",
+  "Makineden gözlenen fire (machine.scrap.observed) — resmi kalite kaydı DEĞİLDİR",
+  "Operasyonel özet projeksiyonu (gözlenen duruş / alarm / setup / fire)",
+  "Observed-only ownership — EDGE üretim/kalite mutasyonu yapmaz",
 ] as const;

@@ -38,6 +38,63 @@ public static class MachineEventKinds
     // EDGE-2 canonical typed signals
     public const string CycleCompleted = "cycle-completed";
     public const string CounterObserved = "counter-observed";
+    // EDGE-3 operational observations
+    public const string DowntimeStarted = "machine.downtime.started";
+    public const string DowntimeEnded = "machine.downtime.ended";
+    public const string AlarmRaised = "machine.alarm.raised";
+    public const string AlarmCleared = "machine.alarm.cleared";
+    public const string SetupStarted = "machine.setup.started";
+    public const string SetupCompleted = "machine.setup.completed";
+    public const string ScrapObserved = "machine.scrap.observed";
+}
+
+/// <summary>
+/// Canonical downtime reason categories. Generic — not vendor-specific codes.
+/// </summary>
+public static class DowntimeReasonCategories
+{
+    public const string Unknown = "unknown";
+    public const string Machine = "machine";
+    public const string Material = "material";
+    public const string Operator = "operator";
+    public const string Quality = "quality";
+    public const string Setup = "setup";
+    public const string External = "external";
+    public const string Planned = "planned";
+    public const string Other = "other";
+}
+
+/// <summary>
+/// Canonical alarm severity foundation. Do not infer from arbitrary text.
+/// </summary>
+public static class AlarmSeverities
+{
+    public const string Info = "info";
+    public const string Warning = "warning";
+    public const string Error = "error";
+    public const string Critical = "critical";
+    public const string Unknown = "unknown";
+
+    public static int Rank(string? severity) => severity switch
+    {
+        Critical => 4,
+        Error => 3,
+        Warning => 2,
+        Info => 1,
+        _ => 0,
+    };
+
+    public static string Higher(string? a, string? b) =>
+        Rank(a) >= Rank(b) ? (a ?? Unknown) : (b ?? Unknown);
+}
+
+/// <summary>
+/// Configurable Edge observation defaults. Fixture threshold is deterministic — not a universal factory rule.
+/// </summary>
+public static class EdgeObservationDefaults
+{
+    /// <summary>Observed micro-stop threshold in milliseconds (fixture default: 60s).</summary>
+    public const long MicroStopThresholdMs = 60_000L;
 }
 
 /// <summary>
@@ -330,7 +387,7 @@ public sealed class MachineStateTransition
 
 /// <summary>
 /// Read-only downstream signal projection for other bounded contexts.
-/// EDGE-2 observation data only. No Production mutation allowed.
+/// EDGE-2/EDGE-3 observation data only. No Production mutation allowed.
 /// One row per machine.
 /// </summary>
 public sealed class MachineSignalProjection
@@ -347,5 +404,236 @@ public sealed class MachineSignalProjection
     public long? LatestCounter { get; set; }
     public string Quality { get; set; } = TelemetryQualities.Unknown;
     public DateTimeOffset? LastTelemetryAtUtc { get; set; }
+    // EDGE-3 operational observation fields (explicitly observational naming)
+    public bool IsInObservedDowntime { get; set; }
+    public DateTimeOffset? CurrentDowntimeStartedAtUtc { get; set; }
+    public long? ObservedDowntimeDurationMs { get; set; }
+    public int ActiveAlarmCount { get; set; }
+    public string? HighestAlarmSeverity { get; set; }
+    public bool IsInObservedSetup { get; set; }
+    public DateTimeOffset? ObservedSetupStartedAtUtc { get; set; }
+    public long ObservedScrapCount { get; set; }
+    public double ObservedScrapQuantity { get; set; }
+    public DateTimeOffset? LastObservedScrapAtUtc { get; set; }
+    public long? LastOperationalSourceSequence { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+// ============================================================
+// EDGE-3: Downtime, Alarm, Setup/Changeover, Scrap observations
+// ============================================================
+
+/// <summary>
+/// Observed downtime episode. Projection may update to close an episode.
+/// NOT official Production downtime classification. No Maintenance request created.
+/// </summary>
+public sealed class MachineDowntimeEpisode
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public string? ExternalEpisodeId { get; set; }
+    public DateTimeOffset StartedAtSourceUtc { get; set; }
+    public DateTimeOffset? EndedAtSourceUtc { get; set; }
+    public DateTimeOffset StartedAtReceivedUtc { get; set; }
+    public DateTimeOffset? EndedAtReceivedUtc { get; set; }
+    public long? DurationMs { get; set; }
+    public string? ReasonCode { get; set; }
+    public string? ReasonCategory { get; set; }
+    public string? ReasonText { get; set; }
+    public bool IsMicroStop { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public long? StartSourceSequence { get; set; }
+    public long? EndSourceSequence { get; set; }
+    public string StartIdempotencyKey { get; set; } = string.Empty;
+    public string? EndIdempotencyKey { get; set; }
+    public bool IsClosed { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Append-only downtime observation event (start or end). Evidence history.
+/// </summary>
+public sealed class MachineDowntimeObservation
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public Guid? EpisodeId { get; set; }
+    public string EventKind { get; set; } = MachineEventKinds.DowntimeStarted;
+    public string? ExternalEpisodeId { get; set; }
+    public string? ReasonCode { get; set; }
+    public string? ReasonCategory { get; set; }
+    public string? ReasonText { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public DateTimeOffset SourceTimestampUtc { get; set; }
+    public DateTimeOffset ReceivedAtUtc { get; set; }
+    public long? SourceSequence { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public bool IsDuplicate { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public bool IsUnmatchedEnd { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Append-only alarm observation history (raised / cleared).
+/// Does NOT create Maintenance work orders. No PLC acknowledge.
+/// </summary>
+public sealed class MachineAlarmObservation
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public string AlarmIdentity { get; set; } = string.Empty;
+    public string ExternalAlarmCode { get; set; } = string.Empty;
+    public string? AlarmText { get; set; }
+    public string Severity { get; set; } = AlarmSeverities.Unknown;
+    public string EventKind { get; set; } = MachineEventKinds.AlarmRaised;
+    public DateTimeOffset SourceTimestampUtc { get; set; }
+    public DateTimeOffset ReceivedAtUtc { get; set; }
+    public long? SourceSequence { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public bool IsDuplicate { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public bool IsUnmatchedClear { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Active alarm projection — one row per (machine, alarm identity) while active.
+/// </summary>
+public sealed class MachineActiveAlarm
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public string AlarmIdentity { get; set; } = string.Empty;
+    public string ExternalAlarmCode { get; set; } = string.Empty;
+    public string? AlarmText { get; set; }
+    public string Severity { get; set; } = AlarmSeverities.Unknown;
+    public DateTimeOffset RaisedAtSourceUtc { get; set; }
+    public DateTimeOffset RaisedAtReceivedUtc { get; set; }
+    public long? SourceSequence { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public Guid RaisedObservationId { get; set; }
+}
+
+/// <summary>
+/// Per-machine active alarm aggregate projection.
+/// </summary>
+public sealed class MachineAlarmProjection
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public int ActiveAlarmCount { get; set; }
+    public string? HighestSeverity { get; set; }
+    public string? LatestAlarmCode { get; set; }
+    public string? LatestAlarmText { get; set; }
+    public DateTimeOffset? LatestRaisedAtUtc { get; set; }
+    public long? LastSourceSequence { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Observed setup/changeover episode. NOT official Production changeover confirmation.
+/// No canonical production-order or mold identifiers required.
+/// </summary>
+public sealed class MachineSetupEpisode
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public string? ExternalEpisodeId { get; set; }
+    public string? SetupType { get; set; }
+    public string? FromReference { get; set; }
+    public string? ToReference { get; set; }
+    public DateTimeOffset StartedAtSourceUtc { get; set; }
+    public DateTimeOffset? CompletedAtSourceUtc { get; set; }
+    public DateTimeOffset StartedAtReceivedUtc { get; set; }
+    public DateTimeOffset? CompletedAtReceivedUtc { get; set; }
+    public long? DurationMs { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public long? StartSourceSequence { get; set; }
+    public long? CompleteSourceSequence { get; set; }
+    public string StartIdempotencyKey { get; set; } = string.Empty;
+    public string? CompleteIdempotencyKey { get; set; }
+    public bool IsClosed { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Append-only setup observation event (started / completed).
+/// </summary>
+public sealed class MachineSetupObservation
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public Guid? EpisodeId { get; set; }
+    public string EventKind { get; set; } = MachineEventKinds.SetupStarted;
+    public string? ExternalEpisodeId { get; set; }
+    public string? SetupType { get; set; }
+    public string? FromReference { get; set; }
+    public string? ToReference { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public DateTimeOffset SourceTimestampUtc { get; set; }
+    public DateTimeOffset ReceivedAtUtc { get; set; }
+    public long? SourceSequence { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public bool IsDuplicate { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public bool IsUnmatchedComplete { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}
+
+/// <summary>
+/// Append-only machine scrap/reject observation.
+/// NOT official Production scrap quantity. NOT Quality disposition.
+/// </summary>
+public sealed class MachineScrapObservation
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MachineId { get; set; }
+    public Guid GatewayId { get; set; }
+    public string ExternalObservationId { get; set; } = string.Empty;
+    public double Quantity { get; set; }
+    public string Unit { get; set; } = "count";
+    public string? ReasonCode { get; set; }
+    public string? ReasonCategory { get; set; }
+    public string? ReasonText { get; set; }
+    public string Quality { get; set; } = TelemetryQualities.Unknown;
+    public string? Transport { get; set; }
+    public DateTimeOffset SourceTimestampUtc { get; set; }
+    public DateTimeOffset ReceivedAtUtc { get; set; }
+    public long? SourceSequence { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public bool IsDuplicate { get; set; }
+    public bool IsOutOfOrder { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 }

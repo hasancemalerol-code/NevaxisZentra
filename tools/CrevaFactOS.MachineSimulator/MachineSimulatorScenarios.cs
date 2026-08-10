@@ -401,6 +401,203 @@ public static class MachineSimulatorScenarios
         new SimulatedCounter("machine_counter", 102, "good"),
         new SimulatedCounter("machine_counter", 5, "good"),
     ];
+
+    // ── EDGE-3 deterministic operational scenarios ────────────────────────
+
+    /// <summary>
+    /// Running → downtime start → stopped → downtime end → running.
+    /// Deterministic duration = 5 minutes.
+    /// </summary>
+    public static (SimulatedEvent Start, SimulatedEvent End) GetDowntimeScenario()
+    {
+        var start = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:DT-START-100",
+            MachineCode: "CNC-001",
+            EventKind: "machine.downtime.started",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(40),
+            SourceSequence: 100,
+            Payload: """{"externalEpisodeId":"SIM-DT-001","reasonCode":"jam","reasonCategory":"machine","reasonText":"fixture jam"}""");
+
+        var end = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:DT-END-102",
+            MachineCode: "CNC-001",
+            EventKind: "machine.downtime.ended",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(45),
+            SourceSequence: 102,
+            Payload: """{"externalEpisodeId":"SIM-DT-001"}""");
+
+        return (start, end);
+    }
+
+    /// <summary>
+    /// Short downtime below MicroStopThresholdMs (60s fixture) → IsMicroStop = true.
+    /// Observed micro-stop — not official Production microstop.
+    /// </summary>
+    public static (SimulatedEvent Start, SimulatedEvent End) GetMicroStopScenario()
+    {
+        var start = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:MS-START-110",
+            MachineCode: "CNC-001",
+            EventKind: "machine.downtime.started",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(50),
+            SourceSequence: 110,
+            Payload: """{"externalEpisodeId":"SIM-MS-001","reasonCode":"brief-stop","reasonCategory":"operator"}""");
+
+        var end = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:MS-END-111",
+            MachineCode: "CNC-001",
+            EventKind: "machine.downtime.ended",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(50).AddSeconds(30),
+            SourceSequence: 111,
+            Payload: """{"externalEpisodeId":"SIM-MS-001"}""");
+
+        return (start, end);
+    }
+
+    /// <summary>Raise SIM-ALARM-001 severity=error then clear.</summary>
+    public static (SimulatedEvent Raise, SimulatedEvent Clear) GetAlarmScenario()
+    {
+        var raise = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-RAISE-001",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.raised",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(55),
+            SourceSequence: 120,
+            Payload: """{"alarmIdentity":"SIM-ALARM-001","externalAlarmCode":"SIM-ALARM-001","alarmText":"Simulator fixture alarm","severity":"error"}""");
+
+        var clear = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-CLEAR-001",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.cleared",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(56),
+            SourceSequence: 121,
+            Payload: """{"alarmIdentity":"SIM-ALARM-001","externalAlarmCode":"SIM-ALARM-001"}""");
+
+        return (raise, clear);
+    }
+
+    /// <summary>Raise warning + critical; clear critical → highest becomes warning.</summary>
+    public static (SimulatedEvent Warning, SimulatedEvent Critical, SimulatedEvent ClearCritical, SimulatedEvent ClearWarning)
+        GetMultipleAlarmScenario()
+    {
+        var warning = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-WARN-200",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.raised",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(60),
+            SourceSequence: 200,
+            Payload: """{"alarmIdentity":"SIM-ALARM-WARN","externalAlarmCode":"SIM-ALARM-WARN","alarmText":"Warning fixture","severity":"warning"}""");
+
+        var critical = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-CRIT-201",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.raised",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(60).AddSeconds(5),
+            SourceSequence: 201,
+            Payload: """{"alarmIdentity":"SIM-ALARM-CRIT","externalAlarmCode":"SIM-ALARM-CRIT","alarmText":"Critical fixture","severity":"critical"}""");
+
+        var clearCritical = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-CRIT-CLEAR-202",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.cleared",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(61),
+            SourceSequence: 202,
+            Payload: """{"alarmIdentity":"SIM-ALARM-CRIT","externalAlarmCode":"SIM-ALARM-CRIT"}""");
+
+        var clearWarning = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-WARN-CLEAR-203",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.cleared",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(62),
+            SourceSequence: 203,
+            Payload: """{"alarmIdentity":"SIM-ALARM-WARN","externalAlarmCode":"SIM-ALARM-WARN"}""");
+
+        return (warning, critical, clearCritical, clearWarning);
+    }
+
+    /// <summary>Setup start → complete with deterministic duration (10 minutes).</summary>
+    public static (SimulatedEvent Start, SimulatedEvent Complete) GetSetupScenario()
+    {
+        var start = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SETUP-START-300",
+            MachineCode: "CNC-001",
+            EventKind: "machine.setup.started",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(70),
+            SourceSequence: 300,
+            Payload: """{"externalEpisodeId":"SIM-SETUP-001","setupType":"changeover","fromReference":"PROG-A42","toReference":"PROG-B17"}""");
+
+        var complete = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SETUP-END-302",
+            MachineCode: "CNC-001",
+            EventKind: "machine.setup.completed",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(80),
+            SourceSequence: 302,
+            Payload: """{"externalEpisodeId":"SIM-SETUP-001"}""");
+
+        return (start, complete);
+    }
+
+    /// <summary>Simulator-only scrap observation: qty 2, unit=count, reason=test-fixture.</summary>
+    public static SimulatedEvent GetScrapScenario() =>
+        new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SCRAP-400",
+            MachineCode: "CNC-001",
+            EventKind: "machine.scrap.observed",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(85),
+            SourceSequence: 400,
+            Payload: """{"externalObservationId":"SIM-SCRAP-001","quantity":2,"unit":"count","reasonCode":"test-fixture","reasonCategory":"quality","reasonText":"simulator-only scrap observation"}""");
+
+    /// <summary>Out-of-order downtime: start 100, end 102, older start 99 — episode stays closed.</summary>
+    public static SimulatedEvent GetOutOfOrderDowntimeStart() =>
+        new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:DT-OOO-START-99",
+            MachineCode: "CNC-001",
+            EventKind: "machine.downtime.started",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(39),
+            SourceSequence: 99,
+            Payload: """{"externalEpisodeId":"SIM-DT-OOO-99","reasonCode":"stale","reasonCategory":"unknown"}""");
+
+    /// <summary>Out-of-order alarm: raised 200, cleared 202, older raised 199 — must not reactivate.</summary>
+    public static SimulatedEvent GetOutOfOrderAlarmRaise() =>
+        new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:ALM-OOO-199",
+            MachineCode: "CNC-001",
+            EventKind: "machine.alarm.raised",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(59),
+            SourceSequence: 199,
+            Payload: """{"alarmIdentity":"SIM-ALARM-OOO","externalAlarmCode":"SIM-ALARM-OOO","alarmText":"Stale raise","severity":"error"}""");
+
+    /// <summary>Out-of-order setup: started 300, completed 302, older started 299.</summary>
+    public static SimulatedEvent GetOutOfOrderSetupStart() =>
+        new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SETUP-OOO-299",
+            MachineCode: "CNC-001",
+            EventKind: "machine.setup.started",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(69),
+            SourceSequence: 299,
+            Payload: """{"externalEpisodeId":"SIM-SETUP-OOO","setupType":"stale","fromReference":"OLD","toReference":"NEW"}""");
+
+    /// <summary>Out-of-order scrap: later observation then older — latest projection must not regress.</summary>
+    public static (SimulatedEvent Later, SimulatedEvent Older) GetOutOfOrderScrapScenario()
+    {
+        var later = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SCRAP-500",
+            MachineCode: "CNC-001",
+            EventKind: "machine.scrap.observed",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(90),
+            SourceSequence: 500,
+            Payload: """{"externalObservationId":"SIM-SCRAP-500","quantity":3,"unit":"count","reasonCode":"test-fixture"}""");
+
+        var older = new SimulatedEvent(
+            IdempotencyKey: "SIM-EDGE3:CNC-001:SCRAP-499",
+            MachineCode: "CNC-001",
+            EventKind: "machine.scrap.observed",
+            SourceTimestampUtc: BaseTimestamp.AddMinutes(89),
+            SourceSequence: 499,
+            Payload: """{"externalObservationId":"SIM-SCRAP-499","quantity":1,"unit":"count","reasonCode":"test-fixture"}""");
+
+        return (later, older);
+    }
 }
 
 public sealed record SimulatedMachine(

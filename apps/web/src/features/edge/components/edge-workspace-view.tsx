@@ -16,11 +16,14 @@ import {
   getTelemetryQualityClass,
   getMetricLabel,
   getConnectivityLabel,
+  getAlarmSeverityLabel,
+  getAlarmSeverityClass,
+  getDowntimeReasonCategoryLabel,
   formatDurationMs,
 } from "../presentation/edge-labels";
 
 // ---------------------------------------------------------------------------
-// Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2)
+// Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2 + EDGE-3)
 // ---------------------------------------------------------------------------
 
 interface EdgeGatewayReadModel {
@@ -135,7 +138,122 @@ interface MachineSignalProjectionReadModel {
   latestCounter?: number | null;
   quality: string;
   lastTelemetryAtUtc?: string | null;
+  // EDGE-3 observational fields (optional for backward compat)
+  isInObservedDowntime?: boolean;
+  currentDowntimeStartedAtUtc?: string | null;
+  observedDowntimeDurationMs?: number | null;
+  activeAlarmCount?: number;
+  highestAlarmSeverity?: string | null;
+  isInObservedSetup?: boolean;
+  observedSetupStartedAtUtc?: string | null;
+  observedScrapCount?: number;
+  observedScrapQuantity?: number;
+  lastObservedScrapAtUtc?: string | null;
   updatedAtUtc: string;
+}
+
+// EDGE-3 types
+interface DowntimeEpisodeReadModel {
+  id: string;
+  machineId: string;
+  externalEpisodeId?: string | null;
+  startedAtSourceUtc: string;
+  endedAtSourceUtc?: string | null;
+  durationMs?: number | null;
+  reasonCode?: string | null;
+  reasonCategory?: string | null;
+  reasonText?: string | null;
+  isMicroStop: boolean;
+  quality: string;
+  isClosed: boolean;
+  isOutOfOrder: boolean;
+  startSourceSequence?: number | null;
+  endSourceSequence?: number | null;
+}
+
+interface ActiveAlarmReadModel {
+  id: string;
+  machineId: string;
+  alarmIdentity: string;
+  externalAlarmCode: string;
+  alarmText?: string | null;
+  severity: string;
+  raisedAtSourceUtc: string;
+  sourceSequence?: number | null;
+  quality: string;
+}
+
+interface AlarmObservationReadModel {
+  id: string;
+  machineId: string;
+  alarmIdentity: string;
+  externalAlarmCode: string;
+  alarmText?: string | null;
+  severity: string;
+  eventKind: string;
+  sourceTimestampUtc: string;
+  receivedAtUtc: string;
+  sourceSequence?: number | null;
+  quality: string;
+  isDuplicate: boolean;
+  isOutOfOrder: boolean;
+  isUnmatchedClear: boolean;
+}
+
+interface SetupEpisodeReadModel {
+  id: string;
+  machineId: string;
+  externalEpisodeId?: string | null;
+  setupType?: string | null;
+  fromReference?: string | null;
+  toReference?: string | null;
+  startedAtSourceUtc: string;
+  completedAtSourceUtc?: string | null;
+  durationMs?: number | null;
+  quality: string;
+  isClosed: boolean;
+  isOutOfOrder: boolean;
+  startSourceSequence?: number | null;
+  completeSourceSequence?: number | null;
+}
+
+interface ScrapObservationReadModel {
+  id: string;
+  machineId: string;
+  externalObservationId: string;
+  quantity: number;
+  unit: string;
+  reasonCode?: string | null;
+  reasonCategory?: string | null;
+  reasonText?: string | null;
+  quality: string;
+  sourceTimestampUtc: string;
+  receivedAtUtc: string;
+  sourceSequence?: number | null;
+  isDuplicate: boolean;
+  isOutOfOrder: boolean;
+}
+
+interface MachineOperationalSummaryReadModel {
+  machineId: string;
+  isInObservedDowntime: boolean;
+  currentDowntimeStartedAtUtc?: string | null;
+  observedDowntimeDurationMs?: number | null;
+  observedDowntimeCount: number;
+  observedDowntimeTotalDurationMs: number;
+  observedMicroStopCount: number;
+  activeAlarmCount: number;
+  highestAlarmSeverity?: string | null;
+  alarmHistoryCount: number;
+  criticalAlarmCount: number;
+  isInObservedSetup: boolean;
+  observedSetupStartedAtUtc?: string | null;
+  observedSetupCount: number;
+  observedSetupTotalDurationMs: number;
+  observedScrapCount: number;
+  observedScrapQuantity: number;
+  lastObservedScrapAtUtc?: string | null;
+  updatedAtUtc?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -337,6 +455,156 @@ function StateTransitionRow({ t }: { t: StateTransitionReadModel }) {
   );
 }
 
+function AlarmSeverityBadge({ severity }: { severity: string }) {
+  return (
+    <span className={`alarm-severity ${getAlarmSeverityClass(severity)}`}>
+      {getAlarmSeverityLabel(severity)}
+    </span>
+  );
+}
+
+function DowntimeEpisodeRow({ episode }: { episode: DowntimeEpisodeReadModel }) {
+  const reason =
+    episode.reasonText ||
+    episode.reasonCode ||
+    "—";
+
+  return (
+    <tr className={episode.isOutOfOrder ? "edge-ops-table__oor" : undefined}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(episode.startedAtSourceUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {episode.endedAtSourceUtc
+          ? new Date(episode.endedAtSourceUtc).toLocaleTimeString("tr-TR")
+          : "—"}
+      </td>
+      <td>{formatDurationMs(episode.durationMs)}</td>
+      <td>{reason}</td>
+      <td>
+        {episode.reasonCategory
+          ? getDowntimeReasonCategoryLabel(episode.reasonCategory)
+          : "—"}
+      </td>
+      <td>
+        {episode.isMicroStop ? (
+          <span className="edge-micro-stop-badge">Gözlenen mikro-duruş</span>
+        ) : (
+          "—"
+        )}
+      </td>
+      <td>
+        <TelemetryQualityBadge quality={episode.quality} />
+      </td>
+    </tr>
+  );
+}
+
+function ActiveAlarmRow({ alarm }: { alarm: ActiveAlarmReadModel }) {
+  return (
+    <tr>
+      <td>
+        <span className="edge-alarm-code">{alarm.externalAlarmCode}</span>
+      </td>
+      <td>{alarm.alarmText ?? "—"}</td>
+      <td>
+        <AlarmSeverityBadge severity={alarm.severity} />
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(alarm.raisedAtSourceUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td>
+        <span className="edge-alarm-status edge-alarm-status--active">Aktif</span>
+      </td>
+    </tr>
+  );
+}
+
+function AlarmHistoryRow({ obs }: { obs: AlarmObservationReadModel }) {
+  const isCleared = obs.eventKind === "machine.alarm.cleared";
+  return (
+    <tr
+      className={[
+        obs.isDuplicate ? "edge-ops-table__duplicate" : "",
+        obs.isOutOfOrder ? "edge-ops-table__oor" : "",
+      ]
+        .filter(Boolean)
+        .join(" ") || undefined}
+    >
+      <td>
+        <span className="edge-alarm-code">{obs.externalAlarmCode}</span>
+      </td>
+      <td>{obs.alarmText ?? "—"}</td>
+      <td>
+        <AlarmSeverityBadge severity={obs.severity} />
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(obs.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td>
+        <span
+          className={`edge-alarm-status ${
+            isCleared ? "edge-alarm-status--cleared" : "edge-alarm-status--raised"
+          }`}
+        >
+          {isCleared ? "Temizlendi" : "Yükseltildi"}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+function SetupEpisodeRow({ episode }: { episode: SetupEpisodeReadModel }) {
+  return (
+    <tr className={episode.isOutOfOrder ? "edge-ops-table__oor" : undefined}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(episode.startedAtSourceUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {episode.completedAtSourceUtc
+          ? new Date(episode.completedAtSourceUtc).toLocaleTimeString("tr-TR")
+          : "—"}
+      </td>
+      <td>{formatDurationMs(episode.durationMs)}</td>
+      <td>{episode.fromReference ?? episode.setupType ?? "—"}</td>
+      <td>{episode.toReference ?? "—"}</td>
+      <td>
+        <TelemetryQualityBadge quality={episode.quality} />
+      </td>
+    </tr>
+  );
+}
+
+function ScrapObservationRow({ scrap }: { scrap: ScrapObservationReadModel }) {
+  const reason =
+    scrap.reasonText ||
+    scrap.reasonCode ||
+    "—";
+
+  return (
+    <tr
+      className={[
+        scrap.isDuplicate ? "edge-ops-table__duplicate" : "",
+        scrap.isOutOfOrder ? "edge-ops-table__oor" : "",
+      ]
+        .filter(Boolean)
+        .join(" ") || undefined}
+    >
+      <td className="edge-scrap-qty">
+        {scrap.quantity.toLocaleString("tr-TR")}
+      </td>
+      <td>{scrap.unit}</td>
+      <td>{reason}</td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(scrap.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td>
+        <TelemetryQualityBadge quality={scrap.quality} />
+      </td>
+    </tr>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main workspace view
 // ---------------------------------------------------------------------------
@@ -350,6 +618,13 @@ interface EdgeWorkspaceViewProps {
   cycleHistory?: ObservedCycleReadModel[];
   signalProjection?: MachineSignalProjectionReadModel | null;
   stateTransitions?: StateTransitionReadModel[];
+  // EDGE-3 (optional, default empty)
+  downtimeEpisodes?: DowntimeEpisodeReadModel[];
+  activeAlarms?: ActiveAlarmReadModel[];
+  alarmHistory?: AlarmObservationReadModel[];
+  setupEpisodes?: SetupEpisodeReadModel[];
+  scrapObservations?: ScrapObservationReadModel[];
+  operationalSummary?: MachineOperationalSummaryReadModel | null;
 }
 
 export function EdgeWorkspaceView({
@@ -361,6 +636,12 @@ export function EdgeWorkspaceView({
   cycleHistory = [],
   signalProjection = null,
   stateTransitions = [],
+  downtimeEpisodes = [],
+  activeAlarms = [],
+  alarmHistory = [],
+  setupEpisodes = [],
+  scrapObservations = [],
+  operationalSummary = null,
 }: EdgeWorkspaceViewProps) {
   const onlineMachines = machines.filter((m) => m.isReadyForProduction).length;
   const totalEvents = recentEvents.length;
@@ -588,6 +869,54 @@ export function EdgeWorkspaceView({
                   <TelemetryQualityBadge quality={signalProjection.quality} />
                 </span>
               </div>
+              {signalProjection.isInObservedDowntime != null && (
+                <div className="edge-signal-item">
+                  <span className="edge-signal-item__label">
+                    Gözlenen Duruşta
+                  </span>
+                  <span className="edge-signal-item__value">
+                    {signalProjection.isInObservedDowntime ? "Evet" : "Hayır"}
+                  </span>
+                </div>
+              )}
+              {signalProjection.activeAlarmCount != null && (
+                <div className="edge-signal-item">
+                  <span className="edge-signal-item__label">Aktif Alarm</span>
+                  <span className="edge-signal-item__value">
+                    {signalProjection.activeAlarmCount}
+                    {signalProjection.highestAlarmSeverity && (
+                      <>
+                        {" · "}
+                        <AlarmSeverityBadge
+                          severity={signalProjection.highestAlarmSeverity}
+                        />
+                      </>
+                    )}
+                  </span>
+                </div>
+              )}
+              {signalProjection.isInObservedSetup != null && (
+                <div className="edge-signal-item">
+                  <span className="edge-signal-item__label">
+                    Gözlenen Setup&apos;ta
+                  </span>
+                  <span className="edge-signal-item__value">
+                    {signalProjection.isInObservedSetup ? "Evet" : "Hayır"}
+                  </span>
+                </div>
+              )}
+              {signalProjection.observedScrapCount != null && (
+                <div className="edge-signal-item">
+                  <span className="edge-signal-item__label">
+                    Makineden Gözlenen Fire
+                  </span>
+                  <span className="edge-signal-item__value">
+                    {signalProjection.observedScrapCount}
+                    {signalProjection.observedScrapQuantity != null &&
+                      ` · ${signalProjection.observedScrapQuantity.toLocaleString("tr-TR")}`}
+                  </span>
+                </div>
+              )}
             </div>
             <p className="edge-signal-disclaimer">
               Salt okunur sinyal projeksiyonu — Üretim mutasyonu yoktur. Bu
@@ -609,9 +938,197 @@ export function EdgeWorkspaceView({
         </section>
       )}
 
+      {/* EDGE-3: Operational summary cards */}
+      {operationalSummary && (
+        <section>
+          <h2 className="edge-section-title">Operasyonel Özet (Gözlenen)</h2>
+          <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
+            Simülatör verisi — gerçek makine bağlantısı değildir.
+          </p>
+          <div className="edge-ops-summary-grid">
+            <div className="edge-ops-summary-card">
+              <span className="edge-ops-summary-card__label">Gözlenen Duruş</span>
+              <span className="edge-ops-summary-card__value">
+                {operationalSummary.isInObservedDowntime ? "Aktif" : "Yok"}
+              </span>
+              <span className="edge-ops-summary-card__meta">
+                {operationalSummary.observedDowntimeCount} kayıt
+                {operationalSummary.observedMicroStopCount > 0 &&
+                  ` · ${operationalSummary.observedMicroStopCount} mikro-duruş`}
+              </span>
+            </div>
+            <div className="edge-ops-summary-card">
+              <span className="edge-ops-summary-card__label">Aktif Alarm</span>
+              <span className="edge-ops-summary-card__value">
+                {operationalSummary.activeAlarmCount}
+              </span>
+              <span className="edge-ops-summary-card__meta">
+                {operationalSummary.highestAlarmSeverity
+                  ? getAlarmSeverityLabel(operationalSummary.highestAlarmSeverity)
+                  : "—"}
+              </span>
+            </div>
+            <div className="edge-ops-summary-card">
+              <span className="edge-ops-summary-card__label">Gözlenen Setup</span>
+              <span className="edge-ops-summary-card__value">
+                {operationalSummary.isInObservedSetup ? "Aktif" : "Yok"}
+              </span>
+              <span className="edge-ops-summary-card__meta">
+                {operationalSummary.observedSetupCount} kayıt
+              </span>
+            </div>
+            <div className="edge-ops-summary-card edge-ops-summary-card--scrap">
+              <span className="edge-ops-summary-card__label">
+                Makineden Gözlenen Fire
+              </span>
+              <span className="edge-ops-summary-card__value">
+                {operationalSummary.observedScrapQuantity.toLocaleString("tr-TR")}
+              </span>
+              <span className="edge-ops-summary-card__meta">
+                {operationalSummary.observedScrapCount} gözlem
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-3: Gözlenen Duruşlar */}
+      {downtimeEpisodes.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Gözlenen Duruşlar</h2>
+          <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
+            Simülatör verisi — gerçek makine bağlantısı değildir.
+          </p>
+          <div style={{ overflowX: "auto" }}>
+            <table className="edge-ops-table">
+              <thead>
+                <tr>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Duration</th>
+                  <th>Reason</th>
+                  <th>Category</th>
+                  <th>Micro-stop</th>
+                  <th>Quality</th>
+                </tr>
+              </thead>
+              <tbody>
+                {downtimeEpisodes.slice(0, 15).map((e) => (
+                  <DowntimeEpisodeRow key={e.id} episode={e} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-3: Aktif Alarmlar */}
+      {activeAlarms.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Aktif Alarmlar</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table className="edge-ops-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Text</th>
+                  <th>Severity</th>
+                  <th>Raised</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeAlarms.map((a) => (
+                  <ActiveAlarmRow key={a.id} alarm={a} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-3: Alarm Geçmişi */}
+      {alarmHistory.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Alarm Geçmişi</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table className="edge-ops-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Text</th>
+                  <th>Severity</th>
+                  <th>Raised</th>
+                  <th>Cleared/Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {alarmHistory.slice(0, 15).map((o) => (
+                  <AlarmHistoryRow key={o.id} obs={o} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-3: Gözlenen Setup / Değişimler */}
+      {setupEpisodes.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Gözlenen Setup / Değişimler</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table className="edge-ops-table">
+              <thead>
+                <tr>
+                  <th>Start</th>
+                  <th>Complete</th>
+                  <th>Duration</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Quality</th>
+                </tr>
+              </thead>
+              <tbody>
+                {setupEpisodes.slice(0, 15).map((e) => (
+                  <SetupEpisodeRow key={e.id} episode={e} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-3: Makineden Gözlenen Fire */}
+      {scrapObservations.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Makineden Gözlenen Fire</h2>
+          <p className="edge-scrap-disclaimer">
+            Bu değer makine gözlemidir; resmi üretim/kalite kaydı değildir.
+          </p>
+          <div style={{ overflowX: "auto" }}>
+            <table className="edge-ops-table">
+              <thead>
+                <tr>
+                  <th>Quantity</th>
+                  <th>Unit</th>
+                  <th>Reason</th>
+                  <th>Time</th>
+                  <th>Quality</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scrapObservations.slice(0, 15).map((s) => (
+                  <ScrapObservationRow key={s.id} scrap={s} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
       {/* Capabilities */}
       <section>
-        <h2 className="edge-section-title">EDGE-1 + EDGE-2 Yetenekleri</h2>
+        <h2 className="edge-section-title">EDGE-1 + EDGE-2 + EDGE-3 Yetenekleri</h2>
         <ul className="edge-capabilities">
           {EDGE_CAPABILITIES.map((cap) => (
             <li key={cap}>{cap}</li>
@@ -622,9 +1139,10 @@ export function EdgeWorkspaceView({
       {/* Simulator note */}
       <div className="edge-simulator-disclaimer">
         <strong>Simülatör modu aktif:</strong> Bu görünüm deterministik test
-        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1/EDGE-2
+        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1/EDGE-2/EDGE-3
         kapsamı dışındadır. Makine yazma/kontrol komutları gönderilmez.
-        Gözlenen Çevrim sayısı resmi Üretim adedi değildir.
+        Gözlenen Çevrim sayısı resmi Üretim adedi değildir. Gözlenen duruş, alarm,
+        setup ve fire değerleri observed-only&apos;dir; resmi üretim/kalite kaydı değildir.
       </div>
     </div>
   );

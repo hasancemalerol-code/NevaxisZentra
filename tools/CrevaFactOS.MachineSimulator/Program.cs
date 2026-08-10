@@ -112,6 +112,83 @@ app.MapGet("/simulate/scenarios/counter-reset", () =>
     return Results.Ok(new { scenario = "counter-reset", note = "100 → 101 → 102 → 5. Last observation must be flagged as counter_reset_suspected.", counters = counters.Select(c => new { counterKey = c.CounterKey, counterValue = c.CounterValue, quality = c.Quality }) });
 });
 
+// EDGE-3 scenario fixtures (deterministic observation events — not real machine signals)
+app.MapGet("/simulate/scenarios/downtime", () =>
+{
+    var (start, end) = MachineSimulatorScenarios.GetDowntimeScenario();
+    return Results.Ok(new
+    {
+        scenario = "downtime",
+        note = "start seq 100 → end seq 102. Observed duration 5 minutes. Not official Production downtime.",
+        events = new[] { Describe(start), Describe(end) },
+    });
+});
+
+app.MapGet("/simulate/scenarios/micro-stop", () =>
+{
+    var (start, end) = MachineSimulatorScenarios.GetMicroStopScenario();
+    return Results.Ok(new
+    {
+        scenario = "micro-stop",
+        note = "30s episode below 60s fixture threshold → Observed micro-stop. Not official Production microstop.",
+        events = new[] { Describe(start), Describe(end) },
+    });
+});
+
+app.MapGet("/simulate/scenarios/alarm", () =>
+{
+    var (raise, clear) = MachineSimulatorScenarios.GetAlarmScenario();
+    return Results.Ok(new
+    {
+        scenario = "alarm",
+        note = "SIM-ALARM-001 severity=error then clear. No Maintenance WO.",
+        events = new[] { Describe(raise), Describe(clear) },
+    });
+});
+
+app.MapGet("/simulate/scenarios/multiple-alarms", () =>
+{
+    var (warning, critical, clearCritical, clearWarning) = MachineSimulatorScenarios.GetMultipleAlarmScenario();
+    return Results.Ok(new
+    {
+        scenario = "multiple-alarms",
+        note = "warning+critical active → clear critical → highest=warning.",
+        events = new[] { Describe(warning), Describe(critical), Describe(clearCritical), Describe(clearWarning) },
+    });
+});
+
+app.MapGet("/simulate/scenarios/setup", () =>
+{
+    var (start, complete) = MachineSimulatorScenarios.GetSetupScenario();
+    return Results.Ok(new
+    {
+        scenario = "setup",
+        note = "Gözlenen Setup / Değişim — not official Production changeover.",
+        events = new[] { Describe(start), Describe(complete) },
+    });
+});
+
+app.MapGet("/simulate/scenarios/scrap", () =>
+{
+    var scrap = MachineSimulatorScenarios.GetScrapScenario();
+    return Results.Ok(new
+    {
+        scenario = "scrap",
+        note = "quantity 2 unit=count reason=test-fixture. Observed only — not Quality disposition.",
+        @event = Describe(scrap),
+    });
+});
+
+static object Describe(SimulatedEvent ev) => new
+{
+    idempotencyKey = ev.IdempotencyKey,
+    machineCode = ev.MachineCode,
+    eventKind = ev.EventKind,
+    sourceTimestampUtc = ev.SourceTimestampUtc,
+    sourceSequence = ev.SourceSequence,
+    payload = ev.Payload,
+};
+
 // Manual trigger: push all machine events to the main API
 // Used by verifiers to seed live ingestion without a real adapter poll loop.
 app.MapPost("/simulate/push-to-api", async (string? apiBaseUrl, string? facilityId, HttpClient http) =>

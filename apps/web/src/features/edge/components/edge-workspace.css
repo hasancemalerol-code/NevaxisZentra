@@ -553,7 +553,203 @@
   border-color: #fde68a;
 }
 
-/* ── EDGE-2: Responsive overrides ──────────────────────── */
+/* ── EDGE-3: Operational summary cards ─────────────────── */
+
+.edge-ops-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.edge-ops-summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.edge-ops-summary-card__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.edge-ops-summary-card__value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.edge-ops-summary-card__meta {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.edge-ops-summary-card--scrap {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.edge-ops-summary-card--scrap .edge-ops-summary-card__label {
+  color: #9a3412;
+}
+
+.edge-ops-summary-card--scrap .edge-ops-summary-card__value {
+  color: #7c2d12;
+}
+
+/* ── EDGE-3: Ops tables (downtime / alarm / setup / scrap) ─ */
+
+.edge-ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.edge-ops-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.edge-ops-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.edge-ops-table tr:hover td {
+  background: #f8fafc;
+}
+
+.edge-ops-table__duplicate {
+  opacity: 0.6;
+  background: #fef2f2 !important;
+}
+
+.edge-ops-table__oor {
+  background: #fffbeb !important;
+}
+
+.edge-micro-stop-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #92400e;
+  letter-spacing: 0.02em;
+}
+
+.edge-alarm-code {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.edge-alarm-status {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.edge-alarm-status--active {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.edge-alarm-status--raised {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.edge-alarm-status--cleared {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.alarm-severity {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.alarm-severity--info {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.alarm-severity--warning {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.alarm-severity--error {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.alarm-severity--critical {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.alarm-severity--unknown {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.edge-scrap-qty {
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.edge-scrap-disclaimer {
+  padding: 10px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a3412;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+}
+
+/* ── EDGE-2 / EDGE-3: Responsive overrides ─────────────── */
+
+@media (max-width: 1600px) {
+  .edge-ops-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1440px) {
+  .edge-ops-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
 @media (max-width: 1280px) {
   .edge-telemetry-grid {
@@ -561,6 +757,9 @@
   }
   .edge-cycle-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .edge-ops-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -577,5 +776,8 @@
   .edge-state-row {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
+  }
+  .edge-ops-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
