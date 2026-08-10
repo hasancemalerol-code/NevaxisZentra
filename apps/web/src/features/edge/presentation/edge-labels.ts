@@ -18,8 +18,18 @@ export const MACHINE_STATUS_LABELS: Record<string, string> = {
   unknown: "Bilinmiyor",
   running: "Çalışıyor",
   idle: "Boşta",
-  stopped: "Durdurulmuş",
+  stopped: "Durdu",
   fault: "Hata",
+  maintenance: "Bakımda",
+};
+
+/** Polish-facing machine state labels (executive UI) */
+export const OBSERVED_MACHINE_STATE_LABELS: Record<string, string> = {
+  unknown: "Bilinmiyor",
+  running: "Çalışıyor",
+  idle: "Boşta",
+  stopped: "Durdu",
+  fault: "Arıza",
   maintenance: "Bakımda",
 };
 
@@ -31,17 +41,16 @@ export const MACHINE_EVENT_KIND_LABELS: Record<string, string> = {
   fault: "Hata",
   "cycle-start": "Döngü Başlangıcı",
   "cycle-end": "Döngü Sonu",
-  // EDGE-2 canonical typed signals
-  "cycle-completed": "Çevrim Tamamlandı (Gözlenen)",
+  "cycle-completed": "Çevrim Tamamlandı",
   "counter-observed": "Sayaç Gözlemi",
-  // EDGE-3 operational observations
-  "machine.downtime.started": "Gözlenen Duruş Başladı",
-  "machine.downtime.ended": "Gözlenen Duruş Bitti",
-  "machine.alarm.raised": "Alarm Yükseltildi",
+  "machine.downtime.started": "Duruş Başladı",
+  "machine.downtime.ended": "Duruş Bitti",
+  "machine.alarm.raised": "Alarm Oluştu",
   "machine.alarm.cleared": "Alarm Temizlendi",
-  "machine.setup.started": "Gözlenen Setup Başladı",
-  "machine.setup.completed": "Gözlenen Setup Tamamlandı",
-  "machine.scrap.observed": "Makineden Gözlenen Fire",
+  "machine.setup.started": "Setup Başladı",
+  "machine.setup.completed": "Setup Tamamlandı",
+  "machine.scrap.observed": "Fire Gözlemi",
+  "edge.delivery.replay": "Edge Teslimatı",
 };
 
 export const ALARM_SEVERITY_LABELS: Record<string, string> = {
@@ -81,6 +90,8 @@ export const TELEMETRY_METRIC_LABELS: Record<string, string> = {
 export const CONNECTIVITY_LABELS: Record<string, string> = {
   online: "Çevrimiçi",
   offline: "Çevrimdışı",
+  degraded: "Bozulmuş",
+  unknown: "Bilinmiyor",
 };
 
 export const MACHINE_ASSIGNMENT_STATUS_LABELS: Record<string, string> = {
@@ -97,11 +108,15 @@ export function getEdgeGatewayStatusLabel(status: string): string {
 }
 
 export function getMachineStatusLabel(status: string): string {
-  return MACHINE_STATUS_LABELS[status] ?? status;
+  return MACHINE_STATUS_LABELS[status] ?? "Bilinmiyor";
+}
+
+export function getObservedMachineStateLabel(status: string): string {
+  return OBSERVED_MACHINE_STATE_LABELS[status] ?? "Bilinmiyor";
 }
 
 export function getMachineEventKindLabel(kind: string): string {
-  return MACHINE_EVENT_KIND_LABELS[kind] ?? kind;
+  return MACHINE_EVENT_KIND_LABELS[kind] ?? "Olay";
 }
 
 export function getEdgeGatewayStatusClass(status: string): string {
@@ -179,7 +194,22 @@ export function getMetricLabel(metricKey: string): string {
 }
 
 export function getConnectivityLabel(connectivity: string): string {
-  return CONNECTIVITY_LABELS[connectivity] ?? connectivity;
+  return CONNECTIVITY_LABELS[connectivity] ?? "Bilinmiyor";
+}
+
+export function getEdgeDeliveryPresentationLabel(
+  deliveryHealth: {
+    deliveryStatus: string;
+    pendingCount: number;
+    retryCount: number;
+    apiConnected: boolean;
+  },
+): string {
+  if (!deliveryHealth.apiConnected) return "Bağlantı Kesildi";
+  const pending = deliveryHealth.pendingCount + deliveryHealth.retryCount;
+  if (pending > 0 && deliveryHealth.retryCount > 0) return "Yeniden Deneme";
+  if (pending > 0) return "Bekleyen Olay";
+  return getEdgeDeliveryStatusLabel(deliveryHealth.deliveryStatus);
 }
 
 export function getAlarmSeverityLabel(severity: string): string {
@@ -277,15 +307,15 @@ export const EDGE_REPLAY_STATUS_LABELS: Record<string, string> = {
 };
 
 export function getEdgeDeliveryStatusLabel(status: string): string {
-  return EDGE_DELIVERY_STATUS_LABELS[status] ?? status;
+  return EDGE_DELIVERY_STATUS_LABELS[status] ?? "Bilinmiyor";
 }
 
 export function getEdgeBufferStatusLabel(status: string): string {
-  return EDGE_BUFFER_STATUS_LABELS[status] ?? status;
+  return EDGE_BUFFER_STATUS_LABELS[status] ?? "Bilinmiyor";
 }
 
 export function getEdgeReplayStatusLabel(status: string): string {
-  return EDGE_REPLAY_STATUS_LABELS[status] ?? status;
+  return EDGE_REPLAY_STATUS_LABELS[status] ?? "Bilinmiyor";
 }
 
 export function getEdgeBufferErrorLabel(code: string | null | undefined): string {

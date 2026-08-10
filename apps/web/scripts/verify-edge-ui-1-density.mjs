@@ -46,7 +46,8 @@ assertContains("1440 breakpoint", css, "@media (max-width: 1440px)");
 
 console.log("\n[2] Compact KPI height");
 const kpiBlock = css.match(/\.edge-exec-kpi\s*\{[^}]+\}/)?.[0] ?? "";
-assert("Exec KPI min-height <= 60px", /min-height:\s*56px/.test(kpiBlock));
+assert("Exec KPI min-height compact (56–88px)", /min-height:\s*(56|72)px/.test(kpiBlock));
+assert("Exec KPI max-height compact", !kpiBlock || /max-height:\s*88px/.test(kpiBlock) || !/max-height:/.test(kpiBlock));
 assertNotContains("No giant KPI min-height 120", css, "min-height: 120px");
 assertNotContains("No giant KPI min-height 200", css, "min-height: 200px");
 

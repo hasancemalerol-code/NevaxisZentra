@@ -6,6 +6,7 @@ import { EdgeExecutiveKpis } from "./edge-executive-kpis";
 import { EdgeGatewayWorkspace } from "./edge-gateway-workspace";
 import { EdgeMachineDetailPanel } from "./edge-machine-detail-panel";
 import { EdgeEventTimeline, EdgeMachineTable } from "./edge-machine-table";
+import { EdgeOperationalAttention } from "./edge-operational-attention";
 import {
   EDGE_CAPABILITIES,
   getEdgeGatewayStatusClass,
@@ -768,21 +769,25 @@ export function EdgeWorkspaceView({
 
   return (
     <div className="edge-workspace-page">
-      {/* Header */}
-      <div className="edge-workspace-header">
+      {/* Executive header */}
+      <div className="edge-workspace-header edge-workspace-header--executive">
         <div className="edge-header__intro">
-          <h1>Makine & Edge</h1>
+          <div className="edge-header__title-row">
+            <h1>Makine & Edge</h1>
+            {isSimulatorFixture && (
+              <span className="edge-sim-badge edge-sim-badge--header">Simülatör</span>
+            )}
+          </div>
           <p className="edge-header__subtitle">
             Makine bağlantıları, operasyonel sinyaller ve Edge veri akışının merkezi.
           </p>
+          {isSimulatorFixture && (
+            <p className="edge-simulator-notice edge-simulator-notice--inline" data-testid="edge-simulator-page-notice">
+              Simülatör verisi — gerçek makine bağlantısı değildir.
+            </p>
+          )}
         </div>
       </div>
-
-      {isSimulatorFixture && (
-        <p className="edge-simulator-notice" data-testid="edge-simulator-page-notice">
-          Simülatör verisi — gerçek makine bağlantısı değildir.
-        </p>
-      )}
 
       {loadError && (
         <div className="edge-load-error" role="alert">
@@ -790,16 +795,23 @@ export function EdgeWorkspaceView({
         </div>
       )}
 
-      {/* EDGE-UI-1 executive KPI strip */}
+      {/* Primary KPI strip */}
       <EdgeExecutiveKpis
         machines={machines}
         machineDetails={machineDetails}
         deliveryHealth={resolvedDeliveryHealth}
       />
 
-      {/* EDGE-UI-1 primary machine table */}
-      <section>
-        <h2 className="edge-section-title">Operasyonel Makine Tablosu</h2>
+      {/* Operational attention */}
+      <EdgeOperationalAttention
+        machines={machines}
+        machineDetails={machineDetails}
+        deliveryHealth={resolvedDeliveryHealth}
+      />
+
+      {/* Primary machine table */}
+      <section className="edge-landing-section">
+        <h2 className="edge-section-title edge-section-title--compact">Makine Operasyonları</h2>
         <EdgeMachineTable
           machines={machines}
           machineDetails={machineDetails}
@@ -810,7 +822,6 @@ export function EdgeWorkspaceView({
         />
       </section>
 
-      {/* EDGE-UI-1 machine detail panel */}
       {selectedMachineId && activeMachine && activeDetail && (
         <EdgeMachineDetailPanel
           machine={activeMachine}
@@ -826,19 +837,19 @@ export function EdgeWorkspaceView({
         />
       )}
 
-      {/* EDGE-UI-1 gateway workspace */}
-      <section>
-        <h2 className="edge-section-title">Edge Gateway&apos;ler</h2>
-        <EdgeGatewayWorkspace gateways={gateways} deliveryHealth={resolvedDeliveryHealth} />
-      </section>
+      <div className="edge-landing-secondary">
+        <section className="edge-landing-section">
+          <h2 className="edge-section-title edge-section-title--compact">Edge Gateway Durumu</h2>
+          <EdgeGatewayWorkspace gateways={gateways} deliveryHealth={resolvedDeliveryHealth} />
+        </section>
 
-      {/* EDGE-UI-1 operational timeline */}
-      <section>
-        <h2 className="edge-section-title">Operasyonel Olay Zaman Çizelgesi</h2>
-        <EdgeEventTimeline events={recentEvents} machineCodeById={machineCodeById} />
-      </section>
+        <section className="edge-landing-section">
+          <h2 className="edge-section-title edge-section-title--compact">Son Operasyonel Olaylar</h2>
+          <EdgeEventTimeline events={recentEvents} machineCodeById={machineCodeById} />
+        </section>
+      </div>
 
-      {/* Legacy KPI strip (EDGE-1 preserved) */}
+      {/* Legacy sections (EDGE-1/2/3/4 regression preserved) */}
       <div className="edge-kpi-grid">
         <div className="edge-kpi">
           <div className="edge-kpi__content">

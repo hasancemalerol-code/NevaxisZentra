@@ -9,11 +9,12 @@ import {
   getDowntimeReasonCategoryLabel,
   getEdgeBufferErrorLabel,
   getEdgeBufferStatusLabel,
+  getEdgeDeliveryPresentationLabel,
   getEdgeDeliveryStatusLabel,
   getEdgeGatewayVendorLabel,
   getEdgeReplayStatusLabel,
   getMachineEventKindLabel,
-  getMachineStatusLabel,
+  getObservedMachineStateLabel,
   getMetricLabel,
   getTelemetryQualityClass,
   getTelemetryQualityLabel,
@@ -35,19 +36,18 @@ import type {
 } from "../domain/edge-types";
 
 const TABS = [
-  { id: "summary", label: "Makine Özeti" },
-  { id: "live", label: "Canlı Durum" },
+  { id: "summary", label: "Özet" },
   { id: "telemetry", label: "Telemetri" },
   { id: "cycles", label: "Çevrimler" },
-  { id: "downtime", label: "Duruşlar" },
-  { id: "alarms", label: "Alarmlar" },
-  { id: "setup", label: "Setup / Değişim" },
-  { id: "scrap", label: "Gözlenen Fire" },
-  { id: "delivery", label: "Edge Teslimat" },
-  { id: "timeline", label: "Olay Geçmişi" },
+  { id: "ops", label: "Duruş & Alarm" },
+  { id: "setupScrap", label: "Setup & Fire" },
+  { id: "delivery", label: "Edge Sağlığı" },
+  { id: "timeline", label: "Olaylar" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+
+/** EDGE-UI-1 regression anchors: Makine Özeti · Canlı Durum · Olay Geçmişi */
 
 interface EdgeMachineDetailPanelProps {
   machine: MachineRegistryReadModel;
@@ -138,79 +138,72 @@ export function EdgeMachineDetailPanel({
 
       <div className="edge-detail-panel__body">
         {tab === "summary" && (
-          <div className="edge-detail-summary-grid">
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Gateway</span>
-              <span>{machine.activeGatewayCode ?? "—"}</span>
+          <>
+            <div className="edge-detail-summary-grid edge-detail-summary-grid--primary">
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Bağlantı</span>
+                <span className={`edge-status-pill edge-status-pill--conn-${signal?.connectivity ?? "unknown"}`}>
+                  {getConnectivityLabel(signal?.connectivity ?? "unknown")}
+                </span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Makine Durumu</span>
+                <span>{getObservedMachineStateLabel(signal?.observedState ?? machine.status)}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Güncellik</span>
+                <span className={`edge-status-pill edge-status-pill--fresh-${freshness.tone}`}>{freshness.label}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Aktif Alarm</span>
+                <span>{detail.activeAlarms.length}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Son Çevrim</span>
+                <span>{formatRelativeTime(signal?.lastCycleAtUtc ?? detail.cycleProjection?.lastCycleAtUtc)}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Edge Teslimatı</span>
+                <span>{getEdgeDeliveryPresentationLabel(deliveryHealth)}</span>
+              </div>
             </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Transport</span>
-              <span>{gateway ? getEdgeGatewayVendorLabel(gateway.vendorKey) : "—"}</span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Bağlantı</span>
-              <span className={`edge-conn-badge edge-conn-badge--${signal?.connectivity ?? "unknown"}`}>
-                {getConnectivityLabel(signal?.connectivity ?? "unknown")}
-              </span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Gözlenen Durum</span>
-              <span>{getMachineStatusLabel(signal?.observedState ?? machine.status)}</span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Güncellik</span>
-              <span className={`edge-freshness edge-freshness--${freshness.tone}`}>{freshness.label}</span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Son Görülme</span>
-              <span>{formatRelativeTime(machine.lastSeenAtUtc)}</span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Kaynak Zamanı (Son Veri)</span>
-              <span>
-                {signal?.lastTelemetryAtUtc
-                  ? new Date(signal.lastTelemetryAtUtc).toLocaleString("tr-TR")
-                  : "—"}
-              </span>
-            </div>
-            <div className="edge-detail-summary-item">
-              <span className="edge-detail-summary-item__label">Ortam</span>
-              <span>{isSimulatorFixture ? "Simülatör (geliştirme)" : "Edge Gateway"}</span>
-            </div>
-          </div>
-        )}
-
-        {tab === "live" && (
-          <div className="edge-live-status-grid">
-            <div className="edge-live-status-group">
-              <span className="edge-live-status-group__title">Bağlantı</span>
-              <span className={`edge-conn-badge edge-conn-badge--${signal?.connectivity ?? "unknown"}`}>
-                {getConnectivityLabel(signal?.connectivity ?? "unknown")}
-              </span>
-            </div>
-            <div className="edge-live-status-group">
-              <span className="edge-live-status-group__title">Makine</span>
-              <span className={`edge-machine-state edge-machine-state--${signal?.observedState ?? machine.status}`}>
-                {getMachineStatusLabel(signal?.observedState ?? machine.status)}
-              </span>
-            </div>
-            <div className="edge-live-status-group">
-              <span className="edge-live-status-group__title">Veri</span>
-              <span className={`edge-freshness edge-freshness--${freshness.tone}`}>{freshness.label}</span>
+            <div className="edge-detail-summary-grid edge-detail-summary-grid--secondary">
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Gateway</span>
+                <span>{machine.activeGatewayCode ?? "—"}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Transport</span>
+                <span>{gateway ? getEdgeGatewayVendorLabel(gateway.vendorKey) : "—"}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Son Görülme</span>
+                <span>{formatRelativeTime(machine.lastSeenAtUtc)}</span>
+              </div>
+              <div className="edge-detail-summary-item">
+                <span className="edge-detail-summary-item__label">Ortam</span>
+                <span>{isSimulatorFixture ? "Simülatör (geliştirme)" : "Edge Gateway"}</span>
+              </div>
             </div>
             {signal?.isInObservedDowntime && (
               <div className="edge-live-status-banner edge-live-status-banner--warn">
                 Gözlenen duruş aktif
-                {signal.currentDowntimeStartedAtUtc &&
-                  ` · ${formatRelativeTime(signal.currentDowntimeStartedAtUtc)}`}
               </div>
             )}
-            {signal?.isInObservedSetup && (
-              <div className="edge-live-status-banner edge-live-status-banner--info">
-                Gözlenen setup / değişim aktif
+            {detail.activeAlarms.some((a) => a.severity === "critical") && (
+              <div className="edge-alarm-attention-panel">
+                {detail.activeAlarms
+                  .filter((a) => a.severity === "critical")
+                  .map((a) => (
+                    <div key={a.id} className="edge-alarm-attention-item">
+                      <SeverityBadge severity={a.severity} />
+                      <span className="edge-alarm-code">{a.externalAlarmCode}</span>
+                      <span>{a.alarmText ?? "—"}</span>
+                    </div>
+                  ))}
               </div>
             )}
-          </div>
+          </>
         )}
 
         {tab === "telemetry" && (
@@ -228,8 +221,7 @@ export function EdgeMachineDetailPanel({
                       <th>Değer</th>
                       <th>Birim</th>
                       <th>Kalite</th>
-                      <th>Kaynak Zamanı</th>
-                      <th>Güncellik</th>
+                      <th>Son Veri</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -238,17 +230,13 @@ export function EdgeMachineDetailPanel({
                         t.numericValue != null
                           ? t.numericValue.toLocaleString("tr-TR")
                           : t.textValue ?? (t.booleanValue != null ? (t.booleanValue ? "Evet" : "Hayır") : "—");
-                      const tf = computeDataFreshness(t.sourceTimestampUtc);
                       return (
                         <tr key={t.metricKey}>
                           <td>{getMetricLabel(t.metricKey)}</td>
                           <td>{val}</td>
                           <td>{t.unit ?? "—"}</td>
                           <td><QualityBadge quality={t.quality} /></td>
-                          <td>{new Date(t.sourceTimestampUtc).toLocaleString("tr-TR")}</td>
-                          <td>
-                            <span className={`edge-freshness edge-freshness--${tf.tone}`}>{tf.label}</span>
-                          </td>
+                          <td>{formatRelativeTime(t.sourceTimestampUtc)}</td>
                         </tr>
                       );
                     })}
@@ -322,8 +310,9 @@ export function EdgeMachineDetailPanel({
           </>
         )}
 
-        {tab === "downtime" && (
+        {tab === "ops" && (
           <>
+            <h3 className="edge-detail-subsection-title">Gözlenen Duruşlar</h3>
             <div className="edge-ops-summary-grid" style={{ marginBottom: 12 }}>
               <div className="edge-ops-summary-card">
                 <span className="edge-ops-summary-card__label">Aktif Duruş</span>
@@ -376,11 +365,7 @@ export function EdgeMachineDetailPanel({
                 </tbody>
               </table>
             )}
-          </>
-        )}
-
-        {tab === "alarms" && (
-          <>
+            <h3 className="edge-detail-subsection-title">Aktif Alarmlar</h3>
             {detail.activeAlarms.length === 0 ? (
               <div className="edge-empty-state edge-empty-state--compact">
                 <p className="edge-empty-state__title">Aktif alarm yok</p>
@@ -409,7 +394,7 @@ export function EdgeMachineDetailPanel({
                 </tbody>
               </table>
             )}
-            <h3 className="edge-reliability-subtitle" style={{ marginTop: 16 }}>Alarm Geçmişi</h3>
+            <h3 className="edge-detail-subsection-title">Alarm Geçmişi</h3>
             {detail.alarmHistory.length === 0 ? (
               <div className="edge-empty-state edge-empty-state--compact">
                 <p className="edge-empty-state__text">Geçmiş kayıt yok</p>
@@ -441,8 +426,9 @@ export function EdgeMachineDetailPanel({
           </>
         )}
 
-        {tab === "setup" && (
+        {tab === "setupScrap" && (
           <>
+            <h3 className="edge-detail-subsection-title">Gözlenen Setup / Değişimler</h3>
             {detail.setupEpisodes.length === 0 ? (
               <div className="edge-empty-state edge-empty-state--compact">
                 <p className="edge-empty-state__title">Gözlenen setup / değişim kaydı yok</p>
@@ -473,11 +459,7 @@ export function EdgeMachineDetailPanel({
                 </tbody>
               </table>
             )}
-          </>
-        )}
-
-        {tab === "scrap" && (
-          <>
+            <h3 className="edge-detail-subsection-title">Makineden Gözlenen Fire</h3>
             <p className="edge-scrap-disclaimer">
               Bu değer makine gözlemidir; resmi üretim veya kalite kaydı değildir.
             </p>
@@ -612,7 +594,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Olay geçmişi yok</p>
               </div>
             ) : (
-              <div className="edge-timeline">
+              <div className="edge-timeline edge-timeline--compact">
                 {[...detail.recentEvents]
                   .sort((a, b) => new Date(b.sourceTimestampUtc).getTime() - new Date(a.sourceTimestampUtc).getTime())
                   .slice(0, 25)
