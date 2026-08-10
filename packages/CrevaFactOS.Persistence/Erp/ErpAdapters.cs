@@ -562,14 +562,6 @@ public sealed class SimulatorWritebackAdapter : IErpWritebackAdapter
 }
 
 /// <summary>
-/// Placeholder Mikro adapter — contract readiness only. No real Mikro SDK/connection.
-/// </summary>
-public sealed class MikroErpAdapterPlaceholder : UnsupportedErpAdapterBase
-{
-    public override string ProviderKey => ErpProviderKeys.Mikro;
-}
-
-/// <summary>
 /// Placeholder Netsis adapter — contract readiness only. No real Netsis SDK/connection.
 /// </summary>
 public sealed class NetsisErpAdapterPlaceholder : UnsupportedErpAdapterBase

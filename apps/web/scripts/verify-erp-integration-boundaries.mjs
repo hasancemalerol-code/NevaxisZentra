@@ -124,7 +124,9 @@ for (const repo of [syncRepo, inventoryRepo, productionRepo, mappingRepo, writeb
   forbidText(repo, "Netsis.", "no Netsis leakage outside adapter");
 }
 
-requireText(adapters, "class MikroErpAdapterPlaceholder", "Mikro placeholder");
+const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+requireText(mikroAdapter, "class MikroErpAdapter", "Mikro adapter");
+forbidText(adapters, "class MikroErpAdapterPlaceholder", "Mikro placeholder removed");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis placeholder");
 const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");

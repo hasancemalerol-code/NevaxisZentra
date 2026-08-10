@@ -23,6 +23,8 @@ import {
   getErpEntityTypeLabel,
   getErpLogoCapabilities,
   getErpLogoSetupGuidance,
+  getErpMikroCapabilities,
+  getErpMikroSetupGuidance,
   getErpProviderLabel,
   getErpSyncStatusLabel,
 } from "../presentation/erp-labels";
@@ -198,7 +200,9 @@ export function ErpWorkspaceView({
                       ? SIMULATOR_CAPABILITIES
                       : connection.provider === "logo"
                         ? getErpLogoCapabilities()
-                        : []
+                        : connection.provider === "mikro"
+                          ? getErpMikroCapabilities()
+                          : []
                   }
                   connectionMode={connection.connectionMode}
                   hasCredentialReference={connection.hasCredentialReference}
@@ -452,6 +456,14 @@ export function ErpWorkspaceView({
         <section className="erp-section erp-section--compact">
           <ErpInfoBanner title="Logo kurulum yönlendirmesi">
             {getErpLogoSetupGuidance()}
+          </ErpInfoBanner>
+        </section>
+      ) : null}
+
+      {isConnectionPage && connections.some((connection) => connection.provider === "mikro") ? (
+        <section className="erp-section erp-section--compact">
+          <ErpInfoBanner title="Mikro kurulum yönlendirmesi">
+            {getErpMikroSetupGuidance()}
           </ErpInfoBanner>
         </section>
       ) : null}

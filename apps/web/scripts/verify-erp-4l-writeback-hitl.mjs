@@ -126,7 +126,7 @@ forbidText(writebackAdapter, "LogoErpAdapterPlaceholder", "Logo must not impleme
 forbidText(writebackAdapter, "MikroErpAdapterPlaceholder", "Mikro must not implement writeback adapter");
 forbidText(writebackAdapter, "NetsisErpAdapterPlaceholder", "Netsis must not implement writeback adapter");
 forbidText(adapters, "class LogoErpAdapterPlaceholder : IErpWritebackAdapter", "Logo writeback unsupported");
-forbidText(adapters, "class MikroErpAdapterPlaceholder : IErpWritebackAdapter", "Mikro writeback unsupported");
+forbidText(adapters, "class MikroErpAdapter : IErpWritebackAdapter", "Mikro writeback unsupported");
 forbidText(adapters, "class NetsisErpAdapterPlaceholder : IErpWritebackAdapter", "Netsis writeback unsupported");
 
 requireText(endpoints, "SimulatorWritebackAdapter", "only simulator writeback adapter registered");

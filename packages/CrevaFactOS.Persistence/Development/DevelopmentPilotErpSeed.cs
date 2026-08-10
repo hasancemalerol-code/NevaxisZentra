@@ -1,5 +1,6 @@
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Erp.Logo;
+using CrevaFactOS.Persistence.Erp.Mikro;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Development;
@@ -71,6 +72,43 @@ internal static class DevelopmentPilotErpSeed
             BaseEndpoint = null,
             ConnectionMode = ErpConnectionModes.Api,
             CredentialReference = LogoCredentialReferences.TestFixture,
+            Status = ErpConnectionStatuses.Configured,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public static async Task EnsureErpMikroTestConnectionAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.ErpConnectionProfiles
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == DevelopmentPilotIds.ErpPilotMikroTestConnectionId, cancellationToken);
+
+        if (existing)
+        {
+            return;
+        }
+
+        dbContext.ErpConnectionProfiles.Add(new ErpConnectionProfile
+        {
+            Id = DevelopmentPilotIds.ErpPilotMikroTestConnectionId,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            Provider = ErpProviderKeys.Mikro,
+            Name = "Development Mikro Test Transport",
+            ExternalCompanyId = MikroReadTransportTestFixture.FixtureCompanyId,
+            ExternalCompanyCode = MikroReadTransportTestFixture.FixtureCompanyCode,
+            BaseEndpoint = null,
+            ConnectionMode = ErpConnectionModes.Api,
+            CredentialReference = MikroCredentialReferences.TestFixture,
             Status = ErpConnectionStatuses.Configured,
             CreatedAtUtc = seedTimestampUtc,
             UpdatedAtUtc = seedTimestampUtc,

@@ -1,6 +1,7 @@
 import type { ErpConnectionStatus, ErpSyncRunStatus } from "../domain/erp";
 
 const LOGO_CAPABILITIES = ["customers.read", "products.read"] as const;
+const MIKRO_CAPABILITIES = ["customers.read", "products.read"] as const;
 
 export function getErpProviderLabel(provider: string, displayName?: string): string {
   if (provider === "simulator") {
@@ -12,7 +13,7 @@ export function getErpProviderLabel(provider: string, displayName?: string): str
   }
 
   if (provider === "mikro") {
-    return "Mikro (hazır değil)";
+    return displayName ?? "Mikro";
   }
 
   if (provider === "netsis") {
@@ -24,6 +25,63 @@ export function getErpProviderLabel(provider: string, displayName?: string): str
 
 export function getErpLogoCapabilities(): readonly string[] {
   return LOGO_CAPABILITIES;
+}
+
+export function getErpMikroCapabilities(): readonly string[] {
+  return MIKRO_CAPABILITIES;
+}
+
+export function getErpMikroConnectionStateLabel(input: {
+  status: ErpConnectionStatus | string;
+  hasCredentialReference: boolean;
+  connectionMode: string;
+  lastErrorCode?: string | null;
+}): string {
+  if (input.lastErrorCode === "mikro.authentication.failed" || (!input.hasCredentialReference && input.connectionMode === "api")) {
+    return "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "healthy") {
+    return "Sağlıklı";
+  }
+
+  if (input.status === "configured" || input.status === "draft") {
+    return input.hasCredentialReference ? "Kurulum Bekliyor" : "Kimlik Bilgisi Gerekli";
+  }
+
+  if (input.status === "degraded") {
+    return "Bağlantı Doğrulandı";
+  }
+
+  if (input.status === "unavailable") {
+    return "Bağlantı Kurulamadı";
+  }
+
+  return getErpConnectionStatusLabel(input.status);
+}
+
+export function getErpMikroAdapterReadyLabel(): string {
+  return "Adapter Hazır";
+}
+
+export function getErpMikroLiveValidatedLabel(isLiveValidated: boolean): string | null {
+  return isLiveValidated ? "Gerçek Mikro Bağlantısı Doğrulandı" : null;
+}
+
+export function getErpMikroTransportLabel(connectionMode: string, hasTestFixtureCredential: boolean): string {
+  if (hasTestFixtureCredential) {
+    return "Test Transport";
+  }
+
+  if (connectionMode === "api") {
+    return "Mikro Bridge (HTTP)";
+  }
+
+  return "Yapılandırılmadı";
+}
+
+export function getErpMikroSetupGuidance(): string {
+  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Mikro Bridge yapılandırılmalıdır.";
 }
 
 export function getErpLogoConnectionStateLabel(input: {

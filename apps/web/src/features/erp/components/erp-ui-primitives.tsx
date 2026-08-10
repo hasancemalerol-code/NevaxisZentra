@@ -8,6 +8,10 @@ import {
   getErpLogoConnectionStateLabel,
   getErpLogoLiveValidatedLabel,
   getErpLogoTransportLabel,
+  getErpMikroAdapterReadyLabel,
+  getErpMikroConnectionStateLabel,
+  getErpMikroLiveValidatedLabel,
+  getErpMikroTransportLabel,
   getErpProviderLabel,
   getErpSourceFreshnessLabel,
   getErpSourceFreshnessTone,
@@ -159,12 +163,14 @@ type ErpProviderBadgeProps = Readonly<{
 export function ErpProviderBadge({ provider, displayName }: ErpProviderBadgeProps) {
   const isSimulator = provider === "simulator";
   const isLogo = provider === "logo";
+  const isMikro = provider === "mikro";
   const primaryLabel = isSimulator ? "ERP Simulator" : getErpProviderLabel(provider, displayName);
   return (
-    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}`}>
+    <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}${isMikro ? " erp-provider-badge--mikro" : ""}`}>
       <strong>{primaryLabel}</strong>
       {isSimulator ? <small>Geliştirme / Test</small> : null}
       {isLogo ? <small>{getErpLogoAdapterReadyLabel()}</small> : null}
+      {isMikro ? <small>{getErpMikroAdapterReadyLabel()}</small> : null}
     </span>
   );
 }
@@ -396,7 +402,8 @@ export function ErpConnectionCard({
 }: ErpConnectionCardProps) {
   const isSimulator = provider === "simulator";
   const isLogo = provider === "logo";
-  const isTestTransport = isLogo && name.toLowerCase().includes("test transport");
+  const isMikro = provider === "mikro";
+  const isTestTransport = (isLogo || isMikro) && name.toLowerCase().includes("test transport");
   const logoStateLabel = isLogo
     ? getErpLogoConnectionStateLabel({
         status,
@@ -405,9 +412,19 @@ export function ErpConnectionCard({
         lastErrorCode,
       })
     : undefined;
+  const mikroStateLabel = isMikro
+    ? getErpMikroConnectionStateLabel({
+        status,
+        hasCredentialReference,
+        connectionMode,
+        lastErrorCode,
+      })
+    : undefined;
   const liveValidatedLabel = isLogo && status === "healthy" && !isTestTransport
     ? getErpLogoLiveValidatedLabel(true)
-    : null;
+    : isMikro && status === "healthy" && !isTestTransport
+      ? getErpMikroLiveValidatedLabel(true)
+      : null;
 
   return (
     <article className="erp-connection-card erp-connection-card--compact">
@@ -417,7 +434,7 @@ export function ErpConnectionCard({
           <h3 className="erp-connection-card__name">{name}</h3>
         </div>
         <div className="erp-connection-card__top-actions">
-          <ErpHealthIndicator status={status} labelOverride={logoStateLabel} />
+          <ErpHealthIndicator status={status} labelOverride={logoStateLabel ?? mikroStateLabel} />
           <Link href={manageHref} className="erp-action erp-action--primary">
             Bağlantıyı Yönet
           </Link>
@@ -437,6 +454,26 @@ export function ErpConnectionCard({
             <div>
               <dt>Logo Ürünü</dt>
               <dd>{isTestTransport ? "Logo Test Fixture" : "—"}</dd>
+            </div>
+          </>
+        ) : null}
+        {isMikro ? (
+          <>
+            <div>
+              <dt>Bağlantı Yöntemi</dt>
+              <dd>{getErpMikroTransportLabel(connectionMode, isTestTransport)}</dd>
+            </div>
+            <div>
+              <dt>Mikro Ürünü</dt>
+              <dd>{isTestTransport ? "Mikro Test Fixture" : "—"}</dd>
+            </div>
+            <div>
+              <dt>Sürüm</dt>
+              <dd>{isTestTransport ? "test-1.0" : "—"}</dd>
+            </div>
+            <div>
+              <dt>Dönem</dt>
+              <dd>{isTestTransport ? "1" : "—"}</dd>
             </div>
           </>
         ) : null}
@@ -477,9 +514,14 @@ export function ErpConnectionCard({
             ERP Simulator — gerçek ERP bağlantısı değildir.
           </p>
         ) : null}
-        {isTestTransport ? (
+        {isTestTransport && isLogo ? (
           <p className="erp-connection-card__disclaimer" role="note">
             Logo test transport — gerçek Logo doğrulaması değildir.
+          </p>
+        ) : null}
+        {isTestTransport && isMikro ? (
+          <p className="erp-connection-card__disclaimer" role="note">
+            Test bağlantısı — gerçek Mikro ERP bağlantısı değildir.
           </p>
         ) : null}
         <div className="erp-connection-card__actions">

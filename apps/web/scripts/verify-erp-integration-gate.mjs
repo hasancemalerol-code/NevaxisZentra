@@ -197,7 +197,9 @@ requireText(entities, "SalesOrdersWriteDraft = \"sales-orders.write-draft\"", "s
 requireText(adapters, "class SimulatorErpAdapter", "simulator adapter");
 const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "logo adapter");
-requireText(adapters, "class MikroErpAdapterPlaceholder", "mikro placeholder");
+const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+requireText(mikroAdapter, "class MikroErpAdapter", "mikro adapter");
+forbidText(adapters, "class MikroErpAdapterPlaceholder", "mikro placeholder removed");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "netsis placeholder");
 requireText(adapterContract, "interface IErpAdapter", "IErpAdapter");
 requireText(readRequired("packages/CrevaFactOS.Persistence/Erp/IErpWritebackAdapter.cs"), "interface IErpWritebackAdapter", "writeback adapter contract");

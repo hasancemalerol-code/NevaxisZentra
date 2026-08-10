@@ -375,7 +375,7 @@ try {
   const writebackAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/IErpWritebackAdapter.cs");
   const adapters = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpAdapters.cs");
   forbidText(adapters, "class LogoErpAdapterPlaceholder : IErpWritebackAdapter", "Logo writeback blocked");
-  forbidText(adapters, "class MikroErpAdapterPlaceholder : IErpWritebackAdapter", "Mikro writeback blocked");
+  forbidText(adapters, "class MikroErpAdapter : IErpWritebackAdapter", "Mikro writeback blocked");
   forbidText(adapters, "class NetsisErpAdapterPlaceholder : IErpWritebackAdapter", "Netsis writeback blocked");
   forbidText(writebackAdapter, "ExecuteArbitrary", "no arbitrary writeback");
 
