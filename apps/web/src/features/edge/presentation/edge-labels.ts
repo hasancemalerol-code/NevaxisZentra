@@ -244,4 +244,66 @@ export const EDGE_CAPABILITIES = [
   "Makineden gözlenen fire (machine.scrap.observed) — resmi kalite kaydı DEĞİLDİR",
   "Operasyonel özet projeksiyonu (gözlenen duruş / alarm / setup / fire)",
   "Observed-only ownership — EDGE üretim/kalite mutasyonu yapmaz",
+  // EDGE-4
+  "Yerel sınırlı Edge olay tamponu (store-and-forward)",
+  "Dayanıklı yerel JSON dosya tamponu — merkezi PostgreSQL değil",
+  "Açık teslimat onayı (API acknowledgement sonrası delivered)",
+  "Sınırlı yeniden deneme + üstel geri çekilme",
+  "Dead-letter (zehir/permanent hata) — otomatik silme yok",
+  "Kuyruk kapasitesi koruması — sessiz düşürme yok",
+  "Çevrimdışı tamponlama + yeniden bağlanma replay",
+  "Makine komutu kuyruğu YOK — yalnızca makine → CrevaFactOS gözlemleri",
 ] as const;
+
+export const EDGE_DELIVERY_STATUS_LABELS: Record<string, string> = {
+  healthy: "Sağlıklı",
+  syncing: "Senkronize ediliyor",
+  disconnected: "Bağlantı kesildi",
+  degraded: "Bozuk",
+};
+
+export const EDGE_BUFFER_STATUS_LABELS: Record<string, string> = {
+  pending: "Bekliyor",
+  "in-flight": "Gönderiliyor",
+  delivered: "Teslim edildi",
+  "retry-wait": "Yeniden deneme",
+  "dead-letter": "Dead letter",
+};
+
+export const EDGE_REPLAY_STATUS_LABELS: Record<string, string> = {
+  idle: "Boşta",
+  "offline-buffering": "Çevrimdışı tamponlama",
+  replaying: "Aktarılıyor",
+};
+
+export function getEdgeDeliveryStatusLabel(status: string): string {
+  return EDGE_DELIVERY_STATUS_LABELS[status] ?? status;
+}
+
+export function getEdgeBufferStatusLabel(status: string): string {
+  return EDGE_BUFFER_STATUS_LABELS[status] ?? status;
+}
+
+export function getEdgeReplayStatusLabel(status: string): string {
+  return EDGE_REPLAY_STATUS_LABELS[status] ?? status;
+}
+
+export function getEdgeBufferErrorLabel(code: string | null | undefined): string {
+  if (!code) return "—";
+  const map: Record<string, string> = {
+    "edge.buffer.capacity-exceeded": "Tampon kapasitesi aşıldı",
+    "edge.delivery.network-unavailable": "Ağ kullanılamıyor",
+    "edge.delivery.timeout": "Zaman aşımı",
+    "edge.delivery.retryable-http": "Geçici HTTP hatası",
+    "edge.delivery.non-retryable": "Kalıcı HTTP hatası",
+    "edge.delivery.unsupported-payload-version": "Desteklenmeyen payload sürümü",
+    "edge.delivery.malformed-event": "Geçersiz olay",
+    "edge.delivery.authorization-denied": "Yetkilendirme reddedildi",
+    "edge.delivery.stale-in-flight-recovered": "Askıda kalan gönderim kurtarıldı",
+  };
+  return map[code] ?? code;
+}
+
+export function formatBufferUtilization(ratio: number): string {
+  return `${Math.round(ratio * 100)}%`;
+}

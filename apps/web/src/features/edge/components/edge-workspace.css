@@ -781,3 +781,172 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ── EDGE-4: Gateway Delivery / Reliability ─────────────── */
+
+.edge-reliability-section {
+  display: grid;
+  gap: 10px;
+}
+
+.edge-reliability-banner {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.edge-reliability-banner--offline {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.edge-reliability-banner--replay {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.edge-reliability-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.edge-reliability-kpi {
+  padding: 8px 10px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #fff;
+  min-height: 56px;
+}
+
+.edge-reliability-kpi__label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.edge-reliability-kpi__value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #12263a;
+}
+
+.edge-reliability-kpi__value--sm {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.edge-reliability-status-card {
+  padding: 10px 12px;
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.edge-reliability-status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.edge-reliability-status-item__label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.edge-reliability-status-item__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #12263a;
+}
+
+.edge-reliability-status-item__value--sm {
+  font-size: 12px;
+}
+
+.edge-reliability-status-item__value--ok {
+  color: #15803d;
+}
+
+.edge-reliability-status-item__value--warn {
+  color: #b45309;
+}
+
+.edge-reliability-subtitle {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.edge-reliability-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.edge-reliability-table th,
+.edge-reliability-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.edge-reliability-table th {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.edge-buffer-status {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.edge-buffer-status--pending {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.edge-buffer-status--retrywait {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.edge-buffer-status--inflight {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.edge-buffer-status--delivered {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.edge-buffer-status--deadletter {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1280px) {
+  .edge-reliability-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .edge-reliability-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .edge-reliability-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

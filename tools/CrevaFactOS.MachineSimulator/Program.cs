@@ -1,9 +1,31 @@
 using CrevaFactOS.MachineSimulator;
+using CrevaFactOS.MachineSimulator.EdgeBuffer;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration["Application:Name"] ??= "CrevaFactOS MachineSimulator";
 
+builder.Services.AddSingleton<EdgeReliabilityState>();
+builder.Services.AddSingleton(sp =>
+{
+    var state = sp.GetRequiredService<EdgeReliabilityState>();
+    var dbPath = Environment.GetEnvironmentVariable("EDGE_BUFFER_DB_PATH")
+        ?? EdgeBufferStore.ResolveDefaultDbPath();
+    return new EdgeBufferStore(dbPath, state, new EdgeRetryPolicy
+    {
+        UseDeterministicJitter = true,
+        InitialDelay = TimeSpan.FromSeconds(2),
+        MaximumDelay = TimeSpan.FromMinutes(5),
+        BackoffMultiplier = 2.0,
+        MaximumAttempts = EdgeBufferConstants.DefaultMaxAttempts,
+    });
+});
+builder.Services.AddHttpClient("EdgeDelivery");
+builder.Services.AddSingleton<EdgeDeliveryWorker>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<EdgeDeliveryWorker>());
+
 var app = builder.Build();
+var bufferStore = app.Services.GetRequiredService<EdgeBufferStore>();
+var reliabilityState = app.Services.GetRequiredService<EdgeReliabilityState>();
 
 // Health endpoint — responds to EdgeSimulatorAdapter.CheckHealthAsync
 app.MapGet("/health", () => new
@@ -179,18 +201,229 @@ app.MapGet("/simulate/scenarios/scrap", () =>
     });
 });
 
-static object Describe(SimulatedEvent ev) => new
+// EDGE-4: Store-and-forward reliability endpoints
+app.MapGet("/simulate/reliability/health", () =>
 {
-    idempotencyKey = ev.IdempotencyKey,
-    machineCode = ev.MachineCode,
-    eventKind = ev.EventKind,
-    sourceTimestampUtc = ev.SourceTimestampUtc,
-    sourceSequence = ev.SourceSequence,
-    payload = ev.Payload,
-};
+    var health = bufferStore.GetHealth(DateTimeOffset.UtcNow);
+    return Results.Ok(new
+    {
+        apiConnected = health.ApiConnected,
+        deliveryStatus = health.DeliveryStatus,
+        pendingCount = health.PendingCount,
+        retryCount = health.RetryCount,
+        deadLetterCount = health.DeadLetterCount,
+        deliveredCount = health.DeliveredCount,
+        oldestPendingAgeMs = health.OldestPendingAge?.TotalMilliseconds,
+        lastSuccessfulDeliveryAtUtc = health.LastSuccessfulDeliveryAtUtc,
+        lastDeliveryAttemptAtUtc = health.LastDeliveryAttemptAtUtc,
+        bufferUtilization = health.BufferUtilization,
+        replayStatus = health.ReplayStatus,
+        maxBufferedEvents = health.MaxBufferedEvents,
+        metrics = new
+        {
+            eventsBuffered = health.EventsBufferedTotal,
+            eventsDelivered = health.EventsDeliveredTotal,
+            retries = health.RetriesTotal,
+            deadLetters = health.DeadLetterCount,
+            deliveryFailures = health.DeliveryFailuresTotal,
+        },
+        activeScenario = reliabilityState.GetActiveScenario(),
+        note = "Simülatör verisi — gerçek makine bağlantısı değildir.",
+    });
+});
+
+app.MapGet("/simulate/reliability/buffer", (string? status, int? limit) =>
+{
+    var events = bufferStore.ListEvents(status, limit ?? 50);
+    return Results.Ok(new
+    {
+        events = events.Select(MapBufferedEvent),
+        note = "Operational view — no raw secrets, no credentials.",
+    });
+});
+
+app.MapGet("/simulate/reliability/dead-letters", (int? limit) =>
+{
+    var events = bufferStore.ListDeadLetters(limit ?? 50);
+    return Results.Ok(new
+    {
+        deadLetters = events.Select(e => new
+        {
+            eventType = e.EventType,
+            machineCode = e.MachineCode,
+            idempotencyKey = e.IdempotencyKey,
+            reason = e.LastErrorCode,
+            attempts = e.AttemptCount,
+            lastFailureAtUtc = e.LastAttemptAtUtc ?? e.DeadLetteredAtUtc,
+            sourceTimestampUtc = e.SourceTimestampUtc,
+        }),
+    });
+});
+
+app.MapPost("/simulate/reliability/network", (NetworkControlRequest? body) =>
+{
+    if (body?.Available is bool available)
+    {
+        reliabilityState.SetApiAvailable(available);
+        reliabilityState.SetScenario(available ? "recover-replay" : "offline-buffer");
+    }
+    return Results.Ok(new
+    {
+        apiAvailable = reliabilityState.IsApiAvailable(),
+        scenario = reliabilityState.GetActiveScenario(),
+        message = reliabilityState.IsApiAvailable()
+            ? "Bağlantı geri geldi — bekleyen olaylar aktarılıyor."
+            : "Gateway çevrimdışı — olaylar yerel kuyrukta saklanıyor.",
+    });
+});
+
+app.MapPost("/simulate/reliability/scenarios/{mode}", async (string mode, EdgeDeliveryWorker worker, CancellationToken ct) =>
+{
+    var now = DateTimeOffset.UtcNow;
+    reliabilityState.Reset(mode);
+
+    switch (mode.ToLowerInvariant())
+    {
+        case "normal":
+            reliabilityState.SetApiAvailable(true);
+            var normal = EdgeReliabilityScenarios.CreateNormalEvent(now);
+            var normalResult = bufferStore.Enqueue(normal);
+            if (!normalResult.Accepted)
+            {
+                return Results.BadRequest(normalResult);
+            }
+            await worker.ProcessPendingBatchAsync(ct);
+            break;
+
+        case "offline-buffer":
+            reliabilityState.SetApiAvailable(false);
+            reliabilityState.SetScenario("offline-buffer");
+            foreach (var ev in EdgeReliabilityScenarios.BuildOfflineBufferEvents(now))
+            {
+                var r = bufferStore.Enqueue(ev);
+                if (!r.Accepted)
+                {
+                    return Results.Json(new { error = r.ErrorCode, accepted = false }, statusCode: 507);
+                }
+            }
+            break;
+
+        case "recover-replay":
+            reliabilityState.SetApiAvailable(true);
+            reliabilityState.SetScenario("recover-replay");
+            await worker.ProcessPendingBatchAsync(ct);
+            break;
+
+        case "duplicate-replay":
+            reliabilityState.SetApiAvailable(true);
+            reliabilityState.EnableDuplicateReplay();
+            bufferStore.ResetDeliveredForReplay();
+            await worker.ProcessPendingBatchAsync(ct);
+            break;
+
+        case "partial-failure":
+            reliabilityState.SetApiAvailable(true);
+            reliabilityState.SetScenario("partial-failure");
+            foreach (var ev in EdgeReliabilityScenarios.BuildPartialFailureBatch(now))
+            {
+                bufferStore.Enqueue(ev);
+            }
+
+            var poison = bufferStore.GetByIdempotencyKey("SIM-EDGE4:PARTIAL:C");
+            if (poison is not null)
+            {
+                bufferStore.MarkDeadLetter(poison.Id, 1, now, EdgeBufferErrorCodes.MalformedEvent);
+            }
+
+            foreach (var key in ReliabilityScenarioKeys.PartialFailureValidKeys)
+            {
+                var evt = bufferStore.GetByIdempotencyKey(key);
+                if (evt is not null)
+                {
+                    bufferStore.MarkDelivered(evt.Id, now, $"sim-ack-{key}");
+                }
+            }
+            break;
+
+        case "poison-event":
+            reliabilityState.SetApiAvailable(true);
+            reliabilityState.SetScenario("poison-event");
+            bufferStore.Enqueue(EdgeReliabilityScenarios.CreatePoisonEvent(now));
+            await worker.ProcessPendingBatchAsync(ct);
+            break;
+
+        case "restart-recovery":
+            reliabilityState.SetApiAvailable(false);
+            reliabilityState.SetScenario("restart-recovery");
+            foreach (var ev in EdgeReliabilityScenarios.BuildOfflineBufferEvents(now).Take(5))
+            {
+                bufferStore.Enqueue(ev);
+            }
+            break;
+
+        case "api-interruption":
+            reliabilityState.SetApiAvailable(true);
+            reliabilityState.SetScenario("api-interruption");
+            reliabilityState.SetSimulatedHttpStatus(503);
+            foreach (var ev in EdgeReliabilityScenarios.BuildOfflineBufferEvents(now).Take(3))
+            {
+                bufferStore.Enqueue(ev);
+            }
+            await worker.ProcessPendingBatchAsync(ct);
+            reliabilityState.SetSimulatedHttpStatus(0);
+            reliabilityState.SetApiAvailable(true);
+            await worker.ProcessPendingBatchAsync(ct);
+            break;
+
+        case "buffer-capacity-test":
+            reliabilityState.SetApiAvailable(false);
+            reliabilityState.SetScenario("buffer-capacity-test");
+            reliabilityState.SetTestMaxBufferedEvents(5);
+            var accepted = 0;
+            string? capacityError = null;
+            foreach (var ev in EdgeReliabilityScenarios.BuildOfflineBufferEvents(now))
+            {
+                var r = bufferStore.Enqueue(ev);
+                if (r.Accepted) accepted++;
+                else { capacityError = r.ErrorCode; break; }
+            }
+            return Results.Ok(new
+            {
+                scenario = mode,
+                accepted,
+                capacityError,
+                health = bufferStore.GetHealth(now),
+            });
+
+        default:
+            return Results.BadRequest(new { error = $"Unknown reliability mode: {mode}" });
+    }
+
+    return Results.Ok(new
+    {
+        scenario = mode,
+        health = bufferStore.GetHealth(now),
+        pending = bufferStore.CountByStatus(EdgeDeliveryStatuses.Pending),
+        retryWait = bufferStore.CountByStatus(EdgeDeliveryStatuses.RetryWait),
+        delivered = bufferStore.CountByStatus(EdgeDeliveryStatuses.Delivered),
+        deadLetter = bufferStore.CountByStatus(EdgeDeliveryStatuses.DeadLetter),
+    });
+});
+
+app.MapPost("/simulate/reliability/reset", () =>
+{
+    bufferStore.ClearAll();
+    reliabilityState.Reset("normal");
+    return Results.Ok(new { reset = true, scenario = "normal" });
+});
+
+app.MapPost("/simulate/reliability/deliver-now", async (EdgeDeliveryWorker worker, CancellationToken ct) =>
+{
+    var processed = await worker.ProcessPendingBatchAsync(ct);
+    return Results.Ok(new { processed, health = bufferStore.GetHealth(DateTimeOffset.UtcNow) });
+});
 
 // Manual trigger: push all machine events to the main API
-// Used by verifiers to seed live ingestion without a real adapter poll loop.
 app.MapPost("/simulate/push-to-api", async (string? apiBaseUrl, string? facilityId, HttpClient http) =>
 {
     var targetApi = apiBaseUrl ?? Environment.GetEnvironmentVariable("CREVAFACTOS_API_URL") ?? "http://localhost:5000";
@@ -258,4 +491,37 @@ app.MapPost("/simulate/push-to-api", async (string? apiBaseUrl, string? facility
 
 app.Run();
 
+static object Describe(SimulatedEvent ev) => new
+{
+    idempotencyKey = ev.IdempotencyKey,
+    machineCode = ev.MachineCode,
+    eventKind = ev.EventKind,
+    sourceTimestampUtc = ev.SourceTimestampUtc,
+    sourceSequence = ev.SourceSequence,
+    payload = ev.Payload,
+};
+
+static object MapBufferedEvent(EdgeBufferedEvent e) => new
+{
+    eventType = e.EventType,
+    machineCode = e.MachineCode,
+    sourceTimestampUtc = e.SourceTimestampUtc,
+    queueTimeUtc = e.CreatedAtUtc,
+    attempts = e.AttemptCount,
+    status = e.DeliveryStatus,
+    lastError = e.LastErrorCode,
+    deliveryDelayMs = e.DeliveredAtUtc.HasValue
+        ? (e.DeliveredAtUtc.Value - e.SourceTimestampUtc).TotalMilliseconds
+        : (double?)null,
+    sourceSequence = e.SourceSequence,
+    payloadVersion = e.PayloadVersion,
+};
+
 internal sealed record PushResponse(bool Accepted, bool IsDuplicate, bool IsOutOfOrder, Guid? EventId);
+internal sealed record NetworkControlRequest(bool? Available);
+
+file static class ReliabilityScenarioKeys
+{
+    public static readonly string[] PartialFailureValidKeys =
+        ["SIM-EDGE4:PARTIAL:A", "SIM-EDGE4:PARTIAL:B", "SIM-EDGE4:PARTIAL:D"];
+}

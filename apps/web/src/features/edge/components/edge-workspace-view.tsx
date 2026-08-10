@@ -20,7 +20,18 @@ import {
   getAlarmSeverityClass,
   getDowntimeReasonCategoryLabel,
   formatDurationMs,
+  getEdgeDeliveryStatusLabel,
+  getEdgeBufferStatusLabel,
+  getEdgeReplayStatusLabel,
+  getEdgeBufferErrorLabel,
+  formatBufferUtilization,
 } from "../presentation/edge-labels";
+import type {
+  EdgeDeliveryHealthReadModel,
+  EdgeBufferedEventReadModel,
+  EdgeDeadLetterReadModel,
+} from "../presentation/edge-reliability-fixtures";
+import { EDGE_RELIABILITY_FIXTURE } from "../presentation/edge-reliability-fixtures";
 
 // ---------------------------------------------------------------------------
 // Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2 + EDGE-3)
@@ -605,6 +616,48 @@ function ScrapObservationRow({ scrap }: { scrap: ScrapObservationReadModel }) {
   );
 }
 
+function BufferedEventRow({ event }: { event: EdgeBufferedEventReadModel }) {
+  return (
+    <tr>
+      <td>{getMachineEventKindLabel(event.eventType)}</td>
+      <td>{event.machineCode}</td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(event.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {new Date(event.queueTimeUtc).toLocaleTimeString("tr-TR")}
+      </td>
+      <td>{event.attempts}</td>
+      <td>
+        <span className={`edge-buffer-status edge-buffer-status--${event.status.replace(/[^a-z]/g, "")}`}>
+          {getEdgeBufferStatusLabel(event.status)}
+        </span>
+      </td>
+      <td style={{ fontSize: 11, color: "#64748b" }}>
+        {getEdgeBufferErrorLabel(event.lastError)}
+      </td>
+    </tr>
+  );
+}
+
+function DeadLetterRow({ record }: { record: EdgeDeadLetterReadModel }) {
+  return (
+    <tr>
+      <td>{getMachineEventKindLabel(record.eventType)}</td>
+      <td>{record.machineCode}</td>
+      <td style={{ fontSize: 11, color: "#64748b" }}>
+        {getEdgeBufferErrorLabel(record.reason)}
+      </td>
+      <td>{record.attempts}</td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+        {record.lastFailureAtUtc
+          ? new Date(record.lastFailureAtUtc).toLocaleTimeString("tr-TR")
+          : "—"}
+      </td>
+    </tr>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main workspace view
 // ---------------------------------------------------------------------------
@@ -625,6 +678,12 @@ interface EdgeWorkspaceViewProps {
   setupEpisodes?: SetupEpisodeReadModel[];
   scrapObservations?: ScrapObservationReadModel[];
   operationalSummary?: MachineOperationalSummaryReadModel | null;
+  // EDGE-4 (optional, defaults to fixture for premium UI)
+  deliveryHealth?: EdgeDeliveryHealthReadModel | null;
+  bufferedEvents?: EdgeBufferedEventReadModel[];
+  deadLetters?: EdgeDeadLetterReadModel[];
+  offlineMessage?: string | null;
+  replayMessage?: string | null;
 }
 
 export function EdgeWorkspaceView({
@@ -642,6 +701,11 @@ export function EdgeWorkspaceView({
   setupEpisodes = [],
   scrapObservations = [],
   operationalSummary = null,
+  deliveryHealth = EDGE_RELIABILITY_FIXTURE.deliveryHealth,
+  bufferedEvents = EDGE_RELIABILITY_FIXTURE.bufferedEvents,
+  deadLetters = EDGE_RELIABILITY_FIXTURE.deadLetters,
+  offlineMessage = EDGE_RELIABILITY_FIXTURE.offlineMessage,
+  replayMessage = EDGE_RELIABILITY_FIXTURE.replayMessage,
 }: EdgeWorkspaceViewProps) {
   const onlineMachines = machines.filter((m) => m.isReadyForProduction).length;
   const totalEvents = recentEvents.length;
@@ -1126,9 +1190,166 @@ export function EdgeWorkspaceView({
         </section>
       )}
 
+      {/* EDGE-4: Gateway Delivery / Edge Reliability */}
+      {deliveryHealth && (
+        <section className="edge-reliability-section">
+          <h2 className="edge-section-title">Gateway Delivery / Edge Reliability</h2>
+          <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
+            Simülatör verisi — gerçek makine bağlantısı değildir.
+          </p>
+
+          {!deliveryHealth.apiConnected && offlineMessage && (
+            <div className="edge-reliability-banner edge-reliability-banner--offline">
+              {offlineMessage}
+            </div>
+          )}
+          {deliveryHealth.apiConnected &&
+            deliveryHealth.replayStatus === "replaying" &&
+            replayMessage && (
+              <div className="edge-reliability-banner edge-reliability-banner--replay">
+                {replayMessage}
+              </div>
+            )}
+
+          <div className="edge-reliability-kpi-grid">
+            <div className="edge-reliability-kpi">
+              <span className="edge-reliability-kpi__label">Bekleyen Olay</span>
+              <span className="edge-reliability-kpi__value">
+                {deliveryHealth.pendingCount}
+              </span>
+            </div>
+            <div className="edge-reliability-kpi">
+              <span className="edge-reliability-kpi__label">Yeniden Deneme</span>
+              <span className="edge-reliability-kpi__value">
+                {deliveryHealth.retryCount}
+              </span>
+            </div>
+            <div className="edge-reliability-kpi">
+              <span className="edge-reliability-kpi__label">Dead Letter</span>
+              <span className="edge-reliability-kpi__value">
+                {deliveryHealth.deadLetterCount}
+              </span>
+            </div>
+            <div className="edge-reliability-kpi">
+              <span className="edge-reliability-kpi__label">Son Başarılı Teslim</span>
+              <span className="edge-reliability-kpi__value edge-reliability-kpi__value--sm">
+                {deliveryHealth.lastSuccessfulDeliveryAtUtc
+                  ? new Date(deliveryHealth.lastSuccessfulDeliveryAtUtc).toLocaleTimeString("tr-TR")
+                  : "—"}
+              </span>
+            </div>
+            <div className="edge-reliability-kpi">
+              <span className="edge-reliability-kpi__label">Kuyruk Kullanımı</span>
+              <span className="edge-reliability-kpi__value">
+                {formatBufferUtilization(deliveryHealth.bufferUtilization)}
+              </span>
+            </div>
+          </div>
+
+          <div className="edge-reliability-status-card">
+            <div className="edge-reliability-status-grid">
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">API Bağlantısı</span>
+                <span className={`edge-reliability-status-item__value ${deliveryHealth.apiConnected ? "edge-reliability-status-item__value--ok" : "edge-reliability-status-item__value--warn"}`}>
+                  {deliveryHealth.apiConnected ? "Bağlı" : "Kesik"}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">Teslimat Durumu</span>
+                <span className="edge-reliability-status-item__value">
+                  {getEdgeDeliveryStatusLabel(deliveryHealth.deliveryStatus)}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">Bekleyen</span>
+                <span className="edge-reliability-status-item__value">
+                  {deliveryHealth.pendingCount + deliveryHealth.retryCount}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">En Eski Bekleyen</span>
+                <span className="edge-reliability-status-item__value">
+                  {deliveryHealth.oldestPendingAgeMs != null
+                    ? formatDurationMs(deliveryHealth.oldestPendingAgeMs)
+                    : "—"}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">Son Deneme</span>
+                <span className="edge-reliability-status-item__value edge-reliability-status-item__value--sm">
+                  {deliveryHealth.lastDeliveryAttemptAtUtc
+                    ? new Date(deliveryHealth.lastDeliveryAttemptAtUtc).toLocaleTimeString("tr-TR")
+                    : "—"}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">Son Başarılı Teslim</span>
+                <span className="edge-reliability-status-item__value edge-reliability-status-item__value--sm">
+                  {deliveryHealth.lastSuccessfulDeliveryAtUtc
+                    ? new Date(deliveryHealth.lastSuccessfulDeliveryAtUtc).toLocaleTimeString("tr-TR")
+                    : "—"}
+                </span>
+              </div>
+              <div className="edge-reliability-status-item">
+                <span className="edge-reliability-status-item__label">Replay</span>
+                <span className="edge-reliability-status-item__value">
+                  {getEdgeReplayStatusLabel(deliveryHealth.replayStatus)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {bufferedEvents.length > 0 && (
+            <div style={{ marginTop: 12, overflowX: "auto" }}>
+              <h3 className="edge-reliability-subtitle">Tamponlanmış Olaylar</h3>
+              <table className="edge-reliability-table">
+                <thead>
+                  <tr>
+                    <th>Olay Türü</th>
+                    <th>Makine</th>
+                    <th>Kaynak Zamanı</th>
+                    <th>Kuyruk Zamanı</th>
+                    <th>Deneme</th>
+                    <th>Durum</th>
+                    <th>Son Hata</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bufferedEvents.slice(0, 20).map((e, i) => (
+                    <BufferedEventRow key={`${e.machineCode}-${e.sourceTimestampUtc}-${i}`} event={e} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {deadLetters.length > 0 && (
+            <div style={{ marginTop: 12, overflowX: "auto" }}>
+              <h3 className="edge-reliability-subtitle">Dead Letter (Salt Okunur)</h3>
+              <table className="edge-reliability-table edge-reliability-table--dead-letter">
+                <thead>
+                  <tr>
+                    <th>Olay</th>
+                    <th>Makine</th>
+                    <th>Neden</th>
+                    <th>Deneme</th>
+                    <th>Son Hata</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deadLetters.map((d, i) => (
+                    <DeadLetterRow key={`${d.machineCode}-${d.eventType}-${i}`} record={d} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Capabilities */}
       <section>
-        <h2 className="edge-section-title">EDGE-1 + EDGE-2 + EDGE-3 Yetenekleri</h2>
+        <h2 className="edge-section-title">EDGE-1 + EDGE-2 + EDGE-3 + EDGE-4 Yetenekleri</h2>
         <ul className="edge-capabilities">
           {EDGE_CAPABILITIES.map((cap) => (
             <li key={cap}>{cap}</li>
@@ -1139,10 +1360,11 @@ export function EdgeWorkspaceView({
       {/* Simulator note */}
       <div className="edge-simulator-disclaimer">
         <strong>Simülatör modu aktif:</strong> Bu görünüm deterministik test
-        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1/EDGE-2/EDGE-3
+        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1/EDGE-2/EDGE-3/EDGE-4
         kapsamı dışındadır. Makine yazma/kontrol komutları gönderilmez.
         Gözlenen Çevrim sayısı resmi Üretim adedi değildir. Gözlenen duruş, alarm,
         setup ve fire değerleri observed-only&apos;dir; resmi üretim/kalite kaydı değildir.
+        EDGE-4 yerel store-and-forward tamponu simülatör yerel dosyası ile modellenir — gerçek fabrika ağı doğrulanmamıştır.
       </div>
     </div>
   );
