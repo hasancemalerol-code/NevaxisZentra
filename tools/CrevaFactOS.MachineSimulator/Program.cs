@@ -53,10 +53,63 @@ app.MapGet("/simulate/events", (string? machineCode, long? sinceSequence, int? l
             sourceTimestampUtc = e.SourceTimestampUtc,
             sourceSequence = e.SourceSequence,
             payload = e.Payload,
+            typedTelemetry = e.TypedTelemetry is null ? null : new
+            {
+                metricKey = e.TypedTelemetry.MetricKey,
+                numericValue = e.TypedTelemetry.NumericValue,
+                textValue = e.TypedTelemetry.TextValue,
+                booleanValue = e.TypedTelemetry.BooleanValue,
+                unit = e.TypedTelemetry.Unit,
+                quality = e.TypedTelemetry.Quality,
+            },
+            typedCycle = e.TypedCycle is null ? null : new
+            {
+                cycleIdentity = e.TypedCycle.CycleIdentity,
+                cycleDurationMs = e.TypedCycle.CycleDurationMs,
+                observedCounter = e.TypedCycle.ObservedCounter,
+                quality = e.TypedCycle.Quality,
+            },
+            typedCounter = e.TypedCounter is null ? null : new
+            {
+                counterKey = e.TypedCounter.CounterKey,
+                counterValue = e.TypedCounter.CounterValue,
+                quality = e.TypedCounter.Quality,
+            },
         }),
         hasMore = page.HasMore,
         nextSequence = page.NextSequence,
     });
+});
+
+// EDGE-2: Return specific scenario events for testing
+app.MapGet("/simulate/scenarios/duplicate-cycle", () =>
+{
+    var ev = MachineSimulatorScenarios.GetDuplicateCycleEvent();
+    return Results.Ok(new { scenario = "duplicate-cycle", note = "Replay of CYCLE-000001. Idempotency key is identical. Must not increment ObservedCycleCount.", @event = new
+    {
+        idempotencyKey = ev.IdempotencyKey,
+        machineCode = ev.MachineCode,
+        eventKind = ev.EventKind,
+        sourceTimestampUtc = ev.SourceTimestampUtc,
+        sourceSequence = ev.SourceSequence,
+        typedCycle = new { cycleIdentity = ev.TypedCycle!.CycleIdentity, cycleDurationMs = ev.TypedCycle.CycleDurationMs, observedCounter = ev.TypedCycle.ObservedCounter, quality = ev.TypedCycle.Quality },
+    }});
+});
+
+app.MapGet("/simulate/scenarios/out-of-order-telemetry", () =>
+{
+    var (first, second) = MachineSimulatorScenarios.GetOutOfOrderTelemetryEvents();
+    return Results.Ok(new { scenario = "out-of-order-telemetry", note = "seq 200 then seq 199. Latest projection must remain seq 200.", events = new[]
+    {
+        new { idempotencyKey = first.IdempotencyKey, sourceSequence = first.SourceSequence, sourceTimestampUtc = first.SourceTimestampUtc, typedTelemetry = new { metricKey = first.TypedTelemetry!.MetricKey, numericValue = first.TypedTelemetry.NumericValue, unit = first.TypedTelemetry.Unit, quality = first.TypedTelemetry.Quality } },
+        new { idempotencyKey = second.IdempotencyKey, sourceSequence = second.SourceSequence, sourceTimestampUtc = second.SourceTimestampUtc, typedTelemetry = new { metricKey = second.TypedTelemetry!.MetricKey, numericValue = second.TypedTelemetry.NumericValue, unit = second.TypedTelemetry.Unit, quality = second.TypedTelemetry.Quality } },
+    }});
+});
+
+app.MapGet("/simulate/scenarios/counter-reset", () =>
+{
+    var counters = MachineSimulatorScenarios.GetCounterResetScenario();
+    return Results.Ok(new { scenario = "counter-reset", note = "100 → 101 → 102 → 5. Last observation must be flagged as counter_reset_suspected.", counters = counters.Select(c => new { counterKey = c.CounterKey, counterValue = c.CounterValue, quality = c.Quality }) });
 });
 
 // Manual trigger: push all machine events to the main API

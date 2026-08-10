@@ -105,12 +105,21 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<PreventiveMaintenanceDue> PreventiveMaintenanceDues => Set<PreventiveMaintenanceDue>();
     public DbSet<MaintenancePartUsage> MaintenancePartUsages => Set<MaintenancePartUsage>();
 
-    // Edge Gateway foundation
+    // Edge Gateway foundation (EDGE-1)
     public DbSet<EdgeGateway> EdgeGateways => Set<EdgeGateway>();
     public DbSet<MachineRegistry> MachineRegistries => Set<MachineRegistry>();
     public DbSet<MachineGatewayAssignment> MachineGatewayAssignments => Set<MachineGatewayAssignment>();
     public DbSet<MachineEvent> MachineEvents => Set<MachineEvent>();
     public DbSet<MachineRuntime> MachineRuntimes => Set<MachineRuntime>();
+
+    // Edge telemetry, cycle, counter and signal intelligence (EDGE-2)
+    public DbSet<MachineTelemetrySample> MachineTelemetrySamples => Set<MachineTelemetrySample>();
+    public DbSet<MachineLatestTelemetry> MachineLatestTelemetries => Set<MachineLatestTelemetry>();
+    public DbSet<MachineObservedCycle> MachineObservedCycles => Set<MachineObservedCycle>();
+    public DbSet<MachineCycleProjection> MachineCycleProjections => Set<MachineCycleProjection>();
+    public DbSet<MachineCounterObservation> MachineCounterObservations => Set<MachineCounterObservation>();
+    public DbSet<MachineStateTransition> MachineStateTransitions => Set<MachineStateTransition>();
+    public DbSet<MachineSignalProjection> MachineSignalProjections => Set<MachineSignalProjection>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -748,6 +757,49 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Edge telemetry, cycle, counter and signal intelligence (EDGE-2)
+        modelBuilder.ApplyConfiguration(new MachineTelemetrySampleEntityConfiguration());
+        modelBuilder.Entity<MachineTelemetrySample>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineLatestTelemetryEntityConfiguration());
+        modelBuilder.Entity<MachineLatestTelemetry>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineObservedCycleEntityConfiguration());
+        modelBuilder.Entity<MachineObservedCycle>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineCycleProjectionEntityConfiguration());
+        modelBuilder.Entity<MachineCycleProjection>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineCounterObservationEntityConfiguration());
+        modelBuilder.Entity<MachineCounterObservation>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineStateTransitionEntityConfiguration());
+        modelBuilder.Entity<MachineStateTransition>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MachineSignalProjectionEntityConfiguration());
+        modelBuilder.Entity<MachineSignalProjection>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());

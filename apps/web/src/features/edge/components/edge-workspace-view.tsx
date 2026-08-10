@@ -12,10 +12,15 @@ import {
   getMachineStatusClass,
   getMachineStatusLabel,
   getEdgeSimulatorDisclaimer,
+  getTelemetryQualityLabel,
+  getTelemetryQualityClass,
+  getMetricLabel,
+  getConnectivityLabel,
+  formatDurationMs,
 } from "../presentation/edge-labels";
 
 // ---------------------------------------------------------------------------
-// Types (mirrors EdgeModels.cs read models)
+// Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2)
 // ---------------------------------------------------------------------------
 
 interface EdgeGatewayReadModel {
@@ -66,6 +71,71 @@ interface MachineEventReadModel {
   payload?: string | null;
   isDuplicate: boolean;
   duplicateOfIdempotencyKey?: string | null;
+}
+
+// EDGE-2 types
+interface LatestTelemetryReadModel {
+  machineId: string;
+  metricKey: string;
+  numericValue?: number | null;
+  textValue?: string | null;
+  booleanValue?: boolean | null;
+  unit?: string | null;
+  quality: string;
+  sourceTimestampUtc: string;
+  receivedAtUtc: string;
+  sourceSequence?: number | null;
+  updatedAtUtc: string;
+}
+
+interface ObservedCycleReadModel {
+  id: string;
+  machineId: string;
+  cycleIdentity: string;
+  cycleDurationMs: number;
+  observedCounter?: number | null;
+  quality: string;
+  sourceTimestampUtc: string;
+  receivedAtUtc: string;
+  sourceSequence?: number | null;
+  idempotencyKey: string;
+  isDuplicate: boolean;
+  isOutOfOrder: boolean;
+}
+
+interface CycleProjectionReadModel {
+  machineId: string;
+  observedCycleCount: number;
+  latestObservedCounter?: number | null;
+  lastCycleAtUtc?: string | null;
+  lastCycleDurationMs?: number | null;
+  averageRecentCycleDurationMs?: number | null;
+  updatedAtUtc: string;
+}
+
+interface StateTransitionReadModel {
+  id: string;
+  machineId: string;
+  fromState: string;
+  toState: string;
+  reason?: string | null;
+  sourceTimestampUtc: string;
+  receivedAtUtc: string;
+  sourceSequence?: number | null;
+  isOutOfOrder: boolean;
+}
+
+interface MachineSignalProjectionReadModel {
+  machineId: string;
+  connectivity: string;
+  observedState: string;
+  lastCycleAtUtc?: string | null;
+  lastCycleDurationMs?: number | null;
+  observedCycleCount: number;
+  latestCounter?: number | null;
+  quality: string;
+  lastTelemetryAtUtc?: string | null;
+  updatedAtUtc: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +249,94 @@ function MachineEventRow({ event }: { event: MachineEventReadModel }) {
   );
 }
 
+function TelemetryQualityBadge({ quality }: { quality: string }) {
+  return (
+    <span className={`telemetry-quality ${getTelemetryQualityClass(quality)}`}>
+      {getTelemetryQualityLabel(quality)}
+    </span>
+  );
+}
+
+function TelemetryCard({ sample }: { sample: LatestTelemetryReadModel }) {
+  const displayValue =
+    sample.numericValue != null
+      ? sample.numericValue.toLocaleString("tr-TR")
+      : sample.textValue != null
+        ? sample.textValue
+        : sample.booleanValue != null
+          ? sample.booleanValue
+            ? "Evet"
+            : "Hayır"
+          : "—";
+
+  return (
+    <div className="edge-telemetry-card">
+      <span className="edge-telemetry-card__metric">
+        {getMetricLabel(sample.metricKey)}
+      </span>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+        <span className="edge-telemetry-card__value">{displayValue}</span>
+        {sample.unit && (
+          <span className="edge-telemetry-card__unit">{sample.unit}</span>
+        )}
+      </div>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}
+      >
+        <TelemetryQualityBadge quality={sample.quality} />
+      </div>
+      <span className="edge-telemetry-card__meta">
+        {sample.sourceSequence != null && `#${sample.sourceSequence} · `}
+        {new Date(sample.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+      </span>
+    </div>
+  );
+}
+
+function CycleRow({ cycle }: { cycle: ObservedCycleReadModel }) {
+  const rowClass = [
+    cycle.isDuplicate ? "edge-cycle-table__duplicate" : "",
+    cycle.isOutOfOrder ? "edge-cycle-table__oor" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <tr className={rowClass}>
+      <td>
+        <span className="edge-cycle-identity">{cycle.cycleIdentity}</span>
+      </td>
+      <td>{formatDurationMs(cycle.cycleDurationMs)}</td>
+      <td>{cycle.observedCounter ?? "—"}</td>
+      <td>{cycle.sourceSequence != null ? `#${cycle.sourceSequence}` : "—"}</td>
+      <td>
+        <TelemetryQualityBadge quality={cycle.quality} />
+      </td>
+      <td style={{ whiteSpace: "nowrap", fontSize: 11, color: "#94a3b8" }}>
+        {new Date(cycle.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+      </td>
+    </tr>
+  );
+}
+
+function StateTransitionRow({ t }: { t: StateTransitionReadModel }) {
+  return (
+    <div className={`edge-state-row ${t.isOutOfOrder ? "edge-state-row--oor" : ""}`}>
+      <span className="edge-state-row__from">
+        {t.fromState} →
+      </span>
+      <span className="edge-state-row__to">{t.toState}</span>
+      <span className="edge-state-row__seq">
+        {t.sourceSequence != null ? `#${t.sourceSequence}` : "—"}
+      </span>
+      <span className="edge-state-row__time">
+        {new Date(t.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
+        {t.reason && ` · ${t.reason}`}
+      </span>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main workspace view
 // ---------------------------------------------------------------------------
@@ -187,12 +345,22 @@ interface EdgeWorkspaceViewProps {
   gateways: EdgeGatewayReadModel[];
   machines: MachineRegistryReadModel[];
   recentEvents?: MachineEventReadModel[];
+  latestTelemetry?: LatestTelemetryReadModel[];
+  cycleProjection?: CycleProjectionReadModel | null;
+  cycleHistory?: ObservedCycleReadModel[];
+  signalProjection?: MachineSignalProjectionReadModel | null;
+  stateTransitions?: StateTransitionReadModel[];
 }
 
 export function EdgeWorkspaceView({
   gateways,
   machines,
   recentEvents = [],
+  latestTelemetry = [],
+  cycleProjection = null,
+  cycleHistory = [],
+  signalProjection = null,
+  stateTransitions = [],
 }: EdgeWorkspaceViewProps) {
   const onlineMachines = machines.filter((m) => m.isReadyForProduction).length;
   const totalEvents = recentEvents.length;
@@ -289,9 +457,161 @@ export function EdgeWorkspaceView({
         </section>
       )}
 
+      {/* EDGE-2: Canlı Telemetri */}
+      {latestTelemetry.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Canlı Telemetri</h2>
+          <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
+            Simülatör verisi — gerçek makine bağlantısı değildir.
+          </p>
+          <div className="edge-telemetry-grid">
+            {latestTelemetry.map((t) => (
+              <TelemetryCard key={`${t.machineId}-${t.metricKey}`} sample={t} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-2: Çevrim Bilgileri */}
+      {(cycleProjection || cycleHistory.length > 0) && (
+        <section>
+          <h2 className="edge-section-title">
+            Çevrim Bilgileri
+            <span
+              style={{
+                marginLeft: 8,
+                fontSize: 11,
+                fontWeight: 400,
+                color: "#92400e",
+              }}
+            >
+              Gözlenen — resmi üretim miktarı değildir
+            </span>
+          </h2>
+
+          {cycleProjection && (
+            <div className="edge-cycle-grid" style={{ marginBottom: 12 }}>
+              <div className="edge-cycle-kpi edge-cycle-kpi--observed">
+                <span className="edge-cycle-kpi__label">
+                  Gözlenen Çevrim Sayısı
+                </span>
+                <span className="edge-cycle-kpi__value">
+                  {cycleProjection.observedCycleCount}
+                </span>
+              </div>
+              <div className="edge-cycle-kpi">
+                <span className="edge-cycle-kpi__label">Son Çevrim Süresi</span>
+                <span className="edge-cycle-kpi__value">
+                  {formatDurationMs(cycleProjection.lastCycleDurationMs)}
+                </span>
+              </div>
+              <div className="edge-cycle-kpi">
+                <span className="edge-cycle-kpi__label">Ort. Çevrim Süresi</span>
+                <span className="edge-cycle-kpi__value">
+                  {formatDurationMs(cycleProjection.averageRecentCycleDurationMs)}
+                </span>
+              </div>
+              <div className="edge-cycle-kpi">
+                <span className="edge-cycle-kpi__label">Son Sayaç</span>
+                <span className="edge-cycle-kpi__value">
+                  {cycleProjection.latestObservedCounter ?? "—"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {cycleHistory.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <table className="edge-cycle-table">
+                <thead>
+                  <tr>
+                    <th>Çevrim Kimliği</th>
+                    <th>Süre</th>
+                    <th>Sayaç</th>
+                    <th>Sıra No.</th>
+                    <th>Kalite</th>
+                    <th>Kaynak Zamanı</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cycleHistory.slice(0, 10).map((c) => (
+                    <CycleRow key={c.id} cycle={c} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* EDGE-2: Makine Sinyalleri */}
+      {signalProjection && (
+        <section>
+          <h2 className="edge-section-title">Makine Sinyalleri</h2>
+          <div className="edge-signal-card">
+            <div className="edge-signal-grid">
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">Bağlantı</span>
+                <span className="edge-signal-item__value">
+                  {getConnectivityLabel(signalProjection.connectivity)}
+                </span>
+              </div>
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">Gözlenen Durum</span>
+                <span className="edge-signal-item__value">
+                  {signalProjection.observedState}
+                </span>
+              </div>
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">
+                  Makineden Gözlenen Çevrim
+                </span>
+                <span className="edge-signal-item__value">
+                  {signalProjection.observedCycleCount}
+                </span>
+              </div>
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">Son Çevrim</span>
+                <span className="edge-signal-item__value">
+                  {formatDurationMs(signalProjection.lastCycleDurationMs)}
+                </span>
+              </div>
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">Son Sayaç</span>
+                <span className="edge-signal-item__value">
+                  {signalProjection.latestCounter ?? "—"}
+                </span>
+              </div>
+              <div className="edge-signal-item">
+                <span className="edge-signal-item__label">Veri Kalitesi</span>
+                <span className="edge-signal-item__value">
+                  <TelemetryQualityBadge quality={signalProjection.quality} />
+                </span>
+              </div>
+            </div>
+            <p className="edge-signal-disclaimer">
+              Salt okunur sinyal projeksiyonu — Üretim mutasyonu yoktur. Bu
+              değerler gözlemdir, resmi üretim miktarı değildir.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* EDGE-2: Durum Geçmişi */}
+      {stateTransitions.length > 0 && (
+        <section>
+          <h2 className="edge-section-title">Durum Geçmişi</h2>
+          <div>
+            {stateTransitions.slice(0, 10).map((t) => (
+              <StateTransitionRow key={t.id} t={t} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Capabilities */}
       <section>
-        <h2 className="edge-section-title">EDGE-1 Yetenekleri</h2>
+        <h2 className="edge-section-title">EDGE-1 + EDGE-2 Yetenekleri</h2>
         <ul className="edge-capabilities">
           {EDGE_CAPABILITIES.map((cap) => (
             <li key={cap}>{cap}</li>
@@ -302,8 +622,9 @@ export function EdgeWorkspaceView({
       {/* Simulator note */}
       <div className="edge-simulator-disclaimer">
         <strong>Simülatör modu aktif:</strong> Bu görünüm deterministik test
-        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1
+        verilerini kullanır. Gerçek makine bağlantısı (MQTT, OPC UA) EDGE-1/EDGE-2
         kapsamı dışındadır. Makine yazma/kontrol komutları gönderilmez.
+        Gözlenen Çevrim sayısı resmi Üretim adedi değildir.
       </div>
     </div>
   );

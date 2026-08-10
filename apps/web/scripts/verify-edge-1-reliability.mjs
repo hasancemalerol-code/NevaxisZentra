@@ -70,7 +70,7 @@ console.log("\n[3] Runtime projection persistence");
 assertContains("LastSeenAtUtc updated on every ingest", ingestion, "runtime.LastSeenAtUtc = receivedAt");
 assertContains("LastEventId updated", ingestion, "runtime.LastEventId = eventId");
 assertContains("MachineRuntime added if not exists", ingestion, "dbContext.MachineRuntimes.Add(runtime)");
-assertContains("Status derived from status-change payload", ingestion, "TryApplyStatusFromPayload");
+assertContains("Status derived from status-change payload", ingestion, "TryParseStatusPayload");
 assertContains("IsReadyForProduction derived from Running status", ingestion, 'MachineStatuses.Running');
 
 // ---------------------------------------------------------------------------

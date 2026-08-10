@@ -31,6 +31,28 @@ export const MACHINE_EVENT_KIND_LABELS: Record<string, string> = {
   fault: "Hata",
   "cycle-start": "Döngü Başlangıcı",
   "cycle-end": "Döngü Sonu",
+  // EDGE-2 canonical typed signals
+  "cycle-completed": "Çevrim Tamamlandı (Gözlenen)",
+  "counter-observed": "Sayaç Gözlemi",
+};
+
+export const TELEMETRY_QUALITY_LABELS: Record<string, string> = {
+  good: "İyi",
+  uncertain: "Belirsiz",
+  bad: "Hatalı",
+  unknown: "Bilinmiyor",
+};
+
+export const TELEMETRY_METRIC_LABELS: Record<string, string> = {
+  cycle_time_ms: "Çevrim Süresi",
+  machine_counter: "Makine Sayacı",
+  temperature_zone_1: "Sıcaklık (Bölge 1)",
+  hydraulic_pressure: "Hidrolik Basınç",
+};
+
+export const CONNECTIVITY_LABELS: Record<string, string> = {
+  online: "Çevrimiçi",
+  offline: "Çevrimdışı",
 };
 
 export const MACHINE_ASSIGNMENT_STATUS_LABELS: Record<string, string> = {
@@ -107,6 +129,38 @@ export function getMachineConnectivityLabel(
   return `${Math.floor(diffHr / 24)} gün önce görüldü`;
 }
 
+export function getTelemetryQualityLabel(quality: string): string {
+  return TELEMETRY_QUALITY_LABELS[quality] ?? quality;
+}
+
+export function getTelemetryQualityClass(quality: string): string {
+  switch (quality) {
+    case "good":
+      return "telemetry-quality--good";
+    case "uncertain":
+      return "telemetry-quality--uncertain";
+    case "bad":
+      return "telemetry-quality--bad";
+    default:
+      return "telemetry-quality--unknown";
+  }
+}
+
+export function getMetricLabel(metricKey: string): string {
+  return TELEMETRY_METRIC_LABELS[metricKey] ?? metricKey;
+}
+
+export function getConnectivityLabel(connectivity: string): string {
+  return CONNECTIVITY_LABELS[connectivity] ?? connectivity;
+}
+
+export function formatDurationMs(ms: number | null | undefined): string {
+  if (ms == null) return "—";
+  if (ms < 1000) return `${ms} ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)} s`;
+  return `${(ms / 60_000).toFixed(1)} dk`;
+}
+
 export const EDGE_CAPABILITIES = [
   "Makine kayıt defteri (CNC, pres, vb.)",
   "Edge gateway kaydı",
@@ -119,4 +173,16 @@ export const EDGE_CAPABILITIES = [
   "Sıra dışı tespit (SourceSequence karşılaştırması)",
   "Makine son-görülme / hazırlık projeksiyonu",
   "API yeniden başlatmalarında kalıcılık",
+  // EDGE-2
+  "Yazılı telemetri örnekleri (MetricKey, Numeric/Text/Bool, Birim, Kalite)",
+  "Son telemetri projeksiyonu (makine+metrik bazlı)",
+  "Sınırlı telemetri geçmişi (from/to/page)",
+  "Gözlenen çevrim tamamlama olayı (machine.cycle.completed)",
+  "Gözlenen çevrim sayacı projeksiyonu — resmi üretim miktarı DEĞİLDİR",
+  "Sayaç gözlemi (machine.counter.observed) + sıfırlama tespiti",
+  "Durum geçiş geçmişi (machine_state_transitions)",
+  "Makine sinyal projeksiyonu (MachineSignalProjection) — salt okunur",
+  "Çoğaltma güvenli sayaç (yinelenen çevrim ObservedCycleCount'u artırmaz)",
+  "Sıra dışı güvenli projeksiyonlar (en son sıra gerilemez)",
+  "Üretim mutasyonu YOK — EDGE sadece gözlem sahibidir",
 ] as const;

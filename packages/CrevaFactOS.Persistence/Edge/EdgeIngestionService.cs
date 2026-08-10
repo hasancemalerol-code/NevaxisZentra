@@ -103,37 +103,98 @@ public sealed class EdgeIngestionService(
                 runtime.LastSourceSequence = request.SourceSequence;
             }
 
-            // Derive status from status-change events
+            // Derive status from status-change events and record EDGE-2 state transitions
+            string? newStatus = null;
+            string? transitionReason = null;
             if (request.EventKind == MachineEventKinds.StatusChange && request.Payload is not null)
             {
-                TryApplyStatusFromPayload(runtime, request.Payload);
+                (newStatus, transitionReason) = TryParseStatusPayload(request.Payload);
+                if (newStatus is not null && !isOutOfOrder)
+                {
+                    runtime.Status = newStatus;
+                    runtime.IsReadyForProduction = newStatus == MachineStatuses.Running;
+                }
             }
 
             runtime.UpdatedAtUtc = receivedAt;
+
+            // EDGE-2: Record state transition when status changes (status-change event)
+            if (request.EventKind == MachineEventKinds.StatusChange && newStatus is not null)
+            {
+                var fromStatus = runtime.Status == newStatus ? MachineStatuses.Unknown : runtime.Status;
+                var transition = new MachineStateTransition
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    FacilityId = facilityId,
+                    MachineId = request.MachineId,
+                    FromState = fromStatus,
+                    ToState = newStatus,
+                    Reason = transitionReason,
+                    SourceTimestampUtc = request.SourceTimestampUtc,
+                    ReceivedAtUtc = receivedAt,
+                    SourceSequence = request.SourceSequence,
+                    IsOutOfOrder = isOutOfOrder,
+                    CreatedAtUtc = receivedAt,
+                };
+                dbContext.MachineStateTransitions.Add(transition);
+            }
+
+            // EDGE-2: Update signal projection connectivity/state
+            await UpdateSignalProjectionStateAsync(context, request.MachineId, facilityId,
+                runtime.Status, isOutOfOrder, receivedAt, ct);
 
             await dbContext.SaveChangesAsync(ct);
 
             return EdgeIngestResult.Success(eventId, isOutOfOrder);
         }, cancellationToken);
 
-    private static void TryApplyStatusFromPayload(MachineRuntime runtime, string payload)
+    private async Task UpdateSignalProjectionStateAsync(
+        EdgeOperationContext context,
+        Guid machineId,
+        Guid facilityId,
+        string currentStatus,
+        bool isOutOfOrder,
+        DateTimeOffset now,
+        CancellationToken ct)
+    {
+        var signal = await dbContext.MachineSignalProjections
+            .FirstOrDefaultAsync(s => s.FacilityId == facilityId && s.MachineId == machineId, ct);
+
+        if (signal is null)
+        {
+            signal = new MachineSignalProjection
+            {
+                Id = Guid.NewGuid(),
+                TenantId = context.TenantId,
+                FacilityId = facilityId,
+                MachineId = machineId,
+            };
+            dbContext.MachineSignalProjections.Add(signal);
+        }
+
+        signal.Connectivity = currentStatus is "offline" or "unknown" ? "offline" : "online";
+        if (!isOutOfOrder)
+            signal.ObservedState = currentStatus;
+        signal.UpdatedAtUtc = now;
+    }
+
+    private static (string? Status, string? Reason) TryParseStatusPayload(string payload)
     {
         try
         {
             using var doc = System.Text.Json.JsonDocument.Parse(payload);
+            string? status = null;
+            string? reason = null;
             if (doc.RootElement.TryGetProperty("status", out var statusEl))
-            {
-                var status = statusEl.GetString();
-                if (!string.IsNullOrWhiteSpace(status))
-                {
-                    runtime.Status = status;
-                    runtime.IsReadyForProduction = status == MachineStatuses.Running;
-                }
-            }
+                status = statusEl.GetString();
+            if (doc.RootElement.TryGetProperty("reason", out var reasonEl))
+                reason = reasonEl.GetString();
+            return (!string.IsNullOrWhiteSpace(status) ? status : null, reason);
         }
         catch (System.Text.Json.JsonException)
         {
-            // Malformed payload — status unchanged
+            return (null, null);
         }
     }
 }
