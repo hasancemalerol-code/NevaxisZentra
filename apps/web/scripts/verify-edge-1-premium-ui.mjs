@@ -111,7 +111,7 @@ const page = readFile("apps/web/src/app/(app)/makineler/page.tsx");
 
 assertContains("Imports EdgeWorkspaceView", page, "EdgeWorkspaceView");
 assertContains("Renders EdgeWorkspaceView", page, "<EdgeWorkspaceView");
-assertContains("Default export", page, "export default function");
+assertContains("Default export", page, "export default async function");
 
 // ---------------------------------------------------------------------------
 // 5. Navigation entry exists

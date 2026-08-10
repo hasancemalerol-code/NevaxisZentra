@@ -1,6 +1,11 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import "./edge-workspace.css";
+import { EdgeExecutiveKpis } from "./edge-executive-kpis";
+import { EdgeGatewayWorkspace } from "./edge-gateway-workspace";
+import { EdgeMachineDetailPanel } from "./edge-machine-detail-panel";
+import { EdgeEventTimeline, EdgeMachineTable } from "./edge-machine-table";
 import {
   EDGE_CAPABILITIES,
   getEdgeGatewayStatusClass,
@@ -32,6 +37,7 @@ import type {
   EdgeDeadLetterReadModel,
 } from "../presentation/edge-reliability-fixtures";
 import { EDGE_RELIABILITY_FIXTURE } from "../presentation/edge-reliability-fixtures";
+import type { EdgeMachineDetailBundle } from "../domain/edge-types";
 
 // ---------------------------------------------------------------------------
 // Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2 + EDGE-3)
@@ -679,11 +685,15 @@ interface EdgeWorkspaceViewProps {
   scrapObservations?: ScrapObservationReadModel[];
   operationalSummary?: MachineOperationalSummaryReadModel | null;
   // EDGE-4 (optional, defaults to fixture for premium UI)
-  deliveryHealth?: EdgeDeliveryHealthReadModel | null;
+  deliveryHealth?: EdgeDeliveryHealthReadModel;
   bufferedEvents?: EdgeBufferedEventReadModel[];
   deadLetters?: EdgeDeadLetterReadModel[];
   offlineMessage?: string | null;
   replayMessage?: string | null;
+  // EDGE-UI-1 workspace bundle
+  machineDetails?: Record<string, EdgeMachineDetailBundle>;
+  isSimulatorFixture?: boolean;
+  loadError?: string | null;
 }
 
 export function EdgeWorkspaceView({
@@ -706,7 +716,52 @@ export function EdgeWorkspaceView({
   deadLetters = EDGE_RELIABILITY_FIXTURE.deadLetters,
   offlineMessage = EDGE_RELIABILITY_FIXTURE.offlineMessage,
   replayMessage = EDGE_RELIABILITY_FIXTURE.replayMessage,
+  machineDetails = {},
+  isSimulatorFixture = true,
+  loadError = null,
 }: EdgeWorkspaceViewProps) {
+  const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
+
+  const activeMachineId =
+    selectedMachineId ?? (machines.length > 0 ? machines[0].id : null);
+  const activeDetail = activeMachineId ? machineDetails[activeMachineId] : undefined;
+  const activeMachine = activeMachineId
+    ? machines.find((m) => m.id === activeMachineId)
+    : undefined;
+
+  const resolvedLatestTelemetry =
+    latestTelemetry.length > 0 ? latestTelemetry : (activeDetail?.latestTelemetry ?? []);
+  const resolvedCycleProjection =
+    cycleProjection ?? activeDetail?.cycleProjection ?? null;
+  const resolvedCycleHistory =
+    cycleHistory.length > 0 ? cycleHistory : (activeDetail?.cycleHistory ?? []);
+  const resolvedSignalProjection =
+    signalProjection ?? activeDetail?.signalProjection ?? null;
+  const resolvedStateTransitions =
+    stateTransitions.length > 0 ? stateTransitions : (activeDetail?.stateTransitions ?? []);
+  const resolvedDowntimeEpisodes =
+    downtimeEpisodes.length > 0 ? downtimeEpisodes : (activeDetail?.downtimeEpisodes ?? []);
+  const resolvedActiveAlarms =
+    activeAlarms.length > 0 ? activeAlarms : (activeDetail?.activeAlarms ?? []);
+  const resolvedAlarmHistory =
+    alarmHistory.length > 0 ? alarmHistory : (activeDetail?.alarmHistory ?? []);
+  const resolvedSetupEpisodes =
+    setupEpisodes.length > 0 ? setupEpisodes : (activeDetail?.setupEpisodes ?? []);
+  const resolvedScrapObservations =
+    scrapObservations.length > 0
+      ? scrapObservations
+      : (activeDetail?.scrapObservations ?? []);
+  const resolvedOperationalSummary =
+    operationalSummary ?? activeDetail?.operationalSummary ?? null;
+
+  const machineCodeById = useMemo(
+    () => Object.fromEntries(machines.map((m) => [m.id, m.machineCode])),
+    [machines],
+  );
+
+  const resolvedDeliveryHealth =
+    deliveryHealth ?? EDGE_RELIABILITY_FIXTURE.deliveryHealth;
+
   const onlineMachines = machines.filter((m) => m.isReadyForProduction).length;
   const totalEvents = recentEvents.length;
   const duplicateEvents = recentEvents.filter((e) => e.isDuplicate).length;
@@ -716,15 +771,74 @@ export function EdgeWorkspaceView({
       {/* Header */}
       <div className="edge-workspace-header">
         <div className="edge-header__intro">
-          <h1>Makineler & Edge Gateway</h1>
+          <h1>Makine & Edge</h1>
           <p className="edge-header__subtitle">
-            Tesis makineleri, gateway kayıtları ve telemetri izleme. Gerçek
-            PLC/makine bağlantısı yok (EDGE-1 foundation).
+            Makine bağlantıları, operasyonel sinyaller ve Edge veri akışının merkezi.
           </p>
         </div>
       </div>
 
-      {/* KPI strip */}
+      {isSimulatorFixture && (
+        <p className="edge-simulator-notice" data-testid="edge-simulator-page-notice">
+          Simülatör verisi — gerçek makine bağlantısı değildir.
+        </p>
+      )}
+
+      {loadError && (
+        <div className="edge-load-error" role="alert">
+          {loadError}
+        </div>
+      )}
+
+      {/* EDGE-UI-1 executive KPI strip */}
+      <EdgeExecutiveKpis
+        machines={machines}
+        machineDetails={machineDetails}
+        deliveryHealth={resolvedDeliveryHealth}
+      />
+
+      {/* EDGE-UI-1 primary machine table */}
+      <section>
+        <h2 className="edge-section-title">Operasyonel Makine Tablosu</h2>
+        <EdgeMachineTable
+          machines={machines}
+          machineDetails={machineDetails}
+          deliveryHealth={resolvedDeliveryHealth}
+          selectedMachineId={selectedMachineId}
+          onSelectMachine={setSelectedMachineId}
+          isSimulatorFixture={isSimulatorFixture}
+        />
+      </section>
+
+      {/* EDGE-UI-1 machine detail panel */}
+      {selectedMachineId && activeMachine && activeDetail && (
+        <EdgeMachineDetailPanel
+          machine={activeMachine}
+          detail={activeDetail}
+          gateway={gateways.find((g) => g.id === activeMachine.activeGatewayId) ?? gateways[0]}
+          deliveryHealth={resolvedDeliveryHealth}
+          bufferedEvents={bufferedEvents}
+          deadLetters={deadLetters}
+          offlineMessage={offlineMessage}
+          replayMessage={replayMessage}
+          isSimulatorFixture={isSimulatorFixture}
+          onClose={() => setSelectedMachineId(null)}
+        />
+      )}
+
+      {/* EDGE-UI-1 gateway workspace */}
+      <section>
+        <h2 className="edge-section-title">Edge Gateway&apos;ler</h2>
+        <EdgeGatewayWorkspace gateways={gateways} deliveryHealth={resolvedDeliveryHealth} />
+      </section>
+
+      {/* EDGE-UI-1 operational timeline */}
+      <section>
+        <h2 className="edge-section-title">Operasyonel Olay Zaman Çizelgesi</h2>
+        <EdgeEventTimeline events={recentEvents} machineCodeById={machineCodeById} />
+      </section>
+
+      {/* Legacy KPI strip (EDGE-1 preserved) */}
       <div className="edge-kpi-grid">
         <div className="edge-kpi">
           <div className="edge-kpi__content">
@@ -752,10 +866,10 @@ export function EdgeWorkspaceView({
         </div>
       </div>
 
-      {/* Gateways */}
+      {/* Gateways (EDGE-1 card grid preserved) */}
       {gateways.length > 0 && (
         <section>
-          <h2 className="edge-section-title">Edge Gateway&apos;ler</h2>
+          <h2 className="edge-section-title">Edge Gateway Kayıtları</h2>
           <div className="edge-card-grid">
             {gateways.map((g) => (
               <GatewayCard key={g.id} gateway={g} />
@@ -803,14 +917,14 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-2: Canlı Telemetri */}
-      {latestTelemetry.length > 0 && (
+      {resolvedLatestTelemetry.length > 0 && (
         <section>
           <h2 className="edge-section-title">Canlı Telemetri</h2>
           <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
             Simülatör verisi — gerçek makine bağlantısı değildir.
           </p>
           <div className="edge-telemetry-grid">
-            {latestTelemetry.map((t) => (
+            {resolvedLatestTelemetry.map((t) => (
               <TelemetryCard key={`${t.machineId}-${t.metricKey}`} sample={t} />
             ))}
           </div>
@@ -818,7 +932,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-2: Çevrim Bilgileri */}
-      {(cycleProjection || cycleHistory.length > 0) && (
+      {(resolvedCycleProjection || resolvedCycleHistory.length > 0) && (
         <section>
           <h2 className="edge-section-title">
             Çevrim Bilgileri
@@ -834,38 +948,38 @@ export function EdgeWorkspaceView({
             </span>
           </h2>
 
-          {cycleProjection && (
+          {resolvedCycleProjection && (
             <div className="edge-cycle-grid" style={{ marginBottom: 12 }}>
               <div className="edge-cycle-kpi edge-cycle-kpi--observed">
                 <span className="edge-cycle-kpi__label">
                   Gözlenen Çevrim Sayısı
                 </span>
                 <span className="edge-cycle-kpi__value">
-                  {cycleProjection.observedCycleCount}
+                  {resolvedCycleProjection.observedCycleCount}
                 </span>
               </div>
               <div className="edge-cycle-kpi">
                 <span className="edge-cycle-kpi__label">Son Çevrim Süresi</span>
                 <span className="edge-cycle-kpi__value">
-                  {formatDurationMs(cycleProjection.lastCycleDurationMs)}
+                  {formatDurationMs(resolvedCycleProjection.lastCycleDurationMs)}
                 </span>
               </div>
               <div className="edge-cycle-kpi">
                 <span className="edge-cycle-kpi__label">Ort. Çevrim Süresi</span>
                 <span className="edge-cycle-kpi__value">
-                  {formatDurationMs(cycleProjection.averageRecentCycleDurationMs)}
+                  {formatDurationMs(resolvedCycleProjection.averageRecentCycleDurationMs)}
                 </span>
               </div>
               <div className="edge-cycle-kpi">
                 <span className="edge-cycle-kpi__label">Son Sayaç</span>
                 <span className="edge-cycle-kpi__value">
-                  {cycleProjection.latestObservedCounter ?? "—"}
+                  {resolvedCycleProjection.latestObservedCounter ?? "—"}
                 </span>
               </div>
             </div>
           )}
 
-          {cycleHistory.length > 0 && (
+          {resolvedCycleHistory.length > 0 && (
             <div style={{ overflowX: "auto" }}>
               <table className="edge-cycle-table">
                 <thead>
@@ -879,7 +993,7 @@ export function EdgeWorkspaceView({
                   </tr>
                 </thead>
                 <tbody>
-                  {cycleHistory.slice(0, 10).map((c) => (
+                  {resolvedCycleHistory.slice(0, 10).map((c) => (
                     <CycleRow key={c.id} cycle={c} />
                   ))}
                 </tbody>
@@ -890,7 +1004,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-2: Makine Sinyalleri */}
-      {signalProjection && (
+      {resolvedSignalProjection && (
         <section>
           <h2 className="edge-section-title">Makine Sinyalleri</h2>
           <div className="edge-signal-card">
@@ -898,13 +1012,13 @@ export function EdgeWorkspaceView({
               <div className="edge-signal-item">
                 <span className="edge-signal-item__label">Bağlantı</span>
                 <span className="edge-signal-item__value">
-                  {getConnectivityLabel(signalProjection.connectivity)}
+                  {getConnectivityLabel(resolvedSignalProjection.connectivity)}
                 </span>
               </div>
               <div className="edge-signal-item">
                 <span className="edge-signal-item__label">Gözlenen Durum</span>
                 <span className="edge-signal-item__value">
-                  {signalProjection.observedState}
+                  {getMachineStatusLabel(resolvedSignalProjection.observedState)}
                 </span>
               </div>
               <div className="edge-signal-item">
@@ -912,72 +1026,72 @@ export function EdgeWorkspaceView({
                   Makineden Gözlenen Çevrim
                 </span>
                 <span className="edge-signal-item__value">
-                  {signalProjection.observedCycleCount}
+                  {resolvedSignalProjection.observedCycleCount}
                 </span>
               </div>
               <div className="edge-signal-item">
                 <span className="edge-signal-item__label">Son Çevrim</span>
                 <span className="edge-signal-item__value">
-                  {formatDurationMs(signalProjection.lastCycleDurationMs)}
+                  {formatDurationMs(resolvedSignalProjection.lastCycleDurationMs)}
                 </span>
               </div>
               <div className="edge-signal-item">
                 <span className="edge-signal-item__label">Son Sayaç</span>
                 <span className="edge-signal-item__value">
-                  {signalProjection.latestCounter ?? "—"}
+                  {resolvedSignalProjection.latestCounter ?? "—"}
                 </span>
               </div>
               <div className="edge-signal-item">
                 <span className="edge-signal-item__label">Veri Kalitesi</span>
                 <span className="edge-signal-item__value">
-                  <TelemetryQualityBadge quality={signalProjection.quality} />
+                  <TelemetryQualityBadge quality={resolvedSignalProjection.quality} />
                 </span>
               </div>
-              {signalProjection.isInObservedDowntime != null && (
+              {resolvedSignalProjection.isInObservedDowntime != null && (
                 <div className="edge-signal-item">
                   <span className="edge-signal-item__label">
                     Gözlenen Duruşta
                   </span>
                   <span className="edge-signal-item__value">
-                    {signalProjection.isInObservedDowntime ? "Evet" : "Hayır"}
+                    {resolvedSignalProjection.isInObservedDowntime ? "Evet" : "Hayır"}
                   </span>
                 </div>
               )}
-              {signalProjection.activeAlarmCount != null && (
+              {resolvedSignalProjection.activeAlarmCount != null && (
                 <div className="edge-signal-item">
                   <span className="edge-signal-item__label">Aktif Alarm</span>
                   <span className="edge-signal-item__value">
-                    {signalProjection.activeAlarmCount}
-                    {signalProjection.highestAlarmSeverity && (
+                    {resolvedSignalProjection.activeAlarmCount}
+                    {resolvedSignalProjection.highestAlarmSeverity && (
                       <>
                         {" · "}
                         <AlarmSeverityBadge
-                          severity={signalProjection.highestAlarmSeverity}
+                          severity={resolvedSignalProjection.highestAlarmSeverity}
                         />
                       </>
                     )}
                   </span>
                 </div>
               )}
-              {signalProjection.isInObservedSetup != null && (
+              {resolvedSignalProjection.isInObservedSetup != null && (
                 <div className="edge-signal-item">
                   <span className="edge-signal-item__label">
                     Gözlenen Setup&apos;ta
                   </span>
                   <span className="edge-signal-item__value">
-                    {signalProjection.isInObservedSetup ? "Evet" : "Hayır"}
+                    {resolvedSignalProjection.isInObservedSetup ? "Evet" : "Hayır"}
                   </span>
                 </div>
               )}
-              {signalProjection.observedScrapCount != null && (
+              {resolvedSignalProjection.observedScrapCount != null && (
                 <div className="edge-signal-item">
                   <span className="edge-signal-item__label">
                     Makineden Gözlenen Fire
                   </span>
                   <span className="edge-signal-item__value">
-                    {signalProjection.observedScrapCount}
-                    {signalProjection.observedScrapQuantity != null &&
-                      ` · ${signalProjection.observedScrapQuantity.toLocaleString("tr-TR")}`}
+                    {resolvedSignalProjection.observedScrapCount}
+                    {resolvedSignalProjection.observedScrapQuantity != null &&
+                      ` · ${resolvedSignalProjection.observedScrapQuantity.toLocaleString("tr-TR")}`}
                   </span>
                 </div>
               )}
@@ -991,11 +1105,11 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-2: Durum Geçmişi */}
-      {stateTransitions.length > 0 && (
+      {resolvedStateTransitions.length > 0 && (
         <section>
           <h2 className="edge-section-title">Durum Geçmişi</h2>
           <div>
-            {stateTransitions.slice(0, 10).map((t) => (
+            {resolvedStateTransitions.slice(0, 10).map((t) => (
               <StateTransitionRow key={t.id} t={t} />
             ))}
           </div>
@@ -1003,7 +1117,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Operational summary cards */}
-      {operationalSummary && (
+      {resolvedOperationalSummary && (
         <section>
           <h2 className="edge-section-title">Operasyonel Özet (Gözlenen)</h2>
           <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
@@ -1013,32 +1127,32 @@ export function EdgeWorkspaceView({
             <div className="edge-ops-summary-card">
               <span className="edge-ops-summary-card__label">Gözlenen Duruş</span>
               <span className="edge-ops-summary-card__value">
-                {operationalSummary.isInObservedDowntime ? "Aktif" : "Yok"}
+                {resolvedOperationalSummary.isInObservedDowntime ? "Aktif" : "Yok"}
               </span>
               <span className="edge-ops-summary-card__meta">
-                {operationalSummary.observedDowntimeCount} kayıt
-                {operationalSummary.observedMicroStopCount > 0 &&
-                  ` · ${operationalSummary.observedMicroStopCount} mikro-duruş`}
+                {resolvedOperationalSummary.observedDowntimeCount} kayıt
+                {resolvedOperationalSummary.observedMicroStopCount > 0 &&
+                  ` · ${resolvedOperationalSummary.observedMicroStopCount} mikro-duruş`}
               </span>
             </div>
             <div className="edge-ops-summary-card">
               <span className="edge-ops-summary-card__label">Aktif Alarm</span>
               <span className="edge-ops-summary-card__value">
-                {operationalSummary.activeAlarmCount}
+                {resolvedOperationalSummary.activeAlarmCount}
               </span>
               <span className="edge-ops-summary-card__meta">
-                {operationalSummary.highestAlarmSeverity
-                  ? getAlarmSeverityLabel(operationalSummary.highestAlarmSeverity)
+                {resolvedOperationalSummary.highestAlarmSeverity
+                  ? getAlarmSeverityLabel(resolvedOperationalSummary.highestAlarmSeverity)
                   : "—"}
               </span>
             </div>
             <div className="edge-ops-summary-card">
               <span className="edge-ops-summary-card__label">Gözlenen Setup</span>
               <span className="edge-ops-summary-card__value">
-                {operationalSummary.isInObservedSetup ? "Aktif" : "Yok"}
+                {resolvedOperationalSummary.isInObservedSetup ? "Aktif" : "Yok"}
               </span>
               <span className="edge-ops-summary-card__meta">
-                {operationalSummary.observedSetupCount} kayıt
+                {resolvedOperationalSummary.observedSetupCount} kayıt
               </span>
             </div>
             <div className="edge-ops-summary-card edge-ops-summary-card--scrap">
@@ -1046,10 +1160,10 @@ export function EdgeWorkspaceView({
                 Makineden Gözlenen Fire
               </span>
               <span className="edge-ops-summary-card__value">
-                {operationalSummary.observedScrapQuantity.toLocaleString("tr-TR")}
+                {resolvedOperationalSummary.observedScrapQuantity.toLocaleString("tr-TR")}
               </span>
               <span className="edge-ops-summary-card__meta">
-                {operationalSummary.observedScrapCount} gözlem
+                {resolvedOperationalSummary.observedScrapCount} gözlem
               </span>
             </div>
           </div>
@@ -1057,7 +1171,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Gözlenen Duruşlar */}
-      {downtimeEpisodes.length > 0 && (
+      {resolvedDowntimeEpisodes.length > 0 && (
         <section>
           <h2 className="edge-section-title">Gözlenen Duruşlar</h2>
           <p className="edge-simulator-disclaimer" style={{ marginBottom: 8 }}>
@@ -1077,7 +1191,7 @@ export function EdgeWorkspaceView({
                 </tr>
               </thead>
               <tbody>
-                {downtimeEpisodes.slice(0, 15).map((e) => (
+                {resolvedDowntimeEpisodes.slice(0, 15).map((e) => (
                   <DowntimeEpisodeRow key={e.id} episode={e} />
                 ))}
               </tbody>
@@ -1087,7 +1201,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Aktif Alarmlar */}
-      {activeAlarms.length > 0 && (
+      {resolvedActiveAlarms.length > 0 && (
         <section>
           <h2 className="edge-section-title">Aktif Alarmlar</h2>
           <div style={{ overflowX: "auto" }}>
@@ -1102,7 +1216,7 @@ export function EdgeWorkspaceView({
                 </tr>
               </thead>
               <tbody>
-                {activeAlarms.map((a) => (
+                {resolvedActiveAlarms.map((a) => (
                   <ActiveAlarmRow key={a.id} alarm={a} />
                 ))}
               </tbody>
@@ -1112,7 +1226,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Alarm Geçmişi */}
-      {alarmHistory.length > 0 && (
+      {resolvedAlarmHistory.length > 0 && (
         <section>
           <h2 className="edge-section-title">Alarm Geçmişi</h2>
           <div style={{ overflowX: "auto" }}>
@@ -1127,7 +1241,7 @@ export function EdgeWorkspaceView({
                 </tr>
               </thead>
               <tbody>
-                {alarmHistory.slice(0, 15).map((o) => (
+                {resolvedAlarmHistory.slice(0, 15).map((o) => (
                   <AlarmHistoryRow key={o.id} obs={o} />
                 ))}
               </tbody>
@@ -1137,7 +1251,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Gözlenen Setup / Değişimler */}
-      {setupEpisodes.length > 0 && (
+      {resolvedSetupEpisodes.length > 0 && (
         <section>
           <h2 className="edge-section-title">Gözlenen Setup / Değişimler</h2>
           <div style={{ overflowX: "auto" }}>
@@ -1153,7 +1267,7 @@ export function EdgeWorkspaceView({
                 </tr>
               </thead>
               <tbody>
-                {setupEpisodes.slice(0, 15).map((e) => (
+                {resolvedSetupEpisodes.slice(0, 15).map((e) => (
                   <SetupEpisodeRow key={e.id} episode={e} />
                 ))}
               </tbody>
@@ -1163,7 +1277,7 @@ export function EdgeWorkspaceView({
       )}
 
       {/* EDGE-3: Makineden Gözlenen Fire */}
-      {scrapObservations.length > 0 && (
+      {resolvedScrapObservations.length > 0 && (
         <section>
           <h2 className="edge-section-title">Makineden Gözlenen Fire</h2>
           <p className="edge-scrap-disclaimer">
@@ -1181,7 +1295,7 @@ export function EdgeWorkspaceView({
                 </tr>
               </thead>
               <tbody>
-                {scrapObservations.slice(0, 15).map((s) => (
+                {resolvedScrapObservations.slice(0, 15).map((s) => (
                   <ScrapObservationRow key={s.id} scrap={s} />
                 ))}
               </tbody>

@@ -239,7 +239,7 @@ export const EDGE_CAPABILITIES = [
   // EDGE-3
   "Gözlenen duruş (machine.downtime.started / ended) — resmi üretim duruşu DEĞİLDİR",
   "Gözlenen mikro-duruş tespiti (eşik tabanlı, observed-only)",
-  "Alarm gözlemi (machine.alarm.raised / cleared) — kök neden analizi YOK",
+  "Alarm gözlemi (machine.alarm.raised / cleared) — otomatik tanı iddiası yok",
   "Gözlenen setup / değişim (machine.setup.started / completed)",
   "Makineden gözlenen fire (machine.scrap.observed) — resmi kalite kaydı DEĞİLDİR",
   "Operasyonel özet projeksiyonu (gözlenen duruş / alarm / setup / fire)",
