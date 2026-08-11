@@ -70,7 +70,7 @@ assertContains("EdgeWorkspaceView exported", workspace, "export function EdgeWor
 assertContains("Gateways rendered", workspace, "GatewayCard");
 assertContains("Machines rendered", workspace, "MachineCard");
 assertContains("Event rows rendered", workspace, "MachineEventRow");
-assertContains("KPI strip present", workspace, "edge-kpi-grid");
+assertContains("KPI strip present", workspace, "<EdgeExecutiveKpis");
 assertContains("Section: Edge Gateways", workspace, "Edge Gateway");
 assertContains("Section: Machine registry", workspace, "Makine Kayıt Defteri");
 assertContains("Capabilities list displayed", workspace, "EDGE_CAPABILITIES");

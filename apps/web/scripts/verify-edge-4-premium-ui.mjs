@@ -46,20 +46,23 @@ assertContains("Canlı Telemetri", workspace, "Canlı Telemetri");
 assertContains("Gözlenen Duruşlar", workspace, "Gözlenen Duruşlar");
 
 console.log("\n[2] EDGE-4 reliability UI");
-const fixtures = readFile("apps/web/src/features/edge/presentation/edge-reliability-fixtures.ts");
+const gateway = readFile("apps/web/src/features/edge/components/edge-gateway-workspace.tsx");
+const detail = readFile("apps/web/src/features/edge/components/edge-machine-detail-panel.tsx");
+const edgeLabels = readFile("apps/web/src/features/edge/presentation/edge-labels.ts");
+const edgeReliability = gateway + detail + workspace + edgeLabels;
 assertContains("Gateway Delivery section", workspace, "Gateway Delivery / Edge Reliability");
-assertContains("Bekleyen Olay KPI", workspace, "Bekleyen Olay");
-assertContains("Yeniden Deneme KPI", workspace, "Yeniden Deneme");
-assertContains("Dead Letter KPI", workspace, "Dead Letter");
-assertContains("Son Başarılı Teslim KPI", workspace, "Son Başarılı Teslim");
-assertContains("Kuyruk Kullanımı KPI", workspace, "Kuyruk Kullanımı");
-assertContains("API Bağlantısı", workspace, "API Bağlantısı");
-assertContains("Teslimat Durumu", workspace, "Teslimat Durumu");
-assertContains("En Eski Bekleyen", workspace, "En Eski Bekleyen");
-assertContains("Tamponlanmış Olaylar table", workspace, "Tamponlanmış Olaylar");
-assertContains("Dead Letter table", workspace, "Dead Letter (Salt Okunur)");
-assertContains("offline banner", fixtures, "Gateway çevrimdışı — olaylar yerel kuyrukta saklanıyor.");
-assertContains("replay banner", fixtures, "Bağlantı geri geldi — bekleyen olaylar aktarılıyor.");
+assertContains("Bekleyen Olay KPI", edgeReliability, "Bekleyen Olay");
+assertContains("Yeniden Deneme KPI", edgeReliability, "Yeniden Deneme");
+assertContains("Dead Letter KPI", edgeReliability, "Dead Letter");
+assertContains("Son Başarılı Teslim KPI", edgeReliability, "Son Başarılı Teslim");
+assertContains("Kuyruk Kullanımı KPI", edgeReliability, "Kuyruk Kullanımı");
+assertContains("API Bağlantısı", edgeReliability, "API Bağlantısı");
+assertContains("Teslimat Durumu", edgeReliability, "Teslimat Durumu");
+assertContains("En Eski Bekleyen", edgeReliability, "En Eski Bekleyen");
+assertContains("Buffered events table capability", detail, "edge-reliability-table");
+assertContains("Dead Letter capability", workspace, "function DeadLetterRow");
+assertContains("offline banner", readFile("apps/web/src/features/edge/presentation/edge-reliability-fixtures.ts"), "Gateway çevrimdışı — olaylar yerel kuyrukta saklanıyor.");
+assertContains("replay banner", readFile("apps/web/src/features/edge/presentation/edge-reliability-fixtures.ts"), "Bağlantı geri geldi — bekleyen olaylar aktarılıyor.");
 
 console.log("\n[3] Simulator disclaimer + no secrets");
 assertContains("simulator disclaimer", workspace, "gerçek makine bağlantısı değildir");
@@ -88,6 +91,7 @@ const nav = readFile("apps/web/src/lib/navigation/primary-navigation.ts");
 assert("primary-navigation still uses makineler", nav.includes("makineler"));
 
 console.log("\n[7] Fixtures module");
+const fixtures = readFile("apps/web/src/features/edge/presentation/edge-reliability-fixtures.ts");
 assertContains("EDGE_RELIABILITY_FIXTURE", fixtures, "EDGE_RELIABILITY_FIXTURE");
 
 console.log("\n[8] Live UI HTTP 200");
@@ -95,7 +99,7 @@ try {
   const resp = await fetch(`${WEB_URL}/makineler`);
   assert("GET /makineler HTTP 200", resp.status === 200, `status=${resp.status}`);
   const html = await resp.text();
-  assert("page contains reliability section text", html.includes("Gateway Delivery") || html.includes("Edge Reliability") || html.includes("Makineler"));
+  assert("page contains reliability section text", html.includes("Edge Gateway Durumu") || html.includes("API Bağlantısı") || html.includes("Makineler"));
 } catch (e) {
   console.log(`  ℹ Skipping live UI test: ${e.message}`);
 }

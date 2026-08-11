@@ -51,6 +51,8 @@ function assertNotContains(label, content, text) {
 // ---------------------------------------------------------------------------
 console.log("\n[1] EDGE-1 layout preserved");
 const workspace = readFile("apps/web/src/features/edge/components/edge-workspace-view.tsx");
+const detail = readFile("apps/web/src/features/edge/components/edge-machine-detail-panel.tsx");
+const css = readFile("apps/web/src/features/edge/components/edge-workspace.css");
 
 assertContains("Gateways section", workspace, "Edge Gateway");
 assertContains("Machines section", workspace, "Makine Kayıt Defteri");
@@ -58,7 +60,7 @@ assertContains("Recent events section", workspace, "Son Olaylar");
 assertContains("GatewayCard component", workspace, "GatewayCard");
 assertContains("MachineCard component", workspace, "MachineCard");
 assertContains("MachineEventRow component", workspace, "MachineEventRow");
-assertContains("KPI grid", workspace, "edge-kpi-grid");
+assertContains("KPI grid", workspace, "<EdgeExecutiveKpis");
 
 // ---------------------------------------------------------------------------
 // 2. Canlı Telemetri section
@@ -66,7 +68,7 @@ assertContains("KPI grid", workspace, "edge-kpi-grid");
 console.log("\n[2] Canlı Telemetri section");
 assertContains("telemetry section heading", workspace, "Canlı Telemetri");
 assertContains("TelemetryCard component", workspace, "TelemetryCard");
-assertContains("edge-telemetry-grid class", workspace, "edge-telemetry-grid");
+assertContains("edge-telemetry-grid class", css, ".edge-telemetry-grid");
 assertContains("latestTelemetry prop", workspace, "latestTelemetry");
 
 // ---------------------------------------------------------------------------
@@ -84,7 +86,7 @@ assertContains("cycle history table", workspace, "edge-cycle-table");
 console.log("\n[4] Makine Sinyalleri section");
 assertContains("signals section heading", workspace, "Makine Sinyalleri");
 assertContains("signalProjection prop", workspace, "signalProjection");
-assertContains("edge-signal-card class", workspace, "edge-signal-card");
+assertContains("edge-signal-card class", css, ".edge-signal-card");
 
 // ---------------------------------------------------------------------------
 // 5. Durum Geçmişi section
@@ -107,8 +109,8 @@ assertContains("quality label shown", workspace, "getTelemetryQualityLabel");
 // ---------------------------------------------------------------------------
 console.log("\n[7] Observed terminology");
 assertContains("Gözlenen label used", workspace, "Gözlenen");
-assertContains("Makineden Gözlenen Çevrim label", workspace, "Makineden Gözlenen Çevrim");
-assertContains("observed-not-production disclaimer", workspace, "resmi üretim miktarı değildir");
+assertContains("Makineden Gözlenen Çevrim label", detail, "Makineden Gözlenen Çevrim");
+assertContains("observed-not-production disclaimer", detail, "resmi üretim veya kalite kaydı değildir");
 assertNotContains("must not use simple Üretim Adedi", workspace, '"Üretim Adedi"');
 
 // ---------------------------------------------------------------------------
@@ -132,7 +134,6 @@ assertNotContains("raw id as primary display in cycle row", workspace, "{cycle.i
 // ---------------------------------------------------------------------------
 console.log("\n[10] CSS scoped, no globals.css");
 
-const css = readFile("apps/web/src/features/edge/components/edge-workspace.css");
 assertContains("telemetry grid class defined", css, ".edge-telemetry-grid");
 assertContains("telemetry card class defined", css, ".edge-telemetry-card");
 assertContains("telemetry quality good class", css, ".telemetry-quality--good");

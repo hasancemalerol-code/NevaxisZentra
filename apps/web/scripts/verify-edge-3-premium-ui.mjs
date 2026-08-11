@@ -57,11 +57,12 @@ assertContains("Makine Sinyalleri", workspace, "Makine Sinyalleri");
 // 2. EDGE-3 operational sections
 // ---------------------------------------------------------------------------
 console.log("\n[2] EDGE-3 observed operational sections");
-assertContains("Gözlenen Duruşlar", workspace, "Gözlenen Duruşlar");
-assertContains("Aktif Alarmlar", workspace, "Aktif Alarmlar");
-assertContains("Alarm Geçmişi", workspace, "Alarm Geçmişi");
-assertContains("Gözlenen Setup / Değişimler", workspace, "Gözlenen Setup / Değişimler");
-assertContains("Makineden Gözlenen Fire", workspace, "Makineden Gözlenen Fire");
+const detail = readFile("apps/web/src/features/edge/components/edge-machine-detail-panel.tsx");
+assertContains("Gözlenen Duruşlar", detail, "Gözlenen Duruşlar");
+assertContains("Aktif Alarmlar", detail, "Aktif Alarmlar");
+assertContains("Alarm Geçmişi", detail, "Alarm Geçmişi");
+assertContains("Gözlenen Setup / Değişimler", detail, "Gözlenen Setup / Değişimler");
+assertContains("Makineden Gözlenen Fire", detail, "Makineden Gözlenen Fire");
 
 // ---------------------------------------------------------------------------
 // 3. Simulator disclaimer
@@ -78,7 +79,7 @@ assertContains(
 // ---------------------------------------------------------------------------
 console.log("\n[4] Observation terminology");
 assertContains("Gözlenen terminology", workspace, "Gözlenen");
-assertContains("makine gözlemidir", workspace, "makine gözlemidir");
+assertContains("makine gözlemidir", detail, "makine gözlemidir");
 assertContains("resmi üretim/kalite", workspace, "resmi üretim/kalite");
 
 // ---------------------------------------------------------------------------

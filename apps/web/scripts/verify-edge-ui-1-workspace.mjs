@@ -99,7 +99,8 @@ console.log("\n[8] EDGE-1/2/3/4 sections preserved");
 assertContains("Edge Gateway section", workspace, "Edge Gateway");
 assertContains("Makine Kayıt Defteri", workspace, "Makine Kayıt Defteri");
 assertContains("Canlı Telemetri", workspace, "Canlı Telemetri");
-assertContains("Gözlenen Duruşlar", workspace, "Gözlenen Duruşlar");
+const detailPanel = readFile("apps/web/src/features/edge/components/edge-machine-detail-panel.tsx");
+assertContains("Gözlenen Duruşlar", detailPanel, "Gözlenen Duruşlar");
 assertContains("Gateway Delivery reliability", workspace, "Gateway Delivery / Edge Reliability");
 
 console.log("\n[9] Empty states");

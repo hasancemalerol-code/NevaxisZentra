@@ -1,7 +1,7 @@
 /* Edge Gateway workspace — follows ERP workspace rhythm */
 
 .edge-workspace-page {
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   max-width: none;
 }
@@ -24,7 +24,7 @@
 
 .edge-header__intro {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   flex: 1 1 420px;
   min-width: 0;
 }
@@ -1515,7 +1515,7 @@
 
 .edge-landing-secondary {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1.55fr 0.95fr;
   gap: 12px;
   align-items: start;
 }
@@ -1801,5 +1801,66 @@
   }
   .edge-gateway-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* EDGE-UI-CLEANUP-1 — landing-only polish */
+.edge-workspace-header--executive {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  gap: 8px;
+}
+
+.edge-workspace-header--executive + .edge-exec-kpi-grid {
+  margin-top: 0;
+}
+
+.edge-landing-secondary {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.95fr);
+}
+
+.edge-landing-section--timeline {
+  min-width: 0;
+}
+
+.edge-landing-section--timeline .edge-timeline--compact {
+  min-width: 0;
+}
+
+.edge-landing-section--timeline .edge-timeline__row {
+  grid-template-columns: 8px 48px minmax(0, 1fr) auto auto;
+}
+
+.edge-landing-section--timeline .edge-timeline__kind {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edge-gateway-panel {
+  align-self: start;
+}
+
+.edge-workspace-landing-footer {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid #e8edf4;
+}
+
+@media (max-width: 1440px) {
+  .edge-landing-secondary {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1280px) {
+  .edge-landing-secondary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .edge-workspace-page {
+    gap: 10px;
   }
 }

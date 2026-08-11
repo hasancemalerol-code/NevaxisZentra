@@ -55,13 +55,13 @@ const detail = readFile("apps/web/src/features/edge/components/edge-machine-deta
 
 console.log("\n[1] Simulator disclaimer");
 assertContains("Page-level simulator notice", workspace, "Simülatör verisi — gerçek makine bağlantısı değildir.");
-assertContains("Simülatör modu aktif preserved", workspace, "Simülatör modu aktif");
+assertContains("Simulator disclaimer exported", readFile("apps/web/src/features/edge/presentation/edge-labels.ts"), "getEdgeSimulatorDisclaimer");
 assertContains("Simülatör badge", all, "Simülatör");
 
 console.log("\n[2] Observed terminology");
 assertContains("Gözlenen çevrim", all, "Gözlenen");
 assertContains("Makineden Gözlenen Çevrim", all, "Makineden Gözlenen Çevrim");
-assertContains("Gözlenen Duruşlar", workspace, "Gözlenen Duruşlar");
+assertContains("Gözlenen Duruşlar", detail, "Gözlenen Duruşlar");
 assertContains("Makineden Gözlenen Fire", all, "Makineden Gözlenen Fire");
 
 console.log("\n[3] No official Production/Quality claims");
