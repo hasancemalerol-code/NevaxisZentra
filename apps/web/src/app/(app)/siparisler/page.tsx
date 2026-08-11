@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { calculateOrderDraftSummary } from "@/features/orders/application/order-draft-query";
 import { OrderDraftKpiLinks } from "@/features/orders/components/order-draft-kpi-links";
 import {
@@ -75,6 +76,20 @@ const workflowSteps = [
   },
 ] as const;
 
+function OrderDraftFilteredWorkspaceFallback() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="order-draft-filtered-workspace"
+    >
+      <div className="order-draft-filtered-workspace__result">
+        <span>Sipariş taslakları yükleniyor…</span>
+      </div>
+    </div>
+  );
+}
+
 export default function OrdersPage() {
   const orderDraftSummary =
     calculateOrderDraftSummary(
@@ -139,9 +154,11 @@ export default function OrdersPage() {
         description="Farklı kanallardan toplanan sipariş taleplerini, AI güven puanlarını, açık sorunları ve onay durumlarını inceleyin."
         title="Sipariş taslakları"
       >
-        <OrderDraftFilteredWorkspace
-          orderDrafts={ORDER_DRAFT_PREVIEW_DATA}
-        />
+        <Suspense fallback={<OrderDraftFilteredWorkspaceFallback />}>
+          <OrderDraftFilteredWorkspace
+            orderDrafts={ORDER_DRAFT_PREVIEW_DATA}
+          />
+        </Suspense>
       </Section>
 
       <Section
