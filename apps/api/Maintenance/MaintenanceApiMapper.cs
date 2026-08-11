@@ -435,4 +435,105 @@ internal static class MaintenanceApiMapper
         recordsWithoutCost = model.RecordsWithoutCost,
         dataCompletenessStatus = model.DataCompletenessStatus,
     };
+
+    public static object MapConditionOverview(MaintenanceConditionOverviewReadModel model) => new
+    {
+        monitoredAssetCount = model.MonitoredAssetCount,
+        normalCount = model.NormalCount,
+        watchCount = model.WatchCount,
+        degradedCount = model.DegradedCount,
+        criticalCount = model.CriticalCount,
+        insufficientDataCount = model.InsufficientDataCount,
+        lastEvaluatedAtUtc = model.LastEvaluatedAtUtc,
+    };
+
+    public static object MapConditionAssetRow(MaintenanceConditionAssetRowReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        machineCode = model.MachineCode,
+        machineName = model.MachineName,
+        machineId = model.MachineId,
+        conditionStatus = model.ConditionStatus,
+        activeAnomalyCount = model.ActiveAnomalyCount,
+        highestAnomalySeverity = model.HighestAnomalySeverity,
+        dataFreshness = model.DataFreshness,
+        dataSufficiency = model.DataSufficiency,
+        lastEvaluatedAtUtc = model.LastEvaluatedAtUtc,
+    };
+
+    public static object MapConditionProfile(MaintenanceConditionProfileReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        machineId = model.MachineId,
+        machineCode = model.MachineCode,
+        machineName = model.MachineName,
+        conditionStatus = model.ConditionStatus,
+        overallConditionScore = model.OverallConditionScore,
+        lastEvaluatedAtUtc = model.LastEvaluatedAtUtc,
+        dataFreshness = model.DataFreshness,
+        dataSufficiency = model.DataSufficiency,
+        activeAnomalyCount = model.ActiveAnomalyCount,
+        highestAnomalySeverity = model.HighestAnomalySeverity,
+        trendState = model.TrendState,
+        signals = model.Signals.Select(MapConditionIntelligenceSignal).ToList(),
+        activeAnomalies = model.ActiveAnomalies.Select(MapConditionAnomaly).ToList(),
+        context = new
+        {
+            alarmContext = new
+            {
+                recentAlarmCount24h = model.Context.AlarmContext.RecentAlarmCount24h,
+                highestSeverity24h = model.Context.AlarmContext.HighestSeverity24h,
+            },
+            downtimeContext = new
+            {
+                episodeCount24h = model.Context.DowntimeContext.EpisodeCount24h,
+                totalDurationMinutes24h = model.Context.DowntimeContext.TotalDurationMinutes24h,
+            },
+            maintenanceHistory = new
+            {
+                recentFailureCount90d = model.Context.MaintenanceHistory.RecentFailureCount90d,
+                lastFailureCategory = model.Context.MaintenanceHistory.LastFailureCategory,
+                lastMaintenanceCompletedAtUtc = model.Context.MaintenanceHistory.LastMaintenanceCompletedAtUtc,
+            },
+            metricSnapshots = model.Context.MetricSnapshots.Select(m => new
+            {
+                metricKey = m.MetricKey,
+                displayName = m.DisplayName,
+                expectedUnit = m.ExpectedUnit,
+                dataSufficiency = m.DataSufficiency,
+                dataFreshness = m.DataFreshness,
+                trendState = m.TrendState,
+                baselineValue = m.BaselineValue,
+                observedValue = m.ObservedValue,
+                deviationPercent = m.DeviationPercent,
+            }).ToList(),
+        },
+    };
+
+    public static object MapConditionAnomaly(MaintenanceConditionAnomalyReadModel model) => new
+    {
+        id = model.Id,
+        metricKey = model.MetricKey,
+        metricDisplayName = model.MetricDisplayName,
+        detectedAtUtc = model.DetectedAtUtc,
+        observedValue = model.ObservedValue,
+        baselineValue = model.BaselineValue,
+        deviationPercent = model.DeviationPercent,
+        severity = model.Severity,
+        direction = model.Direction,
+        evidenceSummary = model.EvidenceSummary,
+        sourceFreshness = model.SourceFreshness,
+        dataQuality = model.DataQuality,
+        status = model.Status,
+    };
+
+    public static object MapConditionIntelligenceSignal(MaintenancePredictiveConditionSignalReadModel model) => new
+    {
+        signalType = model.SignalType,
+        metricKey = model.MetricKey,
+        severity = model.Severity,
+        summary = model.Summary,
+    };
 }

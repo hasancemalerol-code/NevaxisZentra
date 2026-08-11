@@ -1644,3 +1644,376 @@ a.maintenance-asset-cell__reference:hover {
   }
 }
 
+.maintenance-condition-page {
+  gap: 1rem;
+}
+
+.maintenance-condition-disclaimer,
+.maintenance-condition-stale-warning,
+.maintenance-condition-explanation,
+.maintenance-condition-hint {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.maintenance-condition-stale-warning {
+  color: var(--warning-foreground, #b45309);
+}
+
+.maintenance-condition-table-card,
+.maintenance-condition-detail-card {
+  padding: 1rem;
+}
+
+.maintenance-condition-detail-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.maintenance-condition-detail-card--wide {
+  grid-column: 1 / -1;
+}
+
+.maintenance-condition-detail-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.maintenance-condition-metric-list,
+.maintenance-condition-context-list {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.maintenance-condition-metric-list li {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.maintenance-condition-anomaly-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.maintenance-condition-anomaly-card {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.maintenance-condition-anomaly-card header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.maintenance-condition-anomaly-card dl {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0.75rem 0 0;
+}
+
+.maintenance-condition-anomaly-card dt {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.maintenance-condition-overview-link {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.maintenance-predictive-overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #d7e2ef;
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 99%), rgb(247 250 255 / 98%)),
+    linear-gradient(135deg, rgb(21 94 239 / 3%), rgb(21 94 239 / 0%) 42%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 90%) inset,
+    0 10px 28px rgb(15 35 65 / 6%);
+}
+
+.maintenance-predictive-overview-card__header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid #e4ebf4;
+  background: linear-gradient(180deg, rgb(248 251 255 / 96%), rgb(255 255 255 / 88%));
+}
+
+.maintenance-predictive-overview-card__intro {
+  align-items: flex-start;
+  display: flex;
+  flex: 1 1 320px;
+  gap: 14px;
+  min-width: 0;
+}
+
+.maintenance-predictive-overview-card__badge {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #c9dcff;
+  border-radius: 12px;
+  color: #155eef;
+  background: linear-gradient(180deg, #f5f9ff, #edf4ff);
+  box-shadow: 0 4px 12px rgb(21 94 239 / 8%);
+}
+
+.maintenance-predictive-overview-card__badge svg {
+  width: 20px;
+  height: 20px;
+}
+
+.maintenance-predictive-overview-card__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.maintenance-predictive-overview-card__title {
+  margin: 0;
+  color: #10213c;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.maintenance-predictive-overview-card__subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  max-width: 56ch;
+}
+
+.maintenance-predictive-overview-card__cta {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.maintenance-predictive-overview-card__cta:focus-visible {
+  outline: 2px solid #155eef;
+  outline-offset: 2px;
+}
+
+.maintenance-predictive-overview-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px 18px;
+}
+
+.maintenance-predictive-overview-card__error {
+  border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  background: rgb(254 242 242 / 72%);
+}
+
+.maintenance-predictive-overview-card__error p {
+  color: var(--destructive);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.maintenance-predictive-overview-card__empty {
+  color: #64748b;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  margin: 0;
+  padding: 2px 2px 0;
+}
+
+.maintenance-predictive-overview-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.maintenance-predictive-kpi-tile {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 98%), rgb(248 250 252 / 96%));
+  box-shadow: 0 4px 14px rgb(15 35 65 / 4%);
+  overflow: hidden;
+}
+
+.maintenance-predictive-kpi-tile__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: currentcolor;
+  opacity: 0.72;
+}
+
+.maintenance-predictive-kpi-tile__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  margin-top: 2px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.maintenance-predictive-kpi-tile__icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.maintenance-predictive-kpi-tile__content {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.maintenance-predictive-kpi-tile__label {
+  color: #64748b;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.maintenance-predictive-kpi-tile__value {
+  color: #0f172a;
+  font-size: 1.375rem;
+  font-weight: 850;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.maintenance-predictive-kpi-tile__desc {
+  color: #94a3b8;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+.maintenance-predictive-kpi-tile--critical {
+  color: #dc2626;
+}
+
+.maintenance-predictive-kpi-tile--critical .maintenance-predictive-kpi-tile__icon {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.maintenance-predictive-kpi-tile--degraded {
+  color: #ea580c;
+}
+
+.maintenance-predictive-kpi-tile--degraded .maintenance-predictive-kpi-tile__icon {
+  color: #ea580c;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.maintenance-predictive-kpi-tile--watch {
+  color: #d97706;
+}
+
+.maintenance-predictive-kpi-tile--watch .maintenance-predictive-kpi-tile__icon {
+  color: #d97706;
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.maintenance-predictive-kpi-tile--insufficient {
+  color: #64748b;
+}
+
+.maintenance-predictive-kpi-tile--insufficient .maintenance-predictive-kpi-tile__icon {
+  color: #475569;
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.maintenance-predictive-kpi-tile--anomaly {
+  color: #e11d48;
+}
+
+.maintenance-predictive-kpi-tile--anomaly .maintenance-predictive-kpi-tile__icon {
+  color: #e11d48;
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+
+@media (max-width: 1280px) {
+  .maintenance-predictive-overview-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .maintenance-predictive-overview-card__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .maintenance-predictive-overview-card__cta {
+    align-self: flex-start;
+  }
+
+  .maintenance-predictive-overview-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .maintenance-predictive-kpi-tile {
+    min-height: 88px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .maintenance-condition-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-condition-anomaly-card dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .maintenance-condition-kpis.production-execution-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

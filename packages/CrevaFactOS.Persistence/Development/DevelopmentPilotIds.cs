@@ -332,6 +332,22 @@ public static class DevelopmentPilotIds
     public static readonly Guid EdgePilotPressAssignmentId =
         Guid.Parse("bb000001-0098-4000-8000-000000000098");
 
+    // Maintenance condition intelligence pilot fixtures (MAINT-PRED-1)
+    public static readonly Guid MaintenanceConditionCncMappingId =
+        Guid.Parse("bb000001-0099-4000-8000-000000000099");
+
+    public static readonly Guid MaintenanceConditionPressMappingId =
+        Guid.Parse("bb000001-009a-4000-8000-00000000009a");
+
+    public static readonly Guid MaintenanceConditionMetricTemperatureId =
+        Guid.Parse("bb000001-009b-4000-8000-00000000009b");
+
+    public static readonly Guid MaintenanceConditionMetricPressureId =
+        Guid.Parse("bb000001-009c-4000-8000-00000000009c");
+
+    public static readonly Guid MaintenanceConditionMetricCycleTimeId =
+        Guid.Parse("bb000001-009d-4000-8000-00000000009d");
+
     // Development-only facility: exists in tenant but has no pilot operator/reviewer membership.
     public static readonly Guid UnauthorizedFacilityId =
         Guid.Parse("bb000001-0005-4000-8000-000000000099");

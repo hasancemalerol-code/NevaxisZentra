@@ -1,7 +1,14 @@
 import Link from "next/link";
 
 type MaintenanceWorkspaceNavProps = Readonly<{
-  active: "overview" | "work-orders" | "requests" | "preventive" | "planning" | "reporting";
+  active:
+    | "overview"
+    | "work-orders"
+    | "requests"
+    | "preventive"
+    | "planning"
+    | "reporting"
+    | "condition";
 }>;
 
 const NAV_ITEMS = [
@@ -15,6 +22,7 @@ const NAV_ITEMS = [
   },
   { id: "planning" as const, href: "/bakim/planlama", label: "Bakım Planlama" },
   { id: "reporting" as const, href: "/bakim/raporlama", label: "Raporlama" },
+  { id: "condition" as const, href: "/bakim/durum-zekasi", label: "Kestirici Bakım" },
 ];
 
 export function MaintenanceWorkspaceNav({ active }: MaintenanceWorkspaceNavProps) {

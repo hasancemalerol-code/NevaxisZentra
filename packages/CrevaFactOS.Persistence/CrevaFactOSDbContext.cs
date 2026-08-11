@@ -105,6 +105,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<PreventiveMaintenanceDue> PreventiveMaintenanceDues => Set<PreventiveMaintenanceDue>();
     public DbSet<MaintenancePartUsage> MaintenancePartUsages => Set<MaintenancePartUsage>();
 
+    // Maintenance condition intelligence (MAINT-PRED-1)
+    public DbSet<MaintenanceAssetMachineMapping> MaintenanceAssetMachineMappings => Set<MaintenanceAssetMachineMapping>();
+    public DbSet<MaintenanceConditionMetricDefinition> MaintenanceConditionMetricDefinitions => Set<MaintenanceConditionMetricDefinition>();
+    public DbSet<MaintenanceConditionProfile> MaintenanceConditionProfiles => Set<MaintenanceConditionProfile>();
+    public DbSet<MaintenanceConditionAnomaly> MaintenanceConditionAnomalies => Set<MaintenanceConditionAnomaly>();
+
     // Edge Gateway foundation (EDGE-1)
     public DbSet<EdgeGateway> EdgeGateways => Set<EdgeGateway>();
     public DbSet<MachineRegistry> MachineRegistries => Set<MachineRegistry>();
@@ -735,6 +741,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceAssetMachineMappingEntityConfiguration());
+        modelBuilder.Entity<MaintenanceAssetMachineMapping>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceConditionMetricDefinitionEntityConfiguration());
+        modelBuilder.Entity<MaintenanceConditionMetricDefinition>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceConditionProfileEntityConfiguration());
+        modelBuilder.Entity<MaintenanceConditionProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenanceConditionAnomalyEntityConfiguration());
+        modelBuilder.Entity<MaintenanceConditionAnomaly>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Edge Gateway foundation
         modelBuilder.ApplyConfiguration(new EdgeGatewayEntityConfiguration());

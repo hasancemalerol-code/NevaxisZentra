@@ -1,12 +1,18 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   AlertTriangle,
+  BrainCircuit,
   CalendarClock,
   CheckCircle2,
   ClipboardList,
   Clock,
+  Info,
   Settings,
   Wrench,
+  Activity,
+  TrendingDown,
+  Database,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +23,7 @@ import type {
   MaintenanceWorkspaceSummary,
   PreventiveMaintenancePlanSummary,
 } from "../domain/maintenance";
+import type { MaintenanceConditionWorkspace } from "../domain/maintenance-condition";
 import {
   buildMaintenanceCriticalAlerts,
   formatMaintenanceAge,
@@ -47,7 +54,40 @@ type MaintenanceDashboardViewProps = Readonly<{
   requests: readonly MaintenanceRequestSummary[];
   workOrders: readonly MaintenanceWorkOrderSummary[];
   preventivePlans: readonly PreventiveMaintenancePlanSummary[];
+  conditionWorkspace?: MaintenanceConditionWorkspace;
+  conditionOverviewError?: string;
 }>;
+
+function sumActiveAnomalyCount(workspace: MaintenanceConditionWorkspace): number {
+  return workspace.assets.reduce((total, asset) => total + asset.activeAnomalyCount, 0);
+}
+
+type PredictiveKpiTileProps = Readonly<{
+  tone: "critical" | "degraded" | "watch" | "insufficient" | "anomaly";
+  icon: ReactNode;
+  label: string;
+  value: number;
+  description: string;
+}>;
+
+function PredictiveKpiTile({ tone, icon, label, value, description }: PredictiveKpiTileProps) {
+  return (
+    <article
+      className={`maintenance-predictive-kpi-tile maintenance-predictive-kpi-tile--${tone}`}
+      aria-label={`${label}: ${value}`}
+    >
+      <span className="maintenance-predictive-kpi-tile__accent" aria-hidden="true" />
+      <span className="maintenance-predictive-kpi-tile__icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="maintenance-predictive-kpi-tile__content">
+        <span className="maintenance-predictive-kpi-tile__label">{label}</span>
+        <strong className="maintenance-predictive-kpi-tile__value">{value}</strong>
+        <small className="maintenance-predictive-kpi-tile__desc">{description}</small>
+      </div>
+    </article>
+  );
+}
 
 function formatDate(iso?: string): string {
   if (!iso) {
@@ -66,6 +106,8 @@ export function MaintenanceDashboardView({
   requests,
   workOrders,
   preventivePlans,
+  conditionWorkspace,
+  conditionOverviewError,
 }: MaintenanceDashboardViewProps) {
   const activeWorkOrders = [...workOrders]
     .filter((item) => isActiveMaintenanceWorkOrder(item.status))
@@ -87,6 +129,9 @@ export function MaintenanceDashboardView({
     .slice(0, 8);
 
   const alerts = buildMaintenanceCriticalAlerts({ requests, workOrders, preventivePlans });
+
+  const conditionOverview = conditionWorkspace?.overview;
+  const openAnomalyCount = conditionWorkspace ? sumActiveAnomalyCount(conditionWorkspace) : 0;
 
   return (
     <main className="production-execution-page maintenance-dashboard-page">
@@ -175,6 +220,86 @@ export function MaintenanceDashboardView({
           description="Vadesi geçmiş planlar"
         />
       </section>
+
+      <Card className="maintenance-predictive-overview-card production-execution-panel">
+        <header className="maintenance-predictive-overview-card__header">
+          <div className="maintenance-predictive-overview-card__intro">
+            <span className="maintenance-predictive-overview-card__badge" aria-hidden="true">
+              <BrainCircuit />
+            </span>
+            <div className="maintenance-predictive-overview-card__copy">
+              <h2 className="maintenance-predictive-overview-card__title">Kestirici Bakım Uyarıları</h2>
+              <p className="maintenance-predictive-overview-card__subtitle">
+                Edge gözlemleri ve bakım geçmişinden türetilen durum, eğilim ve anomali kanıtları.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/bakim/durum-zekasi"
+            className="maintenance-predictive-overview-card__cta maintenance-dashboard-action maintenance-dashboard-action--secondary"
+          >
+            <Activity aria-hidden="true" />
+            Kestirici Bakımı İncele
+          </Link>
+        </header>
+
+        <div className="maintenance-predictive-overview-card__body">
+          {conditionOverviewError ? (
+            <div role="alert" className="maintenance-predictive-overview-card__error">
+              <p>{conditionOverviewError}</p>
+            </div>
+          ) : conditionOverview ? (
+            <>
+              {conditionOverview.monitoredAssetCount === 0 ? (
+                <p className="maintenance-predictive-overview-card__empty">
+                  Henüz izlenen varlık yok. Durum profilleri eşleştirilmiş makine/varlıklar için
+                  görüntülenir.
+                </p>
+              ) : null}
+              <section
+                className="maintenance-predictive-overview-kpis"
+                aria-label="Kestirici bakım durum özeti"
+              >
+                <PredictiveKpiTile
+                  tone="critical"
+                  icon={<AlertTriangle />}
+                  label="Kritik"
+                  value={conditionOverview.criticalCount}
+                  description="Kritik sapma profili"
+                />
+                <PredictiveKpiTile
+                  tone="degraded"
+                  icon={<TrendingDown />}
+                  label="Bozulma Eğilimi"
+                  value={conditionOverview.degradedCount}
+                  description="Sapma eğilimi"
+                />
+                <PredictiveKpiTile
+                  tone="watch"
+                  icon={<Info />}
+                  label="İzlenmeli"
+                  value={conditionOverview.watchCount}
+                  description="İzleme gerektiren"
+                />
+                <PredictiveKpiTile
+                  tone="insufficient"
+                  icon={<Database />}
+                  label="Yetersiz Veri"
+                  value={conditionOverview.insufficientDataCount}
+                  description="Yetersiz örnek"
+                />
+                <PredictiveKpiTile
+                  tone="anomaly"
+                  icon={<Activity />}
+                  label="Açık Anomali"
+                  value={openAnomalyCount}
+                  description="Aktif anomali kaydı"
+                />
+              </section>
+            </>
+          ) : null}
+        </div>
+      </Card>
 
       <section className="maintenance-dashboard-priority">
         <Card className="production-execution-panel" id="aktif-bakim-isleri">

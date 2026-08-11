@@ -1,10 +1,14 @@
 import { Wrench } from "lucide-react";
 
 import { MaintenanceDashboardView } from "@/features/maintenance/components/maintenance-dashboard-view";
+import { readMaintenanceConditionOverviewSnapshot } from "@/features/maintenance/server/maintenance-condition-reader";
 import { readMaintenanceDashboard } from "@/features/maintenance/server/maintenance-reader";
 
 export default async function MaintenancePage() {
-  const result = await readMaintenanceDashboard();
+  const [result, conditionResult] = await Promise.all([
+    readMaintenanceDashboard(),
+    readMaintenanceConditionOverviewSnapshot(),
+  ]);
 
   if (result.status === "failure") {
     return (
@@ -30,6 +34,12 @@ export default async function MaintenancePage() {
       requests={result.requests}
       workOrders={result.workOrders}
       preventivePlans={result.preventivePlans}
+      conditionWorkspace={
+        conditionResult.status === "success" ? conditionResult.workspace : undefined
+      }
+      conditionOverviewError={
+        conditionResult.status === "failure" ? conditionResult.message : undefined
+      }
     />
   );
 }
