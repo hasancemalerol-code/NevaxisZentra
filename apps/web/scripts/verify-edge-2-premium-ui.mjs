@@ -118,7 +118,7 @@ assertNotContains("must not use simple Üretim Adedi", workspace, '"Üretim Aded
 // ---------------------------------------------------------------------------
 console.log("\n[8] Simulator disclaimer");
 assertContains("simulator disclaimer in telemetry section", workspace, "gerçek makine bağlantısı değildir");
-assertContains("simulator disclaimer at bottom", workspace, "Simülatör modu aktif");
+assertContains("simulator disclaimer at bottom", workspace, "Simülatör verisi — gerçek makine bağlantısı değildir.");
 assertNotContains("must not claim Gerçek makine doğrulandı", workspace, "Gerçek makine doğrulandı");
 
 // ---------------------------------------------------------------------------

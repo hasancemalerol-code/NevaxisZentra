@@ -80,7 +80,7 @@ assertContains(
 console.log("\n[4] Observation terminology");
 assertContains("Gözlenen terminology", workspace, "Gözlenen");
 assertContains("makine gözlemidir", detail, "makine gözlemidir");
-assertContains("resmi üretim/kalite", workspace, "resmi üretim/kalite");
+assertContains("resmi üretim/kalite", detail, "resmi üretim veya kalite kaydı değildir");
 
 // ---------------------------------------------------------------------------
 // 5. No OEE + no raw UUID primary display
