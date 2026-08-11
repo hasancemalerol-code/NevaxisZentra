@@ -610,4 +610,94 @@ internal static class MaintenanceApiMapper
         generatedAtUtc = model.GeneratedAtUtc,
         status = model.Status,
     };
+
+    public static object MapMaintenanceAiDraftSummary(MaintenanceAiDraftSummaryReadModel model) => new
+    {
+        id = model.Id,
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        status = model.Status,
+        qualitativeConfidence = model.QualitativeConfidence,
+        suggestedTitle = model.SuggestedTitle,
+        version = model.Version,
+        generatedAtUtc = model.GeneratedAtUtc,
+        updatedAtUtc = model.UpdatedAtUtc,
+        createdMaintenanceRequestId = model.CreatedMaintenanceRequestId,
+        isDevelopmentProvider = model.IsDevelopmentProvider,
+    };
+
+    public static object MapMaintenanceAiDraftDetail(MaintenanceAiDraftDetailReadModel model) => new
+    {
+        id = model.Id,
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        status = model.Status,
+        qualitativeConfidence = model.QualitativeConfidence,
+        conditionEvaluationReference = model.ConditionEvaluationReference,
+        riskAssessmentId = model.RiskAssessmentId,
+        inputFingerprint = model.InputFingerprint,
+        ruleSetVersion = model.RuleSetVersion,
+        providerIdentifier = model.ProviderIdentifier,
+        modelIdentifier = model.ModelIdentifier,
+        promptVersion = model.PromptVersion,
+        isDevelopmentProvider = model.IsDevelopmentProvider,
+        dataFreshness = model.DataFreshness,
+        dataSufficiency = model.DataSufficiency,
+        riskBand = model.RiskBand,
+        deterministicRecommendationCategory = model.DeterministicRecommendationCategory,
+        validatedOutput = MapMaintenanceAiStructuredOutput(model.ValidatedOutput),
+        aiOriginalOutput = MapMaintenanceAiStructuredOutput(model.AiOriginalOutput),
+        suggestedTitle = model.SuggestedTitle,
+        suggestedDescription = model.SuggestedDescription,
+        suggestedPriority = model.SuggestedPriority,
+        suggestedRequestType = model.SuggestedRequestType,
+        humanEditedTitle = model.HumanEditedTitle,
+        humanEditedDescription = model.HumanEditedDescription,
+        humanEditedPriority = model.HumanEditedPriority,
+        humanEditedRequestType = model.HumanEditedRequestType,
+        humanEditorSubjectId = model.HumanEditorSubjectId,
+        humanEditedAtUtc = model.HumanEditedAtUtc,
+        generatedBySubjectId = model.GeneratedBySubjectId,
+        generatedAtUtc = model.GeneratedAtUtc,
+        approvedBySubjectId = model.ApprovedBySubjectId,
+        approvedAtUtc = model.ApprovedAtUtc,
+        rejectedBySubjectId = model.RejectedBySubjectId,
+        rejectedAtUtc = model.RejectedAtUtc,
+        rejectionReason = model.RejectionReason,
+        createdMaintenanceRequestId = model.CreatedMaintenanceRequestId,
+        createdMaintenanceRequestNumber = model.CreatedMaintenanceRequestNumber,
+        failureCode = model.FailureCode,
+        failureMessage = model.FailureMessage,
+        version = model.Version,
+        auditTrail = model.AuditTrail.Select(a => new
+        {
+            action = a.Action,
+            actorSubjectId = a.ActorSubjectId,
+            draftVersion = a.DraftVersion,
+            resultCode = a.ResultCode,
+            occurredAtUtc = a.OccurredAtUtc,
+        }).ToList(),
+    };
+
+    private static object MapMaintenanceAiStructuredOutput(MaintenanceAiStructuredOutput output) => new
+    {
+        summary = output.Summary,
+        observedCondition = output.ObservedCondition,
+        suggestedTitle = output.SuggestedTitle,
+        suggestedDescription = output.SuggestedDescription,
+        suggestedPriority = output.SuggestedPriority,
+        suggestedRequestType = output.SuggestedRequestType,
+        recommendedReviewType = output.RecommendedReviewType,
+        evidenceReferences = output.EvidenceReferences.Select(e => new
+        {
+            evidenceType = e.EvidenceType,
+            evidenceReference = e.EvidenceReference,
+            summary = e.Summary,
+        }).ToList(),
+        missingInformation = output.MissingInformation,
+        uncertaintyExplanation = output.UncertaintyExplanation,
+        qualitativeConfidence = output.QualitativeConfidence,
+        safetyNotes = output.SafetyNotes,
+        prohibitedActionConfirmation = output.ProhibitedActionConfirmation,
+    };
 }

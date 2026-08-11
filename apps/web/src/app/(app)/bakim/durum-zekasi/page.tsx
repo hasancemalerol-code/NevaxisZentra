@@ -37,6 +37,9 @@ export default async function MaintenanceConditionPage({ searchParams }: Mainten
       riskWorkspace={result.riskWorkspace}
       riskAssessment={result.riskAssessment}
       riskError={result.riskError}
+      aiDraft={result.aiDraft}
+      aiDraftError={result.aiDraftError}
+      canManageMaintenance={result.canManageMaintenance}
     />
   );
 }

@@ -23,6 +23,8 @@ import type {
   MaintenancePredictiveRiskAssessment,
   MaintenancePredictiveRiskWorkspace,
 } from "../domain/maintenance-predictive-risk";
+import type { MaintenanceAiDraftDetail } from "../domain/maintenance-ai-agent";
+import { getMaintenanceAiCurrentDraft } from "./maintenance-ai-agent-api-client";
 
 type ReadFailure = Readonly<{
   status: "failure";
@@ -37,6 +39,9 @@ export type MaintenanceConditionWorkspaceResult =
       riskWorkspace?: MaintenancePredictiveRiskWorkspace;
       riskAssessment?: MaintenancePredictiveRiskAssessment;
       riskError?: string;
+      aiDraft?: MaintenanceAiDraftDetail;
+      aiDraftError?: string;
+      canManageMaintenance?: boolean;
     }>
   | ReadFailure;
 
@@ -124,6 +129,23 @@ export async function readMaintenanceConditionWorkspace(
     }
   }
 
+  let aiDraft: MaintenanceAiDraftDetail | undefined;
+  let aiDraftError: string | undefined;
+  if (selectedAsset) {
+    const draftResult = await getMaintenanceAiCurrentDraft(context, selectedAsset);
+    if (draftResult.status === "success") {
+      aiDraft = draftResult.value;
+    } else if (draftResult.code !== "not-found") {
+      aiDraftError = draftResult.message;
+    }
+  }
+
+  const configResult = parseProductionExecutionRuntimeConfig();
+  const canManageMaintenance =
+    configResult.status === "success" &&
+    configResult.config.mode === "development-api" &&
+    configResult.config.developmentAuth?.subject === "production-pilot-operator";
+
   return {
     status: "success",
     workspace: overviewResult.value,
@@ -131,5 +153,8 @@ export async function readMaintenanceConditionWorkspace(
     riskWorkspace,
     riskAssessment,
     riskError,
+    aiDraft,
+    aiDraftError,
+    canManageMaintenance,
   };
 }

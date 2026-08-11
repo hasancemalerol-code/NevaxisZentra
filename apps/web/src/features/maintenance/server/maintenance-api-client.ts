@@ -50,7 +50,8 @@ export type MaintenanceApiFailure = Readonly<{
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
-    | "concurrency-conflict";
+    | "concurrency-conflict"
+    | "not-found";
   message: string;
   retryable: boolean;
 }>;

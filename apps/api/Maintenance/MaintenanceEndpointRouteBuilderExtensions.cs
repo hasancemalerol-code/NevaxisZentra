@@ -41,6 +41,7 @@ public static class MaintenanceEndpointRouteBuilderExtensions
         group.MapMaintenanceExecutionEndpoints();
         group.MapMaintenanceReportingEndpoints();
         group.MapMaintenanceConditionEndpoints();
+        group.MapMaintenanceAiEndpoints();
 
         return endpoints;
     }
@@ -750,6 +751,7 @@ public static class MaintenanceServiceCollectionExtensions
         services.AddCrevaFactOSMaintenanceExecution();
         services.AddCrevaFactOSMaintenanceReporting();
         services.AddCrevaFactOSMaintenanceCondition();
+        services.AddCrevaFactOSMaintenanceAi();
 
         return services;
     }

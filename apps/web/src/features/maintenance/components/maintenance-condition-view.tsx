@@ -27,6 +27,8 @@ import type {
   MaintenancePredictiveRiskAssessment,
   MaintenancePredictiveRiskWorkspace,
 } from "../domain/maintenance-predictive-risk";
+import type { MaintenanceAiDraftDetail } from "../domain/maintenance-ai-agent";
+import { MaintenanceAiAssistantSection } from "./maintenance-ai-assistant-section";
 import {
   formatMaintenancePredictiveDriverLabel,
   formatMaintenancePredictiveEvidenceTypeLabel,
@@ -50,6 +52,9 @@ type MaintenanceConditionViewProps = Readonly<{
   riskWorkspace?: MaintenancePredictiveRiskWorkspace;
   riskAssessment?: MaintenancePredictiveRiskAssessment;
   riskError?: string;
+  aiDraft?: MaintenanceAiDraftDetail;
+  aiDraftError?: string;
+  canManageMaintenance?: boolean;
 }>;
 
 function RiskBandBadge({
@@ -96,6 +101,9 @@ export function MaintenanceConditionView({
   riskWorkspace,
   riskAssessment,
   riskError,
+  aiDraft,
+  aiDraftError,
+  canManageMaintenance = false,
 }: MaintenanceConditionViewProps) {
   const [selectedReference, setSelectedReference] = useState(
     initialAssetReference ?? workspace.assets[0]?.assetReference ?? "",
@@ -449,6 +457,15 @@ export function MaintenanceConditionView({
             </ul>
           </Card>
         </section>
+      ) : null}
+
+      {selectedReference ? (
+        <MaintenanceAiAssistantSection
+          assetReference={selectedReference}
+          draft={aiDraft}
+          draftError={aiDraftError}
+          canManage={canManageMaintenance}
+        />
       ) : null}
 
       {!profile && selectedReference ? (

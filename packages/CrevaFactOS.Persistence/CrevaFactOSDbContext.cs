@@ -114,6 +114,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaintenancePredictiveRiskDriver> MaintenancePredictiveRiskDrivers => Set<MaintenancePredictiveRiskDriver>();
     public DbSet<MaintenancePredictiveRiskEvidence> MaintenancePredictiveRiskEvidenceItems => Set<MaintenancePredictiveRiskEvidence>();
     public DbSet<MaintenancePredictiveRecommendation> MaintenancePredictiveRecommendations => Set<MaintenancePredictiveRecommendation>();
+    public DbSet<MaintenanceAiActionDraft> MaintenanceAiActionDrafts => Set<MaintenanceAiActionDraft>();
+    public DbSet<MaintenanceAiDraftAuditEvent> MaintenanceAiDraftAuditEvents => Set<MaintenanceAiDraftAuditEvent>();
 
     // Edge Gateway foundation (EDGE-1)
     public DbSet<EdgeGateway> EdgeGateways => Set<EdgeGateway>();
@@ -789,6 +791,8 @@ public sealed class CrevaFactOSDbContext : DbContext
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MaintenancePredictiveRecommendationEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new MaintenanceAiActionDraftEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new MaintenanceAiDraftAuditEventEntityConfiguration());
         modelBuilder.Entity<MaintenancePredictiveRecommendation>().HasQueryFilter(r =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
