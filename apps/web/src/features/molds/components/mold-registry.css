@@ -1,0 +1,258 @@
+.mold-registry-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1.5rem;
+  min-width: 0;
+}
+
+.mold-registry-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.mold-registry-header p {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--brand-blue, #2563eb);
+  font-weight: 600;
+}
+
+.mold-registry-header h1 {
+  margin: 0.15rem 0 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.mold-registry-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.mold-registry-kpi {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.mold-registry-kpi strong {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.mold-registry-kpi span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.mold-registry-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 0.8fr)) auto;
+  gap: 0.65rem;
+  align-items: end;
+}
+
+.mold-registry-toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.mold-registry-toolbar input,
+.mold-registry-toolbar select,
+.mold-registry-panel input,
+.mold-registry-panel select,
+.mold-registry-panel textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  background: #fff;
+}
+
+.mold-registry-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.mold-registry-table-wrap,
+.mold-registry-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  min-width: 0;
+}
+
+.mold-registry-table-wrap {
+  overflow: auto;
+}
+
+.mold-registry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.mold-registry-table th,
+.mold-registry-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mold-registry-table th {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.mold-registry-table tbody tr {
+  cursor: pointer;
+}
+
+.mold-registry-table tbody tr[data-selected="true"] {
+  background: #eff6ff;
+}
+
+.mold-registry-panel {
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mold-registry-panel h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.mold-registry-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+  font-size: 0.84rem;
+}
+
+.mold-registry-meta-grid dt {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.mold-registry-meta-grid dd {
+  margin: 0.1rem 0 0;
+  font-weight: 600;
+}
+
+.mold-registry-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+}
+
+.mold-registry-form-grid label.full-width {
+  grid-column: 1 / -1;
+}
+
+.mold-registry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mold-registry-button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 12px;
+  padding: 0.5rem 0.85rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mold-registry-button.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.mold-registry-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.mold-registry-history-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.82rem;
+}
+
+.mold-registry-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.74rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.mold-registry-empty,
+.mold-registry-error,
+.mold-registry-unauthorized {
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: #f8fafc;
+  color: #475569;
+}
+
+@media (max-width: 1200px) {
+  .mold-registry-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mold-registry-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mold-registry-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mold-registry-kpis,
+  .mold-registry-form-grid,
+  .mold-registry-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mold-registry-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

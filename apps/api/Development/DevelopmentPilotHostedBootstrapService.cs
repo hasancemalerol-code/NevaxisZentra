@@ -14,6 +14,7 @@ public sealed class DevelopmentPilotHostedBootstrapService(
     {
         if (!environment.IsDevelopment() || !options.Value.Enabled)
         {
+            serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
             return;
         }
 
@@ -24,10 +25,12 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
         if (bootstrapService is null)
         {
+            serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
             return;
         }
 
         _ = await bootstrapService.BootstrapAsync(cancellationToken);
+        serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
     }
 
     public Task StopAsync(CancellationToken cancellationToken) =>

@@ -316,6 +316,13 @@ public static class DevelopmentPilotIds
     public static readonly Guid EdgeIngestPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000064");
 
+    // Mold permission definitions (065–066)
+    public static readonly Guid MoldReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000065");
+
+    public static readonly Guid MoldManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000066");
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

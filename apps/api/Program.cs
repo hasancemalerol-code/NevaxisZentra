@@ -17,6 +17,7 @@ using CrevaFactOS.Api.Production;
 using CrevaFactOS.Api.ProductionPlanning;
 using CrevaFactOS.Api.Maintenance;
 using CrevaFactOS.Api.Quality;
+using CrevaFactOS.Api.Mold;
 using CrevaFactOS.Api.Erp;
 using CrevaFactOS.Api.Edge;
 using CrevaFactOS.Persistence.Audit;
@@ -29,7 +30,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration["Application:Name"] ??= "CrevaFactOS API";
 ValidateConfiguration(builder.Configuration);
 
-builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<DevelopmentPilotBootstrapState>();
+builder.Services.AddHealthChecks()
+    .AddCheck<DevelopmentPilotBootstrapHealthCheck>("development-pilot-bootstrap");
 builder.Services.AddInfrastructureOptions(builder.Configuration);
 builder.Services.AddCrevaFactOSPersistence(builder.Configuration);
 builder.Services.AddCrevaFactOSAuthentication(
@@ -41,6 +44,7 @@ builder.Services.AddCrevaFactOSFacilityAccess();
 builder.Services.AddCrevaFactOSProductionPlanning();
 builder.Services.AddCrevaFactOSProductionExecution();
 builder.Services.AddCrevaFactOSQuality();
+builder.Services.AddCrevaFactOSMold();
 builder.Services.AddCrevaFactOSMaintenance();
 builder.Services.AddCrevaFactOSExport();
 builder.Services.AddCrevaFactOSErp();
@@ -84,6 +88,7 @@ app.MapProductionResourceExecutionReadEndpoints();
 app.MapProductionReportingEndpoints();
 
 app.MapQualityEndpoints();
+app.MapMoldEndpoints();
 app.MapMaintenanceEndpoints();
 app.MapErpEndpoints();
 app.MapEdgeEndpoints();

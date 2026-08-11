@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/app-shell/app-shell";
+import { AppShellFrame } from "@/components/app-shell/app-shell-frame";
+import { resolvePermissionAwareNavigation } from "@/lib/navigation/navigation-visibility";
 
-export default function ApplicationLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <AppShell>{children}</AppShell>;
+export default async function ApplicationLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const navigation = await resolvePermissionAwareNavigation();
+
+  return <AppShellFrame navigation={navigation}>{children}</AppShellFrame>;
 }

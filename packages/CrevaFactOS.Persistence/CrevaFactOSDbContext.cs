@@ -12,6 +12,7 @@ using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Maintenance;
+using CrevaFactOS.Persistence.Mold;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -96,6 +97,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityNonconformance> QualityNonconformances => Set<QualityNonconformance>();
     public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
     public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
+
+    // Mold registry & lifecycle (MOLD-1)
+    public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
+    public DbSet<MoldLifecycleEvent> MoldLifecycleEvents => Set<MoldLifecycleEvent>();
+    public DbSet<MoldCounterSnapshot> MoldCounterSnapshots => Set<MoldCounterSnapshot>();
 
     // Maintenance — requests, work orders, preventive plans, execution
     public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
@@ -710,6 +716,25 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Mold registry & lifecycle
+        modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());
+        modelBuilder.Entity<MoldRegistryEntry>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldLifecycleEventEntityConfiguration());
+        modelBuilder.Entity<MoldLifecycleEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldCounterSnapshotEntityConfiguration());
+        modelBuilder.Entity<MoldCounterSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Maintenance
         modelBuilder.ApplyConfiguration(new MaintenanceRequestEntityConfiguration());

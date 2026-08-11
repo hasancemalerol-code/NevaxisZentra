@@ -5,28 +5,29 @@ import {
 } from "lucide-react";
 
 import { IconButton } from "@/components/ui/button";
-import {
-  isNavigationItemActive,
-  primaryNavigation,
-} from "@/lib/navigation/primary-navigation";
+import { resolveNavigationIcon } from "@/lib/navigation/navigation-icon-registry";
+import { isNavigationItemActive } from "@/lib/navigation/navigation-types";
+import type { SerializableNavigationGroup } from "@/lib/navigation/navigation-types";
 
 type SidebarProps = Readonly<{
   pathname: string;
   collapsed: boolean;
   onToggle: () => void;
+  navigation: readonly SerializableNavigationGroup[];
 }>;
 
 export function Sidebar({
   pathname,
   collapsed,
   onToggle,
+  navigation,
 }: SidebarProps) {
   return (
     <aside
       aria-label="Ana uygulama navigasyonu"
       className="app-sidebar"
       data-collapsed={collapsed}
-      data-group-count={primaryNavigation.length}
+      data-group-count={navigation.length}
     >
       <div className="sidebar-brand">
         <Link
@@ -75,7 +76,7 @@ export function Sidebar({
         className="sidebar-navigation"
         data-collapsed={collapsed}
       >
-        {primaryNavigation.map((group) => (
+        {navigation.map((group) => (
           <section
             aria-labelledby={`navigation-group-${group.label}`}
             className="navigation-group"
@@ -95,7 +96,7 @@ export function Sidebar({
                     item,
                     pathname,
                   );
-                const Icon = item.icon;
+                const Icon = resolveNavigationIcon(item.iconKey);
 
                 return (
                   <li key={item.href}>

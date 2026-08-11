@@ -1,42 +1,10 @@
-import {
-  BadgeDollarSign,
-  Boxes,
-  Cable,
-  CalendarClock,
-  CalendarRange,
-  ChartNoAxesCombined,
-  CircleGauge,
-  CirclePercent,
-  Cpu,
-  Factory,
-  FileWarning,
-  Gauge,
-  LayoutDashboard,
-  ListTodo,
-  MessagesSquare,
-  PackageSearch,
-  Settings,
-  ShieldCheck,
-  Ship,
-  ShoppingBasket,
-  TriangleAlert,
-  UsersRound,
-  Wrench,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import type {
+  SerializableNavigationGroup,
+  SerializableNavigationItem,
+} from "./navigation-types";
 
-export type NavigationItem = Readonly<{
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  exact?: boolean;
-}>;
-
-export type NavigationGroup = Readonly<{
-  label: string;
-  items: readonly NavigationItem[];
-}>;
+export type NavigationItem = SerializableNavigationItem;
+export type NavigationGroup = SerializableNavigationGroup;
 
 export const primaryNavigation: readonly NavigationGroup[] = [
   {
@@ -45,18 +13,18 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "AI Görev Merkezi",
         href: "/",
-        icon: ListTodo,
+        iconKey: "list-todo",
         exact: true,
       },
       {
         label: "Dashboard / Operasyon Merkezi",
         href: "/dashboard",
-        icon: LayoutDashboard,
+        iconKey: "layout-dashboard",
       },
       {
         label: "CrevaFactOS Teams",
         href: "/teams",
-        icon: MessagesSquare,
+        iconKey: "messages-square",
       },
     ],
   },
@@ -66,57 +34,58 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "Siparişler",
         href: "/siparisler",
-        icon: ShoppingBasket,
+        iconKey: "shopping-basket",
       },
       {
         label: "Planlama",
         href: "/planlama",
-        icon: CalendarRange,
+        iconKey: "calendar-range",
       },
       {
         label: "Üretim",
         href: "/uretim",
-        icon: Factory,
+        iconKey: "factory",
       },
       {
         label: "İhracat",
         href: "/ihracat",
-        icon: Ship,
+        iconKey: "ship",
       },
       {
         label: "Vardiyalar",
         href: "/vardiyalar",
-        icon: CalendarClock,
+        iconKey: "calendar-clock",
       },
       {
         label: "Makineler",
         href: "/makineler",
-        icon: Cpu,
+        iconKey: "cpu",
       },
       {
         label: "Kalıplar",
         href: "/kaliplar",
-        icon: Boxes,
+        iconKey: "molds",
+        permissionKey: "mold.read",
       },
       {
         label: "Bakım",
         href: "/bakim",
-        icon: Wrench,
+        iconKey: "wrench",
       },
       {
         label: "Kalite Kontrol",
         href: "/kalite",
-        icon: ShieldCheck,
+        iconKey: "shield-check",
       },
       {
         label: "Enerji",
         href: "/enerji",
-        icon: Zap,
+        iconKey: "zap",
       },
       {
         label: "IoT & PLC",
         href: "/iot-plc",
-        icon: Cable,
+        iconKey: "cable",
       },
     ],
   },
@@ -126,32 +95,32 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "Malzeme Uygunluğu",
         href: "/riskler/malzeme-uygunlugu",
-        icon: PackageSearch,
+        iconKey: "package-search",
       },
       {
         label: "Tedarik Riskleri",
         href: "/riskler/tedarik",
-        icon: ShoppingBasket,
+        iconKey: "shopping-basket",
       },
       {
         label: "Sipariş & Termin Riskleri",
         href: "/riskler/siparis-termin",
-        icon: TriangleAlert,
+        iconKey: "triangle-alert",
       },
       {
         label: "Maliyet Sapmaları",
         href: "/riskler/maliyet-sapmalari",
-        icon: CirclePercent,
+        iconKey: "circle-percent",
       },
       {
         label: "Kapasite Riskleri",
         href: "/riskler/kapasite",
-        icon: Gauge,
+        iconKey: "gauge",
       },
       {
         label: "Kalite Riskleri",
         href: "/riskler/kalite",
-        icon: FileWarning,
+        iconKey: "file-warning",
       },
     ],
   },
@@ -161,32 +130,32 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "Satın Alma Fiyat Analizi",
         href: "/ticari-zeka/satin-alma-fiyat-analizi",
-        icon: ShoppingBasket,
+        iconKey: "shopping-basket",
       },
       {
         label: "Tedarikçi Karşılaştırması",
         href: "/ticari-zeka/tedarikci-karsilastirmasi",
-        icon: UsersRound,
+        iconKey: "users-round",
       },
       {
         label: "Satış Fiyat Analizi",
         href: "/ticari-zeka/satis-fiyat-analizi",
-        icon: BadgeDollarSign,
+        iconKey: "badge-dollar-sign",
       },
       {
         label: "Ürün Kârlılığı",
         href: "/ticari-zeka/urun-karliligi",
-        icon: CircleGauge,
+        iconKey: "circle-gauge",
       },
       {
         label: "Müşteri Kârlılığı",
         href: "/ticari-zeka/musteri-karliligi",
-        icon: UsersRound,
+        iconKey: "users-round",
       },
       {
         label: "Teklif Riskleri",
         href: "/ticari-zeka/teklif-riskleri",
-        icon: FileWarning,
+        iconKey: "file-warning",
       },
     ],
   },
@@ -196,27 +165,27 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "ERP Bağlantısı",
         href: "/erp-entegrasyonlari/baglanti",
-        icon: Cable,
+        iconKey: "cable",
       },
       {
         label: "Veri Eşleştirme",
         href: "/erp-entegrasyonlari/veri-eslestirme",
-        icon: Boxes,
+        iconKey: "boxes",
       },
       {
         label: "Senkronizasyonlar",
         href: "/erp-entegrasyonlari/senkronizasyonlar",
-        icon: CircleGauge,
+        iconKey: "circle-gauge",
       },
       {
         label: "Hata Kuyruğu",
         href: "/erp-entegrasyonlari/hata-kuyrugu",
-        icon: TriangleAlert,
+        iconKey: "triangle-alert",
       },
       {
         label: "Entegrasyon Sağlığı",
         href: "/erp-entegrasyonlari/saglik",
-        icon: Gauge,
+        iconKey: "gauge",
       },
     ],
   },
@@ -226,12 +195,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       {
         label: "Raporlama & Analitik",
         href: "/raporlar",
-        icon: ChartNoAxesCombined,
+        iconKey: "chart-no-axes-combined",
       },
       {
         label: "Ayarlar",
         href: "/ayarlar",
-        icon: Settings,
+        iconKey: "settings",
       },
     ],
   },
@@ -241,12 +210,4 @@ export const navigationItems = primaryNavigation.flatMap(
   (group) => group.items,
 );
 
-export function isNavigationItemActive(
-  item: NavigationItem,
-  pathname: string,
-) {
-  return item.exact
-    ? pathname === item.href
-    : pathname === item.href ||
-        pathname.startsWith(`${item.href}/`);
-}
+export { isNavigationItemActive } from "./navigation-types";

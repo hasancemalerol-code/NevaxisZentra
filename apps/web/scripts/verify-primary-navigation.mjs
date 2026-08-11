@@ -50,12 +50,12 @@ for (const requiredValue of requiredUniqueValues) {
   }
 }
 
-if (!source.includes("icon: Ship")) {
-  fail('İhracat must use icon: Ship.');
+if (!source.includes('iconKey: "ship"')) {
+  fail('İhracat must use iconKey: "ship".');
 }
 
 const factoryOperationsGroupPattern =
-  /label:\s*"Fabrika operasyonları"\s*,\s*items:\s*\[\s*\{\s*label:\s*"Siparişler"\s*,\s*href:\s*"\/siparisler"\s*,\s*icon:\s*ShoppingBasket\s*,?\s*\}\s*,\s*\{\s*label:\s*"Planlama"\s*,\s*href:\s*"\/planlama"\s*,\s*icon:\s*CalendarRange\s*,?\s*\}\s*,\s*\{\s*label:\s*"Üretim"\s*,\s*href:\s*"\/uretim"\s*,\s*icon:\s*Factory\s*,?\s*\}\s*,\s*\{\s*label:\s*"İhracat"\s*,\s*href:\s*"\/ihracat"\s*,\s*icon:\s*Ship\s*,?\s*\}/s;
+  /label:\s*"Fabrika operasyonları"\s*,\s*items:\s*\[\s*\{\s*label:\s*"Siparişler"\s*,\s*href:\s*"\/siparisler"\s*,\s*iconKey:\s*"shopping-basket"\s*,?\s*\}\s*,\s*\{\s*label:\s*"Planlama"\s*,\s*href:\s*"\/planlama"\s*,\s*iconKey:\s*"calendar-range"\s*,?\s*\}\s*,\s*\{\s*label:\s*"Üretim"\s*,\s*href:\s*"\/uretim"\s*,\s*iconKey:\s*"factory"\s*,?\s*\}\s*,\s*\{\s*label:\s*"İhracat"\s*,\s*href:\s*"\/ihracat"\s*,\s*iconKey:\s*"ship"\s*,?\s*\}/s;
 
 if (!factoryOperationsGroupPattern.test(source)) {
   fail(

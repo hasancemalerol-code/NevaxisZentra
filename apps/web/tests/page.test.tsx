@@ -5,11 +5,11 @@ import { Activity } from "lucide-react";
 
 import HomePage from "../src/app/(app)/page";
 import { GET as getHealth } from "../src/app/health/route";
-import { AppShellFrame } from "../src/components/app-shell/app-shell";
+import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { Sidebar } from "../src/components/app-shell/sidebar";
 import { KpiCard } from "../src/components/ui/card";
 import { PageHeader } from "../src/components/ui/page";
-import { navigationItems } from "../src/lib/navigation/primary-navigation";
+import { navigationItems, primaryNavigation } from "../src/lib/navigation/primary-navigation";
 
 test("renders the polished shell preview without implying real operational data", () => {
   const markup = renderToStaticMarkup(<HomePage />);
@@ -25,7 +25,7 @@ test("renders the polished shell preview without implying real operational data"
 
 test("app shell renders landmarks, skip link, top bar, and content viewport", () => {
   const markup = renderToStaticMarkup(
-    <AppShellFrame pathname="/" collapsed={false} onToggle={() => undefined}>
+    <AppShellFrame navigation={primaryNavigation}>
       <p>Shell content</p>
     </AppShellFrame>,
   );
@@ -38,7 +38,7 @@ test("app shell renders landmarks, skip link, top bar, and content viewport", ()
 
 test("sidebar renders the exact locked navigation and marks AI Task Center active", () => {
   const markup = renderToStaticMarkup(
-    <Sidebar pathname="/" collapsed={false} onToggle={() => undefined} />,
+    <Sidebar pathname="/" collapsed={false} onToggle={() => undefined} navigation={primaryNavigation} />,
   );
 
   for (const item of navigationItems) {
@@ -71,7 +71,7 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
 
 test("collapsed sidebar preserves accessible labels and expandable control", () => {
   const markup = renderToStaticMarkup(
-    <Sidebar pathname="/dashboard" collapsed onToggle={() => undefined} />,
+    <Sidebar pathname="/dashboard" collapsed onToggle={() => undefined} navigation={primaryNavigation} />,
   );
 
   assert.match(markup, /data-collapsed="true"/);
@@ -99,7 +99,7 @@ test("page header and KPI variants render typed foundational treatments", () => 
 
 test("all interactive shell controls use keyboard-focusable native elements", () => {
   const markup = renderToStaticMarkup(
-    <AppShellFrame pathname="/" collapsed={false} onToggle={() => undefined}>Content</AppShellFrame>,
+    <AppShellFrame navigation={primaryNavigation}>Content</AppShellFrame>,
   );
 
   assert.match(markup, /<a class="navigation-link"/);
