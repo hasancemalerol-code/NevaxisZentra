@@ -536,4 +536,78 @@ internal static class MaintenanceApiMapper
         severity = model.Severity,
         summary = model.Summary,
     };
+
+    public static object MapPredictiveRiskOverview(MaintenancePredictiveRiskOverviewReadModel model) => new
+    {
+        monitoredAssetCount = model.MonitoredAssetCount,
+        insufficientDataCount = model.InsufficientDataCount,
+        lowRiskCount = model.LowRiskCount,
+        watchCount = model.WatchCount,
+        highRiskCount = model.HighRiskCount,
+        criticalRiskCount = model.CriticalRiskCount,
+        lastAssessedAtUtc = model.LastAssessedAtUtc,
+    };
+
+    public static object MapPredictiveRiskAssetRow(MaintenancePredictiveRiskAssetRowReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        machineCode = model.MachineCode,
+        machineName = model.MachineName,
+        riskBand = model.RiskBand,
+        reviewPriority = model.ReviewPriority,
+        dataFreshness = model.DataFreshness,
+        dataSufficiency = model.DataSufficiency,
+        assessedAtUtc = model.AssessedAtUtc,
+    };
+
+    public static object MapPredictiveRiskAssessment(MaintenancePredictiveRiskAssessmentReadModel model) => new
+    {
+        assetReference = model.AssetReference,
+        assetName = model.AssetName,
+        machineCode = model.MachineCode,
+        machineName = model.MachineName,
+        riskBand = model.RiskBand,
+        reviewPriority = model.ReviewPriority,
+        ruleSetVersion = model.RuleSetVersion,
+        conditionEvaluationIdentity = model.ConditionEvaluationIdentity,
+        dataFreshness = model.DataFreshness,
+        dataSufficiency = model.DataSufficiency,
+        activeAnomalyCount = model.ActiveAnomalyCount,
+        maintenanceHistorySummary = model.MaintenanceHistorySummary,
+        explanation = model.Explanation,
+        assessedAtUtc = model.AssessedAtUtc,
+        riskDrivers = model.Drivers.Select(d => new
+        {
+            driverCode = d.DriverCode,
+            summary = d.Summary,
+        }).ToList(),
+        evidence = model.Evidence.Select(e => new
+        {
+            evidenceType = e.EvidenceType,
+            evidenceReference = e.EvidenceReference,
+            summary = e.Summary,
+        }).ToList(),
+        recommendation = model.Recommendation is null
+            ? null
+            : MapPredictiveRecommendation(model.Recommendation),
+    };
+
+    public static object MapPredictiveRiskAssessmentSummary(MaintenancePredictiveRiskAssessmentSummaryReadModel model) => new
+    {
+        riskBand = model.RiskBand,
+        reviewPriority = model.ReviewPriority,
+        assessedAtUtc = model.AssessedAtUtc,
+        ruleSetVersion = model.RuleSetVersion,
+    };
+
+    public static object MapPredictiveRecommendation(MaintenancePredictiveRecommendationReadModel model) => new
+    {
+        category = model.Category,
+        reviewPriority = model.ReviewPriority,
+        explanation = model.Explanation,
+        ruleSetVersion = model.RuleSetVersion,
+        generatedAtUtc = model.GeneratedAtUtc,
+        status = model.Status,
+    };
 }

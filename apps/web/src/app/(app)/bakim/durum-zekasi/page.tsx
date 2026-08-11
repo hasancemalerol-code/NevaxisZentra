@@ -16,7 +16,7 @@ export default async function MaintenanceConditionPage({ searchParams }: Mainten
       <main className="production-execution-page">
         <header className="production-execution-header">
           <p>BAKIM &amp; ARIZA</p>
-          <h1>Durum Zekâsı</h1>
+          <h1>Kestirici Bakım</h1>
         </header>
         <div role="alert" className="state-panel error-state">
           <Activity aria-hidden="true" />
@@ -34,6 +34,9 @@ export default async function MaintenanceConditionPage({ searchParams }: Mainten
       workspace={result.workspace}
       initialProfile={result.profile}
       initialAssetReference={params.asset ?? result.workspace.assets[0]?.assetReference}
+      riskWorkspace={result.riskWorkspace}
+      riskAssessment={result.riskAssessment}
+      riskError={result.riskError}
     />
   );
 }

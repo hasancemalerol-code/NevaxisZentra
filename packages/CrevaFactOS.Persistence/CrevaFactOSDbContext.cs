@@ -110,6 +110,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaintenanceConditionMetricDefinition> MaintenanceConditionMetricDefinitions => Set<MaintenanceConditionMetricDefinition>();
     public DbSet<MaintenanceConditionProfile> MaintenanceConditionProfiles => Set<MaintenanceConditionProfile>();
     public DbSet<MaintenanceConditionAnomaly> MaintenanceConditionAnomalies => Set<MaintenanceConditionAnomaly>();
+    public DbSet<MaintenancePredictiveRiskAssessment> MaintenancePredictiveRiskAssessments => Set<MaintenancePredictiveRiskAssessment>();
+    public DbSet<MaintenancePredictiveRiskDriver> MaintenancePredictiveRiskDrivers => Set<MaintenancePredictiveRiskDriver>();
+    public DbSet<MaintenancePredictiveRiskEvidence> MaintenancePredictiveRiskEvidenceItems => Set<MaintenancePredictiveRiskEvidence>();
+    public DbSet<MaintenancePredictiveRecommendation> MaintenancePredictiveRecommendations => Set<MaintenancePredictiveRecommendation>();
 
     // Edge Gateway foundation (EDGE-1)
     public DbSet<EdgeGateway> EdgeGateways => Set<EdgeGateway>();
@@ -765,6 +769,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePredictiveRiskAssessmentEntityConfiguration());
+        modelBuilder.Entity<MaintenancePredictiveRiskAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePredictiveRiskDriverEntityConfiguration());
+        modelBuilder.Entity<MaintenancePredictiveRiskDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePredictiveRiskEvidenceEntityConfiguration());
+        modelBuilder.Entity<MaintenancePredictiveRiskEvidence>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePredictiveRecommendationEntityConfiguration());
+        modelBuilder.Entity<MaintenancePredictiveRecommendation>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Edge Gateway foundation
         modelBuilder.ApplyConfiguration(new EdgeGatewayEntityConfiguration());

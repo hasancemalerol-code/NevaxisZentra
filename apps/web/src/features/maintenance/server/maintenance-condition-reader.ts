@@ -5,6 +5,11 @@ import {
   getMaintenanceConditionOverview,
   getMaintenanceConditionProfile,
 } from "./maintenance-condition-api-client";
+import {
+  evaluateMaintenancePredictiveRisk,
+  getMaintenancePredictiveRiskAssessment,
+  getMaintenancePredictiveRiskOverview,
+} from "./maintenance-predictive-risk-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import {
   resolveProductionOrderRequestContext,
@@ -14,6 +19,10 @@ import type {
   MaintenanceConditionProfile,
   MaintenanceConditionWorkspace,
 } from "../domain/maintenance-condition";
+import type {
+  MaintenancePredictiveRiskAssessment,
+  MaintenancePredictiveRiskWorkspace,
+} from "../domain/maintenance-predictive-risk";
 
 type ReadFailure = Readonly<{
   status: "failure";
@@ -25,6 +34,9 @@ export type MaintenanceConditionWorkspaceResult =
       status: "success";
       workspace: MaintenanceConditionWorkspace;
       profile?: MaintenanceConditionProfile;
+      riskWorkspace?: MaintenancePredictiveRiskWorkspace;
+      riskAssessment?: MaintenancePredictiveRiskAssessment;
+      riskError?: string;
     }>
   | ReadFailure;
 
@@ -76,6 +88,7 @@ export async function readMaintenanceConditionWorkspace(
 
   const context = contextResult.context;
   await evaluateMaintenanceCondition(context);
+  await evaluateMaintenancePredictiveRisk(context);
 
   const overviewResult = await getMaintenanceConditionOverview(context);
   if (overviewResult.status === "failure") {
@@ -91,9 +104,32 @@ export async function readMaintenanceConditionWorkspace(
     }
   }
 
+  let riskWorkspace: MaintenancePredictiveRiskWorkspace | undefined;
+  let riskAssessment: MaintenancePredictiveRiskAssessment | undefined;
+  let riskError: string | undefined;
+
+  const riskOverviewResult = await getMaintenancePredictiveRiskOverview(context);
+  if (riskOverviewResult.status === "success") {
+    riskWorkspace = riskOverviewResult.value;
+  } else {
+    riskError = riskOverviewResult.message;
+  }
+
+  if (selectedAsset) {
+    const riskAssessmentResult = await getMaintenancePredictiveRiskAssessment(context, selectedAsset);
+    if (riskAssessmentResult.status === "success") {
+      riskAssessment = riskAssessmentResult.value;
+    } else if (!riskError) {
+      riskError = riskAssessmentResult.message;
+    }
+  }
+
   return {
     status: "success",
     workspace: overviewResult.value,
     profile,
+    riskWorkspace,
+    riskAssessment,
+    riskError,
   };
 }

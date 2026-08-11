@@ -2015,5 +2015,127 @@ a.maintenance-asset-cell__reference:hover {
   .maintenance-condition-kpis.production-execution-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .maintenance-predictive-risk-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .maintenance-predictive-risk-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.maintenance-predictive-risk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.maintenance-predictive-risk-safety-copy,
+.maintenance-predictive-risk-simulator-copy {
+  color: #64748b;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.maintenance-predictive-risk-error {
+  border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.maintenance-predictive-risk-error p {
+  color: var(--destructive);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.maintenance-predictive-risk-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.maintenance-predictive-risk-table__row--selected {
+  background: rgb(239 244 255 / 72%);
+}
+
+.maintenance-predictive-risk-insufficient-warning {
+  border-left: 3px solid #d97706;
+  color: #92400e;
+  font-size: 0.8125rem;
+  margin: 0;
+  padding-left: 0.75rem;
+}
+
+.maintenance-predictive-risk-detail-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.maintenance-predictive-risk-detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maintenance-predictive-risk-detail-card--wide {
+  grid-column: 1 / -1;
+}
+
+.maintenance-predictive-risk-detail-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  color: #334155;
+  font-size: 0.8125rem;
+}
+
+.maintenance-predictive-risk-explanation,
+.maintenance-predictive-risk-history-summary {
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.maintenance-predictive-risk-driver-list,
+.maintenance-predictive-risk-evidence-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.maintenance-predictive-risk-driver-list li,
+.maintenance-predictive-risk-evidence-list li {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.maintenance-predictive-risk-driver-list strong,
+.maintenance-predictive-risk-evidence-list strong {
+  color: #10213c;
+  font-size: 0.8125rem;
+}
+
+.maintenance-predictive-risk-driver-list span,
+.maintenance-predictive-risk-evidence-list span {
+  color: #64748b;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 1280px) {
+  .maintenance-predictive-risk-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
