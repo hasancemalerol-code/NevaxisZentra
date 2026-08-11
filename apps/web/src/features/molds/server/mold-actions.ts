@@ -12,6 +12,10 @@ export async function loadMoldDetailAction(moldId: string) {
     status: "success" as const,
     mold: result.mold,
     lifecycleHistory: result.lifecycleHistory,
+    maintenanceHistory: result.maintenanceHistory,
+    revisionHistory: result.revisionHistory,
+    trialHistory: result.trialHistory,
+    timeline: result.timeline,
     canManage: result.canManage,
   };
 }

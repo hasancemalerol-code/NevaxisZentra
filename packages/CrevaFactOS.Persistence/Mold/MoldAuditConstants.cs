@@ -6,6 +6,12 @@ public static class MoldAuditActions
     public const string Updated = "mold.updated";
     public const string CounterRecorded = "mold.counter.recorded";
     public const string LifecycleTransitioned = "mold.lifecycle.transitioned";
+    public const string MaintenanceCreated = "mold.maintenance.created";
+    public const string MaintenanceUpdated = "mold.maintenance.updated";
+    public const string MaintenanceCompleted = "mold.maintenance.completed";
+    public const string MaintenanceCancelled = "mold.maintenance.cancelled";
+    public const string RevisionAppended = "mold.revision.appended";
+    public const string TrialAppended = "mold.trial.appended";
 }
 
 public static class MoldAuditEventTypes
@@ -14,4 +20,10 @@ public static class MoldAuditEventTypes
     public const string Updated = "mold.updated";
     public const string CounterRecorded = "mold.counter.recorded";
     public const string LifecycleTransitioned = "mold.lifecycle.transitioned";
+    public const string MaintenanceCreated = "mold.maintenance.created";
+    public const string MaintenanceUpdated = "mold.maintenance.updated";
+    public const string MaintenanceCompleted = "mold.maintenance.completed";
+    public const string MaintenanceCancelled = "mold.maintenance.cancelled";
+    public const string RevisionAppended = "mold.revision.appended";
+    public const string TrialAppended = "mold.trial.appended";
 }

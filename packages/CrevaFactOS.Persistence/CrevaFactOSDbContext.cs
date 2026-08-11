@@ -102,6 +102,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
     public DbSet<MoldLifecycleEvent> MoldLifecycleEvents => Set<MoldLifecycleEvent>();
     public DbSet<MoldCounterSnapshot> MoldCounterSnapshots => Set<MoldCounterSnapshot>();
+    public DbSet<MoldMaintenanceRecord> MoldMaintenanceRecords => Set<MoldMaintenanceRecord>();
+    public DbSet<MoldRevisionRecord> MoldRevisionRecords => Set<MoldRevisionRecord>();
+    public DbSet<MoldTrialRecord> MoldTrialRecords => Set<MoldTrialRecord>();
 
     // Maintenance — requests, work orders, preventive plans, execution
     public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
@@ -735,6 +738,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldMaintenanceRecordEntityConfiguration());
+        modelBuilder.Entity<MoldMaintenanceRecord>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldRevisionRecordEntityConfiguration());
+        modelBuilder.Entity<MoldRevisionRecord>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldTrialRecordEntityConfiguration());
+        modelBuilder.Entity<MoldTrialRecord>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Maintenance
         modelBuilder.ApplyConfiguration(new MaintenanceRequestEntityConfiguration());

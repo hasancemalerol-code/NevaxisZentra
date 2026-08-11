@@ -1,7 +1,11 @@
 import type {
   MoldDetail,
   MoldLifecycleEvent,
+  MoldMaintenanceRecord,
+  MoldRevisionRecord,
   MoldSummary,
+  MoldTimelineEntry,
+  MoldTrialRecord,
   MoldWorkspaceSummary,
   MoldWriteResult,
 } from "../domain/molds";
@@ -138,4 +142,108 @@ export function parseMoldWriteApiResponse(payload: unknown): MoldWriteResult {
     version: Number(item.version),
     idempotentReplay: Boolean(item.idempotentReplay),
   };
+}
+
+export function parseMoldMaintenanceRecord(value: unknown): MoldMaintenanceRecord {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    moldId: String(item.moldId),
+    maintenanceType: String(item.maintenanceType),
+    status: String(item.status),
+    openedAtUtc: String(item.openedAtUtc),
+    completedAtUtc: readString(item.completedAtUtc),
+    summary: String(item.summary),
+    findings: readString(item.findings),
+    actionsTaken: readString(item.actionsTaken),
+    performedByDisplayName: readString(item.performedByDisplayName),
+    externalMaintenanceRequestReference: readString(item.externalMaintenanceRequestReference),
+    externalWorkOrderReference: readString(item.externalWorkOrderReference),
+    sourceType: String(item.sourceType),
+    sourceReference: readString(item.sourceReference),
+    createdAtUtc: String(item.createdAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMoldMaintenanceRecordList(payload: unknown): readonly MoldMaintenanceRecord[] {
+  if (!Array.isArray(payload)) throw new Error("Expected maintenance history array.");
+  return payload.map(parseMoldMaintenanceRecord);
+}
+
+export function parseMoldRevisionRecord(value: unknown): MoldRevisionRecord {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    moldId: String(item.moldId),
+    revisionNumber: String(item.revisionNumber),
+    revisionType: String(item.revisionType),
+    revisionDate: String(item.revisionDate),
+    summary: String(item.summary),
+    reason: readString(item.reason),
+    technicalChange: readString(item.technicalChange),
+    previousCavityCount: readNumber(item.previousCavityCount),
+    newCavityCount: readNumber(item.newCavityCount),
+    performedByDisplayName: readString(item.performedByDisplayName),
+    externalReference: readString(item.externalReference),
+    sourceType: String(item.sourceType),
+    sourceReference: readString(item.sourceReference),
+    createdAtUtc: String(item.createdAtUtc),
+  };
+}
+
+export function parseMoldRevisionRecordList(payload: unknown): readonly MoldRevisionRecord[] {
+  if (!Array.isArray(payload)) throw new Error("Expected revision history array.");
+  return payload.map(parseMoldRevisionRecord);
+}
+
+export function parseMoldTrialRecord(value: unknown): MoldTrialRecord {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    moldId: String(item.moldId),
+    trialNumber: String(item.trialNumber),
+    trialDate: String(item.trialDate),
+    result: String(item.result),
+    machineReference: readString(item.machineReference),
+    productionOrderReference: readString(item.productionOrderReference),
+    productReference: readString(item.productReference),
+    materialReference: readString(item.materialReference),
+    cycleTimeSeconds: readNumber(item.cycleTimeSeconds),
+    shotCount: readNumber(item.shotCount),
+    goodPartCount: readNumber(item.goodPartCount),
+    scrapPartCount: readNumber(item.scrapPartCount),
+    findings: readString(item.findings),
+    decision: readString(item.decision),
+    performedByDisplayName: readString(item.performedByDisplayName),
+    sourceType: String(item.sourceType),
+    sourceReference: readString(item.sourceReference),
+    createdAtUtc: String(item.createdAtUtc),
+  };
+}
+
+export function parseMoldTrialRecordList(payload: unknown): readonly MoldTrialRecord[] {
+  if (!Array.isArray(payload)) throw new Error("Expected trial history array.");
+  return payload.map(parseMoldTrialRecord);
+}
+
+export function parseMoldTimelineEntry(value: unknown): MoldTimelineEntry {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    eventKind: String(item.eventKind),
+    eventDateUtc: String(item.eventDateUtc),
+    createdAtUtc: String(item.createdAtUtc),
+    title: String(item.title),
+    summary: String(item.summary),
+    statusOrResult: readString(item.statusOrResult),
+    reference: readString(item.reference),
+    actorDisplayName: readString(item.actorDisplayName),
+  };
+}
+
+export function parseMoldTimelineEntryList(payload: unknown): readonly MoldTimelineEntry[] {
+  if (!Array.isArray(payload)) throw new Error("Expected timeline array.");
+  return payload.map(parseMoldTimelineEntry);
 }

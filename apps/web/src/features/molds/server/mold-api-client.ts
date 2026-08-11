@@ -3,14 +3,22 @@ import "./mold-server-boundary";
 import type {
   MoldDetail,
   MoldLifecycleEvent,
+  MoldMaintenanceRecord,
+  MoldRevisionRecord,
   MoldSummary,
+  MoldTimelineEntry,
+  MoldTrialRecord,
   MoldWorkspaceSummary,
   MoldWriteResult,
 } from "../domain/molds";
 import {
   parseMoldDetail,
   parseMoldLifecycleEventList,
+  parseMoldMaintenanceRecordList,
+  parseMoldRevisionRecordList,
   parseMoldSummaryList,
+  parseMoldTimelineEntryList,
+  parseMoldTrialRecordList,
   parseMoldWorkspaceSummary,
   parseMoldWriteApiResponse,
 } from "./mold-api-contracts";
@@ -240,6 +248,111 @@ export function transitionMoldLifecycle(
   return mutateJson(
     context,
     `/api/molds/${encodeURIComponent(moldId)}/lifecycle-transitions`,
+    "POST",
+    body,
+    parseMoldWriteApiResponse,
+  );
+}
+
+export function listMoldMaintenanceHistory(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<readonly MoldMaintenanceRecord[]>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/maintenance-history`,
+    undefined,
+    parseMoldMaintenanceRecordList,
+  );
+}
+
+export function listMoldRevisionHistory(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<readonly MoldRevisionRecord[]>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/revision-history`,
+    undefined,
+    parseMoldRevisionRecordList,
+  );
+}
+
+export function listMoldTrialHistory(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<readonly MoldTrialRecord[]>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/trial-history`,
+    undefined,
+    parseMoldTrialRecordList,
+  );
+}
+
+export function listMoldTimeline(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<readonly MoldTimelineEntry[]>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/timeline`,
+    undefined,
+    parseMoldTimelineEntryList,
+  );
+}
+
+export function createMoldMaintenanceRecord(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+  body: Record<string, unknown>,
+): Promise<MoldApiResult<MoldWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/maintenance-history`,
+    "POST",
+    body,
+    parseMoldWriteApiResponse,
+  );
+}
+
+export function completeMoldMaintenanceRecord(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+  maintenanceId: string,
+  body: Record<string, unknown>,
+): Promise<MoldApiResult<MoldWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/maintenance-history/${encodeURIComponent(maintenanceId)}/complete`,
+    "POST",
+    body,
+    parseMoldWriteApiResponse,
+  );
+}
+
+export function appendMoldRevisionRecord(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+  body: Record<string, unknown>,
+): Promise<MoldApiResult<MoldWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/revision-history`,
+    "POST",
+    body,
+    parseMoldWriteApiResponse,
+  );
+}
+
+export function appendMoldTrialRecord(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+  body: Record<string, unknown>,
+): Promise<MoldApiResult<MoldWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/trial-history`,
     "POST",
     body,
     parseMoldWriteApiResponse,

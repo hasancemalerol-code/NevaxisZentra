@@ -89,3 +89,83 @@ export type MoldWriteResult = Readonly<{
   version: number;
   idempotentReplay: boolean;
 }>;
+
+export type MoldMaintenanceRecord = Readonly<{
+  id: string;
+  moldId: string;
+  maintenanceType: string;
+  status: string;
+  openedAtUtc: string;
+  completedAtUtc?: string;
+  summary: string;
+  findings?: string;
+  actionsTaken?: string;
+  performedByDisplayName?: string;
+  externalMaintenanceRequestReference?: string;
+  externalWorkOrderReference?: string;
+  sourceType: string;
+  sourceReference?: string;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  version: number;
+}>;
+
+export type MoldRevisionRecord = Readonly<{
+  id: string;
+  moldId: string;
+  revisionNumber: string;
+  revisionType: string;
+  revisionDate: string;
+  summary: string;
+  reason?: string;
+  technicalChange?: string;
+  previousCavityCount?: number;
+  newCavityCount?: number;
+  performedByDisplayName?: string;
+  externalReference?: string;
+  sourceType: string;
+  sourceReference?: string;
+  createdAtUtc: string;
+}>;
+
+export type MoldTrialRecord = Readonly<{
+  id: string;
+  moldId: string;
+  trialNumber: string;
+  trialDate: string;
+  result: string;
+  machineReference?: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  materialReference?: string;
+  cycleTimeSeconds?: number;
+  shotCount?: number;
+  goodPartCount?: number;
+  scrapPartCount?: number;
+  findings?: string;
+  decision?: string;
+  performedByDisplayName?: string;
+  sourceType: string;
+  sourceReference?: string;
+  createdAtUtc: string;
+}>;
+
+export type MoldTimelineEntry = Readonly<{
+  id: string;
+  eventKind: string;
+  eventDateUtc: string;
+  createdAtUtc: string;
+  title: string;
+  summary: string;
+  statusOrResult?: string;
+  reference?: string;
+  actorDisplayName?: string;
+}>;
+
+export type MoldHistorySummary = Readonly<{
+  maintenanceCount: number;
+  openMaintenanceCount: number;
+  revisionCount: number;
+  trialCount: number;
+  successfulTrialCount: number;
+}>;

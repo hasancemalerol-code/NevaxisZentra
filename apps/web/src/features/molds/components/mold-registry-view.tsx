@@ -3,30 +3,22 @@
 import { useMemo, useState, useTransition } from "react";
 import { Boxes, LoaderCircle } from "lucide-react";
 
-import type { MoldDetail, MoldLifecycleEvent, MoldSummary, MoldWorkspaceSummary } from "../domain/molds";
+import type { MoldDetail, MoldLifecycleEvent, MoldMaintenanceRecord, MoldRevisionRecord, MoldSummary, MoldTimelineEntry, MoldTrialRecord, MoldWorkspaceSummary } from "../domain/molds";
 import {
-  formatMoldDateTime,
   formatMoldNumber,
-  getMoldCounterSourceLabel,
   getMoldLifecycleStateLabel,
   getMoldLocationLabel,
   getMoldOwnershipLabel,
-  getMoldSourceLabel,
   MOLD_LIFECYCLE_FILTER_OPTIONS,
   MOLD_LOCATION_FILTER_OPTIONS,
   MOLD_LOCATION_FORM_OPTIONS,
   MOLD_OWNERSHIP_FILTER_OPTIONS,
   MOLD_OWNERSHIP_FORM_OPTIONS,
   MOLD_SOURCE_FORM_OPTIONS,
-  MOLD_TRANSITION_TARGETS,
 } from "../presentation/mold-labels";
-import {
-  createMoldAction,
-  recordMoldCounterAction,
-  transitionMoldLifecycleAction,
-  updateMoldAction,
-} from "../server/mold-writer";
+import { createMoldAction } from "../server/mold-writer";
 import { loadMoldDetailAction } from "../server/mold-actions";
+import { MoldHistoryDetailPanel } from "./mold-history-detail-panel";
 import "./mold-registry.css";
 
 type MoldRegistryViewProps = Readonly<{
@@ -53,6 +45,11 @@ export function MoldRegistryView({
   const [selectedId, setSelectedId] = useState(initialSelectedId ?? molds[0]?.id ?? "");
   const [detail, setDetail] = useState<MoldDetail | undefined>(initialDetail);
   const [history, setHistory] = useState<readonly MoldLifecycleEvent[]>(initialHistory);
+  const [maintenanceHistory, setMaintenanceHistory] = useState<readonly MoldMaintenanceRecord[]>([]);
+  const [revisionHistory, setRevisionHistory] = useState<readonly MoldRevisionRecord[]>([]);
+  const [trialHistory, setTrialHistory] = useState<readonly MoldTrialRecord[]>([]);
+  const [timeline, setTimeline] = useState<readonly MoldTimelineEntry[]>([]);
+  const [detailCanManage, setDetailCanManage] = useState(canManage);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -73,12 +70,15 @@ export function MoldRegistryView({
 
   const selectedSummary = filteredMolds.find((mold) => mold.id === selectedId) ?? molds.find((m) => m.id === selectedId);
   const activeDetail = detail && detail.id === selectedId ? detail : undefined;
-  const transitionOptions = activeDetail ? MOLD_TRANSITION_TARGETS[activeDetail.lifecycleState] ?? [] : [];
 
   function selectMold(mold: MoldSummary) {
     setSelectedId(mold.id);
     setDetail(undefined);
     setHistory([]);
+    setMaintenanceHistory([]);
+    setRevisionHistory([]);
+    setTrialHistory([]);
+    setTimeline([]);
     setMessage(null);
     setError(null);
 
@@ -87,6 +87,11 @@ export function MoldRegistryView({
       if (result.status === "success") {
         setDetail(result.mold);
         setHistory(result.lifecycleHistory);
+        setMaintenanceHistory(result.maintenanceHistory);
+        setRevisionHistory(result.revisionHistory);
+        setTrialHistory(result.trialHistory);
+        setTimeline(result.timeline);
+        setDetailCanManage(result.canManage);
       } else {
         setError(result.message);
       }
@@ -105,6 +110,19 @@ export function MoldRegistryView({
 
       setMessage("Kayıt güncellendi.");
       setShowCreate(false);
+
+      if (selectedId) {
+        const refreshed = await loadMoldDetailAction(selectedId);
+        if (refreshed.status === "success") {
+          setDetail(refreshed.mold);
+          setHistory(refreshed.lifecycleHistory);
+          setMaintenanceHistory(refreshed.maintenanceHistory);
+          setRevisionHistory(refreshed.revisionHistory);
+          setTrialHistory(refreshed.trialHistory);
+          setTimeline(refreshed.timeline);
+          setDetailCanManage(refreshed.canManage);
+        }
+      }
     });
   }
 
@@ -257,106 +275,18 @@ export function MoldRegistryView({
           {!selectedSummary ? (
             <div className="mold-registry-empty">Detay görmek için bir kalıp seçin.</div>
           ) : (
-            <>
-              <h2>{selectedSummary.code} · {selectedSummary.name}</h2>
-              <dl className="mold-registry-meta-grid">
-                <div><dt>Durum</dt><dd>{getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}</dd></div>
-                <div><dt>Sahiplik</dt><dd>{getMoldOwnershipLabel(selectedSummary.ownershipType)}</dd></div>
-                <div><dt>Konum</dt><dd>{getMoldLocationLabel(selectedSummary.locationType)}</dd></div>
-                <div><dt>Gözenek</dt><dd>{formatMoldNumber(selectedSummary.cavityCount)}</dd></div>
-                <div><dt>Vuruş Sayısı</dt><dd>{formatMoldNumber(selectedSummary.currentShotCount)}</dd></div>
-                <div><dt>Sayaç Zamanı</dt><dd>{formatMoldDateTime(selectedSummary.counterRecordedAtUtc)}</dd></div>
-                <div><dt>Kaynak</dt><dd>{getMoldSourceLabel(selectedSummary.sourceType)}</dd></div>
-                <div><dt>Son Güncelleme</dt><dd>{formatMoldDateTime(selectedSummary.updatedAtUtc)}</dd></div>
-              </dl>
-
-              {activeDetail && canManage ? (
-                <>
-                  <form
-                    className="mold-registry-form-grid"
-                    action={(formData) => runAction(() => updateMoldAction(formData))}
-                  >
-                    <input type="hidden" name="moldId" value={activeDetail.id} />
-                    <input type="hidden" name="expectedVersion" value={activeDetail.version} />
-                    <label className="full-width">Ad<input name="name" defaultValue={activeDetail.name} required /></label>
-                    <label>Sahiplik
-                      <select name="ownershipType" defaultValue={activeDetail.ownershipType}>
-                        {MOLD_OWNERSHIP_FORM_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>Konum
-                      <select name="locationType" defaultValue={activeDetail.locationType}>
-                        {MOLD_LOCATION_FORM_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="full-width">Notlar<textarea name="notes" rows={2} defaultValue={activeDetail.notes ?? ""} /></label>
-                    <div className="mold-registry-actions full-width">
-                      <button type="submit" className="mold-registry-button primary">Kayıt Güncelle</button>
-                    </div>
-                  </form>
-
-                  <form
-                    className="mold-registry-form-grid"
-                    action={(formData) => runAction(() => recordMoldCounterAction(formData))}
-                  >
-                    <input type="hidden" name="moldId" value={activeDetail.id} />
-                    <input type="hidden" name="expectedVersion" value={activeDetail.version} />
-                    <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-                    <label>Vuruş Sayısı<input name="shotCount" type="number" min="0" defaultValue={activeDetail.currentShotCount ?? 0} required /></label>
-                    <label>Not<input name="note" /></label>
-                    <div className="mold-registry-actions full-width">
-                      <button type="submit" className="mold-registry-button">Sayaç Kaydet</button>
-                    </div>
-                  </form>
-
-                  {transitionOptions.length > 0 ? (
-                    <form
-                      className="mold-registry-form-grid"
-                      action={(formData) => runAction(() => transitionMoldLifecycleAction(formData))}
-                    >
-                      <input type="hidden" name="moldId" value={activeDetail.id} />
-                      <input type="hidden" name="expectedVersion" value={activeDetail.version} />
-                      <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-                      <label>Hedef Durum
-                        <select name="targetState" required defaultValue={transitionOptions[0]?.value}>
-                          {transitionOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="full-width">Geçiş Gerekçesi<input name="reason" required /></label>
-                      <div className="mold-registry-actions full-width">
-                        <button type="submit" className="mold-registry-button primary">Durum Geçişi</button>
-                      </div>
-                    </form>
-                  ) : null}
-                </>
-              ) : null}
-
-              {activeDetail ? (
-                <section aria-label="Yaşam döngüsü geçmişi">
-                  <h3>Yaşam Döngüsü Geçmişi</h3>
-                  <div className="mold-registry-history">
-                    {history.length === 0 ? (
-                      <div className="mold-registry-empty">Henüz geçiş kaydı yok.</div>
-                    ) : (
-                      history.map((event) => (
-                        <article key={event.id} className="mold-registry-history-item">
-                          <strong>{getMoldLifecycleStateLabel(event.previousState)} → {getMoldLifecycleStateLabel(event.newState)}</strong>
-                          <div>{event.reason}</div>
-                          <small>{event.actorDisplayName} · {formatMoldDateTime(event.occurredAtUtc)}</small>
-                        </article>
-                      ))
-                    )}
-                  </div>
-                  <div><small>Sayaç kaynağı: {getMoldCounterSourceLabel(activeDetail.counterSource)}</small></div>
-                </section>
-              ) : null}
-            </>
+            <MoldHistoryDetailPanel
+              selectedSummary={selectedSummary}
+              detail={activeDetail}
+              lifecycleHistory={history}
+              maintenanceHistory={maintenanceHistory}
+              revisionHistory={revisionHistory}
+              trialHistory={trialHistory}
+              timeline={timeline}
+              canManage={detailCanManage}
+              isPending={isPending}
+              onAction={runAction}
+            />
           )}
         </aside>
       </div>

@@ -4,6 +4,10 @@ import {
   getMold,
   getMoldWorkspaceSummary,
   listMoldLifecycleHistory,
+  listMoldMaintenanceHistory,
+  listMoldRevisionHistory,
+  listMoldTimeline,
+  listMoldTrialHistory,
   listMolds,
   probeMoldManagePermission,
   probeMoldReadPermission,
@@ -12,7 +16,11 @@ import { resolveMoldRequestContext } from "./mold-request-context";
 import type {
   MoldDetail,
   MoldLifecycleEvent,
+  MoldMaintenanceRecord,
+  MoldRevisionRecord,
   MoldSummary,
+  MoldTimelineEntry,
+  MoldTrialRecord,
   MoldWorkspaceSummary,
 } from "../domain/molds";
 import type { MoldApiFailure, MoldListFilters } from "./mold-api-client";
@@ -37,6 +45,10 @@ export type MoldDetailResult =
       status: "success";
       mold: MoldDetail;
       lifecycleHistory: readonly MoldLifecycleEvent[];
+      maintenanceHistory: readonly MoldMaintenanceRecord[];
+      revisionHistory: readonly MoldRevisionRecord[];
+      trialHistory: readonly MoldTrialRecord[];
+      timeline: readonly MoldTimelineEntry[];
       canManage: boolean;
     }>
   | ReadFailure;
@@ -97,10 +109,15 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
     return resolved;
   }
 
-  const [moldResult, historyResult] = await Promise.all([
-    getMold(resolved.context, moldId),
-    listMoldLifecycleHistory(resolved.context, moldId),
-  ]);
+  const [moldResult, historyResult, maintenanceResult, revisionResult, trialResult, timelineResult] =
+    await Promise.all([
+      getMold(resolved.context, moldId),
+      listMoldLifecycleHistory(resolved.context, moldId),
+      listMoldMaintenanceHistory(resolved.context, moldId),
+      listMoldRevisionHistory(resolved.context, moldId),
+      listMoldTrialHistory(resolved.context, moldId),
+      listMoldTimeline(resolved.context, moldId),
+    ]);
 
   if (moldResult.status === "failure") {
     return {
@@ -111,17 +128,29 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
   }
 
   if (historyResult.status === "failure") {
-    return {
-      status: "failure",
-      message: historyResult.message,
-      code: historyResult.code,
-    };
+    return { status: "failure", message: historyResult.message, code: historyResult.code };
+  }
+  if (maintenanceResult.status === "failure") {
+    return { status: "failure", message: maintenanceResult.message, code: maintenanceResult.code };
+  }
+  if (revisionResult.status === "failure") {
+    return { status: "failure", message: revisionResult.message, code: revisionResult.code };
+  }
+  if (trialResult.status === "failure") {
+    return { status: "failure", message: trialResult.message, code: trialResult.code };
+  }
+  if (timelineResult.status === "failure") {
+    return { status: "failure", message: timelineResult.message, code: timelineResult.code };
   }
 
   return {
     status: "success",
     mold: moldResult.value,
     lifecycleHistory: historyResult.value,
+    maintenanceHistory: maintenanceResult.value,
+    revisionHistory: revisionResult.value,
+    trialHistory: trialResult.value,
+    timeline: timelineResult.value,
     canManage: await probeMoldManagePermission(resolved.context),
   };
 }

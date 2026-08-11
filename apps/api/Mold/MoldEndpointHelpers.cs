@@ -95,10 +95,7 @@ internal static class MoldEndpointHelpers
             : TypedResults.Ok(dto);
     }
 
-    internal static Dictionary<string, object?> FailureExt(string failureCode) =>
-        new() { ["failureCode"] = failureCode };
-
-    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult MapMoldFailure(string failureCode, string? reason) =>
+    internal static IResult MapMoldFailure(string failureCode, string? reason) =>
         failureCode switch
         {
             MoldFailureCodes.InvalidScope => TypedResults.Problem(
@@ -129,6 +126,22 @@ internal static class MoldEndpointHelpers
                 title: reason ?? "The idempotency key belongs to a legacy create that cannot be verified safely.",
                 statusCode: StatusCodes.Status409Conflict,
                 extensions: FailureExt(MoldApiFailureCodes.IdempotencyLegacyUnverifiable)),
+            MoldHistoryFailureCodes.HistoryIdempotencyConflict => TypedResults.Problem(
+                title: reason ?? "The idempotency key was already used with a different history payload.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MoldApiFailureCodes.HistoryIdempotencyConflict)),
+            MoldHistoryFailureCodes.DuplicateRevisionNumber => TypedResults.Problem(
+                title: reason ?? "A revision with this number already exists for the mold.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MoldApiFailureCodes.DuplicateRevisionNumber)),
+            MoldHistoryFailureCodes.DuplicateTrialNumber => TypedResults.Problem(
+                title: reason ?? "A trial with this number already exists for the mold.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MoldApiFailureCodes.DuplicateTrialNumber)),
+            MoldHistoryFailureCodes.InvalidMaintenanceState => TypedResults.Problem(
+                title: reason ?? "The maintenance record is not in a valid state for this operation.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MoldApiFailureCodes.InvalidMaintenanceState)),
             MoldFailureCodes.ValidationFailed => TypedResults.Problem(
                 title: reason ?? "Validation failed.",
                 statusCode: StatusCodes.Status400BadRequest,
@@ -178,6 +191,9 @@ internal static class MoldEndpointHelpers
                 title: reason,
                 statusCode: StatusCodes.Status403Forbidden,
                 extensions: FailureExt(MoldApiFailureCodes.FacilityAccessDenied));
+
+    internal static Dictionary<string, object?> FailureExt(string failureCode) =>
+        new() { ["failureCode"] = failureCode };
 }
 
 internal static class MoldApiFailureCodes
@@ -190,6 +206,10 @@ internal static class MoldApiFailureCodes
     public const string DuplicateCode = "mold.duplicate-code";
     public const string IdempotencyConflict = "mold.idempotency-conflict";
     public const string IdempotencyLegacyUnverifiable = "mold.idempotency-legacy-unverifiable";
+    public const string HistoryIdempotencyConflict = "mold.history-idempotency-conflict";
+    public const string DuplicateRevisionNumber = "mold.duplicate-revision-number";
+    public const string DuplicateTrialNumber = "mold.duplicate-trial-number";
+    public const string InvalidMaintenanceState = "mold.invalid-maintenance-state";
     public const string SourceUnavailable = "mold.source-unavailable";
     public const string Unauthenticated = "mold.unauthenticated";
     public const string PermissionDenied = "mold.permission-denied";
