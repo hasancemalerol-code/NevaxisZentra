@@ -69,12 +69,44 @@ public interface IProcessOeeRepository
         ProcessOeeOperationContext context,
         Guid windowId,
         CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeStabilityOverviewReadModel> GetStabilityOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeDowntimeParetoReadModel?> GetDowntimeParetoForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeShiftComparisonReadModel> GetShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        Guid? machineAssetId,
+        DateTimeOffset periodStartUtc,
+        DateTimeOffset periodEndUtc,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeWriteResult> EvaluateShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        EvaluateProcessOeeShiftComparisonCommand command,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class ProcessOeeRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
-    ProcessOeeEvidenceCollector evidenceCollector) : IProcessOeeRepository
+    ProcessOeeEvidenceCollector evidenceCollector,
+    ProcessOeeStabilityDataCollector stabilityDataCollector) : IProcessOeeRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -539,6 +571,15 @@ public sealed class ProcessOeeRepository(
                 calculation,
                 existingByFingerprint,
                 cancellationToken);
+            await ProcessOeeStabilityPersistence.EnsureStabilityPersistedAsync(
+                dbContext,
+                context,
+                window,
+                evidence,
+                calculation,
+                existingByFingerprint,
+                stabilityDataCollector,
+                cancellationToken);
             return ProcessOeeWriteResult.Success(
                 existingByFingerprint.Id,
                 existingByFingerprint.Version,
@@ -567,6 +608,15 @@ public sealed class ProcessOeeRepository(
                 evidence,
                 calculation,
                 existingByKey,
+                cancellationToken);
+            await ProcessOeeStabilityPersistence.EnsureStabilityPersistedAsync(
+                dbContext,
+                context,
+                window,
+                evidence,
+                calculation,
+                existingByKey,
+                stabilityDataCollector,
                 cancellationToken);
             return ProcessOeeWriteResult.Success(existingByKey.Id, existingByKey.Version, idempotentReplay: true);
         }
@@ -631,6 +681,10 @@ public sealed class ProcessOeeRepository(
 
         var lossAnalysis = ProcessOeeLossCalculator.Analyze(window, evidence, calculation);
         PersistLossDrivers(context, assessment, lossAnalysis, actor);
+
+        var stabilityData = await stabilityDataCollector.CollectAsync(context, window, evidence, cancellationToken);
+        var stabilityAnalysis = ProcessOeeStabilityCalculator.Analyze(window, evidence, calculation, stabilityData);
+        ProcessOeeStabilityPersistence.PersistStability(context, assessment, stabilityAnalysis, actor, dbContext);
 
         try
         {
@@ -759,6 +813,394 @@ public sealed class ProcessOeeRepository(
             detail.CalculationHonestyDisclaimer,
             detail.SimulatorHonestyDisclaimer);
     }
+
+    public Task<ProcessOeeStabilityOverviewReadModel> GetStabilityOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessments = await dbContext.ProcessOeeStabilityAssessments.AsNoTracking()
+                    .Where(s => s.TenantId == context.TenantId && s.FacilityId == context.FacilityId)
+                    .ToListAsync(ct);
+
+                return new ProcessOeeStabilityOverviewReadModel(
+                    assessments.Count,
+                    assessments.Count(s => s.ResultState == ProcessOeeStabilityStates.Stable),
+                    assessments.Count(s => s.ResultState == ProcessOeeStabilityStates.Variable),
+                    assessments.Count(s => s.ResultState == ProcessOeeStabilityStates.Drifting),
+                    assessments.Count(s => s.ResultState == ProcessOeeStabilityStates.ReviewRequired),
+                    assessments.Count(s => s.ResultState == ProcessOeeStabilityStates.InsufficientData),
+                    ProcessOeeStabilityConstants.RuleSetVersion);
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ProcessOeeAssessments.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        a => a.Id == assessmentId
+                             && a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId,
+                        ct);
+                return assessment is null ? null : await BuildStabilityDetailAsync(context, assessment, ct);
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ProcessOeeAssessments.AsNoTracking()
+                    .Where(a => a.EvaluationWindowId == windowId
+                                && a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId)
+                    .OrderByDescending(a => a.EvaluatedAtUtc)
+                    .FirstOrDefaultAsync(ct);
+                return assessment is null ? null : await BuildStabilityDetailAsync(context, assessment, ct);
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeDowntimeParetoReadModel?> GetDowntimeParetoForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ProcessOeeAssessments.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        a => a.Id == assessmentId
+                             && a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId,
+                        ct);
+                if (assessment is null)
+                {
+                    return null;
+                }
+
+                var stability = await dbContext.ProcessOeeStabilityAssessments.AsNoTracking()
+                    .FirstOrDefaultAsync(s => s.AssessmentId == assessment.Id && s.TenantId == context.TenantId, ct);
+                if (stability is null)
+                {
+                    return null;
+                }
+
+                var rows = await dbContext.ProcessOeeDowntimeBreakdownRows.AsNoTracking()
+                    .Where(r => r.AssessmentId == assessment.Id && r.TenantId == context.TenantId)
+                    .OrderBy(r => r.SortRank)
+                    .ToListAsync(ct);
+
+                var total = rows.Sum(r => r.DurationSeconds);
+                return new ProcessOeeDowntimeParetoReadModel(
+                    assessment.Id,
+                    assessment.WindowStartUtc,
+                    assessment.WindowEndUtc,
+                    total,
+                    stability.ClassifiedDowntimeSeconds,
+                    stability.UnclassifiedDowntimeSeconds,
+                    ProcessOeeStabilityConstants.RuleSetVersion,
+                    rows.Select(r => ProcessOeeStabilityPersistence.MapBreakdownRow(r, total)).ToList());
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeShiftComparisonReadModel> GetShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        Guid? machineAssetId,
+        DateTimeOffset periodStartUtc,
+        DateTimeOffset periodEndUtc,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => BuildShiftComparisonAsync(context, machineAssetId, periodStartUtc, periodEndUtc, ct),
+            cancellationToken);
+
+    public Task<ProcessOeeWriteResult> EvaluateShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        EvaluateProcessOeeShiftComparisonCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                if (string.IsNullOrWhiteSpace(command.IdempotencyKey))
+                {
+                    return ProcessOeeWriteResult.Fail(ProcessOeeFailureCodes.ValidationFailed, "IdempotencyKey is required.");
+                }
+
+                var existing = await dbContext.ProcessOeeShiftComparisonBatches
+                    .FirstOrDefaultAsync(
+                        b => b.TenantId == context.TenantId
+                             && b.IdempotencyKey == command.IdempotencyKey.Trim(),
+                        ct);
+                if (existing is not null)
+                {
+                    return ProcessOeeWriteResult.Success(existing.Id, 1, idempotentReplay: true);
+                }
+
+                var comparison = await BuildShiftComparisonAsync(
+                    context,
+                    command.MachineAssetId,
+                    command.PeriodStartUtc,
+                    command.PeriodEndUtc,
+                    ct);
+
+                var actor = context.IdentitySubjectId.ToString();
+                var now = DateTimeOffset.UtcNow;
+                var batch = new ProcessOeeShiftComparisonBatch
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    FacilityId = context.FacilityId,
+                    MachineAssetId = command.MachineAssetId,
+                    ComparisonPeriodStartUtc = command.PeriodStartUtc,
+                    ComparisonPeriodEndUtc = command.PeriodEndUtc,
+                    IsComparable = comparison.IsComparable,
+                    ComparabilityWarningCode = comparison.ComparabilityWarningCode,
+                    SummaryJson = JsonSerializer.Serialize(comparison.Summary, JsonOptions),
+                    EvidenceFingerprint = ComputeShiftComparisonFingerprint(comparison),
+                    RuleSetVersion = comparison.RuleSetVersion,
+                    IdempotencyKey = command.IdempotencyKey.Trim(),
+                    CreatedAtUtc = now,
+                    CreatedBySubjectId = actor,
+                };
+
+                dbContext.ProcessOeeShiftComparisonBatches.Add(batch);
+                foreach (var row in comparison.Rows)
+                {
+                    dbContext.ProcessOeeShiftComparisonRows.Add(new ProcessOeeShiftComparisonRow
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        FacilityId = context.FacilityId,
+                        BatchId = batch.Id,
+                        AssessmentId = row.AssessmentId,
+                        ShiftCode = row.ShiftCode,
+                        ShiftLabel = row.ShiftLabel,
+                        WindowStartUtc = row.WindowStartUtc,
+                        WindowEndUtc = row.WindowEndUtc,
+                        PlannedProductionSeconds = row.PlannedProductionSeconds,
+                        OperatingSeconds = row.OperatingSeconds,
+                        AvailabilityPercent = row.AvailabilityPercent,
+                        PerformancePercent = row.PerformancePercent,
+                        QualityPercent = row.QualityPercent,
+                        OeePercent = row.OeePercent,
+                        StabilityResultState = row.StabilityResultState,
+                        DowntimeSeconds = row.DowntimeSeconds,
+                        MicroStopCount = row.MicroStopCount,
+                        DataSufficiency = row.DataSufficiency,
+                        FreshnessState = row.FreshnessState,
+                        IsComparable = row.IsComparable,
+                        CreatedAtUtc = now,
+                        CreatedBySubjectId = actor,
+                    });
+                }
+
+                await dbContext.SaveChangesAsync(ct);
+                return ProcessOeeWriteResult.Success(batch.Id, 1);
+            },
+            cancellationToken);
+
+    private async Task<ProcessOeeStabilityDetailReadModel?> BuildStabilityDetailAsync(
+        ProcessOeeOperationContext context,
+        ProcessOeeAssessment assessment,
+        CancellationToken cancellationToken)
+    {
+        var stability = await dbContext.ProcessOeeStabilityAssessments.AsNoTracking()
+            .FirstOrDefaultAsync(
+                s => s.AssessmentId == assessment.Id
+                     && s.TenantId == context.TenantId
+                     && s.FacilityId == context.FacilityId,
+                cancellationToken);
+        if (stability is null)
+        {
+            return null;
+        }
+
+        var drivers = await dbContext.ProcessOeeStabilityDrivers.AsNoTracking()
+            .Where(d => d.AssessmentId == assessment.Id && d.TenantId == context.TenantId)
+            .OrderByDescending(d => d.OperationalPriority)
+            .ThenBy(d => d.ReasonCode)
+            .ToListAsync(cancellationToken);
+
+        var breakdown = await dbContext.ProcessOeeDowntimeBreakdownRows.AsNoTracking()
+            .Where(r => r.AssessmentId == assessment.Id && r.TenantId == context.TenantId)
+            .OrderBy(r => r.SortRank)
+            .ToListAsync(cancellationToken);
+
+        var total = breakdown.Sum(r => r.DurationSeconds);
+        var detail = MapAssessmentDetail(assessment, await LoadMachineLookupAsync(context, cancellationToken));
+
+        return new ProcessOeeStabilityDetailReadModel(
+            assessment.Id,
+            assessment.EvaluationWindowId,
+            assessment.Status,
+            stability.ResultState,
+            stability.RuleSetVersion,
+            stability.MedianCycleMs,
+            stability.MadCycleMs,
+            stability.SampleCount,
+            stability.DriftDirection,
+            stability.MicroStopCount,
+            stability.MicroStopTotalSeconds,
+            stability.MicroStopMedianSeconds,
+            stability.ClassifiedDowntimeSeconds,
+            stability.UnclassifiedDowntimeSeconds,
+            drivers.Select(ProcessOeeStabilityPersistence.MapStabilityDriver).ToList(),
+            breakdown.Select(r => ProcessOeeStabilityPersistence.MapBreakdownRow(r, total)).ToList(),
+            detail.Evidence,
+            detail.MissingFields,
+            detail.Conflicts,
+            detail.SourceSystem,
+            detail.SourceFreshnessUtc,
+            detail.IsSimulatorDerived,
+            detail.CalculationHonestyDisclaimer,
+            detail.SimulatorHonestyDisclaimer);
+    }
+
+    private async Task<ProcessOeeShiftComparisonReadModel> BuildShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        Guid? machineAssetId,
+        DateTimeOffset periodStartUtc,
+        DateTimeOffset periodEndUtc,
+        CancellationToken cancellationToken)
+    {
+        var assessmentsQuery = dbContext.ProcessOeeAssessments.AsNoTracking()
+            .Where(a => a.TenantId == context.TenantId
+                        && a.FacilityId == context.FacilityId
+                        && a.WindowStartUtc >= periodStartUtc
+                        && a.WindowEndUtc <= periodEndUtc);
+
+        if (machineAssetId.HasValue)
+        {
+            assessmentsQuery = assessmentsQuery.Where(a => a.MachineAssetId == machineAssetId.Value);
+        }
+
+        var assessments = await assessmentsQuery.ToListAsync(cancellationToken);
+        var assessmentIds = assessments.Select(a => a.Id).ToList();
+        var stabilityMap = await dbContext.ProcessOeeStabilityAssessments.AsNoTracking()
+            .Where(s => assessmentIds.Contains(s.AssessmentId) && s.TenantId == context.TenantId)
+            .ToDictionaryAsync(s => s.AssessmentId, cancellationToken);
+
+        var inputs = new List<ProcessOeeShiftComparisonInput>();
+        foreach (var assessment in assessments)
+        {
+            if (string.IsNullOrWhiteSpace(assessment.ProductionOrderReference))
+            {
+                continue;
+            }
+
+            var order = await dbContext.ProductionOrders.AsNoTracking()
+                .FirstOrDefaultAsync(
+                    o => o.TenantId == context.TenantId
+                         && o.FacilityId == context.FacilityId
+                         && o.ReferenceCode == assessment.ProductionOrderReference.Trim(),
+                    cancellationToken);
+            if (order is null)
+            {
+                continue;
+            }
+
+            var assignment = await dbContext.ProductionOrderShiftAssignments.AsNoTracking()
+                .Where(a => a.TenantId == context.TenantId
+                            && a.FacilityId == context.FacilityId
+                            && a.ProductionOrderId == order.Id
+                            && a.ShiftStartAtUtc < assessment.WindowEndUtc
+                            && a.ShiftEndAtUtc > assessment.WindowStartUtc)
+                .OrderByDescending(a => a.AssignedAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (assignment is null)
+            {
+                continue;
+            }
+
+            var shift = await dbContext.ProductionShifts.AsNoTracking()
+                .FirstOrDefaultAsync(
+                    s => s.Id == assignment.ProductionShiftId
+                         && s.TenantId == context.TenantId
+                         && s.FacilityId == context.FacilityId,
+                    cancellationToken);
+            var shiftLabel = shift is not null ? $"{shift.Code} — {shift.Name}" : assignment.ShiftCode;
+            stabilityMap.TryGetValue(assessment.Id, out var stability);
+
+            var isSufficient = assessment.Status == ProcessOeeAssessmentStatuses.Calculated
+                               || assessment.Status == ProcessOeeAssessmentStatuses.StaleData;
+            var isStale = assessment.Status == ProcessOeeAssessmentStatuses.StaleData;
+
+            inputs.Add(new ProcessOeeShiftComparisonInput(
+                assessment.FacilityId,
+                assessment.Id,
+                assignment.ShiftCode,
+                shiftLabel,
+                assessment.WindowStartUtc,
+                assessment.WindowEndUtc,
+                assessment.PlannedProductionSeconds,
+                assessment.OperatingSeconds,
+                assessment.AvailabilityPercent,
+                assessment.PerformancePercent,
+                assessment.QualityPercent,
+                assessment.OeePercent,
+                stability?.ResultState,
+                assessment.DowntimeSeconds,
+                stability?.MicroStopCount ?? 0,
+                isSufficient ? "sufficient" : "insufficient",
+                isStale ? ProcessOeeStabilityFreshnessStates.Stale : ProcessOeeStabilityFreshnessStates.Fresh,
+                isSufficient,
+                isStale));
+        }
+
+        var result = ProcessOeeStabilityCalculator.CompareShifts(context, periodStartUtc, periodEndUtc, inputs);
+        return new ProcessOeeShiftComparisonReadModel(
+            result.PeriodStartUtc,
+            result.PeriodEndUtc,
+            result.IsComparable,
+            result.ComparabilityWarningCode,
+            result.RuleSetVersion,
+            result.Summary is null
+                ? null
+                : new ProcessOeeShiftComparisonSummaryReadModel(
+                    result.Summary.HighestOeeShiftLabel,
+                    result.Summary.LowestAvailabilityShiftLabel,
+                    result.Summary.HighestDowntimeShiftLabel,
+                    result.Summary.HighestVariabilityShiftLabel),
+            result.Rows.Select(r => new ProcessOeeShiftComparisonRowReadModel(
+                r.AssessmentId,
+                r.ShiftCode,
+                r.ShiftLabel,
+                r.WindowStartUtc,
+                r.WindowEndUtc,
+                r.PlannedProductionSeconds,
+                r.OperatingSeconds,
+                r.AvailabilityPercent,
+                r.PerformancePercent,
+                r.QualityPercent,
+                r.OeePercent,
+                r.StabilityResultState,
+                r.DowntimeSeconds,
+                r.MicroStopCount,
+                r.DataSufficiency,
+                r.FreshnessState,
+                r.IsComparable)).ToList());
+    }
+
+    private static string ComputeShiftComparisonFingerprint(ProcessOeeShiftComparisonReadModel comparison) =>
+        Convert.ToHexString(
+            System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes(
+                    JsonSerializer.Serialize(new
+                    {
+                        comparison.PeriodStartUtc,
+                        comparison.PeriodEndUtc,
+                        comparison.IsComparable,
+                        rows = comparison.Rows.Select(r => r.AssessmentId).OrderBy(id => id),
+                        comparison.RuleSetVersion,
+                    })))).ToLowerInvariant();
 
     private async Task EnsureLossDriversPersistedAsync(
         ProcessOeeOperationContext context,
@@ -1085,4 +1527,48 @@ public sealed class UnavailableProcessOeeRepository : IProcessOeeRepository
         Guid windowId,
         CancellationToken cancellationToken = default) =>
         Task.FromResult<ProcessOeeLossDetailReadModel?>(null);
+
+    public Task<ProcessOeeStabilityOverviewReadModel> GetStabilityOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new ProcessOeeStabilityOverviewReadModel(0, 0, 0, 0, 0, 0, ProcessOeeStabilityConstants.RuleSetVersion));
+
+    public Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<ProcessOeeStabilityDetailReadModel?>(null);
+
+    public Task<ProcessOeeStabilityDetailReadModel?> GetStabilityDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<ProcessOeeStabilityDetailReadModel?>(null);
+
+    public Task<ProcessOeeDowntimeParetoReadModel?> GetDowntimeParetoForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<ProcessOeeDowntimeParetoReadModel?>(null);
+
+    public Task<ProcessOeeShiftComparisonReadModel> GetShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        Guid? machineAssetId,
+        DateTimeOffset periodStartUtc,
+        DateTimeOffset periodEndUtc,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new ProcessOeeShiftComparisonReadModel(
+            periodStartUtc,
+            periodEndUtc,
+            false,
+            "unavailable",
+            ProcessOeeStabilityConstants.RuleSetVersion,
+            null,
+            []));
+
+    public Task<ProcessOeeWriteResult> EvaluateShiftComparisonAsync(
+        ProcessOeeOperationContext context,
+        EvaluateProcessOeeShiftComparisonCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
 }

@@ -3,6 +3,8 @@ import "./process-oee-server-boundary";
 import {
   getProcessOeeAssessment,
   getProcessOeeAssessmentLosses,
+  getProcessOeeAssessmentStability,
+  getProcessOeeShiftComparison,
   getProcessOeeWorkspaceSummary,
   listProcessOeeAssessments,
 } from "./process-oee-api-client";
@@ -12,6 +14,8 @@ import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
   ProcessOeeLossDetail,
+  ProcessOeeShiftComparison,
+  ProcessOeeStabilityDetail,
   ProcessOeeWorkspaceSummary,
 } from "../domain/process-oee";
 
@@ -42,6 +46,20 @@ export type ProcessOeeLossDetailResult =
   | Readonly<{
       status: "success";
       lossDetail: ProcessOeeLossDetail;
+    }>
+  | ReadFailure;
+
+export type ProcessOeeStabilityDetailResult =
+  | Readonly<{
+      status: "success";
+      stabilityDetail: ProcessOeeStabilityDetail;
+    }>
+  | ReadFailure;
+
+export type ProcessOeeShiftComparisonResult =
+  | Readonly<{
+      status: "success";
+      shiftComparison: ProcessOeeShiftComparison;
     }>
   | ReadFailure;
 
@@ -177,6 +195,54 @@ export async function readProcessOeeLossDetail(
   return {
     status: "success",
     lossDetail: lossResult.value,
+  };
+}
+
+export async function readProcessOeeStabilityDetail(
+  assessmentId: string,
+): Promise<ProcessOeeStabilityDetailResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const stabilityResult = await getProcessOeeAssessmentStability(resolved.context, assessmentId);
+  if (stabilityResult.status === "failure") {
+    return {
+      status: "failure",
+      message: stabilityResult.message,
+      code: stabilityResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    stabilityDetail: stabilityResult.value,
+  };
+}
+
+export async function readProcessOeeShiftComparison(params: {
+  machineAssetId?: string;
+  periodStartUtc: string;
+  periodEndUtc: string;
+}): Promise<ProcessOeeShiftComparisonResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const comparisonResult = await getProcessOeeShiftComparison(resolved.context, params);
+  if (comparisonResult.status === "failure") {
+    return {
+      status: "failure",
+      message: comparisonResult.message,
+      code: comparisonResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    shiftComparison: comparisonResult.value,
   };
 }
 

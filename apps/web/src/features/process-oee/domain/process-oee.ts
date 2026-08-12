@@ -136,3 +136,106 @@ export type ProcessOeeLossDetail = Readonly<{
   calculationHonestyDisclaimer: string;
   simulatorHonestyDisclaimer?: string;
 }>;
+
+export type ProcessOeeStabilityDriver = Readonly<{
+  id: string;
+  reasonCode: string;
+  category: string;
+  categoryLabel: string;
+  resultState: string;
+  resultStateLabel: string;
+  severity: string;
+  severityLabel: string;
+  operationalPriority: number;
+  observedValue: number | null;
+  referenceValue: number | null;
+  unit: string;
+  sampleCount: number;
+  timeRangeStartUtc: string;
+  timeRangeEndUtc: string;
+  sourceReferences: readonly string[];
+  freshnessState: string;
+  freshnessLabel: string;
+  explanationLabel: string;
+  dataLimitations: readonly string[];
+  ruleSetVersion: string;
+}>;
+
+export type ProcessOeeDowntimeBreakdownRow = Readonly<{
+  reasonCode: string;
+  reasonLabel: string;
+  durationSeconds: number;
+  occurrenceCount: number;
+  sortRank: number;
+  isClassified: boolean;
+  durationPercent: number | null;
+}>;
+
+export type ProcessOeeStabilityDetail = Readonly<{
+  assessmentId: string;
+  evaluationWindowId: string;
+  assessmentStatus: string;
+  assessmentStatusLabel: string;
+  resultState: string;
+  resultStateLabel: string;
+  ruleSetVersion: string;
+  medianCycleMs: number | null;
+  madCycleMs: number | null;
+  sampleCount: number;
+  driftDirection: string;
+  driftDirectionLabel: string;
+  microStopCount: number;
+  microStopTotalSeconds: number;
+  microStopMedianSeconds: number;
+  classifiedDowntimeSeconds: number;
+  unclassifiedDowntimeSeconds: number;
+  drivers: readonly ProcessOeeStabilityDriver[];
+  downtimeBreakdown: readonly ProcessOeeDowntimeBreakdownRow[];
+  evidence: readonly ProcessOeeEvidence[];
+  missingFields: readonly string[];
+  conflicts: readonly string[];
+  sourceSystem?: string;
+  sourceFreshnessUtc?: string;
+  isSimulatorDerived: boolean;
+  calculationHonestyDisclaimer: string;
+  simulatorHonestyDisclaimer?: string;
+}>;
+
+export type ProcessOeeShiftComparisonRow = Readonly<{
+  assessmentId: string;
+  shiftCode: string;
+  shiftLabel: string;
+  windowStartUtc: string;
+  windowEndUtc: string;
+  plannedProductionSeconds: number | null;
+  operatingSeconds: number | null;
+  availabilityPercent: number | null;
+  performancePercent: number | null;
+  qualityPercent: number | null;
+  oeePercent: number | null;
+  stabilityResultState: string | null;
+  stabilityResultStateLabel: string | null;
+  downtimeSeconds: number | null;
+  microStopCount: number;
+  dataSufficiency: string;
+  dataSufficiencyLabel: string;
+  freshnessState: string;
+  freshnessLabel: string;
+  isComparable: boolean;
+}>;
+
+export type ProcessOeeShiftComparison = Readonly<{
+  periodStartUtc: string;
+  periodEndUtc: string;
+  isComparable: boolean;
+  comparabilityWarningCode: string | null;
+  comparabilityWarningLabel: string | null;
+  ruleSetVersion: string;
+  summary: Readonly<{
+    highestOeeShiftLabel: string | null;
+    lowestAvailabilityShiftLabel: string | null;
+    highestDowntimeShiftLabel: string | null;
+    highestVariabilityShiftLabel: string | null;
+  }> | null;
+  rows: readonly ProcessOeeShiftComparisonRow[];
+}>;

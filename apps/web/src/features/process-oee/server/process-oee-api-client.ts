@@ -4,15 +4,24 @@ import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
   ProcessOeeLossDetail,
+  ProcessOeeShiftComparison,
+  ProcessOeeStabilityDetail,
   ProcessOeeWorkspaceSummary,
   ProcessOeeWriteResult,
 } from "../domain/process-oee";
 import {
+  getComparabilityWarningLabel,
+  getDataSufficiencyLabel,
+  getDowntimeReasonLabel,
+  getDriftDirectionLabel,
   getLossCategoryLabel,
   getLossExplanationLabel,
   getLossFreshnessLabel,
   getProcessOeeStatusLabel,
   getDriverSeverityLabel,
+  getStabilityCategoryLabel,
+  getStabilityExplanationLabel,
+  getStabilityResultStateLabel,
 } from "../presentation/process-oee-labels";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 
@@ -393,6 +402,184 @@ export function getProcessOeeAssessmentLosses(
     `/api/process-oee/assessments/${encodeURIComponent(assessmentId)}/losses`,
     undefined,
     parseLossDetail,
+  );
+}
+
+function parseStabilityDriver(value: unknown) {
+  const item = value as Record<string, unknown>;
+  const category = String(item.category);
+  const resultState = String(item.resultState);
+  const severity = String(item.severity);
+  const explanationCode = String(item.explanationCode);
+  const freshnessState = String(item.freshnessState);
+  return {
+    id: String(item.id),
+    reasonCode: String(item.reasonCode),
+    category,
+    categoryLabel: getStabilityCategoryLabel(category),
+    resultState,
+    resultStateLabel: getStabilityResultStateLabel(resultState),
+    severity,
+    severityLabel: getDriverSeverityLabel(severity),
+    operationalPriority: Number(item.operationalPriority ?? 0),
+    observedValue: readNumber(item.observedValue),
+    referenceValue: readNumber(item.referenceValue),
+    unit: String(item.unit ?? ""),
+    sampleCount: Number(item.sampleCount ?? 0),
+    timeRangeStartUtc: String(item.timeRangeStartUtc),
+    timeRangeEndUtc: String(item.timeRangeEndUtc),
+    sourceReferences: Array.isArray(item.sourceReferences)
+      ? item.sourceReferences.map(String)
+      : [],
+    freshnessState,
+    freshnessLabel: getLossFreshnessLabel(freshnessState),
+    explanationLabel: getStabilityExplanationLabel(explanationCode),
+    dataLimitations: Array.isArray(item.dataLimitations)
+      ? item.dataLimitations.map(String)
+      : [],
+    ruleSetVersion: String(item.ruleSetVersion),
+  };
+}
+
+function parseDowntimeBreakdownRow(value: unknown) {
+  const item = value as Record<string, unknown>;
+  const reasonCode = String(item.reasonCode);
+  return {
+    reasonCode,
+    reasonLabel: getDowntimeReasonLabel(reasonCode),
+    durationSeconds: Number(item.durationSeconds ?? 0),
+    occurrenceCount: Number(item.occurrenceCount ?? 0),
+    sortRank: Number(item.sortRank ?? 0),
+    isClassified: readBoolean(item.isClassified),
+    durationPercent: readNumber(item.durationPercent),
+  };
+}
+
+function parseStabilityDetail(payload: unknown): ProcessOeeStabilityDetail {
+  const item = payload as Record<string, unknown>;
+  const assessmentStatus = String(item.assessmentStatus);
+  const resultState = String(item.resultState);
+  const driftDirection = String(item.driftDirection ?? "none");
+  return {
+    assessmentId: String(item.assessmentId),
+    evaluationWindowId: String(item.evaluationWindowId),
+    assessmentStatus,
+    assessmentStatusLabel: getProcessOeeStatusLabel(
+      assessmentStatus,
+      readString(item.assessmentStatusLabel),
+    ),
+    resultState,
+    resultStateLabel: getStabilityResultStateLabel(resultState),
+    ruleSetVersion: String(item.ruleSetVersion),
+    medianCycleMs: readNumber(item.medianCycleMs),
+    madCycleMs: readNumber(item.madCycleMs),
+    sampleCount: Number(item.sampleCount ?? 0),
+    driftDirection,
+    driftDirectionLabel: getDriftDirectionLabel(driftDirection),
+    microStopCount: Number(item.microStopCount ?? 0),
+    microStopTotalSeconds: Number(item.microStopTotalSeconds ?? 0),
+    microStopMedianSeconds: Number(item.microStopMedianSeconds ?? 0),
+    classifiedDowntimeSeconds: Number(item.classifiedDowntimeSeconds ?? 0),
+    unclassifiedDowntimeSeconds: Number(item.unclassifiedDowntimeSeconds ?? 0),
+    drivers: Array.isArray(item.drivers) ? item.drivers.map(parseStabilityDriver) : [],
+    downtimeBreakdown: Array.isArray(item.downtimeBreakdown)
+      ? item.downtimeBreakdown.map(parseDowntimeBreakdownRow)
+      : [],
+    evidence: Array.isArray(item.evidence) ? item.evidence.map(parseEvidence) : [],
+    missingFields: Array.isArray(item.missingFields)
+      ? item.missingFields.map(String)
+      : [],
+    conflicts: Array.isArray(item.conflicts) ? item.conflicts.map(String) : [],
+    sourceSystem: readString(item.sourceSystem),
+    sourceFreshnessUtc: readString(item.sourceFreshnessUtc),
+    isSimulatorDerived: readBoolean(item.isSimulatorDerived),
+    calculationHonestyDisclaimer: String(item.calculationHonestyDisclaimer ?? ""),
+    simulatorHonestyDisclaimer: readString(item.simulatorHonestyDisclaimer),
+  };
+}
+
+export function getProcessOeeAssessmentStability(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<ProcessOeeApiResult<ProcessOeeStabilityDetail>> {
+  return getJson(
+    context,
+    `/api/process-oee/assessments/${encodeURIComponent(assessmentId)}/stability`,
+    undefined,
+    parseStabilityDetail,
+  );
+}
+
+function parseShiftComparison(payload: unknown): ProcessOeeShiftComparison {
+  const item = payload as Record<string, unknown>;
+  const warningCode = readString(item.comparabilityWarningCode);
+  const summaryRaw = item.summary as Record<string, unknown> | null | undefined;
+  const rows = Array.isArray(item.rows) ? item.rows : [];
+  return {
+    periodStartUtc: String(item.periodStartUtc),
+    periodEndUtc: String(item.periodEndUtc),
+    isComparable: readBoolean(item.isComparable),
+    comparabilityWarningCode: warningCode ?? null,
+    comparabilityWarningLabel: getComparabilityWarningLabel(warningCode),
+    ruleSetVersion: String(item.ruleSetVersion),
+    summary: summaryRaw
+      ? {
+          highestOeeShiftLabel: readString(summaryRaw.highestOeeShiftLabel) ?? null,
+          lowestAvailabilityShiftLabel: readString(summaryRaw.lowestAvailabilityShiftLabel) ?? null,
+          highestDowntimeShiftLabel: readString(summaryRaw.highestDowntimeShiftLabel) ?? null,
+          highestVariabilityShiftLabel: readString(summaryRaw.highestVariabilityShiftLabel) ?? null,
+        }
+      : null,
+    rows: rows.map((row) => {
+      const r = row as Record<string, unknown>;
+      const stabilityState = readString(r.stabilityResultState);
+      const dataSufficiency = String(r.dataSufficiency ?? "insufficient");
+      const freshnessState = String(r.freshnessState ?? "unknown");
+      return {
+        assessmentId: String(r.assessmentId),
+        shiftCode: String(r.shiftCode),
+        shiftLabel: String(r.shiftLabel),
+        windowStartUtc: String(r.windowStartUtc),
+        windowEndUtc: String(r.windowEndUtc),
+        plannedProductionSeconds: readNumber(r.plannedProductionSeconds),
+        operatingSeconds: readNumber(r.operatingSeconds),
+        availabilityPercent: readNumber(r.availabilityPercent),
+        performancePercent: readNumber(r.performancePercent),
+        qualityPercent: readNumber(r.qualityPercent),
+        oeePercent: readNumber(r.oeePercent),
+        stabilityResultState: stabilityState ?? null,
+        stabilityResultStateLabel: stabilityState
+          ? getStabilityResultStateLabel(stabilityState)
+          : null,
+        downtimeSeconds: readNumber(r.downtimeSeconds),
+        microStopCount: Number(r.microStopCount ?? 0),
+        dataSufficiency,
+        dataSufficiencyLabel: getDataSufficiencyLabel(dataSufficiency),
+        freshnessState,
+        freshnessLabel: getLossFreshnessLabel(freshnessState),
+        isComparable: readBoolean(r.isComparable),
+      };
+    }),
+  };
+}
+
+export function getProcessOeeShiftComparison(
+  context: ProductionOrderRequestContext,
+  params: {
+    machineAssetId?: string;
+    periodStartUtc: string;
+    periodEndUtc: string;
+  },
+): Promise<ProcessOeeApiResult<ProcessOeeShiftComparison>> {
+  return getJson(
+    context,
+    "/api/process-oee/shift-comparison",
+    {
+      machineAssetId: params.machineAssetId,
+      periodStartUtc: params.periodStartUtc,
+      periodEndUtc: params.periodEndUtc,
+    },
+    parseShiftComparison,
   );
 }
 

@@ -62,6 +62,33 @@ async function request(method, path, body, actor = ACTOR) {
   return { status: response.status, json, raw: text };
 }
 
+function deleteStabilityChildrenMatchingAssessmentFilter(assessmentFilterSql, batchPrefix = CLOSURE_PREFIX) {
+  db(`
+    DELETE FROM process_oee_shift_comparison_rows
+    WHERE batch_id IN (
+      SELECT id FROM process_oee_shift_comparison_batches
+      WHERE idempotency_key LIKE '${batchPrefix}%'
+    );
+    DELETE FROM process_oee_shift_comparison_batches
+    WHERE idempotency_key LIKE '${batchPrefix}%';
+    DELETE FROM process_oee_downtime_breakdown_rows
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE ${assessmentFilterSql}
+    );
+    DELETE FROM process_oee_stability_drivers
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE ${assessmentFilterSql}
+    );
+    DELETE FROM process_oee_stability_assessments
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE ${assessmentFilterSql}
+    );
+  `);
+}
+
 function deleteLossDriversMatchingAssessmentFilter(assessmentFilterSql) {
   db(`
     DELETE FROM process_oee_loss_drivers
@@ -73,6 +100,7 @@ function deleteLossDriversMatchingAssessmentFilter(assessmentFilterSql) {
 }
 
 function cleanupFixtures() {
+  deleteStabilityChildrenMatchingAssessmentFilter(`idempotency_key LIKE '${PREFIX}%' OR input_fingerprint LIKE '${PREFIX}%'`, PREFIX);
   deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${PREFIX}%' OR input_fingerprint LIKE '${PREFIX}%'`);
   db(`
     DELETE FROM process_oee_assessments
@@ -86,6 +114,10 @@ function cleanupFixtures() {
 }
 
 function cleanupClosureFixtures() {
+  deleteStabilityChildrenMatchingAssessmentFilter(`idempotency_key LIKE '${CLOSURE_PREFIX}%' OR evaluation_window_id IN (
+         SELECT id FROM process_oee_evaluation_windows
+         WHERE create_idempotency_key LIKE '${CLOSURE_PREFIX}%'
+       )`);
   deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${CLOSURE_PREFIX}%' OR evaluation_window_id IN (
          SELECT id FROM process_oee_evaluation_windows
          WHERE create_idempotency_key LIKE '${CLOSURE_PREFIX}%'

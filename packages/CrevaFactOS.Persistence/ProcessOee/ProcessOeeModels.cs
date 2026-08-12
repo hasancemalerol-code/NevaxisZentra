@@ -290,3 +290,115 @@ public sealed record ProcessOeeLossDetailReadModel(
     bool IsSimulatorDerived,
     string CalculationHonestyDisclaimer,
     string? SimulatorHonestyDisclaimer);
+
+public sealed record ProcessOeeStabilityDriverReadModel(
+    Guid Id,
+    string ReasonCode,
+    string Category,
+    string ResultState,
+    string Severity,
+    int OperationalPriority,
+    decimal? ObservedValue,
+    decimal? ReferenceValue,
+    string Unit,
+    int SampleCount,
+    DateTimeOffset TimeRangeStartUtc,
+    DateTimeOffset TimeRangeEndUtc,
+    IReadOnlyList<string> SourceReferences,
+    string FreshnessState,
+    string ExplanationCode,
+    IReadOnlyList<string> DataLimitations,
+    string RuleSetVersion);
+
+public sealed record ProcessOeeDowntimeBreakdownReadModel(
+    string ReasonCode,
+    int DurationSeconds,
+    int OccurrenceCount,
+    int SortRank,
+    bool IsClassified,
+    decimal? DurationPercent);
+
+public sealed record ProcessOeeStabilityOverviewReadModel(
+    int AssessmentCountWithStability,
+    int StableCount,
+    int VariableCount,
+    int DriftingCount,
+    int ReviewRequiredCount,
+    int InsufficientDataCount,
+    string RuleSetVersion);
+
+public sealed record ProcessOeeStabilityDetailReadModel(
+    Guid AssessmentId,
+    Guid EvaluationWindowId,
+    string AssessmentStatus,
+    string ResultState,
+    string RuleSetVersion,
+    long? MedianCycleMs,
+    long? MadCycleMs,
+    int SampleCount,
+    string DriftDirection,
+    int MicroStopCount,
+    int MicroStopTotalSeconds,
+    int MicroStopMedianSeconds,
+    int ClassifiedDowntimeSeconds,
+    int UnclassifiedDowntimeSeconds,
+    IReadOnlyList<ProcessOeeStabilityDriverReadModel> Drivers,
+    IReadOnlyList<ProcessOeeDowntimeBreakdownReadModel> DowntimeBreakdown,
+    IReadOnlyList<ProcessOeeEvidenceReadModel> Evidence,
+    IReadOnlyList<string> MissingFields,
+    IReadOnlyList<string> Conflicts,
+    string? SourceSystem,
+    DateTimeOffset? SourceFreshnessUtc,
+    bool IsSimulatorDerived,
+    string CalculationHonestyDisclaimer,
+    string? SimulatorHonestyDisclaimer);
+
+public sealed record ProcessOeeDowntimeParetoReadModel(
+    Guid AssessmentId,
+    DateTimeOffset WindowStartUtc,
+    DateTimeOffset WindowEndUtc,
+    int TotalDowntimeSeconds,
+    int ClassifiedDurationSeconds,
+    int UnclassifiedDurationSeconds,
+    string RuleSetVersion,
+    IReadOnlyList<ProcessOeeDowntimeBreakdownReadModel> Rows);
+
+public sealed record ProcessOeeShiftComparisonSummaryReadModel(
+    string? HighestOeeShiftLabel,
+    string? LowestAvailabilityShiftLabel,
+    string? HighestDowntimeShiftLabel,
+    string? HighestVariabilityShiftLabel);
+
+public sealed record ProcessOeeShiftComparisonRowReadModel(
+    Guid AssessmentId,
+    string ShiftCode,
+    string ShiftLabel,
+    DateTimeOffset WindowStartUtc,
+    DateTimeOffset WindowEndUtc,
+    int? PlannedProductionSeconds,
+    int? OperatingSeconds,
+    decimal? AvailabilityPercent,
+    decimal? PerformancePercent,
+    decimal? QualityPercent,
+    decimal? OeePercent,
+    string? StabilityResultState,
+    int? DowntimeSeconds,
+    int MicroStopCount,
+    string DataSufficiency,
+    string FreshnessState,
+    bool IsComparable);
+
+public sealed record ProcessOeeShiftComparisonReadModel(
+    DateTimeOffset PeriodStartUtc,
+    DateTimeOffset PeriodEndUtc,
+    bool IsComparable,
+    string? ComparabilityWarningCode,
+    string RuleSetVersion,
+    ProcessOeeShiftComparisonSummaryReadModel? Summary,
+    IReadOnlyList<ProcessOeeShiftComparisonRowReadModel> Rows);
+
+public sealed record EvaluateProcessOeeShiftComparisonCommand(
+    Guid? MachineAssetId,
+    DateTimeOffset PeriodStartUtc,
+    DateTimeOffset PeriodEndUtc,
+    string IdempotencyKey);

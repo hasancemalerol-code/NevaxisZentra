@@ -173,3 +173,119 @@ export function getLossExplanationLabel(code: string): string {
       return "Kayıp sürücüsü mevcut kanıtlara dayanır.";
   }
 }
+
+export function getStabilityResultStateLabel(state: string): string {
+  switch (state) {
+    case "stable":
+      return "Kararlı";
+    case "variable":
+      return "Değişken";
+    case "drifting":
+      return "Kayıyor";
+    case "review-required":
+      return "İnceleme gerekli";
+    case "insufficient-data":
+      return "Yetersiz veri";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getStabilityCategoryLabel(category: string): string {
+  switch (category) {
+    case "cycle-variability":
+      return "Çevrim değişkenliği";
+    case "cycle-drift":
+      return "Çevrim kayması";
+    case "micro-stop":
+      return "Mikro duruş";
+    case "downtime-concentration":
+      return "Duruş yoğunlaşması";
+    case "shift-comparison":
+      return "Vardiya karşılaştırması";
+    case "insufficient-data":
+      return "Yetersiz veri";
+    case "source-conflict":
+      return "Kaynak çakışması";
+    default:
+      return "Proses kararlılığı";
+  }
+}
+
+export function getDriftDirectionLabel(direction: string): string {
+  switch (direction) {
+    case "increasing":
+      return "Artan";
+    case "decreasing":
+      return "Azalan";
+    case "none":
+      return "Belirgin kayma yok";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getDowntimeReasonLabel(reasonCode: string): string {
+  if (reasonCode === "unknown") {
+    return "Bilinmeyen";
+  }
+  return reasonCode.replaceAll("-", " ");
+}
+
+export function getStabilityExplanationLabel(code: string): string {
+  switch (code) {
+    case "robust-dispersion-stable":
+      return "Medyan ve MAD oranı kararlı eşiğin altında.";
+    case "robust-dispersion-variable":
+      return "Medyan ve MAD oranı yüksek değişkenlik gösteriyor.";
+    case "early-late-median-increase":
+      return "Geç pencere medyanı erken pencereye göre belirgin şekilde arttı.";
+    case "early-late-median-decrease":
+      return "Geç pencere medyanı erken pencereye göre belirgin şekilde azaldı.";
+    case "insufficient-cycle-samples":
+      return "Kararlılık için yeterli iyi kalite çevrim örneği yok.";
+    case "stale-cycle-evidence":
+      return "Çevrim kanıtı bayat; normal sonuç üretilmedi.";
+    case "micro-stop-episodes-detected":
+      return "Mikro duruşlar güvenilir duruş kanıtından tespit edildi.";
+    case "source-evidence-conflict":
+      return "Kaynak çakışması nedeniyle inceleme gerekli.";
+    default:
+      return "Sonuç mevcut operasyonel kanıta dayanır.";
+  }
+}
+
+export function getComparabilityWarningLabel(code: string | null | undefined): string | null {
+  if (!code) {
+    return null;
+  }
+  switch (code) {
+    case "facility-or-evidence-incomparable":
+      return "Tesis veya kanıt yeterliliği farklı; sıralama yapılmadı.";
+    case "no-shift-windows":
+      return "Karşılaştırılabilir vardiya penceresi bulunamadı.";
+    default:
+      return "Karşılaştırma sınırlı güvenilirlikte.";
+  }
+}
+
+export function getDataSufficiencyLabel(value: string): string {
+  switch (value) {
+    case "sufficient":
+      return "Yeterli";
+    case "insufficient":
+      return "Yetersiz";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function formatCycleMs(value: number | null): string {
+  if (value == null) {
+    return "—";
+  }
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)} sn`;
+  }
+  return `${value} ms`;
+}

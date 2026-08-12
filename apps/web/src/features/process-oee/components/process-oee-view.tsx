@@ -7,9 +7,12 @@ import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
   ProcessOeeLossDetail,
+  ProcessOeeShiftComparison,
+  ProcessOeeStabilityDetail,
   ProcessOeeWorkspaceSummary,
 } from "../domain/process-oee";
 import {
+  formatCycleMs,
   formatDataSufficiencyPercent,
   formatMachineLabel,
   formatPercent,
@@ -25,6 +28,8 @@ import {
   loadProcessOeeAssessmentDetailAction,
   loadProcessOeeAssessmentsAction,
   loadProcessOeeLossDetailAction,
+  loadProcessOeeShiftComparisonAction,
+  loadProcessOeeStabilityDetailAction,
 } from "../server/process-oee-actions";
 import "./process-oee.css";
 
@@ -38,6 +43,21 @@ type MachineOption = Readonly<{
   id: string;
   label: string;
 }>;
+
+function stabilityBadgeClass(state: string): string {
+  switch (state) {
+    case "stable":
+      return "process-oee-badge process-oee-badge--calculated";
+    case "variable":
+    case "drifting":
+    case "review-required":
+      return "process-oee-badge process-oee-badge--review";
+    case "insufficient-data":
+      return "process-oee-badge process-oee-badge--insufficient";
+    default:
+      return "process-oee-badge process-oee-badge--stale";
+  }
+}
 
 function statusBadgeClass(status: string): string {
   switch (status) {
@@ -93,6 +113,9 @@ export function ProcessOeeView({
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState<ProcessOeeAssessmentDetail | undefined>();
   const [lossDetail, setLossDetail] = useState<ProcessOeeLossDetail | undefined>();
+  const [stabilityDetail, setStabilityDetail] = useState<ProcessOeeStabilityDetail | undefined>();
+  const [shiftComparison, setShiftComparison] = useState<ProcessOeeShiftComparison | undefined>();
+  const [shiftComparisonError, setShiftComparisonError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -168,13 +191,22 @@ export function ProcessOeeView({
     setSelectedId(item.id);
     setDetail(undefined);
     setLossDetail(undefined);
+    setStabilityDetail(undefined);
+    setShiftComparison(undefined);
+    setShiftComparisonError(null);
     setMessage(null);
     setError(null);
 
     startTransition(async () => {
-      const [result, lossResult] = await Promise.all([
+      const [result, lossResult, stabilityResult, shiftResult] = await Promise.all([
         loadProcessOeeAssessmentDetailAction(item.id),
         loadProcessOeeLossDetailAction(item.id),
+        loadProcessOeeStabilityDetailAction(item.id),
+        loadProcessOeeShiftComparisonAction({
+          machineAssetId: item.machineAssetId,
+          periodStartUtc: item.windowStartUtc,
+          periodEndUtc: item.windowEndUtc,
+        }),
       ]);
       if (result.status === "success") {
         setDetail(result.assessment);
@@ -183,6 +215,14 @@ export function ProcessOeeView({
       }
       if (lossResult.status === "success") {
         setLossDetail(lossResult.lossDetail);
+      }
+      if (stabilityResult.status === "success") {
+        setStabilityDetail(stabilityResult.stabilityDetail);
+      }
+      if (shiftResult.status === "success") {
+        setShiftComparison(shiftResult.shiftComparison);
+      } else {
+        setShiftComparisonError(shiftResult.message);
       }
     });
   }
@@ -201,15 +241,30 @@ export function ProcessOeeView({
       setMessage("OEE değerlendirmesi tamamlandı.");
       reloadAssessments();
       if (selectedId) {
-        const [refreshed, refreshedLoss] = await Promise.all([
+        const selected = assessments.find((item) => item.id === selectedId);
+        const [refreshed, refreshedLoss, refreshedStability, refreshedShift] = await Promise.all([
           loadProcessOeeAssessmentDetailAction(selectedId),
           loadProcessOeeLossDetailAction(selectedId),
+          loadProcessOeeStabilityDetailAction(selectedId),
+          selected
+            ? loadProcessOeeShiftComparisonAction({
+                machineAssetId: selected.machineAssetId,
+                periodStartUtc: selected.windowStartUtc,
+                periodEndUtc: selected.windowEndUtc,
+              })
+            : Promise.resolve({ status: "failure" as const, message: "" }),
         ]);
         if (refreshed.status === "success") {
           setDetail(refreshed.assessment);
         }
         if (refreshedLoss.status === "success") {
           setLossDetail(refreshedLoss.lossDetail);
+        }
+        if (refreshedStability.status === "success") {
+          setStabilityDetail(refreshedStability.stabilityDetail);
+        }
+        if (refreshedShift.status === "success") {
+          setShiftComparison(refreshedShift.shiftComparison);
         }
       }
     });
@@ -627,6 +682,186 @@ export function ProcessOeeView({
                       ) : (
                         <p>—</p>
                       )}
+                    </>
+                  )}
+                </section>
+
+                <section className="process-oee-detail-section process-oee-stability-section">
+                  <h3>Proses Kararlılığı ve Duruş Analizi</h3>
+                  {!stabilityDetail ? (
+                    <p className="process-oee-empty-inline">
+                      {isPending
+                        ? "Kararlılık analizi yükleniyor…"
+                        : "Kararlılık analizi mevcut değil; önce değerlendirme gerekir."}
+                    </p>
+                  ) : (
+                    <>
+                      <dl className="process-oee-loss-kpi-grid">
+                        <div>
+                          <dt>Kararlılık durumu</dt>
+                          <dd>
+                            <span className={stabilityBadgeClass(stabilityDetail.resultState)}>
+                              {stabilityDetail.resultStateLabel}
+                            </span>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Çevrim örneği</dt>
+                          <dd>{formatProcessOeeNumber(stabilityDetail.sampleCount)}</dd>
+                        </div>
+                        <div>
+                          <dt>Medyan çevrim</dt>
+                          <dd>{formatCycleMs(stabilityDetail.medianCycleMs)}</dd>
+                        </div>
+                        <div>
+                          <dt>Değişkenlik (MAD)</dt>
+                          <dd>{formatCycleMs(stabilityDetail.madCycleMs)}</dd>
+                        </div>
+                        <div>
+                          <dt>Kayma yönü</dt>
+                          <dd>{stabilityDetail.driftDirectionLabel}</dd>
+                        </div>
+                        <div>
+                          <dt>Mikro duruş</dt>
+                          <dd>
+                            {formatProcessOeeNumber(stabilityDetail.microStopCount)} adet ·{" "}
+                            {formatProcessOeeNumber(stabilityDetail.microStopTotalSeconds)} sn
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Sınıflı / sınıfsız duruş</dt>
+                          <dd>
+                            {formatProcessOeeNumber(stabilityDetail.classifiedDowntimeSeconds)} /{" "}
+                            {formatProcessOeeNumber(stabilityDetail.unclassifiedDowntimeSeconds)} sn
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Kural seti</dt>
+                          <dd>{stabilityDetail.ruleSetVersion}</dd>
+                        </div>
+                      </dl>
+
+                      {stabilityDetail.resultState === "insufficient-data" ? (
+                        <div className="process-oee-alert process-oee-alert--warning" role="status">
+                          <p>Yetersiz veya bayat kanıt; normal sonuç üretilmedi.</p>
+                        </div>
+                      ) : null}
+
+                      {stabilityDetail.downtimeBreakdown.length > 0 ? (
+                        <div className="process-oee-pareto-block">
+                          <h4>Duruş Pareto</h4>
+                          <ul className="process-oee-loss-list">
+                            {stabilityDetail.downtimeBreakdown.map((row) => (
+                              <li key={row.reasonCode}>
+                                <strong>{row.reasonLabel}</strong>
+                                {" · "}
+                                {formatProcessOeeNumber(row.durationSeconds)} sn
+                                {" · "}
+                                {formatProcessOeeNumber(row.occurrenceCount)} olay
+                                {row.durationPercent != null
+                                  ? ` · %${row.durationPercent.toFixed(1)}`
+                                  : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {stabilityDetail.drivers.length > 0 ? (
+                        <ul className="process-oee-loss-list">
+                          {stabilityDetail.drivers.map((driver) => (
+                            <li key={driver.reasonCode}>
+                              <strong>{driver.categoryLabel}</strong>
+                              {" · "}
+                              {driver.explanationLabel}
+                              {" · "}
+                              {driver.resultStateLabel}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </>
+                  )}
+                </section>
+
+                <section className="process-oee-detail-section process-oee-shift-section">
+                  <h3>Vardiya Karşılaştırması</h3>
+                  {shiftComparisonError ? (
+                    <div className="process-oee-alert process-oee-alert--warning" role="status">
+                      <p>{shiftComparisonError}</p>
+                    </div>
+                  ) : null}
+                  {!shiftComparison ? (
+                    <p className="process-oee-empty-inline">
+                      {isPending
+                        ? "Vardiya karşılaştırması yükleniyor…"
+                        : "Karşılaştırılabilir vardiya penceresi bulunamadı."}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="process-oee-shift-period">
+                        Dönem:{" "}
+                        {formatProcessOeeDateRange(
+                          shiftComparison.periodStartUtc,
+                          shiftComparison.periodEndUtc,
+                        )}
+                      </p>
+                      {!shiftComparison.isComparable && shiftComparison.comparabilityWarningLabel ? (
+                        <div className="process-oee-alert process-oee-alert--warning" role="status">
+                          <p>{shiftComparison.comparabilityWarningLabel}</p>
+                        </div>
+                      ) : null}
+                      {shiftComparison.rows.length === 0 ? (
+                        <p className="process-oee-empty-inline">Vardiya satırı yok.</p>
+                      ) : (
+                        <div className="process-oee-shift-table-wrap">
+                          <table className="process-oee-shift-table">
+                            <thead>
+                              <tr>
+                                <th>Vardiya</th>
+                                <th>OEE</th>
+                                <th>Kullanılabilirlik</th>
+                                <th>Performans</th>
+                                <th>Kalite</th>
+                                <th>Kararlılık</th>
+                                <th>Duruş</th>
+                                <th>Mikro duruş</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {shiftComparison.rows.map((row) => (
+                                <tr key={`${row.shiftCode}-${row.windowStartUtc}`}>
+                                  <td>{row.shiftLabel}</td>
+                                  <td>{formatPercent(row.oeePercent)}</td>
+                                  <td>{formatPercent(row.availabilityPercent)}</td>
+                                  <td>{formatPercent(row.performancePercent)}</td>
+                                  <td>{formatPercent(row.qualityPercent)}</td>
+                                  <td>{row.stabilityResultStateLabel ?? "—"}</td>
+                                  <td>{formatProcessOeeNumber(row.downtimeSeconds)} sn</td>
+                                  <td>{formatProcessOeeNumber(row.microStopCount)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                      {shiftComparison.summary ? (
+                        <dl className="process-oee-loss-kpi-grid">
+                          {shiftComparison.summary.highestOeeShiftLabel ? (
+                            <div>
+                              <dt>En yüksek desteklenen OEE</dt>
+                              <dd>{shiftComparison.summary.highestOeeShiftLabel}</dd>
+                            </div>
+                          ) : null}
+                          {shiftComparison.summary.lowestAvailabilityShiftLabel ? (
+                            <div>
+                              <dt>En düşük kullanılabilirlik</dt>
+                              <dd>{shiftComparison.summary.lowestAvailabilityShiftLabel}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      ) : null}
+                      <p className="process-oee-rule-set">Kural seti: {shiftComparison.ruleSetVersion}</p>
                     </>
                   )}
                 </section>

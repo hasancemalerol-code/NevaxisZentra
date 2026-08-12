@@ -12,6 +12,8 @@ import {
   readProcessOeeAssessmentDetail,
   readProcessOeeAssessments,
   readProcessOeeLossDetail,
+  readProcessOeeShiftComparison,
+  readProcessOeeStabilityDetail,
 } from "./process-oee-reader";
 import { resolveProcessOeeRequestContext } from "./process-oee-request-context";
 
@@ -55,6 +57,34 @@ export async function loadProcessOeeLossDetailAction(assessmentId: string) {
   return {
     status: "success" as const,
     lossDetail: result.lossDetail,
+  };
+}
+
+export async function loadProcessOeeStabilityDetailAction(assessmentId: string) {
+  const result = await readProcessOeeStabilityDetail(assessmentId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    stabilityDetail: result.stabilityDetail,
+  };
+}
+
+export async function loadProcessOeeShiftComparisonAction(params: {
+  machineAssetId?: string;
+  periodStartUtc: string;
+  periodEndUtc: string;
+}) {
+  const result = await readProcessOeeShiftComparison(params);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    shiftComparison: result.shiftComparison,
   };
 }
 

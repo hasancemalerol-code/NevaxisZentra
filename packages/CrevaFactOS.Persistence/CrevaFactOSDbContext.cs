@@ -120,6 +120,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
     public DbSet<ProcessOeeAssessment> ProcessOeeAssessments => Set<ProcessOeeAssessment>();
     public DbSet<ProcessOeeLossDriver> ProcessOeeLossDrivers => Set<ProcessOeeLossDriver>();
+    public DbSet<ProcessOeeStabilityAssessment> ProcessOeeStabilityAssessments => Set<ProcessOeeStabilityAssessment>();
+    public DbSet<ProcessOeeStabilityDriver> ProcessOeeStabilityDrivers => Set<ProcessOeeStabilityDriver>();
+    public DbSet<ProcessOeeDowntimeBreakdownRow> ProcessOeeDowntimeBreakdownRows => Set<ProcessOeeDowntimeBreakdownRow>();
+    public DbSet<ProcessOeeShiftComparisonBatch> ProcessOeeShiftComparisonBatches => Set<ProcessOeeShiftComparisonBatch>();
+    public DbSet<ProcessOeeShiftComparisonRow> ProcessOeeShiftComparisonRows => Set<ProcessOeeShiftComparisonRow>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -824,6 +829,36 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeStabilityAssessmentEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeStabilityAssessment>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeStabilityDriverEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeStabilityDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeDowntimeBreakdownRowEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeDowntimeBreakdownRow>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeShiftComparisonBatchEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeShiftComparisonBatch>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeShiftComparisonRowEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeShiftComparisonRow>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

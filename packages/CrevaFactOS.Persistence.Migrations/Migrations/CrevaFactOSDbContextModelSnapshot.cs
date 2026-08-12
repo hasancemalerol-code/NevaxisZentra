@@ -10989,6 +10989,76 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("process_oee_assessments", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeDowntimeBreakdownRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsClassified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_classified");
+
+                    b.Property<int>("OccurrenceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("occurrence_count");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("SortRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_rank");
+
+                    b.Property<Guid>("StabilityAssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("stability_assessment_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("StabilityAssessmentId");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.HasIndex("TenantId", "AssessmentId", "ReasonCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_downtime_breakdown_tenant_assessment_reason");
+
+                    b.ToTable("process_oee_downtime_breakdown_rows", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeEvaluationWindow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -11231,6 +11301,443 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ix_process_oee_loss_drivers_tenant_facility_assessment");
 
                     b.ToTable("process_oee_loss_drivers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ComparabilityWarningCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("comparability_warning_code");
+
+                    b.Property<DateTimeOffset>("ComparisonPeriodEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("comparison_period_end_utc");
+
+                    b.Property<DateTimeOffset>("ComparisonPeriodStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("comparison_period_start_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<string>("EvidenceFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evidence_fingerprint");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<bool>("IsComparable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_comparable");
+
+                    b.Property<Guid?>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("SummaryJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("summary_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_shift_comparison_batches_tenant_idempotency")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.ToTable("process_oee_shift_comparison_batches", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<decimal?>("AvailabilityPercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("availability_percent");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<string>("DataSufficiency")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("data_sufficiency");
+
+                    b.Property<int?>("DowntimeSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("downtime_seconds");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<bool>("IsComparable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_comparable");
+
+                    b.Property<int>("MicroStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("micro_stop_count");
+
+                    b.Property<decimal?>("OeePercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("oee_percent");
+
+                    b.Property<int?>("OperatingSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("operating_seconds");
+
+                    b.Property<decimal?>("PerformancePercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("performance_percent");
+
+                    b.Property<int?>("PlannedProductionSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("planned_production_seconds");
+
+                    b.Property<decimal?>("QualityPercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("quality_percent");
+
+                    b.Property<string>("ShiftCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("shift_code");
+
+                    b.Property<string>("ShiftLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("shift_label");
+
+                    b.Property<string>("StabilityResultState")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("stability_result_state");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("WindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end_utc");
+
+                    b.Property<DateTimeOffset>("WindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId", "AssessmentId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_shift_comparison_rows_batch_assessment");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.ToTable("process_oee_shift_comparison_rows", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<int>("ClassifiedDowntimeSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("classified_downtime_seconds");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<string>("DriftDirection")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("drift_direction");
+
+                    b.Property<string>("EvidenceFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evidence_fingerprint");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<long?>("MadCycleMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("mad_cycle_ms");
+
+                    b.Property<long?>("MedianCycleMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("median_cycle_ms");
+
+                    b.Property<int>("MicroStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("micro_stop_count");
+
+                    b.Property<int>("MicroStopMedianSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("micro_stop_median_seconds");
+
+                    b.Property<int>("MicroStopTotalSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("micro_stop_total_seconds");
+
+                    b.Property<string>("ResultState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("result_state");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sample_count");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("UnclassifiedDowntimeSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("unclassified_downtime_seconds");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "AssessmentId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_stability_assessments_tenant_assessment");
+
+                    b.HasIndex("TenantId", "EvidenceFingerprint")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_stability_assessments_tenant_fingerprint");
+
+                    b.HasIndex("TenantId", "FacilityId", "ResultState")
+                        .HasDatabaseName("ix_process_oee_stability_assessments_tenant_facility_state");
+
+                    b.ToTable("process_oee_stability_assessments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<string>("DataLimitationsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("data_limitations_json");
+
+                    b.Property<string>("ExplanationCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("explanation_code");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<decimal?>("ObservedValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("observed_value");
+
+                    b.Property<int>("OperationalPriority")
+                        .HasColumnType("integer")
+                        .HasColumnName("operational_priority");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<decimal?>("ReferenceValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("reference_value");
+
+                    b.Property<string>("ResultState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("result_state");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sample_count");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<string>("SourceReferencesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_references_json");
+
+                    b.Property<Guid>("StabilityAssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("stability_assessment_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("TimeRangeEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("time_range_end_utc");
+
+                    b.Property<DateTimeOffset>("TimeRangeStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("time_range_start_utc");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("StabilityAssessmentId");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.HasIndex("TenantId", "AssessmentId", "ReasonCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_stability_drivers_tenant_assessment_reason");
+
+                    b.ToTable("process_oee_stability_drivers", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionCycleEntry", b =>
@@ -15526,6 +16033,38 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("EvaluationWindow");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeDowntimeBreakdownRow", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", "Assessment")
+                        .WithMany("DowntimeBreakdownRows")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", "StabilityAssessment")
+                        .WithMany("DowntimeBreakdownRows")
+                        .HasForeignKey("StabilityAssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+
+                    b.Navigation("StabilityAssessment");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeEvaluationWindow", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -15564,6 +16103,102 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Assessment");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonBatch", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonRow", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonBatch", "Batch")
+                        .WithMany("Rows")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", "Assessment")
+                        .WithOne("StabilityAssessment")
+                        .HasForeignKey("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", "AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", "Assessment")
+                        .WithMany("StabilityDrivers")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", "StabilityAssessment")
+                        .WithMany("Drivers")
+                        .HasForeignKey("StabilityAssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+
+                    b.Navigation("StabilityAssessment");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionCycleEntry", b =>
@@ -15913,7 +16548,25 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", b =>
                 {
+                    b.Navigation("DowntimeBreakdownRows");
+
                     b.Navigation("LossDrivers");
+
+                    b.Navigation("StabilityAssessment");
+
+                    b.Navigation("StabilityDrivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeShiftComparisonBatch", b =>
+                {
+                    b.Navigation("Rows");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeStabilityAssessment", b =>
+                {
+                    b.Navigation("DowntimeBreakdownRows");
+
+                    b.Navigation("Drivers");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityControlPlan", b =>

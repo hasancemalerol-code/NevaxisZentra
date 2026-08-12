@@ -239,6 +239,30 @@ function cleanupClosureFixtures() {
     WHERE start_idempotency_key LIKE '${CLOSURE_PREFIX}%';
   `);
   db(`
+    DELETE FROM process_oee_shift_comparison_rows
+    WHERE batch_id IN (
+      SELECT id FROM process_oee_shift_comparison_batches
+      WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
+    );
+    DELETE FROM process_oee_shift_comparison_batches
+    WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%';
+    DELETE FROM process_oee_downtime_breakdown_rows
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
+    );
+    DELETE FROM process_oee_stability_drivers
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
+    );
+    DELETE FROM process_oee_stability_assessments
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
+    );
+  `);
+  db(`
     DELETE FROM process_oee_loss_drivers
     WHERE assessment_id IN (
       SELECT id FROM process_oee_assessments
