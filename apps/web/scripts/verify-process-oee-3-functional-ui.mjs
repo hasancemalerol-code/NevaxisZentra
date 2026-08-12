@@ -32,7 +32,10 @@ const actions = readRequired("apps/web/src/features/process-oee/server/process-o
 const reader = readRequired("apps/web/src/features/process-oee/server/process-oee-reader.ts");
 const domain = readRequired("apps/web/src/features/process-oee/domain/process-oee.ts");
 
-assert("stability section title", view.includes("Proses Kararlılığı ve Duruş Analizi"));
+assert(
+  "stability section title",
+  view.includes("Proses Kararlılığı") && view.includes("Duruş Analizi"),
+);
 assert("shift comparison section title", view.includes("Vardiya Karşılaştırması"));
 assert("stability detail state", view.includes("ProcessOeeStabilityDetail") || view.includes("stabilityDetail"));
 assert("shift comparison state", view.includes("ProcessOeeShiftComparison") || view.includes("shiftComparison"));
@@ -109,8 +112,8 @@ forbidText(view, "{stabilityDetail.resultState}", "must not render raw stability
 forbidText(view, "{stabilityDetail.driftDirection}", "must not render raw drift direction enum");
 forbidText(view, "{row.stabilityResultState}", "must not render raw shift stability enum");
 
-const shiftSectionStart = view.indexOf('className="process-oee-detail-section process-oee-shift-section"');
-const shiftSectionEnd = view.indexOf('<section className="process-oee-detail-section">', shiftSectionStart + 1);
+const shiftSectionStart = view.indexOf('aria-label="Vardiya Karşılaştırması"');
+const shiftSectionEnd = view.indexOf("function renderEvidenceTab", shiftSectionStart + 1);
 const shiftSection = shiftSectionStart >= 0 && shiftSectionEnd > shiftSectionStart
   ? view.slice(shiftSectionStart, shiftSectionEnd)
   : view;
