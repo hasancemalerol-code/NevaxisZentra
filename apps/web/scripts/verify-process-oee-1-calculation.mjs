@@ -305,9 +305,7 @@ const invalid = await request(
 );
 assert("negative/invalid values → 400", invalid.status === 400);
 
-deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${PREFIX}%'`);
-db(`DELETE FROM process_oee_assessments WHERE idempotency_key LIKE '${PREFIX}%'`);
-db(`DELETE FROM process_oee_evaluation_windows WHERE create_idempotency_key LIKE '${PREFIX}%'`);
+cleanupFixtures();
 
 cleanupClosureFixtures();
 
