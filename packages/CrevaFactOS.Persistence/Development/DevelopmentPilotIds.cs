@@ -346,6 +346,13 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaintenanceConditionPressMappingId =
         Guid.Parse("bb000001-009a-4000-8000-00000000009a");
 
+    // MOLD-3 compatibility pilot profiles
+    public static readonly Guid MoldCompatibilityPressProfileId =
+        Guid.Parse("bb000001-009b-4000-8000-00000000009b");
+
+    public static readonly Guid MoldCompatibilityCncProfileId =
+        Guid.Parse("bb000001-009c-4000-8000-00000000009c");
+
     public static readonly Guid MaintenanceConditionMetricTemperatureId =
         Guid.Parse("bb000001-009b-4000-8000-00000000009b");
 

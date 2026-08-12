@@ -1,4 +1,9 @@
 import type {
+  MachineCompatibilityProfile,
+  MoldCompatibilityAssessment,
+  MoldCompatibilityOverview,
+  MoldCompatibilityRequirement,
+  MoldCompatibilityRuleResult,
   MoldDetail,
   MoldLifecycleEvent,
   MoldMaintenanceRecord,
@@ -246,4 +251,172 @@ export function parseMoldTimelineEntry(value: unknown): MoldTimelineEntry {
 export function parseMoldTimelineEntryList(payload: unknown): readonly MoldTimelineEntry[] {
   if (!Array.isArray(payload)) throw new Error("Expected timeline array.");
   return payload.map(parseMoldTimelineEntry);
+}
+
+function readStringList(value: unknown): readonly string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function readStringRecord(value: unknown): Readonly<Record<string, string>> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  const record: Record<string, string> = {};
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof entry === "string") {
+      record[key] = entry;
+    }
+  }
+
+  return record;
+}
+
+export function parseMoldCompatibilityRequirement(payload: unknown): MoldCompatibilityRequirement | null {
+  if (payload === null || payload === undefined) {
+    return null;
+  }
+
+  const item = payload as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    moldId: String(item.moldId),
+    requiredClampForceTon: readNumber(item.requiredClampForceTon),
+    moldWidthMm: readNumber(item.moldWidthMm),
+    moldHeightMm: readNumber(item.moldHeightMm),
+    moldDepthMm: readNumber(item.moldDepthMm),
+    requiredTieBarWidthMm: readNumber(item.requiredTieBarWidthMm),
+    requiredTieBarHeightMm: readNumber(item.requiredTieBarHeightMm),
+    minimumShotCapacityGrams: readNumber(item.minimumShotCapacityGrams),
+    requiredInjectionUnit: readString(item.requiredInjectionUnit),
+    supportedMaterialGroup: readString(item.supportedMaterialGroup),
+    nominalCycleTimeSeconds: readNumber(item.nominalCycleTimeSeconds),
+    effectiveCavityCount: readNumber(item.effectiveCavityCount),
+    sourceType: String(item.sourceType),
+    sourceReference: readString(item.sourceReference),
+    dataRecordedAtUtc: readString(item.dataRecordedAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMachineCompatibilityProfile(value: unknown): MachineCompatibilityProfile {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    machineAssetId: String(item.machineAssetId),
+    machineCode: String(item.machineCode),
+    machineDisplayName: String(item.machineDisplayName),
+    clampForceTon: readNumber(item.clampForceTon),
+    maximumMoldWidthMm: readNumber(item.maximumMoldWidthMm),
+    maximumMoldHeightMm: readNumber(item.maximumMoldHeightMm),
+    minimumMoldDepthMm: readNumber(item.minimumMoldDepthMm),
+    maximumMoldDepthMm: readNumber(item.maximumMoldDepthMm),
+    tieBarWidthMm: readNumber(item.tieBarWidthMm),
+    tieBarHeightMm: readNumber(item.tieBarHeightMm),
+    maximumShotCapacityGrams: readNumber(item.maximumShotCapacityGrams),
+    injectionUnit: readString(item.injectionUnit),
+    supportedMaterialGroups: readStringList(item.supportedMaterialGroups),
+    sourceType: String(item.sourceType),
+    sourceReference: readString(item.sourceReference),
+    dataRecordedAtUtc: readString(item.dataRecordedAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMachineCompatibilityProfileList(payload: unknown): readonly MachineCompatibilityProfile[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected machine compatibility profile array.");
+  }
+
+  return payload.map(parseMachineCompatibilityProfile);
+}
+
+export function parseMoldCompatibilityRuleResult(value: unknown): MoldCompatibilityRuleResult {
+  const item = value as Record<string, unknown>;
+  return {
+    ruleCode: String(item.ruleCode),
+    labelTr: String(item.labelTr),
+    status: String(item.status),
+    requiredValue: readString(item.requiredValue),
+    availableValue: readString(item.availableValue),
+    source: String(item.source),
+    dataTimestampUtc: readString(item.dataTimestampUtc),
+    isCritical: readBoolean(item.isCritical) === true,
+  };
+}
+
+export function parseMoldCompatibilityAssessment(payload: unknown): MoldCompatibilityAssessment {
+  const item = payload as Record<string, unknown>;
+  const reasons = Array.isArray(item.reasons)
+    ? item.reasons.map(parseMoldCompatibilityRuleResult)
+    : [];
+
+  return {
+    id: String(item.id),
+    moldId: String(item.moldId),
+    machineAssetId: String(item.machineAssetId),
+    machineCode: String(item.machineCode),
+    machineDisplayName: String(item.machineDisplayName),
+    status: String(item.status),
+    ruleSetVersion: String(item.ruleSetVersion),
+    requirementVersion: Number(item.requirementVersion),
+    machineProfileVersion: Number(item.machineProfileVersion),
+    evaluatedAtUtc: String(item.evaluatedAtUtc),
+    reasons,
+    evidence: readStringRecord(item.evidence),
+    theoreticalPartsPerHour: readNumber(item.theoreticalPartsPerHour),
+    requirementStale: readBoolean(item.requirementStale) === true,
+    machineProfileStale: readBoolean(item.machineProfileStale) === true,
+    missingFields: readStringList(item.missingFields),
+    idempotentReplay: readBoolean(item.idempotentReplay) === true,
+  };
+}
+
+export function parseMoldCompatibilityAssessmentList(payload: unknown): readonly MoldCompatibilityAssessment[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected compatibility assessment array.");
+  }
+
+  return payload.map(parseMoldCompatibilityAssessment);
+}
+
+function parseMoldCompatibilityAssessmentSummary(value: unknown) {
+  const item = value as Record<string, unknown>;
+  return {
+    assessmentId: String(item.assessmentId),
+    machineAssetId: String(item.machineAssetId),
+    machineCode: String(item.machineCode),
+    machineDisplayName: String(item.machineDisplayName),
+    status: String(item.status),
+    criticalConstraintLabel: readString(item.criticalConstraintLabel),
+    requirementStale: readBoolean(item.requirementStale) === true,
+    machineProfileStale: readBoolean(item.machineProfileStale) === true,
+    theoreticalPartsPerHour: readNumber(item.theoreticalPartsPerHour),
+    evaluatedAtUtc: String(item.evaluatedAtUtc),
+  };
+}
+
+export function parseMoldCompatibilityOverview(payload: unknown): MoldCompatibilityOverview {
+  const item = payload as Record<string, unknown>;
+  const machines = Array.isArray(item.machines)
+    ? item.machines.map(parseMoldCompatibilityAssessmentSummary)
+    : [];
+
+  return {
+    moldId: String(item.moldId),
+    requirement: item.requirement === null || item.requirement === undefined
+      ? undefined
+      : parseMoldCompatibilityRequirement(item.requirement) ?? undefined,
+    compatibleCount: Number(item.compatibleCount),
+    conditionalCount: Number(item.conditionalCount),
+    incompatibleCount: Number(item.incompatibleCount),
+    insufficientDataCount: Number(item.insufficientDataCount),
+    machines,
+  };
 }

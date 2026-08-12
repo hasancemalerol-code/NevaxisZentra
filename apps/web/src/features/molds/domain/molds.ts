@@ -169,3 +169,108 @@ export type MoldHistorySummary = Readonly<{
   trialCount: number;
   successfulTrialCount: number;
 }>;
+
+export type MoldCompatibilityStatus =
+  | "compatible"
+  | "conditional"
+  | "incompatible"
+  | "insufficient-data";
+
+export type MoldCompatibilityRuleStatus = "pass" | "warn" | "fail" | "unknown";
+
+export type MoldCompatibilityRequirement = Readonly<{
+  id: string;
+  moldId: string;
+  requiredClampForceTon?: number;
+  moldWidthMm?: number;
+  moldHeightMm?: number;
+  moldDepthMm?: number;
+  requiredTieBarWidthMm?: number;
+  requiredTieBarHeightMm?: number;
+  minimumShotCapacityGrams?: number;
+  requiredInjectionUnit?: string;
+  supportedMaterialGroup?: string;
+  nominalCycleTimeSeconds?: number;
+  effectiveCavityCount?: number;
+  sourceType: string;
+  sourceReference?: string;
+  dataRecordedAtUtc?: string;
+  updatedAtUtc: string;
+  version: number;
+}>;
+
+export type MachineCompatibilityProfile = Readonly<{
+  id: string;
+  machineAssetId: string;
+  machineCode: string;
+  machineDisplayName: string;
+  clampForceTon?: number;
+  maximumMoldWidthMm?: number;
+  maximumMoldHeightMm?: number;
+  minimumMoldDepthMm?: number;
+  maximumMoldDepthMm?: number;
+  tieBarWidthMm?: number;
+  tieBarHeightMm?: number;
+  maximumShotCapacityGrams?: number;
+  injectionUnit?: string;
+  supportedMaterialGroups: readonly string[];
+  sourceType: string;
+  sourceReference?: string;
+  dataRecordedAtUtc?: string;
+  updatedAtUtc: string;
+  version: number;
+}>;
+
+export type MoldCompatibilityRuleResult = Readonly<{
+  ruleCode: string;
+  labelTr: string;
+  status: string;
+  requiredValue?: string;
+  availableValue?: string;
+  source: string;
+  dataTimestampUtc?: string;
+  isCritical: boolean;
+}>;
+
+export type MoldCompatibilityAssessment = Readonly<{
+  id: string;
+  moldId: string;
+  machineAssetId: string;
+  machineCode: string;
+  machineDisplayName: string;
+  status: MoldCompatibilityStatus | string;
+  ruleSetVersion: string;
+  requirementVersion: number;
+  machineProfileVersion: number;
+  evaluatedAtUtc: string;
+  reasons: readonly MoldCompatibilityRuleResult[];
+  evidence: Readonly<Record<string, string>>;
+  theoreticalPartsPerHour?: number;
+  requirementStale: boolean;
+  machineProfileStale: boolean;
+  missingFields: readonly string[];
+  idempotentReplay: boolean;
+}>;
+
+export type MoldCompatibilityAssessmentSummary = Readonly<{
+  assessmentId: string;
+  machineAssetId: string;
+  machineCode: string;
+  machineDisplayName: string;
+  status: MoldCompatibilityStatus | string;
+  criticalConstraintLabel?: string;
+  requirementStale: boolean;
+  machineProfileStale: boolean;
+  theoreticalPartsPerHour?: number;
+  evaluatedAtUtc: string;
+}>;
+
+export type MoldCompatibilityOverview = Readonly<{
+  moldId: string;
+  requirement?: MoldCompatibilityRequirement;
+  compatibleCount: number;
+  conditionalCount: number;
+  incompatibleCount: number;
+  insufficientDataCount: number;
+  machines: readonly MoldCompatibilityAssessmentSummary[];
+}>;

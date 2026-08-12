@@ -491,6 +491,16 @@ public static class MoldServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
+        services.AddScoped<IMoldCompatibilityRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableMoldCompatibilityRepository()
+                : new MoldCompatibilityRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
         return services;
     }
 }

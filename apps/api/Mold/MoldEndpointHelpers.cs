@@ -150,6 +150,10 @@ internal static class MoldEndpointHelpers
                 title: reason ?? "Mold service is unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable,
                 extensions: FailureExt(MoldApiFailureCodes.SourceUnavailable)),
+            MoldCompatibilityFailureCodes.MachineNotVisible => TypedResults.Problem(
+                title: reason ?? "Machine is not visible in this facility.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(MoldApiFailureCodes.MachineNotVisible)),
             _ => TypedResults.Problem(
                 title: reason ?? "Request failed.",
                 statusCode: StatusCodes.Status400BadRequest,
@@ -211,6 +215,7 @@ internal static class MoldApiFailureCodes
     public const string DuplicateTrialNumber = "mold.duplicate-trial-number";
     public const string InvalidMaintenanceState = "mold.invalid-maintenance-state";
     public const string SourceUnavailable = "mold.source-unavailable";
+    public const string MachineNotVisible = "mold.machine-not-visible";
     public const string Unauthenticated = "mold.unauthenticated";
     public const string PermissionDenied = "mold.permission-denied";
     public const string FacilityAccessDenied = "mold.facility-access-denied";

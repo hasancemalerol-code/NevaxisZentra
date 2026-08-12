@@ -90,6 +90,7 @@ app.MapProductionReportingEndpoints();
 app.MapQualityEndpoints();
 app.MapMoldEndpoints();
 app.MapMoldHistoryEndpoints();
+app.MapMoldCompatibilityEndpoints();
 app.MapMaintenanceEndpoints();
 app.MapErpEndpoints();
 app.MapEdgeEndpoints();

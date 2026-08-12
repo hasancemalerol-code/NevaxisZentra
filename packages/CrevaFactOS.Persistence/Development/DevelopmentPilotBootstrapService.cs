@@ -496,6 +496,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotMoldCompatibilitySeed.EnsureMoldCompatibilityPilotProfilesAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotMaintenanceConditionSeed.EnsureMaintenanceConditionPilotDataAsync(
                 dbContext,
                 tenant.Id,

@@ -105,6 +105,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MoldMaintenanceRecord> MoldMaintenanceRecords => Set<MoldMaintenanceRecord>();
     public DbSet<MoldRevisionRecord> MoldRevisionRecords => Set<MoldRevisionRecord>();
     public DbSet<MoldTrialRecord> MoldTrialRecords => Set<MoldTrialRecord>();
+    public DbSet<MoldCompatibilityRequirement> MoldCompatibilityRequirements => Set<MoldCompatibilityRequirement>();
+    public DbSet<MachineCompatibilityCapabilityProfile> MachineCompatibilityCapabilityProfiles => Set<MachineCompatibilityCapabilityProfile>();
+    public DbSet<MoldMachineCompatibilityAssessment> MoldMachineCompatibilityAssessments => Set<MoldMachineCompatibilityAssessment>();
 
     // Maintenance — requests, work orders, preventive plans, execution
     public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
@@ -752,6 +755,9 @@ public sealed class CrevaFactOSDbContext : DbContext
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MoldTrialRecordEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new MoldCompatibilityRequirementEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new MachineCompatibilityCapabilityProfileEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new MoldMachineCompatibilityAssessmentEntityConfiguration());
         modelBuilder.Entity<MoldTrialRecord>().HasQueryFilter(r =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable

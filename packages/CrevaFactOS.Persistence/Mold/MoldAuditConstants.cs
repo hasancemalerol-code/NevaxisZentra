@@ -12,6 +12,9 @@ public static class MoldAuditActions
     public const string MaintenanceCancelled = "mold.maintenance.cancelled";
     public const string RevisionAppended = "mold.revision.appended";
     public const string TrialAppended = "mold.trial.appended";
+    public const string CompatibilityRequirementUpserted = "mold.compatibility.requirement.upserted";
+    public const string CompatibilityMachineProfileUpserted = "mold.compatibility.machine-profile.upserted";
+    public const string CompatibilityEvaluated = "mold.compatibility.evaluated";
 }
 
 public static class MoldAuditEventTypes
@@ -26,4 +29,7 @@ public static class MoldAuditEventTypes
     public const string MaintenanceCancelled = "mold.maintenance.cancelled";
     public const string RevisionAppended = "mold.revision.appended";
     public const string TrialAppended = "mold.trial.appended";
+    public const string CompatibilityRequirementUpserted = "mold.compatibility.requirement.upserted";
+    public const string CompatibilityMachineProfileUpserted = "mold.compatibility.machine-profile.upserted";
+    public const string CompatibilityEvaluated = "mold.compatibility.evaluated";
 }

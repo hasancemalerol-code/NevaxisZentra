@@ -2,6 +2,7 @@ import "./mold-server-boundary";
 
 import {
   getMold,
+  getMoldCompatibilityOverview,
   getMoldWorkspaceSummary,
   listMoldLifecycleHistory,
   listMoldMaintenanceHistory,
@@ -14,6 +15,7 @@ import {
 } from "./mold-api-client";
 import { resolveMoldRequestContext } from "./mold-request-context";
 import type {
+  MoldCompatibilityOverview,
   MoldDetail,
   MoldLifecycleEvent,
   MoldMaintenanceRecord,
@@ -49,6 +51,7 @@ export type MoldDetailResult =
       revisionHistory: readonly MoldRevisionRecord[];
       trialHistory: readonly MoldTrialRecord[];
       timeline: readonly MoldTimelineEntry[];
+      compatibilityOverview: MoldCompatibilityOverview;
       canManage: boolean;
     }>
   | ReadFailure;
@@ -109,7 +112,7 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
     return resolved;
   }
 
-  const [moldResult, historyResult, maintenanceResult, revisionResult, trialResult, timelineResult] =
+  const [moldResult, historyResult, maintenanceResult, revisionResult, trialResult, timelineResult, compatibilityResult] =
     await Promise.all([
       getMold(resolved.context, moldId),
       listMoldLifecycleHistory(resolved.context, moldId),
@@ -117,6 +120,7 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
       listMoldRevisionHistory(resolved.context, moldId),
       listMoldTrialHistory(resolved.context, moldId),
       listMoldTimeline(resolved.context, moldId),
+      getMoldCompatibilityOverview(resolved.context, moldId),
     ]);
 
   if (moldResult.status === "failure") {
@@ -142,6 +146,9 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
   if (timelineResult.status === "failure") {
     return { status: "failure", message: timelineResult.message, code: timelineResult.code };
   }
+  if (compatibilityResult.status === "failure") {
+    return { status: "failure", message: compatibilityResult.message, code: compatibilityResult.code };
+  }
 
   return {
     status: "success",
@@ -151,6 +158,7 @@ export async function readMoldDetail(moldId: string): Promise<MoldDetailResult> 
     revisionHistory: revisionResult.value,
     trialHistory: trialResult.value,
     timeline: timelineResult.value,
+    compatibilityOverview: compatibilityResult.value,
     canManage: await probeMoldManagePermission(resolved.context),
   };
 }

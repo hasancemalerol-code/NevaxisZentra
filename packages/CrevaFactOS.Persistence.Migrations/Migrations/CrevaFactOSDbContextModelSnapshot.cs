@@ -8954,6 +8954,49 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("mold_trial_records", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldCompatibilityRequirement", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("TenantId").HasColumnType("uuid").HasColumnName("tenant_id");
+                    b.Property<Guid>("FacilityId").HasColumnType("uuid").HasColumnName("facility_id");
+                    b.Property<Guid>("MoldId").HasColumnType("uuid").HasColumnName("mold_id");
+                    b.Property<decimal?>("RequiredClampForceTon").HasPrecision(18, 3).HasColumnName("required_clamp_force_ton");
+                    b.Property<decimal?>("NominalCycleTimeSeconds").HasPrecision(18, 3).HasColumnName("nominal_cycle_time_seconds");
+                    b.Property<int?>("EffectiveCavityCount").HasColumnName("effective_cavity_count");
+                    b.Property<uint>("Version").IsConcurrencyToken().HasColumnName("version");
+                    b.HasKey("Id");
+                    b.HasIndex("TenantId", "FacilityId", "MoldId").IsUnique();
+                    b.ToTable("mold_compatibility_requirements", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MachineCompatibilityCapabilityProfile", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("TenantId").HasColumnType("uuid").HasColumnName("tenant_id");
+                    b.Property<Guid>("FacilityId").HasColumnType("uuid").HasColumnName("facility_id");
+                    b.Property<Guid>("MachineAssetId").HasColumnType("uuid").HasColumnName("machine_asset_id");
+                    b.Property<decimal?>("ClampForceTon").HasPrecision(18, 3).HasColumnName("clamp_force_ton");
+                    b.Property<uint>("Version").IsConcurrencyToken().HasColumnName("version");
+                    b.HasKey("Id");
+                    b.HasIndex("TenantId", "FacilityId", "MachineAssetId").IsUnique();
+                    b.ToTable("machine_compatibility_capability_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldMachineCompatibilityAssessment", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("TenantId").HasColumnType("uuid").HasColumnName("tenant_id");
+                    b.Property<Guid>("FacilityId").HasColumnType("uuid").HasColumnName("facility_id");
+                    b.Property<Guid>("MoldId").HasColumnType("uuid").HasColumnName("mold_id");
+                    b.Property<Guid>("MachineAssetId").HasColumnType("uuid").HasColumnName("machine_asset_id");
+                    b.Property<string>("Status").HasMaxLength(30).HasColumnName("status");
+                    b.Property<string>("InputFingerprint").HasMaxLength(64).HasColumnName("input_fingerprint");
+                    b.Property<decimal?>("TheoreticalPartsPerHour").HasPrecision(18, 3).HasColumnName("theoretical_parts_per_hour");
+                    b.HasKey("Id");
+                    b.HasIndex("TenantId", "MoldId", "MachineAssetId", "InputFingerprint").IsUnique();
+                    b.ToTable("mold_machine_compatibility_assessments", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -13050,6 +13093,24 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId", "FacilityId")
                         .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldCompatibilityRequirement", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Mold.MoldRegistryEntry", null)
+                        .WithMany()
+                        .HasForeignKey("MoldId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldMachineCompatibilityAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Mold.MoldRegistryEntry", null)
+                        .WithMany()
+                        .HasForeignKey("MoldId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

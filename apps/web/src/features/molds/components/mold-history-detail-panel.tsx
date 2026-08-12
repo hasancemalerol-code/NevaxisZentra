@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import type {
+  MoldCompatibilityOverview,
   MoldDetail,
   MoldLifecycleEvent,
   MoldMaintenanceRecord,
@@ -41,8 +42,9 @@ import {
   createMoldMaintenanceAction,
 } from "../server/mold-history-writer";
 import { transitionMoldLifecycleAction, updateMoldAction } from "../server/mold-writer";
+import { MoldCompatibilityDetailPanel } from "./mold-compatibility-detail-panel";
 
-type DetailTab = "overview" | "maintenance" | "revisions" | "trials" | "timeline";
+type DetailTab = "overview" | "maintenance" | "revisions" | "trials" | "timeline" | "compatibility";
 
 type MoldHistoryDetailPanelProps = Readonly<{
   selectedSummary: MoldSummary;
@@ -52,9 +54,11 @@ type MoldHistoryDetailPanelProps = Readonly<{
   revisionHistory: readonly MoldRevisionRecord[];
   trialHistory: readonly MoldTrialRecord[];
   timeline: readonly MoldTimelineEntry[];
+  compatibilityOverview?: MoldCompatibilityOverview;
+  compatibilityError?: string | null;
   canManage: boolean;
   isPending: boolean;
-  onAction: (action: () => Promise<{ status: string; message?: string }>) => void;
+  onAction: (action: () => Promise<{ status: string; message?: string; compatibilityOverview?: MoldCompatibilityOverview }>) => void;
 }>;
 
 export function MoldHistoryDetailPanel({
@@ -65,6 +69,8 @@ export function MoldHistoryDetailPanel({
   revisionHistory,
   trialHistory,
   timeline,
+  compatibilityOverview,
+  compatibilityError,
   canManage,
   isPending,
   onAction,
@@ -109,6 +115,7 @@ export function MoldHistoryDetailPanel({
           ["revisions", "Revizyonlar"],
           ["trials", "Denemeler"],
           ["timeline", "Zaman Çizelgesi"],
+          ["compatibility", "Makine Uyumluluğu"],
         ] as const).map(([value, label]) => (
           <button
             key={value}
@@ -386,6 +393,18 @@ export function MoldHistoryDetailPanel({
             </article>
           ))}
         </div>
+      ) : null}
+
+      {detail && tab === "compatibility" ? (
+        <MoldCompatibilityDetailPanel
+          key={detail.id}
+          moldId={detail.id}
+          overview={compatibilityOverview}
+          canManage={canManage}
+          isPending={isPending}
+          loadError={compatibilityError}
+          onAction={onAction}
+        />
       ) : null}
     </>
   );

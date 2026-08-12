@@ -1,6 +1,10 @@
 import "./mold-server-boundary";
 
 import type {
+  MachineCompatibilityProfile,
+  MoldCompatibilityAssessment,
+  MoldCompatibilityOverview,
+  MoldCompatibilityRequirement,
   MoldDetail,
   MoldLifecycleEvent,
   MoldMaintenanceRecord,
@@ -12,6 +16,10 @@ import type {
   MoldWriteResult,
 } from "../domain/molds";
 import {
+  parseMachineCompatibilityProfileList,
+  parseMoldCompatibilityAssessmentList,
+  parseMoldCompatibilityOverview,
+  parseMoldCompatibilityRequirement,
   parseMoldDetail,
   parseMoldLifecycleEventList,
   parseMoldMaintenanceRecordList,
@@ -356,6 +364,54 @@ export function appendMoldTrialRecord(
     "POST",
     body,
     parseMoldWriteApiResponse,
+  );
+}
+
+export function getMoldCompatibilityRequirement(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<MoldCompatibilityRequirement | null>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/compatibility-requirement`,
+    undefined,
+    parseMoldCompatibilityRequirement,
+  );
+}
+
+export function getMoldCompatibilityOverview(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<MoldCompatibilityOverview>> {
+  return getJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/compatibility-overview`,
+    undefined,
+    parseMoldCompatibilityOverview,
+  );
+}
+
+export function listMachineCompatibilityProfiles(
+  context: ProductionOrderRequestContext,
+): Promise<MoldApiResult<readonly MachineCompatibilityProfile[]>> {
+  return getJson(
+    context,
+    "/api/molds/machine-compatibility-profiles",
+    undefined,
+    parseMachineCompatibilityProfileList,
+  );
+}
+
+export function evaluateMoldCompatibilityAll(
+  context: ProductionOrderRequestContext,
+  moldId: string,
+): Promise<MoldApiResult<readonly MoldCompatibilityAssessment[]>> {
+  return mutateJson(
+    context,
+    `/api/molds/${encodeURIComponent(moldId)}/compatibility-evaluations`,
+    "POST",
+    {},
+    parseMoldCompatibilityAssessmentList,
   );
 }
 

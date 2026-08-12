@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { Boxes, LoaderCircle } from "lucide-react";
 
-import type { MoldDetail, MoldLifecycleEvent, MoldMaintenanceRecord, MoldRevisionRecord, MoldSummary, MoldTimelineEntry, MoldTrialRecord, MoldWorkspaceSummary } from "../domain/molds";
+import type { MoldCompatibilityOverview, MoldDetail, MoldLifecycleEvent, MoldMaintenanceRecord, MoldRevisionRecord, MoldSummary, MoldTimelineEntry, MoldTrialRecord, MoldWorkspaceSummary } from "../domain/molds";
 import {
   formatMoldNumber,
   getMoldLifecycleStateLabel,
@@ -49,6 +49,8 @@ export function MoldRegistryView({
   const [revisionHistory, setRevisionHistory] = useState<readonly MoldRevisionRecord[]>([]);
   const [trialHistory, setTrialHistory] = useState<readonly MoldTrialRecord[]>([]);
   const [timeline, setTimeline] = useState<readonly MoldTimelineEntry[]>([]);
+  const [compatibilityOverview, setCompatibilityOverview] = useState<MoldCompatibilityOverview | undefined>();
+  const [compatibilityError, setCompatibilityError] = useState<string | null>(null);
   const [detailCanManage, setDetailCanManage] = useState(canManage);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,8 @@ export function MoldRegistryView({
     setRevisionHistory([]);
     setTrialHistory([]);
     setTimeline([]);
+    setCompatibilityOverview(undefined);
+    setCompatibilityError(null);
     setMessage(null);
     setError(null);
 
@@ -91,6 +95,8 @@ export function MoldRegistryView({
         setRevisionHistory(result.revisionHistory);
         setTrialHistory(result.trialHistory);
         setTimeline(result.timeline);
+        setCompatibilityOverview(result.compatibilityOverview);
+        setCompatibilityError(null);
         setDetailCanManage(result.canManage);
       } else {
         setError(result.message);
@@ -98,7 +104,7 @@ export function MoldRegistryView({
     });
   }
 
-  function runAction(action: () => Promise<{ status: string; message?: string }>) {
+  function runAction(action: () => Promise<{ status: string; message?: string; compatibilityOverview?: MoldCompatibilityOverview }>) {
     startTransition(async () => {
       setMessage(null);
       setError(null);
@@ -106,6 +112,11 @@ export function MoldRegistryView({
       if (result.status === "failure") {
         setError(result.message ?? "İşlem başarısız.");
         return;
+      }
+
+      if (result.compatibilityOverview) {
+        setCompatibilityOverview(result.compatibilityOverview);
+        setCompatibilityError(null);
       }
 
       setMessage("Kayıt güncellendi.");
@@ -120,6 +131,8 @@ export function MoldRegistryView({
           setRevisionHistory(refreshed.revisionHistory);
           setTrialHistory(refreshed.trialHistory);
           setTimeline(refreshed.timeline);
+          setCompatibilityOverview(refreshed.compatibilityOverview);
+          setCompatibilityError(null);
           setDetailCanManage(refreshed.canManage);
         }
       }
@@ -283,6 +296,8 @@ export function MoldRegistryView({
               revisionHistory={revisionHistory}
               trialHistory={trialHistory}
               timeline={timeline}
+              compatibilityOverview={compatibilityOverview}
+              compatibilityError={compatibilityError}
               canManage={detailCanManage}
               isPending={isPending}
               onAction={runAction}
