@@ -402,6 +402,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMaterialManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProcessOeeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProcessOeeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProcessOeeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProcessOeeManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -525,6 +533,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotMaterialRequirementSeed.EnsureMaterialRequirementPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotProcessOeeSeed.EnsureProcessOeePilotRecordsAsync(
                 dbContext,
                 tenant.Id,
                 facility.Id,
@@ -2381,5 +2396,23 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             MaterialPermissionKeys.Manage,
             DevelopmentPilotIds.MaterialManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProcessOeeReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProcessOeePermissionKeys.Read,
+            DevelopmentPilotIds.ProcessOeeReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProcessOeeManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProcessOeePermissionKeys.Manage,
+            DevelopmentPilotIds.ProcessOeeManagePermissionDefinitionId,
             cancellationToken);
 }

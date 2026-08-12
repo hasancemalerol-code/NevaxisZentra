@@ -14,6 +14,7 @@ using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Maintenance;
 using CrevaFactOS.Persistence.Material;
 using CrevaFactOS.Persistence.Mold;
+using CrevaFactOS.Persistence.ProcessOee;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -114,6 +115,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaterialRequirementProfile> MaterialRequirementProfiles => Set<MaterialRequirementProfile>();
     public DbSet<MaterialConsumptionObservation> MaterialConsumptionObservations => Set<MaterialConsumptionObservation>();
     public DbSet<MaterialRequirementAssessment> MaterialRequirementAssessments => Set<MaterialRequirementAssessment>();
+
+    // Process OEE foundation (PROCESS-OEE-1)
+    public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
+    public DbSet<ProcessOeeAssessment> ProcessOeeAssessments => Set<ProcessOeeAssessment>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -797,6 +802,18 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new MaterialRequirementAssessmentEntityConfiguration());
         modelBuilder.Entity<MaterialRequirementAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeEvaluationWindowEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeEvaluationWindow>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeAssessmentEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeAssessment>().HasQueryFilter(a =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);

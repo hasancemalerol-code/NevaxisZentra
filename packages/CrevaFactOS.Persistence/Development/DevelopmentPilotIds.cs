@@ -330,6 +330,32 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaterialManagePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000068");
 
+    // Process/OEE permission definitions (069–06a)
+    public static readonly Guid ProcessOeeReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000069");
+
+    public static readonly Guid ProcessOeeManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006a");
+
+    // Process/OEE pilot fixtures
+    public static readonly Guid ProcessOeePilotWindowCalculatedId =
+        Guid.Parse("bb000001-00c0-4000-8000-0000000000c0");
+
+    public static readonly Guid ProcessOeePilotWindowInsufficientId =
+        Guid.Parse("bb000001-00c1-4000-8000-0000000000c1");
+
+    public static readonly Guid ProcessOeePilotWindowReviewRequiredId =
+        Guid.Parse("bb000001-00c2-4000-8000-0000000000c2");
+
+    public static readonly Guid ProcessOeePilotAssessmentCalculatedId =
+        Guid.Parse("bb000001-00c3-4000-8000-0000000000c3");
+
+    public static readonly Guid ProcessOeePilotAssessmentInsufficientId =
+        Guid.Parse("bb000001-00c4-4000-8000-0000000000c4");
+
+    public static readonly Guid ProcessOeePilotAssessmentReviewRequiredId =
+        Guid.Parse("bb000001-00c5-4000-8000-0000000000c5");
+
     // Material pilot fixtures
     public static readonly Guid MaterialPilotPpId =
         Guid.Parse("bb000001-00a2-4000-8000-0000000000a2");

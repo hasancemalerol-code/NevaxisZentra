@@ -1,5 +1,6 @@
 import { resolveMaterialNavigationVisibility } from "@/features/materials/server/material-reader";
 import { resolveMoldNavigationVisibility } from "@/features/molds/server/mold-reader";
+import { resolveProcessOeeNavigationVisibility } from "@/features/process-oee/server/process-oee-reader";
 import { primaryNavigation } from "@/lib/navigation/primary-navigation";
 import type {
   SerializableNavigationGroup,
@@ -17,9 +18,10 @@ function toSerializableItem(item: SerializableNavigationItem): SerializableNavig
 }
 
 export async function resolvePermissionAwareNavigation(): Promise<readonly SerializableNavigationGroup[]> {
-  const [moldVisible, materialVisible] = await Promise.all([
+  const [moldVisible, materialVisible, processOeeVisible] = await Promise.all([
     resolveMoldNavigationVisibility(),
     resolveMaterialNavigationVisibility(),
+    resolveProcessOeeNavigationVisibility(),
   ]);
 
   return primaryNavigation.map((group) => ({
@@ -32,6 +34,10 @@ export async function resolvePermissionAwareNavigation(): Promise<readonly Seria
 
         if (item.permissionKey === "material.read") {
           return materialVisible;
+        }
+
+        if (item.permissionKey === "process-oee.read") {
+          return processOeeVisible;
         }
 
         return true;

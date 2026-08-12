@@ -57,6 +57,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "calendar-clock",
       },
       {
+        label: "Proses & OEE",
+        href: "/proses-oee",
+        iconKey: "circle-gauge",
+        permissionKey: "process-oee.read",
+      },
+      {
         label: "Makineler",
         href: "/makineler",
         iconKey: "cpu",

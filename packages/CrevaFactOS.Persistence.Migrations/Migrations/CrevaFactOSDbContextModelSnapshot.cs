@@ -8181,103 +8181,130 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
 
                     b.Property<string>("CreatedBySubjectId")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
 
                     b.Property<DateTimeOffset?>("DataRecordedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_recorded_at_utc");
 
                     b.Property<Guid>("FacilityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
 
                     b.Property<decimal?>("GoodPartQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("good_part_quantity");
 
                     b.Property<string>("IdempotencyKey")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
 
                     b.Property<Guid>("MaterialId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
 
                     b.Property<Guid?>("MaterialLotId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_lot_id");
 
                     b.Property<string>("MoldReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("mold_reference");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("notes");
 
                     b.Property<string>("ObservationType")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("observation_type");
 
                     b.Property<DateTimeOffset>("ObservedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("observed_at_utc");
 
                     b.Property<string>("PayloadFingerprint")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("payload_fingerprint");
 
                     b.Property<string>("ProductReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("product_reference");
 
                     b.Property<string>("ProductionOrderReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
 
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("quantity");
 
                     b.Property<decimal?>("RegrindQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("regrind_quantity");
 
                     b.Property<Guid?>("RequirementProfileId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("requirement_profile_id");
 
                     b.Property<decimal?>("ScrapQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("scrap_quantity");
 
                     b.Property<string>("SourceReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_reference");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_type");
 
                     b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
 
                     b.Property<string>("UnitOfMeasure")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("unit_of_measure");
 
                     b.Property<long>("Version")
-                        .HasColumnType("bigint");
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.Property<decimal?>("VirginQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("virgin_quantity");
 
                     b.HasKey("Id");
 
@@ -8286,6 +8313,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("MaterialLotId");
 
                     b.HasIndex("RequirementProfileId");
+
+                    b.HasIndex("TenantId", "MaterialId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FacilityId", "MaterialId", "ObservedAtUtc");
 
                     b.ToTable("material_consumption_observations", (string)null);
                 });
@@ -8976,95 +9008,127 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("AssessmentType")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("assessment_type");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
 
                     b.Property<string>("CreatedBySubjectId")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
 
                     b.Property<DateTimeOffset>("EvaluatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
 
                     b.Property<Guid>("FacilityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
 
                     b.Property<string>("IdempotencyKey")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
 
                     b.Property<string>("InputFingerprint")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("input_fingerprint");
 
                     b.Property<Guid>("MaterialId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
 
                     b.Property<decimal?>("ObservedConsumptionGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("observed_consumption_grams");
 
                     b.Property<decimal?>("RegrindRequirementGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("regrind_requirement_grams");
 
                     b.Property<Guid?>("RequirementProfileId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("requirement_profile_id");
 
                     b.Property<string>("RuleSetVersion")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
 
                     b.Property<string>("StructuredDrivers")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("structured_drivers");
 
                     b.Property<string>("StructuredEvidence")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("structured_evidence");
 
                     b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
 
                     b.Property<decimal?>("TheoreticalRequirementGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("theoretical_requirement_grams");
 
                     b.Property<decimal?>("VarianceGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("variance_grams");
 
                     b.Property<decimal?>("VariancePercent")
                         .HasPrecision(8, 4)
-                        .HasColumnType("numeric(8,4)");
+                        .HasColumnType("numeric(8,4)")
+                        .HasColumnName("variance_percent");
 
                     b.Property<long>("Version")
-                        .HasColumnType("bigint");
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.Property<decimal?>("VirginRequirementGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("virgin_requirement_grams");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MaterialId");
 
                     b.HasIndex("RequirementProfileId");
+
+                    b.HasIndex("TenantId", "MaterialId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "MaterialId", "EvaluatedAtUtc");
+
+                    b.HasIndex("TenantId", "MaterialId", "AssessmentType", "InputFingerprint")
+                        .IsUnique();
 
                     b.ToTable("material_requirement_assessments", (string)null);
                 });
@@ -9073,111 +9137,145 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("CreateIdempotencyKey")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("create_idempotency_key");
 
                     b.Property<string>("CreateIdempotencyPayloadFingerprint")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("create_idempotency_payload_fingerprint");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
 
                     b.Property<string>("CreatedBySubjectId")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
 
                     b.Property<DateTimeOffset?>("DataRecordedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_recorded_at_utc");
 
                     b.Property<int?>("EffectiveCavityCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("effective_cavity_count");
 
                     b.Property<Guid>("FacilityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
 
                     b.Property<decimal?>("GoodPartTargetQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("good_part_target_quantity");
 
                     b.Property<Guid>("MaterialId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
 
                     b.Property<string>("MoldReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("mold_reference");
 
                     b.Property<decimal?>("PartWeightGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("part_weight_grams");
 
                     b.Property<decimal?>("PlannedProductionQuantity")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("planned_production_quantity");
 
                     b.Property<decimal?>("PlannedRegrindPercent")
                         .HasPrecision(8, 4)
-                        .HasColumnType("numeric(8,4)");
+                        .HasColumnType("numeric(8,4)")
+                        .HasColumnName("planned_regrind_percent");
 
                     b.Property<decimal?>("PlannedVirginPercent")
                         .HasPrecision(8, 4)
-                        .HasColumnType("numeric(8,4)");
+                        .HasColumnType("numeric(8,4)")
+                        .HasColumnName("planned_virgin_percent");
 
                     b.Property<decimal?>("ProcessLossAllowancePercent")
                         .HasPrecision(8, 4)
-                        .HasColumnType("numeric(8,4)");
+                        .HasColumnType("numeric(8,4)")
+                        .HasColumnName("process_loss_allowance_percent");
 
                     b.Property<string>("ProductReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("product_reference");
 
                     b.Property<string>("ProductionOrderReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
 
                     b.Property<string>("RequirementType")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("requirement_type");
 
                     b.Property<decimal?>("RunnerWeightGramsPerShot")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("runner_weight_grams_per_shot");
 
                     b.Property<decimal?>("SetupAllowanceGrams")
                         .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("setup_allowance_grams");
 
                     b.Property<string>("SourceReference")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_reference");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_type");
 
                     b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
 
                     b.Property<DateTimeOffset>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
 
                     b.Property<string>("UpdatedBySubjectId")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by_subject_id");
 
                     b.Property<long>("Version")
-                        .HasColumnType("bigint");
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MaterialId");
+
+                    b.HasIndex("TenantId", "CreateIdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("create_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "MaterialId");
 
                     b.ToTable("material_requirement_profiles", (string)null);
                 });
@@ -10716,6 +10814,294 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                             t.HasCheckConstraint("ck_outbox_messages_type", "message_type IN ('infrastructure.audit.recorded', 'infrastructure.ai-decision.recorded', 'infrastructure.outbox.probe')");
                         });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("AvailabilityPercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("availability_percent");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<int?>("DerivedShotCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("derived_shot_count");
+
+                    b.Property<int?>("DowntimeSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("downtime_seconds");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<Guid>("EvaluationWindowId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("evaluation_window_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int?>("GoodPieceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("good_piece_count");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("InputFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("input_fingerprint");
+
+                    b.Property<Guid>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("MoldReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("mold_reference");
+
+                    b.Property<int?>("ObservedCycleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("observed_cycle_count");
+
+                    b.Property<decimal?>("OeePercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("oee_percent");
+
+                    b.Property<int?>("OperatingSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("operating_seconds");
+
+                    b.Property<decimal?>("PerformancePercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("performance_percent");
+
+                    b.Property<decimal?>("PerformanceRawPercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("performance_raw_percent");
+
+                    b.Property<int?>("PlannedProductionSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("planned_production_seconds");
+
+                    b.Property<string>("ProductionOrderReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
+
+                    b.Property<decimal?>("QualityPercent")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)")
+                        .HasColumnName("quality_percent");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int?>("ScrapPieceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("scrap_piece_count");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StructuredDrivers")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("structured_drivers");
+
+                    b.Property<string>("StructuredEvidence")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("structured_evidence");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int?>("TotalPieceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_piece_count");
+
+                    b.Property<int?>("UnknownSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("unknown_seconds");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<DateTimeOffset>("WindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end_utc");
+
+                    b.Property<DateTimeOffset>("WindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaluationWindowId")
+                        .HasDatabaseName("ix_process_oee_assessments_evaluation_window_id");
+
+                    b.HasIndex("TenantId", "MachineAssetId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_assessments_tenant_machine_idempotency_key")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "MachineAssetId", "InputFingerprint")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_assessments_tenant_machine_fingerprint");
+
+                    b.HasIndex("TenantId", "FacilityId", "WindowEndUtc", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_process_oee_assessments_tenant_facility_window_evaluated");
+
+                    b.ToTable("process_oee_assessments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeEvaluationWindow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CreateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("create_idempotency_key");
+
+                    b.Property<string>("CreateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("create_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<DateTimeOffset?>("DataRecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_recorded_at_utc");
+
+                    b.Property<int?>("EffectiveCavityCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("effective_cavity_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<decimal?>("IdealCycleTimeSeconds")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("ideal_cycle_time_seconds");
+
+                    b.Property<Guid>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("MoldReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("mold_reference");
+
+                    b.Property<int?>("PlannedProductionSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("planned_production_seconds");
+
+                    b.Property<string>("ProductionOrderReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
+
+                    b.Property<string>("SourceReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_reference");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by_subject_id");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<DateTimeOffset>("WindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end_utc");
+
+                    b.Property<DateTimeOffset>("WindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_process_oee_windows_tenant_create_idempotency_key")
+                        .HasFilter("create_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "MachineAssetId")
+                        .HasDatabaseName("ix_process_oee_windows_tenant_facility_machine");
+
+                    b.HasIndex("TenantId", "FacilityId", "WindowEndUtc")
+                        .HasDatabaseName("ix_process_oee_windows_tenant_facility_window_end");
+
+                    b.ToTable("process_oee_evaluation_windows", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionCycleEntry", b =>
@@ -14593,6 +14979,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasForeignKey("RequirementProfileId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Material");
 
                     b.Navigation("MaterialLot");
@@ -14730,6 +15129,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasForeignKey("RequirementProfileId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Material");
 
                     b.Navigation("RequirementProfile");
@@ -14740,6 +15152,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasOne("CrevaFactOS.Persistence.Material.MaterialRegistryEntry", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -14944,6 +15369,46 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProcessOee.ProcessOeeEvaluationWindow", "EvaluationWindow")
+                        .WithMany()
+                        .HasForeignKey("EvaluationWindowId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EvaluationWindow");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProcessOee.ProcessOeeEvaluationWindow", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
