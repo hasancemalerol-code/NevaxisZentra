@@ -6,6 +6,7 @@ import { CircleGauge, LoaderCircle, X } from "lucide-react";
 import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
+  ProcessOeeLossDetail,
   ProcessOeeWorkspaceSummary,
 } from "../domain/process-oee";
 import {
@@ -23,6 +24,7 @@ import {
   evaluateProcessOeeAction,
   loadProcessOeeAssessmentDetailAction,
   loadProcessOeeAssessmentsAction,
+  loadProcessOeeLossDetailAction,
 } from "../server/process-oee-actions";
 import "./process-oee.css";
 
@@ -90,6 +92,7 @@ export function ProcessOeeView({
   const [evaluatedTo, setEvaluatedTo] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState<ProcessOeeAssessmentDetail | undefined>();
+  const [lossDetail, setLossDetail] = useState<ProcessOeeLossDetail | undefined>();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -164,15 +167,22 @@ export function ProcessOeeView({
   function selectAssessment(item: ProcessOeeAssessmentSummary) {
     setSelectedId(item.id);
     setDetail(undefined);
+    setLossDetail(undefined);
     setMessage(null);
     setError(null);
 
     startTransition(async () => {
-      const result = await loadProcessOeeAssessmentDetailAction(item.id);
+      const [result, lossResult] = await Promise.all([
+        loadProcessOeeAssessmentDetailAction(item.id),
+        loadProcessOeeLossDetailAction(item.id),
+      ]);
       if (result.status === "success") {
         setDetail(result.assessment);
       } else {
         setError(result.message);
+      }
+      if (lossResult.status === "success") {
+        setLossDetail(lossResult.lossDetail);
       }
     });
   }
@@ -191,9 +201,15 @@ export function ProcessOeeView({
       setMessage("OEE değerlendirmesi tamamlandı.");
       reloadAssessments();
       if (selectedId) {
-        const refreshed = await loadProcessOeeAssessmentDetailAction(selectedId);
+        const [refreshed, refreshedLoss] = await Promise.all([
+          loadProcessOeeAssessmentDetailAction(selectedId),
+          loadProcessOeeLossDetailAction(selectedId),
+        ]);
         if (refreshed.status === "success") {
           setDetail(refreshed.assessment);
+        }
+        if (refreshedLoss.status === "success") {
+          setLossDetail(refreshedLoss.lossDetail);
         }
       }
     });
@@ -515,6 +531,104 @@ export function ProcessOeeView({
                       <dd>{formatProcessOeeDateTime(activeDetail.evaluatedAtUtc)}</dd>
                     </div>
                   </dl>
+                </section>
+
+                <section className="process-oee-detail-section process-oee-loss-section">
+                  <h3>OEE Kayıp Analizi</h3>
+                  {!lossDetail ? (
+                    <p className="process-oee-empty-inline">Kayıp analizi yükleniyor veya mevcut değil.</p>
+                  ) : (
+                    <>
+                      <dl className="process-oee-loss-kpi-grid">
+                        <div>
+                          <dt>Kullanılabilirlik kaybı</dt>
+                          <dd>
+                            {formatProcessOeeNumber(
+                              lossDetail.drivers.find((d) => d.category === "availability-loss")
+                                ?.affectedDurationSeconds ?? null,
+                            )}{" "}
+                            sn
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Performans kaybı</dt>
+                          <dd>
+                            {formatProcessOeeNumber(
+                              lossDetail.drivers.find((d) => d.category === "performance-loss")
+                                ?.affectedDurationSeconds ?? null,
+                            )}{" "}
+                            sn
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Kalite kaybı</dt>
+                          <dd>
+                            {formatProcessOeeNumber(
+                              lossDetail.drivers.find((d) => d.category === "quality-loss")
+                                ?.affectedQuantity ?? null,
+                            )}{" "}
+                            adet
+                          </dd>
+                        </div>
+                      </dl>
+
+                      {lossDetail.leadingLoss ? (
+                        <div className="process-oee-loss-leading" role="status">
+                          <h4>Öncelikli kayıp</h4>
+                          <p>
+                            <strong>{lossDetail.leadingLoss.categoryLabel}</strong>
+                            {" · "}
+                            {lossDetail.leadingLoss.explanationLabel}
+                          </p>
+                          {lossDetail.leadingLoss.normalizedImpactPoints != null ? (
+                            <p>
+                              Normalleştirilmiş OEE etkisi:{" "}
+                              {formatPercent(lossDetail.leadingLoss.normalizedImpactPoints)}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {lossDetail.drivers.some((d) => d.category === "insufficient-data") ? (
+                        <div className="process-oee-alert process-oee-alert--warning" role="status">
+                          <p>Kayıp analizi için bazı kanıtlar yetersiz; sonuç uydurulmadı.</p>
+                        </div>
+                      ) : null}
+                      {lossDetail.drivers.some((d) => d.category === "source-conflict") ? (
+                        <div className="process-oee-alert process-oee-alert--warning" role="status">
+                          <p>Kaynak çakışması tespit edildi; otomatik uzlaştırma yapılmadı.</p>
+                        </div>
+                      ) : null}
+                      {lossDetail.drivers.some((d) => d.freshnessState === "stale") ? (
+                        <div className="process-oee-alert process-oee-alert--warning" role="status">
+                          <p>Bayat kanıt kullanıldı; kayıp analizi sınırlı güvenilirlikte.</p>
+                        </div>
+                      ) : null}
+
+                      {lossDetail.drivers.length > 0 ? (
+                        <ul className="process-oee-loss-list">
+                          {lossDetail.drivers.map((driver) => (
+                            <li key={driver.reasonCode} data-leading={driver.isLeadingLoss ? "true" : "false"}>
+                              <strong>{driver.categoryLabel}</strong>
+                              {" · "}
+                              {driver.explanationLabel}
+                              {" · "}
+                              {driver.severityLabel}
+                              {driver.sourceReferences.length > 0
+                                ? ` · Kaynak: ${driver.sourceReferences.join(", ")}`
+                                : ""}
+                              {driver.evidenceTimestampUtc
+                                ? ` · ${formatProcessOeeDateTime(driver.evidenceTimestampUtc)}`
+                                : ""}
+                              {driver.freshnessLabel ? ` · Tazelik: ${driver.freshnessLabel}` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>—</p>
+                      )}
+                    </>
+                  )}
                 </section>
 
                 <section className="process-oee-detail-section">

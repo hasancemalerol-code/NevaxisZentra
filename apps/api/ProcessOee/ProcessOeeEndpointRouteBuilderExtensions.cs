@@ -23,6 +23,9 @@ public static class ProcessOeeEndpointRouteBuilderExtensions
         group.MapGet("/assessments", ListAssessmentsAsync);
         group.MapGet("/assessments/{assessmentId:guid}", GetAssessmentAsync);
         group.MapGet("/evaluation-windows/{windowId:guid}/current-assessment", GetCurrentAssessmentAsync);
+        group.MapGet("/loss-overview", GetLossOverviewAsync);
+        group.MapGet("/assessments/{assessmentId:guid}/losses", GetAssessmentLossesAsync);
+        group.MapGet("/evaluation-windows/{windowId:guid}/losses", GetWindowLossesAsync);
 
         return endpoints;
     }
@@ -281,6 +284,67 @@ public static class ProcessOeeEndpointRouteBuilderExtensions
             : TypedResults.Ok(MapAssessmentDetail(assessment));
     }
 
+    private static async Task<IResult> GetLossOverviewAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProcessOeeRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ProcessOeeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var overview = await repository.GetLossOverviewAsync(context, cancellationToken);
+        return TypedResults.Ok(new
+        {
+            assessmentCountWithLossDrivers = overview.AssessmentCountWithLossDrivers,
+            availabilityLossCount = overview.AvailabilityLossCount,
+            performanceLossCount = overview.PerformanceLossCount,
+            qualityLossCount = overview.QualityLossCount,
+            insufficientDataCount = overview.InsufficientDataCount,
+            sourceConflictCount = overview.SourceConflictCount,
+            ruleSetVersion = overview.RuleSetVersion,
+            leadingLossMethod = overview.LeadingLossMethod,
+        });
+    }
+
+    private static async Task<IResult> GetAssessmentLossesAsync(
+        Guid assessmentId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProcessOeeRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ProcessOeeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var detail = await repository.GetLossDetailForAssessmentAsync(context, assessmentId, cancellationToken);
+        return detail is null
+            ? ProcessOeeEndpointHelpers.MapFailure(ProcessOeeFailureCodes.NotFound, "Loss detail not found.")
+            : TypedResults.Ok(MapLossDetail(detail));
+    }
+
+    private static async Task<IResult> GetWindowLossesAsync(
+        Guid windowId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IProcessOeeRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await ProcessOeeEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var detail = await repository.GetLossDetailForWindowAsync(context, windowId, cancellationToken);
+        return detail is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(MapLossDetail(detail));
+    }
+
     private static object MapWindowSummary(ProcessOeeWindowSummaryReadModel window) => new
     {
         id = window.Id,
@@ -378,6 +442,48 @@ public static class ProcessOeeEndpointRouteBuilderExtensions
         calculationHonestyDisclaimer = assessment.CalculationHonestyDisclaimer,
         simulatorHonestyDisclaimer = assessment.SimulatorHonestyDisclaimer,
         evaluatedAtUtc = assessment.EvaluatedAtUtc,
+    };
+
+    private static object MapLossDetail(ProcessOeeLossDetailReadModel detail) => new
+    {
+        assessmentId = detail.AssessmentId,
+        evaluationWindowId = detail.EvaluationWindowId,
+        assessmentStatus = detail.AssessmentStatus,
+        assessmentStatusLabel = ProcessOeeValueConversions.ToDisplayStatus(detail.AssessmentStatus),
+        ruleSetVersion = detail.RuleSetVersion,
+        leadingLossMethod = detail.LeadingLossMethod,
+        leadingLoss = detail.LeadingLoss is null ? null : MapLossDriver(detail.LeadingLoss),
+        drivers = detail.Drivers.Select(MapLossDriver),
+        evidence = detail.Evidence,
+        missingFields = detail.MissingFields,
+        conflicts = detail.Conflicts,
+        sourceSystem = detail.SourceSystem,
+        sourceFreshnessUtc = detail.SourceFreshnessUtc,
+        isSimulatorDerived = detail.IsSimulatorDerived,
+        calculationHonestyDisclaimer = detail.CalculationHonestyDisclaimer,
+        simulatorHonestyDisclaimer = detail.SimulatorHonestyDisclaimer,
+    };
+
+    private static object MapLossDriver(ProcessOeeLossDriverReadModel driver) => new
+    {
+        id = driver.Id,
+        reasonCode = driver.ReasonCode,
+        category = driver.Category,
+        severity = driver.Severity,
+        operationalPriority = driver.OperationalPriority,
+        observedValue = driver.ObservedValue,
+        expectedValue = driver.ExpectedValue,
+        absoluteLossValue = driver.AbsoluteLossValue,
+        affectedDurationSeconds = driver.AffectedDurationSeconds,
+        affectedQuantity = driver.AffectedQuantity,
+        sourceReferences = driver.SourceReferences,
+        evidenceTimestampUtc = driver.EvidenceTimestampUtc,
+        freshnessState = driver.FreshnessState,
+        explanationCode = driver.ExplanationCode,
+        dataLimitations = driver.DataLimitations,
+        ruleSetVersion = driver.RuleSetVersion,
+        isLeadingLoss = driver.IsLeadingLoss,
+        normalizedImpactPoints = driver.NormalizedImpactPoints,
     };
 }
 

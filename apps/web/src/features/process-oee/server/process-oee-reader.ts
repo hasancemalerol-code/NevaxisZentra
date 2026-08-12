@@ -2,6 +2,7 @@ import "./process-oee-server-boundary";
 
 import {
   getProcessOeeAssessment,
+  getProcessOeeAssessmentLosses,
   getProcessOeeWorkspaceSummary,
   listProcessOeeAssessments,
 } from "./process-oee-api-client";
@@ -10,6 +11,7 @@ import { resolveProcessOeeRequestContext } from "./process-oee-request-context";
 import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
+  ProcessOeeLossDetail,
   ProcessOeeWorkspaceSummary,
 } from "../domain/process-oee";
 
@@ -33,6 +35,13 @@ export type ProcessOeeAssessmentDetailResult =
       status: "success";
       assessment: ProcessOeeAssessmentDetail;
       canManage: boolean;
+    }>
+  | ReadFailure;
+
+export type ProcessOeeLossDetailResult =
+  | Readonly<{
+      status: "success";
+      lossDetail: ProcessOeeLossDetail;
     }>
   | ReadFailure;
 
@@ -145,6 +154,29 @@ export async function readProcessOeeAssessments(
   return {
     status: "success",
     assessments: assessmentsResult.value,
+  };
+}
+
+export async function readProcessOeeLossDetail(
+  assessmentId: string,
+): Promise<ProcessOeeLossDetailResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lossResult = await getProcessOeeAssessmentLosses(resolved.context, assessmentId);
+  if (lossResult.status === "failure") {
+    return {
+      status: "failure",
+      message: lossResult.message,
+      code: lossResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    lossDetail: lossResult.value,
   };
 }
 

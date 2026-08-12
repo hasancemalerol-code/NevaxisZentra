@@ -62,7 +62,18 @@ async function request(method, path, body, actor = ACTOR) {
   return { status: response.status, json, raw: text };
 }
 
+function deleteLossDriversMatchingAssessmentFilter(assessmentFilterSql) {
+  db(`
+    DELETE FROM process_oee_loss_drivers
+    WHERE assessment_id IN (
+      SELECT id FROM process_oee_assessments
+      WHERE ${assessmentFilterSql}
+    )
+  `);
+}
+
 function cleanupFixtures() {
+  deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${PREFIX}%' OR input_fingerprint LIKE '${PREFIX}%'`);
   db(`
     DELETE FROM process_oee_assessments
     WHERE idempotency_key LIKE '${PREFIX}%'
@@ -75,6 +86,10 @@ function cleanupFixtures() {
 }
 
 function cleanupClosureFixtures() {
+  deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${CLOSURE_PREFIX}%' OR evaluation_window_id IN (
+         SELECT id FROM process_oee_evaluation_windows
+         WHERE create_idempotency_key LIKE '${CLOSURE_PREFIX}%'
+       )`);
   db(`
     DELETE FROM process_oee_assessments
     WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
@@ -258,6 +273,7 @@ const invalid = await request(
 );
 assert("negative/invalid values → 400", invalid.status === 400);
 
+deleteLossDriversMatchingAssessmentFilter(`idempotency_key LIKE '${PREFIX}%'`);
 db(`DELETE FROM process_oee_assessments WHERE idempotency_key LIKE '${PREFIX}%'`);
 db(`DELETE FROM process_oee_evaluation_windows WHERE create_idempotency_key LIKE '${PREFIX}%'`);
 

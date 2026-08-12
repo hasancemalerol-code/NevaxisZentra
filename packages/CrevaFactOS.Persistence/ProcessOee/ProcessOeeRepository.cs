@@ -55,6 +55,20 @@ public interface IProcessOeeRepository
         ProcessOeeOperationContext context,
         EvaluateProcessOeeBoundedCommand command,
         CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeLossOverviewReadModel> GetLossOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeLossDetailReadModel?> GetLossDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcessOeeLossDetailReadModel?> GetLossDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class ProcessOeeRepository(
@@ -518,6 +532,13 @@ public sealed class ProcessOeeRepository(
 
         if (existingByFingerprint is not null)
         {
+            await EnsureLossDriversPersistedAsync(
+                context,
+                window,
+                evidence,
+                calculation,
+                existingByFingerprint,
+                cancellationToken);
             return ProcessOeeWriteResult.Success(
                 existingByFingerprint.Id,
                 existingByFingerprint.Version,
@@ -540,6 +561,13 @@ public sealed class ProcessOeeRepository(
                     "The idempotency key was already used with a different evaluation input.");
             }
 
+            await EnsureLossDriversPersistedAsync(
+                context,
+                window,
+                evidence,
+                calculation,
+                existingByKey,
+                cancellationToken);
             return ProcessOeeWriteResult.Success(existingByKey.Id, existingByKey.Version, idempotentReplay: true);
         }
 
@@ -601,6 +629,9 @@ public sealed class ProcessOeeRepository(
 
         dbContext.ProcessOeeAssessments.Add(assessment);
 
+        var lossAnalysis = ProcessOeeLossCalculator.Analyze(window, evidence, calculation);
+        PersistLossDrivers(context, assessment, lossAnalysis, actor);
+
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -623,6 +654,194 @@ public sealed class ProcessOeeRepository(
         }
 
         return ProcessOeeWriteResult.Success(assessment.Id, assessment.Version);
+    }
+
+    public Task<ProcessOeeLossOverviewReadModel> GetLossOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var drivers = await dbContext.ProcessOeeLossDrivers.AsNoTracking()
+                    .Where(d => d.TenantId == context.TenantId && d.FacilityId == context.FacilityId)
+                    .ToListAsync(ct);
+
+                var assessmentIds = drivers.Select(d => d.AssessmentId).Distinct().Count();
+                return new ProcessOeeLossOverviewReadModel(
+                    assessmentIds,
+                    drivers.Count(d => d.Category == ProcessOeeLossCategories.AvailabilityLoss),
+                    drivers.Count(d => d.Category == ProcessOeeLossCategories.PerformanceLoss),
+                    drivers.Count(d => d.Category == ProcessOeeLossCategories.QualityLoss),
+                    drivers.Count(d => d.Category == ProcessOeeLossCategories.InsufficientData),
+                    drivers.Count(d => d.Category == ProcessOeeLossCategories.SourceConflict),
+                    ProcessOeeLossConstants.RuleSetVersion,
+                    ProcessOeeLossConstants.LeadingLossMethod);
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeLossDetailReadModel?> GetLossDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ProcessOeeAssessments.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        a => a.Id == assessmentId
+                             && a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId,
+                        ct);
+
+                if (assessment is null)
+                {
+                    return null;
+                }
+
+                return await BuildLossDetailAsync(context, assessment, ct);
+            },
+            cancellationToken);
+
+    public Task<ProcessOeeLossDetailReadModel?> GetLossDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ProcessOeeAssessments.AsNoTracking()
+                    .Where(a => a.EvaluationWindowId == windowId
+                                && a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId)
+                    .OrderByDescending(a => a.EvaluatedAtUtc)
+                    .FirstOrDefaultAsync(ct);
+
+                if (assessment is null)
+                {
+                    return null;
+                }
+
+                return await BuildLossDetailAsync(context, assessment, ct);
+            },
+            cancellationToken);
+
+    private async Task<ProcessOeeLossDetailReadModel?> BuildLossDetailAsync(
+        ProcessOeeOperationContext context,
+        ProcessOeeAssessment assessment,
+        CancellationToken cancellationToken)
+    {
+        var drivers = await dbContext.ProcessOeeLossDrivers.AsNoTracking()
+            .Where(d => d.AssessmentId == assessment.Id
+                        && d.TenantId == context.TenantId
+                        && d.FacilityId == context.FacilityId)
+            .OrderByDescending(d => d.IsLeadingLoss)
+            .ThenByDescending(d => d.OperationalPriority)
+            .ThenBy(d => d.ReasonCode)
+            .ToListAsync(cancellationToken);
+
+        var detail = MapAssessmentDetail(assessment, await LoadMachineLookupAsync(context, cancellationToken));
+        var mappedDrivers = drivers.Select(MapLossDriver).ToList();
+
+        return new ProcessOeeLossDetailReadModel(
+            assessment.Id,
+            assessment.EvaluationWindowId,
+            assessment.Status,
+            ProcessOeeLossConstants.RuleSetVersion,
+            ProcessOeeLossConstants.LeadingLossMethod,
+            mappedDrivers.FirstOrDefault(d => d.IsLeadingLoss),
+            mappedDrivers,
+            detail.Evidence,
+            detail.MissingFields,
+            detail.Conflicts,
+            detail.SourceSystem,
+            detail.SourceFreshnessUtc,
+            detail.IsSimulatorDerived,
+            detail.CalculationHonestyDisclaimer,
+            detail.SimulatorHonestyDisclaimer);
+    }
+
+    private async Task EnsureLossDriversPersistedAsync(
+        ProcessOeeOperationContext context,
+        ProcessOeeEvaluationWindow window,
+        ProcessOeeEvidenceBundle evidence,
+        ProcessOeeCalculationResult calculation,
+        ProcessOeeAssessment assessment,
+        CancellationToken cancellationToken)
+    {
+        var hasDrivers = await dbContext.ProcessOeeLossDrivers.AsNoTracking()
+            .AnyAsync(d => d.TenantId == context.TenantId && d.AssessmentId == assessment.Id, cancellationToken);
+        if (hasDrivers)
+        {
+            return;
+        }
+
+        var actor = context.IdentitySubjectId.ToString();
+        var lossAnalysis = ProcessOeeLossCalculator.Analyze(window, evidence, calculation);
+        PersistLossDrivers(context, assessment, lossAnalysis, actor);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private void PersistLossDrivers(
+        ProcessOeeOperationContext context,
+        ProcessOeeAssessment assessment,
+        ProcessOeeLossAnalysisResult lossAnalysis,
+        string actor)
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var draft in lossAnalysis.Drivers)
+        {
+            dbContext.ProcessOeeLossDrivers.Add(new ProcessOeeLossDriver
+            {
+                Id = Guid.NewGuid(),
+                TenantId = context.TenantId,
+                FacilityId = context.FacilityId,
+                AssessmentId = assessment.Id,
+                ReasonCode = draft.ReasonCode,
+                Category = draft.Category,
+                Severity = draft.Severity,
+                OperationalPriority = draft.OperationalPriority,
+                ObservedValue = draft.ObservedValue,
+                ExpectedValue = draft.ExpectedValue,
+                AbsoluteLossValue = draft.AbsoluteLossValue,
+                AffectedDurationSeconds = draft.AffectedDurationSeconds,
+                AffectedQuantity = draft.AffectedQuantity,
+                SourceReferencesJson = draft.SourceReferencesJson,
+                EvidenceTimestampUtc = draft.EvidenceTimestampUtc,
+                FreshnessState = draft.FreshnessState,
+                ExplanationCode = draft.ExplanationCode,
+                DataLimitationsJson = draft.DataLimitationsJson,
+                RuleSetVersion = lossAnalysis.RuleSetVersion,
+                IsLeadingLoss = draft.IsLeadingLoss,
+                NormalizedImpactPoints = draft.NormalizedImpactPoints,
+                CreatedAtUtc = now,
+                CreatedBySubjectId = actor,
+            });
+        }
+    }
+
+    private static ProcessOeeLossDriverReadModel MapLossDriver(ProcessOeeLossDriver driver)
+    {
+        var sourceReferences = JsonSerializer.Deserialize<List<string>>(driver.SourceReferencesJson, JsonOptions) ?? [];
+        var limitations = JsonSerializer.Deserialize<List<string>>(driver.DataLimitationsJson, JsonOptions) ?? [];
+        return new ProcessOeeLossDriverReadModel(
+            driver.Id,
+            driver.ReasonCode,
+            driver.Category,
+            driver.Severity,
+            driver.OperationalPriority,
+            driver.ObservedValue,
+            driver.ExpectedValue,
+            driver.AbsoluteLossValue,
+            driver.AffectedDurationSeconds,
+            driver.AffectedQuantity,
+            sourceReferences,
+            driver.EvidenceTimestampUtc,
+            driver.FreshnessState,
+            driver.ExplanationCode,
+            limitations,
+            driver.RuleSetVersion,
+            driver.IsLeadingLoss,
+            driver.NormalizedImpactPoints);
     }
 
     private async Task<bool> MachineExistsAsync(
@@ -849,4 +1068,21 @@ public sealed class UnavailableProcessOeeRepository : IProcessOeeRepository
         EvaluateProcessOeeBoundedCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
+
+    public Task<ProcessOeeLossOverviewReadModel> GetLossOverviewAsync(
+        ProcessOeeOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new ProcessOeeLossOverviewReadModel(0, 0, 0, 0, 0, 0, ProcessOeeLossConstants.RuleSetVersion, ProcessOeeLossConstants.LeadingLossMethod));
+
+    public Task<ProcessOeeLossDetailReadModel?> GetLossDetailForAssessmentAsync(
+        ProcessOeeOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<ProcessOeeLossDetailReadModel?>(null);
+
+    public Task<ProcessOeeLossDetailReadModel?> GetLossDetailForWindowAsync(
+        ProcessOeeOperationContext context,
+        Guid windowId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<ProcessOeeLossDetailReadModel?>(null);
 }

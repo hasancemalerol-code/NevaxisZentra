@@ -119,6 +119,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     // Process OEE foundation (PROCESS-OEE-1)
     public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
     public DbSet<ProcessOeeAssessment> ProcessOeeAssessments => Set<ProcessOeeAssessment>();
+    public DbSet<ProcessOeeLossDriver> ProcessOeeLossDrivers => Set<ProcessOeeLossDriver>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -817,6 +818,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcessOeeLossDriverEntityConfiguration());
+        modelBuilder.Entity<ProcessOeeLossDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

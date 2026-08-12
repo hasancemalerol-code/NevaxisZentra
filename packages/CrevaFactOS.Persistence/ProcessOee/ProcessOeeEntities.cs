@@ -62,4 +62,34 @@ public sealed class ProcessOeeAssessment
     public uint Version { get; set; } = 1;
 
     public ProcessOeeEvaluationWindow? EvaluationWindow { get; set; }
+    public ICollection<ProcessOeeLossDriver> LossDrivers { get; set; } = [];
+}
+
+public sealed class ProcessOeeLossDriver
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid AssessmentId { get; set; }
+    public string ReasonCode { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Severity { get; set; } = string.Empty;
+    public int OperationalPriority { get; set; }
+    public decimal? ObservedValue { get; set; }
+    public decimal? ExpectedValue { get; set; }
+    public decimal? AbsoluteLossValue { get; set; }
+    public int? AffectedDurationSeconds { get; set; }
+    public int? AffectedQuantity { get; set; }
+    public string SourceReferencesJson { get; set; } = "[]";
+    public DateTimeOffset? EvidenceTimestampUtc { get; set; }
+    public string FreshnessState { get; set; } = ProcessOeeLossFreshnessStates.Unknown;
+    public string ExplanationCode { get; set; } = string.Empty;
+    public string DataLimitationsJson { get; set; } = "[]";
+    public string RuleSetVersion { get; set; } = ProcessOeeLossConstants.RuleSetVersion;
+    public bool IsLeadingLoss { get; set; }
+    public decimal? NormalizedImpactPoints { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public string CreatedBySubjectId { get; set; } = string.Empty;
+
+    public ProcessOeeAssessment? Assessment { get; set; }
 }

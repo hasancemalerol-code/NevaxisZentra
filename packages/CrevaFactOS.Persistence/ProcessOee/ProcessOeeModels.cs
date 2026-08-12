@@ -243,3 +243,50 @@ public sealed record ProcessOeeEvidenceBundle(
     bool HasEvidenceConflict,
     IReadOnlyList<ProcessOeeEvidenceReadModel> Evidence,
     IReadOnlyList<string> Conflicts);
+
+public sealed record ProcessOeeLossDriverReadModel(
+    Guid Id,
+    string ReasonCode,
+    string Category,
+    string Severity,
+    int OperationalPriority,
+    decimal? ObservedValue,
+    decimal? ExpectedValue,
+    decimal? AbsoluteLossValue,
+    int? AffectedDurationSeconds,
+    int? AffectedQuantity,
+    IReadOnlyList<string> SourceReferences,
+    DateTimeOffset? EvidenceTimestampUtc,
+    string FreshnessState,
+    string ExplanationCode,
+    IReadOnlyList<string> DataLimitations,
+    string RuleSetVersion,
+    bool IsLeadingLoss,
+    decimal? NormalizedImpactPoints);
+
+public sealed record ProcessOeeLossOverviewReadModel(
+    int AssessmentCountWithLossDrivers,
+    int AvailabilityLossCount,
+    int PerformanceLossCount,
+    int QualityLossCount,
+    int InsufficientDataCount,
+    int SourceConflictCount,
+    string RuleSetVersion,
+    string LeadingLossMethod);
+
+public sealed record ProcessOeeLossDetailReadModel(
+    Guid AssessmentId,
+    Guid EvaluationWindowId,
+    string AssessmentStatus,
+    string RuleSetVersion,
+    string LeadingLossMethod,
+    ProcessOeeLossDriverReadModel? LeadingLoss,
+    IReadOnlyList<ProcessOeeLossDriverReadModel> Drivers,
+    IReadOnlyList<ProcessOeeEvidenceReadModel> Evidence,
+    IReadOnlyList<string> MissingFields,
+    IReadOnlyList<string> Conflicts,
+    string? SourceSystem,
+    DateTimeOffset? SourceFreshnessUtc,
+    bool IsSimulatorDerived,
+    string CalculationHonestyDisclaimer,
+    string? SimulatorHonestyDisclaimer);

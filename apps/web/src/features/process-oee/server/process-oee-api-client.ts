@@ -3,9 +3,17 @@ import "./process-oee-server-boundary";
 import type {
   ProcessOeeAssessmentDetail,
   ProcessOeeAssessmentSummary,
+  ProcessOeeLossDetail,
   ProcessOeeWorkspaceSummary,
   ProcessOeeWriteResult,
 } from "../domain/process-oee";
+import {
+  getLossCategoryLabel,
+  getLossExplanationLabel,
+  getLossFreshnessLabel,
+  getProcessOeeStatusLabel,
+  getDriverSeverityLabel,
+} from "../presentation/process-oee-labels";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 
 export type ProcessOeeApiFailure = Readonly<{
@@ -308,6 +316,83 @@ export function getProcessOeeAssessment(
     `/api/process-oee/assessments/${encodeURIComponent(assessmentId)}`,
     undefined,
     parseAssessmentDetail,
+  );
+}
+
+function parseLossDriver(value: unknown) {
+  const item = value as Record<string, unknown>;
+  const category = String(item.category);
+  const severity = String(item.severity);
+  const explanationCode = String(item.explanationCode);
+  const freshnessState = String(item.freshnessState);
+  return {
+    id: String(item.id),
+    reasonCode: String(item.reasonCode),
+    category,
+    categoryLabel: getLossCategoryLabel(category),
+    severity,
+    severityLabel: getDriverSeverityLabel(severity),
+    operationalPriority: Number(item.operationalPriority ?? 0),
+    observedValue: readNumber(item.observedValue),
+    expectedValue: readNumber(item.expectedValue),
+    absoluteLossValue: readNumber(item.absoluteLossValue),
+    affectedDurationSeconds: readNumber(item.affectedDurationSeconds),
+    affectedQuantity: readNumber(item.affectedQuantity),
+    sourceReferences: Array.isArray(item.sourceReferences)
+      ? item.sourceReferences.map(String)
+      : [],
+    evidenceTimestampUtc: readString(item.evidenceTimestampUtc),
+    freshnessState,
+    freshnessLabel: getLossFreshnessLabel(freshnessState),
+    explanationLabel: getLossExplanationLabel(explanationCode),
+    dataLimitations: Array.isArray(item.dataLimitations)
+      ? item.dataLimitations.map(String)
+      : [],
+    ruleSetVersion: String(item.ruleSetVersion),
+    isLeadingLoss: readBoolean(item.isLeadingLoss),
+    normalizedImpactPoints: readNumber(item.normalizedImpactPoints),
+  };
+}
+
+function parseLossDetail(payload: unknown): ProcessOeeLossDetail {
+  const item = payload as Record<string, unknown>;
+  const assessmentStatus = String(item.assessmentStatus);
+  const drivers = Array.isArray(item.drivers) ? item.drivers.map(parseLossDriver) : [];
+  const leadingLossRaw = item.leadingLoss;
+  return {
+    assessmentId: String(item.assessmentId),
+    evaluationWindowId: String(item.evaluationWindowId),
+    assessmentStatus,
+    assessmentStatusLabel: getProcessOeeStatusLabel(
+      assessmentStatus,
+      readString(item.assessmentStatusLabel),
+    ),
+    ruleSetVersion: String(item.ruleSetVersion),
+    leadingLossMethod: String(item.leadingLossMethod),
+    leadingLoss: leadingLossRaw ? parseLossDriver(leadingLossRaw) : undefined,
+    drivers,
+    evidence: Array.isArray(item.evidence) ? item.evidence.map(parseEvidence) : [],
+    missingFields: Array.isArray(item.missingFields)
+      ? item.missingFields.map(String)
+      : [],
+    conflicts: Array.isArray(item.conflicts) ? item.conflicts.map(String) : [],
+    sourceSystem: readString(item.sourceSystem),
+    sourceFreshnessUtc: readString(item.sourceFreshnessUtc),
+    isSimulatorDerived: readBoolean(item.isSimulatorDerived),
+    calculationHonestyDisclaimer: String(item.calculationHonestyDisclaimer ?? ""),
+    simulatorHonestyDisclaimer: readString(item.simulatorHonestyDisclaimer),
+  };
+}
+
+export function getProcessOeeAssessmentLosses(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<ProcessOeeApiResult<ProcessOeeLossDetail>> {
+  return getJson(
+    context,
+    `/api/process-oee/assessments/${encodeURIComponent(assessmentId)}/losses`,
+    undefined,
+    parseLossDetail,
   );
 }
 

@@ -93,3 +93,46 @@ export type ProcessOeeWriteResult = Readonly<{
   version: number;
   idempotentReplay: boolean;
 }>;
+
+export type ProcessOeeLossDriver = Readonly<{
+  id: string;
+  reasonCode: string;
+  category: string;
+  categoryLabel: string;
+  severity: string;
+  severityLabel: string;
+  operationalPriority: number;
+  observedValue: number | null;
+  expectedValue: number | null;
+  absoluteLossValue: number | null;
+  affectedDurationSeconds: number | null;
+  affectedQuantity: number | null;
+  sourceReferences: readonly string[];
+  evidenceTimestampUtc?: string;
+  freshnessState: string;
+  freshnessLabel: string;
+  explanationLabel: string;
+  dataLimitations: readonly string[];
+  ruleSetVersion: string;
+  isLeadingLoss: boolean;
+  normalizedImpactPoints: number | null;
+}>;
+
+export type ProcessOeeLossDetail = Readonly<{
+  assessmentId: string;
+  evaluationWindowId: string;
+  assessmentStatus: string;
+  assessmentStatusLabel: string;
+  ruleSetVersion: string;
+  leadingLossMethod: string;
+  leadingLoss?: ProcessOeeLossDriver;
+  drivers: readonly ProcessOeeLossDriver[];
+  evidence: readonly ProcessOeeEvidence[];
+  missingFields: readonly string[];
+  conflicts: readonly string[];
+  sourceSystem?: string;
+  sourceFreshnessUtc?: string;
+  isSimulatorDerived: boolean;
+  calculationHonestyDisclaimer: string;
+  simulatorHonestyDisclaimer?: string;
+}>;

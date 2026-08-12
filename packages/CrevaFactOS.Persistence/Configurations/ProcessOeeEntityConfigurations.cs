@@ -110,3 +110,49 @@ internal sealed class ProcessOeeAssessmentEntityConfiguration : IEntityTypeConfi
             .HasDatabaseName("ix_process_oee_assessments_evaluation_window_id");
     }
 }
+
+internal sealed class ProcessOeeLossDriverEntityConfiguration : IEntityTypeConfiguration<ProcessOeeLossDriver>
+{
+    public void Configure(EntityTypeBuilder<ProcessOeeLossDriver> entity)
+    {
+        entity.ToTable("process_oee_loss_drivers");
+        entity.HasKey(d => d.Id);
+        entity.Property(d => d.Id).HasColumnName("id");
+        entity.Property(d => d.TenantId).HasColumnName("tenant_id");
+        entity.Property(d => d.FacilityId).HasColumnName("facility_id");
+        entity.Property(d => d.AssessmentId).HasColumnName("assessment_id");
+        entity.Property(d => d.ReasonCode).HasColumnName("reason_code").HasMaxLength(100).IsRequired();
+        entity.Property(d => d.Category).HasColumnName("category").HasMaxLength(40).IsRequired();
+        entity.Property(d => d.Severity).HasColumnName("severity").HasMaxLength(20).IsRequired();
+        entity.Property(d => d.OperationalPriority).HasColumnName("operational_priority");
+        entity.Property(d => d.ObservedValue).HasColumnName("observed_value").HasPrecision(18, 4);
+        entity.Property(d => d.ExpectedValue).HasColumnName("expected_value").HasPrecision(18, 4);
+        entity.Property(d => d.AbsoluteLossValue).HasColumnName("absolute_loss_value").HasPrecision(18, 4);
+        entity.Property(d => d.AffectedDurationSeconds).HasColumnName("affected_duration_seconds");
+        entity.Property(d => d.AffectedQuantity).HasColumnName("affected_quantity");
+        entity.Property(d => d.SourceReferencesJson).HasColumnName("source_references_json").IsRequired();
+        entity.Property(d => d.EvidenceTimestampUtc).HasColumnName("evidence_timestamp_utc");
+        entity.Property(d => d.FreshnessState).HasColumnName("freshness_state").HasMaxLength(20).IsRequired();
+        entity.Property(d => d.ExplanationCode).HasColumnName("explanation_code").HasMaxLength(100).IsRequired();
+        entity.Property(d => d.DataLimitationsJson).HasColumnName("data_limitations_json").IsRequired();
+        entity.Property(d => d.RuleSetVersion).HasColumnName("rule_set_version").HasMaxLength(50).IsRequired();
+        entity.Property(d => d.IsLeadingLoss).HasColumnName("is_leading_loss");
+        entity.Property(d => d.NormalizedImpactPoints).HasColumnName("normalized_impact_points").HasPrecision(8, 2);
+        entity.Property(d => d.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(d => d.CreatedBySubjectId).HasColumnName("created_by_subject_id").HasMaxLength(200).IsRequired();
+        entity.HasOne(d => d.Assessment)
+            .WithMany(a => a.LossDrivers)
+            .HasForeignKey(d => d.AssessmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(d => d.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(d => new { d.TenantId, d.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(d => new { d.TenantId, d.AssessmentId, d.ReasonCode })
+            .HasDatabaseName("ix_process_oee_loss_drivers_tenant_assessment_reason")
+            .IsUnique();
+        entity.HasIndex(d => new { d.TenantId, d.FacilityId, d.AssessmentId })
+            .HasDatabaseName("ix_process_oee_loss_drivers_tenant_facility_assessment");
+    }
+}
