@@ -3,6 +3,12 @@ import "./material-server-boundary";
 import type {
   MaterialDetail,
   MaterialLifecycleEvent,
+  MaterialLotDetail,
+  MaterialLotSummary,
+  MaterialLotTimelineEntry,
+  MaterialLotTraceability,
+  MaterialLotWorkspaceSummary,
+  MaterialStorageLocation,
   MaterialSummary,
   MaterialTechnicalSpecification,
   MaterialWorkspaceSummary,
@@ -11,6 +17,12 @@ import type {
 import {
   parseMaterialDetail,
   parseMaterialLifecycleEventList,
+  parseMaterialLotDetail,
+  parseMaterialLotSummaryList,
+  parseMaterialLotTimelineEntryList,
+  parseMaterialLotTraceability,
+  parseMaterialLotWorkspaceSummary,
+  parseMaterialStorageLocationList,
   parseMaterialSummaryList,
   parseMaterialTechnicalSpecification,
   parseMaterialWorkspaceSummary,
@@ -43,6 +55,19 @@ export type MaterialListFilters = Readonly<{
   materialCategory?: string;
   polymerFamily?: string;
   isActive?: boolean;
+  page?: number;
+  pageSize?: number;
+}>;
+
+export type MaterialLotListFilters = Readonly<{
+  materialId?: string;
+  search?: string;
+  supplierLotSearch?: string;
+  warehouseReference?: string;
+  locationReference?: string;
+  status?: string;
+  qualityStatus?: string;
+  expiryState?: string;
   page?: number;
   pageSize?: number;
 }>;
@@ -259,6 +284,160 @@ export function transitionMaterialLifecycle(
   return mutateJson(
     context,
     `/api/materials/${encodeURIComponent(materialId)}/lifecycle-transitions`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function getMaterialLotWorkspaceSummary(
+  context: ProductionOrderRequestContext,
+  filters: Pick<MaterialLotListFilters, "materialId"> = {},
+): Promise<MaterialApiResult<MaterialLotWorkspaceSummary>> {
+  return getJson(
+    context,
+    "/api/materials/lots/workspace-summary",
+    { materialId: filters.materialId },
+    parseMaterialLotWorkspaceSummary,
+  );
+}
+
+export function listMaterialLots(
+  context: ProductionOrderRequestContext,
+  filters: MaterialLotListFilters = {},
+): Promise<MaterialApiResult<readonly MaterialLotSummary[]>> {
+  return getJson(
+    context,
+    "/api/materials/lots",
+    {
+      materialId: filters.materialId,
+      search: filters.search,
+      supplierLotSearch: filters.supplierLotSearch,
+      warehouseReference: filters.warehouseReference,
+      locationReference: filters.locationReference,
+      status: filters.status,
+      qualityStatus: filters.qualityStatus,
+      expiryState: filters.expiryState,
+      page: filters.page?.toString(),
+      pageSize: filters.pageSize?.toString(),
+    },
+    parseMaterialLotSummaryList,
+  );
+}
+
+export function getMaterialLot(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+): Promise<MaterialApiResult<MaterialLotDetail>> {
+  return getJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}`,
+    undefined,
+    parseMaterialLotDetail,
+  );
+}
+
+export function listMaterialStorageLocations(
+  context: ProductionOrderRequestContext,
+): Promise<MaterialApiResult<readonly MaterialStorageLocation[]>> {
+  return getJson(context, "/api/materials/storage-locations", undefined, parseMaterialStorageLocationList);
+}
+
+export function getMaterialLotTimeline(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+): Promise<MaterialApiResult<readonly MaterialLotTimelineEntry[]>> {
+  return getJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/timeline`,
+    undefined,
+    parseMaterialLotTimelineEntryList,
+  );
+}
+
+export function getMaterialLotTraceability(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+): Promise<MaterialApiResult<MaterialLotTraceability>> {
+  return getJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/traceability`,
+    undefined,
+    parseMaterialLotTraceability,
+  );
+}
+
+export function createMaterialLot(
+  context: ProductionOrderRequestContext,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(context, "/api/materials/lots", "POST", body, parseMaterialWriteApiResponse);
+}
+
+export function observeMaterialLotReceipt(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/receipt-observations`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function transferMaterialLot(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/transfers`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function transitionMaterialLotStatus(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/status-transitions`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function recordMaterialLotQualityStatus(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/quality-status`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function linkMaterialLotCertificate(
+  context: ProductionOrderRequestContext,
+  lotId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/lots/${encodeURIComponent(lotId)}/certificates`,
     "POST",
     body,
     parseMaterialWriteApiResponse,

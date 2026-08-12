@@ -267,3 +267,206 @@ export const MATERIAL_TRANSITION_TARGETS: Record<string, readonly { value: strin
   ],
   obsolete: [],
 };
+
+export const MATERIAL_LOT_QUANTITY_DISCLAIMER =
+  "Operasyonel gözlem miktarıdır; ERP stok bakiyesi değildir.";
+
+export function getMaterialLotStatusLabel(status: string): string {
+  switch (status) {
+    case "draft":
+      return "Taslak";
+    case "received":
+      return "Alındı";
+    case "available":
+      return "Kullanılabilir";
+    case "quality-hold":
+      return "Kalite Bekliyor";
+    case "blocked":
+      return "Bloke";
+    case "closed":
+      return "Kapatıldı";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialLotQualityStatusLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Beklemede";
+    case "accepted":
+      return "Kabul";
+    case "conditionally-accepted":
+      return "Koşullu Kabul";
+    case "rejected":
+      return "Red";
+    case "not-required":
+      return "Gerekli Değil";
+    case "unknown":
+      return "Bilinmiyor";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialLotCertificateTypeLabel(type: string): string {
+  switch (type) {
+    case "certificate-of-analysis":
+      return "Analiz Sertifikası (CoA)";
+    case "material-certificate":
+      return "Malzeme Sertifikası";
+    case "safety-data-sheet":
+      return "Güvenlik Bilgi Formu (SDS)";
+    case "technical-data-sheet":
+      return "Teknik Veri Formu (TDS)";
+    case "conformity-certificate":
+      return "Uygunluk Sertifikası";
+    case "other":
+      return "Diğer";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialLotEventTypeLabel(eventType: string): string {
+  switch (eventType) {
+    case "lot-created":
+      return "Lot Oluşturuldu";
+    case "receipt-observed":
+      return "Kabul Gözlemi";
+    case "location-transfer":
+      return "Konum Transferi";
+    case "status-changed":
+      return "Durum Değişikliği";
+    case "quality-status-recorded":
+      return "Kalite Durumu";
+    case "certificate-linked":
+      return "Belge Bağlandı";
+    case "note-recorded":
+      return "Not";
+    default:
+      return "Olay";
+  }
+}
+
+export function formatMaterialLotLocation(
+  warehouse?: string | null,
+  location?: string | null,
+): string {
+  if (!warehouse && !location) {
+    return "—";
+  }
+
+  if (warehouse && location) {
+    return `${warehouse} / ${location}`;
+  }
+
+  return warehouse ?? location ?? "—";
+}
+
+export function formatMaterialLotExpiry(
+  expiryDate?: string,
+  retestDate?: string,
+  isApproaching?: boolean,
+): string {
+  const parts: string[] = [];
+  if (expiryDate) {
+    parts.push(`SKT: ${formatMaterialDateOnly(expiryDate)}`);
+  }
+  if (retestDate) {
+    parts.push(`Yeniden test: ${formatMaterialDateOnly(retestDate)}`);
+  }
+  if (parts.length === 0) {
+    return "—";
+  }
+  return isApproaching ? `${parts.join(" · ")} (yaklaşıyor)` : parts.join(" · ");
+}
+
+export function formatMaterialDateOnly(value?: string): string {
+  if (!value) {
+    return "—";
+  }
+
+  return new Date(value).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function formatMaterialQuantity(value?: number | null, unit?: string): string {
+  if (value === undefined || value === null) {
+    return "—";
+  }
+
+  const formatted = value.toLocaleString("tr-TR");
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
+export const MATERIAL_LOT_STATUS_FILTER_OPTIONS = [
+  { value: "", label: "Tüm durumlar" },
+  { value: "draft", label: "Taslak" },
+  { value: "received", label: "Alındı" },
+  { value: "available", label: "Kullanılabilir" },
+  { value: "quality-hold", label: "Kalite Bekliyor" },
+  { value: "blocked", label: "Bloke" },
+  { value: "closed", label: "Kapatıldı" },
+] as const;
+
+export const MATERIAL_LOT_QUALITY_FILTER_OPTIONS = [
+  { value: "", label: "Tüm kalite durumları" },
+  { value: "pending", label: "Beklemede" },
+  { value: "accepted", label: "Kabul" },
+  { value: "conditionally-accepted", label: "Koşullu Kabul" },
+  { value: "rejected", label: "Red" },
+  { value: "not-required", label: "Gerekli Değil" },
+] as const;
+
+export const MATERIAL_LOT_EXPIRY_FILTER_OPTIONS = [
+  { value: "", label: "Tüm SKT durumları" },
+  { value: "approaching", label: "Süresi Yaklaşan" },
+  { value: "expired", label: "Süresi Geçmiş" },
+] as const;
+
+export const MATERIAL_LOT_QUALITY_FORM_OPTIONS = [
+  { value: "pending", label: "Beklemede" },
+  { value: "accepted", label: "Kabul" },
+  { value: "conditionally-accepted", label: "Koşullu Kabul" },
+  { value: "rejected", label: "Red" },
+  { value: "not-required", label: "Gerekli Değil" },
+] as const;
+
+export const MATERIAL_LOT_CERTIFICATE_FORM_OPTIONS = [
+  { value: "certificate-of-analysis", label: "Analiz Sertifikası (CoA)" },
+  { value: "material-certificate", label: "Malzeme Sertifikası" },
+  { value: "safety-data-sheet", label: "Güvenlik Bilgi Formu (SDS)" },
+  { value: "technical-data-sheet", label: "Teknik Veri Formu (TDS)" },
+  { value: "conformity-certificate", label: "Uygunluk Sertifikası" },
+  { value: "other", label: "Diğer" },
+] as const;
+
+export const MATERIAL_LOT_TRANSITION_TARGETS: Record<string, readonly { value: string; label: string }[]> = {
+  draft: [
+    { value: "received", label: "Alındı" },
+    { value: "blocked", label: "Bloke" },
+  ],
+  received: [
+    { value: "quality-hold", label: "Kalite Bekliyor" },
+    { value: "available", label: "Kullanılabilir" },
+    { value: "blocked", label: "Bloke" },
+  ],
+  "quality-hold": [
+    { value: "available", label: "Kullanılabilir" },
+    { value: "blocked", label: "Bloke" },
+  ],
+  available: [
+    { value: "quality-hold", label: "Kalite Bekliyor" },
+    { value: "blocked", label: "Bloke" },
+    { value: "closed", label: "Kapatıldı" },
+  ],
+  blocked: [
+    { value: "quality-hold", label: "Kalite Bekliyor" },
+    { value: "closed", label: "Kapatıldı" },
+  ],
+  closed: [],
+};

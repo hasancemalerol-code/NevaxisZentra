@@ -517,6 +517,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotMaterialLotSeed.EnsureMaterialLotPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotMaintenanceConditionSeed.EnsureMaintenanceConditionPilotDataAsync(
                 dbContext,
                 tenant.Id,

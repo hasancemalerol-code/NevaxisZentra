@@ -37,6 +37,7 @@ import {
   updateMaterialAction,
   updateMaterialTechnicalAction,
 } from "../server/material-writer";
+import { MaterialLotPanel } from "./material-lot-panel";
 import "./material-registry.css";
 
 type MaterialRegistryViewProps = Readonly<{
@@ -48,7 +49,7 @@ type MaterialRegistryViewProps = Readonly<{
   initialHistory?: readonly MaterialLifecycleEvent[];
 }>;
 
-type DetailTab = "overview" | "technical" | "source" | "history";
+type DetailTab = "overview" | "technical" | "source" | "history" | "lots" | "traceability";
 type ActionPanel = "edit" | "technical" | "transition" | null;
 
 function lifecycleBadgeClass(status: string): string {
@@ -82,6 +83,8 @@ const DETAIL_TABS: readonly [DetailTab, string][] = [
   ["technical", "Teknik Özellikler"],
   ["source", "Kaynak ve ERP Referansı"],
   ["history", "Durum Geçmişi"],
+  ["lots", "Lotlar"],
+  ["traceability", "İzlenebilirlik"],
 ];
 
 export function MaterialRegistryView({
@@ -1055,6 +1058,27 @@ export function MaterialRegistryView({
                       </div>
                     )}
                   </div>
+                ) : null}
+
+                {tab === "lots" && activeDetail ? (
+                  <MaterialLotPanel
+                    materialId={activeDetail.id}
+                    materialCode={activeDetail.code}
+                    materialName={activeDetail.name}
+                    unitOfMeasure={activeDetail.unitOfMeasure}
+                    canManage={detailCanManage}
+                  />
+                ) : null}
+
+                {tab === "traceability" && activeDetail ? (
+                  <MaterialLotPanel
+                    materialId={activeDetail.id}
+                    materialCode={activeDetail.code}
+                    materialName={activeDetail.name}
+                    unitOfMeasure={activeDetail.unitOfMeasure}
+                    canManage={detailCanManage}
+                    traceabilityMode
+                  />
                 ) : null}
               </>
             ) : !isPending ? (

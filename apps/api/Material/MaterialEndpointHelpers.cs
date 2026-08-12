@@ -95,6 +95,73 @@ internal static class MaterialEndpointHelpers
             : TypedResults.Ok(dto);
     }
 
+    internal static IResult MapLotWriteResult(MaterialLotWriteResult result, bool isCreate)
+    {
+        if (!result.Succeeded)
+        {
+            return MapMaterialLotFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        var dto = new MaterialWriteSuccessDto(result.EntityId!.Value, result.Version!.Value, result.IdempotentReplay);
+
+        return isCreate
+            ? TypedResults.Created((string?)null, dto)
+            : TypedResults.Ok(dto);
+    }
+
+    internal static IResult MapMaterialLotFailure(string failureCode, string? reason) =>
+        failureCode switch
+        {
+            MaterialLotFailureCodes.InvalidScope => TypedResults.Problem(
+                title: reason ?? "Invalid scope.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialLotApiFailureCodes.InvalidScope)),
+            MaterialLotFailureCodes.NotFound => TypedResults.Problem(
+                title: reason ?? "Material lot not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(MaterialLotApiFailureCodes.NotFound)),
+            MaterialLotFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: reason ?? "The record was modified by another user.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialLotApiFailureCodes.ConcurrencyConflict)),
+            MaterialLotFailureCodes.InvalidTransition => TypedResults.Problem(
+                title: reason ?? "This lot status transition is not allowed.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialLotApiFailureCodes.InvalidTransition)),
+            MaterialLotFailureCodes.LotNumberConflict => TypedResults.Problem(
+                title: reason ?? "A lot with this number already exists for the material.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialLotApiFailureCodes.LotNumberConflict)),
+            MaterialLotFailureCodes.IdempotencyConflict => TypedResults.Problem(
+                title: reason ?? "The idempotency key was already used with a different command payload.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialLotApiFailureCodes.IdempotencyConflict)),
+            MaterialLotFailureCodes.IdempotencyLegacyUnverifiable => TypedResults.Problem(
+                title: reason ?? "The idempotency key belongs to a legacy create that cannot be verified safely.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialLotApiFailureCodes.IdempotencyLegacyUnverifiable)),
+            MaterialLotFailureCodes.InvalidLocation => TypedResults.Problem(
+                title: reason ?? "Storage location is invalid.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialLotApiFailureCodes.InvalidLocation)),
+            MaterialLotFailureCodes.InvalidQuantity => TypedResults.Problem(
+                title: reason ?? "Quantity is invalid.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialLotApiFailureCodes.InvalidQuantity)),
+            MaterialLotFailureCodes.ValidationFailed => TypedResults.Problem(
+                title: reason ?? "Validation failed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialLotApiFailureCodes.ValidationFailed)),
+            MaterialLotFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: reason ?? "Material lot service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: FailureExt(MaterialLotApiFailureCodes.SourceUnavailable)),
+            _ => TypedResults.Problem(
+                title: reason ?? "Request failed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialLotApiFailureCodes.ValidationFailed)),
+        };
+
     internal static IResult MapMaterialFailure(string failureCode, string? reason) =>
         failureCode switch
         {
@@ -179,6 +246,21 @@ internal static class MaterialEndpointHelpers
 
     internal static Dictionary<string, object?> FailureExt(string failureCode) =>
         new() { ["failureCode"] = failureCode };
+}
+
+internal static class MaterialLotApiFailureCodes
+{
+    public const string InvalidScope = "material.lot.invalid-scope";
+    public const string NotFound = "material.lot.not-found";
+    public const string InvalidTransition = "material.lot.invalid-transition";
+    public const string ConcurrencyConflict = "material.lot.concurrency-conflict";
+    public const string ValidationFailed = "material.lot.validation-failed";
+    public const string LotNumberConflict = "material.lot.lot-number-conflict";
+    public const string IdempotencyConflict = "material.lot.idempotency-conflict";
+    public const string IdempotencyLegacyUnverifiable = "material.lot.idempotency-legacy-unverifiable";
+    public const string InvalidLocation = "material.lot.invalid-location";
+    public const string InvalidQuantity = "material.lot.invalid-quantity";
+    public const string SourceUnavailable = "material.lot.source-unavailable";
 }
 
 internal static class MaterialApiFailureCodes

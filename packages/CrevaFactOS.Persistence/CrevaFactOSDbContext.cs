@@ -104,6 +104,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaterialTechnicalSpecification> MaterialTechnicalSpecifications => Set<MaterialTechnicalSpecification>();
     public DbSet<MaterialLifecycleEvent> MaterialLifecycleEvents => Set<MaterialLifecycleEvent>();
 
+    // Material lots & traceability (MATERIAL-2)
+    public DbSet<MaterialLot> MaterialLots => Set<MaterialLot>();
+    public DbSet<MaterialStorageLocation> MaterialStorageLocations => Set<MaterialStorageLocation>();
+    public DbSet<MaterialLotTraceabilityEvent> MaterialLotTraceabilityEvents => Set<MaterialLotTraceabilityEvent>();
+    public DbSet<MaterialLotCertificateReference> MaterialLotCertificateReferences => Set<MaterialLotCertificateReference>();
+
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
     public DbSet<MoldLifecycleEvent> MoldLifecycleEvents => Set<MoldLifecycleEvent>();
@@ -747,6 +753,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialLotEntityConfiguration());
+        modelBuilder.Entity<MaterialLot>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialStorageLocationEntityConfiguration());
+        modelBuilder.Entity<MaterialStorageLocation>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialLotTraceabilityEventEntityConfiguration());
+        modelBuilder.Entity<MaterialLotTraceabilityEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialLotCertificateReferenceEntityConfiguration());
+        modelBuilder.Entity<MaterialLotCertificateReference>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

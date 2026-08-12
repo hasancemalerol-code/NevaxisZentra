@@ -6,7 +6,13 @@ import { revalidatePath } from "next/cache";
 
 import {
   createMaterial,
+  createMaterialLot,
+  linkMaterialLotCertificate,
+  observeMaterialLotReceipt,
+  recordMaterialLotQualityStatus,
   transitionMaterialLifecycle,
+  transitionMaterialLotStatus,
+  transferMaterialLot,
   updateMaterial,
   updateMaterialTechnicalSpecification,
 } from "./material-api-client";
@@ -166,4 +172,131 @@ export async function transitionMaterialLifecycleAction(formData: FormData): Pro
   };
 
   return mapResult(await transitionMaterialLifecycle(resolved.context, materialId, body));
+}
+
+export async function createMaterialLotAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const body = {
+    materialId: String(formData.get("materialId") ?? ""),
+    lotNumber: String(formData.get("lotNumber") ?? ""),
+    supplierLotNumber: String(formData.get("supplierLotNumber") ?? "") || null,
+    manufacturerLotNumber: String(formData.get("manufacturerLotNumber") ?? "") || null,
+    supplierReference: String(formData.get("supplierReference") ?? "") || null,
+    purchaseOrderReference: String(formData.get("purchaseOrderReference") ?? "") || null,
+    goodsReceiptReference: String(formData.get("goodsReceiptReference") ?? "") || null,
+    externalSystem: String(formData.get("externalSystem") ?? "") || null,
+    externalLotReference: String(formData.get("externalLotReference") ?? "") || null,
+    manufactureDate: String(formData.get("manufactureDate") ?? "") || null,
+    expiryDate: String(formData.get("expiryDate") ?? "") || null,
+    retestDate: String(formData.get("retestDate") ?? "") || null,
+    initialQuantity: readOptionalNumber(formData, "initialQuantity"),
+    unitOfMeasure: String(formData.get("unitOfMeasure") ?? "kg"),
+    qualityStatus: String(formData.get("qualityStatus") ?? "pending"),
+    storageLocationId: String(formData.get("storageLocationId") ?? "") || null,
+    sourceType: String(formData.get("sourceType") ?? "manual"),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    notes: String(formData.get("notes") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await createMaterialLot(resolved.context, body));
+}
+
+export async function observeMaterialLotReceiptAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotId = String(formData.get("lotId") ?? "");
+  const body = {
+    expectedVersion: Number(formData.get("expectedVersion") ?? 0),
+    receivedAtUtc: String(formData.get("receivedAtUtc") ?? new Date().toISOString()),
+    observedQuantity: Number(formData.get("observedQuantity") ?? 0),
+    goodsReceiptReference: String(formData.get("goodsReceiptReference") ?? "") || null,
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await observeMaterialLotReceipt(resolved.context, lotId, body));
+}
+
+export async function transferMaterialLotAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotId = String(formData.get("lotId") ?? "");
+  const body = {
+    expectedVersion: Number(formData.get("expectedVersion") ?? 0),
+    targetStorageLocationId: String(formData.get("targetStorageLocationId") ?? ""),
+    reason: String(formData.get("reason") ?? "") || null,
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await transferMaterialLot(resolved.context, lotId, body));
+}
+
+export async function transitionMaterialLotStatusAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotId = String(formData.get("lotId") ?? "");
+  const body = {
+    expectedVersion: Number(formData.get("expectedVersion") ?? 0),
+    targetStatus: String(formData.get("targetStatus") ?? ""),
+    reason: String(formData.get("reason") ?? ""),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await transitionMaterialLotStatus(resolved.context, lotId, body));
+}
+
+export async function recordMaterialLotQualityStatusAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotId = String(formData.get("lotId") ?? "");
+  const body = {
+    expectedVersion: Number(formData.get("expectedVersion") ?? 0),
+    qualityStatus: String(formData.get("qualityStatus") ?? ""),
+    reason: String(formData.get("reason") ?? "") || null,
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await recordMaterialLotQualityStatus(resolved.context, lotId, body));
+}
+
+export async function linkMaterialLotCertificateAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotId = String(formData.get("lotId") ?? "");
+  const body = {
+    certificateType: String(formData.get("certificateType") ?? "other"),
+    documentReference: String(formData.get("documentReference") ?? ""),
+    documentNumber: String(formData.get("documentNumber") ?? "") || null,
+    issuer: String(formData.get("issuer") ?? "") || null,
+    issuedDate: String(formData.get("issuedDate") ?? "") || null,
+    expiryDate: String(formData.get("expiryDate") ?? "") || null,
+    sourceType: String(formData.get("sourceType") ?? "manual"),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await linkMaterialLotCertificate(resolved.context, lotId, body));
 }

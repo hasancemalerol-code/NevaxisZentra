@@ -2,9 +2,15 @@ import "./material-server-boundary";
 
 import {
   getMaterial,
+  getMaterialLot,
+  getMaterialLotTimeline,
+  getMaterialLotTraceability,
+  getMaterialLotWorkspaceSummary,
   getMaterialWorkspaceSummary,
   listMaterialLifecycleHistory,
+  listMaterialLots,
   listMaterials,
+  listMaterialStorageLocations,
   probeMaterialManagePermission,
   probeMaterialReadPermission,
 } from "./material-api-client";
@@ -12,10 +18,16 @@ import { resolveMaterialRequestContext } from "./material-request-context";
 import type {
   MaterialDetail,
   MaterialLifecycleEvent,
+  MaterialLotDetail,
+  MaterialLotSummary,
+  MaterialLotTimelineEntry,
+  MaterialLotTraceability,
+  MaterialLotWorkspaceSummary,
+  MaterialStorageLocation,
   MaterialSummary,
   MaterialWorkspaceSummary,
 } from "../domain/materials";
-import type { MaterialApiFailure, MaterialListFilters } from "./material-api-client";
+import type { MaterialApiFailure, MaterialListFilters, MaterialLotListFilters } from "./material-api-client";
 
 type ReadFailure = Readonly<{
   status: "failure";
@@ -37,6 +49,27 @@ export type MaterialDetailResult =
       status: "success";
       material: MaterialDetail;
       lifecycleHistory: readonly MaterialLifecycleEvent[];
+      canManage: boolean;
+    }>
+  | ReadFailure;
+
+export type MaterialLotsResult =
+  | Readonly<{
+      status: "success";
+      summary: MaterialLotWorkspaceSummary;
+      lots: readonly MaterialLotSummary[];
+      storageLocations: readonly MaterialStorageLocation[];
+      canManage: boolean;
+    }>
+  | ReadFailure;
+
+export type MaterialLotDetailResult =
+  | Readonly<{
+      status: "success";
+      lot: MaterialLotDetail;
+      timeline: readonly MaterialLotTimelineEntry[];
+      traceability: MaterialLotTraceability;
+      storageLocations: readonly MaterialStorageLocation[];
       canManage: boolean;
     }>
   | ReadFailure;
@@ -124,6 +157,110 @@ export async function readMaterialDetail(materialId: string): Promise<MaterialDe
     status: "success",
     material: materialResult.value,
     lifecycleHistory: historyResult.value,
+    canManage: await probeMaterialManagePermission(resolved.context),
+  };
+}
+
+export async function readMaterialLotsForMaterial(
+  materialId: string,
+  filters: MaterialLotListFilters = {},
+): Promise<MaterialLotsResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const lotFilters = { ...filters, materialId };
+  const [summaryResult, lotsResult, locationsResult] = await Promise.all([
+    getMaterialLotWorkspaceSummary(resolved.context, { materialId }),
+    listMaterialLots(resolved.context, lotFilters),
+    listMaterialStorageLocations(resolved.context),
+  ]);
+
+  if (summaryResult.status === "failure") {
+    return {
+      status: "failure",
+      message: summaryResult.message,
+      code: summaryResult.code,
+    };
+  }
+
+  if (lotsResult.status === "failure") {
+    return {
+      status: "failure",
+      message: lotsResult.message,
+      code: lotsResult.code,
+    };
+  }
+
+  if (locationsResult.status === "failure") {
+    return {
+      status: "failure",
+      message: locationsResult.message,
+      code: locationsResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    summary: summaryResult.value,
+    lots: lotsResult.value,
+    storageLocations: locationsResult.value,
+    canManage: await probeMaterialManagePermission(resolved.context),
+  };
+}
+
+export async function readMaterialLotDetail(lotId: string): Promise<MaterialLotDetailResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const [lotResult, timelineResult, traceabilityResult, locationsResult] = await Promise.all([
+    getMaterialLot(resolved.context, lotId),
+    getMaterialLotTimeline(resolved.context, lotId),
+    getMaterialLotTraceability(resolved.context, lotId),
+    listMaterialStorageLocations(resolved.context),
+  ]);
+
+  if (lotResult.status === "failure") {
+    return {
+      status: "failure",
+      message: lotResult.message,
+      code: lotResult.code,
+    };
+  }
+
+  if (timelineResult.status === "failure") {
+    return {
+      status: "failure",
+      message: timelineResult.message,
+      code: timelineResult.code,
+    };
+  }
+
+  if (traceabilityResult.status === "failure") {
+    return {
+      status: "failure",
+      message: traceabilityResult.message,
+      code: traceabilityResult.code,
+    };
+  }
+
+  if (locationsResult.status === "failure") {
+    return {
+      status: "failure",
+      message: locationsResult.message,
+      code: locationsResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    lot: lotResult.value,
+    timeline: timelineResult.value,
+    traceability: traceabilityResult.value,
+    storageLocations: locationsResult.value,
     canManage: await probeMaterialManagePermission(resolved.context),
   };
 }

@@ -346,6 +346,28 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaterialPilotBlockedId =
         Guid.Parse("bb000001-00a6-4000-8000-0000000000a6");
 
+    // Material lot pilot fixtures (MATERIAL-2)
+    public static readonly Guid MaterialStorageLocationRawWarehouseId =
+        Guid.Parse("bb000001-00a7-4000-8000-0000000000a7");
+
+    public static readonly Guid MaterialStorageLocationQuarantineId =
+        Guid.Parse("bb000001-00a8-4000-8000-0000000000a8");
+
+    public static readonly Guid MaterialStorageLocationBlockedBayId =
+        Guid.Parse("bb000001-00a9-4000-8000-0000000000a9");
+
+    public static readonly Guid MaterialPilotLotPpAvailableId =
+        Guid.Parse("bb000001-00aa-4000-8000-0000000000aa");
+
+    public static readonly Guid MaterialPilotLotAbsQualityHoldId =
+        Guid.Parse("bb000001-00ab-4000-8000-0000000000ab");
+
+    public static readonly Guid MaterialPilotLotBlockedExpiryRiskId =
+        Guid.Parse("bb000001-00ac-4000-8000-0000000000ac");
+
+    public static readonly Guid MaterialPilotLotPpCertificateId =
+        Guid.Parse("bb000001-00ad-4000-8000-0000000000ad");
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

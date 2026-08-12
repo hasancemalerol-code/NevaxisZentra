@@ -1712,3 +1712,122 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ─── MATERIAL-2 lot workspace ─── */
+
+.material-lot-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.material-lot-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.material-lot-disclaimer {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.material-lot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.material-lot-registry {
+  margin-top: 0.25rem;
+}
+
+.material-lot-detail {
+  margin-top: 0.5rem;
+}
+
+.material-lot-document-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.material-lot-document-list li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.material-lot-document-list em {
+  font-style: normal;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.material-lot-traceability {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.material-lot-traceability__header p {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #155eef;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.material-lot-traceability__header h3 {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  color: #12263a;
+}
+
+.material-lot-traceability__header span {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.material-lot-traceability__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.material-lot-traceability-picker label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.material-lot-traceability-picker select {
+  min-height: 2.2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+}
+
+@media (max-width: 960px) {
+  .material-lot-kpis,
+  .material-lot-traceability__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

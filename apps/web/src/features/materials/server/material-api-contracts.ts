@@ -1,6 +1,15 @@
 import type {
   MaterialDetail,
   MaterialLifecycleEvent,
+  MaterialLotBackwardTraceability,
+  MaterialLotCertificate,
+  MaterialLotDetail,
+  MaterialLotForwardTraceability,
+  MaterialLotSummary,
+  MaterialLotTimelineEntry,
+  MaterialLotTraceability,
+  MaterialLotWorkspaceSummary,
+  MaterialStorageLocation,
   MaterialSummary,
   MaterialTechnicalSpecification,
   MaterialWorkspaceSummary,
@@ -157,5 +166,227 @@ export function parseMaterialWriteApiResponse(payload: unknown): MaterialWriteRe
     id: String(item.id),
     version: Number(item.version),
     idempotentReplay: Boolean(item.idempotentReplay),
+  };
+}
+
+function readOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+export function parseMaterialLotSummary(value: unknown): MaterialLotSummary {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialName: String(item.materialName),
+    lotNumber: String(item.lotNumber),
+    supplierLotNumber: readOptionalString(item.supplierLotNumber),
+    manufacturerLotNumber: readOptionalString(item.manufacturerLotNumber),
+    status: String(item.status),
+    qualityStatus: String(item.qualityStatus),
+    currentWarehouseReference: readOptionalString(item.currentWarehouseReference),
+    currentLocationReference: readOptionalString(item.currentLocationReference),
+    currentObservedQuantity: readNumber(item.currentObservedQuantity),
+    unitOfMeasure: String(item.unitOfMeasure),
+    expiryDate: readOptionalString(item.expiryDate),
+    retestDate: readOptionalString(item.retestDate),
+    isExpiryApproaching: item.isExpiryApproaching === true,
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialLotSummaryList(payload: unknown): readonly MaterialLotSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected material lot list array.");
+  }
+
+  return payload.map(parseMaterialLotSummary);
+}
+
+export function parseMaterialLotDetail(payload: unknown): MaterialLotDetail {
+  const item = payload as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    facilityId: String(item.facilityId),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialName: String(item.materialName),
+    lotNumber: String(item.lotNumber),
+    supplierLotNumber: readOptionalString(item.supplierLotNumber),
+    manufacturerLotNumber: readOptionalString(item.manufacturerLotNumber),
+    supplierReference: readOptionalString(item.supplierReference),
+    purchaseOrderReference: readOptionalString(item.purchaseOrderReference),
+    goodsReceiptReference: readOptionalString(item.goodsReceiptReference),
+    externalSystem: readOptionalString(item.externalSystem),
+    externalLotReference: readOptionalString(item.externalLotReference),
+    manufactureDate: readOptionalString(item.manufactureDate),
+    receivedAtUtc: readOptionalString(item.receivedAtUtc),
+    expiryDate: readOptionalString(item.expiryDate),
+    retestDate: readOptionalString(item.retestDate),
+    initialQuantity: readNumber(item.initialQuantity),
+    currentObservedQuantity: readNumber(item.currentObservedQuantity),
+    unitOfMeasure: String(item.unitOfMeasure),
+    status: String(item.status),
+    qualityStatus: String(item.qualityStatus),
+    currentStorageLocationId: readOptionalString(item.currentStorageLocationId),
+    currentWarehouseReference: readOptionalString(item.currentWarehouseReference),
+    currentLocationReference: readOptionalString(item.currentLocationReference),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    notes: readOptionalString(item.notes),
+    createdAtUtc: String(item.createdAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialLotWorkspaceSummary(payload: unknown): MaterialLotWorkspaceSummary {
+  const item = payload as Record<string, unknown>;
+  return {
+    totalCount: Number(item.totalCount),
+    availableCount: Number(item.availableCount),
+    qualityHoldCount: Number(item.qualityHoldCount),
+    blockedCount: Number(item.blockedCount),
+    expiryApproachingCount: Number(item.expiryApproachingCount),
+  };
+}
+
+export function parseMaterialStorageLocation(value: unknown): MaterialStorageLocation {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    warehouseCode: String(item.warehouseCode),
+    warehouseName: String(item.warehouseName),
+    locationCode: String(item.locationCode),
+    locationName: String(item.locationName),
+    isActive: item.isActive === true,
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialStorageLocationList(payload: unknown): readonly MaterialStorageLocation[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected storage location list array.");
+  }
+
+  return payload.map(parseMaterialStorageLocation);
+}
+
+export function parseMaterialLotTimelineEntry(value: unknown): MaterialLotTimelineEntry {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    eventType: String(item.eventType),
+    eventAtUtc: String(item.eventAtUtc),
+    quantity: readNumber(item.quantity),
+    unitOfMeasure: readOptionalString(item.unitOfMeasure),
+    fromWarehouseReference: readOptionalString(item.fromWarehouseReference),
+    fromLocationReference: readOptionalString(item.fromLocationReference),
+    toWarehouseReference: readOptionalString(item.toWarehouseReference),
+    toLocationReference: readOptionalString(item.toLocationReference),
+    statusBefore: readOptionalString(item.statusBefore),
+    statusAfter: readOptionalString(item.statusAfter),
+    qualityStatusBefore: readOptionalString(item.qualityStatusBefore),
+    qualityStatusAfter: readOptionalString(item.qualityStatusAfter),
+    reason: readOptionalString(item.reason),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    actorDisplayName: String(item.actorDisplayName),
+    createdAtUtc: String(item.createdAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialLotTimelineEntryList(payload: unknown): readonly MaterialLotTimelineEntry[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected lot timeline array.");
+  }
+
+  return payload.map(parseMaterialLotTimelineEntry);
+}
+
+export function parseMaterialLotCertificate(value: unknown): MaterialLotCertificate {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    certificateType: String(item.certificateType),
+    documentReference: String(item.documentReference),
+    documentNumber: readOptionalString(item.documentNumber),
+    issuer: readOptionalString(item.issuer),
+    issuedDate: readOptionalString(item.issuedDate),
+    expiryDate: readOptionalString(item.expiryDate),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    createdAtUtc: String(item.createdAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialLotBackwardTraceability(payload: unknown): MaterialLotBackwardTraceability {
+  const item = payload as Record<string, unknown>;
+  const certificates = item.certificates;
+  const sourceEvents = item.sourceEvents;
+  return {
+    lotId: String(item.lotId),
+    lotNumber: String(item.lotNumber),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialName: String(item.materialName),
+    supplierLotNumber: readOptionalString(item.supplierLotNumber),
+    manufacturerLotNumber: readOptionalString(item.manufacturerLotNumber),
+    supplierReference: readOptionalString(item.supplierReference),
+    purchaseOrderReference: readOptionalString(item.purchaseOrderReference),
+    goodsReceiptReference: readOptionalString(item.goodsReceiptReference),
+    externalSystem: readOptionalString(item.externalSystem),
+    externalLotReference: readOptionalString(item.externalLotReference),
+    initialWarehouseReference: readOptionalString(item.initialWarehouseReference),
+    initialLocationReference: readOptionalString(item.initialLocationReference),
+    certificates: Array.isArray(certificates) ? certificates.map(parseMaterialLotCertificate) : [],
+    sourceEvents: Array.isArray(sourceEvents) ? sourceEvents.map(parseMaterialLotTimelineEntry) : [],
+  };
+}
+
+export function parseMaterialLotForwardTraceability(payload: unknown): MaterialLotForwardTraceability {
+  const item = payload as Record<string, unknown>;
+  const locationTransfers = item.locationTransfers;
+  const statusChanges = item.statusChanges;
+  const qualityChanges = item.qualityChanges;
+  const certificates = item.certificates;
+  return {
+    lotId: String(item.lotId),
+    lotNumber: String(item.lotNumber),
+    currentWarehouseReference: readOptionalString(item.currentWarehouseReference),
+    currentLocationReference: readOptionalString(item.currentLocationReference),
+    status: String(item.status),
+    qualityStatus: String(item.qualityStatus),
+    locationTransfers: Array.isArray(locationTransfers) ? locationTransfers.map(parseMaterialLotTimelineEntry) : [],
+    statusChanges: Array.isArray(statusChanges) ? statusChanges.map(parseMaterialLotTimelineEntry) : [],
+    qualityChanges: Array.isArray(qualityChanges) ? qualityChanges.map(parseMaterialLotTimelineEntry) : [],
+    certificates: Array.isArray(certificates) ? certificates.map(parseMaterialLotCertificate) : [],
+  };
+}
+
+export function parseMaterialLotTraceability(payload: unknown): MaterialLotTraceability {
+  const item = payload as Record<string, unknown>;
+  const backward = item.backward;
+  const forward = item.forward;
+  return {
+    backward:
+      backward && typeof backward === "object"
+        ? parseMaterialLotBackwardTraceability(backward)
+        : null,
+    forward:
+      forward && typeof forward === "object"
+        ? parseMaterialLotForwardTraceability(forward)
+        : null,
   };
 }
