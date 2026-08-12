@@ -26,6 +26,25 @@ type MoldCompatibilityDetailPanelProps = Readonly<{
   onAction: (action: () => Promise<{ status: string; message?: string; compatibilityOverview?: MoldCompatibilityOverview }>) => void;
 }>;
 
+function compatibilityBadgeClass(status: string): string {
+  switch (status) {
+    case "compatible":
+    case "pass":
+      return "mold-registry-badge mold-registry-badge--compatible";
+    case "conditional":
+    case "warn":
+      return "mold-registry-badge mold-registry-badge--conditional";
+    case "incompatible":
+    case "fail":
+      return "mold-registry-badge mold-registry-badge--incompatible";
+    case "insufficient-data":
+    case "unknown":
+      return "mold-registry-badge mold-registry-badge--insufficient-data";
+    default:
+      return "mold-registry-badge mold-registry-badge--neutral";
+  }
+}
+
 export function MoldCompatibilityDetailPanel({
   moldId,
   overview,
@@ -48,11 +67,19 @@ export function MoldCompatibilityDetailPanel({
   );
 
   if (loadError) {
-    return <div className="mold-registry-error" role="alert">{loadError}</div>;
+    return (
+      <div className="mold-registry-error" role="alert">
+        {loadError}
+      </div>
+    );
   }
 
   if (!overview && isPending) {
-    return <div className="mold-registry-empty" role="status">Makine uyumluluğu yükleniyor…</div>;
+    return (
+      <div className="mold-registry-empty" role="status" aria-live="polite">
+        Makine uyumluluğu yükleniyor…
+      </div>
+    );
   }
 
   if (!overview && !isPending) {
@@ -86,20 +113,20 @@ export function MoldCompatibilityDetailPanel({
 
   return (
     <>
-      <section className="mold-registry-kpis" aria-label="Makine uyumluluğu özeti">
-        <article className="mold-registry-kpi">
+      <section className="mold-registry-kpis mold-registry-kpis--compact" aria-label="Makine uyumluluğu özeti">
+        <article className="mold-registry-kpi mold-registry-kpi--success">
           <strong>{overview.compatibleCount}</strong>
           <span>Uyumlu</span>
         </article>
-        <article className="mold-registry-kpi">
+        <article className="mold-registry-kpi mold-registry-kpi--warning">
           <strong>{overview.conditionalCount}</strong>
           <span>Koşullu</span>
         </article>
-        <article className="mold-registry-kpi">
+        <article className="mold-registry-kpi mold-registry-kpi--critical">
           <strong>{overview.incompatibleCount}</strong>
           <span>Uyumsuz</span>
         </article>
-        <article className="mold-registry-kpi">
+        <article className="mold-registry-kpi mold-registry-kpi--neutral">
           <strong>{overview.insufficientDataCount}</strong>
           <span>Yetersiz Veri</span>
         </article>
@@ -111,8 +138,8 @@ export function MoldCompatibilityDetailPanel({
         </div>
       ) : null}
 
-      {canManage ? (
-        <div className="mold-registry-actions">
+      <div className="mold-registry-actions mold-registry-actions--start">
+        {canManage ? (
           <button
             type="button"
             className="mold-registry-button primary"
@@ -121,166 +148,203 @@ export function MoldCompatibilityDetailPanel({
           >
             Tüm Makineleri Değerlendir
           </button>
-        </div>
-      ) : (
-        <div className="mold-registry-empty">Makine uyumluluğu için yalnızca görüntüleme yetkiniz var.</div>
-      )}
-
-      <table className="mold-registry-table">
-        <thead>
-          <tr>
-            <th>Makine</th>
-            <th>Teknik Durum</th>
-            <th>Kritik Kısıt</th>
-            <th>Veri Güncelliği</th>
-            <th>Teorik Kapasite</th>
-            <th>İncele</th>
-          </tr>
-        </thead>
-        <tbody>
-          {overview.machines.length === 0 ? (
-            <tr><td colSpan={6}>Henüz makine uyumluluk değerlendirmesi yok.</td></tr>
-          ) : overview.machines.map((machine) => (
-            <tr
-              key={machine.assessmentId}
-              data-selected={machine.machineAssetId === selectedMachineAssetId}
-              onClick={() => handleSelectMachine(machine)}
-            >
-              <td>
-                <strong>{machine.machineCode}</strong>
-                <div>{machine.machineDisplayName}</div>
-              </td>
-              <td>
-                <span className="mold-registry-badge">
-                  {getMoldCompatibilityStatusLabel(machine.status)}
-                </span>
-              </td>
-              <td>{machine.criticalConstraintLabel ?? "—"}</td>
-              <td>
-                {formatCompatibilityTimestamp(machine.evaluatedAtUtc)}
-                {machine.requirementStale || machine.machineProfileStale ? (
-                  <div>
-                    {machine.requirementStale ? <span className="mold-registry-badge">Gereksinim eski</span> : null}
-                    {machine.machineProfileStale ? <span className="mold-registry-badge">Makine profili eski</span> : null}
-                  </div>
-                ) : null}
-              </td>
-              <td>
-                {formatTheoreticalPartsPerHour(machine.theoreticalPartsPerHour)}
-                {machine.theoreticalPartsPerHour !== undefined ? (
-                  <small>{MOLD_COMPATIBILITY_THEORETICAL_CAPACITY_DISCLAIMER}</small>
-                ) : null}
-              </td>
-              <td>
-                <button
-                  type="button"
-                  className="mold-registry-button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleSelectMachine(machine);
-                  }}
-                >
-                  İncele
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <section aria-label="Kanıt paneli">
-        <h3>Kanıt ve Kural Sonuçları</h3>
-        {!selectedSummary ? (
-          <div className="mold-registry-empty">Kural sonuçlarını görmek için tablodan bir makine seçin.</div>
         ) : (
-          <>
-            <dl className="mold-registry-meta-grid">
-              <div>
-                <dt>Makine</dt>
-                <dd>{selectedSummary.machineCode} · {selectedSummary.machineDisplayName}</dd>
-              </div>
-              <div>
-                <dt>Uyumluluk Durumu</dt>
-                <dd>{getMoldCompatibilityStatusLabel(selectedSummary.status)}</dd>
-              </div>
-              <div>
-                <dt>Teorik Kapasite</dt>
-                <dd>
-                  {formatTheoreticalPartsPerHour(selectedSummary.theoreticalPartsPerHour)}
-                  {selectedSummary.theoreticalPartsPerHour !== undefined ? (
-                    <small>{MOLD_COMPATIBILITY_THEORETICAL_CAPACITY_DISCLAIMER}</small>
-                  ) : null}
-                </dd>
-              </div>
-              <div>
-                <dt>Son Değerlendirme</dt>
-                <dd>{formatCompatibilityTimestamp(selectedSummary.evaluatedAtUtc)}</dd>
-              </div>
-            </dl>
-
-            {selectedAssessment && selectedAssessment.reasons.length > 0 ? (
-              <table className="mold-registry-table">
-                <thead>
-                  <tr>
-                    <th>Kural</th>
-                    <th>Durum</th>
-                    <th>Gerekli</th>
-                    <th>Mevcut</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedAssessment.reasons.map((reason) => (
-                    <tr key={reason.ruleCode}>
-                      <td>{reason.labelTr}</td>
-                      <td>
-                        <span className="mold-registry-badge">
-                          {getMoldCompatibilityRuleStatusLabel(reason.status)}
-                        </span>
-                      </td>
-                      <td>{reason.requiredValue ?? "—"}</td>
-                      <td>{reason.availableValue ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="mold-registry-empty">
-                {selectedSummary.criticalConstraintLabel
-                  ? `Özet kısıt: ${selectedSummary.criticalConstraintLabel}`
-                  : "Detaylı kural sonuçları için değerlendirme çalıştırın."}
-              </div>
-            )}
-
-            {overview.requirement ? (
-              <section aria-label="Kalıp gereksinim kanıtı">
-                <h4>Kalıp Gereksinim Profili</h4>
-                <dl className="mold-registry-meta-grid">
-                  <div>
-                    <dt>Kıskaç Kuvveti (ton)</dt>
-                    <dd>{formatMoldNumber(overview.requirement.requiredClampForceTon)}</dd>
-                  </div>
-                  <div>
-                    <dt>Gözenek Sayısı</dt>
-                    <dd>{formatMoldNumber(overview.requirement.effectiveCavityCount)}</dd>
-                  </div>
-                  <div>
-                    <dt>Kalıp Boyutları (mm)</dt>
-                    <dd>
-                      {formatMoldNumber(overview.requirement.moldWidthMm)} ×{" "}
-                      {formatMoldNumber(overview.requirement.moldHeightMm)} ×{" "}
-                      {formatMoldNumber(overview.requirement.moldDepthMm)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Malzeme Grubu</dt>
-                    <dd>{overview.requirement.supportedMaterialGroup ?? "—"}</dd>
-                  </div>
-                </dl>
-              </section>
-            ) : null}
-          </>
+          <div className="mold-readonly-note">Makine uyumluluğu için yalnızca görüntüleme yetkiniz var.</div>
         )}
-      </section>
+      </div>
+
+      <div className="mold-compat-layout">
+        <div className="mold-compat-table-wrap" aria-label="Makine karşılaştırma tablosu">
+          <table className="mold-registry-table">
+            <thead>
+              <tr>
+                <th>Makine</th>
+                <th>Teknik Durum</th>
+                <th>Kritik Kısıt</th>
+                <th>Veri Güncelliği</th>
+                <th>Teorik Kapasite</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {overview.machines.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>Henüz makine uyumluluk değerlendirmesi yok.</td>
+                </tr>
+              ) : (
+                overview.machines.map((machine) => (
+                  <tr
+                    key={machine.assessmentId}
+                    data-selected={machine.machineAssetId === selectedMachineAssetId}
+                    tabIndex={0}
+                    onClick={() => handleSelectMachine(machine)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleSelectMachine(machine);
+                      }
+                    }}
+                  >
+                    <td>
+                      <div className="mold-identity">
+                        <span className="mold-identity__name">{machine.machineDisplayName}</span>
+                        <span className="mold-identity__code">{machine.machineCode}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={compatibilityBadgeClass(machine.status)}>
+                        {getMoldCompatibilityStatusLabel(machine.status)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="mold-cell-truncate" title={machine.criticalConstraintLabel ?? undefined}>
+                        {machine.criticalConstraintLabel ?? "—"}
+                      </span>
+                    </td>
+                    <td>
+                      {formatCompatibilityTimestamp(machine.evaluatedAtUtc)}
+                      {machine.requirementStale || machine.machineProfileStale ? (
+                        <div>
+                          {machine.requirementStale ? (
+                            <span className="mold-registry-badge mold-registry-badge--warning">Gereksinim eski</span>
+                          ) : null}{" "}
+                          {machine.machineProfileStale ? (
+                            <span className="mold-registry-badge mold-registry-badge--warning">Makine profili eski</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      {formatTheoreticalPartsPerHour(machine.theoreticalPartsPerHour)}
+                      {machine.theoreticalPartsPerHour !== undefined ? (
+                        <small className="mold-compat-disclaimer">
+                          {MOLD_COMPATIBILITY_THEORETICAL_CAPACITY_DISCLAIMER}
+                        </small>
+                      ) : null}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="mold-registry-button compact"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleSelectMachine(machine);
+                        }}
+                      >
+                        İncele
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <aside className="mold-compat-evidence" aria-label="Kanıt paneli">
+          <h3>Kanıt ve Kural Sonuçları</h3>
+          {!selectedSummary ? (
+            <div className="mold-registry-empty">Kural sonuçlarını görmek için tablodan bir makine seçin.</div>
+          ) : (
+            <>
+              <dl className="mold-registry-meta-grid">
+                <div>
+                  <dt>Makine</dt>
+                  <dd>
+                    {selectedSummary.machineCode} · {selectedSummary.machineDisplayName}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Uyumluluk Durumu</dt>
+                  <dd>
+                    <span className={compatibilityBadgeClass(selectedSummary.status)}>
+                      {getMoldCompatibilityStatusLabel(selectedSummary.status)}
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Teorik Kapasite</dt>
+                  <dd>
+                    {formatTheoreticalPartsPerHour(selectedSummary.theoreticalPartsPerHour)}
+                    {selectedSummary.theoreticalPartsPerHour !== undefined ? (
+                      <small className="mold-compat-disclaimer">
+                        {MOLD_COMPATIBILITY_THEORETICAL_CAPACITY_DISCLAIMER}
+                      </small>
+                    ) : null}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Son Değerlendirme</dt>
+                  <dd>{formatCompatibilityTimestamp(selectedSummary.evaluatedAtUtc)}</dd>
+                </div>
+              </dl>
+
+              {selectedAssessment && selectedAssessment.reasons.length > 0 ? (
+                <div className="mold-compat-table-wrap">
+                  <table className="mold-registry-table">
+                    <thead>
+                      <tr>
+                        <th>Kural</th>
+                        <th>Durum</th>
+                        <th>Gerekli</th>
+                        <th>Mevcut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedAssessment.reasons.map((reason) => (
+                        <tr key={reason.ruleCode}>
+                          <td>{reason.labelTr}</td>
+                          <td>
+                            <span className={compatibilityBadgeClass(reason.status)}>
+                              {getMoldCompatibilityRuleStatusLabel(reason.status)}
+                            </span>
+                          </td>
+                          <td>{reason.requiredValue ?? "—"}</td>
+                          <td>{reason.availableValue ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="mold-registry-empty">
+                  {selectedSummary.criticalConstraintLabel
+                    ? `Özet kısıt: ${selectedSummary.criticalConstraintLabel}`
+                    : "Detaylı kural sonuçları için değerlendirme çalıştırın."}
+                </div>
+              )}
+
+              {overview.requirement ? (
+                <section aria-label="Kalıp gereksinim kanıtı">
+                  <h4>Kalıp Gereksinim Profili</h4>
+                  <dl className="mold-registry-meta-grid">
+                    <div>
+                      <dt>Kıskaç Kuvveti (ton)</dt>
+                      <dd>{formatMoldNumber(overview.requirement.requiredClampForceTon)}</dd>
+                    </div>
+                    <div>
+                      <dt>Göz Sayısı</dt>
+                      <dd>{formatMoldNumber(overview.requirement.effectiveCavityCount)}</dd>
+                    </div>
+                    <div>
+                      <dt>Kalıp Boyutları (mm)</dt>
+                      <dd>
+                        {formatMoldNumber(overview.requirement.moldWidthMm)} ×{" "}
+                        {formatMoldNumber(overview.requirement.moldHeightMm)} ×{" "}
+                        {formatMoldNumber(overview.requirement.moldDepthMm)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Malzeme Grubu</dt>
+                      <dd>{overview.requirement.supportedMaterialGroup ?? "—"}</dd>
+                    </div>
+                  </dl>
+                </section>
+              ) : null}
+            </>
+          )}
+        </aside>
+      </div>
     </>
   );
 }

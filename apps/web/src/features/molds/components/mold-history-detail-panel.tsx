@@ -41,10 +41,15 @@ import {
   completeMoldMaintenanceAction,
   createMoldMaintenanceAction,
 } from "../server/mold-history-writer";
-import { transitionMoldLifecycleAction, updateMoldAction } from "../server/mold-writer";
+import {
+  recordMoldCounterAction,
+  transitionMoldLifecycleAction,
+  updateMoldAction,
+} from "../server/mold-writer";
 import { MoldCompatibilityDetailPanel } from "./mold-compatibility-detail-panel";
 
 type DetailTab = "overview" | "maintenance" | "revisions" | "trials" | "timeline" | "compatibility";
+type ActionPanel = "edit" | "counter" | "transition" | null;
 
 type MoldHistoryDetailPanelProps = Readonly<{
   selectedSummary: MoldSummary;
@@ -61,6 +66,72 @@ type MoldHistoryDetailPanelProps = Readonly<{
   onAction: (action: () => Promise<{ status: string; message?: string; compatibilityOverview?: MoldCompatibilityOverview }>) => void;
 }>;
 
+function lifecycleBadgeClass(state: string): string {
+  switch (state) {
+    case "active":
+      return "mold-registry-badge mold-registry-badge--active";
+    case "maintenance":
+      return "mold-registry-badge mold-registry-badge--maintenance";
+    case "trial":
+      return "mold-registry-badge mold-registry-badge--trial";
+    case "quarantined":
+    case "scrapped":
+      return "mold-registry-badge mold-registry-badge--quarantined";
+    case "draft":
+    case "retired":
+      return "mold-registry-badge mold-registry-badge--draft";
+    default:
+      return "mold-registry-badge mold-registry-badge--neutral";
+  }
+}
+
+function timelineDotClass(kind: string): string {
+  switch (kind) {
+    case "maintenance":
+      return "mold-timeline__dot mold-timeline__dot--maintenance";
+    case "revision":
+      return "mold-timeline__dot mold-timeline__dot--revision";
+    case "trial":
+      return "mold-timeline__dot mold-timeline__dot--trial";
+    case "counter":
+      return "mold-timeline__dot mold-timeline__dot--counter";
+    default:
+      return "mold-timeline__dot";
+  }
+}
+
+function localizeTimelineStatus(value?: string): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const lifecycle = getMoldLifecycleStateLabel(value);
+  if (lifecycle !== "Bilinmiyor") {
+    return lifecycle;
+  }
+
+  const maintenance = getMoldMaintenanceStatusLabel(value);
+  if (maintenance !== "Bilinmiyor") {
+    return maintenance;
+  }
+
+  const trial = getMoldTrialResultLabel(value);
+  if (trial !== "Bilinmiyor") {
+    return trial;
+  }
+
+  return value.includes("-") ? "Bilinmiyor" : value;
+}
+
+const DETAIL_TABS = [
+  ["overview", "Genel Bakış"],
+  ["maintenance", "Bakım Geçmişi"],
+  ["revisions", "Revizyonlar"],
+  ["trials", "Denemeler"],
+  ["timeline", "Zaman Çizelgesi"],
+  ["compatibility", "Makine Uyumluluğu"],
+] as const;
+
 export function MoldHistoryDetailPanel({
   selectedSummary,
   detail,
@@ -76,6 +147,8 @@ export function MoldHistoryDetailPanel({
   onAction,
 }: MoldHistoryDetailPanelProps) {
   const [tab, setTab] = useState<DetailTab>("overview");
+  const [actionPanel, setActionPanel] = useState<ActionPanel>(null);
+  const [transitionTarget, setTransitionTarget] = useState("");
 
   const historyKpis = useMemo(
     () => ({
@@ -85,9 +158,6 @@ export function MoldHistoryDetailPanel({
       ).length,
       revisionCount: revisionHistory.length,
       trialCount: trialHistory.length,
-      successfulTrialCount: trialHistory.filter(
-        (item) => item.result === "successful" || item.result === "conditionally-approved",
-      ).length,
     }),
     [maintenanceHistory, revisionHistory, trialHistory],
   );
@@ -96,31 +166,234 @@ export function MoldHistoryDetailPanel({
   const openMaintenance = maintenanceHistory.find(
     (item) => item.status === "planned" || item.status === "in-progress",
   );
+  const selectedTarget = transitionTarget || transitionOptions[0]?.value || "";
+  const isTerminalTransition = selectedTarget === "scrapped" || selectedTarget === "quarantined";
+
+  const locationSummary = `${getMoldLocationLabel(selectedSummary.locationType)}${
+    selectedSummary.locationLabel ? ` · ${selectedSummary.locationLabel}` : ""
+  }`;
+
+  function toggleAction(panel: ActionPanel) {
+    setActionPanel((current) => (current === panel ? null : panel));
+  }
 
   return (
     <>
-      <h2>{selectedSummary.code} · {selectedSummary.name}</h2>
+      <header className="mold-detail-header">
+        <p className="mold-detail-breadcrumb">Kalıplar / {selectedSummary.code}</p>
+        <div className="mold-detail-header__top">
+          <div className="mold-detail-header__identity">
+            <h2 className="mold-detail-header__name">{selectedSummary.name}</h2>
+            <span className="mold-detail-header__code">{selectedSummary.code}</span>
+            <div className="mold-detail-header__meta">
+              <span className={lifecycleBadgeClass(selectedSummary.lifecycleState)}>
+                {getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}
+              </span>
+              <span>
+                Sahiplik: <strong>{getMoldOwnershipLabel(selectedSummary.ownershipType)}</strong>
+              </span>
+              <span>
+                Lokasyon: <strong>{locationSummary}</strong>
+              </span>
+              <span>
+                Güncel Sayaç: <strong>{formatMoldNumber(selectedSummary.currentShotCount)}</strong>
+              </span>
+              <span>
+                Son Güncelleme: <strong>{formatMoldDateTime(selectedSummary.updatedAtUtc)}</strong>
+              </span>
+            </div>
+          </div>
+          {canManage ? (
+            <div className="mold-detail-header__actions">
+              <button
+                type="button"
+                className="mold-registry-button compact"
+                aria-pressed={actionPanel === "edit"}
+                onClick={() => toggleAction("edit")}
+              >
+                Düzenle
+              </button>
+              <button
+                type="button"
+                className="mold-registry-button compact"
+                aria-pressed={actionPanel === "counter"}
+                onClick={() => toggleAction("counter")}
+              >
+                Sayaç Kaydet
+              </button>
+              {transitionOptions.length > 0 ? (
+                <button
+                  type="button"
+                  className="mold-registry-button compact"
+                  aria-pressed={actionPanel === "transition"}
+                  onClick={() => toggleAction("transition")}
+                >
+                  Durum Değiştir
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </header>
 
-      <section className="mold-registry-kpis" aria-label="Kalıp geçmişi özeti">
-        <article className="mold-registry-kpi"><strong>{historyKpis.maintenanceCount}</strong><span>Bakım</span></article>
-        <article className="mold-registry-kpi"><strong>{historyKpis.openMaintenanceCount}</strong><span>Açık Bakım</span></article>
-        <article className="mold-registry-kpi"><strong>{historyKpis.revisionCount}</strong><span>Revizyon</span></article>
-        <article className="mold-registry-kpi"><strong>{historyKpis.trialCount}</strong><span>Deneme</span></article>
+      {canManage && actionPanel === "edit" && detail ? (
+        <section className="mold-detail-action-panel" aria-label="Kalıp düzenle">
+          <h3 className="mold-detail-action-panel__title">Kalıp Düzenle</h3>
+          <p className="mold-form-hint">Kimlik alanları korunur; sahiplik ve konum güncellenebilir.</p>
+          <form className="mold-registry-form-grid" action={(formData) => onAction(() => updateMoldAction(formData))}>
+            <input type="hidden" name="moldId" value={detail.id} />
+            <input type="hidden" name="expectedVersion" value={detail.version} />
+            <label className="full-width mold-required">
+              Ad
+              <input name="name" defaultValue={detail.name} required aria-required="true" />
+            </label>
+            <label>
+              Sahiplik
+              <select name="ownershipType" defaultValue={detail.ownershipType}>
+                {MOLD_OWNERSHIP_FORM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Konum
+              <select name="locationType" defaultValue={detail.locationType}>
+                {MOLD_LOCATION_FORM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="mold-registry-actions full-width">
+              <button type="button" className="mold-registry-button ghost" onClick={() => setActionPanel(null)}>
+                Kapat
+              </button>
+              <button type="submit" className="mold-registry-button primary">
+                Kaydı Güncelle
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      {canManage && actionPanel === "counter" && detail ? (
+        <section className="mold-detail-action-panel" aria-label="Sayaç kaydet">
+          <h3 className="mold-detail-action-panel__title">Sayaç Kaydet</h3>
+          <p className="mold-form-hint">Manuel sayaç kaydı oluşturur; mevcut API sözleşmesi korunur.</p>
+          <form
+            className="mold-registry-form-grid"
+            action={(formData) => onAction(() => recordMoldCounterAction(formData))}
+          >
+            <input type="hidden" name="moldId" value={detail.id} />
+            <input type="hidden" name="expectedVersion" value={detail.version} />
+            <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+            <label className="mold-required">
+              Vuruş Sayısı
+              <input
+                name="shotCount"
+                type="number"
+                min="0"
+                required
+                aria-required="true"
+                defaultValue={detail.currentShotCount ?? 0}
+              />
+            </label>
+            <label className="full-width">
+              Not
+              <input name="note" placeholder="İsteğe bağlı not" />
+            </label>
+            <div className="mold-registry-actions full-width">
+              <button type="button" className="mold-registry-button ghost" onClick={() => setActionPanel(null)}>
+                Kapat
+              </button>
+              <button type="submit" className="mold-registry-button primary">
+                Sayaç Kaydet
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      {canManage && actionPanel === "transition" && detail && transitionOptions.length > 0 ? (
+        <section className="mold-detail-action-panel" aria-label="Durum değiştir">
+          <h3 className="mold-detail-action-panel__title">Durum Değiştir</h3>
+          <p className="mold-form-hint">Geçiş gerekçesi zorunludur. Terminal durumlar ek onay gerektirir.</p>
+          {isTerminalTransition ? (
+            <p className="mold-form-warning" role="status">
+              Seçilen hedef durum kritik bir geçiştir. İşlemi onaylamadan önce gerekçeyi doğrulayın.
+            </p>
+          ) : null}
+          <form
+            className="mold-registry-form-grid"
+            action={(formData) => onAction(() => transitionMoldLifecycleAction(formData))}
+          >
+            <input type="hidden" name="moldId" value={detail.id} />
+            <input type="hidden" name="expectedVersion" value={detail.version} />
+            <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+            <label className="mold-required">
+              Hedef Durum
+              <select
+                name="targetState"
+                required
+                aria-required="true"
+                value={selectedTarget}
+                onChange={(event) => setTransitionTarget(event.target.value)}
+              >
+                {transitionOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="full-width mold-required">
+              Geçiş Gerekçesi
+              <input name="reason" required aria-required="true" placeholder="Operasyonel gerekçe" />
+            </label>
+            <div className="mold-registry-actions full-width">
+              <button type="button" className="mold-registry-button ghost" onClick={() => setActionPanel(null)}>
+                Kapat
+              </button>
+              <button type="submit" className="mold-registry-button primary">
+                Durum Geçişi Uygula
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      <section className="mold-registry-kpis mold-registry-kpis--compact" aria-label="Kalıp geçmişi özeti">
+        <article className="mold-registry-kpi mold-registry-kpi--neutral">
+          <strong>{historyKpis.maintenanceCount}</strong>
+          <span>Bakım</span>
+        </article>
+        <article className="mold-registry-kpi mold-registry-kpi--warning">
+          <strong>{historyKpis.openMaintenanceCount}</strong>
+          <span>Açık Bakım</span>
+        </article>
+        <article className="mold-registry-kpi mold-registry-kpi--info">
+          <strong>{historyKpis.revisionCount}</strong>
+          <span>Revizyon</span>
+        </article>
+        <article className="mold-registry-kpi mold-registry-kpi--success">
+          <strong>{historyKpis.trialCount}</strong>
+          <span>Deneme</span>
+        </article>
       </section>
 
-      <nav className="mold-registry-toolbar" aria-label="Kalıp detay sekmeleri">
-        {([
-          ["overview", "Genel Bakış"],
-          ["maintenance", "Bakım Geçmişi"],
-          ["revisions", "Revizyonlar"],
-          ["trials", "Denemeler"],
-          ["timeline", "Zaman Çizelgesi"],
-          ["compatibility", "Makine Uyumluluğu"],
-        ] as const).map(([value, label]) => (
+      <nav className="mold-detail-tabs" aria-label="Kalıp detay sekmeleri" role="tablist">
+        {DETAIL_TABS.map(([value, label]) => (
           <button
             key={value}
             type="button"
-            className={`mold-registry-button${tab === value ? " primary" : ""}`}
+            role="tab"
+            id={`mold-tab-${value}`}
+            aria-selected={tab === value}
+            aria-controls={`mold-tab-panel-${value}`}
+            className="mold-detail-tabs__button"
             onClick={() => setTab(value)}
           >
             {label}
@@ -129,7 +402,9 @@ export function MoldHistoryDetailPanel({
       </nav>
 
       {!detail && isPending ? (
-        <div className="mold-registry-empty" role="status">Detay yükleniyor…</div>
+        <div className="mold-registry-empty" role="status" aria-live="polite">
+          Detay yükleniyor…
+        </div>
       ) : null}
 
       {!detail && !isPending ? (
@@ -137,274 +412,521 @@ export function MoldHistoryDetailPanel({
       ) : null}
 
       {detail && tab === "overview" ? (
-        <>
-          <dl className="mold-registry-meta-grid">
-            <div><dt>Durum</dt><dd>{getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}</dd></div>
-            <div><dt>Sahiplik</dt><dd>{getMoldOwnershipLabel(selectedSummary.ownershipType)}</dd></div>
-            <div><dt>Konum</dt><dd>{getMoldLocationLabel(selectedSummary.locationType)}</dd></div>
-            <div><dt>Gözenek</dt><dd>{formatMoldNumber(selectedSummary.cavityCount)}</dd></div>
-            <div><dt>Vuruş Sayısı</dt><dd>{formatMoldNumber(selectedSummary.currentShotCount)}</dd></div>
-            <div><dt>Kaynak</dt><dd>{getMoldSourceLabel(selectedSummary.sourceType)}</dd></div>
-            <div><dt>Son Güncelleme</dt><dd>{formatMoldDateTime(selectedSummary.updatedAtUtc)}</dd></div>
-            <div><dt>Sayaç Kaynağı</dt><dd>{getMoldCounterSourceLabel(detail.counterSource)}</dd></div>
-          </dl>
+        <div
+          id="mold-tab-panel-overview"
+          role="tabpanel"
+          aria-labelledby="mold-tab-overview"
+          className="mold-overview-grid"
+        >
+          <section className="mold-overview-card">
+            <h3 className="mold-overview-card__title">Teknik Özellikler</h3>
+            <dl className="mold-registry-meta-grid">
+              <div>
+                <dt>Göz Sayısı</dt>
+                <dd>{formatMoldNumber(detail.cavityCount ?? selectedSummary.cavityCount)}</dd>
+              </div>
+              <div>
+                <dt>Kalıp Tipi</dt>
+                <dd>{detail.moldType ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Üretici</dt>
+                <dd>{detail.manufacturer ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Seri No</dt>
+                <dd>{detail.serialNumber ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Ağırlık (kg)</dt>
+                <dd>{formatMoldNumber(detail.moldWeightKg)}</dd>
+              </div>
+              <div>
+                <dt>Boyutlar (mm)</dt>
+                <dd>
+                  {formatMoldNumber(detail.dimensionLengthMm)} × {formatMoldNumber(detail.dimensionWidthMm)} ×{" "}
+                  {formatMoldNumber(detail.dimensionHeightMm)}
+                </dd>
+              </div>
+            </dl>
+          </section>
 
-          {canManage ? (
-            <>
-              <form className="mold-registry-form-grid" action={(formData) => onAction(() => updateMoldAction(formData))}>
-                <input type="hidden" name="moldId" value={detail.id} />
-                <input type="hidden" name="expectedVersion" value={detail.version} />
-                <label className="full-width">Ad<input name="name" defaultValue={detail.name} required /></label>
-                <label>Sahiplik
-                  <select name="ownershipType" defaultValue={detail.ownershipType}>
-                    {MOLD_OWNERSHIP_FORM_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>Konum
-                  <select name="locationType" defaultValue={detail.locationType}>
-                    {MOLD_LOCATION_FORM_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
-                <div className="mold-registry-actions full-width">
-                  <button type="submit" className="mold-registry-button primary">Kayıt Güncelle</button>
-                </div>
-              </form>
+          <section className="mold-overview-card">
+            <h3 className="mold-overview-card__title">Yaşam Döngüsü ve Lokasyon</h3>
+            <dl className="mold-registry-meta-grid">
+              <div>
+                <dt>Durum</dt>
+                <dd>{getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}</dd>
+              </div>
+              <div>
+                <dt>Lokasyon</dt>
+                <dd>{locationSummary}</dd>
+              </div>
+              <div>
+                <dt>Kaynak</dt>
+                <dd>{getMoldSourceLabel(selectedSummary.sourceType)}</dd>
+              </div>
+              <div>
+                <dt>Son Güncelleme</dt>
+                <dd>{formatMoldDateTime(selectedSummary.updatedAtUtc)}</dd>
+              </div>
+            </dl>
+          </section>
 
-              {transitionOptions.length > 0 ? (
-                <form className="mold-registry-form-grid" action={(formData) => onAction(() => transitionMoldLifecycleAction(formData))}>
-                  <input type="hidden" name="moldId" value={detail.id} />
-                  <input type="hidden" name="expectedVersion" value={detail.version} />
-                  <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-                  <label>Hedef Durum
-                    <select name="targetState" required defaultValue={transitionOptions[0]?.value}>
-                      {transitionOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="full-width">Geçiş Gerekçesi<input name="reason" required /></label>
-                  <div className="mold-registry-actions full-width">
-                    <button type="submit" className="mold-registry-button">Durum Geçişi</button>
-                  </div>
-                </form>
-              ) : null}
-            </>
-          ) : (
-            <div className="mold-registry-empty">Bu kalıp için yalnızca görüntüleme yetkiniz var.</div>
-          )}
+          <section className="mold-overview-card">
+            <h3 className="mold-overview-card__title">Sahiplik ve Müşteri</h3>
+            <dl className="mold-registry-meta-grid">
+              <div>
+                <dt>Sahiplik</dt>
+                <dd>{getMoldOwnershipLabel(selectedSummary.ownershipType)}</dd>
+              </div>
+              <div>
+                <dt>Sahip Referansı</dt>
+                <dd>{detail.ownerReference ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Ürün Referansı</dt>
+                <dd>{detail.primaryProductReference ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Malzeme Grubu</dt>
+                <dd>{detail.materialFamilyReference ?? "—"}</dd>
+              </div>
+            </dl>
+          </section>
 
-          <section aria-label="Yaşam döngüsü geçmişi">
-            <h3>Son Yaşam Döngüsü Olayları</h3>
+          <section className="mold-overview-card">
+            <h3 className="mold-overview-card__title">Sayaç ve Operasyon</h3>
+            <dl className="mold-registry-meta-grid">
+              <div>
+                <dt>Güncel Sayaç</dt>
+                <dd>{formatMoldNumber(selectedSummary.currentShotCount)}</dd>
+              </div>
+              <div>
+                <dt>Sayaç Kaynağı</dt>
+                <dd>{getMoldCounterSourceLabel(detail.counterSource)}</dd>
+              </div>
+              <div>
+                <dt>Sayaç Zamanı</dt>
+                <dd>{formatMoldDateTime(detail.counterRecordedAtUtc)}</dd>
+              </div>
+              <div>
+                <dt>Nominal Ömür</dt>
+                <dd>{formatMoldNumber(detail.nominalShotLife)}</dd>
+              </div>
+            </dl>
+          </section>
+
+          {!canManage ? (
+            <div className="mold-overview-card mold-overview-card--wide">
+              <div className="mold-readonly-note">Bu kalıp için yalnızca görüntüleme yetkiniz var.</div>
+            </div>
+          ) : null}
+
+          <section className="mold-overview-card mold-overview-card--wide" aria-label="Yaşam döngüsü geçmişi">
+            <h3 className="mold-overview-card__title">Son Yaşam Döngüsü Olayları</h3>
             <div className="mold-registry-history">
               {lifecycleHistory.length === 0 ? (
                 <div className="mold-registry-empty">Henüz geçiş kaydı yok.</div>
               ) : (
                 lifecycleHistory.slice(0, 5).map((event) => (
                   <article key={event.id} className="mold-registry-history-item">
-                    <strong>{getMoldLifecycleStateLabel(event.previousState)} → {getMoldLifecycleStateLabel(event.newState)}</strong>
+                    <strong>
+                      {getMoldLifecycleStateLabel(event.previousState)} → {getMoldLifecycleStateLabel(event.newState)}
+                    </strong>
                     <div>{event.reason}</div>
-                    <small>{event.actorDisplayName} · {formatMoldDateTime(event.occurredAtUtc)}</small>
+                    <small>
+                      {event.actorDisplayName} · {formatMoldDateTime(event.occurredAtUtc)}
+                    </small>
                   </article>
                 ))
               )}
             </div>
           </section>
-        </>
+        </div>
       ) : null}
 
       {detail && tab === "maintenance" ? (
-        <>
+        <div id="mold-tab-panel-maintenance" role="tabpanel" aria-labelledby="mold-tab-maintenance">
           {canManage ? (
-            <form className="mold-registry-form-grid" action={(formData) => onAction(() => createMoldMaintenanceAction(formData))}>
-              <input type="hidden" name="moldId" value={detail.id} />
-              <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-              <label>Bakım Türü
-                <select name="maintenanceType" defaultValue="preventive">
-                  {MOLD_MAINTENANCE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>Durum
-                <select name="status" defaultValue="planned">
-                  {MOLD_MAINTENANCE_STATUS_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="full-width">Özet<input name="summary" required placeholder="Örn. Planlı yağlama ve temizlik" /></label>
-              <label className="full-width">Bulgular<textarea name="findings" rows={2} /></label>
-              <label>Uygulayan<input name="performedByDisplayName" placeholder="Örn. Bakım Ekibi" /></label>
-              <label>Dış Bakım Talebi Ref.<input name="externalMaintenanceRequestReference" placeholder="İsteğe bağlı referans" /></label>
-              <div className="mold-registry-actions full-width">
-                <button type="submit" className="mold-registry-button primary">Bakım Kaydı Aç</button>
-              </div>
-            </form>
+            <section className="mold-form-section" aria-label="Bakım kaydı">
+              <p className="mold-form-section__label">Bakım Kaydı</p>
+              <form
+                className="mold-registry-form-grid"
+                action={(formData) => onAction(() => createMoldMaintenanceAction(formData))}
+              >
+                <input type="hidden" name="moldId" value={detail.id} />
+                <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+                <label>
+                  Bakım Türü
+                  <select name="maintenanceType" defaultValue="preventive">
+                    {MOLD_MAINTENANCE_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Durum
+                  <select name="status" defaultValue="planned">
+                    {MOLD_MAINTENANCE_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="full-width mold-required">
+                  Özet
+                  <input name="summary" required aria-required="true" placeholder="Örn. Planlı yağlama ve temizlik" />
+                </label>
+                <label className="full-width">
+                  Bulgular
+                  <textarea name="findings" rows={2} />
+                </label>
+                <label>
+                  Uygulayan
+                  <input name="performedByDisplayName" placeholder="Örn. Bakım Ekibi" />
+                </label>
+                <label>
+                  Dış Bakım Talebi Ref.
+                  <input name="externalMaintenanceRequestReference" placeholder="İsteğe bağlı referans" />
+                </label>
+                <div className="mold-registry-actions full-width">
+                  <button type="submit" className="mold-registry-button primary">
+                    Bakım Kaydı Aç
+                  </button>
+                </div>
+              </form>
+            </section>
           ) : null}
 
           {canManage && openMaintenance ? (
-            <form className="mold-registry-form-grid" action={(formData) => onAction(() => completeMoldMaintenanceAction(formData))}>
-              <input type="hidden" name="moldId" value={detail.id} />
-              <input type="hidden" name="maintenanceId" value={openMaintenance.id} />
-              <input type="hidden" name="expectedVersion" value={openMaintenance.version} />
-              <label className="full-width">Tamamlama Notu<textarea name="actionsTaken" rows={2} defaultValue="Bakım tamamlandı." /></label>
-              <div className="mold-registry-actions full-width">
-                <button type="submit" className="mold-registry-button primary">Açık Bakımı Tamamla</button>
-              </div>
-            </form>
+            <section className="mold-form-section" aria-label="Açık bakım tamamlama">
+              <p className="mold-form-section__label">Açık Bakımı Tamamla</p>
+              <form
+                className="mold-registry-form-grid"
+                action={(formData) => onAction(() => completeMoldMaintenanceAction(formData))}
+              >
+                <input type="hidden" name="moldId" value={detail.id} />
+                <input type="hidden" name="maintenanceId" value={openMaintenance.id} />
+                <input type="hidden" name="expectedVersion" value={openMaintenance.version} />
+                <label className="full-width">
+                  Tamamlama Notu
+                  <textarea name="actionsTaken" rows={2} defaultValue="Bakım tamamlandı." />
+                </label>
+                <div className="mold-registry-actions full-width">
+                  <button type="submit" className="mold-registry-button primary">
+                    Açık Bakımı Tamamla
+                  </button>
+                </div>
+              </form>
+            </section>
           ) : null}
 
-          <table className="mold-registry-table">
-            <thead>
-              <tr>
-                <th>Tür</th>
-                <th>Durum</th>
-                <th>Özet</th>
-                <th>Açılış</th>
-              </tr>
-            </thead>
-            <tbody>
-              {maintenanceHistory.length === 0 ? (
-                <tr><td colSpan={4}>Bakım kaydı yok.</td></tr>
-              ) : maintenanceHistory.map((item) => (
-                <tr key={item.id}>
-                  <td><span className="mold-registry-badge">{getMoldMaintenanceTypeLabel(item.maintenanceType)}</span></td>
-                  <td><span className="mold-registry-badge">{getMoldMaintenanceStatusLabel(item.status)}</span></td>
-                  <td>{item.summary}</td>
-                  <td>{formatMoldDateTime(item.openedAtUtc)}</td>
+          <div className="mold-compat-table-wrap">
+            <table className="mold-registry-table">
+              <thead>
+                <tr>
+                  <th>Durum</th>
+                  <th>Tür</th>
+                  <th>Açılış</th>
+                  <th>Tamamlanma</th>
+                  <th>Bulgular / Aksiyon</th>
+                  <th>Kaynak / Referans</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {maintenanceHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>Bakım kaydı yok.</td>
+                  </tr>
+                ) : (
+                  maintenanceHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <span className="mold-registry-badge">{getMoldMaintenanceStatusLabel(item.status)}</span>
+                      </td>
+                      <td>
+                        <span className="mold-registry-badge mold-registry-badge--neutral">
+                          {getMoldMaintenanceTypeLabel(item.maintenanceType)}
+                        </span>
+                      </td>
+                      <td>{formatMoldDateTime(item.openedAtUtc)}</td>
+                      <td>{formatMoldDateTime(item.completedAtUtc)}</td>
+                      <td>
+                        <strong>{item.summary}</strong>
+                        {item.findings ? <div>{item.findings}</div> : null}
+                        {item.actionsTaken ? <div>{item.actionsTaken}</div> : null}
+                      </td>
+                      <td>
+                        {item.performedByDisplayName ?? "—"}
+                        {item.externalMaintenanceRequestReference
+                          ? ` · ${item.externalMaintenanceRequestReference}`
+                          : ""}
+                        {item.externalWorkOrderReference ? ` · ${item.externalWorkOrderReference}` : ""}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : null}
 
       {detail && tab === "revisions" ? (
-        <>
+        <div id="mold-tab-panel-revisions" role="tabpanel" aria-labelledby="mold-tab-revisions">
           {canManage ? (
-            <form className="mold-registry-form-grid" action={(formData) => onAction(() => appendMoldRevisionAction(formData))}>
-              <input type="hidden" name="moldId" value={detail.id} />
-              <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-              <label>Revizyon No<input name="revisionNumber" required placeholder="R-01" /></label>
-              <label>Tür
-                <select name="revisionType" defaultValue="cavity-change">
-                  {MOLD_REVISION_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>Tarih<input name="revisionDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label>
-              <label className="full-width">Özet<input name="summary" required placeholder="Örn. Gözenek sayısı güncellendi" /></label>
-              <label>Önceki Gözenek<input name="previousCavityCount" type="number" min="1" /></label>
-              <label>Yeni Gözenek<input name="newCavityCount" type="number" min="1" /></label>
-              <div className="mold-registry-actions full-width">
-                <button type="submit" className="mold-registry-button primary">Revizyon Ekle</button>
-              </div>
-            </form>
+            <section className="mold-form-section" aria-label="Revizyon kaydı">
+              <p className="mold-form-section__label">Revizyon Kaydı</p>
+              <form
+                className="mold-registry-form-grid"
+                action={(formData) => onAction(() => appendMoldRevisionAction(formData))}
+              >
+                <input type="hidden" name="moldId" value={detail.id} />
+                <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+                <label className="mold-required">
+                  Revizyon No
+                  <input name="revisionNumber" required aria-required="true" placeholder="R-01" />
+                </label>
+                <label>
+                  Tür
+                  <select name="revisionType" defaultValue="cavity-change">
+                    {MOLD_REVISION_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Tarih
+                  <input name="revisionDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+                </label>
+                <label className="full-width mold-required">
+                  Özet
+                  <input name="summary" required aria-required="true" placeholder="Örn. Gözenek sayısı güncellendi" />
+                </label>
+                <label>
+                  Önceki Göz
+                  <input name="previousCavityCount" type="number" min="1" />
+                </label>
+                <label>
+                  Yeni Göz
+                  <input name="newCavityCount" type="number" min="1" />
+                </label>
+                <div className="mold-registry-actions full-width">
+                  <button type="submit" className="mold-registry-button primary">
+                    Revizyon Ekle
+                  </button>
+                </div>
+              </form>
+            </section>
           ) : null}
 
-          <table className="mold-registry-table">
-            <thead>
-              <tr><th>No</th><th>Tür</th><th>Özet</th><th>Tarih</th></tr>
-            </thead>
-            <tbody>
-              {revisionHistory.length === 0 ? (
-                <tr><td colSpan={4}>Revizyon kaydı yok.</td></tr>
-              ) : revisionHistory.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.revisionNumber}</td>
-                  <td><span className="mold-registry-badge">{getMoldRevisionTypeLabel(item.revisionType)}</span></td>
-                  <td>{item.summary}</td>
-                  <td>{item.revisionDate}</td>
+          <div className="mold-compat-table-wrap">
+            <table className="mold-registry-table">
+              <thead>
+                <tr>
+                  <th>Revizyon No</th>
+                  <th>Tür</th>
+                  <th>Tarih</th>
+                  <th>Teknik Değişiklik</th>
+                  <th>Önceki / Yeni</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {revisionHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={5}>Revizyon kaydı yok.</td>
+                  </tr>
+                ) : (
+                  revisionHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <strong>{item.revisionNumber}</strong>
+                      </td>
+                      <td>
+                        <span className="mold-registry-badge">{getMoldRevisionTypeLabel(item.revisionType)}</span>
+                      </td>
+                      <td>{item.revisionDate}</td>
+                      <td>
+                        <strong>{item.summary}</strong>
+                        {item.technicalChange ? <div>{item.technicalChange}</div> : null}
+                      </td>
+                      <td>
+                        {item.previousCavityCount !== undefined || item.newCavityCount !== undefined
+                          ? `${formatMoldNumber(item.previousCavityCount)} → ${formatMoldNumber(item.newCavityCount)}`
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : null}
 
       {detail && tab === "trials" ? (
-        <>
+        <div id="mold-tab-panel-trials" role="tabpanel" aria-labelledby="mold-tab-trials">
           {canManage ? (
-            <form className="mold-registry-form-grid" action={(formData) => onAction(() => appendMoldTrialAction(formData))}>
-              <input type="hidden" name="moldId" value={detail.id} />
-              <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
-              <label>Deneme No<input name="trialNumber" required placeholder="T-01" /></label>
-              <label>Sonuç
-                <select name="result" defaultValue="successful">
-                  {MOLD_TRIAL_RESULT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>Tarih<input name="trialDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label>
-              <label>Makine Ref.<input name="machineReference" placeholder="IM-120" /></label>
-              <label>Vuruş<input name="shotCount" type="number" min="0" /></label>
-              <label>İyi Parça<input name="goodPartCount" type="number" min="0" /></label>
-              <label>Hurda<input name="scrapPartCount" type="number" min="0" /></label>
-              <label className="full-width">Bulgular<textarea name="findings" rows={2} placeholder="Deneme sonucu notları" /></label>
-              <div className="mold-registry-actions full-width">
-                <button type="submit" className="mold-registry-button primary">Deneme Ekle</button>
-              </div>
-            </form>
+            <section className="mold-form-section" aria-label="Deneme kaydı">
+              <p className="mold-form-section__label">Deneme Kaydı</p>
+              <form
+                className="mold-registry-form-grid"
+                action={(formData) => onAction(() => appendMoldTrialAction(formData))}
+              >
+                <input type="hidden" name="moldId" value={detail.id} />
+                <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
+                <label className="mold-required">
+                  Deneme No
+                  <input name="trialNumber" required aria-required="true" placeholder="T-01" />
+                </label>
+                <label>
+                  Sonuç
+                  <select name="result" defaultValue="successful">
+                    {MOLD_TRIAL_RESULT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Tarih
+                  <input name="trialDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+                </label>
+                <label>
+                  Makine Ref.
+                  <input name="machineReference" placeholder="IM-120" />
+                </label>
+                <label>
+                  Vuruş
+                  <input name="shotCount" type="number" min="0" />
+                </label>
+                <label>
+                  İyi Parça
+                  <input name="goodPartCount" type="number" min="0" />
+                </label>
+                <label>
+                  Hurda
+                  <input name="scrapPartCount" type="number" min="0" />
+                </label>
+                <label className="full-width">
+                  Bulgular
+                  <textarea name="findings" rows={2} placeholder="Deneme sonucu notları" />
+                </label>
+                <div className="mold-registry-actions full-width">
+                  <button type="submit" className="mold-registry-button primary">
+                    Deneme Ekle
+                  </button>
+                </div>
+              </form>
+            </section>
           ) : null}
 
-          <table className="mold-registry-table">
-            <thead>
-              <tr><th>No</th><th>Sonuç</th><th>Makine</th><th>Tarih</th></tr>
-            </thead>
-            <tbody>
-              {trialHistory.length === 0 ? (
-                <tr><td colSpan={4}>Deneme kaydı yok.</td></tr>
-              ) : trialHistory.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.trialNumber}</td>
-                  <td><span className="mold-registry-badge">{getMoldTrialResultLabel(item.result)}</span></td>
-                  <td>{item.machineReference ?? "—"}</td>
-                  <td>{item.trialDate}</td>
+          <div className="mold-compat-table-wrap">
+            <table className="mold-registry-table">
+              <thead>
+                <tr>
+                  <th>Deneme No</th>
+                  <th>Sonuç</th>
+                  <th>Tarih</th>
+                  <th>Makine / Ürün / Malzeme</th>
+                  <th>Çevrim / Parça</th>
+                  <th>Bulgular / Karar</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {trialHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>Deneme kaydı yok.</td>
+                  </tr>
+                ) : (
+                  trialHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <strong>{item.trialNumber}</strong>
+                      </td>
+                      <td>
+                        <span className="mold-registry-badge">{getMoldTrialResultLabel(item.result)}</span>
+                      </td>
+                      <td>{item.trialDate}</td>
+                      <td>
+                        {item.machineReference ?? "—"}
+                        {item.productReference ? ` · ${item.productReference}` : ""}
+                        {item.materialReference ? ` · ${item.materialReference}` : ""}
+                      </td>
+                      <td>
+                        {item.cycleTimeSeconds !== undefined ? `${formatMoldNumber(item.cycleTimeSeconds)} sn` : "—"}
+                        {" · "}
+                        {formatMoldNumber(item.shotCount)} vuruş
+                        {" · "}
+                        {formatMoldNumber(item.goodPartCount)} iyi / {formatMoldNumber(item.scrapPartCount)} hurda
+                      </td>
+                      <td>
+                        {item.findings ?? "—"}
+                        {item.decision ? <div>{item.decision}</div> : null}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : null}
 
       {detail && tab === "timeline" ? (
-        <div className="mold-registry-history">
+        <div id="mold-tab-panel-timeline" role="tabpanel" aria-labelledby="mold-tab-timeline">
           {timeline.length === 0 ? (
             <div className="mold-registry-empty">Zaman çizelgesi boş.</div>
-          ) : timeline.map((entry) => (
-            <article key={`${entry.eventKind}-${entry.id}`} className="mold-registry-history-item">
-              <strong>{entry.title}</strong>
-              <div>{entry.summary}</div>
-              <small>
-                {getMoldTimelineKindLabel(entry.eventKind)}
-                {entry.statusOrResult ? ` · ${entry.statusOrResult.startsWith("draft") || entry.statusOrResult.includes("-")
-                  ? getMoldLifecycleStateLabel(entry.statusOrResult)
-                  : getMoldMaintenanceStatusLabel(entry.statusOrResult) || getMoldTrialResultLabel(entry.statusOrResult) || entry.statusOrResult}` : ""}
-                {entry.reference ? ` · ${entry.reference}` : ""}
-                {entry.actorDisplayName ? ` · ${entry.actorDisplayName}` : ""}
-                {" · "}{formatMoldDateTime(entry.eventDateUtc)}
-              </small>
-            </article>
-          ))}
+          ) : (
+            <div className="mold-timeline" aria-label="Zaman çizelgesi">
+              {timeline.map((entry, index) => {
+                const statusLabel = localizeTimelineStatus(entry.statusOrResult);
+                return (
+                  <article key={`${entry.eventKind}-${entry.id}-${index}`} className="mold-timeline__item">
+                    <div className="mold-timeline__rail" aria-hidden="true">
+                      <span className={timelineDotClass(entry.eventKind)} />
+                      <span className="mold-timeline__line" />
+                    </div>
+                    <div className="mold-timeline__body">
+                      <h3 className="mold-timeline__title">{entry.title}</h3>
+                      <p className="mold-timeline__summary">{entry.summary}</p>
+                      <div className="mold-timeline__meta">
+                        <span className="mold-registry-badge mold-registry-badge--neutral">
+                          {getMoldTimelineKindLabel(entry.eventKind)}
+                        </span>
+                        {statusLabel ? <span>{statusLabel}</span> : null}
+                        {entry.reference ? <span>{entry.reference}</span> : null}
+                        {entry.actorDisplayName ? <span>{entry.actorDisplayName}</span> : null}
+                        <span>{formatMoldDateTime(entry.eventDateUtc)}</span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : null}
 
       {detail && tab === "compatibility" ? (
-        <MoldCompatibilityDetailPanel
-          key={detail.id}
-          moldId={detail.id}
-          overview={compatibilityOverview}
-          canManage={canManage}
-          isPending={isPending}
-          loadError={compatibilityError}
-          onAction={onAction}
-        />
+        <div id="mold-tab-panel-compatibility" role="tabpanel" aria-labelledby="mold-tab-compatibility">
+          <MoldCompatibilityDetailPanel
+            key={detail.id}
+            moldId={detail.id}
+            overview={compatibilityOverview}
+            canManage={canManage}
+            isPending={isPending}
+            loadError={compatibilityError}
+            onAction={onAction}
+          />
+        </div>
       ) : null}
     </>
   );

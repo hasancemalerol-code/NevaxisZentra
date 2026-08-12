@@ -1,6 +1,7 @@
 import { Boxes } from "lucide-react";
 
 import { MoldRegistryView } from "@/features/molds/components/mold-registry-view";
+import "@/features/molds/components/mold-registry.css";
 import { readMoldRegistry } from "@/features/molds/server/mold-reader";
 
 export default async function MoldRegistryPage() {
@@ -12,9 +13,12 @@ export default async function MoldRegistryPage() {
     return (
       <main className="mold-registry-page">
         <header className="mold-registry-header">
-          <div>
-            <p>KALIP YÖNETİMİ</p>
+          <div className="mold-registry-header__intro">
+            <p className="mold-registry-header__eyebrow">KALIP YÖNETİMİ</p>
             <h1>Kalıplar</h1>
+            <p className="mold-registry-header__subtitle">
+              Kalıp yaşam döngüsü, bakım geçmişi ve makine uyumluluğunu tek operasyon yüzeyinden yönetin.
+            </p>
           </div>
         </header>
         <div
