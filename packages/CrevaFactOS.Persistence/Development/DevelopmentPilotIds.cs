@@ -368,6 +368,19 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaterialPilotLotPpCertificateId =
         Guid.Parse("bb000001-00ad-4000-8000-0000000000ad");
 
+    // Material requirement pilot fixtures (MATERIAL-3)
+    public static readonly Guid MaterialPilotRequirementPpCompleteId =
+        Guid.Parse("bb000001-00ae-4000-8000-0000000000ae");
+
+    public static readonly Guid MaterialPilotRequirementAbsPartialId =
+        Guid.Parse("bb000001-00af-4000-8000-0000000000af");
+
+    public static readonly Guid MaterialPilotRequirementPpExceedsRegrindId =
+        Guid.Parse("bb000001-00b0-4000-8000-0000000000b0");
+
+    public static readonly Guid MaterialPilotConsumptionObservationId =
+        Guid.Parse("bb000001-00b1-4000-8000-0000000000b1");
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

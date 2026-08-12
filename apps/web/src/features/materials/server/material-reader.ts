@@ -6,6 +6,8 @@ import {
   getMaterialLotTimeline,
   getMaterialLotTraceability,
   getMaterialLotWorkspaceSummary,
+  getMaterialRequirementOverview,
+  getMaterialRequirementProfile,
   getMaterialWorkspaceSummary,
   listMaterialLifecycleHistory,
   listMaterialLots,
@@ -23,6 +25,8 @@ import type {
   MaterialLotTimelineEntry,
   MaterialLotTraceability,
   MaterialLotWorkspaceSummary,
+  MaterialRequirementOverview,
+  MaterialRequirementProfileDetail,
   MaterialStorageLocation,
   MaterialSummary,
   MaterialWorkspaceSummary,
@@ -70,6 +74,22 @@ export type MaterialLotDetailResult =
       timeline: readonly MaterialLotTimelineEntry[];
       traceability: MaterialLotTraceability;
       storageLocations: readonly MaterialStorageLocation[];
+      canManage: boolean;
+    }>
+  | ReadFailure;
+
+export type MaterialRequirementOverviewResult =
+  | Readonly<{
+      status: "success";
+      overview: MaterialRequirementOverview;
+      canManage: boolean;
+    }>
+  | ReadFailure;
+
+export type MaterialRequirementProfileDetailResult =
+  | Readonly<{
+      status: "success";
+      profile: MaterialRequirementProfileDetail;
       canManage: boolean;
     }>
   | ReadFailure;
@@ -261,6 +281,54 @@ export async function readMaterialLotDetail(lotId: string): Promise<MaterialLotD
     timeline: timelineResult.value,
     traceability: traceabilityResult.value,
     storageLocations: locationsResult.value,
+    canManage: await probeMaterialManagePermission(resolved.context),
+  };
+}
+
+export async function readMaterialRequirementOverview(
+  materialId: string,
+): Promise<MaterialRequirementOverviewResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const overviewResult = await getMaterialRequirementOverview(resolved.context, materialId);
+  if (overviewResult.status === "failure") {
+    return {
+      status: "failure",
+      message: overviewResult.message,
+      code: overviewResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    overview: overviewResult.value,
+    canManage: await probeMaterialManagePermission(resolved.context),
+  };
+}
+
+export async function readMaterialRequirementProfile(
+  profileId: string,
+): Promise<MaterialRequirementProfileDetailResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const profileResult = await getMaterialRequirementProfile(resolved.context, profileId);
+  if (profileResult.status === "failure") {
+    return {
+      status: "failure",
+      message: profileResult.message,
+      code: profileResult.code,
+    };
+  }
+
+  return {
+    status: "success",
+    profile: profileResult.value,
     canManage: await probeMaterialManagePermission(resolved.context),
   };
 }

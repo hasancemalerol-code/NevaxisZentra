@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache";
 
 import {
   createMaterial,
+  createMaterialConsumptionObservation,
   createMaterialLot,
+  createMaterialRequirementProfile,
+  evaluateMaterialRegrindPolicy,
+  evaluateMaterialRequirement,
+  evaluateMaterialVariance,
   linkMaterialLotCertificate,
   observeMaterialLotReceipt,
   recordMaterialLotQualityStatus,
@@ -14,6 +19,7 @@ import {
   transitionMaterialLotStatus,
   transferMaterialLot,
   updateMaterial,
+  updateMaterialRequirementProfile,
   updateMaterialTechnicalSpecification,
 } from "./material-api-client";
 import { resolveMaterialRequestContext } from "./material-request-context";
@@ -299,4 +305,146 @@ export async function linkMaterialLotCertificateAction(formData: FormData): Prom
   };
 
   return mapResult(await linkMaterialLotCertificate(resolved.context, lotId, body));
+}
+
+export async function createMaterialRequirementProfileAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const body = {
+    materialId: String(formData.get("materialId") ?? ""),
+    requirementType: String(formData.get("requirementType") ?? "manual-planning"),
+    productionOrderReference: String(formData.get("productionOrderReference") ?? "") || null,
+    productReference: String(formData.get("productReference") ?? "") || null,
+    moldReference: String(formData.get("moldReference") ?? "") || null,
+    plannedProductionQuantity: readOptionalNumber(formData, "plannedProductionQuantity"),
+    goodPartTargetQuantity: readOptionalNumber(formData, "goodPartTargetQuantity"),
+    partWeightGrams: readOptionalNumber(formData, "partWeightGrams"),
+    runnerWeightGramsPerShot: readOptionalNumber(formData, "runnerWeightGramsPerShot"),
+    effectiveCavityCount:
+      formData.get("effectiveCavityCount") === null || formData.get("effectiveCavityCount") === ""
+        ? null
+        : Number(formData.get("effectiveCavityCount")),
+    setupAllowanceGrams: readOptionalNumber(formData, "setupAllowanceGrams"),
+    processLossAllowancePercent: readOptionalNumber(formData, "processLossAllowancePercent"),
+    plannedVirginPercent: readOptionalNumber(formData, "plannedVirginPercent"),
+    plannedRegrindPercent: readOptionalNumber(formData, "plannedRegrindPercent"),
+    sourceType: String(formData.get("sourceType") ?? "manual"),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    dataRecordedAtUtc: String(formData.get("dataRecordedAtUtc") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await createMaterialRequirementProfile(resolved.context, body));
+}
+
+export async function updateMaterialRequirementProfileAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const profileId = String(formData.get("profileId") ?? "");
+  const body = {
+    expectedVersion: Number(formData.get("expectedVersion") ?? 0),
+    requirementType: String(formData.get("requirementType") ?? "manual-planning"),
+    productionOrderReference: String(formData.get("productionOrderReference") ?? "") || null,
+    productReference: String(formData.get("productReference") ?? "") || null,
+    moldReference: String(formData.get("moldReference") ?? "") || null,
+    plannedProductionQuantity: readOptionalNumber(formData, "plannedProductionQuantity"),
+    goodPartTargetQuantity: readOptionalNumber(formData, "goodPartTargetQuantity"),
+    partWeightGrams: readOptionalNumber(formData, "partWeightGrams"),
+    runnerWeightGramsPerShot: readOptionalNumber(formData, "runnerWeightGramsPerShot"),
+    effectiveCavityCount:
+      formData.get("effectiveCavityCount") === null || formData.get("effectiveCavityCount") === ""
+        ? null
+        : Number(formData.get("effectiveCavityCount")),
+    setupAllowanceGrams: readOptionalNumber(formData, "setupAllowanceGrams"),
+    processLossAllowancePercent: readOptionalNumber(formData, "processLossAllowancePercent"),
+    plannedVirginPercent: readOptionalNumber(formData, "plannedVirginPercent"),
+    plannedRegrindPercent: readOptionalNumber(formData, "plannedRegrindPercent"),
+    sourceType: String(formData.get("sourceType") ?? "manual"),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    dataRecordedAtUtc: String(formData.get("dataRecordedAtUtc") ?? "") || null,
+  };
+
+  return mapResult(await updateMaterialRequirementProfile(resolved.context, profileId, body));
+}
+
+export async function createMaterialConsumptionObservationAction(formData: FormData): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const body = {
+    materialId: String(formData.get("materialId") ?? ""),
+    materialLotId: String(formData.get("materialLotId") ?? "") || null,
+    requirementProfileId: String(formData.get("requirementProfileId") ?? "") || null,
+    observationType: String(formData.get("observationType") ?? "consumption-observed"),
+    quantity: Number(formData.get("quantity") ?? 0),
+    unitOfMeasure: String(formData.get("unitOfMeasure") ?? "kg"),
+    virginQuantity: readOptionalNumber(formData, "virginQuantity"),
+    regrindQuantity: readOptionalNumber(formData, "regrindQuantity"),
+    goodPartQuantity: readOptionalNumber(formData, "goodPartQuantity"),
+    scrapQuantity: readOptionalNumber(formData, "scrapQuantity"),
+    productionOrderReference: String(formData.get("productionOrderReference") ?? "") || null,
+    productReference: String(formData.get("productReference") ?? "") || null,
+    moldReference: String(formData.get("moldReference") ?? "") || null,
+    observedAtUtc: String(formData.get("observedAtUtc") ?? new Date().toISOString()),
+    sourceType: String(formData.get("sourceType") ?? "manual"),
+    sourceReference: String(formData.get("sourceReference") ?? "") || null,
+    dataRecordedAtUtc: String(formData.get("dataRecordedAtUtc") ?? "") || null,
+    notes: String(formData.get("notes") ?? "") || null,
+    idempotencyKey: String(formData.get("idempotencyKey") ?? crypto.randomUUID()),
+  };
+
+  return mapResult(await createMaterialConsumptionObservation(resolved.context, body));
+}
+
+export async function evaluateMaterialRequirementAssessmentsAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const resolved = await resolveContext();
+  if (resolved.status === "failure") {
+    return resolved;
+  }
+
+  const materialId = String(formData.get("materialId") ?? "");
+  const profileId = String(formData.get("requirementProfileId") ?? "");
+  const idempotencyKey = String(formData.get("idempotencyKey") ?? crypto.randomUUID());
+  const body = {
+    requirementProfileId: profileId,
+    idempotencyKey,
+  };
+
+  const requirementResult = await evaluateMaterialRequirement(resolved.context, materialId, body);
+  if (requirementResult.status === "failure") {
+    return { status: "failure", message: requirementResult.message };
+  }
+
+  const varianceResult = await evaluateMaterialVariance(resolved.context, materialId, {
+    requirementProfileId: profileId,
+    idempotencyKey: crypto.randomUUID(),
+  });
+  if (varianceResult.status === "failure") {
+    return { status: "failure", message: varianceResult.message };
+  }
+
+  const regrindResult = await evaluateMaterialRegrindPolicy(resolved.context, materialId, {
+    requirementProfileId: profileId,
+    idempotencyKey: crypto.randomUUID(),
+  });
+  if (regrindResult.status === "failure") {
+    return { status: "failure", message: regrindResult.message };
+  }
+
+  revalidatePath("/malzemeler");
+  return {
+    status: "success",
+    id: requirementResult.value.id,
+    version: requirementResult.value.version,
+  };
 }

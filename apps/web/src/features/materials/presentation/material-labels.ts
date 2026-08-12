@@ -470,3 +470,147 @@ export const MATERIAL_LOT_TRANSITION_TARGETS: Record<string, readonly { value: s
   ],
   closed: [],
 };
+
+export function getMaterialRequirementTypeLabel(type: string): string {
+  switch (type) {
+    case "production-order":
+      return "Üretim Emri";
+    case "trial":
+      return "Deneme";
+    case "setup":
+      return "Kurulum";
+    case "manual-planning":
+      return "Manuel Planlama";
+    case "other":
+      return "Diğer";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialConsumptionObservationTypeLabel(type: string): string {
+  switch (type) {
+    case "consumption-observed":
+      return "Tüketim Gözlemi";
+    case "setup-consumption-observed":
+      return "Kurulum Tüketimi";
+    case "trial-consumption-observed":
+      return "Deneme Tüketimi";
+    case "scrap-observed":
+      return "Fire Gözlemi";
+    case "regrind-use-observed":
+      return "Regrind Kullanımı";
+    case "correction-observed":
+      return "Düzeltme Gözlemi";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialRequirementAssessmentStatusLabel(status: string): string {
+  switch (status) {
+    case "calculated":
+      return "Hesaplandı";
+    case "insufficient-data":
+      return "Yetersiz Veri";
+    case "within-tolerance":
+      return "Tolerans Dahilinde";
+    case "above-plan":
+      return "Plan Üstü";
+    case "below-plan":
+      return "Plan Altı";
+    case "compliant":
+      return "Uyumlu";
+    case "prohibited":
+      return "Yasak";
+    case "exceeds-limit":
+      return "Limit Aşımı";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialAssessmentDriverStateLabel(state: string): string {
+  switch (state) {
+    case "pass":
+      return "Uygun";
+    case "warn":
+      return "Uyarı";
+    case "fail":
+      return "Uygunsuz";
+    case "unknown":
+      return "Bilinmiyor";
+    default:
+      return "Bilinmiyor";
+  }
+}
+
+export function getMaterialAssessmentEvidenceFieldLabel(field: string): string {
+  switch (field) {
+    case "goodPartTargetQuantity":
+      return "Hedef Sağlam Parça";
+    case "partWeightGrams":
+      return "Parça Ağırlığı (g)";
+    case "runnerWeightGramsPerShot":
+      return "Yolluk Ağırlığı/Vuruş (g)";
+    case "effectiveCavityCount":
+      return "Etkin Göz Sayısı";
+    case "setupAllowanceGrams":
+      return "Kurulum Payı (g)";
+    case "processLossAllowancePercent":
+      return "Proses Kaybı (%)";
+    case "productionOrderReference":
+      return "Üretim Emri Referansı";
+    case "moldReference":
+      return "Kalıp Referansı";
+    case "plannedRegrindPercent":
+      return "Planlanan Regrind (%)";
+    case "maximumRegrindPercent":
+      return "Maks. Regrind (%)";
+    case "theoreticalRequirementGrams":
+      return "Teorik İhtiyaç (g)";
+    case "observedConsumptionGrams":
+      return "Gözlenen Tüketim (g)";
+    default:
+      return field;
+  }
+}
+
+export function formatMaterialGrams(value?: number | null): string {
+  if (value === undefined || value === null) {
+    return "—";
+  }
+
+  return `${value.toLocaleString("tr-TR", { maximumFractionDigits: 4 })} g`;
+}
+
+export function formatMaterialPercent(value?: number | null): string {
+  if (value === undefined || value === null) {
+    return "—";
+  }
+
+  return `${value.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} %`;
+}
+
+export const MATERIAL_REQUIREMENT_TYPE_FORM_OPTIONS = [
+  { value: "production-order", label: "Üretim Emri" },
+  { value: "trial", label: "Deneme" },
+  { value: "setup", label: "Kurulum" },
+  { value: "manual-planning", label: "Manuel Planlama" },
+  { value: "other", label: "Diğer" },
+] as const;
+
+export const MATERIAL_CONSUMPTION_OBSERVATION_FORM_OPTIONS = [
+  { value: "consumption-observed", label: "Tüketim Gözlemi" },
+  { value: "setup-consumption-observed", label: "Kurulum Tüketimi" },
+  { value: "trial-consumption-observed", label: "Deneme Tüketimi" },
+  { value: "scrap-observed", label: "Fire Gözlemi" },
+  { value: "regrind-use-observed", label: "Regrind Kullanımı" },
+  { value: "correction-observed", label: "Düzeltme Gözlemi" },
+] as const;
+
+export const MATERIAL_REQUIREMENT_THEORETICAL_DISCLAIMER =
+  "Teorik malzeme ihtiyacıdır; ERP stok rezervasyonu veya gerçek tüketim değildir.";
+
+export const MATERIAL_REQUIREMENT_CONSUMPTION_DISCLAIMER =
+  "Operasyonel tüketim gözlemidir; ERP stok hareketi değildir.";

@@ -110,6 +110,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaterialLotTraceabilityEvent> MaterialLotTraceabilityEvents => Set<MaterialLotTraceabilityEvent>();
     public DbSet<MaterialLotCertificateReference> MaterialLotCertificateReferences => Set<MaterialLotCertificateReference>();
 
+    // Material requirement & consumption intelligence (MATERIAL-3)
+    public DbSet<MaterialRequirementProfile> MaterialRequirementProfiles => Set<MaterialRequirementProfile>();
+    public DbSet<MaterialConsumptionObservation> MaterialConsumptionObservations => Set<MaterialConsumptionObservation>();
+    public DbSet<MaterialRequirementAssessment> MaterialRequirementAssessments => Set<MaterialRequirementAssessment>();
+
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
     public DbSet<MoldLifecycleEvent> MoldLifecycleEvents => Set<MoldLifecycleEvent>();
@@ -777,6 +782,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialRequirementProfileEntityConfiguration());
+        modelBuilder.Entity<MaterialRequirementProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialConsumptionObservationEntityConfiguration());
+        modelBuilder.Entity<MaterialConsumptionObservation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialRequirementAssessmentEntityConfiguration());
+        modelBuilder.Entity<MaterialRequirementAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

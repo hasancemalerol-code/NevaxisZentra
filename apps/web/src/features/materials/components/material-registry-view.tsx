@@ -38,6 +38,7 @@ import {
   updateMaterialTechnicalAction,
 } from "../server/material-writer";
 import { MaterialLotPanel } from "./material-lot-panel";
+import { MaterialRequirementPanel } from "./material-requirement-panel";
 import "./material-registry.css";
 
 type MaterialRegistryViewProps = Readonly<{
@@ -49,7 +50,15 @@ type MaterialRegistryViewProps = Readonly<{
   initialHistory?: readonly MaterialLifecycleEvent[];
 }>;
 
-type DetailTab = "overview" | "technical" | "source" | "history" | "lots" | "traceability";
+type DetailTab =
+  | "overview"
+  | "technical"
+  | "source"
+  | "history"
+  | "lots"
+  | "traceability"
+  | "requirement"
+  | "regrind-policy";
 type ActionPanel = "edit" | "technical" | "transition" | null;
 
 function lifecycleBadgeClass(status: string): string {
@@ -85,6 +94,8 @@ const DETAIL_TABS: readonly [DetailTab, string][] = [
   ["history", "Durum Geçmişi"],
   ["lots", "Lotlar"],
   ["traceability", "İzlenebilirlik"],
+  ["requirement", "İhtiyaç ve Tüketim"],
+  ["regrind-policy", "Regrind Politikası"],
 ];
 
 export function MaterialRegistryView({
@@ -1078,6 +1089,28 @@ export function MaterialRegistryView({
                     unitOfMeasure={activeDetail.unitOfMeasure}
                     canManage={detailCanManage}
                     traceabilityMode
+                  />
+                ) : null}
+
+                {tab === "requirement" && activeDetail ? (
+                  <MaterialRequirementPanel
+                    materialId={activeDetail.id}
+                    materialCode={activeDetail.code}
+                    materialName={activeDetail.name}
+                    unitOfMeasure={activeDetail.unitOfMeasure}
+                    canManage={detailCanManage}
+                    section="consumption"
+                  />
+                ) : null}
+
+                {tab === "regrind-policy" && activeDetail ? (
+                  <MaterialRequirementPanel
+                    materialId={activeDetail.id}
+                    materialCode={activeDetail.code}
+                    materialName={activeDetail.name}
+                    unitOfMeasure={activeDetail.unitOfMeasure}
+                    canManage={detailCanManage}
+                    section="regrind-policy"
                   />
                 ) : null}
               </>

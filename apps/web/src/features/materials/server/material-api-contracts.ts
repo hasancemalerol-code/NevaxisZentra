@@ -1,4 +1,7 @@
 import type {
+  MaterialAssessmentDriver,
+  MaterialAssessmentEvidence,
+  MaterialConsumptionObservation,
   MaterialDetail,
   MaterialLifecycleEvent,
   MaterialLotBackwardTraceability,
@@ -9,6 +12,10 @@ import type {
   MaterialLotTimelineEntry,
   MaterialLotTraceability,
   MaterialLotWorkspaceSummary,
+  MaterialRequirementAssessment,
+  MaterialRequirementOverview,
+  MaterialRequirementProfileDetail,
+  MaterialRequirementProfileSummary,
   MaterialStorageLocation,
   MaterialSummary,
   MaterialTechnicalSpecification,
@@ -388,5 +395,193 @@ export function parseMaterialLotTraceability(payload: unknown): MaterialLotTrace
       forward && typeof forward === "object"
         ? parseMaterialLotForwardTraceability(forward)
         : null,
+  };
+}
+
+function parseMaterialAssessmentDriver(value: unknown): MaterialAssessmentDriver {
+  const item = value as Record<string, unknown>;
+  return {
+    code: String(item.code),
+    label: String(item.label),
+    value: readOptionalString(item.value),
+    state: String(item.state),
+  };
+}
+
+function parseMaterialAssessmentEvidence(value: unknown): MaterialAssessmentEvidence {
+  const item = value as Record<string, unknown>;
+  return {
+    field: String(item.field),
+    value: readOptionalString(item.value),
+    source: readOptionalString(item.source),
+    recordedAtUtc: readOptionalString(item.recordedAtUtc),
+    isMissing: item.isMissing === true,
+  };
+}
+
+export function parseMaterialRequirementAssessment(value: unknown): MaterialRequirementAssessment {
+  const item = value as Record<string, unknown>;
+  const drivers = item.drivers;
+  const evidence = item.evidence;
+  return {
+    id: String(item.id),
+    materialId: String(item.materialId),
+    requirementProfileId: readOptionalString(item.requirementProfileId),
+    assessmentType: String(item.assessmentType),
+    status: String(item.status),
+    ruleSetVersion: String(item.ruleSetVersion),
+    inputFingerprint: String(item.inputFingerprint),
+    drivers: Array.isArray(drivers) ? drivers.map(parseMaterialAssessmentDriver) : [],
+    evidence: Array.isArray(evidence) ? evidence.map(parseMaterialAssessmentEvidence) : [],
+    theoreticalRequirementGrams: readNumber(item.theoreticalRequirementGrams),
+    observedConsumptionGrams: readNumber(item.observedConsumptionGrams),
+    varianceGrams: readNumber(item.varianceGrams),
+    variancePercent: readNumber(item.variancePercent),
+    virginRequirementGrams: readNumber(item.virginRequirementGrams),
+    regrindRequirementGrams: readNumber(item.regrindRequirementGrams),
+    evaluatedAtUtc: String(item.evaluatedAtUtc),
+    createdAtUtc: String(item.createdAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialRequirementProfileSummary(value: unknown): MaterialRequirementProfileSummary {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialName: String(item.materialName),
+    requirementType: String(item.requirementType),
+    productionOrderReference: readOptionalString(item.productionOrderReference),
+    productReference: readOptionalString(item.productReference),
+    moldReference: readOptionalString(item.moldReference),
+    goodPartTargetQuantity: readNumber(item.goodPartTargetQuantity),
+    plannedRegrindPercent: readNumber(item.plannedRegrindPercent),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialRequirementProfileSummaryList(
+  payload: unknown,
+): readonly MaterialRequirementProfileSummary[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected requirement profile list array.");
+  }
+
+  return payload.map(parseMaterialRequirementProfileSummary);
+}
+
+export function parseMaterialRequirementProfileDetail(payload: unknown): MaterialRequirementProfileDetail {
+  const item = payload as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    facilityId: String(item.facilityId),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialName: String(item.materialName),
+    requirementType: String(item.requirementType),
+    productionOrderReference: readOptionalString(item.productionOrderReference),
+    productReference: readOptionalString(item.productReference),
+    moldReference: readOptionalString(item.moldReference),
+    plannedProductionQuantity: readNumber(item.plannedProductionQuantity),
+    goodPartTargetQuantity: readNumber(item.goodPartTargetQuantity),
+    partWeightGrams: readNumber(item.partWeightGrams),
+    runnerWeightGramsPerShot: readNumber(item.runnerWeightGramsPerShot),
+    effectiveCavityCount:
+      item.effectiveCavityCount === undefined || item.effectiveCavityCount === null
+        ? undefined
+        : Number(item.effectiveCavityCount),
+    setupAllowanceGrams: readNumber(item.setupAllowanceGrams),
+    processLossAllowancePercent: readNumber(item.processLossAllowancePercent),
+    plannedVirginPercent: readNumber(item.plannedVirginPercent),
+    plannedRegrindPercent: readNumber(item.plannedRegrindPercent),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    createdAtUtc: String(item.createdAtUtc),
+    updatedAtUtc: String(item.updatedAtUtc),
+    version: Number(item.version),
+  };
+}
+
+export function parseMaterialConsumptionObservation(value: unknown): MaterialConsumptionObservation {
+  const item = value as Record<string, unknown>;
+  return {
+    id: String(item.id),
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    materialLotId: readOptionalString(item.materialLotId),
+    lotNumber: readOptionalString(item.lotNumber),
+    requirementProfileId: readOptionalString(item.requirementProfileId),
+    observationType: String(item.observationType),
+    quantity: Number(item.quantity),
+    unitOfMeasure: String(item.unitOfMeasure),
+    virginQuantity: readNumber(item.virginQuantity),
+    regrindQuantity: readNumber(item.regrindQuantity),
+    goodPartQuantity: readNumber(item.goodPartQuantity),
+    scrapQuantity: readNumber(item.scrapQuantity),
+    productionOrderReference: readOptionalString(item.productionOrderReference),
+    productReference: readOptionalString(item.productReference),
+    moldReference: readOptionalString(item.moldReference),
+    observedAtUtc: String(item.observedAtUtc),
+    sourceType: String(item.sourceType),
+    sourceReference: readOptionalString(item.sourceReference),
+    dataRecordedAtUtc: readOptionalString(item.dataRecordedAtUtc),
+    notes: readOptionalString(item.notes),
+    createdAtUtc: String(item.createdAtUtc),
+    version: Number(item.version),
+    disclaimer: readOptionalString(item.disclaimer),
+  };
+}
+
+export function parseMaterialConsumptionObservationList(
+  payload: unknown,
+): readonly MaterialConsumptionObservation[] {
+  if (!Array.isArray(payload)) {
+    throw new Error("Expected consumption observation list array.");
+  }
+
+  return payload.map(parseMaterialConsumptionObservation);
+}
+
+export function parseMaterialRequirementOverview(payload: unknown): MaterialRequirementOverview {
+  const item = payload as Record<string, unknown>;
+  const currentRequirementAssessment = item.currentRequirementAssessment;
+  const currentVarianceAssessment = item.currentVarianceAssessment;
+  const currentRegrindAssessment = item.currentRegrindAssessment;
+  const currentAvailabilityAssessment = item.currentAvailabilityAssessment;
+  const profiles = item.profiles;
+  const recentObservations = item.recentObservations;
+
+  return {
+    materialId: String(item.materialId),
+    materialCode: String(item.materialCode),
+    currentRequirementAssessment:
+      currentRequirementAssessment && typeof currentRequirementAssessment === "object"
+        ? parseMaterialRequirementAssessment(currentRequirementAssessment)
+        : undefined,
+    currentVarianceAssessment:
+      currentVarianceAssessment && typeof currentVarianceAssessment === "object"
+        ? parseMaterialRequirementAssessment(currentVarianceAssessment)
+        : undefined,
+    currentRegrindAssessment:
+      currentRegrindAssessment && typeof currentRegrindAssessment === "object"
+        ? parseMaterialRequirementAssessment(currentRegrindAssessment)
+        : undefined,
+    currentAvailabilityAssessment:
+      currentAvailabilityAssessment && typeof currentAvailabilityAssessment === "object"
+        ? parseMaterialRequirementAssessment(currentAvailabilityAssessment)
+        : undefined,
+    profiles: Array.isArray(profiles) ? profiles.map(parseMaterialRequirementProfileSummary) : [],
+    recentObservations: Array.isArray(recentObservations)
+      ? recentObservations.map(parseMaterialConsumptionObservation)
+      : [],
+    theoreticalRequirementDisclaimer: String(item.theoreticalRequirementDisclaimer),
+    consumptionObservationDisclaimer: String(item.consumptionObservationDisclaimer),
   };
 }

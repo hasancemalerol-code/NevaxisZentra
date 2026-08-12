@@ -254,3 +254,124 @@ export type MaterialLotTraceability = Readonly<{
   backward: MaterialLotBackwardTraceability | null;
   forward: MaterialLotForwardTraceability | null;
 }>;
+
+export type MaterialAssessmentDriver = Readonly<{
+  code: string;
+  label: string;
+  value?: string;
+  state: string;
+}>;
+
+export type MaterialAssessmentEvidence = Readonly<{
+  field: string;
+  value?: string;
+  source?: string;
+  recordedAtUtc?: string;
+  isMissing: boolean;
+}>;
+
+export type MaterialRequirementAssessment = Readonly<{
+  id: string;
+  materialId: string;
+  requirementProfileId?: string;
+  assessmentType: string;
+  status: string;
+  ruleSetVersion: string;
+  inputFingerprint: string;
+  drivers: readonly MaterialAssessmentDriver[];
+  evidence: readonly MaterialAssessmentEvidence[];
+  theoreticalRequirementGrams?: number;
+  observedConsumptionGrams?: number;
+  varianceGrams?: number;
+  variancePercent?: number;
+  virginRequirementGrams?: number;
+  regrindRequirementGrams?: number;
+  evaluatedAtUtc: string;
+  createdAtUtc: string;
+  version: number;
+}>;
+
+export type MaterialRequirementProfileSummary = Readonly<{
+  id: string;
+  materialId: string;
+  materialCode: string;
+  materialName: string;
+  requirementType: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  moldReference?: string;
+  goodPartTargetQuantity?: number;
+  plannedRegrindPercent?: number;
+  sourceType: string;
+  sourceReference?: string;
+  dataRecordedAtUtc?: string;
+  updatedAtUtc: string;
+  version: number;
+}>;
+
+export type MaterialRequirementProfileDetail = Readonly<{
+  id: string;
+  facilityId: string;
+  materialId: string;
+  materialCode: string;
+  materialName: string;
+  requirementType: string;
+  productionOrderReference?: string;
+  productReference?: string;
+  moldReference?: string;
+  plannedProductionQuantity?: number;
+  goodPartTargetQuantity?: number;
+  partWeightGrams?: number;
+  runnerWeightGramsPerShot?: number;
+  effectiveCavityCount?: number;
+  setupAllowanceGrams?: number;
+  processLossAllowancePercent?: number;
+  plannedVirginPercent?: number;
+  plannedRegrindPercent?: number;
+  sourceType: string;
+  sourceReference?: string;
+  dataRecordedAtUtc?: string;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  version: number;
+}>;
+
+export type MaterialConsumptionObservation = Readonly<{
+  id: string;
+  materialId: string;
+  materialCode: string;
+  materialLotId?: string;
+  lotNumber?: string;
+  requirementProfileId?: string;
+  observationType: string;
+  quantity: number;
+  unitOfMeasure: string;
+  virginQuantity?: number;
+  regrindQuantity?: number;
+  goodPartQuantity?: number;
+  scrapQuantity?: number;
+  productionOrderReference?: string;
+  productReference?: string;
+  moldReference?: string;
+  observedAtUtc: string;
+  sourceType: string;
+  sourceReference?: string;
+  dataRecordedAtUtc?: string;
+  notes?: string;
+  createdAtUtc: string;
+  version: number;
+  disclaimer?: string;
+}>;
+
+export type MaterialRequirementOverview = Readonly<{
+  materialId: string;
+  materialCode: string;
+  currentRequirementAssessment?: MaterialRequirementAssessment;
+  currentVarianceAssessment?: MaterialRequirementAssessment;
+  currentRegrindAssessment?: MaterialRequirementAssessment;
+  currentAvailabilityAssessment?: MaterialRequirementAssessment;
+  profiles: readonly MaterialRequirementProfileSummary[];
+  recentObservations: readonly MaterialConsumptionObservation[];
+  theoreticalRequirementDisclaimer: string;
+  consumptionObservationDisclaimer: string;
+}>;

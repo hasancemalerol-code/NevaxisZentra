@@ -246,6 +246,87 @@ internal static class MaterialEndpointHelpers
 
     internal static Dictionary<string, object?> FailureExt(string failureCode) =>
         new() { ["failureCode"] = failureCode };
+
+    internal static IResult MapRequirementWriteResult(MaterialRequirementWriteResult result, bool isCreate)
+    {
+        if (!result.Succeeded)
+        {
+            return MapRequirementFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        var dto = new MaterialWriteSuccessDto(result.EntityId!.Value, result.Version!.Value, result.IdempotentReplay);
+        return isCreate
+            ? TypedResults.Created((string?)null, dto)
+            : TypedResults.Ok(dto);
+    }
+
+    internal static IResult MapRequirementFailure(string failureCode, string? reason) =>
+        failureCode switch
+        {
+            MaterialRequirementFailureCodes.NotFound => TypedResults.Problem(
+                title: reason ?? "Not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.NotFound)),
+            MaterialRequirementFailureCodes.ConcurrencyConflict => TypedResults.Problem(
+                title: reason ?? "The record was modified by another user.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.ConcurrencyConflict)),
+            MaterialRequirementFailureCodes.IdempotencyConflict => TypedResults.Problem(
+                title: reason ?? "The idempotency key was already used with a different command payload.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.IdempotencyConflict)),
+            MaterialRequirementFailureCodes.IdempotencyLegacyUnverifiable => TypedResults.Problem(
+                title: reason ?? "The idempotency key belongs to a legacy record that cannot be verified safely.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.IdempotencyLegacyUnverifiable)),
+            MaterialRequirementFailureCodes.AssessmentConcurrencyConflict => TypedResults.Problem(
+                title: reason ?? "Concurrent evaluation conflict.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.AssessmentConcurrencyConflict)),
+            MaterialRequirementFailureCodes.InvalidQuantity => TypedResults.Problem(
+                title: reason ?? "Quantity is invalid.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.InvalidQuantity)),
+            MaterialRequirementFailureCodes.InvalidLot => TypedResults.Problem(
+                title: reason ?? "Lot is invalid for this material.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.InvalidLot)),
+            MaterialRequirementFailureCodes.InsufficientData => TypedResults.Problem(
+                title: reason ?? "Insufficient data.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.InsufficientData)),
+            MaterialRequirementFailureCodes.RegrindLimitExceeded => TypedResults.Problem(
+                title: reason ?? "Regrind limit exceeded.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.RegrindLimitExceeded)),
+            MaterialRequirementFailureCodes.ValidationFailed => TypedResults.Problem(
+                title: reason ?? "Validation failed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.ValidationFailed)),
+            MaterialRequirementFailureCodes.SourceUnavailable => TypedResults.Problem(
+                title: reason ?? "Material requirement service is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.SourceUnavailable)),
+            _ => TypedResults.Problem(
+                title: reason ?? "Request failed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.ValidationFailed)),
+        };
+}
+
+internal static class MaterialRequirementApiFailureCodes
+{
+    public const string NotFound = "material.requirement.not-found";
+    public const string ConcurrencyConflict = "material.requirement.concurrency-conflict";
+    public const string IdempotencyConflict = "material.requirement.idempotency-conflict";
+    public const string IdempotencyLegacyUnverifiable = "material.requirement.idempotency-legacy-unverifiable";
+    public const string AssessmentConcurrencyConflict = "material.assessment.concurrency-conflict";
+    public const string InvalidQuantity = "material.consumption.invalid-quantity";
+    public const string InvalidLot = "material.consumption.invalid-lot";
+    public const string InsufficientData = "material.requirement.insufficient-data";
+    public const string RegrindLimitExceeded = "material.regrind.limit-exceeded";
+    public const string ValidationFailed = "material.requirement.validation-failed";
+    public const string SourceUnavailable = "material.requirement.source-unavailable";
 }
 
 internal static class MaterialLotApiFailureCodes

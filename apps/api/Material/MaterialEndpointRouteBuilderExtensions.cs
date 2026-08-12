@@ -24,6 +24,7 @@ public static class MaterialEndpointRouteBuilderExtensions
         group.MapPost("/{materialId:guid}/lifecycle-transitions", TransitionLifecycleAsync);
 
         endpoints.MapMaterialLotEndpoints();
+        endpoints.MapMaterialRequirementEndpoints();
 
         return endpoints;
     }
@@ -532,6 +533,16 @@ public static class MaterialServiceCollectionExtensions
             return dbContext is null
                 ? new UnavailableMaterialLotRepository()
                 : new MaterialLotRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IMaterialRequirementRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableMaterialRequirementRepository()
+                : new MaterialRequirementRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });

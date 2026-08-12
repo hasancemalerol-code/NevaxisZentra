@@ -1,6 +1,12 @@
 "use server";
 
-import { readMaterialDetail, readMaterialLotDetail, readMaterialLotsForMaterial } from "./material-reader";
+import {
+  readMaterialDetail,
+  readMaterialLotDetail,
+  readMaterialLotsForMaterial,
+  readMaterialRequirementOverview,
+  readMaterialRequirementProfile,
+} from "./material-reader";
 import type { MaterialLotListFilters } from "./material-api-client";
 
 export async function loadMaterialDetailAction(materialId: string) {
@@ -44,6 +50,32 @@ export async function loadMaterialLotDetailAction(lotId: string) {
     timeline: result.timeline,
     traceability: result.traceability,
     storageLocations: result.storageLocations,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadMaterialRequirementOverviewAction(materialId: string) {
+  const result = await readMaterialRequirementOverview(materialId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    overview: result.overview,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadMaterialRequirementProfileAction(profileId: string) {
+  const result = await readMaterialRequirementProfile(profileId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    profile: result.profile,
     canManage: result.canManage,
   };
 }

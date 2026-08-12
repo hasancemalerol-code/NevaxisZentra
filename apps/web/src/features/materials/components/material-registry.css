@@ -1827,7 +1827,163 @@
 
 @media (max-width: 960px) {
   .material-lot-kpis,
-  .material-lot-traceability__grid {
+  .material-lot-traceability__grid,
+  .material-requirement-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ─── MATERIAL-3 requirement workspace ─── */
+
+.material-requirement-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.material-requirement-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.material-requirement-honesty {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.material-requirement-disclaimer {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.material-requirement-disclaimer--consumption {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.material-requirement-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.material-requirement-profiles {
+  margin-top: 0.25rem;
+}
+
+.material-requirement-assessment-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.material-requirement-assessment-header small {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.material-requirement-insufficient {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  color: #854d0e;
+  font-size: 0.8rem;
+}
+
+.material-requirement-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.85rem;
+  margin: 0;
+}
+
+.material-requirement-evidence-grid div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.material-requirement-evidence-grid dt {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.material-requirement-evidence-grid dd {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #12263a;
+}
+
+.material-requirement-evidence-grid dd small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.material-requirement-evidence-grid div[data-missing="true"] {
+  opacity: 0.85;
+}
+
+.material-requirement-evidence-missing {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.material-requirement-driver-list {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.material-requirement-driver-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.material-requirement-driver-list em {
+  font-style: normal;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.material-requirement-regrind {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 960px) {
+  .material-requirement-evidence-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }

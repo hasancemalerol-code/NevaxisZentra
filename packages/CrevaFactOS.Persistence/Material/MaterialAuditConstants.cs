@@ -12,6 +12,10 @@ public static class MaterialAuditActions
     public const string LotStatusChanged = "material.lot.status.changed";
     public const string LotQualityRecorded = "material.lot.quality.recorded";
     public const string LotCertificateLinked = "material.lot.certificate.linked";
+    public const string RequirementProfileCreated = "material.requirement.profile.created";
+    public const string RequirementProfileUpdated = "material.requirement.profile.updated";
+    public const string ConsumptionObserved = "material.consumption.observed";
+    public const string RequirementAssessed = "material.requirement.assessed";
 }
 
 public static class MaterialAuditEventTypes
@@ -26,6 +30,10 @@ public static class MaterialAuditEventTypes
     public const string LotStatusChanged = "material.lot.status.changed";
     public const string LotQualityRecorded = "material.lot.quality.recorded";
     public const string LotCertificateLinked = "material.lot.certificate.linked";
+    public const string RequirementProfileCreated = "material.requirement.profile.created";
+    public const string RequirementProfileUpdated = "material.requirement.profile.updated";
+    public const string ConsumptionObserved = "material.consumption.observed";
+    public const string RequirementAssessed = "material.requirement.assessed";
 }
 
 public static class MaterialActorDisplayNames

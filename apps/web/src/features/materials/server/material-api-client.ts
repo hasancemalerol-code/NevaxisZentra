@@ -1,6 +1,7 @@
 import "./material-server-boundary";
 
 import type {
+  MaterialConsumptionObservation,
   MaterialDetail,
   MaterialLifecycleEvent,
   MaterialLotDetail,
@@ -8,6 +9,9 @@ import type {
   MaterialLotTimelineEntry,
   MaterialLotTraceability,
   MaterialLotWorkspaceSummary,
+  MaterialRequirementOverview,
+  MaterialRequirementProfileDetail,
+  MaterialRequirementProfileSummary,
   MaterialStorageLocation,
   MaterialSummary,
   MaterialTechnicalSpecification,
@@ -15,6 +19,7 @@ import type {
   MaterialWriteResult,
 } from "../domain/materials";
 import {
+  parseMaterialConsumptionObservationList,
   parseMaterialDetail,
   parseMaterialLifecycleEventList,
   parseMaterialLotDetail,
@@ -22,6 +27,9 @@ import {
   parseMaterialLotTimelineEntryList,
   parseMaterialLotTraceability,
   parseMaterialLotWorkspaceSummary,
+  parseMaterialRequirementOverview,
+  parseMaterialRequirementProfileDetail,
+  parseMaterialRequirementProfileSummaryList,
   parseMaterialStorageLocationList,
   parseMaterialSummaryList,
   parseMaterialTechnicalSpecification,
@@ -68,6 +76,21 @@ export type MaterialLotListFilters = Readonly<{
   status?: string;
   qualityStatus?: string;
   expiryState?: string;
+  page?: number;
+  pageSize?: number;
+}>;
+
+export type MaterialRequirementProfileListFilters = Readonly<{
+  materialId?: string;
+  requirementType?: string;
+  page?: number;
+  pageSize?: number;
+}>;
+
+export type MaterialConsumptionObservationListFilters = Readonly<{
+  materialId?: string;
+  requirementProfileId?: string;
+  observationType?: string;
   page?: number;
   pageSize?: number;
 }>;
@@ -438,6 +461,141 @@ export function linkMaterialLotCertificate(
   return mutateJson(
     context,
     `/api/materials/lots/${encodeURIComponent(lotId)}/certificates`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function getMaterialRequirementOverview(
+  context: ProductionOrderRequestContext,
+  materialId: string,
+): Promise<MaterialApiResult<MaterialRequirementOverview>> {
+  return getJson(
+    context,
+    `/api/materials/${encodeURIComponent(materialId)}/requirement-overview`,
+    undefined,
+    parseMaterialRequirementOverview,
+  );
+}
+
+export function listMaterialRequirementProfiles(
+  context: ProductionOrderRequestContext,
+  filters: MaterialRequirementProfileListFilters = {},
+): Promise<MaterialApiResult<readonly MaterialRequirementProfileSummary[]>> {
+  return getJson(
+    context,
+    "/api/materials/requirement-profiles",
+    {
+      materialId: filters.materialId,
+      requirementType: filters.requirementType,
+      page: filters.page?.toString(),
+      pageSize: filters.pageSize?.toString(),
+    },
+    parseMaterialRequirementProfileSummaryList,
+  );
+}
+
+export function getMaterialRequirementProfile(
+  context: ProductionOrderRequestContext,
+  profileId: string,
+): Promise<MaterialApiResult<MaterialRequirementProfileDetail>> {
+  return getJson(
+    context,
+    `/api/materials/requirement-profiles/${encodeURIComponent(profileId)}`,
+    undefined,
+    parseMaterialRequirementProfileDetail,
+  );
+}
+
+export function createMaterialRequirementProfile(
+  context: ProductionOrderRequestContext,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(context, "/api/materials/requirement-profiles", "POST", body, parseMaterialWriteApiResponse);
+}
+
+export function updateMaterialRequirementProfile(
+  context: ProductionOrderRequestContext,
+  profileId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/requirement-profiles/${encodeURIComponent(profileId)}`,
+    "PUT",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function listMaterialConsumptionObservations(
+  context: ProductionOrderRequestContext,
+  filters: MaterialConsumptionObservationListFilters = {},
+): Promise<MaterialApiResult<readonly MaterialConsumptionObservation[]>> {
+  return getJson(
+    context,
+    "/api/materials/consumption-observations",
+    {
+      materialId: filters.materialId,
+      requirementProfileId: filters.requirementProfileId,
+      observationType: filters.observationType,
+      page: filters.page?.toString(),
+      pageSize: filters.pageSize?.toString(),
+    },
+    parseMaterialConsumptionObservationList,
+  );
+}
+
+export function createMaterialConsumptionObservation(
+  context: ProductionOrderRequestContext,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    "/api/materials/consumption-observations",
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function evaluateMaterialRequirement(
+  context: ProductionOrderRequestContext,
+  materialId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/${encodeURIComponent(materialId)}/requirement-evaluations`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function evaluateMaterialVariance(
+  context: ProductionOrderRequestContext,
+  materialId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/${encodeURIComponent(materialId)}/variance-evaluations`,
+    "POST",
+    body,
+    parseMaterialWriteApiResponse,
+  );
+}
+
+export function evaluateMaterialRegrindPolicy(
+  context: ProductionOrderRequestContext,
+  materialId: string,
+  body: Record<string, unknown>,
+): Promise<MaterialApiResult<MaterialWriteResult>> {
+  return mutateJson(
+    context,
+    `/api/materials/${encodeURIComponent(materialId)}/regrind-policy-evaluations`,
     "POST",
     body,
     parseMaterialWriteApiResponse,
