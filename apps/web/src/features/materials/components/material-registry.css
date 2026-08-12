@@ -1,4 +1,4 @@
-/* Mold Management — premium workspace (scoped to /malzemeler) */
+/* Material Management — premium workspace (scoped to /malzemeler) */
 
 .material-registry-page {
   /* Single material-local offset sourced from the shared shell token (do not duplicate). */
@@ -1053,6 +1053,13 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #64748b;
+}
+
+.material-tech-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
 }
 
 .material-required::after {

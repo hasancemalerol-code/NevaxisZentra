@@ -810,6 +810,9 @@ export function MaterialRequirementPanel({
               <p className="material-form-hint">
                 {materialCode} · {materialName}
               </p>
+              <p className="material-form-hint">
+                Regrind uygunluk değerlendirmesi otomatik onay sağlamaz; operasyonel karar insan onayı gerektirir.
+              </p>
               {renderRegrindPolicySection()}
             </article>
           ) : null}

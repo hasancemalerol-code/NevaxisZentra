@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { LoaderCircle, Package, Search, X } from "lucide-react";
 
 import type {
@@ -120,9 +120,12 @@ export function MaterialRegistryView({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [stickyContextVisible, setStickyContextVisible] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const heroRef = useRef<HTMLElement | null>(null);
 
   const filtersActive = Boolean(search.trim() || lifecycleFilter || categoryFilter || polymerFilter);
+  const activeTabLabel = DETAIL_TABS.find(([value]) => value === tab)?.[1] ?? "Genel Bakış";
 
   const filteredMaterials = useMemo(() => {
     return materials.filter((material) => {
@@ -153,6 +156,7 @@ export function MaterialRegistryView({
   }
 
   function clearSelection() {
+    const restoreId = selectedId;
     setSelectedId("");
     setDetail(undefined);
     setHistory([]);
@@ -160,6 +164,22 @@ export function MaterialRegistryView({
     setActionPanel(null);
     setMessage(null);
     setError(null);
+    setStickyContextVisible(false);
+
+    requestAnimationFrame(() => {
+      const row = document.querySelector(
+        `tr[data-material-id="${CSS.escape(restoreId)}"]`,
+      ) as HTMLElement | null;
+      row?.focus({ preventScroll: true });
+
+      const heading = document.querySelector(".material-executive__intro h1") as HTMLElement | null;
+      if (!heading) return;
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      if (heading.getBoundingClientRect().top < topBarPx) {
+        heading.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+    });
   }
 
   function selectMaterial(material: MaterialSummary) {
@@ -177,6 +197,7 @@ export function MaterialRegistryView({
         setDetail(result.material);
         setHistory(result.lifecycleHistory);
         setDetailCanManage(result.canManage);
+        focusSelectedDetail();
       } else {
         setError(result.message);
       }
@@ -215,6 +236,61 @@ export function MaterialRegistryView({
         ? MATERIAL_TRANSITION_TARGETS[selectedSummary.lifecycleStatus] ?? []
         : [];
 
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || !detailOpen) {
+      setStickyContextVisible(false);
+      return;
+    }
+
+    const updateStickyVisibility = () => {
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      const rect = hero.getBoundingClientRect();
+      setStickyContextVisible(rect.bottom <= topBarPx + 1);
+    };
+
+    updateStickyVisibility();
+    window.addEventListener("scroll", updateStickyVisibility, { passive: true });
+    window.addEventListener("resize", updateStickyVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateStickyVisibility);
+      window.removeEventListener("resize", updateStickyVisibility);
+    };
+  }, [detailOpen, selectedId, tab]);
+
+  function focusSelectedDetail() {
+    requestAnimationFrame(() => {
+      const target =
+        (document.getElementById("material-detail-focus-target") as HTMLElement | null) ??
+        (document.getElementById("material-detail-heading") as HTMLElement | null);
+      if (!target) return;
+
+      target.focus({ preventScroll: true });
+
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      if (target.getBoundingClientRect().top < topBarPx) {
+        target.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+    });
+  }
+
+  function selectTab(next: DetailTab) {
+    setTab(next);
+    requestAnimationFrame(() => {
+      const panel = document.getElementById(`material-tab-panel-${next}`);
+      if (!panel) return;
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      const sticky = document.querySelector(".material-sticky-context.is-visible") as HTMLElement | null;
+      const stickyH = sticky?.getBoundingClientRect().height || 0;
+      const offset = topBarPx + stickyH + 8;
+      const nextTop = window.scrollY + panel.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, nextTop), behavior: "auto" });
+    });
+  }
+
   return (
     <main className="material-registry-page">
       <section className="material-executive" aria-label="Malzeme yönetim komuta yüzeyi">
@@ -223,7 +299,8 @@ export function MaterialRegistryView({
             <p className="material-executive__eyebrow">MALZEME YÖNETİMİ</p>
             <h1>Malzemeler</h1>
             <p className="material-executive__subtitle">
-              Polimer malzeme kayıtlarını, teknik özelliklerini ve yaşam döngüsü durumlarını yönetin.
+              Enjeksiyon kalıplama operasyonları için polimer malzeme sicili, teknik veri, lot izlenebilirliği ve
+              ihtiyaç zekâsını tek çalışma yüzeyinde yönetin.
             </p>
           </div>
           <div className="material-executive__actions">
@@ -371,6 +448,8 @@ export function MaterialRegistryView({
 
       <div
         className={`material-registry-layout ${detailOpen ? "material-registry-layout--detail" : "material-registry-layout--solo"}`}
+        data-registry-mode={detailOpen ? "detail" : "full"}
+        data-detail-open={detailOpen ? "true" : "false"}
       >
         <section className="material-registry-surface" aria-label="Malzeme listesi">
           <div className="material-registry-surface__header">
@@ -454,7 +533,7 @@ export function MaterialRegistryView({
                     {!detailOpen ? <th>Kod</th> : null}
                     <th>Polimer</th>
                     {!detailOpen ? <th>Kategori</th> : null}
-                    {!detailOpen ? <th>Üretici/Grade</th> : null}
+                    {!detailOpen ? <th>Üretici / Grade</th> : null}
                     {!detailOpen ? <th>Renk</th> : null}
                     <th>Durum</th>
                     <th>Teknik Veri</th>
@@ -551,29 +630,69 @@ export function MaterialRegistryView({
 
         {detailOpen && selectedSummary ? (
           <aside className="material-registry-panel" aria-label="Malzeme detayı">
-            <header className="material-detail-header">
+            <header
+              ref={heroRef}
+              className="material-detail-header"
+              id="material-detail-focus-target"
+              tabIndex={-1}
+            >
               <div className="material-detail-header__context">
                 <p className="material-detail-breadcrumb">Malzemeler / {selectedSummary.code}</p>
                 <button
                   type="button"
                   className="material-detail-close"
-                  aria-label="Detayı kapat"
+                  aria-label="Malzeme detayını kapat"
+                  title="Malzeme detayını kapat"
                   onClick={clearSelection}
                 >
-                  <X aria-hidden="true" size={18} />
+                  <X aria-hidden="true" size={18} strokeWidth={2.25} />
                 </button>
               </div>
               <div className="material-detail-header__identity">
                 <div className="material-detail-header__title-row">
-                  <h2 id="material-detail-heading" className="material-detail-header__name">
+                  <h2
+                    id="material-detail-heading"
+                    className="material-detail-header__name"
+                    title={selectedSummary.name}
+                  >
                     {selectedSummary.name}
                   </h2>
                   <span className={lifecycleBadgeClass(selectedSummary.lifecycleStatus)}>
                     {getMaterialLifecycleStatusLabel(selectedSummary.lifecycleStatus)}
                   </span>
                 </div>
-                <span className="material-detail-header__code">{selectedSummary.code}</span>
+                <span className="material-detail-header__code" title={selectedSummary.code}>
+                  {selectedSummary.code}
+                </span>
               </div>
+
+              <div className="material-detail-header__meta" aria-label="Malzeme özet bilgileri">
+                <div className="material-detail-meta-item">
+                  <span className="material-detail-meta-item__label">Polimer</span>
+                  <strong className="material-detail-meta-item__value">
+                    {getPolymerFamilyLabel(selectedSummary.polymerFamily)}
+                  </strong>
+                </div>
+                <div className="material-detail-meta-item">
+                  <span className="material-detail-meta-item__label">Kategori</span>
+                  <strong className="material-detail-meta-item__value">
+                    {getMaterialCategoryLabel(selectedSummary.materialCategory)}
+                  </strong>
+                </div>
+                <div className="material-detail-meta-item">
+                  <span className="material-detail-meta-item__label">Üretici / Grade</span>
+                  <strong className="material-detail-meta-item__value" title={manufacturerGradeText(selectedSummary)}>
+                    {manufacturerGradeText(selectedSummary)}
+                  </strong>
+                </div>
+                <div className="material-detail-meta-item">
+                  <span className="material-detail-meta-item__label">Son Güncelleme</span>
+                  <strong className="material-detail-meta-item__value">
+                    {formatMaterialDateTime(selectedSummary.updatedAtUtc)}
+                  </strong>
+                </div>
+              </div>
+
               {detailCanManage ? (
                 <div className="material-detail-header__actions">
                   <button
@@ -604,6 +723,61 @@ export function MaterialRegistryView({
                 <p className="material-readonly-note">Bu kayıt salt okunurdur. Düzenleme yetkiniz bulunmuyor.</p>
               )}
             </header>
+
+            <div
+              className={`material-sticky-context${stickyContextVisible ? " is-visible" : ""}`}
+              data-material-sticky-context={stickyContextVisible ? "true" : "false"}
+              aria-hidden={!stickyContextVisible}
+              role={stickyContextVisible ? "region" : undefined}
+              aria-label={stickyContextVisible ? "Seçili malzeme bağlamı" : undefined}
+            >
+              <div className="material-sticky-context__identity">
+                <p className="material-sticky-context__name" title={selectedSummary.name}>
+                  {selectedSummary.name}
+                </p>
+                <span className="material-sticky-context__code" title={selectedSummary.code}>
+                  {selectedSummary.code}
+                </span>
+                <span className={lifecycleBadgeClass(selectedSummary.lifecycleStatus)}>
+                  {getMaterialLifecycleStatusLabel(selectedSummary.lifecycleStatus)}
+                </span>
+                <span className="material-sticky-context__tab">{activeTabLabel}</span>
+              </div>
+              <button
+                type="button"
+                className="material-detail-close"
+                aria-label="Malzeme detayını kapat"
+                title="Malzeme detayını kapat"
+                tabIndex={stickyContextVisible ? 0 : -1}
+                onClick={clearSelection}
+              >
+                <X aria-hidden="true" size={18} strokeWidth={2.25} />
+              </button>
+            </div>
+
+            {activeDetail ? (
+              <section
+                className="material-registry-kpis material-registry-kpis--compact"
+                aria-label="Malzeme detay özeti"
+              >
+                <article className="material-executive__kpi material-executive__kpi--info">
+                  <strong>{getTechnicalDataLabel(selectedSummary.hasTechnicalData)}</strong>
+                  <span>Teknik Veri</span>
+                </article>
+                <article className="material-executive__kpi material-executive__kpi--neutral">
+                  <strong>{getMaterialSourceLabel(activeDetail.sourceType)}</strong>
+                  <span>Kaynak</span>
+                </article>
+                <article className="material-executive__kpi material-executive__kpi--neutral">
+                  <strong>{formatMaterialDateTime(activeDetail.dataRecordedAtUtc)}</strong>
+                  <span>Veri Yaşı</span>
+                </article>
+                <article className="material-executive__kpi material-executive__kpi--neutral">
+                  <strong>{formatMaterialDateTime(activeDetail.updatedAtUtc)}</strong>
+                  <span>Güncellik</span>
+                </article>
+              </section>
+            ) : null}
 
             {!activeDetail && isPending ? (
               <div className="material-registry-status">
@@ -847,7 +1021,7 @@ export function MaterialRegistryView({
                     role="tab"
                     className="material-detail-tabs__button"
                     aria-selected={tab === value}
-                    onClick={() => setTab(value)}
+                    onClick={() => selectTab(value)}
                   >
                     {label}
                   </button>
@@ -858,7 +1032,7 @@ export function MaterialRegistryView({
             {activeDetail ? (
               <>
                 {tab === "overview" ? (
-                  <div className="material-overview-grid" role="tabpanel">
+                  <div className="material-overview-grid" role="tabpanel" id="material-tab-panel-overview">
                     <article className="material-overview-card material-overview-card--wide">
                       <h3 className="material-overview-card__title">Genel Bilgiler</h3>
                       <dl className="material-registry-meta-grid">
@@ -911,101 +1085,171 @@ export function MaterialRegistryView({
                 ) : null}
 
                 {tab === "technical" ? (
-                  <div className="material-overview-grid" role="tabpanel">
+                  <div className="material-overview-grid" role="tabpanel" id="material-tab-panel-technical">
                     <article className="material-overview-card material-overview-card--wide">
                       <h3 className="material-overview-card__title">Teknik Özellikler</h3>
                       {activeDetail.technicalSpecification?.hasTechnicalData ? (
-                        <dl className="material-registry-meta-grid">
-                          <div>
-                            <dt>Yoğunluk</dt>
-                            <dd>
-                              {formatMaterialNumber(activeDetail.technicalSpecification.densityGPerCm3)} g/cm³
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Erime Akış İndeksi</dt>
-                            <dd>
-                              {formatMaterialNumber(activeDetail.technicalSpecification.meltFlowRate)}
-                              {activeDetail.technicalSpecification.meltFlowUnit
-                                ? ` ${activeDetail.technicalSpecification.meltFlowUnit}`
-                                : ""}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Erime Sıcaklığı</dt>
-                            <dd>
-                              {formatMaterialRange(
-                                activeDetail.technicalSpecification.meltTemperatureMinC,
-                                activeDetail.technicalSpecification.meltTemperatureMaxC,
-                                "°C",
-                              )}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Kalıp Sıcaklığı</dt>
-                            <dd>
-                              {formatMaterialRange(
-                                activeDetail.technicalSpecification.moldTemperatureMinC,
-                                activeDetail.technicalSpecification.moldTemperatureMaxC,
-                                "°C",
-                              )}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Depolama Sıcaklığı</dt>
-                            <dd>
-                              {formatMaterialRange(
-                                activeDetail.technicalSpecification.storageTemperatureMinC,
-                                activeDetail.technicalSpecification.storageTemperatureMaxC,
-                                "°C",
-                              )}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Nem Limiti</dt>
-                            <dd>
-                              {activeDetail.technicalSpecification.moistureLimitPercent !== undefined
-                                ? `${formatMaterialNumber(activeDetail.technicalSpecification.moistureLimitPercent)} %`
-                                : "—"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Kurutma</dt>
-                            <dd>
-                              {activeDetail.technicalSpecification.dryingRequired === true
-                                ? "Gerekli"
-                                : activeDetail.technicalSpecification.dryingRequired === false
-                                  ? "Gerekli değil"
-                                  : "—"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Maks. Regranül</dt>
-                            <dd>
-                              {activeDetail.technicalSpecification.maximumRegrindPercent !== undefined
-                                ? `${formatMaterialNumber(activeDetail.technicalSpecification.maximumRegrindPercent)} %`
-                                : "—"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Spesifikasyon Kaynağı</dt>
-                            <dd>
-                              {getSpecificationSourceLabel(activeDetail.technicalSpecification.specificationSource)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Kayıt Tarihi</dt>
-                            <dd>
-                              {formatMaterialDateTime(activeDetail.technicalSpecification.specificationRecordedAtUtc)}
-                            </dd>
-                          </div>
-                          {activeDetail.technicalSpecification.technicalNotes ? (
-                            <div className="full-width">
-                              <dt>Teknik Notlar</dt>
-                              <dd>{activeDetail.technicalSpecification.technicalNotes}</dd>
-                            </div>
-                          ) : null}
-                        </dl>
+                        <div className="material-tech-groups">
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Fiziksel Özellikler</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Yoğunluk</dt>
+                                <dd>
+                                  {activeDetail.technicalSpecification.densityGPerCm3 !== undefined
+                                    ? `${formatMaterialNumber(activeDetail.technicalSpecification.densityGPerCm3)} g/cm³`
+                                    : "—"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Akış ve Nem</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Erime Akış İndeksi</dt>
+                                <dd>
+                                  {activeDetail.technicalSpecification.meltFlowRate !== undefined
+                                    ? `${formatMaterialNumber(activeDetail.technicalSpecification.meltFlowRate)}${
+                                        activeDetail.technicalSpecification.meltFlowUnit
+                                          ? ` ${activeDetail.technicalSpecification.meltFlowUnit}`
+                                          : ""
+                                      }`
+                                    : "—"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Nem Limiti</dt>
+                                <dd>
+                                  {activeDetail.technicalSpecification.moistureLimitPercent !== undefined
+                                    ? `${formatMaterialNumber(activeDetail.technicalSpecification.moistureLimitPercent)} %`
+                                    : "—"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Kurutma</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Kurutma Gerekli</dt>
+                                <dd>
+                                  {activeDetail.technicalSpecification.dryingRequired === true
+                                    ? "Gerekli"
+                                    : activeDetail.technicalSpecification.dryingRequired === false
+                                      ? "Gerekli değil"
+                                      : "—"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Kurutma Sıcaklığı</dt>
+                                <dd>
+                                  {formatMaterialRange(
+                                    activeDetail.technicalSpecification.dryingTemperatureMinC,
+                                    activeDetail.technicalSpecification.dryingTemperatureMaxC,
+                                    "°C",
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Kurutma Süresi</dt>
+                                <dd>
+                                  {formatMaterialRange(
+                                    activeDetail.technicalSpecification.dryingTimeMinHours,
+                                    activeDetail.technicalSpecification.dryingTimeMaxHours,
+                                    "sa",
+                                  )}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Eriyik ve Kalıp Sıcaklıkları</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Erime Sıcaklığı</dt>
+                                <dd>
+                                  {formatMaterialRange(
+                                    activeDetail.technicalSpecification.meltTemperatureMinC,
+                                    activeDetail.technicalSpecification.meltTemperatureMaxC,
+                                    "°C",
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Kalıp Sıcaklığı</dt>
+                                <dd>
+                                  {formatMaterialRange(
+                                    activeDetail.technicalSpecification.moldTemperatureMinC,
+                                    activeDetail.technicalSpecification.moldTemperatureMaxC,
+                                    "°C",
+                                  )}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Depolama</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Depolama Sıcaklığı</dt>
+                                <dd>
+                                  {formatMaterialRange(
+                                    activeDetail.technicalSpecification.storageTemperatureMinC,
+                                    activeDetail.technicalSpecification.storageTemperatureMaxC,
+                                    "°C",
+                                  )}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Regrind Sınırı</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Maksimum Regrind</dt>
+                                <dd>
+                                  {activeDetail.technicalSpecification.maximumRegrindPercent !== undefined
+                                    ? `${formatMaterialNumber(activeDetail.technicalSpecification.maximumRegrindPercent)} %`
+                                    : "—"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className="material-form-section">
+                            <p className="material-form-section__label">Teknik Dokümanlar ve Notlar</p>
+                            <dl className="material-registry-meta-grid">
+                              <div>
+                                <dt>Spesifikasyon Kaynağı</dt>
+                                <dd>
+                                  {getSpecificationSourceLabel(activeDetail.technicalSpecification.specificationSource)}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Kayıt Tarihi</dt>
+                                <dd>
+                                  {formatMaterialDateTime(
+                                    activeDetail.technicalSpecification.specificationRecordedAtUtc,
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>SDS Referansı</dt>
+                                <dd>{activeDetail.technicalSpecification.safetyDataSheetReference ?? "—"}</dd>
+                              </div>
+                              <div>
+                                <dt>TDS Referansı</dt>
+                                <dd>{activeDetail.technicalSpecification.technicalDataSheetReference ?? "—"}</dd>
+                              </div>
+                              {activeDetail.technicalSpecification.technicalNotes ? (
+                                <div className="full-width">
+                                  <dt>Teknik Notlar</dt>
+                                  <dd>{activeDetail.technicalSpecification.technicalNotes}</dd>
+                                </div>
+                              ) : null}
+                            </dl>
+                          </section>
+                        </div>
                       ) : (
                         <p className="material-form-hint">Bu malzeme için teknik veri kaydı bulunmuyor.</p>
                       )}
@@ -1014,9 +1258,13 @@ export function MaterialRegistryView({
                 ) : null}
 
                 {tab === "source" ? (
-                  <div className="material-overview-grid" role="tabpanel">
+                  <div className="material-overview-grid" role="tabpanel" id="material-tab-panel-source">
                     <article className="material-overview-card material-overview-card--wide">
                       <h3 className="material-overview-card__title">Kaynak ve ERP Referansı</h3>
+                      <p className="material-form-hint">
+                        ERP kaynaklı kayıtlarda sistem-of-record ERP&apos;dir; bu ekran CrevaFactOS malzeme kaydı
+                        bağlamını gösterir.
+                      </p>
                       <dl className="material-registry-meta-grid">
                         <div>
                           <dt>Kaynak</dt>
@@ -1048,7 +1296,7 @@ export function MaterialRegistryView({
                 ) : null}
 
                 {tab === "history" ? (
-                  <div role="tabpanel">
+                  <div role="tabpanel" id="material-tab-panel-history">
                     <h3 className="material-overview-card__title">Durum Geçmişi</h3>
                     {history.length === 0 ? (
                       <p className="material-form-hint">Durum geçmişi kaydı bulunmuyor.</p>
@@ -1072,46 +1320,54 @@ export function MaterialRegistryView({
                 ) : null}
 
                 {tab === "lots" && activeDetail ? (
-                  <MaterialLotPanel
-                    materialId={activeDetail.id}
-                    materialCode={activeDetail.code}
-                    materialName={activeDetail.name}
-                    unitOfMeasure={activeDetail.unitOfMeasure}
-                    canManage={detailCanManage}
-                  />
+                  <div id="material-tab-panel-lots" role="tabpanel">
+                    <MaterialLotPanel
+                      materialId={activeDetail.id}
+                      materialCode={activeDetail.code}
+                      materialName={activeDetail.name}
+                      unitOfMeasure={activeDetail.unitOfMeasure}
+                      canManage={detailCanManage}
+                    />
+                  </div>
                 ) : null}
 
                 {tab === "traceability" && activeDetail ? (
-                  <MaterialLotPanel
-                    materialId={activeDetail.id}
-                    materialCode={activeDetail.code}
-                    materialName={activeDetail.name}
-                    unitOfMeasure={activeDetail.unitOfMeasure}
-                    canManage={detailCanManage}
-                    traceabilityMode
-                  />
+                  <div id="material-tab-panel-traceability" role="tabpanel">
+                    <MaterialLotPanel
+                      materialId={activeDetail.id}
+                      materialCode={activeDetail.code}
+                      materialName={activeDetail.name}
+                      unitOfMeasure={activeDetail.unitOfMeasure}
+                      canManage={detailCanManage}
+                      traceabilityMode
+                    />
+                  </div>
                 ) : null}
 
                 {tab === "requirement" && activeDetail ? (
-                  <MaterialRequirementPanel
-                    materialId={activeDetail.id}
-                    materialCode={activeDetail.code}
-                    materialName={activeDetail.name}
-                    unitOfMeasure={activeDetail.unitOfMeasure}
-                    canManage={detailCanManage}
-                    section="consumption"
-                  />
+                  <div id="material-tab-panel-requirement" role="tabpanel">
+                    <MaterialRequirementPanel
+                      materialId={activeDetail.id}
+                      materialCode={activeDetail.code}
+                      materialName={activeDetail.name}
+                      unitOfMeasure={activeDetail.unitOfMeasure}
+                      canManage={detailCanManage}
+                      section="consumption"
+                    />
+                  </div>
                 ) : null}
 
                 {tab === "regrind-policy" && activeDetail ? (
-                  <MaterialRequirementPanel
-                    materialId={activeDetail.id}
-                    materialCode={activeDetail.code}
-                    materialName={activeDetail.name}
-                    unitOfMeasure={activeDetail.unitOfMeasure}
-                    canManage={detailCanManage}
-                    section="regrind-policy"
-                  />
+                  <div id="material-tab-panel-regrind-policy" role="tabpanel">
+                    <MaterialRequirementPanel
+                      materialId={activeDetail.id}
+                      materialCode={activeDetail.code}
+                      materialName={activeDetail.name}
+                      unitOfMeasure={activeDetail.unitOfMeasure}
+                      canManage={detailCanManage}
+                      section="regrind-policy"
+                    />
+                  </div>
                 ) : null}
               </>
             ) : !isPending ? (
