@@ -52,24 +52,28 @@ type DetailTab =
   | "shift"
   | "evidence";
 
-type AttentionItem = Readonly<{
+type AttentionGroup = Readonly<{
   id: string;
   assessmentId: string;
   label: string;
+  summary: string;
   meta: string;
   tone: "critical" | "warning" | "info";
   priority: number;
   tab: DetailTab;
+  count: number;
 }>;
 
-const DETAIL_TABS: readonly { id: DetailTab; label: string }[] = [
+const DETAIL_TABS: readonly { id: DetailTab; label: string; panelTitle?: string }[] = [
   { id: "overview", label: "Genel Bakış" },
   { id: "loss", label: "OEE Kayıp Analizi" },
   { id: "stability", label: "Proses Kararlılığı" },
   { id: "downtime", label: "Duruş Analizi" },
   { id: "shift", label: "Vardiya Karşılaştırması" },
-  { id: "evidence", label: "Hesaplama Kanıtları" },
+  { id: "evidence", label: "Kanıtlar", panelTitle: "Hesaplama Kanıtları" },
 ];
+
+const ATTENTION_INITIAL_LIMIT = 3;
 
 function stabilityBadgeClass(state: string): string {
   switch (state) {
@@ -114,47 +118,142 @@ function buildMachineOptions(assessments: readonly ProcessOeeAssessmentSummary[]
     .sort((a, b) => a.label.localeCompare(b.label, "tr"));
 }
 
-function buildAttentionItems(assessments: readonly ProcessOeeAssessmentSummary[]): AttentionItem[] {
-  const items: AttentionItem[] = [];
+function formatCompactPeriod(startUtc: string, endUtc: string): string {
+  const start = new Date(startUtc);
+  const end = new Date(endUtc);
+  const opts: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short" };
+  return `${start.toLocaleDateString("tr-TR", opts)} – ${end.toLocaleDateString("tr-TR", opts)}`;
+}
 
-  for (const item of assessments) {
-    const machine = formatMachineLabel(item.machineCode, item.machineDisplayName);
-    const period = formatProcessOeeDateRange(item.windowStartUtc, item.windowEndUtc);
+function representativeMeta(item: ProcessOeeAssessmentSummary, extraCount: number): string {
+  const machine = formatMachineLabel(item.machineCode, item.machineDisplayName);
+  const period = formatCompactPeriod(item.windowStartUtc, item.windowEndUtc);
+  if (extraCount > 0) {
+    return `${machine} · ${period} · +${extraCount} diğer`;
+  }
+  return `${machine} · ${period}`;
+}
 
-    if (item.status === "review-required") {
-      items.push({
-        id: `review-${item.id}`,
-        assessmentId: item.id,
-        label: "İnceleme gerekli",
-        meta: `${machine} · ${period}`,
+function buildStatusGroup(
+  key: string,
+  items: readonly ProcessOeeAssessmentSummary[],
+  label: string,
+  countLabel: string,
+  priority: number,
+  tab: DetailTab,
+  tone: AttentionGroup["tone"],
+): AttentionGroup | null {
+  if (items.length === 0) {
+    return null;
+  }
+
+  const first = items[0];
+  return {
+    id: key,
+    assessmentId: first.id,
+    label,
+    summary: items.length > 1 ? `${items.length} değerlendirmede ${countLabel}` : label,
+    meta: representativeMeta(first, items.length - 1),
+    tone,
+    priority,
+    tab,
+    count: items.length,
+  };
+}
+
+function buildAttentionGroups(
+  assessments: readonly ProcessOeeAssessmentSummary[],
+  selectedId: string,
+  lossDetail?: ProcessOeeLossDetail,
+  stabilityDetail?: ProcessOeeStabilityDetail,
+): AttentionGroup[] {
+  const groups: AttentionGroup[] = [];
+
+  const review = assessments.filter((item) => item.status === "review-required");
+  const stale = assessments.filter((item) => item.status === "stale-data");
+  const insufficient = assessments.filter((item) => item.status === "insufficient-data");
+
+  const reviewGroup = buildStatusGroup(
+    "review",
+    review,
+    "İnceleme gerekli",
+    "inceleme gerekli",
+    10,
+    "overview",
+    "critical",
+  );
+  if (reviewGroup) {
+    groups.push(reviewGroup);
+  }
+
+  if (
+    selectedId
+    && lossDetail?.drivers.some((driver) => driver.category === "source-conflict")
+  ) {
+    const selected = assessments.find((item) => item.id === selectedId);
+    if (selected) {
+      groups.push({
+        id: "source-conflict-selected",
+        assessmentId: selected.id,
+        label: "Kaynak çelişkisi",
+        summary: "Seçili değerlendirmede kaynak çelişkisi",
+        meta: representativeMeta(selected, 0),
         tone: "critical",
-        priority: 10,
-        tab: "overview",
-      });
-    } else if (item.status === "stale-data") {
-      items.push({
-        id: `stale-${item.id}`,
-        assessmentId: item.id,
-        label: "Bayat kanıt",
-        meta: `${machine} · ${period}`,
-        tone: "warning",
-        priority: 20,
-        tab: "overview",
-      });
-    } else if (item.status === "insufficient-data") {
-      items.push({
-        id: `insufficient-${item.id}`,
-        assessmentId: item.id,
-        label: "Veri yetersiz",
-        meta: `${machine} · ${period}`,
-        tone: "warning",
-        priority: 30,
-        tab: "overview",
+        priority: 15,
+        tab: "loss",
+        count: 1,
       });
     }
   }
 
-  return items.sort((a, b) => a.priority - b.priority || a.label.localeCompare(b.label, "tr")).slice(0, 8);
+  if (
+    selectedId
+    && stabilityDetail
+    && (stabilityDetail.resultState === "drifting" || stabilityDetail.resultState === "variable")
+  ) {
+    const selected = assessments.find((item) => item.id === selectedId);
+    if (selected) {
+      groups.push({
+        id: "stability-drift-selected",
+        assessmentId: selected.id,
+        label: "Proses kararsızlığı",
+        summary: stabilityDetail.resultStateLabel,
+        meta: representativeMeta(selected, 0),
+        tone: "warning",
+        priority: 25,
+        tab: "stability",
+        count: 1,
+      });
+    }
+  }
+
+  const staleGroup = buildStatusGroup(
+    "stale",
+    stale,
+    "Veri bayat",
+    "veri bayat",
+    40,
+    "overview",
+    "warning",
+  );
+  if (staleGroup) {
+    groups.push(staleGroup);
+  }
+
+  const insufficientGroup = buildStatusGroup(
+    "insufficient",
+    insufficient,
+    "Veri yetersiz",
+    "veri yetersiz",
+    50,
+    "overview",
+    "warning",
+  );
+  if (insufficientGroup) {
+    groups.push(insufficientGroup);
+  }
+
+  return groups.sort((a, b) => a.priority - b.priority || a.label.localeCompare(b.label, "tr"));
 }
 
 function toUtcIso(dateValue: string, endOfDay = false): string | undefined {
@@ -191,6 +290,7 @@ export function ProcessOeeView({
   const [shiftComparison, setShiftComparison] = useState<ProcessOeeShiftComparison | undefined>();
   const [shiftComparisonError, setShiftComparisonError] = useState<string | null>(null);
   const [stickyContextVisible, setStickyContextVisible] = useState(false);
+  const [attentionExpanded, setAttentionExpanded] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -201,7 +301,13 @@ export function ProcessOeeView({
   );
 
   const machineOptions = useMemo(() => buildMachineOptions(assessments), [assessments]);
-  const attentionItems = useMemo(() => buildAttentionItems(assessments), [assessments]);
+  const attentionGroups = useMemo(
+    () => buildAttentionGroups(assessments, selectedId, lossDetail, stabilityDetail),
+    [assessments, selectedId, lossDetail, stabilityDetail],
+  );
+  const visibleAttentionGroups = attentionExpanded
+    ? attentionGroups
+    : attentionGroups.slice(0, ATTENTION_INITIAL_LIMIT);
 
   const filteredAssessments = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -234,7 +340,10 @@ export function ProcessOeeView({
     summary.assessmentCount,
   );
 
-  const activeTabLabel = DETAIL_TABS.find((tab) => tab.id === activeTab)?.label ?? "Genel Bakış";
+  const activeTabLabel =
+    DETAIL_TABS.find((tab) => tab.id === activeTab)?.panelTitle
+    ?? DETAIL_TABS.find((tab) => tab.id === activeTab)?.label
+    ?? "Genel Bakış";
   const freshnessLabel = activeDetail?.sourceFreshnessUtc
     ? formatProcessOeeDateTime(activeDetail.sourceFreshnessUtc)
     : null;
@@ -329,7 +438,7 @@ export function ProcessOeeView({
 
     requestAnimationFrame(() => {
       const row = document.querySelector(
-        `tr[data-assessment-id="${CSS.escape(restoreId)}"]`,
+        `[data-assessment-id="${CSS.escape(restoreId)}"]`,
       ) as HTMLElement | null;
       row?.focus({ preventScroll: true });
     });
@@ -435,40 +544,47 @@ export function ProcessOeeView({
 
   const evaluateWindowId = activeDetail?.evaluationWindowId;
 
-  function renderStatusAlerts(detailItem: ProcessOeeAssessmentDetail) {
+  function renderDataContextNotice(detailItem: ProcessOeeAssessmentDetail) {
+    const contextLines: string[] = [];
+
+    if (detailItem.isSimulatorDerived) {
+      contextLines.push("Simülatör türevi veri kullanılıyor.");
+    }
+    if (detailItem.calculationHonestyDisclaimer) {
+      contextLines.push(detailItem.calculationHonestyDisclaimer);
+    }
+    if (detailItem.simulatorHonestyDisclaimer) {
+      contextLines.push(detailItem.simulatorHonestyDisclaimer);
+    }
+    if (detailItem.status === "insufficient-data") {
+      contextLines.push("Hesaplama için gerekli alanların bir kısmı eksik; sonuçlar güvenilir olmayabilir.");
+    }
+    if (detailItem.status === "stale-data") {
+      contextLines.push("Kaynak veriler güncel değil; yeniden değerlendirme önerilir.");
+    }
+    if (detailItem.status === "review-required") {
+      contextLines.push("Bu değerlendirme operasyonel inceleme gerektiriyor.");
+    }
+    if (lossDetail?.drivers.some((driver) => driver.category === "source-conflict")) {
+      contextLines.push("Kaynak çakışması tespit edildi; otomatik uzlaştırma yapılmadı.");
+    }
+    if (stabilityDetail?.resultState === "insufficient-data") {
+      contextLines.push("Yetersiz veya bayat kanıt; normal sonuç üretilmedi.");
+    }
+
+    if (contextLines.length === 0) {
+      return null;
+    }
+
     return (
-      <>
-        {detailItem.status === "insufficient-data" ? (
-          <div className="process-oee-alert process-oee-alert--warning" role="status">
-            <div>
-              <h3>Veri yetersiz</h3>
-              <p>Hesaplama için gerekli alanların bir kısmı eksik; sonuçlar güvenilir olmayabilir.</p>
-            </div>
-          </div>
-        ) : null}
-        {detailItem.status === "stale-data" ? (
-          <div className="process-oee-alert process-oee-alert--warning" role="status">
-            <div>
-              <h3>Bayat veri</h3>
-              <p>Kaynak veriler güncel değil; yeniden değerlendirme önerilir.</p>
-            </div>
-          </div>
-        ) : null}
-        {detailItem.status === "review-required" ? (
-          <div className="process-oee-alert process-oee-alert--warning" role="status">
-            <div>
-              <h3>İnceleme gerekli</h3>
-              <p>Bu değerlendirme operasyonel inceleme gerektiriyor.</p>
-            </div>
-          </div>
-        ) : null}
-        {detailItem.calculationHonestyDisclaimer ? (
-          <div className="process-oee-disclaimer">{detailItem.calculationHonestyDisclaimer}</div>
-        ) : null}
-        {detailItem.simulatorHonestyDisclaimer ? (
-          <div className="process-oee-disclaimer">{detailItem.simulatorHonestyDisclaimer}</div>
-        ) : null}
-      </>
+      <div className="process-oee-data-context" role="status" aria-label="Veri Bağlamı">
+        <h4 className="process-oee-data-context__title">Veri Bağlamı</h4>
+        <ul className="process-oee-data-context__list">
+          {contextLines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
     );
   }
 
@@ -496,20 +612,12 @@ export function ProcessOeeView({
           <h3>Değerlendirme özeti</h3>
           <dl className="process-oee-detail-grid process-oee-detail-grid--3">
             <div>
-              <dt>Makine</dt>
-              <dd>{formatMachineLabel(detailItem.machineCode, detailItem.machineDisplayName)}</dd>
-            </div>
-            <div>
               <dt>Üretim emri</dt>
               <dd>{detailItem.productionOrderReference ?? "—"}</dd>
             </div>
             <div>
               <dt>Kalıp referansı</dt>
               <dd>{detailItem.moldReference ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>Değerlendirme aralığı</dt>
-              <dd>{formatProcessOeeDateRange(detailItem.windowStartUtc, detailItem.windowEndUtc)}</dd>
             </div>
             <div>
               <dt>Planlanan süre</dt>
@@ -520,16 +628,8 @@ export function ProcessOeeView({
               <dd>{formatProcessOeeNumber(detailItem.operatingSeconds)} sn</dd>
             </div>
             <div>
-              <dt>Veri durumu</dt>
-              <dd>
-                <span className={statusBadgeClass(detailItem.status)}>
-                  {getProcessOeeStatusLabel(detailItem.status, detailItem.statusLabel)}
-                </span>
-              </dd>
-            </div>
-            <div>
-              <dt>Veri tazeliği</dt>
-              <dd>{formatProcessOeeDateTime(detailItem.sourceFreshnessUtc)}</dd>
+              <dt>Kaynak sistemi</dt>
+              <dd>{detailItem.sourceSystem ?? "—"}</dd>
             </div>
             <div>
               <dt>Kural seti</dt>
@@ -885,7 +985,8 @@ export function ProcessOeeView({
     return (
       <div className="process-oee-tab-panel" id="process-oee-tab-panel-evidence" role="tabpanel">
         <section className="process-oee-detail-section">
-          <h3>Hesaplama sürücüleri</h3>
+          <h3>Hesaplama Kanıtları</h3>
+          <h4 className="process-oee-detail-subheading">Hesaplama sürücüleri</h4>
           {detailItem.drivers.length > 0 ? (
             <ul className="process-oee-driver-list">
               {detailItem.drivers.map((driver) => (
@@ -1014,33 +1115,45 @@ export function ProcessOeeView({
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">Veri Yeterliliği</span>
             <strong className="process-oee-kpi__value">{kpiDataSufficiency}</strong>
-            {attentionItems.length > 0 ? (
-              <span className="process-oee-kpi__hint">{attentionItems.length} operasyonel dikkat</span>
+            {attentionGroups.length > 0 ? (
+              <span className="process-oee-kpi__hint">{attentionGroups.length} operasyonel dikkat</span>
             ) : null}
           </article>
         </div>
 
-        {attentionItems.length === 0 ? (
+        {attentionGroups.length === 0 ? (
           <p className="process-oee-attention__quiet">Takip gerektiren operasyonel değerlendirme bulunmuyor.</p>
         ) : (
           <div className="process-oee-attention" aria-label="Operasyonel Dikkat">
-            <h2 className="process-oee-attention__title">Operasyonel Dikkat</h2>
+            <div className="process-oee-attention__header">
+              <h2 className="process-oee-attention__title">Operasyonel Dikkat</h2>
+              {attentionGroups.length > ATTENTION_INITIAL_LIMIT ? (
+                <button
+                  type="button"
+                  className="process-oee-attention__toggle"
+                  onClick={() => setAttentionExpanded((current) => !current)}
+                  aria-expanded={attentionExpanded}
+                >
+                  {attentionExpanded ? "Daha az göster" : "Tümünü göster"}
+                </button>
+              ) : null}
+            </div>
             <ul className="process-oee-attention__list">
-              {attentionItems.map((item) => (
-                <li key={item.id}>
+              {visibleAttentionGroups.map((group) => (
+                <li key={group.id}>
                   <button
                     type="button"
-                    className={`process-oee-attention__item process-oee-attention__item--${item.tone}`}
+                    className={`process-oee-attention__item process-oee-attention__item--${group.tone}`}
                     onClick={() => {
-                      const assessment = assessments.find((row) => row.id === item.assessmentId);
+                      const assessment = assessments.find((row) => row.id === group.assessmentId);
                       if (assessment) {
-                        selectAssessment(assessment, item.tab);
+                        selectAssessment(assessment, group.tab);
                       }
                     }}
                   >
-                    <span className="process-oee-attention__label">{item.label}</span>
-                    <span className="process-oee-attention__meta" title={item.meta}>
-                      {item.meta}
+                    <span className="process-oee-attention__label">{group.summary}</span>
+                    <span className="process-oee-attention__meta" title={group.meta}>
+                      {group.meta}
                     </span>
                   </button>
                 </li>
@@ -1169,15 +1282,55 @@ export function ProcessOeeView({
                     : "Henüz OEE değerlendirmesi oluşturulmamış."}
                 </p>
               </div>
+            ) : detailOpen ? (
+              <ul className="process-oee-compact-list" aria-label="Seçili değerlendirme listesi">
+                {filteredAssessments.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      className="process-oee-compact-row"
+                      data-assessment-id={item.id}
+                      data-selected={item.id === selectedId ? "true" : "false"}
+                      onClick={() => selectAssessment(item)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          selectAssessment(item);
+                        }
+                      }}
+                    >
+                      <div className="process-oee-compact-row__main">
+                        <span className="process-oee-compact-row__machine">
+                          {formatMachineLabel(item.machineCode, item.machineDisplayName)}
+                        </span>
+                        <span className="process-oee-compact-row__order">
+                          {item.productionOrderReference ?? "—"}
+                        </span>
+                        <span className="process-oee-compact-row__period">
+                          {formatCompactPeriod(item.windowStartUtc, item.windowEndUtc)}
+                        </span>
+                      </div>
+                      <div className="process-oee-compact-row__aside">
+                        <strong className="process-oee-compact-row__oee">
+                          {formatPercent(item.oeePercent)}
+                        </strong>
+                        <span className={statusBadgeClass(item.status)}>
+                          {getProcessOeeStatusLabel(item.status, item.statusLabel)}
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <table className={`process-oee-table${detailOpen ? " process-oee-table--compact" : ""}`}>
+              <table className="process-oee-table">
                 <thead>
                   <tr>
                     <th>Makine / Emir</th>
                     <th>Değerlendirme Aralığı</th>
-                    {!detailOpen ? <th>Kullanılabilirlik</th> : null}
-                    {!detailOpen ? <th>Performans</th> : null}
-                    {!detailOpen ? <th>Kalite</th> : null}
+                    <th>Kullanılabilirlik</th>
+                    <th>Performans</th>
+                    <th>Kalite</th>
                     <th>OEE</th>
                     <th>Veri Durumu</th>
                     <th>İşlem</th>
@@ -1207,9 +1360,9 @@ export function ProcessOeeView({
                         </span>
                       </td>
                       <td>{formatProcessOeeDateRange(item.windowStartUtc, item.windowEndUtc)}</td>
-                      {!detailOpen ? <td>{formatPercent(item.availabilityPercent)}</td> : null}
-                      {!detailOpen ? <td>{formatPercent(item.performancePercent)}</td> : null}
-                      {!detailOpen ? <td>{formatPercent(item.qualityPercent)}</td> : null}
+                      <td>{formatPercent(item.availabilityPercent)}</td>
+                      <td>{formatPercent(item.performancePercent)}</td>
+                      <td>{formatPercent(item.qualityPercent)}</td>
                       <td>{formatPercent(item.oeePercent)}</td>
                       <td>
                         <span className={statusBadgeClass(item.status)}>
@@ -1266,11 +1419,12 @@ export function ProcessOeeView({
               tabIndex={-1}
             >
               <div className="process-oee-detail-header__row">
-                <div>
-                  <p className="process-oee-detail-breadcrumb">
-                    Proses &amp; OEE / {selectedSummary.productionOrderReference ?? "Değerlendirme"}
-                  </p>
+                <div className="process-oee-detail-header__identity">
+                  <p className="process-oee-detail-breadcrumb">Proses &amp; OEE</p>
                   <h2>{formatMachineLabel(selectedSummary.machineCode, selectedSummary.machineDisplayName)}</h2>
+                  <p className="process-oee-detail-header__order">
+                    {selectedSummary.productionOrderReference ?? "Üretim emri yok"}
+                  </p>
                   <p className="process-oee-detail-header__period">
                     {formatProcessOeeDateRange(selectedSummary.windowStartUtc, selectedSummary.windowEndUtc)}
                   </p>
@@ -1278,6 +1432,11 @@ export function ProcessOeeView({
                     <span className={statusBadgeClass(selectedSummary.status)}>
                       {getProcessOeeStatusLabel(selectedSummary.status, selectedSummary.statusLabel)}
                     </span>
+                    {activeDetail?.sourceFreshnessUtc ? (
+                      <span className="process-oee-detail-header__freshness">
+                        Tazelik: {formatProcessOeeDateTime(activeDetail.sourceFreshnessUtc)}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <button
@@ -1290,7 +1449,7 @@ export function ProcessOeeView({
                   <X aria-hidden="true" size={16} />
                 </button>
               </div>
-              <div className="process-oee-detail-header__summary">
+              <div className="process-oee-detail-header__summary" aria-label="OEE bileşen özeti">
                 <div className="process-oee-detail-header__metric">
                   <span>OEE</span>
                   <strong>{formatPercent(activeDetail?.oeePercent ?? selectedSummary.oeePercent)}</strong>
@@ -1356,7 +1515,7 @@ export function ProcessOeeView({
                 </div>
               ) : activeDetail ? (
                 <>
-                  {renderStatusAlerts(activeDetail)}
+                  {renderDataContextNotice(activeDetail)}
                   {activeTab === "overview" ? renderOverviewTab(activeDetail) : null}
                   {activeTab === "loss" ? renderLossTab() : null}
                   {activeTab === "stability" ? renderStabilityTab() : null}

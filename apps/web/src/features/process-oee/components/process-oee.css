@@ -3,7 +3,7 @@
 .process-oee-page {
   --poee-sticky-top: var(--top-bar-height, 4.5rem);
   --poee-sticky-context-height: 3.25rem;
-  --poee-registry-width: min(30rem, 100%);
+  --poee-registry-width: 28rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -176,26 +176,53 @@
   color: #64748b;
 }
 
+.process-oee-attention__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.process-oee-attention__toggle {
+  border: none;
+  background: transparent;
+  color: #155eef;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 0.15rem 0.25rem;
+}
+
+.process-oee-attention__toggle:hover {
+  text-decoration: underline;
+}
+
+.process-oee-attention__toggle:focus-visible {
+  outline: 2px solid #155eef;
+  outline-offset: 2px;
+}
+
 .process-oee-attention__list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  flex-direction: column;
+  gap: 0.35rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .process-oee-attention__item {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.1rem;
+  gap: 0.12rem;
+  width: 100%;
   min-width: 0;
-  max-width: 100%;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #e8edf3;
   border-radius: 12px;
-  background: #fff;
+  background: #fafbfc;
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -238,7 +265,88 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 18rem;
+  max-width: 100%;
+}
+
+/* Compact registry list (selected mode) */
+.process-oee-compact-list {
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.process-oee-compact-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.process-oee-compact-row:hover {
+  background: #f8fafc;
+  border-color: #e8edf3;
+}
+
+.process-oee-compact-row:focus-visible {
+  outline: 2px solid #155eef;
+  outline-offset: 1px;
+}
+
+.process-oee-compact-row[data-selected="true"] {
+  background: #eff6ff;
+  border-color: #c7d7fe;
+  box-shadow: inset 3px 0 0 #155eef;
+}
+
+.process-oee-compact-row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.process-oee-compact-row__machine {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #12263a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.process-oee-compact-row__order,
+.process-oee-compact-row__period {
+  font-size: 0.7rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.process-oee-compact-row__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+}
+
+.process-oee-compact-row__oee {
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: #0f172a;
 }
 
 /* Workspace master-detail */
@@ -475,31 +583,54 @@
   gap: 0.65rem;
 }
 
+.process-oee-detail-header__identity {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .process-oee-detail-breadcrumb {
-  margin: 0 0 0.2rem;
-  font-size: 0.72rem;
-  color: #64748b;
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .process-oee-detail-header h2 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 750;
-  color: #12263a;
-  line-height: 1.25;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.process-oee-detail-header__order {
+  margin: 0.18rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #334155;
 }
 
 .process-oee-detail-header__period {
-  margin: 0.2rem 0 0;
-  font-size: 0.76rem;
+  margin: 0.12rem 0 0;
+  font-size: 0.74rem;
   color: #64748b;
 }
 
 .process-oee-detail-header__chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.35rem;
-  margin-top: 0.45rem;
+  margin-top: 0.4rem;
+}
+
+.process-oee-detail-header__freshness {
+  font-size: 0.7rem;
+  color: #64748b;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  white-space: nowrap;
 }
 
 .process-oee-detail-header__summary {
@@ -603,6 +734,7 @@
 
 /* Tab rail */
 .process-oee-tab-rail-wrap {
+  position: relative;
   border-bottom: 1px solid #eef2f7;
   background: #fafbfc;
 }
@@ -610,21 +742,27 @@
 .process-oee-tab-rail {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.15rem;
-  padding: 0.35rem 0.65rem;
+  gap: 0.1rem;
+  padding: 0.3rem 0.55rem;
   overflow-x: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.process-oee-tab-rail::-webkit-scrollbar {
+  display: none;
+  height: 0;
 }
 
 .process-oee-tab-rail__tab {
   flex: 0 0 auto;
-  min-height: 2rem;
-  padding: 0.35rem 0.75rem;
+  min-height: 1.85rem;
+  padding: 0.28rem 0.58rem;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.73rem;
   font-weight: 650;
   color: #475569;
   white-space: nowrap;
@@ -649,11 +787,44 @@
 }
 
 .process-oee-detail-body {
-  padding: 0.85rem 1rem 1.1rem;
+  padding: 0.75rem 0.95rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
   scroll-margin-top: calc(var(--poee-sticky-top) + var(--poee-sticky-context-height) + 0.5rem);
+}
+
+.process-oee-data-context {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  background: #fffbeb;
+  font-size: 0.78rem;
+  color: #78350f;
+}
+
+.process-oee-data-context__title {
+  margin: 0 0 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #92400e;
+}
+
+.process-oee-data-context__list {
+  margin: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.process-oee-detail-subheading {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
 }
 
 .process-oee-tab-panel {
@@ -686,13 +857,17 @@
 
 .process-oee-detail-grid dt {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: #64748b;
 }
 
 .process-oee-detail-grid dd {
-  margin: 0;
-  font-size: 0.82rem;
+  margin: 0.08rem 0 0;
+  font-size: 0.84rem;
+  font-weight: 600;
   color: #0f172a;
 }
 
