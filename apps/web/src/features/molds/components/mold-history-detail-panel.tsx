@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { X } from "lucide-react";
 
 import type {
   MoldCompatibilityOverview,
@@ -64,6 +65,7 @@ type MoldHistoryDetailPanelProps = Readonly<{
   canManage: boolean;
   isPending: boolean;
   onAction: (action: () => Promise<{ status: string; message?: string; compatibilityOverview?: MoldCompatibilityOverview }>) => void;
+  onClose?: () => void;
 }>;
 
 function lifecycleBadgeClass(state: string): string {
@@ -145,10 +147,52 @@ export function MoldHistoryDetailPanel({
   canManage,
   isPending,
   onAction,
+  onClose,
 }: MoldHistoryDetailPanelProps) {
   const [tab, setTab] = useState<DetailTab>("overview");
   const [actionPanel, setActionPanel] = useState<ActionPanel>(null);
   const [transitionTarget, setTransitionTarget] = useState("");
+  const [stickyContextVisible, setStickyContextVisible] = useState(false);
+  const heroRef = useRef<HTMLElement | null>(null);
+
+  const activeTabLabel = DETAIL_TABS.find(([value]) => value === tab)?.[1] ?? "Genel Bakış";
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) {
+      return;
+    }
+
+    const updateStickyVisibility = () => {
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      const rect = hero.getBoundingClientRect();
+      setStickyContextVisible(rect.bottom <= topBarPx + 1);
+    };
+
+    updateStickyVisibility();
+    window.addEventListener("scroll", updateStickyVisibility, { passive: true });
+    window.addEventListener("resize", updateStickyVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateStickyVisibility);
+      window.removeEventListener("resize", updateStickyVisibility);
+    };
+  }, [selectedSummary.id]);
+
+  function selectTab(next: DetailTab) {
+    setTab(next);
+    requestAnimationFrame(() => {
+      const panel = document.getElementById(`mold-tab-panel-${next}`);
+      if (!panel) return;
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      const sticky = document.querySelector(".mold-sticky-context.is-visible") as HTMLElement | null;
+      const stickyH = sticky?.getBoundingClientRect().height || 0;
+      const offset = topBarPx + stickyH + 8;
+      const nextTop = window.scrollY + panel.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, nextTop), behavior: "auto" });
+    });
+  }
 
   const historyKpis = useMemo(
     () => ({
@@ -179,62 +223,130 @@ export function MoldHistoryDetailPanel({
 
   return (
     <>
-      <header className="mold-detail-header">
-        <p className="mold-detail-breadcrumb">Kalıplar / {selectedSummary.code}</p>
-        <div className="mold-detail-header__top">
-          <div className="mold-detail-header__identity">
-            <h2 className="mold-detail-header__name">{selectedSummary.name}</h2>
-            <span className="mold-detail-header__code">{selectedSummary.code}</span>
-            <div className="mold-detail-header__meta">
-              <span className={lifecycleBadgeClass(selectedSummary.lifecycleState)}>
-                {getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}
-              </span>
-              <span>
-                Sahiplik: <strong>{getMoldOwnershipLabel(selectedSummary.ownershipType)}</strong>
-              </span>
-              <span>
-                Lokasyon: <strong>{locationSummary}</strong>
-              </span>
-              <span>
-                Güncel Sayaç: <strong>{formatMoldNumber(selectedSummary.currentShotCount)}</strong>
-              </span>
-              <span>
-                Son Güncelleme: <strong>{formatMoldDateTime(selectedSummary.updatedAtUtc)}</strong>
-              </span>
-            </div>
-          </div>
-          {canManage ? (
-            <div className="mold-detail-header__actions">
-              <button
-                type="button"
-                className="mold-registry-button compact"
-                aria-pressed={actionPanel === "edit"}
-                onClick={() => toggleAction("edit")}
-              >
-                Düzenle
-              </button>
-              <button
-                type="button"
-                className="mold-registry-button compact"
-                aria-pressed={actionPanel === "counter"}
-                onClick={() => toggleAction("counter")}
-              >
-                Sayaç Kaydet
-              </button>
-              {transitionOptions.length > 0 ? (
-                <button
-                  type="button"
-                  className="mold-registry-button compact"
-                  aria-pressed={actionPanel === "transition"}
-                  onClick={() => toggleAction("transition")}
-                >
-                  Durum Değiştir
-                </button>
-              ) : null}
-            </div>
+      <header
+        ref={heroRef}
+        className="mold-detail-header"
+        id="mold-detail-focus-target"
+        tabIndex={-1}
+      >
+        <div className="mold-detail-header__context">
+          <p className="mold-detail-breadcrumb">Kalıplar / {selectedSummary.code}</p>
+          {onClose ? (
+            <button
+              type="button"
+              className="mold-detail-close"
+              aria-label="Kalıp detayını kapat"
+              title="Kalıp detayını kapat"
+              onClick={onClose}
+            >
+              <X aria-hidden="true" size={18} strokeWidth={2.25} />
+            </button>
           ) : null}
         </div>
+
+        <div className="mold-detail-header__identity">
+          <div className="mold-detail-header__title-row">
+            <h2
+              className="mold-detail-header__name"
+              id="mold-detail-heading"
+              title={selectedSummary.name}
+            >
+              {selectedSummary.name}
+            </h2>
+            <span className={lifecycleBadgeClass(selectedSummary.lifecycleState)}>
+              {getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}
+            </span>
+          </div>
+          <span className="mold-detail-header__code" title={selectedSummary.code}>
+            {selectedSummary.code}
+          </span>
+        </div>
+
+        <div className="mold-detail-header__meta" aria-label="Kalıp özet bilgileri">
+          <div className="mold-detail-meta-item">
+            <span className="mold-detail-meta-item__label">Sahiplik</span>
+            <strong className="mold-detail-meta-item__value">{getMoldOwnershipLabel(selectedSummary.ownershipType)}</strong>
+          </div>
+          <div className="mold-detail-meta-item">
+            <span className="mold-detail-meta-item__label">Lokasyon</span>
+            <strong className="mold-detail-meta-item__value" title={locationSummary}>
+              {locationSummary}
+            </strong>
+          </div>
+          <div className="mold-detail-meta-item">
+            <span className="mold-detail-meta-item__label">Güncel Sayaç</span>
+            <strong className="mold-detail-meta-item__value">{formatMoldNumber(selectedSummary.currentShotCount)}</strong>
+          </div>
+          <div className="mold-detail-meta-item">
+            <span className="mold-detail-meta-item__label">Son Güncelleme</span>
+            <strong className="mold-detail-meta-item__value">{formatMoldDateTime(selectedSummary.updatedAtUtc)}</strong>
+          </div>
+        </div>
+
+        {canManage ? (
+          <div className="mold-detail-header__actions">
+            <button
+              type="button"
+              className="mold-registry-button compact"
+              aria-pressed={actionPanel === "edit"}
+              onClick={() => toggleAction("edit")}
+            >
+              Düzenle
+            </button>
+            <button
+              type="button"
+              className="mold-registry-button compact"
+              aria-pressed={actionPanel === "counter"}
+              onClick={() => toggleAction("counter")}
+            >
+              Sayaç Kaydet
+            </button>
+            {transitionOptions.length > 0 ? (
+              <button
+                type="button"
+                className="mold-registry-button compact"
+                aria-pressed={actionPanel === "transition"}
+                onClick={() => toggleAction("transition")}
+              >
+                Durum Değiştir
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </header>
+
+      <div
+        className={`mold-sticky-context${stickyContextVisible ? " is-visible" : ""}`}
+        data-mold-sticky-context={stickyContextVisible ? "true" : "false"}
+        aria-hidden={!stickyContextVisible}
+        role={stickyContextVisible ? "region" : undefined}
+        aria-label={stickyContextVisible ? "Seçili kalıp bağlamı" : undefined}
+      >
+        <div className="mold-sticky-context__identity">
+          <p className="mold-sticky-context__name" title={selectedSummary.name}>
+            {selectedSummary.name}
+          </p>
+          <span className="mold-sticky-context__code" title={selectedSummary.code}>
+            {selectedSummary.code}
+          </span>
+          <span className={lifecycleBadgeClass(selectedSummary.lifecycleState)}>
+            {getMoldLifecycleStateLabel(selectedSummary.lifecycleState)}
+          </span>
+          <span className="mold-sticky-context__tab">{activeTabLabel}</span>
+        </div>
+        {onClose ? (
+          <button
+            type="button"
+            className="mold-detail-close"
+            aria-label="Kalıp detayını kapat"
+            title="Kalıp detayını kapat"
+            tabIndex={stickyContextVisible ? 0 : -1}
+            onClick={onClose}
+          >
+            <X aria-hidden="true" size={18} strokeWidth={2.25} />
+          </button>
+        ) : null}
+      </div>
 
       {canManage && actionPanel === "edit" && detail ? (
         <section className="mold-detail-action-panel" aria-label="Kalıp düzenle">
@@ -384,22 +496,24 @@ export function MoldHistoryDetailPanel({
         </article>
       </section>
 
-      <nav className="mold-detail-tabs" aria-label="Kalıp detay sekmeleri" role="tablist">
-        {DETAIL_TABS.map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            id={`mold-tab-${value}`}
-            aria-selected={tab === value}
-            aria-controls={`mold-tab-panel-${value}`}
-            className="mold-detail-tabs__button"
-            onClick={() => setTab(value)}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      <div className="mold-detail-tabs-rail">
+        <nav className="mold-detail-tabs" aria-label="Kalıp detay sekmeleri" role="tablist">
+          {DETAIL_TABS.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              id={`mold-tab-${value}`}
+              aria-selected={tab === value}
+              aria-controls={`mold-tab-panel-${value}`}
+              className="mold-detail-tabs__button"
+              onClick={() => selectTab(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {!detail && isPending ? (
         <div className="mold-registry-empty" role="status" aria-live="polite">

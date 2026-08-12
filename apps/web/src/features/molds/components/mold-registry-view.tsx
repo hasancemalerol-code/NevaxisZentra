@@ -147,12 +147,64 @@ export function MoldRegistryView({
   const attentionItems = useMemo(() => buildAttentionItems(molds), [molds]);
   const selectedSummary = filteredMolds.find((mold) => mold.id === selectedId) ?? molds.find((m) => m.id === selectedId);
   const activeDetail = detail && detail.id === selectedId ? detail : undefined;
+  const detailOpen = Boolean(selectedSummary);
 
   function resetFilters() {
     setSearch("");
     setLifecycleFilter("");
     setOwnershipFilter("");
     setLocationFilter("");
+  }
+
+  function clearSelection() {
+    const restoreId = selectedId;
+    setSelectedId("");
+    setDetail(undefined);
+    setHistory([]);
+    setMaintenanceHistory([]);
+    setRevisionHistory([]);
+    setTrialHistory([]);
+    setTimeline([]);
+    setCompatibilityOverview(undefined);
+    setCompatibilityError(null);
+    setMessage(null);
+    setError(null);
+
+    requestAnimationFrame(() => {
+      const row = document.querySelector(
+        `tr[data-mold-id="${CSS.escape(restoreId)}"]`,
+      ) as HTMLElement | null;
+      row?.focus({ preventScroll: true });
+
+      const heading = document.querySelector(".mold-executive__intro h1") as HTMLElement | null;
+      if (!heading) return;
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      if (heading.getBoundingClientRect().top < topBarPx) {
+        heading.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+    });
+  }
+
+  function focusSelectedDetail() {
+    const run = () => {
+      const target =
+        (document.getElementById("mold-detail-focus-target") as HTMLElement | null) ??
+        (document.getElementById("mold-detail-heading") as HTMLElement | null);
+      if (!target) return;
+
+      target.focus({ preventScroll: true });
+
+      const topBarRaw = getComputedStyle(document.documentElement).getPropertyValue("--top-bar-height").trim();
+      const topBarPx = Number.parseFloat(topBarRaw) || 72;
+      const rect = target.getBoundingClientRect();
+      const nextTop = window.scrollY + rect.top - topBarPx - 8;
+      window.scrollTo({ top: Math.max(0, nextTop), behavior: "auto" });
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(run);
+    });
   }
 
   function selectMold(mold: MoldSummary) {
@@ -167,6 +219,7 @@ export function MoldRegistryView({
     setCompatibilityError(null);
     setMessage(null);
     setError(null);
+    focusSelectedDetail();
 
     startTransition(async () => {
       const result = await loadMoldDetailAction(mold.id);
@@ -230,73 +283,75 @@ export function MoldRegistryView({
 
   return (
     <main className="mold-registry-page">
-      <header className="mold-registry-header">
-        <div className="mold-registry-header__intro">
-          <p className="mold-registry-header__eyebrow">KALIP YÖNETİMİ</p>
-          <h1>Kalıplar</h1>
-          <p className="mold-registry-header__subtitle">
-            Kalıp yaşam döngüsü, bakım geçmişi ve makine uyumluluğunu tek operasyon yüzeyinden yönetin.
-          </p>
+      <section className="mold-executive" aria-label="Kalıp yönetim komuta yüzeyi">
+        <div className="mold-executive__top">
+          <div className="mold-executive__intro">
+            <p className="mold-executive__eyebrow">KALIP YÖNETİMİ</p>
+            <h1>Kalıplar</h1>
+            <p className="mold-executive__subtitle">
+              Kalıp yaşam döngüsü, bakım geçmişi ve makine uyumluluğunu tek operasyon yüzeyinden yönetin.
+            </p>
+          </div>
+          <div className="mold-executive__actions">
+            {canManage ? (
+              <button
+                type="button"
+                className="mold-registry-button primary"
+                onClick={() => setShowCreate((current) => !current)}
+                aria-expanded={showCreate}
+              >
+                Yeni Kalıp
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div className="mold-registry-header__actions">
-          {canManage ? (
-            <button
-              type="button"
-              className="mold-registry-button primary"
-              onClick={() => setShowCreate((current) => !current)}
-              aria-expanded={showCreate}
-            >
-              Yeni Kalıp
-            </button>
-          ) : null}
-        </div>
-      </header>
 
-      <section className="mold-registry-kpis" aria-label="Kalıp özet sayıları">
-        <article className="mold-registry-kpi mold-registry-kpi--neutral">
-          <strong>{summary.totalCount}</strong>
-          <span>Toplam Kalıp</span>
-        </article>
-        <article className="mold-registry-kpi mold-registry-kpi--success">
-          <strong>{summary.activeCount}</strong>
-          <span>Aktif</span>
-        </article>
-        <article className="mold-registry-kpi mold-registry-kpi--warning">
-          <strong>{summary.maintenanceCount}</strong>
-          <span>Bakımda</span>
-        </article>
-        <article className="mold-registry-kpi mold-registry-kpi--info">
-          <strong>{summary.trialCount}</strong>
-          <span>Denemede</span>
-        </article>
-        <article className="mold-registry-kpi mold-registry-kpi--critical">
-          <strong>{summary.quarantinedCount}</strong>
-          <span>Kritik Dikkat</span>
-          <small>Karantinada</small>
-        </article>
-      </section>
-
-      <section className="mold-attention" aria-label="Operasyonel Dikkat">
-        <div className="mold-attention__header">
-          <h2>Operasyonel Dikkat</h2>
+        <div className="mold-executive__kpis" aria-label="Kalıp özet sayıları">
+          <article className="mold-executive__kpi mold-executive__kpi--neutral">
+            <strong>{summary.totalCount}</strong>
+            <span>Toplam Kalıp</span>
+          </article>
+          <article className="mold-executive__kpi mold-executive__kpi--success">
+            <strong>{summary.activeCount}</strong>
+            <span>Aktif</span>
+          </article>
+          <article className="mold-executive__kpi mold-executive__kpi--warning">
+            <strong>{summary.maintenanceCount}</strong>
+            <span>Bakımda</span>
+          </article>
+          <article className="mold-executive__kpi mold-executive__kpi--info">
+            <strong>{summary.trialCount}</strong>
+            <span>Denemede</span>
+          </article>
+          <article className="mold-executive__kpi mold-executive__kpi--critical">
+            <strong>{summary.quarantinedCount}</strong>
+            <span>Kritik Dikkat</span>
+            <small>Karantinada</small>
+          </article>
         </div>
+
         {attentionItems.length === 0 ? (
-          <p className="mold-attention__empty">Şu an takip gerektiren operasyonel kalıp kaydı yok.</p>
+          <p className="mold-executive__quiet">Takip gerektiren operasyonel kalıp kaydı bulunmuyor.</p>
         ) : (
-          <ul className="mold-attention__list">
-            {attentionItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  className={`mold-attention__item mold-attention__item--${item.tone}`}
-                  onClick={() => selectMoldById(item.moldId)}
-                >
-                  <span className="mold-attention__item-label">{item.label}</span>
-                  <span className="mold-attention__item-meta">{item.meta}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div className="mold-executive__attention" aria-label="Operasyonel Dikkat">
+            <h2 className="mold-executive__attention-title">Operasyonel Dikkat</h2>
+            <ul className="mold-executive__attention-list">
+              {attentionItems.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className={`mold-executive__attention-item mold-executive__attention-item--${item.tone}`}
+                    onClick={() => selectMoldById(item.moldId)}
+                  >
+                    <span className="mold-executive__attention-label">{item.label}</span>
+                    <span className="mold-executive__attention-meta" title={item.meta}>
+                      {item.meta}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </section>
 
@@ -395,8 +450,10 @@ export function MoldRegistryView({
         </section>
       ) : null}
 
-      <div className="mold-registry-layout">
-        <section className="mold-registry-surface" aria-label="Kalıp listesi">
+      <div
+        className={`mold-registry-layout ${detailOpen ? "mold-registry-layout--detail" : "mold-registry-layout--solo"}`}
+      >
+        <section className="mold-registry-surface" aria-label="Kalıp listesi" data-registry-mode={detailOpen ? "detail" : "full"}>
           <div className="mold-registry-surface__header">
             <h2 className="mold-registry-surface__title">Kalıp Sicili</h2>
             <span className="mold-registry-surface__count">
@@ -405,7 +462,7 @@ export function MoldRegistryView({
           </div>
 
           <div className="mold-registry-toolbar" aria-label="Kalıp arama ve filtreler">
-            <label>
+            <label className="mold-registry-toolbar__search">
               Ara
               <span className="mold-registry-search">
                 <Search aria-hidden="true" size={14} className="mold-registry-search__icon" />
@@ -416,48 +473,52 @@ export function MoldRegistryView({
                 />
               </span>
             </label>
-            <label>
-              Durum
-              <select value={lifecycleFilter} onChange={(event) => setLifecycleFilter(event.target.value)}>
-                {MOLD_LIFECYCLE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value || "all"} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Sahiplik
-              <select value={ownershipFilter} onChange={(event) => setOwnershipFilter(event.target.value)}>
-                {MOLD_OWNERSHIP_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value || "all"} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Lokasyon
-              <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
-                {MOLD_LOCATION_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value || "all"} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {filtersActive ? (
+            <div className="mold-registry-toolbar__filters">
+              <label className="mold-registry-toolbar__filter">
+                Sahiplik
+                <select value={ownershipFilter} onChange={(event) => setOwnershipFilter(event.target.value)}>
+                  {MOLD_OWNERSHIP_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value || "all"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="mold-registry-toolbar__filter">
+                Lokasyon
+                <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
+                  {MOLD_LOCATION_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value || "all"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {filtersActive ? (
+                <button
+                  type="button"
+                  className="mold-registry-button compact mold-registry-toolbar__reset"
+                  onClick={resetFilters}
+                >
+                  <X aria-hidden="true" size={14} />
+                  Filtreleri Temizle
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="mold-lifecycle-pills" aria-label="Yaşam döngüsü filtreleri">
+            {MOLD_LIFECYCLE_FILTER_OPTIONS.map((option) => (
               <button
+                key={option.value || "all"}
                 type="button"
-                className="mold-registry-button compact mold-registry-toolbar__reset"
-                onClick={resetFilters}
+                className="mold-lifecycle-pill"
+                aria-pressed={lifecycleFilter === option.value}
+                onClick={() => setLifecycleFilter(option.value)}
               >
-                <X aria-hidden="true" size={14} />
-                Filtreleri Temizle
+                {option.label}
               </button>
-            ) : (
-              <span className="mold-registry-toolbar__reset" aria-hidden="true" />
-            )}
+            ))}
           </div>
 
           <div className="mold-registry-table-wrap">
@@ -467,17 +528,26 @@ export function MoldRegistryView({
                 <p>Kayıtlı kalıp bulunamadı.</p>
               </div>
             ) : (
-              <table className="mold-registry-table">
+              <table className={`mold-registry-table${detailOpen ? " mold-registry-table--compact" : ""}`}>
+                <colgroup>
+                  <col className="mold-col-identity" />
+                  <col className="mold-col-status" />
+                  {!detailOpen ? <col className="mold-col-owner" /> : null}
+                  <col className="mold-col-location" />
+                  {!detailOpen ? <col className="mold-col-num" /> : null}
+                  {!detailOpen ? <col className="mold-col-num" /> : null}
+                  {!detailOpen ? <col className="mold-col-date" /> : null}
+                  <col className="mold-col-action" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Kalıp</th>
-                    <th>Kod</th>
                     <th>Durum</th>
-                    <th>Sahiplik</th>
+                    {!detailOpen ? <th>Sahiplik</th> : null}
                     <th>Lokasyon</th>
-                    <th>Göz Sayısı</th>
-                    <th>Güncel Sayaç</th>
-                    <th>Son Güncelleme</th>
+                    {!detailOpen ? <th>Göz</th> : null}
+                    {!detailOpen ? <th>Sayaç</th> : null}
+                    {!detailOpen ? <th>Güncelleme</th> : null}
                     <th>İşlem</th>
                   </tr>
                 </thead>
@@ -486,9 +556,12 @@ export function MoldRegistryView({
                     const locationText = `${getMoldLocationLabel(mold.locationType)}${
                       mold.locationLabel ? ` · ${mold.locationLabel}` : ""
                     }`;
+                    const ownershipText = getMoldOwnershipLabel(mold.ownershipType);
+                    const updatedText = formatMoldDateTime(mold.updatedAtUtc);
                     return (
                       <tr
                         key={mold.id}
+                        data-mold-id={mold.id}
                         data-selected={mold.id === selectedId}
                         tabIndex={0}
                         onClick={() => selectMold(mold)}
@@ -504,37 +577,48 @@ export function MoldRegistryView({
                             <span className="mold-identity__name" title={mold.name}>
                               {mold.name}
                             </span>
+                            <span className="mold-identity__code" title={mold.code}>
+                              {mold.code}
+                            </span>
                           </div>
                         </td>
                         <td>
-                          <span className="mold-identity__code">{mold.code}</span>
-                        </td>
-                        <td>
-                          <span className={lifecycleBadgeClass(mold.lifecycleState)}>
+                          <span
+                            className={lifecycleBadgeClass(mold.lifecycleState)}
+                            title={getMoldLifecycleStateLabel(mold.lifecycleState)}
+                          >
                             {getMoldLifecycleStateLabel(mold.lifecycleState)}
                           </span>
                         </td>
-                        <td>
-                          <span className="mold-cell-truncate" title={getMoldOwnershipLabel(mold.ownershipType)}>
-                            {getMoldOwnershipLabel(mold.ownershipType)}
-                          </span>
-                        </td>
+                        {!detailOpen ? (
+                          <td>
+                            <span className="mold-cell-truncate" title={ownershipText}>
+                              {ownershipText}
+                            </span>
+                          </td>
+                        ) : null}
                         <td>
                           <span className="mold-cell-truncate" title={locationText}>
                             {locationText}
                           </span>
                         </td>
-                        <td>{formatMoldNumber(mold.cavityCount)}</td>
-                        <td>{formatMoldNumber(mold.currentShotCount)}</td>
-                        <td>
-                          <span className="mold-cell-truncate" title={formatMoldDateTime(mold.updatedAtUtc)}>
-                            {formatMoldDateTime(mold.updatedAtUtc)}
-                          </span>
-                        </td>
+                        {!detailOpen ? (
+                          <td className="mold-num">{formatMoldNumber(mold.cavityCount)}</td>
+                        ) : null}
+                        {!detailOpen ? (
+                          <td className="mold-num">{formatMoldNumber(mold.currentShotCount)}</td>
+                        ) : null}
+                        {!detailOpen ? (
+                          <td>
+                            <span className="mold-cell-truncate" title={updatedText}>
+                              {updatedText}
+                            </span>
+                          </td>
+                        ) : null}
                         <td className="mold-registry-row-action">
                           <button
                             type="button"
-                            className="mold-registry-button compact"
+                            className="mold-registry-link-action"
                             onClick={(event) => {
                               event.stopPropagation();
                               selectMold(mold);
@@ -552,11 +636,10 @@ export function MoldRegistryView({
           </div>
         </section>
 
-        <aside className="mold-registry-panel" aria-label="Kalıp detayı">
-          {!selectedSummary ? (
-            <div className="mold-registry-empty">Detay görmek için bir kalıp seçin.</div>
-          ) : (
+        {detailOpen && selectedSummary ? (
+          <aside className="mold-registry-panel" aria-label="Kalıp detayı" data-detail-open="true">
             <MoldHistoryDetailPanel
+              key={selectedSummary.id}
               selectedSummary={selectedSummary}
               detail={activeDetail}
               lifecycleHistory={history}
@@ -569,9 +652,10 @@ export function MoldRegistryView({
               canManage={detailCanManage}
               isPending={isPending}
               onAction={runAction}
+              onClose={clearSelection}
             />
-          )}
-        </aside>
+          </aside>
+        ) : null}
       </div>
     </main>
   );
