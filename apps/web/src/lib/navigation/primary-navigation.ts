@@ -55,6 +55,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Vardiyalar",
         href: "/vardiyalar",
         iconKey: "calendar-clock",
+        permissionKey: "shift-workforce.read",
       },
       {
         label: "Proses & OEE",

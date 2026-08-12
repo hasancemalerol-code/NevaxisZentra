@@ -15,6 +15,7 @@ using CrevaFactOS.Persistence.Maintenance;
 using CrevaFactOS.Persistence.Material;
 using CrevaFactOS.Persistence.Mold;
 using CrevaFactOS.Persistence.ProcessOee;
+using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -125,6 +126,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ProcessOeeDowntimeBreakdownRow> ProcessOeeDowntimeBreakdownRows => Set<ProcessOeeDowntimeBreakdownRow>();
     public DbSet<ProcessOeeShiftComparisonBatch> ProcessOeeShiftComparisonBatches => Set<ProcessOeeShiftComparisonBatch>();
     public DbSet<ProcessOeeShiftComparisonRow> ProcessOeeShiftComparisonRows => Set<ProcessOeeShiftComparisonRow>();
+
+    // Shift workforce foundation (SHIFT-WORKFORCE-1)
+    public DbSet<ShiftWorkforcePerson> ShiftWorkforcePersons => Set<ShiftWorkforcePerson>();
+    public DbSet<ShiftWorkforceCompetencyDefinition> ShiftWorkforceCompetencyDefinitions => Set<ShiftWorkforceCompetencyDefinition>();
+    public DbSet<ShiftWorkforceCompetencyAssignment> ShiftWorkforceCompetencyAssignments => Set<ShiftWorkforceCompetencyAssignment>();
+    public DbSet<ShiftWorkforceAuditEvent> ShiftWorkforceAuditEvents => Set<ShiftWorkforceAuditEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -859,6 +866,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftWorkforcePersonEntityConfiguration());
+        modelBuilder.Entity<ShiftWorkforcePerson>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftWorkforceCompetencyDefinitionEntityConfiguration());
+        modelBuilder.Entity<ShiftWorkforceCompetencyDefinition>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftWorkforceCompetencyAssignmentEntityConfiguration());
+        modelBuilder.Entity<ShiftWorkforceCompetencyAssignment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftWorkforceAuditEventEntityConfiguration());
+        modelBuilder.Entity<ShiftWorkforceAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

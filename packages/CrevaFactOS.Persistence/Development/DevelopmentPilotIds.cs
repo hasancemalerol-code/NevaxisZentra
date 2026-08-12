@@ -469,4 +469,60 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ExportPilotBrokerWorkspaceId =
         Guid.Parse("bb000001-0057-4000-8000-000000000057");
+
+    // Shift workforce permission definitions (06b–06c)
+    public static readonly Guid ShiftWorkforceReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006b");
+
+    public static readonly Guid ShiftWorkforceManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006c");
+
+    // Shift workforce pilot fixtures
+    public static readonly Guid ShiftWorkforcePilotPerson001Id =
+        Guid.Parse("bb000001-00d0-4000-8000-0000000000d0");
+
+    public static readonly Guid ShiftWorkforcePilotPerson002Id =
+        Guid.Parse("bb000001-00d1-4000-8000-0000000000d1");
+
+    public static readonly Guid ShiftWorkforcePilotPerson003Id =
+        Guid.Parse("bb000001-00d2-4000-8000-0000000000d2");
+
+    public static readonly Guid ShiftWorkforcePilotPerson004Id =
+        Guid.Parse("bb000001-00d3-4000-8000-0000000000d3");
+
+    public static readonly Guid ShiftWorkforcePilotPerson005Id =
+        Guid.Parse("bb000001-00d4-4000-8000-0000000000d4");
+
+    public static readonly Guid ShiftWorkforcePilotPerson006Id =
+        Guid.Parse("bb000001-00d5-4000-8000-0000000000d5");
+
+    public static readonly Guid ShiftWorkforceCompetencyInjectionId =
+        Guid.Parse("bb000001-00e0-4000-8000-0000000000e0");
+
+    public static readonly Guid ShiftWorkforceCompetencyMoldChangeId =
+        Guid.Parse("bb000001-00e1-4000-8000-0000000000e1");
+
+    public static readonly Guid ShiftWorkforceCompetencyProcessReviewId =
+        Guid.Parse("bb000001-00e2-4000-8000-0000000000e2");
+
+    public static readonly Guid ShiftWorkforceCompetencyMaterialHandlingId =
+        Guid.Parse("bb000001-00e3-4000-8000-0000000000e3");
+
+    public static readonly Guid ShiftWorkforceCompetencyRobotAuxId =
+        Guid.Parse("bb000001-00e4-4000-8000-0000000000e4");
+
+    public static readonly Guid ShiftWorkforceCompetencyQualityCheckId =
+        Guid.Parse("bb000001-00e5-4000-8000-0000000000e5");
+
+    public static readonly Guid ShiftWorkforceCompetencyMaintenanceSupportId =
+        Guid.Parse("bb000001-00e6-4000-8000-0000000000e6");
+
+    public static readonly Guid ShiftWorkforcePilotAssignmentInjectionId =
+        Guid.Parse("bb000001-00f0-4000-8000-0000000000f0");
+
+    public static readonly Guid ShiftWorkforcePilotAssignmentMoldChangeId =
+        Guid.Parse("bb000001-00f1-4000-8000-0000000000f1");
+
+    public static readonly Guid ShiftWorkforcePilotAssignmentQualityPartialId =
+        Guid.Parse("bb000001-00f2-4000-8000-0000000000f2");
 }
