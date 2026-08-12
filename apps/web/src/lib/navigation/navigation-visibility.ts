@@ -1,3 +1,4 @@
+import { resolveMaterialNavigationVisibility } from "@/features/materials/server/material-reader";
 import { resolveMoldNavigationVisibility } from "@/features/molds/server/mold-reader";
 import { primaryNavigation } from "@/lib/navigation/primary-navigation";
 import type {
@@ -16,7 +17,10 @@ function toSerializableItem(item: SerializableNavigationItem): SerializableNavig
 }
 
 export async function resolvePermissionAwareNavigation(): Promise<readonly SerializableNavigationGroup[]> {
-  const moldVisible = await resolveMoldNavigationVisibility();
+  const [moldVisible, materialVisible] = await Promise.all([
+    resolveMoldNavigationVisibility(),
+    resolveMaterialNavigationVisibility(),
+  ]);
 
   return primaryNavigation.map((group) => ({
     label: group.label,
@@ -24,6 +28,10 @@ export async function resolvePermissionAwareNavigation(): Promise<readonly Seria
       .filter((item) => {
         if (item.permissionKey === "mold.read") {
           return moldVisible;
+        }
+
+        if (item.permissionKey === "material.read") {
+          return materialVisible;
         }
 
         return true;

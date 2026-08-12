@@ -323,6 +323,29 @@ public static class DevelopmentPilotIds
     public static readonly Guid MoldManagePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000066");
 
+    // Material permission definitions (067–068)
+    public static readonly Guid MaterialReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000067");
+
+    public static readonly Guid MaterialManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000068");
+
+    // Material pilot fixtures
+    public static readonly Guid MaterialPilotPpId =
+        Guid.Parse("bb000001-00a2-4000-8000-0000000000a2");
+
+    public static readonly Guid MaterialPilotPpSpecId =
+        Guid.Parse("bb000001-00a3-4000-8000-0000000000a3");
+
+    public static readonly Guid MaterialPilotAbsId =
+        Guid.Parse("bb000001-00a4-4000-8000-0000000000a4");
+
+    public static readonly Guid MaterialPilotAbsSpecId =
+        Guid.Parse("bb000001-00a5-4000-8000-0000000000a5");
+
+    public static readonly Guid MaterialPilotBlockedId =
+        Guid.Parse("bb000001-00a6-4000-8000-0000000000a6");
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

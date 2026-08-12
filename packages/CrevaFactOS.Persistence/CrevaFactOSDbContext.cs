@@ -12,6 +12,7 @@ using CrevaFactOS.Persistence.Export;
 using CrevaFactOS.Persistence.AiUsage;
 using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.Maintenance;
+using CrevaFactOS.Persistence.Material;
 using CrevaFactOS.Persistence.Mold;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
@@ -97,6 +98,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityNonconformance> QualityNonconformances => Set<QualityNonconformance>();
     public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
     public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
+
+    // Material registry (MATERIAL-1)
+    public DbSet<MaterialRegistryEntry> Materials => Set<MaterialRegistryEntry>();
+    public DbSet<MaterialTechnicalSpecification> MaterialTechnicalSpecifications => Set<MaterialTechnicalSpecification>();
+    public DbSet<MaterialLifecycleEvent> MaterialLifecycleEvents => Set<MaterialLifecycleEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -722,6 +728,25 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Material registry
+        modelBuilder.ApplyConfiguration(new MaterialRegistryEntryEntityConfiguration());
+        modelBuilder.Entity<MaterialRegistryEntry>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialTechnicalSpecificationEntityConfiguration());
+        modelBuilder.Entity<MaterialTechnicalSpecification>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialLifecycleEventEntityConfiguration());
+        modelBuilder.Entity<MaterialLifecycleEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

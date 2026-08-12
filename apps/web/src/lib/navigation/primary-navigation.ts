@@ -68,6 +68,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         permissionKey: "mold.read",
       },
       {
+        label: "Malzemeler",
+        href: "/malzemeler",
+        iconKey: "package",
+        permissionKey: "material.read",
+      },
+      {
         label: "Bakım",
         href: "/bakim",
         iconKey: "wrench",

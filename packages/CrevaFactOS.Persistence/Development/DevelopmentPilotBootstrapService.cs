@@ -394,6 +394,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMoldManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaterialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaterialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaterialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMaterialManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -500,6 +508,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 dbContext,
                 tenant.Id,
                 facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotMaterialSeed.EnsureMaterialPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotMaintenanceConditionSeed.EnsureMaintenanceConditionPilotDataAsync(
@@ -2334,5 +2349,23 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             MoldPermissionKeys.Manage,
             DevelopmentPilotIds.MoldManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMaterialReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MaterialPermissionKeys.Read,
+            DevelopmentPilotIds.MaterialReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMaterialManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MaterialPermissionKeys.Manage,
+            DevelopmentPilotIds.MaterialManagePermissionDefinitionId,
             cancellationToken);
 }

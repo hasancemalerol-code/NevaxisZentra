@@ -10,6 +10,7 @@ export const NAVIGATION_ICON_KEYS = [
   "cpu",
   "boxes",
   "molds",
+  "package",
   "wrench",
   "shield-check",
   "zap",
