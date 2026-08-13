@@ -14597,9 +14597,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("ApprovedAssignmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("approved_assignment_count");
+
                     b.Property<int>("ApprovedEligibleCount")
                         .HasColumnType("integer")
                         .HasColumnName("approved_eligible_count");
+
+                    b.Property<string>("AssessmentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("assessment_type");
 
                     b.Property<int>("CoverageGap")
                         .HasColumnType("integer")
@@ -14680,6 +14690,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("outcome");
 
+                    b.Property<int>("PlannedAssignmentMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("planned_assignment_minutes");
+
                     b.Property<DateTimeOffset>("PlannedEndUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("planned_end_utc");
@@ -14726,6 +14740,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
+                    b.Property<Guid?>("WorkforcePersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workforce_person_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CoverageRequirementId");
@@ -14742,6 +14760,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "FacilityId", "InputFingerprint")
                         .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_fingerprint");
+
+                    b.HasIndex("TenantId", "FacilityId", "AssessmentType", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_type_evaluated");
 
                     b.HasIndex("TenantId", "FacilityId", "Outcome", "ShiftDate")
                         .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_outcome_date");
@@ -14912,13 +14933,17 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
+                    b.Property<Guid?>("WorkforcePersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workforce_person_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssessmentId");
 
-                    b.HasIndex("TenantId", "AssessmentId", "ReasonCode")
+                    b.HasIndex("TenantId", "AssessmentId", "ReasonCode", "WorkforcePersonId")
                         .IsUnique()
-                        .HasDatabaseName("ix_shift_risk_drivers_tenant_assessment_reason");
+                        .HasDatabaseName("ix_shift_risk_drivers_tenant_assessment_reason_person");
 
                     b.ToTable("shift_risk_drivers", (string)null);
                 });

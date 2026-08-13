@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { AlertTriangle, LoaderCircle, ShieldAlert, X } from "lucide-react";
 
+import { ShiftContinuityPanel } from "./shift-continuity-panel";
+
 import {
   formatShiftRiskCount,
   formatShiftRiskDateTime,
@@ -30,9 +32,16 @@ type ShiftRiskPanelProps = Readonly<{
   canManage: boolean;
 }>;
 
+type RiskSubView = "coverage" | "continuity";
+
+const RISK_SUB_VIEWS = [
+  { id: "coverage" as const, label: "Kapsama Riskleri" },
+  { id: "continuity" as const, label: "Personel Sürekliliği" },
+] as const;
+
 const PAGE_SIZE = 20;
 
-export function ShiftRiskPanel({ canManage }: ShiftRiskPanelProps) {
+function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
   const [overview, setOverview] = useState<ShiftRiskOverview | null>(null);
   const [assessments, setAssessments] = useState<readonly ShiftRiskAssessmentSummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -362,5 +371,34 @@ export function ShiftRiskPanel({ canManage }: ShiftRiskPanelProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function ShiftRiskPanel({ canManage }: ShiftRiskPanelProps) {
+  const [activeSubView, setActiveSubView] = useState<RiskSubView>("coverage");
+
+  return (
+    <>
+      <div className="shift-workforce-workspace-tabs" role="tablist" aria-label="Vardiya risk alt görünümleri">
+        {RISK_SUB_VIEWS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeSubView === tab.id}
+            className={`shift-workforce-workspace-tab${activeSubView === tab.id ? " shift-workforce-workspace-tab--active" : ""}`}
+            onClick={() => setActiveSubView(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeSubView === "coverage" ? (
+        <ShiftCoveragePanel canManage={canManage} />
+      ) : (
+        <ShiftContinuityPanel canManage={canManage} />
+      )}
+    </>
   );
 }

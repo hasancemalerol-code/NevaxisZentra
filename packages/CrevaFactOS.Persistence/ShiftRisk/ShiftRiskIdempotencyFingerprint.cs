@@ -15,6 +15,7 @@ internal static class ShiftRiskIdempotencyFingerprint
     internal static string ComputeEvaluationInputFingerprint(ShiftRiskEvaluationContext context) =>
         HashPayload(new
         {
+            assessmentType = ShiftRiskAssessmentTypes.Coverage,
             productionShiftId = context.ProductionShiftId,
             shiftDate = context.ShiftDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             plannedStartUtc = FormatDateTime(context.PlannedStartUtc),
@@ -26,11 +27,29 @@ internal static class ShiftRiskIdempotencyFingerprint
             ruleSetVersion = ShiftRiskConstants.RuleSetVersion,
         });
 
+    internal static string ComputeContinuityEvaluationInputFingerprint(
+        Guid workforcePersonId,
+        ShiftRiskEvaluationContext context) =>
+        HashPayload(new
+        {
+            assessmentType = ShiftWorkforceContinuityConstants.AssessmentType,
+            workforcePersonId,
+            productionShiftId = context.ProductionShiftId,
+            shiftDate = context.ShiftDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            plannedStartUtc = FormatDateTime(context.PlannedStartUtc),
+            plannedEndUtc = FormatDateTime(context.PlannedEndUtc),
+            productionOrderReference = NormalizeOptionalString(context.ProductionOrderReference),
+            machineAssetId = context.MachineAssetId,
+            requiredCompetencyCode = NormalizeOptionalString(context.RequiredCompetencyCode),
+            ruleSetVersion = ShiftWorkforceContinuityConstants.RuleSetVersion,
+        });
+
     internal static string ComputeEvaluateCommandFingerprint(
         ShiftRiskOperationContext context,
         EvaluateShiftRiskCommand command) =>
         HashPayload(new
         {
+            assessmentType = ShiftRiskAssessmentTypes.Coverage,
             facilityId = context.FacilityId,
             tenantId = context.TenantId,
             productionShiftId = command.ProductionShiftId,
@@ -38,6 +57,22 @@ internal static class ShiftRiskIdempotencyFingerprint
             productionOrderReference = NormalizeOptionalString(command.ProductionOrderReference),
             machineAssetId = command.MachineAssetId,
             machineFamilyScope = NormalizeOptionalString(command.MachineFamilyScope),
+            requiredCompetencyCode = NormalizeOptionalString(command.RequiredCompetencyCode),
+        });
+
+    internal static string ComputeContinuityEvaluateCommandFingerprint(
+        ShiftRiskOperationContext context,
+        EvaluateWorkforceContinuityCommand command) =>
+        HashPayload(new
+        {
+            assessmentType = ShiftWorkforceContinuityConstants.AssessmentType,
+            facilityId = context.FacilityId,
+            tenantId = context.TenantId,
+            workforcePersonId = command.WorkforcePersonId,
+            productionShiftId = command.ProductionShiftId,
+            shiftDate = command.ShiftDate.Trim(),
+            productionOrderReference = NormalizeOptionalString(command.ProductionOrderReference),
+            machineAssetId = command.MachineAssetId,
             requiredCompetencyCode = NormalizeOptionalString(command.RequiredCompetencyCode),
         });
 

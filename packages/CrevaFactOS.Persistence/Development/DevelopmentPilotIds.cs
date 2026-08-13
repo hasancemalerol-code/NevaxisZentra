@@ -596,4 +596,68 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ShiftRiskPilotDraftConflictAssignmentId =
         Guid.Parse("bb000001-0125-4000-8000-000000000125");
+
+    // Shift workforce continuity risk pilot fixtures (0130-0149)
+    public static readonly Guid ShiftContinuityPilotAssessmentClearId =
+        Guid.Parse("bb000001-0130-4000-8000-000000000130");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentAbsenceId =
+        Guid.Parse("bb000001-0131-4000-8000-000000000131");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentExpiredId =
+        Guid.Parse("bb000001-0132-4000-8000-000000000132");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentExpiringUrgentId =
+        Guid.Parse("bb000001-0133-4000-8000-000000000133");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentExpiringUpcomingId =
+        Guid.Parse("bb000001-0134-4000-8000-000000000134");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentPendingVerificationId =
+        Guid.Parse("bb000001-0135-4000-8000-000000000135");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentStaleSourceId =
+        Guid.Parse("bb000001-0136-4000-8000-000000000136");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentUnknownAvailabilityId =
+        Guid.Parse("bb000001-0137-4000-8000-000000000137");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentOverlapId =
+        Guid.Parse("bb000001-0138-4000-8000-000000000138");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentWorkloadFactsId =
+        Guid.Parse("bb000001-0139-4000-8000-000000000139");
+
+    public static readonly Guid ShiftContinuityPilotAssessmentCriticalCoverageId =
+        Guid.Parse("bb000001-0140-4000-8000-000000000140");
+
+    public static readonly Guid ShiftContinuityPilotCompetencyExpiredAssignmentId =
+        Guid.Parse("bb000001-0141-4000-8000-000000000141");
+
+    public static readonly Guid ShiftContinuityPilotCompetencyUrgentAssignmentId =
+        Guid.Parse("bb000001-0142-4000-8000-000000000142");
+
+    public static readonly Guid ShiftContinuityPilotCompetencyUpcomingAssignmentId =
+        Guid.Parse("bb000001-0143-4000-8000-000000000143");
+
+    public static readonly Guid ShiftContinuityPilotCompetencyPendingAssignmentId =
+        Guid.Parse("bb000001-0144-4000-8000-000000000144");
+
+    public static readonly Guid ShiftContinuityPilotOverlapAssignmentAId =
+        Guid.Parse("bb000001-0145-4000-8000-000000000145");
+
+    public static readonly Guid ShiftContinuityPilotOverlapAssignmentBId =
+        Guid.Parse("bb000001-0146-4000-8000-000000000146");
+
+    public static readonly Guid ShiftContinuityPilotWorkloadAssignmentId =
+        Guid.Parse("bb000001-0147-4000-8000-000000000147");
+
+    public static readonly Guid ShiftContinuityPilotCriticalRequirementId =
+        Guid.Parse("bb000001-0148-4000-8000-000000000148");
+
+    public static readonly Guid ShiftContinuityPilotStaleAssignmentId =
+        Guid.Parse("bb000001-0149-4000-8000-000000000149");
+
+    public static readonly Guid ShiftContinuityPilotCompetencyClearAssignmentId =
+        Guid.Parse("bb000001-0150-4000-8000-000000000150");
 }

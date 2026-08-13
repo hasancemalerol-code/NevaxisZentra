@@ -43,6 +43,25 @@ public interface IShiftRiskRepository
         EvaluateShiftRiskCommand command,
         CancellationToken cancellationToken = default);
 
+    Task<ShiftRiskWriteResult> EvaluateWorkforceContinuityAsync(
+        ShiftRiskOperationContext context,
+        EvaluateWorkforceContinuityCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<ShiftContinuityOverviewReadModel> GetContinuityOverviewAsync(
+        ShiftRiskOperationContext context,
+        CancellationToken cancellationToken = default);
+
+    Task<ShiftContinuityAssessmentListReadModel> ListContinuityAssessmentsAsync(
+        ShiftRiskOperationContext context,
+        ShiftContinuityAssessmentListFilters filters,
+        CancellationToken cancellationToken = default);
+
+    Task<ShiftContinuityAssessmentDetailReadModel?> GetContinuityAssessmentByIdAsync(
+        ShiftRiskOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default);
+
     Task<ShiftRiskOverviewReadModel> GetOverviewAsync(
         ShiftRiskOperationContext context,
         CancellationToken cancellationToken = default);
@@ -64,7 +83,7 @@ public interface IShiftRiskRepository
         CancellationToken cancellationToken = default);
 }
 
-public sealed class ShiftRiskRepository(
+public sealed partial class ShiftRiskRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession) : IShiftRiskRepository
 {
@@ -441,6 +460,7 @@ public sealed class ShiftRiskRepository(
             .FirstOrDefaultAsync(
                 a => a.TenantId == context.TenantId
                      && a.FacilityId == context.FacilityId
+                     && a.AssessmentType == ShiftRiskAssessmentTypes.Coverage
                      && a.InputFingerprint == inputFingerprint,
                 ct);
 
@@ -483,6 +503,7 @@ public sealed class ShiftRiskRepository(
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
             FacilityId = context.FacilityId,
+            AssessmentType = ShiftRiskAssessmentTypes.Coverage,
             CoverageRequirementId = requirement?.Id,
             ProductionShiftId = evaluationContext.ProductionShiftId,
             ShiftDate = evaluationContext.ShiftDate,
@@ -581,6 +602,511 @@ public sealed class ShiftRiskRepository(
             },
             cancellationToken);
 
+    public Task<ShiftRiskWriteResult> EvaluateWorkforceContinuityAsync(
+        ShiftRiskOperationContext context,
+        EvaluateWorkforceContinuityCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                if (string.IsNullOrWhiteSpace(command.IdempotencyKey))
+                {
+                    return ShiftRiskWriteResult.Fail(
+                        ShiftRiskFailureCodes.ValidationFailed,
+                        "IdempotencyKey is required.");
+                }
+
+                if (command.WorkforcePersonId == Guid.Empty)
+                {
+                    return ShiftRiskWriteResult.Fail(
+                        ShiftRiskFailureCodes.ValidationFailed,
+                        "WorkforcePersonId is required.");
+                }
+
+                if (!DateOnly.TryParse(command.ShiftDate, out var shiftDate))
+                {
+                    return ShiftRiskWriteResult.Fail(
+                        ShiftRiskFailureCodes.ValidationFailed,
+                        "ShiftDate must be a valid date.");
+                }
+
+                var commandFingerprint = ShiftRiskIdempotencyFingerprint.ComputeContinuityEvaluateCommandFingerprint(
+                    context,
+                    command);
+                var existingByKey = await dbContext.ShiftRiskAssessments
+                    .FirstOrDefaultAsync(
+                        a => a.TenantId == context.TenantId
+                             && a.EvaluateIdempotencyKey == command.IdempotencyKey.Trim(),
+                        ct);
+
+                if (existingByKey is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(existingByKey.EvaluateIdempotencyPayloadFingerprint))
+                    {
+                        return ShiftRiskWriteResult.Fail(
+                            ShiftRiskFailureCodes.IdempotencyLegacyUnverifiable,
+                            "Evaluate idempotency key belongs to a legacy record that cannot be verified safely.");
+                    }
+
+                    if (existingByKey.EvaluateIdempotencyPayloadFingerprint == commandFingerprint)
+                    {
+                        return ShiftRiskWriteResult.SuccessAssessment(existingByKey.Id, true);
+                    }
+
+                    return ShiftRiskWriteResult.Fail(
+                        ShiftRiskFailureCodes.IdempotencyConflict,
+                        "Evaluate idempotency key was already used with a different payload.");
+                }
+
+                var buildResult = await BuildEvaluationContextCoreAsync(
+                    context, command.ProductionShiftId, shiftDate, ct);
+                if (!buildResult.Succeeded || buildResult.Context is null)
+                {
+                    return ShiftRiskWriteResult.Fail(
+                        buildResult.FailureCode ?? ShiftRiskFailureCodes.ValidationFailed,
+                        buildResult.FailureReason ?? "Evaluation context build failed.");
+                }
+
+                var evaluationContext = buildResult.Context with
+                {
+                    ProductionOrderReference = TrimOrNull(command.ProductionOrderReference),
+                    MachineAssetId = command.MachineAssetId is null || command.MachineAssetId == Guid.Empty
+                        ? null
+                        : command.MachineAssetId,
+                    RequiredCompetencyCode = TrimOrNull(command.RequiredCompetencyCode),
+                };
+
+                var inputFingerprint = ShiftRiskIdempotencyFingerprint.ComputeContinuityEvaluationInputFingerprint(
+                    command.WorkforcePersonId,
+                    evaluationContext);
+                var existingByFingerprint = await dbContext.ShiftRiskAssessments
+                    .FirstOrDefaultAsync(
+                        a => a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId
+                             && a.AssessmentType == ShiftWorkforceContinuityConstants.AssessmentType
+                             && a.InputFingerprint == inputFingerprint,
+                        ct);
+
+                if (existingByFingerprint is not null)
+                {
+                    return ShiftRiskWriteResult.SuccessAssessment(existingByFingerprint.Id, true);
+                }
+
+                var person = await dbContext.ShiftWorkforcePersons.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        p => p.TenantId == context.TenantId
+                             && p.FacilityId == context.FacilityId
+                             && p.Id == command.WorkforcePersonId,
+                        ct);
+
+                if (person is null)
+                {
+                    return ShiftRiskWriteResult.Fail(
+                        ShiftRiskFailureCodes.PersonNotFound,
+                        "Workforce person not found.");
+                }
+
+                var competencies = await LoadContinuityCompetencyEvidenceAsync(
+                    context,
+                    command.WorkforcePersonId,
+                    ct);
+                var assignments = await LoadContinuityAssignmentEvidenceAsync(
+                    context,
+                    command.WorkforcePersonId,
+                    evaluationContext,
+                    ct);
+                var coverageRequirements = await LoadContinuityCoverageRequirementsAsync(
+                    context,
+                    evaluationContext,
+                    ct);
+
+                var personContext = new ShiftWorkforceContinuityRiskEvaluator.PersonContext(
+                    person.Id,
+                    person.EmployeeCode,
+                    person.DisplayName,
+                    person.IsActive,
+                    person.AvailabilityState,
+                    person.FreshnessState,
+                    person.SourceUpdatedAtUtc,
+                    person.SourceSystem == ShiftWorkforceSourceSystems.LocalDevelopmentPilot);
+
+                var now = DateTimeOffset.UtcNow;
+                var evaluation = ShiftWorkforceContinuityRiskEvaluator.Evaluate(
+                    personContext,
+                    competencies,
+                    assignments,
+                    coverageRequirements,
+                    evaluationContext.ProductionShiftId,
+                    evaluationContext.ShiftDate,
+                    evaluationContext.PlannedStartUtc,
+                    evaluationContext.PlannedEndUtc,
+                    evaluationContext.RequiredCompetencyCode,
+                    now);
+
+                var actor = context.IdentitySubjectId.ToString();
+                var assessment = new ShiftRiskAssessment
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = context.TenantId,
+                    FacilityId = context.FacilityId,
+                    AssessmentType = ShiftWorkforceContinuityConstants.AssessmentType,
+                    WorkforcePersonId = command.WorkforcePersonId,
+                    ProductionShiftId = evaluationContext.ProductionShiftId,
+                    ShiftDate = evaluationContext.ShiftDate,
+                    PlannedStartUtc = evaluationContext.PlannedStartUtc,
+                    PlannedEndUtc = evaluationContext.PlannedEndUtc,
+                    ProductionOrderReference = evaluationContext.ProductionOrderReference,
+                    MachineAssetId = evaluationContext.MachineAssetId,
+                    RequiredCompetencyCode = evaluationContext.RequiredCompetencyCode,
+                    ApprovedEligibleCount = evaluation.TrustworthyAvailableCount,
+                    ApprovedAssignmentCount = evaluation.ApprovedAssignmentCount,
+                    PlannedAssignmentMinutes = evaluation.PlannedAssignmentMinutes,
+                    CoverageGap = evaluation.CoverageGap,
+                    RuleSetVersion = ShiftWorkforceContinuityConstants.RuleSetVersion,
+                    InputFingerprint = inputFingerprint,
+                    Outcome = evaluation.Outcome,
+                    LeadingDriverCategory = evaluation.LeadingDriverCategory,
+                    LeadingReasonCode = evaluation.LeadingReasonCode,
+                    StructuredEvidenceJson = JsonSerializer.Serialize(
+                        new
+                        {
+                            consideredAssignmentIds = evaluation.ConsideredAssignments.Select(a => a.AssignmentId),
+                            competencyAssignmentIds = competencies.Select(c => c.AssignmentId),
+                        },
+                        JsonOptions),
+                    SourceFreshnessSnapshotJson = JsonSerializer.Serialize(
+                        new
+                        {
+                            personId = person.Id,
+                            availabilityState = person.AvailabilityState,
+                            freshnessState = person.FreshnessState,
+                            sourceUpdatedAtUtc = person.SourceUpdatedAtUtc,
+                        },
+                        JsonOptions),
+                    EvaluatedAtUtc = now,
+                    EvaluateIdempotencyKey = command.IdempotencyKey.Trim(),
+                    EvaluateIdempotencyPayloadFingerprint = commandFingerprint,
+                    CreatedAtUtc = now,
+                    CreatedBy = actor,
+                };
+
+                foreach (var driverDraft in evaluation.Drivers)
+                {
+                    var driver = new ShiftRiskDriver
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = context.TenantId,
+                        AssessmentId = assessment.Id,
+                        ReasonCode = driverDraft.ReasonCode,
+                        LabelTr = ShiftWorkforceContinuityReasonLabels.GetLabelTr(driverDraft.ReasonCode),
+                        Category = driverDraft.Category,
+                        Severity = driverDraft.Severity,
+                        RequiredValue = driverDraft.RequiredValue,
+                        ObservedValue = driverDraft.ObservedValue,
+                        GapValue = driverDraft.GapValue,
+                        WorkforcePersonId = driverDraft.WorkforcePersonId,
+                        ProductionShiftId = driverDraft.ProductionShiftId,
+                        ProductionOrderReference = driverDraft.ProductionOrderReference,
+                        MachineAssetId = driverDraft.MachineAssetId,
+                        RequiredCompetencyCode = driverDraft.RequiredCompetencyCode,
+                        EvidenceSource = driverDraft.EvidenceSource,
+                        EvidenceReference = driverDraft.EvidenceReference,
+                        EvidenceTimestampUtc = driverDraft.EvidenceTimestampUtc,
+                        FreshnessState = driverDraft.FreshnessState,
+                        RuleSetVersion = ShiftWorkforceContinuityConstants.RuleSetVersion,
+                        IsLeadingRisk = driverDraft.ReasonCode == evaluation.LeadingReasonCode,
+                    };
+                    assessment.Drivers.Add(driver);
+                }
+
+                assessment.LeadingDriverId = assessment.Drivers.FirstOrDefault(d => d.IsLeadingRisk)?.Id;
+                dbContext.ShiftRiskAssessments.Add(assessment);
+                AddAuditEvent(
+                    context,
+                    assessment.Id,
+                    ShiftRiskEntityTypes.Assessment,
+                    ShiftRiskAuditEventTypes.AssessmentEvaluated,
+                    actor,
+                    now,
+                    new { assessmentId = assessment.Id, outcome = assessment.Outcome, assessmentType = assessment.AssessmentType });
+
+                try
+                {
+                    await dbContext.SaveChangesAsync(ct);
+                }
+                catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+                {
+                    return await ResolveEvaluateIdempotencyRaceAsync(
+                        context,
+                        command.IdempotencyKey.Trim(),
+                        commandFingerprint,
+                        ct);
+                }
+
+                return ShiftRiskWriteResult.SuccessAssessment(assessment.Id);
+            },
+            cancellationToken);
+
+    public Task<ShiftContinuityOverviewReadModel> GetContinuityOverviewAsync(
+        ShiftRiskOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessments = await dbContext.ShiftRiskAssessments.AsNoTracking()
+                    .Where(a => a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId
+                                && a.AssessmentType == ShiftWorkforceContinuityConstants.AssessmentType)
+                    .ToListAsync(ct);
+
+                return new ShiftContinuityOverviewReadModel(
+                    assessments.Count,
+                    assessments.Count(a => a.Outcome == ShiftRiskOutcomes.Clear),
+                    assessments.Count(a => a.Outcome == ShiftRiskOutcomes.Attention),
+                    assessments.Count(a => a.Outcome == ShiftRiskOutcomes.Critical),
+                    assessments.Count(a => a.Outcome == ShiftRiskOutcomes.InsufficientData),
+                    assessments.Count(a => a.LeadingDriverCategory == ShiftWorkforceContinuityDriverCategories.AbsenceImpact),
+                    assessments.Count(a => a.LeadingDriverCategory == ShiftWorkforceContinuityDriverCategories.CompetencyExpired),
+                    assessments.Count(a => a.LeadingDriverCategory == ShiftWorkforceContinuityDriverCategories.CompetencyExpiring),
+                    assessments.Count(a => a.LeadingDriverCategory is ShiftWorkforceContinuityDriverCategories.SourceStale
+                        or ShiftWorkforceContinuityDriverCategories.AvailabilityUnknown),
+                    assessments.Count(a => a.LeadingDriverCategory == ShiftWorkforceContinuityDriverCategories.AssignmentOverlap),
+                    assessments.Count(a => a.LeadingDriverCategory == ShiftWorkforceContinuityDriverCategories.CoverageImpact));
+            },
+            cancellationToken);
+
+    public Task<ShiftContinuityAssessmentListReadModel> ListContinuityAssessmentsAsync(
+        ShiftRiskOperationContext context,
+        ShiftContinuityAssessmentListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var page = filters.Page < 1 ? 1 : filters.Page;
+                var pageSize = filters.PageSize is < 1 or > 100 ? 25 : filters.PageSize;
+
+                var query = dbContext.ShiftRiskAssessments.AsNoTracking()
+                    .Where(a => a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId
+                                && a.AssessmentType == ShiftWorkforceContinuityConstants.AssessmentType);
+
+                if (filters.ProductionShiftId.HasValue)
+                {
+                    query = query.Where(a => a.ProductionShiftId == filters.ProductionShiftId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.ProductionOrderReference))
+                {
+                    var reference = filters.ProductionOrderReference.Trim();
+                    query = query.Where(a => a.ProductionOrderReference == reference);
+                }
+
+                if (filters.MachineAssetId.HasValue)
+                {
+                    query = query.Where(a => a.MachineAssetId == filters.MachineAssetId.Value);
+                }
+
+                if (filters.WorkforcePersonId.HasValue)
+                {
+                    query = query.Where(a => a.WorkforcePersonId == filters.WorkforcePersonId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.Outcome))
+                {
+                    var outcome = filters.Outcome.Trim();
+                    query = query.Where(a => a.Outcome == outcome);
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.DriverCategory))
+                {
+                    var category = filters.DriverCategory.Trim();
+                    query = query.Where(a => a.LeadingDriverCategory == category);
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.RequiredCompetencyCode))
+                {
+                    var competencyCode = filters.RequiredCompetencyCode.Trim();
+                    query = query.Where(a => a.RequiredCompetencyCode == competencyCode);
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.AvailabilityState)
+                    || !string.IsNullOrWhiteSpace(filters.FreshnessState))
+                {
+                    var personQuery = dbContext.ShiftWorkforcePersons.AsNoTracking()
+                        .Where(p => p.TenantId == context.TenantId && p.FacilityId == context.FacilityId);
+                    if (!string.IsNullOrWhiteSpace(filters.AvailabilityState))
+                    {
+                        var availability = filters.AvailabilityState.Trim();
+                        personQuery = personQuery.Where(p => p.AvailabilityState == availability);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(filters.FreshnessState))
+                    {
+                        var freshness = filters.FreshnessState.Trim();
+                        personQuery = personQuery.Where(p => p.FreshnessState == freshness);
+                    }
+
+                    var personIds = await personQuery.Select(p => p.Id).ToListAsync(ct);
+                    query = query.Where(a => a.WorkforcePersonId.HasValue && personIds.Contains(a.WorkforcePersonId.Value));
+                }
+
+                if (filters.CriticalOnly == true)
+                {
+                    query = query.Where(a => a.IsCriticalRole == true);
+                }
+
+                var totalCount = await query.CountAsync(ct);
+                var assessments = await query
+                    .OrderByDescending(a => a.EvaluatedAtUtc)
+                    .ThenByDescending(a => a.CreatedAtUtc)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(ct);
+
+                var shiftLookup = await LoadShiftLookupAsync(context, ct);
+                var machineLookup = await LoadMachineLookupAsync(context, ct);
+                var personIdsOnPage = assessments
+                    .Where(a => a.WorkforcePersonId.HasValue)
+                    .Select(a => a.WorkforcePersonId!.Value)
+                    .Distinct()
+                    .ToList();
+                var persons = await dbContext.ShiftWorkforcePersons.AsNoTracking()
+                    .Where(p => p.TenantId == context.TenantId && personIdsOnPage.Contains(p.Id))
+                    .ToDictionaryAsync(p => p.Id, ct);
+
+                var items = assessments
+                    .Select(a => MapContinuityAssessmentSummary(a, persons, shiftLookup, machineLookup))
+                    .ToList();
+
+                return new ShiftContinuityAssessmentListReadModel(items, totalCount, page, pageSize);
+            },
+            cancellationToken);
+
+    public Task<ShiftContinuityAssessmentDetailReadModel?> GetContinuityAssessmentByIdAsync(
+        ShiftRiskOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.ShiftRiskAssessments.AsNoTracking()
+                    .Include(a => a.Drivers)
+                    .FirstOrDefaultAsync(
+                        a => a.Id == assessmentId
+                             && a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId
+                             && a.AssessmentType == ShiftWorkforceContinuityConstants.AssessmentType,
+                        ct);
+
+                if (assessment is null || !assessment.WorkforcePersonId.HasValue)
+                {
+                    return null;
+                }
+
+                var person = await dbContext.ShiftWorkforcePersons.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        p => p.TenantId == context.TenantId && p.Id == assessment.WorkforcePersonId.Value,
+                        ct);
+
+                if (person is null)
+                {
+                    return null;
+                }
+
+                var shiftLookup = await LoadShiftLookupAsync(context, ct);
+                var machineLookup = await LoadMachineLookupAsync(context, ct);
+                var evaluationContext = new ShiftRiskEvaluationContext(
+                    assessment.ProductionShiftId,
+                    assessment.ShiftDate,
+                    assessment.PlannedStartUtc,
+                    assessment.PlannedEndUtc,
+                    assessment.ProductionOrderReference,
+                    assessment.MachineAssetId,
+                    null,
+                    assessment.RequiredCompetencyCode);
+
+                var competencies = await LoadContinuityCompetencyEvidenceAsync(
+                    context,
+                    assessment.WorkforcePersonId.Value,
+                    ct);
+                var assignments = await LoadContinuityAssignmentEvidenceAsync(
+                    context,
+                    assessment.WorkforcePersonId.Value,
+                    evaluationContext,
+                    ct);
+
+                return new ShiftContinuityAssessmentDetailReadModel(
+                    assessment.Id,
+                    assessment.WorkforcePersonId.Value,
+                    person.EmployeeCode,
+                    person.DisplayName,
+                    person.Department ?? "—",
+                    person.JobTitle ?? "—",
+                    person.IsActive,
+                    person.AvailabilityState,
+                    person.FreshnessState,
+                    person.SourceUpdatedAtUtc,
+                    assessment.ProductionShiftId,
+                    shiftLookup.GetValueOrDefault(assessment.ProductionShiftId)?.Name
+                        ?? shiftLookup.GetValueOrDefault(assessment.ProductionShiftId)?.Code
+                        ?? "—",
+                    assessment.ShiftDate,
+                    assessment.PlannedStartUtc,
+                    assessment.PlannedEndUtc,
+                    assessment.ProductionOrderReference,
+                    assessment.MachineAssetId,
+                    assessment.MachineAssetId.HasValue
+                        ? machineLookup.GetValueOrDefault(assessment.MachineAssetId.Value)?.Name ?? "—"
+                        : null,
+                    assessment.RequiredCompetencyCode,
+                    assessment.ApprovedAssignmentCount,
+                    assessment.PlannedAssignmentMinutes,
+                    assessment.ApprovedEligibleCount,
+                    assessment.CoverageGap,
+                    assessment.Outcome,
+                    assessment.LeadingDriverCategory,
+                    assessment.LeadingReasonCode,
+                    assessment.LeadingDriverId,
+                    assessment.RuleSetVersion,
+                    assessment.InputFingerprint,
+                    assessment.EvaluatedAtUtc,
+                    assessment.StructuredEvidenceJson,
+                    assessment.SourceFreshnessSnapshotJson,
+                    assessment.Drivers
+                        .OrderByDescending(d => d.IsLeadingRisk)
+                        .ThenBy(d => d.Category)
+                        .Select(MapDriver)
+                        .ToList(),
+                    competencies.Select(c => new ShiftContinuityCompetencyEvidenceReadModel(
+                        c.AssignmentId,
+                        c.CompetencyCode,
+                        c.CompetencyLabel,
+                        c.VerificationStatus,
+                        c.ValidFromUtc,
+                        c.ValidUntilUtc,
+                        c.IsPilotData)).ToList(),
+                    assignments.Select(a => MapAssignmentEvidence(
+                        new ShiftCoverageRiskEvaluator.AssignmentEvidence(
+                            a.AssignmentId,
+                            a.WorkforcePersonId,
+                            person.EmployeeCode,
+                            person.DisplayName,
+                            a.Status,
+                            a.PlannedStartUtc,
+                            a.PlannedEndUtc,
+                            a.RequiredCompetencyCode,
+                            a.MachineAssetId,
+                            a.ProductionOrderReference,
+                            Guid.Empty,
+                            null,
+                            null,
+                            a.IsPilotData),
+                        null)).ToList(),
+                    person.SourceSystem == ShiftWorkforceSourceSystems.LocalDevelopmentPilot
+                        || assessment.StructuredEvidenceJson.Contains("pilot", StringComparison.OrdinalIgnoreCase));
+            },
+            cancellationToken);
+
     public Task<ShiftRiskOverviewReadModel> GetOverviewAsync(
         ShiftRiskOperationContext context,
         CancellationToken cancellationToken = default) =>
@@ -588,7 +1114,9 @@ public sealed class ShiftRiskRepository(
             async ct =>
             {
                 var assessments = await dbContext.ShiftRiskAssessments.AsNoTracking()
-                    .Where(a => a.TenantId == context.TenantId && a.FacilityId == context.FacilityId)
+                    .Where(a => a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId
+                                && a.AssessmentType == ShiftRiskAssessmentTypes.Coverage)
                     .ToListAsync(ct);
 
                 return new ShiftRiskOverviewReadModel(
@@ -614,7 +1142,9 @@ public sealed class ShiftRiskRepository(
                 var pageSize = filters.PageSize is < 1 or > 100 ? 25 : filters.PageSize;
 
                 var query = dbContext.ShiftRiskAssessments.AsNoTracking()
-                    .Where(a => a.TenantId == context.TenantId && a.FacilityId == context.FacilityId);
+                    .Where(a => a.TenantId == context.TenantId
+                                && a.FacilityId == context.FacilityId
+                                && a.AssessmentType == ShiftRiskAssessmentTypes.Coverage);
 
                 if (filters.ProductionShiftId.HasValue)
                 {
@@ -680,7 +1210,8 @@ public sealed class ShiftRiskRepository(
                     .FirstOrDefaultAsync(
                         a => a.Id == assessmentId
                              && a.TenantId == context.TenantId
-                             && a.FacilityId == context.FacilityId,
+                             && a.FacilityId == context.FacilityId
+                             && a.AssessmentType == ShiftRiskAssessmentTypes.Coverage,
                         ct);
 
                 if (assessment is null)
@@ -821,6 +1352,123 @@ public sealed class ShiftRiskRepository(
                     BuildAuditSummary(e.EventType))).ToList();
             },
             cancellationToken);
+
+    private async Task<IReadOnlyList<ShiftWorkforceContinuityRiskEvaluator.CompetencyContext>> LoadContinuityCompetencyEvidenceAsync(
+        ShiftRiskOperationContext context,
+        Guid workforcePersonId,
+        CancellationToken cancellationToken)
+    {
+        var assignments = await dbContext.ShiftWorkforceCompetencyAssignments.AsNoTracking()
+            .Include(a => a.CompetencyDefinition)
+            .Where(a => a.TenantId == context.TenantId
+                        && a.FacilityId == context.FacilityId
+                        && a.WorkforcePersonId == workforcePersonId)
+            .ToListAsync(cancellationToken);
+
+        return assignments.Select(a => new ShiftWorkforceContinuityRiskEvaluator.CompetencyContext(
+            a.Id,
+            a.CompetencyDefinition?.Code ?? string.Empty,
+            a.CompetencyDefinition?.DisplayLabelTr ?? string.Empty,
+            a.VerificationStatus,
+            a.ValidFromUtc,
+            a.ValidUntilUtc,
+            a.CreateIdempotencyKey?.StartsWith("pilot-shift-continuity", StringComparison.OrdinalIgnoreCase) == true)).ToList();
+    }
+
+    private async Task<IReadOnlyList<ShiftWorkforceContinuityRiskEvaluator.AssignmentContext>> LoadContinuityAssignmentEvidenceAsync(
+        ShiftRiskOperationContext context,
+        Guid workforcePersonId,
+        ShiftRiskEvaluationContext evaluationContext,
+        CancellationToken cancellationToken)
+    {
+        var assignments = await dbContext.ShiftOperatorAssignments.AsNoTracking()
+            .Where(a => a.TenantId == context.TenantId
+                        && a.FacilityId == context.FacilityId
+                        && a.WorkforcePersonId == workforcePersonId
+                        && a.ProductionShiftId == evaluationContext.ProductionShiftId
+                        && a.ShiftDate == evaluationContext.ShiftDate)
+            .ToListAsync(cancellationToken);
+
+        return assignments.Select(a => new ShiftWorkforceContinuityRiskEvaluator.AssignmentContext(
+            a.Id,
+            a.WorkforcePersonId,
+            a.Status,
+            a.PlannedStartUtc,
+            a.PlannedEndUtc,
+            a.ProductionOrderReference,
+            a.MachineAssetId,
+            a.RequiredCompetencyCode,
+            a.CreatedBy.StartsWith("pilot", StringComparison.OrdinalIgnoreCase))).ToList();
+    }
+
+    private async Task<IReadOnlyList<ShiftWorkforceContinuityRiskEvaluator.CoverageRequirementContext>> LoadContinuityCoverageRequirementsAsync(
+        ShiftRiskOperationContext context,
+        ShiftRiskEvaluationContext evaluationContext,
+        CancellationToken cancellationToken)
+    {
+        var requirements = await dbContext.ShiftCoverageRequirements.AsNoTracking()
+            .Where(r => r.TenantId == context.TenantId
+                        && r.FacilityId == context.FacilityId
+                        && r.IsActive
+                        && r.ProductionShiftId == evaluationContext.ProductionShiftId
+                        && r.ShiftDate == evaluationContext.ShiftDate)
+            .ToListAsync(cancellationToken);
+
+        return requirements
+            .Where(r => MatchesOptionalReference(r.ProductionOrderReference, evaluationContext.ProductionOrderReference))
+            .Where(r => evaluationContext.MachineAssetId is null
+                        || r.MachineAssetId is null
+                        || r.MachineAssetId == evaluationContext.MachineAssetId)
+            .Select(r => new ShiftWorkforceContinuityRiskEvaluator.CoverageRequirementContext(
+                r.Id,
+                r.ProductionOrderReference,
+                r.MachineAssetId,
+                r.RequiredCompetencyCode,
+                r.MinimumApprovedOperatorCount,
+                r.IsCriticalRole))
+            .ToList();
+    }
+
+    private static ShiftContinuityAssessmentSummaryReadModel MapContinuityAssessmentSummary(
+        ShiftRiskAssessment assessment,
+        IReadOnlyDictionary<Guid, ShiftWorkforcePerson> persons,
+        IReadOnlyDictionary<Guid, ProductionShift> shiftLookup,
+        IReadOnlyDictionary<Guid, MachineRegistry> machineLookup)
+    {
+        var person = assessment.WorkforcePersonId.HasValue
+            ? persons.GetValueOrDefault(assessment.WorkforcePersonId.Value)
+            : null;
+        var shift = shiftLookup.GetValueOrDefault(assessment.ProductionShiftId);
+        var machineLabel = assessment.MachineAssetId.HasValue
+            ? machineLookup.GetValueOrDefault(assessment.MachineAssetId.Value)?.Name
+            : null;
+
+        return new ShiftContinuityAssessmentSummaryReadModel(
+            assessment.Id,
+            assessment.WorkforcePersonId ?? Guid.Empty,
+            person?.EmployeeCode ?? "—",
+            person?.DisplayName ?? "—",
+            assessment.ProductionShiftId,
+            shift?.Name ?? shift?.Code ?? "—",
+            assessment.ShiftDate,
+            assessment.ProductionOrderReference,
+            assessment.MachineAssetId,
+            machineLabel,
+            assessment.RequiredCompetencyCode,
+            person?.AvailabilityState ?? ShiftWorkforceAvailabilityStates.Unknown,
+            person?.FreshnessState ?? ShiftWorkforceFreshnessStates.Unknown,
+            assessment.ApprovedAssignmentCount,
+            assessment.PlannedAssignmentMinutes,
+            assessment.ApprovedEligibleCount,
+            assessment.CoverageGap,
+            assessment.Outcome,
+            assessment.LeadingDriverCategory,
+            assessment.LeadingReasonCode,
+            assessment.RuleSetVersion,
+            assessment.EvaluatedAtUtc,
+            assessment.StructuredEvidenceJson.Contains("pilot", StringComparison.OrdinalIgnoreCase)
+                || person?.SourceSystem == ShiftWorkforceSourceSystems.LocalDevelopmentPilot);
+    }
 
     private async Task<ShiftCoverageRequirement?> FindMatchingRequirementAsync(
         ShiftRiskOperationContext context,
@@ -1241,6 +1889,29 @@ public sealed class UnavailableShiftRiskRepository : IShiftRiskRepository
         EvaluateShiftRiskCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(ShiftRiskWriteResult.Fail(ShiftRiskFailureCodes.InvalidScope, Message));
+
+    public Task<ShiftRiskWriteResult> EvaluateWorkforceContinuityAsync(
+        ShiftRiskOperationContext context,
+        EvaluateWorkforceContinuityCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(ShiftRiskWriteResult.Fail(ShiftRiskFailureCodes.InvalidScope, Message));
+
+    public Task<ShiftContinuityOverviewReadModel> GetContinuityOverviewAsync(
+        ShiftRiskOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException(Message);
+
+    public Task<ShiftContinuityAssessmentListReadModel> ListContinuityAssessmentsAsync(
+        ShiftRiskOperationContext context,
+        ShiftContinuityAssessmentListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException(Message);
+
+    public Task<ShiftContinuityAssessmentDetailReadModel?> GetContinuityAssessmentByIdAsync(
+        ShiftRiskOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException(Message);
 
     public Task<ShiftRiskOverviewReadModel> GetOverviewAsync(
         ShiftRiskOperationContext context,

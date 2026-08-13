@@ -211,6 +211,120 @@ public sealed record EvaluateShiftRiskCommand(
     string? RequiredCompetencyCode,
     string IdempotencyKey);
 
+public sealed record EvaluateWorkforceContinuityCommand(
+    Guid ProductionShiftId,
+    string ShiftDate,
+    Guid WorkforcePersonId,
+    string? ProductionOrderReference,
+    Guid? MachineAssetId,
+    string? RequiredCompetencyCode,
+    string IdempotencyKey);
+
+public sealed record ShiftContinuityAssessmentSummaryReadModel(
+    Guid Id,
+    Guid WorkforcePersonId,
+    string EmployeeCode,
+    string DisplayName,
+    Guid ProductionShiftId,
+    string ShiftLabel,
+    DateOnly ShiftDate,
+    string? ProductionOrderReference,
+    Guid? MachineAssetId,
+    string? MachineAssetLabel,
+    string? RequiredCompetencyCode,
+    string AvailabilityState,
+    string FreshnessState,
+    int ApprovedAssignmentCount,
+    int PlannedAssignmentMinutes,
+    int TrustworthyAvailableCount,
+    int CoverageGap,
+    string Outcome,
+    string? LeadingDriverCategory,
+    string? LeadingReasonCode,
+    string RuleSetVersion,
+    DateTimeOffset EvaluatedAtUtc,
+    bool IsPilotData);
+
+public sealed record ShiftContinuityAssessmentDetailReadModel(
+    Guid Id,
+    Guid WorkforcePersonId,
+    string EmployeeCode,
+    string DisplayName,
+    string Department,
+    string JobTitle,
+    bool IsActive,
+    string AvailabilityState,
+    string FreshnessState,
+    DateTimeOffset? SourceUpdatedAtUtc,
+    Guid ProductionShiftId,
+    string ShiftLabel,
+    DateOnly ShiftDate,
+    DateTimeOffset PlannedStartUtc,
+    DateTimeOffset PlannedEndUtc,
+    string? ProductionOrderReference,
+    Guid? MachineAssetId,
+    string? MachineAssetLabel,
+    string? RequiredCompetencyCode,
+    int ApprovedAssignmentCount,
+    int PlannedAssignmentMinutes,
+    int TrustworthyAvailableCount,
+    int CoverageGap,
+    string Outcome,
+    string? LeadingDriverCategory,
+    string? LeadingReasonCode,
+    Guid? LeadingDriverId,
+    string RuleSetVersion,
+    string InputFingerprint,
+    DateTimeOffset EvaluatedAtUtc,
+    string StructuredEvidenceJson,
+    string SourceFreshnessSnapshotJson,
+    IReadOnlyList<ShiftRiskDriverReadModel> Drivers,
+    IReadOnlyList<ShiftContinuityCompetencyEvidenceReadModel> Competencies,
+    IReadOnlyList<ShiftRiskAssignmentEvidenceReadModel> ConsideredAssignments,
+    bool IsPilotData);
+
+public sealed record ShiftContinuityCompetencyEvidenceReadModel(
+    Guid AssignmentId,
+    string CompetencyCode,
+    string CompetencyLabel,
+    string VerificationStatus,
+    DateTimeOffset? ValidFromUtc,
+    DateTimeOffset? ValidUntilUtc,
+    bool IsPilotData);
+
+public sealed record ShiftContinuityAssessmentListReadModel(
+    IReadOnlyList<ShiftContinuityAssessmentSummaryReadModel> Items,
+    int TotalCount,
+    int Page,
+    int PageSize);
+
+public sealed record ShiftContinuityAssessmentListFilters(
+    Guid? ProductionShiftId,
+    string? ProductionOrderReference,
+    Guid? MachineAssetId,
+    Guid? WorkforcePersonId,
+    string? Outcome,
+    string? DriverCategory,
+    string? AvailabilityState,
+    string? FreshnessState,
+    string? RequiredCompetencyCode,
+    bool? CriticalOnly,
+    int Page,
+    int PageSize);
+
+public sealed record ShiftContinuityOverviewReadModel(
+    int EvaluatedContextCount,
+    int ClearCount,
+    int AttentionCount,
+    int CriticalCount,
+    int InsufficientDataCount,
+    int AbsenceImpactCount,
+    int CompetencyExpiredCount,
+    int CompetencyExpiringCount,
+    int StaleOrUnknownCount,
+    int AssignmentOverlapCount,
+    int CoverageImpactCount);
+
 public static class ShiftRiskFailureCodes
 {
     public const string InvalidScope = "shift-risk.invalid-scope";
@@ -221,6 +335,7 @@ public static class ShiftRiskFailureCodes
     public const string IdempotencyLegacyUnverifiable = "shift-risk.idempotency-legacy-unverifiable";
     public const string ShiftNotFound = "shift-risk.shift-not-found";
     public const string MachineNotFound = "shift-risk.machine-not-found";
+    public const string PersonNotFound = "shift-risk.person-not-found";
 }
 
 public sealed class ShiftRiskWriteResult

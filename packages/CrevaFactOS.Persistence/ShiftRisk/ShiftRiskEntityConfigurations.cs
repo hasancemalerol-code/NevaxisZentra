@@ -64,6 +64,8 @@ internal sealed class ShiftRiskAssessmentEntityConfiguration : IEntityTypeConfig
         entity.Property(a => a.Id).HasColumnName("id");
         entity.Property(a => a.TenantId).HasColumnName("tenant_id");
         entity.Property(a => a.FacilityId).HasColumnName("facility_id");
+        entity.Property(a => a.AssessmentType).HasColumnName("assessment_type").HasMaxLength(50).IsRequired();
+        entity.Property(a => a.WorkforcePersonId).HasColumnName("workforce_person_id");
         entity.Property(a => a.CoverageRequirementId).HasColumnName("coverage_requirement_id");
         entity.Property(a => a.ProductionShiftId).HasColumnName("production_shift_id");
         entity.Property(a => a.ShiftDate).HasColumnName("shift_date");
@@ -77,6 +79,8 @@ internal sealed class ShiftRiskAssessmentEntityConfiguration : IEntityTypeConfig
         entity.Property(a => a.IsCriticalRole).HasColumnName("is_critical_role");
         entity.Property(a => a.ApprovedEligibleCount).HasColumnName("approved_eligible_count");
         entity.Property(a => a.CoverageGap).HasColumnName("coverage_gap");
+        entity.Property(a => a.ApprovedAssignmentCount).HasColumnName("approved_assignment_count");
+        entity.Property(a => a.PlannedAssignmentMinutes).HasColumnName("planned_assignment_minutes");
         entity.Property(a => a.RuleSetVersion).HasColumnName("rule_set_version").HasMaxLength(100).IsRequired();
         entity.Property(a => a.InputFingerprint).HasColumnName("input_fingerprint").HasMaxLength(64).IsRequired();
         entity.Property(a => a.Outcome).HasColumnName("outcome").HasMaxLength(30).IsRequired();
@@ -111,6 +115,8 @@ internal sealed class ShiftRiskAssessmentEntityConfiguration : IEntityTypeConfig
             .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_evaluated");
         entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.Outcome, a.ShiftDate })
             .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_outcome_date");
+        entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.AssessmentType, a.EvaluatedAtUtc })
+            .HasDatabaseName("ix_shift_risk_assessments_tenant_facility_type_evaluated");
     }
 }
 
@@ -134,6 +140,7 @@ internal sealed class ShiftRiskDriverEntityConfiguration : IEntityTypeConfigurat
         entity.Property(d => d.ProductionOrderReference).HasColumnName("production_order_reference").HasMaxLength(200);
         entity.Property(d => d.MachineAssetId).HasColumnName("machine_asset_id");
         entity.Property(d => d.RequiredCompetencyCode).HasColumnName("required_competency_code").HasMaxLength(100);
+        entity.Property(d => d.WorkforcePersonId).HasColumnName("workforce_person_id");
         entity.Property(d => d.EvidenceSource).HasColumnName("evidence_source").HasMaxLength(100).IsRequired();
         entity.Property(d => d.EvidenceReference).HasColumnName("evidence_reference").HasMaxLength(200);
         entity.Property(d => d.EvidenceTimestampUtc).HasColumnName("evidence_timestamp_utc");
@@ -145,8 +152,8 @@ internal sealed class ShiftRiskDriverEntityConfiguration : IEntityTypeConfigurat
             .HasForeignKey(d => d.AssessmentId)
             .OnDelete(DeleteBehavior.Restrict);
         entity.HasOne<Tenant>().WithMany().HasForeignKey(d => d.TenantId).OnDelete(DeleteBehavior.Restrict);
-        entity.HasIndex(d => new { d.TenantId, d.AssessmentId, d.ReasonCode })
-            .HasDatabaseName("ix_shift_risk_drivers_tenant_assessment_reason")
+        entity.HasIndex(d => new { d.TenantId, d.AssessmentId, d.ReasonCode, d.WorkforcePersonId })
+            .HasDatabaseName("ix_shift_risk_drivers_tenant_assessment_reason_person")
             .IsUnique();
     }
 }

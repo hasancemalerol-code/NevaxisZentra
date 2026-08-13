@@ -33,6 +33,8 @@ public sealed class ShiftRiskAssessment
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
     public Guid FacilityId { get; set; }
+    public string AssessmentType { get; set; } = ShiftRiskAssessmentTypes.Coverage;
+    public Guid? WorkforcePersonId { get; set; }
     public Guid? CoverageRequirementId { get; set; }
     public Guid ProductionShiftId { get; set; }
     public DateOnly ShiftDate { get; set; }
@@ -45,6 +47,8 @@ public sealed class ShiftRiskAssessment
     public int? MinimumRequiredCount { get; set; }
     public bool? IsCriticalRole { get; set; }
     public int ApprovedEligibleCount { get; set; }
+    public int ApprovedAssignmentCount { get; set; }
+    public int PlannedAssignmentMinutes { get; set; }
     public int CoverageGap { get; set; }
     public string RuleSetVersion { get; set; } = ShiftRiskConstants.RuleSetVersion;
     public string InputFingerprint { get; set; } = string.Empty;
@@ -79,6 +83,7 @@ public sealed class ShiftRiskDriver
     public string? ProductionOrderReference { get; set; }
     public Guid? MachineAssetId { get; set; }
     public string? RequiredCompetencyCode { get; set; }
+    public Guid? WorkforcePersonId { get; set; }
     public string EvidenceSource { get; set; } = string.Empty;
     public string? EvidenceReference { get; set; }
     public DateTimeOffset? EvidenceTimestampUtc { get; set; }

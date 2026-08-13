@@ -3,7 +3,14 @@ namespace CrevaFactOS.Persistence.ShiftRisk;
 public static class ShiftRiskConstants
 {
     public const string RuleSetVersion = "SHIFT-COVERAGE-RISK-V1";
+    public const string ContinuityRuleSetVersion = "SHIFT-WORKFORCE-CONTINUITY-RISK-V1";
     public const int MaxMinimumOperatorCount = 50;
+}
+
+public static class ShiftRiskAssessmentTypes
+{
+    public const string Coverage = "coverage";
+    public const string WorkforceContinuity = "workforce-continuity";
 }
 
 public static class ShiftRiskOutcomes
@@ -23,6 +30,14 @@ public static class ShiftRiskDriverCategories
     public const string RequirementMissing = "requirement-missing";
     public const string SourceStale = "source-stale";
     public const string EvidenceConflict = "evidence-conflict";
+    public const string AbsenceImpact = "absence-impact";
+    public const string AvailabilityUnknown = "availability-unknown";
+    public const string CompetencyExpired = "competency-expired";
+    public const string CompetencyExpiring = "competency-expiring";
+    public const string CompetencyPendingVerification = "competency-pending-verification";
+    public const string AssignmentOverlap = "assignment-overlap";
+    public const string AssignmentLoadPressure = "assignment-load-pressure";
+    public const string CoverageImpact = "coverage-impact";
 }
 
 public static class ShiftRiskDriverSeverities
@@ -49,6 +64,18 @@ public static class ShiftRiskReasonCodes
     public const string EvidenceConflict = "evidence-conflict";
     public const string CompetencyMismatch = "competency-mismatch";
     public const string EligibilityInsufficient = "eligibility-insufficient";
+    public const string AbsenceImpact = "absence-impact";
+    public const string AvailabilityUnknown = "availability-unknown";
+    public const string CompetencyExpired = "competency-expired";
+    public const string CompetencyExpiringUrgent = "competency-expiring-urgent";
+    public const string CompetencyExpiringUpcoming = "competency-expiring-upcoming";
+    public const string CompetencyPendingVerification = "competency-pending-verification";
+    public const string AssignmentOverlap = "assignment-overlap";
+    public const string AssignmentLoadFacts = "assignment-load-facts";
+    public const string AssignmentLoadThresholdMissing = "assignment-load-threshold-missing";
+    public const string CoverageImpact = "coverage-impact";
+    public const string ContinuityClear = "continuity-clear";
+    public const string EmploymentInactive = "employment-inactive";
 }
 
 public static class ShiftRiskEvidenceSources
@@ -93,6 +120,35 @@ public static class ShiftRiskReasonLabels
             ShiftRiskReasonCodes.EvidenceConflict => "Çelişkili kanıt",
             ShiftRiskReasonCodes.CompetencyMismatch => "Yetkinlik uyuşmazlığı",
             ShiftRiskReasonCodes.EligibilityInsufficient => "Uygunluk verisi yetersiz",
+            ShiftRiskReasonCodes.AbsenceImpact => "İzin/yokluk etkisi",
+            ShiftRiskReasonCodes.AvailabilityUnknown => "Müsaitlik bilinmiyor",
+            ShiftRiskReasonCodes.CompetencyExpired => "Yetkinlik süresi dolmuş",
+            ShiftRiskReasonCodes.CompetencyExpiringUrgent => "Yetkinlik süresi 14 gün içinde doluyor",
+            ShiftRiskReasonCodes.CompetencyExpiringUpcoming => "Yetkinlik süresi 30 gün içinde doluyor",
+            ShiftRiskReasonCodes.CompetencyPendingVerification => "Yetkinlik doğrulaması bekliyor",
+            ShiftRiskReasonCodes.AssignmentOverlap => "Onaylı atama çakışması",
+            ShiftRiskReasonCodes.AssignmentLoadFacts => "Planlı atama yükü",
+            ShiftRiskReasonCodes.AssignmentLoadThresholdMissing => "Yetkili kapasite eşiği yok",
+            ShiftRiskReasonCodes.CoverageImpact => "Kapsama etkisi",
+            ShiftRiskReasonCodes.ContinuityClear => "Süreklilik kanıtı güncel",
+            ShiftRiskReasonCodes.EmploymentInactive => "Personel pasif",
             _ => "Risk değerlendirme nedeni",
         };
+}
+
+public static class ShiftWorkforceContinuityRiskPriority
+{
+    public static readonly string[] LeadingCategoryOrder =
+    [
+        ShiftRiskDriverCategories.CompetencyExpired,
+        ShiftRiskDriverCategories.AbsenceImpact,
+        ShiftRiskDriverCategories.AssignmentOverlap,
+        ShiftRiskDriverCategories.CoverageImpact,
+        ShiftRiskDriverCategories.CompetencyExpiring,
+        ShiftRiskDriverCategories.CompetencyPendingVerification,
+        ShiftRiskDriverCategories.AssignmentLoadPressure,
+        ShiftRiskDriverCategories.EvidenceConflict,
+        ShiftRiskDriverCategories.SourceStale,
+        ShiftRiskDriverCategories.AvailabilityUnknown,
+    ];
 }
