@@ -557,6 +557,9 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotProcessOeeFixtureHygiene.CleanAttributableVerifierFixturesAsync(
+                dbContext,
+                cancellationToken);
             await DevelopmentPilotProcessOeeSeed.EnsureProcessOeePilotRecordsAsync(
                 dbContext,
                 tenant.Id,

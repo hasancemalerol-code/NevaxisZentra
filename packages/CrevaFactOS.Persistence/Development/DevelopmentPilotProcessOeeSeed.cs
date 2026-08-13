@@ -17,10 +17,100 @@ internal static class DevelopmentPilotProcessOeeSeed
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
     {
+        await ReconcilePilotMachineDistributionAsync(
+            dbContext, actorSubjectId, seedTimestampUtc, cancellationToken);
+
         var windows = await EnsurePilotWindowsAsync(
             dbContext, tenantId, facilityId, actorSubjectId, seedTimestampUtc, cancellationToken);
         await EnsurePilotAssessmentsAsync(
             dbContext, windows, actorSubjectId, seedTimestampUtc, cancellationToken);
+    }
+
+    private static async Task ReconcilePilotMachineDistributionAsync(
+        CrevaFactOSDbContext dbContext,
+        string actorSubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        await ReconcilePilotWindowMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotWindowCalculatedId,
+            DevelopmentPilotIds.EdgePilotPressMachineId,
+            actorSubjectId,
+            seedTimestampUtc,
+            cancellationToken);
+
+        await ReconcilePilotWindowMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotWindowInsufficientId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine2Id,
+            actorSubjectId,
+            seedTimestampUtc,
+            cancellationToken);
+
+        await ReconcilePilotWindowMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotWindowReviewRequiredId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine3Id,
+            actorSubjectId,
+            seedTimestampUtc,
+            cancellationToken);
+
+        await ReconcilePilotAssessmentMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotAssessmentCalculatedId,
+            DevelopmentPilotIds.EdgePilotPressMachineId,
+            cancellationToken);
+
+        await ReconcilePilotAssessmentMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotAssessmentInsufficientId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine2Id,
+            cancellationToken);
+
+        await ReconcilePilotAssessmentMachineAsync(
+            dbContext,
+            DevelopmentPilotIds.ProcessOeePilotAssessmentReviewRequiredId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine3Id,
+            cancellationToken);
+    }
+
+    private static async Task ReconcilePilotWindowMachineAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid windowId,
+        Guid machineAssetId,
+        string actorSubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var window = await dbContext.ProcessOeeEvaluationWindows
+            .FirstOrDefaultAsync(w => w.Id == windowId, cancellationToken);
+        if (window is null || window.MachineAssetId == machineAssetId)
+        {
+            return;
+        }
+
+        window.MachineAssetId = machineAssetId;
+        window.UpdatedAtUtc = seedTimestampUtc;
+        window.UpdatedBySubjectId = actorSubjectId;
+        window.Version++;
+    }
+
+    private static async Task ReconcilePilotAssessmentMachineAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid assessmentId,
+        Guid machineAssetId,
+        CancellationToken cancellationToken)
+    {
+        var assessment = await dbContext.ProcessOeeAssessments
+            .FirstOrDefaultAsync(a => a.Id == assessmentId, cancellationToken);
+        if (assessment is null || assessment.MachineAssetId == machineAssetId)
+        {
+            return;
+        }
+
+        assessment.MachineAssetId = machineAssetId;
+        assessment.Version++;
     }
 
     private static async Task<IReadOnlyList<ProcessOeeEvaluationWindow>> EnsurePilotWindowsAsync(
@@ -58,7 +148,7 @@ internal static class DevelopmentPilotProcessOeeSeed
             DevelopmentPilotIds.ProcessOeePilotWindowInsufficientId,
             tenantId,
             facilityId,
-            DevelopmentPilotIds.EdgePilotPressMachineId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine2Id,
             "PILOT-PO-PP-002",
             null,
             windowStart.AddDays(-1),
@@ -75,7 +165,7 @@ internal static class DevelopmentPilotProcessOeeSeed
             DevelopmentPilotIds.ProcessOeePilotWindowReviewRequiredId,
             tenantId,
             facilityId,
-            DevelopmentPilotIds.EdgePilotPressMachineId,
+            DevelopmentPilotIds.EdgePilotInjectionMachine3Id,
             "PILOT-PO-PP-001",
             "PILOT-MOLD-PP-4CAV",
             windowStart.AddDays(-2),

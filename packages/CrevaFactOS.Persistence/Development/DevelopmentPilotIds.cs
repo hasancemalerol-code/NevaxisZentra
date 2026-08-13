@@ -423,6 +423,19 @@ public static class DevelopmentPilotIds
     public static readonly Guid EdgePilotPressAssignmentId =
         Guid.Parse("bb000001-0098-4000-8000-000000000098");
 
+    // Plastic injection pilot machines 2–3 (0103–0106)
+    public static readonly Guid EdgePilotInjectionMachine2Id =
+        Guid.Parse("bb000001-0103-4000-8000-000000000103");
+
+    public static readonly Guid EdgePilotInjectionMachine3Id =
+        Guid.Parse("bb000001-0104-4000-8000-000000000104");
+
+    public static readonly Guid EdgePilotInjection2AssignmentId =
+        Guid.Parse("bb000001-0105-4000-8000-000000000105");
+
+    public static readonly Guid EdgePilotInjection3AssignmentId =
+        Guid.Parse("bb000001-0106-4000-8000-000000000106");
+
     // Maintenance condition intelligence pilot fixtures (MAINT-PRED-1)
     public static readonly Guid MaintenanceConditionCncMappingId =
         Guid.Parse("bb000001-0099-4000-8000-000000000099");
