@@ -14007,6 +14007,459 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("quality_nonconformances", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ApproveIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("approve_idempotency_key");
+
+                    b.Property<string>("ApproveIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("approve_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at_utc");
+
+                    b.Property<string>("ApprovedBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("approved_by_subject_id");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("cancellation_reason");
+
+                    b.Property<DateTimeOffset?>("CancelledAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at_utc");
+
+                    b.Property<string>("CancelledBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("cancelled_by_subject_id");
+
+                    b.Property<string>("CreateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("create_idempotency_key");
+
+                    b.Property<string>("CreateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("create_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("EligibilityAssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("eligibility_assessment_id");
+
+                    b.Property<Guid>("EligibilityResultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("eligibility_result_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("MachineFamilyScope")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("machine_family_scope");
+
+                    b.Property<DateTimeOffset>("PlannedEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_utc");
+
+                    b.Property<DateTimeOffset>("PlannedStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_start_utc");
+
+                    b.Property<string>("ProcessScope")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("process_scope");
+
+                    b.Property<string>("ProductionOrderReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
+
+                    b.Property<Guid>("ProductionShiftId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_shift_id");
+
+                    b.Property<string>("RequiredCompetencyCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("required_competency_code");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<DateOnly>("ShiftDate")
+                        .HasColumnType("date")
+                        .HasColumnName("shift_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<Guid>("WorkforcePersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workforce_person_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EligibilityAssessmentId");
+
+                    b.HasIndex("EligibilityResultId");
+
+                    b.HasIndex("ProductionShiftId");
+
+                    b.HasIndex("WorkforcePersonId");
+
+                    b.HasIndex("TenantId", "CreateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_shift_operator_assignments_tenant_create_idempotency")
+                        .HasFilter("create_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "ProductionOrderReference")
+                        .HasDatabaseName("ix_shift_operator_assignments_tenant_facility_order_ref");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status", "ShiftDate")
+                        .HasDatabaseName("ix_shift_operator_assignments_tenant_facility_status_date");
+
+                    b.HasIndex("TenantId", "WorkforcePersonId", "PlannedStartUtc", "PlannedEndUtc")
+                        .IsUnique()
+                        .HasDatabaseName("ix_shift_operator_assignments_tenant_person_window")
+                        .HasFilter("status = 'approved'");
+
+                    b.ToTable("shift_operator_assignments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignmentAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorSubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_subject_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "EntityType", "EntityId")
+                        .HasDatabaseName("ix_shift_operator_assignment_audit_events_tenant_entity");
+
+                    b.HasIndex("TenantId", "FacilityId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_shift_operator_assignment_audit_events_tenant_facility_occurred");
+
+                    b.ToTable("shift_operator_assignment_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("InputFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("input_fingerprint");
+
+                    b.Property<Guid>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("MachineFamilyScope")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("machine_family_scope");
+
+                    b.Property<DateTimeOffset>("PlannedEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_utc");
+
+                    b.Property<DateTimeOffset>("PlannedStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_start_utc");
+
+                    b.Property<string>("ProcessScope")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("process_scope");
+
+                    b.Property<string>("ProductionOrderReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_order_reference");
+
+                    b.Property<Guid>("ProductionShiftId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_shift_id");
+
+                    b.Property<string>("RequiredCompetencyCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("required_competency_code");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<DateOnly>("ShiftDate")
+                        .HasColumnType("date")
+                        .HasColumnName("shift_date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionShiftId");
+
+                    b.HasIndex("TenantId", "FacilityId", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_shift_operator_eligibility_assessments_tenant_facility_evaluated");
+
+                    b.HasIndex("TenantId", "FacilityId", "InputFingerprint")
+                        .HasDatabaseName("ix_shift_operator_eligibility_assessments_tenant_facility_fingerprint");
+
+                    b.ToTable("shift_operator_eligibility_assessments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityReason", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EvidenceSource")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("evidence_source");
+
+                    b.Property<DateTimeOffset?>("EvidenceTimestampUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evidence_timestamp_utc");
+
+                    b.Property<string>("FreshnessState")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<string>("LabelTr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("label_tr");
+
+                    b.Property<string>("ObservedValue")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("observed_value");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<string>("RequiredValue")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("required_value");
+
+                    b.Property<Guid>("ResultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("result_id");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResultId");
+
+                    b.HasIndex("TenantId", "ResultId")
+                        .HasDatabaseName("ix_shift_operator_eligibility_reasons_tenant_result");
+
+                    b.ToTable("shift_operator_eligibility_reasons", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("DisplayNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name_snapshot");
+
+                    b.Property<string>("EmployeeCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("employee_code_snapshot");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("PrimaryReasonCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("primary_reason_code");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkforcePersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workforce_person_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("WorkforcePersonId");
+
+                    b.HasIndex("TenantId", "AssessmentId", "WorkforcePersonId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_shift_operator_eligibility_results_tenant_assessment_person");
+
+                    b.ToTable("shift_operator_eligibility_results", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftWorkforce.ShiftWorkforceAuditEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -16864,6 +17317,124 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", null)
+                        .WithMany()
+                        .HasForeignKey("EligibilityAssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", null)
+                        .WithMany()
+                        .HasForeignKey("EligibilityResultId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Production.ProductionShift", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionShiftId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ShiftWorkforce.ShiftWorkforcePerson", null)
+                        .WithMany()
+                        .HasForeignKey("WorkforcePersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignmentAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Production.ProductionShift", null)
+                        .WithMany()
+                        .HasForeignKey("ProductionShiftId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityReason", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", "Result")
+                        .WithMany("Reasons")
+                        .HasForeignKey("ResultId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Result");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", "Assessment")
+                        .WithMany("Results")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.ShiftWorkforce.ShiftWorkforcePerson", null)
+                        .WithMany()
+                        .HasForeignKey("WorkforcePersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftWorkforce.ShiftWorkforceAuditEvent", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -17026,6 +17597,16 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("CorrectiveActions");
 
                     b.Navigation("Holds");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", b =>
+                {
+                    b.Navigation("Results");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", b =>
+                {
+                    b.Navigation("Reasons");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftWorkforce.ShiftWorkforceCompetencyDefinition", b =>

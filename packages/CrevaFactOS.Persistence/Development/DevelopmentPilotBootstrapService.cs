@@ -7,6 +7,7 @@ using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.ShiftWorkforce;
+using CrevaFactOS.Persistence.ShiftAssignment;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -419,6 +420,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftWorkforceManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftAssignReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftAssignReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftAssignReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftAssignManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -556,6 +565,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotWorkforceSeed.EnsureShiftWorkforcePilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotShiftAssignmentSeed.EnsureShiftAssignmentPilotRecordsAsync(
                 dbContext,
                 tenant.Id,
                 facility.Id,
@@ -2448,5 +2464,23 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ShiftWorkforcePermissionKeys.Manage,
             DevelopmentPilotIds.ShiftWorkforceManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftAssignReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftAssignmentPermissionKeys.Read,
+            DevelopmentPilotIds.ShiftAssignReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftAssignManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftAssignmentPermissionKeys.Manage,
+            DevelopmentPilotIds.ShiftAssignManagePermissionDefinitionId,
             cancellationToken);
 }

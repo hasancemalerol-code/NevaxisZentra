@@ -35,6 +35,11 @@ import {
   synchronizeShiftWorkforceAction,
   updateShiftWorkforceCompetencyAction,
 } from "../server/shift-workforce-actions";
+import { ShiftAssignmentPanel } from "../../shift-assignment/components/shift-assignment-panel";
+import type {
+  ShiftAssignmentContextOptions,
+  ShiftAssignmentSelectionContext,
+} from "../../shift-assignment/domain/shift-assignment-types";
 import "./shift-workforce.css";
 
 type ShiftWorkforceViewProps = Readonly<{
@@ -42,6 +47,10 @@ type ShiftWorkforceViewProps = Readonly<{
   persons: ShiftWorkforcePersonListResult;
   competencyDefinitions: readonly ShiftWorkforceCompetencyDefinition[];
   canManage: boolean;
+  assignmentCanRead: boolean;
+  assignmentCanManage: boolean;
+  assignmentContextOptions: ShiftAssignmentContextOptions;
+  assignmentInitialSelection: ShiftAssignmentSelectionContext;
 }>;
 
 type CompetencyModalState =
@@ -53,7 +62,10 @@ const PAGE_SIZE = 20;
 
 const WORKSPACE_TABS = [
   { id: "personnel", label: "Personel ve Yetkinlikler" },
+  { id: "assignment", label: "Operatör Atama" },
 ] as const;
+
+type WorkspaceTabId = (typeof WORKSPACE_TABS)[number]["id"];
 
 function competencyScopeText(assignment: ShiftWorkforceCompetencyAssignment): string {
   const parts = [
@@ -70,7 +82,12 @@ export function ShiftWorkforceView({
   persons: initialPersons,
   competencyDefinitions,
   canManage,
+  assignmentCanRead,
+  assignmentCanManage,
+  assignmentContextOptions,
+  assignmentInitialSelection,
 }: ShiftWorkforceViewProps) {
+  const [activeTab, setActiveTab] = useState<WorkspaceTabId>("personnel");
   const [persons, setPersons] = useState(initialPersons);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
@@ -630,6 +647,10 @@ export function ShiftWorkforceView({
     );
   }
 
+  const visibleTabs = WORKSPACE_TABS.filter(
+    (tab) => tab.id !== "assignment" || assignmentCanRead,
+  );
+
   return (
     <div className="shift-workforce-page">
       <section className="shift-workforce-executive" aria-label="Vardiya personel komuta yüzeyi">
@@ -638,11 +659,12 @@ export function ShiftWorkforceView({
             <p className="shift-workforce-executive__eyebrow">VARDİYA YÖNETİMİ</p>
             <h1>Vardiyalar</h1>
             <p className="shift-workforce-executive__subtitle">
-              ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini
-              vardiya planlama bağlamında izleyin.
+              {activeTab === "assignment"
+                ? "Üretim emri, makine ve vardiya bağlamında deterministik operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın."
+                : "ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin."}
             </p>
           </div>
-          {canManage ? (
+          {activeTab === "personnel" && canManage ? (
             <div className="shift-workforce-executive__actions">
               <button
                 type="button"
@@ -658,19 +680,22 @@ export function ShiftWorkforceView({
         </div>
 
         <div className="shift-workforce-workspace-tabs" role="tablist" aria-label="Vardiya çalışma alanı">
-          {WORKSPACE_TABS.map((tab) => (
-            <span
+          {visibleTabs.map((tab) => (
+            <button
               key={tab.id}
+              type="button"
               role="tab"
-              aria-selected="true"
-              className="shift-workforce-workspace-tab shift-workforce-workspace-tab--active"
+              aria-selected={activeTab === tab.id}
+              className={`shift-workforce-workspace-tab${activeTab === tab.id ? " shift-workforce-workspace-tab--active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
-            </span>
+            </button>
           ))}
         </div>
 
-        <div className="shift-workforce-executive__kpis" aria-label="Personel göstergeleri">
+        {activeTab === "personnel" ? (
+          <div className="shift-workforce-executive__kpis" aria-label="Personel göstergeleri">
           <article className="shift-workforce-kpi">
             <span className="shift-workforce-kpi__label">Toplam Personel</span>
             <strong className="shift-workforce-kpi__value">
@@ -708,9 +733,10 @@ export function ShiftWorkforceView({
             </strong>
           </article>
         </div>
+        ) : null}
       </section>
 
-      {!canManage ? (
+      {activeTab === "personnel" && !canManage ? (
         <div className="shift-workforce-alert shift-workforce-alert--info" role="status">
           <div>
             <h3>Salt okunur erişim</h3>
@@ -719,8 +745,10 @@ export function ShiftWorkforceView({
         </div>
       ) : null}
 
-      {message ? <div className="shift-workforce-message" role="status">{message}</div> : null}
-      {error ? (
+      {activeTab === "personnel" && message ? (
+        <div className="shift-workforce-message" role="status">{message}</div>
+      ) : null}
+      {activeTab === "personnel" && error ? (
         <div className="shift-workforce-alert shift-workforce-alert--error" role="alert">
           <div>
             <h3>İşlem hatası</h3>
@@ -729,6 +757,7 @@ export function ShiftWorkforceView({
         </div>
       ) : null}
 
+      {activeTab === "personnel" ? (
       <div
         className={`shift-workforce-workspace${detailOpen ? " shift-workforce-workspace--detail-open" : ""}`}
       >
@@ -954,8 +983,15 @@ export function ShiftWorkforceView({
 
         {renderDetailPanel()}
       </div>
+      ) : (
+        <ShiftAssignmentPanel
+          contextOptions={assignmentContextOptions}
+          initialSelection={assignmentInitialSelection}
+          canManage={assignmentCanManage}
+        />
+      )}
 
-      {renderCompetencyModal()}
+      {activeTab === "personnel" ? renderCompetencyModal() : null}
     </div>
   );
 }

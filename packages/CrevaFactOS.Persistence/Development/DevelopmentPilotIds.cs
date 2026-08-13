@@ -525,4 +525,21 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ShiftWorkforcePilotAssignmentQualityPartialId =
         Guid.Parse("bb000001-00f2-4000-8000-0000000000f2");
+
+    // Shift operator assignment permission definitions (06d–06e)
+    public static readonly Guid ShiftAssignReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006d");
+
+    public static readonly Guid ShiftAssignManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006e");
+
+    // Shift operator assignment pilot fixtures
+    public static readonly Guid ShiftAssignPilotAssessmentId =
+        Guid.Parse("bb000001-0100-4000-8000-000000000100");
+
+    public static readonly Guid ShiftAssignPilotResult002Id =
+        Guid.Parse("bb000001-0101-4000-8000-000000000101");
+
+    public static readonly Guid ShiftAssignPilotAssignment002Id =
+        Guid.Parse("bb000001-0102-4000-8000-000000000102");
 }

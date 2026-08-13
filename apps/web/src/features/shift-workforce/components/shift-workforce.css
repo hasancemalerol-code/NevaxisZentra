@@ -94,7 +94,12 @@
   padding: 0.35rem 0.85rem;
   font-size: 0.78rem;
   font-weight: 600;
-  cursor: default;
+  cursor: pointer;
+}
+
+.shift-workforce-workspace-tab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .shift-workforce-workspace-tab--active {
@@ -704,4 +709,146 @@
 
 .shift-workforce-limitations li {
   margin-bottom: 0.2rem;
+}
+
+/* Shift assignment (Operatör Atama tab) */
+
+.shift-assignment-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.shift-assignment-context {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.shift-assignment-context__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (max-width: 1100px) {
+  .shift-assignment-context__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .shift-assignment-context__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shift-assignment-context__grid label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.74rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.shift-assignment-context__grid select,
+.shift-assignment-context__grid input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: #fff;
+}
+
+.shift-assignment-context__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.shift-assignment-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .shift-assignment-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.shift-assignment-kpi__value--eligible {
+  color: #047857;
+}
+
+.shift-assignment-kpi__value--conditional {
+  color: #b45309;
+}
+
+.shift-assignment-kpi__value--ineligible {
+  color: #b91c1c;
+}
+
+.shift-assignment-kpi__value--insufficient {
+  color: #64748b;
+}
+
+.shift-assignment-reason-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.shift-assignment-reason-item {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e8edf3;
+  border-radius: 12px;
+  background: #fafbfd;
+}
+
+.shift-assignment-reason-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.shift-assignment-reason-item__title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #0f172a;
+}
+
+.shift-assignment-reason-item__meta {
+  margin-top: 0.2rem;
+  font-size: 0.74rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.shift-assignment-approval-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+}
+
+.shift-assignment-registry .shift-workforce-registry__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shift-assignment-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }

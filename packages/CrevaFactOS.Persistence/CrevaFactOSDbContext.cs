@@ -16,6 +16,7 @@ using CrevaFactOS.Persistence.Material;
 using CrevaFactOS.Persistence.Mold;
 using CrevaFactOS.Persistence.ProcessOee;
 using CrevaFactOS.Persistence.ShiftWorkforce;
+using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -132,6 +133,13 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ShiftWorkforceCompetencyDefinition> ShiftWorkforceCompetencyDefinitions => Set<ShiftWorkforceCompetencyDefinition>();
     public DbSet<ShiftWorkforceCompetencyAssignment> ShiftWorkforceCompetencyAssignments => Set<ShiftWorkforceCompetencyAssignment>();
     public DbSet<ShiftWorkforceAuditEvent> ShiftWorkforceAuditEvents => Set<ShiftWorkforceAuditEvent>();
+
+    // Shift operator assignment planning (SHIFT-ASSIGN-1)
+    public DbSet<ShiftOperatorEligibilityAssessment> ShiftOperatorEligibilityAssessments => Set<ShiftOperatorEligibilityAssessment>();
+    public DbSet<ShiftOperatorEligibilityResult> ShiftOperatorEligibilityResults => Set<ShiftOperatorEligibilityResult>();
+    public DbSet<ShiftOperatorEligibilityReason> ShiftOperatorEligibilityReasons => Set<ShiftOperatorEligibilityReason>();
+    public DbSet<ShiftOperatorAssignment> ShiftOperatorAssignments => Set<ShiftOperatorAssignment>();
+    public DbSet<ShiftOperatorAssignmentAuditEvent> ShiftOperatorAssignmentAuditEvents => Set<ShiftOperatorAssignmentAuditEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -887,6 +895,36 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ShiftWorkforceAuditEventEntityConfiguration());
         modelBuilder.Entity<ShiftWorkforceAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOperatorEligibilityAssessmentEntityConfiguration());
+        modelBuilder.Entity<ShiftOperatorEligibilityAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOperatorEligibilityResultEntityConfiguration());
+        modelBuilder.Entity<ShiftOperatorEligibilityResult>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOperatorEligibilityReasonEntityConfiguration());
+        modelBuilder.Entity<ShiftOperatorEligibilityReason>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOperatorAssignmentEntityConfiguration());
+        modelBuilder.Entity<ShiftOperatorAssignment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOperatorAssignmentAuditEventEntityConfiguration());
+        modelBuilder.Entity<ShiftOperatorAssignmentAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

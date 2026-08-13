@@ -104,7 +104,7 @@ internal static class DevelopmentPilotWorkforceSeed
                 """["Pilot veri — gerçek ERP kaydı değildir."]"""),
             (DevelopmentPilotIds.ShiftWorkforcePilotPerson002Id, "pilot-swf-002", "PILOT-SWF-002",
                 "Pilot Enjeksiyon Operatörü 01", "Enjeksiyon", "Operatör", true,
-                ShiftWorkforceAvailabilityStates.Available, "SHIFT-B",
+                ShiftWorkforceAvailabilityStates.Available, "V1",
                 ShiftWorkforceFreshnessStates.Fresh, "pilot-swf-002-seed-v1", "[]"),
             (DevelopmentPilotIds.ShiftWorkforcePilotPerson003Id, "pilot-swf-003", "PILOT-SWF-003",
                 "Pilot Enjeksiyon Operatörü 02", "Enjeksiyon", "Operatör", true,
