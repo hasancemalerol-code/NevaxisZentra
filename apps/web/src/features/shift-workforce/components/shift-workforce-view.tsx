@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { LoaderCircle, Search, Users, X } from "lucide-react";
 
 import {
@@ -37,6 +37,10 @@ import {
 } from "../server/shift-workforce-actions";
 import { ShiftRiskPanel } from "../../shift-risk/components/shift-risk-panel";
 import { ShiftAssignmentPanel } from "../../shift-assignment/components/shift-assignment-panel";
+import { loadShiftAssignmentRegistryAction } from "../../shift-assignment/server/shift-assignment-actions";
+import { loadShiftRiskOverviewAction } from "../../shift-risk/server/shift-risk-actions";
+import { loadShiftContinuityOverviewAction } from "../../shift-risk/server/shift-continuity-actions";
+import { ShiftPlanPanel } from "./shift-plan-panel";
 import type {
   ShiftAssignmentContextOptions,
   ShiftAssignmentSelectionContext,
@@ -64,6 +68,7 @@ type CompetencyModalState =
 const PAGE_SIZE = 20;
 
 const WORKSPACE_TABS = [
+  { id: "plan", label: "Vardiya Planı" },
   { id: "personnel", label: "Personel ve Yetkinlikler" },
   { id: "assignment", label: "Operatör Atama" },
   { id: "risk", label: "Vardiya Riskleri" },
@@ -93,7 +98,7 @@ export function ShiftWorkforceView({
   riskCanRead,
   riskCanManage,
 }: ShiftWorkforceViewProps) {
-  const [activeTab, setActiveTab] = useState<WorkspaceTabId>("personnel");
+  const [activeTab, setActiveTab] = useState<WorkspaceTabId>("plan");
   const [persons, setPersons] = useState(initialPersons);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
@@ -108,6 +113,55 @@ export function ShiftWorkforceView({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
+  const [executiveMetrics, setExecutiveMetrics] = useState({
+    activeShifts: assignmentContextOptions.shifts.length,
+    approvedAssignments: null as number | null,
+    coverageGap: null as number | null,
+    criticalRoleGap: null as number | null,
+    dataWarnings:
+      (overview.staleSourceRecords ?? 0) + (overview.competencyAttentionCount ?? 0),
+  });
+
+  useEffect(() => {
+    startTransition(async () => {
+      const [riskResult, continuityResult, assignmentResult] = await Promise.all([
+        riskCanRead ? loadShiftRiskOverviewAction() : Promise.resolve(null),
+        riskCanRead ? loadShiftContinuityOverviewAction() : Promise.resolve(null),
+        assignmentCanRead
+          ? loadShiftAssignmentRegistryAction({ status: "approved", page: 1, pageSize: 1 })
+          : Promise.resolve(null),
+      ]);
+
+      setExecutiveMetrics((current) => ({
+        activeShifts: assignmentContextOptions.shifts.length,
+        approvedAssignments:
+          assignmentResult?.status === "success"
+            ? assignmentResult.assignments.totalCount
+            : current.approvedAssignments,
+        coverageGap:
+          riskResult?.status === "success" && riskResult.overview
+            ? riskResult.overview.coverageGapCount
+            : current.coverageGap,
+        criticalRoleGap:
+          riskResult?.status === "success" && riskResult.overview
+            ? riskResult.overview.criticalRoleGapCount
+            : current.criticalRoleGap,
+        dataWarnings:
+          (overview.staleSourceRecords ?? 0) +
+          (overview.competencyAttentionCount ?? 0) +
+          (continuityResult?.status === "success" && continuityResult.overview
+            ? continuityResult.overview.insufficientDataCount
+            : 0),
+      }));
+    });
+  }, [
+    assignmentCanRead,
+    assignmentContextOptions.shifts.length,
+    overview.competencyAttentionCount,
+    overview.staleSourceRecords,
+    riskCanRead,
+  ]);
 
   const filtersActive = Boolean(
     search.trim() || activeFilter || availabilityFilter || freshnessFilter || competencyFilter,
@@ -175,11 +229,15 @@ export function ShiftWorkforceView({
   }
 
   function clearSelection() {
+    const restoreTarget = selectedRowRef.current;
     setSelectedId("");
     setDetail(undefined);
     setCompetencyModal(null);
     setMessage(null);
     setError(null);
+    requestAnimationFrame(() => {
+      restoreTarget?.focus();
+    });
   }
 
   function selectPerson(item: ShiftWorkforcePersonSummary) {
@@ -199,6 +257,49 @@ export function ShiftWorkforceView({
       }
     });
   }
+
+  const executiveKpiItems = useMemo(
+    () => [
+      {
+        label: "Aktif vardiya",
+        value: formatShiftWorkforceCount(executiveMetrics.activeShifts),
+      },
+      {
+        label: "Kullanılabilir personel",
+        value: formatShiftWorkforceCount(overview.currentlyAvailable),
+      },
+      {
+        label: "Onaylı atama",
+        value: formatShiftWorkforceCount(executiveMetrics.approvedAssignments),
+      },
+      {
+        label: "Kapsama açığı",
+        value: formatShiftWorkforceCount(executiveMetrics.coverageGap),
+      },
+      {
+        label: "Kritik rol riski",
+        value: formatShiftWorkforceCount(executiveMetrics.criticalRoleGap),
+      },
+      {
+        label: "Veri/yetkinlik uyarısı",
+        value: formatShiftWorkforceCount(executiveMetrics.dataWarnings),
+      },
+    ],
+    [executiveMetrics, overview.currentlyAvailable],
+  );
+
+  const pageSubtitle = useMemo(() => {
+    switch (activeTab) {
+      case "plan":
+        return "Üretim vardiyalarını, personel uygunluğunu, insan onaylı atamaları ve deterministik risk değerlendirmelerini tek operasyon yüzeyinde yönetin.";
+      case "assignment":
+        return "Üretim emri, makine ve vardiya bağlamında deterministik operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın.";
+      case "risk":
+        return "Kapsama gereksinimleri, onaylı atamalar ve personel sürekliliği risklerini deterministik olarak inceleyin.";
+      default:
+        return "ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin.";
+    }
+  }, [activeTab]);
 
   function runSynchronize() {
     startTransition(async () => {
@@ -655,24 +756,20 @@ export function ShiftWorkforceView({
 
   const visibleTabs = WORKSPACE_TABS.filter(
     (tab) =>
-      (tab.id !== "assignment" || assignmentCanRead) &&
-      (tab.id !== "risk" || riskCanRead),
+      tab.id === "plan" ||
+      tab.id === "personnel" ||
+      (tab.id === "assignment" && assignmentCanRead) ||
+      (tab.id === "risk" && riskCanRead),
   );
 
   return (
     <div className="shift-workforce-page">
-      <section className="shift-workforce-executive" aria-label="Vardiya personel komuta yüzeyi">
+      <section className="shift-workforce-executive" aria-label="Vardiya operasyon komuta yüzeyi">
         <div className="shift-workforce-executive__top">
           <div className="shift-workforce-executive__intro">
-            <p className="shift-workforce-executive__eyebrow">VARDİYA YÖNETİMİ</p>
+            <p className="shift-workforce-executive__eyebrow">VARDİYA OPERASYONLARI</p>
             <h1>Vardiyalar</h1>
-            <p className="shift-workforce-executive__subtitle">
-              {activeTab === "assignment"
-                ? "Üretim emri, makine ve vardiya bağlamında deterministik operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın."
-                : activeTab === "risk"
-                  ? "Açık personel gereksinimleri, onaylı atamalar ve deterministik kapsama/çakışma risklerini inceleyin."
-                  : "ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin."}
-            </p>
+            <p className="shift-workforce-executive__subtitle">{pageSubtitle}</p>
           </div>
           {activeTab === "personnel" && canManage ? (
             <div className="shift-workforce-executive__actions">
@@ -689,7 +786,11 @@ export function ShiftWorkforceView({
           ) : null}
         </div>
 
-        <div className="shift-workforce-workspace-tabs" role="tablist" aria-label="Vardiya çalışma alanı">
+        <div
+          className="shift-workforce-workspace-tabs shift-workforce-workspace-tabs--primary"
+          role="tablist"
+          aria-label="Vardiya operasyon görünümleri"
+        >
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
@@ -704,47 +805,27 @@ export function ShiftWorkforceView({
           ))}
         </div>
 
-        {activeTab === "personnel" ? (
-          <div className="shift-workforce-executive__kpis" aria-label="Personel göstergeleri">
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">Toplam Personel</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.totalWorkforce)}
-            </strong>
-          </article>
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">Aktif</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.activeWorkforce)}
-            </strong>
-          </article>
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">Müsait</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.currentlyAvailable)}
-            </strong>
-          </article>
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">İzinli / Müsait Değil</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.unavailableOrLeave)}
-            </strong>
-          </article>
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">Bayat Kayıt</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.staleSourceRecords)}
-            </strong>
-          </article>
-          <article className="shift-workforce-kpi">
-            <span className="shift-workforce-kpi__label">Yetkinlik Dikkati</span>
-            <strong className="shift-workforce-kpi__value">
-              {formatShiftWorkforceCount(overview.competencyAttentionCount)}
-            </strong>
-          </article>
+        <div className="shift-workforce-executive__kpis shift-workforce-executive__kpis--primary" aria-label="Operasyon göstergeleri">
+          {executiveKpiItems.map((item) => (
+            <article key={item.label} className="shift-workforce-kpi">
+              <span className="shift-workforce-kpi__label">{item.label}</span>
+              <strong className="shift-workforce-kpi__value">{item.value}</strong>
+            </article>
+          ))}
         </div>
-        ) : null}
       </section>
+
+      {activeTab === "personnel" && detailOpen && selectedSummary ? (
+        <div
+          className="shift-workforce-sticky-context is-visible"
+          aria-label="Seçili personel bağlamı"
+        >
+          <div className="shift-workforce-sticky-context__identity">
+            <p className="shift-workforce-sticky-context__name">{selectedSummary.displayName}</p>
+            <span className="shift-workforce-sticky-context__code">{selectedSummary.employeeCode}</span>
+          </div>
+        </div>
+      ) : null}
 
       {activeTab === "personnel" && !canManage ? (
         <div className="shift-workforce-alert shift-workforce-alert--info" role="status">
@@ -767,7 +848,9 @@ export function ShiftWorkforceView({
         </div>
       ) : null}
 
-      {activeTab === "personnel" ? (
+      {activeTab === "plan" ? (
+        <ShiftPlanPanel contextOptions={assignmentContextOptions} />
+      ) : activeTab === "personnel" ? (
       <div
         className={`shift-workforce-workspace${detailOpen ? " shift-workforce-workspace--detail-open" : ""}`}
       >
@@ -905,7 +988,9 @@ export function ShiftWorkforceView({
                   {persons.items.map((item) => (
                     <tr
                       key={item.id}
+                      ref={item.id === selectedId ? selectedRowRef : undefined}
                       data-person-id={item.id}
+                      data-focus-restore={item.id === selectedId ? "true" : undefined}
                       data-selected={item.id === selectedId ? "true" : "false"}
                       tabIndex={0}
                       onClick={() => selectPerson(item)}

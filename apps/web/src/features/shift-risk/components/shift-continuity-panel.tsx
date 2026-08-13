@@ -449,7 +449,7 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
                 <button
                   type="button"
                   className="shift-workforce-btn shift-workforce-btn--ghost"
-                  aria-label="Detayı kapat"
+                  aria-label="Süreklilik risk detayını kapat"
                   onClick={() => {
                     setSelectedId("");
                     setDetail(undefined);

@@ -35,7 +35,7 @@ type ShiftRiskPanelProps = Readonly<{
 type RiskSubView = "coverage" | "continuity";
 
 const RISK_SUB_VIEWS = [
-  { id: "coverage" as const, label: "Kapsama Riskleri" },
+  { id: "coverage" as const, label: "Kapsama ve Çakışmalar" },
   { id: "continuity" as const, label: "Personel Sürekliliği" },
 ] as const;
 
@@ -286,7 +286,7 @@ function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
                 <button
                   type="button"
                   className="shift-workforce-btn shift-workforce-btn--ghost"
-                  aria-label="Detayı kapat"
+                  aria-label="Kapsama risk detayını kapat"
                   onClick={() => {
                     setSelectedId("");
                     setDetail(undefined);
@@ -379,7 +379,7 @@ export function ShiftRiskPanel({ canManage }: ShiftRiskPanelProps) {
 
   return (
     <>
-      <div className="shift-workforce-workspace-tabs" role="tablist" aria-label="Vardiya risk alt görünümleri">
+      <div className="shift-workforce-workspace-tabs shift-workforce-workspace-tabs--primary" role="tablist" aria-label="Vardiya risk alt görünümleri">
         {RISK_SUB_VIEWS.map((tab) => (
           <button
             key={tab.id}

@@ -29,7 +29,7 @@ export default async function VardiyalarPage() {
       <main className="shift-workforce-page">
         <header className="shift-workforce-executive">
           <div className="shift-workforce-executive__intro">
-            <p className="shift-workforce-executive__eyebrow">VARDİYA YÖNETİMİ</p>
+            <p className="shift-workforce-executive__eyebrow">VARDİYA OPERASYONLARI</p>
             <h1>Vardiyalar</h1>
             <p className="shift-workforce-executive__subtitle">
               ERP/HR kaynaklı personel verilerini ve operasyonel yetkinlik zenginleştirmesini izleyin.

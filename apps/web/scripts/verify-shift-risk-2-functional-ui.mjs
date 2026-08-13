@@ -41,7 +41,7 @@ const nav = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 
 requireText(riskPanel, "Personel Sürekliliği", "continuity sub-view label");
 requireText(riskPanel, "ShiftContinuityPanel", "continuity panel mount");
-requireText(riskPanel, "Kapsama Riskleri", "coverage sub-view label");
+requireText(riskPanel, "Kapsama ve Çakışmalar", "coverage sub-view label");
 requireText(panel, "Personel Sürekliliği Değerlendirmeleri", "continuity registry heading");
 requireText(panel, "Değerlendirilen bağlam", "evaluated KPI");
 requireText(panel, "Atama çakışması", "overlap KPI");
