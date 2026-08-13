@@ -7,16 +7,18 @@ import {
   readShiftAssignmentContextOptions,
   readShiftAssignmentPermissions,
 } from "@/features/shift-assignment/server/shift-assignment-queries";
+import { readShiftRiskPermissions } from "@/features/shift-risk/server/shift-risk-queries";
 import { readShiftWorkforceWorkspace } from "@/features/shift-workforce/server/shift-workforce-queries";
 
 export default async function VardiyalarPage() {
-  const [result, assignmentPermissions, assignmentContext] = await Promise.all([
+  const [result, assignmentPermissions, assignmentContext, riskPermissions] = await Promise.all([
     readShiftWorkforceWorkspace({
       page: 1,
       pageSize: 20,
     }),
     readShiftAssignmentPermissions(),
     readShiftAssignmentContextOptions(),
+    readShiftRiskPermissions(),
   ]);
 
   if (result.status === "failure") {
@@ -54,6 +56,10 @@ export default async function VardiyalarPage() {
     assignmentPermissions.status === "success" && assignmentPermissions.capabilities.canRead;
   const assignmentCanManage =
     assignmentPermissions.status === "success" && assignmentPermissions.capabilities.canManage;
+  const riskCanRead =
+    riskPermissions.status === "success" && riskPermissions.capabilities.canRead;
+  const riskCanManage =
+    riskPermissions.status === "success" && riskPermissions.capabilities.canManage;
   const assignmentContextOptions =
     assignmentContext.status === "success"
       ? assignmentContext.options
@@ -74,6 +80,8 @@ export default async function VardiyalarPage() {
       assignmentCanManage={assignmentCanManage}
       assignmentContextOptions={assignmentContextOptions}
       assignmentInitialSelection={getDefaultShiftAssignmentSelection()}
+      riskCanRead={riskCanRead}
+      riskCanManage={riskCanManage}
     />
   );
 }

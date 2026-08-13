@@ -17,6 +17,7 @@ using CrevaFactOS.Persistence.Mold;
 using CrevaFactOS.Persistence.ProcessOee;
 using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
+using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -140,6 +141,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ShiftOperatorEligibilityReason> ShiftOperatorEligibilityReasons => Set<ShiftOperatorEligibilityReason>();
     public DbSet<ShiftOperatorAssignment> ShiftOperatorAssignments => Set<ShiftOperatorAssignment>();
     public DbSet<ShiftOperatorAssignmentAuditEvent> ShiftOperatorAssignmentAuditEvents => Set<ShiftOperatorAssignmentAuditEvent>();
+
+    // Shift coverage risk intelligence (SHIFT-RISK-1)
+    public DbSet<ShiftCoverageRequirement> ShiftCoverageRequirements => Set<ShiftCoverageRequirement>();
+    public DbSet<ShiftRiskAssessment> ShiftRiskAssessments => Set<ShiftRiskAssessment>();
+    public DbSet<ShiftRiskDriver> ShiftRiskDrivers => Set<ShiftRiskDriver>();
+    public DbSet<ShiftRiskAuditEvent> ShiftRiskAuditEvents => Set<ShiftRiskAuditEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -925,6 +932,30 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ShiftOperatorAssignmentAuditEventEntityConfiguration());
         modelBuilder.Entity<ShiftOperatorAssignmentAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftCoverageRequirementEntityConfiguration());
+        modelBuilder.Entity<ShiftCoverageRequirement>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftRiskAssessmentEntityConfiguration());
+        modelBuilder.Entity<ShiftRiskAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftRiskDriverEntityConfiguration());
+        modelBuilder.Entity<ShiftRiskDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftRiskAuditEventEntityConfiguration());
+        modelBuilder.Entity<ShiftRiskAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

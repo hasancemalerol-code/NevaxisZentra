@@ -35,6 +35,7 @@ import {
   synchronizeShiftWorkforceAction,
   updateShiftWorkforceCompetencyAction,
 } from "../server/shift-workforce-actions";
+import { ShiftRiskPanel } from "../../shift-risk/components/shift-risk-panel";
 import { ShiftAssignmentPanel } from "../../shift-assignment/components/shift-assignment-panel";
 import type {
   ShiftAssignmentContextOptions,
@@ -51,6 +52,8 @@ type ShiftWorkforceViewProps = Readonly<{
   assignmentCanManage: boolean;
   assignmentContextOptions: ShiftAssignmentContextOptions;
   assignmentInitialSelection: ShiftAssignmentSelectionContext;
+  riskCanRead: boolean;
+  riskCanManage: boolean;
 }>;
 
 type CompetencyModalState =
@@ -63,6 +66,7 @@ const PAGE_SIZE = 20;
 const WORKSPACE_TABS = [
   { id: "personnel", label: "Personel ve Yetkinlikler" },
   { id: "assignment", label: "Operatör Atama" },
+  { id: "risk", label: "Vardiya Riskleri" },
 ] as const;
 
 type WorkspaceTabId = (typeof WORKSPACE_TABS)[number]["id"];
@@ -86,6 +90,8 @@ export function ShiftWorkforceView({
   assignmentCanManage,
   assignmentContextOptions,
   assignmentInitialSelection,
+  riskCanRead,
+  riskCanManage,
 }: ShiftWorkforceViewProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTabId>("personnel");
   const [persons, setPersons] = useState(initialPersons);
@@ -648,7 +654,9 @@ export function ShiftWorkforceView({
   }
 
   const visibleTabs = WORKSPACE_TABS.filter(
-    (tab) => tab.id !== "assignment" || assignmentCanRead,
+    (tab) =>
+      (tab.id !== "assignment" || assignmentCanRead) &&
+      (tab.id !== "risk" || riskCanRead),
   );
 
   return (
@@ -661,7 +669,9 @@ export function ShiftWorkforceView({
             <p className="shift-workforce-executive__subtitle">
               {activeTab === "assignment"
                 ? "Üretim emri, makine ve vardiya bağlamında deterministik operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın."
-                : "ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin."}
+                : activeTab === "risk"
+                  ? "Açık personel gereksinimleri, onaylı atamalar ve deterministik kapsama/çakışma risklerini inceleyin."
+                  : "ERP/HR kaynaklı personel verilerini ve CrevaFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin."}
             </p>
           </div>
           {activeTab === "personnel" && canManage ? (
@@ -983,13 +993,15 @@ export function ShiftWorkforceView({
 
         {renderDetailPanel()}
       </div>
-      ) : (
+      ) : activeTab === "assignment" ? (
         <ShiftAssignmentPanel
           contextOptions={assignmentContextOptions}
           initialSelection={assignmentInitialSelection}
           canManage={assignmentCanManage}
         />
-      )}
+      ) : activeTab === "risk" ? (
+        <ShiftRiskPanel canManage={riskCanManage} />
+      ) : null}
 
       {activeTab === "personnel" ? renderCompetencyModal() : null}
     </div>

@@ -108,7 +108,7 @@ internal static class DevelopmentPilotWorkforceSeed
                 ShiftWorkforceFreshnessStates.Fresh, "pilot-swf-002-seed-v1", "[]"),
             (DevelopmentPilotIds.ShiftWorkforcePilotPerson003Id, "pilot-swf-003", "PILOT-SWF-003",
                 "Pilot Enjeksiyon Operatörü 02", "Enjeksiyon", "Operatör", true,
-                ShiftWorkforceAvailabilityStates.Leave, "SHIFT-B",
+                ShiftWorkforceAvailabilityStates.Available, "V1",
                 ShiftWorkforceFreshnessStates.Stale, "pilot-swf-003-seed-v1", "[]"),
             (DevelopmentPilotIds.ShiftWorkforcePilotPerson004Id, "pilot-swf-004", "PILOT-SWF-004",
                 "Pilot Kalıp Teknisyeni 01", "Kalıphane", "Kalıp Teknisyeni", true,

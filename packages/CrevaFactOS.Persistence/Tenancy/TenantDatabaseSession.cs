@@ -29,6 +29,11 @@ public sealed class TenantDatabaseSession(
         Func<CancellationToken, Task<T>> action,
         CancellationToken cancellationToken = default)
     {
+        if (dbContext.Database.CurrentTransaction is not null)
+        {
+            return await action(cancellationToken);
+        }
+
         await using var transaction = await BeginTransactionAsync(cancellationToken);
         return await action(cancellationToken);
     }
@@ -37,6 +42,11 @@ public sealed class TenantDatabaseSession(
         Func<CancellationToken, Task<T>> action,
         CancellationToken cancellationToken = default)
     {
+        if (dbContext.Database.CurrentTransaction is not null)
+        {
+            return await action(cancellationToken);
+        }
+
         await using var transaction = await BeginTransactionAsync(cancellationToken);
         try
         {

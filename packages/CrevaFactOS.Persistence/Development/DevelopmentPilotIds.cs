@@ -555,4 +555,45 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ShiftAssignPilotAssignment002Id =
         Guid.Parse("bb000001-0102-4000-8000-000000000102");
+
+    // Shift coverage risk permission definitions (06f–070)
+    public static readonly Guid ShiftRiskReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-00000000006f");
+
+    public static readonly Guid ShiftRiskManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000070");
+
+    // Shift coverage risk pilot fixtures
+    public static readonly Guid ShiftRiskPilotRequirementCoveredId =
+        Guid.Parse("bb000001-0110-4000-8000-000000000110");
+
+    public static readonly Guid ShiftRiskPilotRequirementGapId =
+        Guid.Parse("bb000001-0111-4000-8000-000000000111");
+
+    public static readonly Guid ShiftRiskPilotRequirementCriticalId =
+        Guid.Parse("bb000001-0112-4000-8000-000000000112");
+
+    public static readonly Guid ShiftRiskPilotRequirementConflictId =
+        Guid.Parse("bb000001-0113-4000-8000-000000000113");
+
+    public static readonly Guid ShiftRiskPilotRequirementStaleId =
+        Guid.Parse("bb000001-0114-4000-8000-000000000114");
+
+    public static readonly Guid ShiftRiskPilotAssessmentCoveredId =
+        Guid.Parse("bb000001-0120-4000-8000-000000000120");
+
+    public static readonly Guid ShiftRiskPilotAssessmentGapId =
+        Guid.Parse("bb000001-0121-4000-8000-000000000121");
+
+    public static readonly Guid ShiftRiskPilotAssessmentCriticalId =
+        Guid.Parse("bb000001-0122-4000-8000-000000000122");
+
+    public static readonly Guid ShiftRiskPilotAssessmentConflictId =
+        Guid.Parse("bb000001-0123-4000-8000-000000000123");
+
+    public static readonly Guid ShiftRiskPilotAssessmentStaleId =
+        Guid.Parse("bb000001-0124-4000-8000-000000000124");
+
+    public static readonly Guid ShiftRiskPilotDraftConflictAssignmentId =
+        Guid.Parse("bb000001-0125-4000-8000-000000000125");
 }
