@@ -1,10 +1,16 @@
 "use server";
 
+import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { readMoldDetail } from "./mold-reader";
 import { evaluateMoldCompatibilityAll, getMoldCompatibilityOverview } from "./mold-api-client";
 import { resolveMoldRequestContext } from "./mold-request-context";
 
 export async function loadMoldDetailAction(moldId: string) {
+  const authorization = await denyUnlessGranted("mold.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readMoldDetail(moldId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -24,6 +30,11 @@ export async function loadMoldDetailAction(moldId: string) {
 }
 
 export async function evaluateMoldCompatibilityAllAction(moldId: string) {
+  const authorization = await denyUnlessGranted("mold.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const contextResult = resolveMoldRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };

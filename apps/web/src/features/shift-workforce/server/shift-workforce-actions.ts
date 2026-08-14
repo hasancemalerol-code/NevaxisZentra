@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import type {
   CreateShiftWorkforceCompetencyCommand,
   ShiftWorkforceListFilters,
@@ -25,6 +26,11 @@ type ActionResult =
 export async function loadShiftWorkforcePersonsAction(
   filters: ShiftWorkforceListFilters = {},
 ) {
+  const authorization = await denyUnlessGranted("shift-workforce.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readShiftWorkforcePersons(filters);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -37,6 +43,11 @@ export async function loadShiftWorkforcePersonsAction(
 }
 
 export async function loadShiftWorkforcePersonDetailAction(personId: string) {
+  const authorization = await denyUnlessGranted("shift-workforce.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readShiftWorkforcePersonDetail(personId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -53,6 +64,11 @@ export async function createShiftWorkforceCompetencyAction(
   personId: string,
   command: CreateShiftWorkforceCompetencyCommand,
 ): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("shift-workforce.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };
@@ -81,6 +97,11 @@ export async function updateShiftWorkforceCompetencyAction(
   assignmentId: string,
   command: UpdateShiftWorkforceCompetencyCommand,
 ): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("shift-workforce.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };
@@ -109,6 +130,11 @@ export async function synchronizeShiftWorkforceAction(): Promise<
   | Readonly<{ status: "success" }>
   | Readonly<{ status: "failure"; message: string }>
 > {
+  const authorization = await denyUnlessGranted("shift-workforce.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };

@@ -12,9 +12,11 @@ import { PlanConfidencePanel } from "@/components/dashboard/plan-confidence-pane
 import { ProductionOrdersTable } from "@/components/dashboard/production-orders-table";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
 import { SystemHealthPanel } from "@/components/dashboard/system-health-panel";
+import { fetchCurrentEffectiveAccess } from "@/features/admin-access/server/admin-access-effective-access";
 import { dashboardPreviewData } from "@/lib/mock-data/dashboard";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const access = await fetchCurrentEffectiveAccess();
   const {
     aiTasks,
     criticalRisks,
@@ -141,7 +143,9 @@ export default function DashboardPage() {
         aria-label="Hızlı işlemler"
         className="command-center__quick-actions-strip"
       >
-        <QuickActionsPanel />
+        <QuickActionsPanel
+          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+        />
       </section>
 
       <section

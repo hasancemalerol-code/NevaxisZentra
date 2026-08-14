@@ -1,10 +1,13 @@
 import { Boxes } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MoldRegistryView } from "@/features/molds/components/mold-registry-view";
 import "@/features/molds/components/mold-registry.css";
 import { readMoldRegistry } from "@/features/molds/server/mold-reader";
 
 export default async function MoldRegistryPage() {
+  await forbidUnlessGranted("mold.read");
+
   const result = await readMoldRegistry();
 
   if (result.status === "failure") {

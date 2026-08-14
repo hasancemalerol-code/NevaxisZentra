@@ -1,5 +1,6 @@
 import { CalendarClock } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { ShiftWorkforceView } from "@/features/shift-workforce/components/shift-workforce-view";
 import "@/features/shift-workforce/components/shift-workforce.css";
 import {
@@ -11,6 +12,8 @@ import { readShiftRiskPermissions } from "@/features/shift-risk/server/shift-ris
 import { readShiftWorkforceWorkspace } from "@/features/shift-workforce/server/shift-workforce-queries";
 
 export default async function VardiyalarPage() {
+  await forbidUnlessGranted("shift-workforce.read");
+
   const [result, assignmentPermissions, assignmentContext, riskPermissions] = await Promise.all([
     readShiftWorkforceWorkspace({
       page: 1,

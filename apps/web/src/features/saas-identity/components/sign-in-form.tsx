@@ -2,23 +2,39 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { signInSaasIdentityBrowser } from "../client/saas-identity-browser-client";
+import { stripSensitiveQueryParam } from "../lib/saas-identity-csrf";
+import { isSafeAppReturnUrl } from "../lib/saas-identity-return-url";
 import {
   mapSaasIdentityFailureMessage,
   SAAS_IDENTITY_MESSAGES,
 } from "../presentation/saas-identity-messages";
 import { AuthFeedback } from "./auth-feedback";
 
-export function SignInForm() {
+type SignInFormProps = Readonly<{
+  initialError?: string | null;
+  returnUrl?: string | null;
+}>;
+
+export function SignInForm({
+  initialError = null,
+  returnUrl = null,
+}: SignInFormProps) {
   const router = useRouter();
   const [organizationContext, setOrganizationContext] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
+
+  useEffect(() => {
+    stripSensitiveQueryParam("password");
+    stripSensitiveQueryParam("email");
+    stripSensitiveQueryParam("organizationContext");
+  }, []);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -44,22 +60,33 @@ export function SignInForm() {
         return;
       }
 
-      const returnUrl =
+      const requestedReturnUrl =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("returnUrl")
-          : null;
+          : returnUrl;
       router.push(
-        returnUrl && returnUrl.startsWith("/") && !returnUrl.startsWith("//")
-          ? returnUrl
+        isSafeAppReturnUrl(requestedReturnUrl)
+          ? requestedReturnUrl
           : "/dashboard",
       );
       router.refresh();
     },
-    [email, organizationContext, password, router],
+    [email, organizationContext, password, returnUrl, router],
   );
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+    <form
+      action="/giris/oturum"
+      autoComplete="on"
+      className="auth-form"
+      method="post"
+      noValidate
+      onSubmit={handleSubmit}
+    >
+      {isSafeAppReturnUrl(returnUrl) ? (
+        <input name="returnUrl" type="hidden" value={returnUrl} />
+      ) : null}
+
       <div className="auth-form__field">
         <label htmlFor="sign-in-organization">Kuruluş kodu</label>
         <input

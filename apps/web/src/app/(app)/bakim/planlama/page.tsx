@@ -1,5 +1,6 @@
 import { CalendarClock } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenancePlanningView } from "@/features/maintenance/components/maintenance-planning-view";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import { readMaintenancePlanning } from "@/features/maintenance/server/maintenance-reader";
@@ -10,6 +11,8 @@ import {
 import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 
 export default async function MaintenancePlanningPage() {
+  await forbidUnlessGranted("maintenance.read");
+
   const result = await readMaintenancePlanning();
 
   if (result.status === "failure") {

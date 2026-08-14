@@ -15,6 +15,7 @@ import {
   readProcessOeeShiftComparison,
   readProcessOeeStabilityDetail,
 } from "./process-oee-reader";
+import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { resolveProcessOeeRequestContext } from "./process-oee-request-context";
 
 type ActionResult =
@@ -24,6 +25,11 @@ type ActionResult =
 export async function loadProcessOeeAssessmentsAction(
   filters: ProcessOeeAssessmentListFilters = {},
 ) {
+  const authorization = await denyUnlessGranted("process-oee.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readProcessOeeAssessments(filters);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -36,6 +42,11 @@ export async function loadProcessOeeAssessmentsAction(
 }
 
 export async function loadProcessOeeAssessmentDetailAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("process-oee.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readProcessOeeAssessmentDetail(assessmentId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -49,6 +60,11 @@ export async function loadProcessOeeAssessmentDetailAction(assessmentId: string)
 }
 
 export async function loadProcessOeeLossDetailAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("process-oee.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readProcessOeeLossDetail(assessmentId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -61,6 +77,11 @@ export async function loadProcessOeeLossDetailAction(assessmentId: string) {
 }
 
 export async function loadProcessOeeStabilityDetailAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("process-oee.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readProcessOeeStabilityDetail(assessmentId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -77,6 +98,11 @@ export async function loadProcessOeeShiftComparisonAction(params: {
   periodStartUtc: string;
   periodEndUtc: string;
 }) {
+  const authorization = await denyUnlessGranted("process-oee.read");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const result = await readProcessOeeShiftComparison(params);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -92,6 +118,11 @@ export async function evaluateProcessOeeAction(
   windowId: string,
   idempotencyKey: string,
 ): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("process-oee.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const contextResult = resolveProcessOeeRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };

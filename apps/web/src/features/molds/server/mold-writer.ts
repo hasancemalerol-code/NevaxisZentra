@@ -10,6 +10,7 @@ import {
   transitionMoldLifecycle,
   updateMold,
 } from "./mold-api-client";
+import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 
@@ -45,6 +46,11 @@ function mapResult(result: Awaited<ReturnType<typeof createMold>>): ActionResult
 }
 
 export async function createMoldAction(formData: FormData): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("mold.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return resolved;
@@ -68,6 +74,11 @@ export async function createMoldAction(formData: FormData): Promise<ActionResult
 }
 
 export async function updateMoldAction(formData: FormData): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("mold.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return resolved;
@@ -90,6 +101,11 @@ export async function updateMoldAction(formData: FormData): Promise<ActionResult
 }
 
 export async function recordMoldCounterAction(formData: FormData): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("mold.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return resolved;
@@ -108,6 +124,11 @@ export async function recordMoldCounterAction(formData: FormData): Promise<Actio
 }
 
 export async function transitionMoldLifecycleAction(formData: FormData): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("mold.manage");
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
     return resolved;

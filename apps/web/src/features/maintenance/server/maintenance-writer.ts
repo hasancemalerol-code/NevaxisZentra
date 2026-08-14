@@ -8,6 +8,7 @@ import {
   createWorkOrderFromPreventiveDue,
   generatePreventiveNextDue,
 } from "./maintenance-api-client";
+import { denyUnlessAnyGranted } from "../../admin-access/server/require-current-permission";
 import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 
@@ -61,6 +62,14 @@ export async function createMaintenanceWorkNoteAction(input: {
   text: string;
   isImportant: boolean;
 }): Promise<MaintenanceActionResult> {
+  const authorization = await denyUnlessAnyGranted([
+    "maintenance.execute",
+    "maintenance.manage",
+  ]);
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -85,6 +94,14 @@ export async function createMaintenancePartUsageAction(input: {
   estimatedUnitCost?: number;
   actualUnitCost?: number;
 }): Promise<MaintenanceActionResult> {
+  const authorization = await denyUnlessAnyGranted([
+    "maintenance.execute",
+    "maintenance.manage",
+  ]);
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -106,6 +123,14 @@ export async function createMaintenancePartUsageAction(input: {
 export async function generatePreventiveNextDueAction(
   planId: string,
 ): Promise<MaintenanceActionResult> {
+  const authorization = await denyUnlessAnyGranted([
+    "maintenance.execute",
+    "maintenance.manage",
+  ]);
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -119,6 +144,14 @@ export async function createWorkOrderFromPreventiveDueAction(input: {
   dueId: string;
   expectedVersion: number;
 }): Promise<MaintenanceActionResult> {
+  const authorization = await denyUnlessAnyGranted([
+    "maintenance.execute",
+    "maintenance.manage",
+  ]);
+  if (authorization.status === "failure") {
+    return authorization;
+  }
+
   const resolved = resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;

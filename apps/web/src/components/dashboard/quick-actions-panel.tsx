@@ -15,6 +15,7 @@ type QuickAction = Readonly<{
   description: string;
   href: string;
   icon: LucideIcon;
+  permissionKey?: string;
   tone:
     | "blue"
     | "green"
@@ -50,6 +51,7 @@ const quickActions: readonly QuickAction[] = [
     description: "Makine veya kalıp talebi aç",
     href: "/bakim",
     icon: Wrench,
+    permissionKey: "maintenance.read",
     tone: "purple",
   },
   {
@@ -117,7 +119,21 @@ function getToneStyles(tone: QuickAction["tone"]) {
   }
 }
 
-export function QuickActionsPanel() {
+type QuickActionsPanelProps = Readonly<{
+  grantedPermissionKeys?: readonly string[];
+}>;
+
+export function QuickActionsPanel({
+  grantedPermissionKeys = [],
+}: QuickActionsPanelProps) {
+  const visibleActions = quickActions.filter((action) => {
+    if (!action.permissionKey) {
+      return true;
+    }
+
+    return grantedPermissionKeys.includes(action.permissionKey);
+  });
+
   return (
     <section className="dashboard-panel dashboard-panel--quick-actions">
       <header className="dashboard-section-heading">
@@ -132,12 +148,12 @@ export function QuickActionsPanel() {
         </div>
 
         <span className="dashboard-section-heading__meta">
-          {quickActions.length} işlem
+          {visibleActions.length} işlem
         </span>
       </header>
 
       <div className="locked-quick-actions">
-        {quickActions.map((action) => {
+        {visibleActions.map((action) => {
           const Icon = action.icon;
           const toneStyles = getToneStyles(action.tone);
 

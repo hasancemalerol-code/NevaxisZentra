@@ -1,10 +1,13 @@
 import { CircleGauge } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { ProcessOeeView } from "@/features/process-oee/components/process-oee-view";
 import "@/features/process-oee/components/process-oee.css";
 import { readProcessOeeWorkspace } from "@/features/process-oee/server/process-oee-reader";
 
 export default async function ProcessOeePage() {
+  await forbidUnlessGranted("process-oee.read");
+
   const result = await readProcessOeeWorkspace();
 
   if (result.status === "failure") {
