@@ -10,9 +10,14 @@ import type { SerializableNavigationGroup } from "@/lib/navigation/navigation-ty
 type AppShellFrameProps = Readonly<{
   children: ReactNode;
   navigation: readonly SerializableNavigationGroup[];
+  accountDisplayName?: string | null;
 }>;
 
-export function AppShellFrame({ children, navigation }: AppShellFrameProps) {
+export function AppShellFrame({
+  children,
+  navigation,
+  accountDisplayName = null,
+}: AppShellFrameProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -25,7 +30,7 @@ export function AppShellFrame({ children, navigation }: AppShellFrameProps) {
       <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
       <Sidebar pathname={pathname} collapsed={collapsed} onToggle={toggleSidebar} navigation={navigation} />
       <div className="app-workspace">
-        <TopBar />
+        <TopBar accountDisplayName={accountDisplayName} />
         <main className="content-viewport" id="main-content" tabIndex={-1}>{children}</main>
       </div>
     </div>

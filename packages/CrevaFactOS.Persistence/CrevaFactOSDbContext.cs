@@ -19,6 +19,7 @@ using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -158,6 +159,17 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<SaasCommercialPaymentMethodCapability> SaasCommercialPaymentMethodCapabilities => Set<SaasCommercialPaymentMethodCapability>();
     public DbSet<SaasCommercialGracePeriodPolicy> SaasCommercialGracePeriodPolicies => Set<SaasCommercialGracePeriodPolicy>();
     public DbSet<SaasCommercialAuditEvent> SaasCommercialAuditEvents => Set<SaasCommercialAuditEvent>();
+
+    // SaaS identity foundation (SAAS-IDENTITY-1)
+    public DbSet<SaasIdentityAccount> SaasIdentityAccounts => Set<SaasIdentityAccount>();
+    public DbSet<SaasIdentityPasswordCredential> SaasIdentityPasswordCredentials => Set<SaasIdentityPasswordCredential>();
+    public DbSet<SaasIdentitySession> SaasIdentitySessions => Set<SaasIdentitySession>();
+    public DbSet<SaasIdentityInvitation> SaasIdentityInvitations => Set<SaasIdentityInvitation>();
+    public DbSet<SaasIdentityEmailVerificationToken> SaasIdentityEmailVerificationTokens => Set<SaasIdentityEmailVerificationToken>();
+    public DbSet<SaasIdentityPasswordResetToken> SaasIdentityPasswordResetTokens => Set<SaasIdentityPasswordResetToken>();
+    public DbSet<SaasIdentityMfaMethod> SaasIdentityMfaMethods => Set<SaasIdentityMfaMethod>();
+    public DbSet<SaasIdentityRecoveryCode> SaasIdentityRecoveryCodes => Set<SaasIdentityRecoveryCode>();
+    public DbSet<SaasIdentitySecurityAuditEvent> SaasIdentitySecurityAuditEvents => Set<SaasIdentitySecurityAuditEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -1468,6 +1480,17 @@ public sealed class CrevaFactOSDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SaasCommercialPaymentMethodCapabilityEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasCommercialGracePeriodPolicyEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasCommercialAuditEventEntityConfiguration());
+
+        // SaaS identity foundation (SAAS-IDENTITY-1) — platform-global accounts, tenant-scoped sessions
+        modelBuilder.ApplyConfiguration(new SaasIdentityAccountEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityPasswordCredentialEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentitySessionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityInvitationEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityEmailVerificationTokenEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityPasswordResetTokenEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityMfaMethodEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentityRecoveryCodeEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasIdentitySecurityAuditEventEntityConfiguration());
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

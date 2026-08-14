@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
@@ -8,6 +10,7 @@ using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
+using CrevaFactOS.Persistence.SaasIdentity;
 
 namespace CrevaFactOS.Persistence;
 
@@ -15,10 +18,47 @@ public static class PersistenceServiceCollectionExtensions
 {
     public static IServiceCollection AddCrevaFactOSPersistence(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment? environment = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+
+        services.AddDataProtection();
+        services.AddScoped<SaasIdentityMfaSecretProtector>();
+        services.AddScoped<IIdentityEmailDeliveryProvider, UnavailableIdentityEmailDeliveryProvider>();
+        services.AddScoped<ISaasIdentityRepository, UnavailableSaasIdentityRepository>();
+        services.AddOptions<DevelopmentSaasIdentityOptions>()
+            .Bind(configuration.GetSection(DevelopmentSaasIdentityOptions.SectionName))
+            .PostConfigure(options =>
+            {
+                if (environment?.IsDevelopment() != true)
+                {
+                    options.Enabled = false;
+                    return;
+                }
+
+                options.TenantOwnerPassword = GetSaasIdentityEnvironmentValue(
+                    nameof(DevelopmentSaasIdentityOptions.TenantOwnerPassword),
+                    options.TenantOwnerPassword);
+                options.ActiveUserPassword = GetSaasIdentityEnvironmentValue(
+                    nameof(DevelopmentSaasIdentityOptions.ActiveUserPassword),
+                    options.ActiveUserPassword);
+                options.DeactivatedUserPassword = GetSaasIdentityEnvironmentValue(
+                    nameof(DevelopmentSaasIdentityOptions.DeactivatedUserPassword),
+                    options.DeactivatedUserPassword);
+                options.NoMembershipUserPassword = GetSaasIdentityEnvironmentValue(
+                    nameof(DevelopmentSaasIdentityOptions.NoMembershipUserPassword),
+                    options.NoMembershipUserPassword);
+                options.MfaSharedSecret = GetSaasIdentityEnvironmentValue(
+                    nameof(DevelopmentSaasIdentityOptions.MfaSharedSecret),
+                    options.MfaSharedSecret);
+            });
+
+        if (environment?.IsDevelopment() == true)
+        {
+            services.AddScoped<IDevelopmentTokenDeliverySink, DevelopmentTokenDeliverySink>();
+        }
 
         services.AddSingleton<IValidateOptions<PersistenceOptions>, PersistenceOptionsValidator>();
         services.AddOptions<PersistenceOptions>()
@@ -82,6 +122,13 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IOutboxWriter, PostgreSqlOutboxWriter>();
         services.AddScoped<IOutboxReader, PostgreSqlOutboxReader>();
         services.AddScoped<IOutboxDiagnosticService, PostgreSqlOutboxDiagnosticService>();
+        services.AddScoped<ISaasIdentityRepository>(serviceProvider =>
+            new SaasIdentityRepository(
+                serviceProvider.GetRequiredService<CrevaFactOSDbContext>(),
+                serviceProvider.GetRequiredService<SaasIdentityMfaSecretProtector>(),
+                serviceProvider.GetRequiredService<IIdentityEmailDeliveryProvider>(),
+                serviceProvider.GetRequiredService<TenantContextAccessor>(),
+                serviceProvider.GetService<IDevelopmentTokenDeliverySink>()));
 
         if (options.HealthChecksEnabled)
         {
@@ -128,4 +175,7 @@ public static class PersistenceServiceCollectionExtensions
         var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__PERSISTENCE__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
+
+    private static string GetSaasIdentityEnvironmentValue(string propertyName, string fallback) =>
+        Environment.GetEnvironmentVariable($"DevelopmentSaasIdentity__{propertyName}") ?? fallback;
 }

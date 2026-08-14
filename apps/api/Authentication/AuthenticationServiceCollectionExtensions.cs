@@ -1,3 +1,5 @@
+using CrevaFactOS.Persistence.SaasIdentity;
+using CrevaFactOS.Api.SaasIdentity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -77,6 +79,48 @@ public static class AuthenticationServiceCollectionExtensions
                             ValidateLifetime = true,
                         };
                     });
+                break;
+
+            case AuthenticationMode.SessionCookie:
+                if (environment.IsDevelopment())
+                {
+                    const string policyScheme = "CrevaFactOS.SessionOrDevelopment";
+                    services.AddAuthentication(authenticationOptions =>
+                        {
+                            authenticationOptions.DefaultAuthenticateScheme = policyScheme;
+                            authenticationOptions.DefaultChallengeScheme = policyScheme;
+                        })
+                        .AddPolicyScheme(
+                            policyScheme,
+                            "Session cookie with development header fallback",
+                            policyOptions =>
+                            {
+                                policyOptions.ForwardDefaultSelector = context =>
+                                    context.Request.Cookies.ContainsKey(SaasIdentityConstants.SessionCookieName)
+                                        ? SessionCookieAuthenticationHandler.SchemeName
+                                        : DevelopmentAuthenticationHandler.SchemeName;
+                            })
+                        .AddScheme<AuthenticationSchemeOptions, SessionCookieAuthenticationHandler>(
+                            SessionCookieAuthenticationHandler.SchemeName,
+                            _ => { })
+                        .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
+                            DevelopmentAuthenticationHandler.SchemeName,
+                            _ => { });
+                }
+                else
+                {
+                    services.AddAuthentication(authenticationOptions =>
+                        {
+                            authenticationOptions.DefaultAuthenticateScheme =
+                                SessionCookieAuthenticationHandler.SchemeName;
+                            authenticationOptions.DefaultChallengeScheme =
+                                SessionCookieAuthenticationHandler.SchemeName;
+                        })
+                        .AddScheme<AuthenticationSchemeOptions, SessionCookieAuthenticationHandler>(
+                            SessionCookieAuthenticationHandler.SchemeName,
+                            _ => { });
+                }
+
                 break;
 
             default:

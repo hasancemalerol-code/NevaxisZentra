@@ -10,6 +10,7 @@ using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasIdentity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -18,7 +19,9 @@ namespace CrevaFactOS.Persistence.Development;
 
 internal sealed class DevelopmentPilotBootstrapService(
     IOptions<DevelopmentPilotOptions> options,
-    IOptions<PersistenceOptions> persistenceOptions)
+    IOptions<PersistenceOptions> persistenceOptions,
+    IOptions<DevelopmentSaasIdentityOptions> saasIdentityOptions,
+    SaasIdentityMfaSecretProtector mfaSecretProtector)
     : IDevelopmentPilotBootstrapService
 {
     public async Task<DevelopmentPilotBootstrapResult> BootstrapAsync(
@@ -623,6 +626,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
         }
+
+        await DevelopmentSaasIdentitySeed.EnsureDevelopmentSaasIdentityFixturesAsync(
+            dbContext,
+            mfaSecretProtector,
+            saasIdentityOptions,
+            seedTimestampUtc,
+            cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

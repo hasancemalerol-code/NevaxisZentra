@@ -1,8 +1,13 @@
-import { Bell, Building2, ChevronDown, Search, UserRound } from "lucide-react";
+import { Bell, Building2, ChevronDown, Search } from "lucide-react";
 
 import { IconButton } from "@/components/ui/button";
+import { AccountMenu } from "@/features/saas-identity/components/account-menu";
 
-export function TopBar() {
+type TopBarProps = Readonly<{
+  accountDisplayName?: string | null;
+}>;
+
+export function TopBar({ accountDisplayName = null }: TopBarProps) {
   return (
     <header className="top-bar">
       <div className="workspace-context" aria-label="Çalışma alanı bağlamı">
@@ -24,11 +29,14 @@ export function TopBar() {
           <Bell />
         </IconButton>
         <span className="top-bar-divider" aria-hidden="true" />
-        <button className="account-placeholder" type="button" aria-label="Hesap menüsü — kimlik doğrulama arayüzü henüz eklenmedi">
-          <span className="account-icon" aria-hidden="true"><UserRound /></span>
-          <span className="account-copy"><strong>Hesap</strong><small>Oturum bağlamı</small></span>
-          <ChevronDown aria-hidden="true" />
-        </button>
+        {accountDisplayName ? (
+          <AccountMenu displayName={accountDisplayName} />
+        ) : (
+          <span className="account-copy account-copy--placeholder">
+            <strong>Hesap</strong>
+            <small>Oturum bağlamı</small>
+          </span>
+        )}
       </div>
     </header>
   );

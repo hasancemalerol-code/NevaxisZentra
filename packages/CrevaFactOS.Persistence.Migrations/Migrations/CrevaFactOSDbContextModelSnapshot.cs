@@ -14422,6 +14422,478 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("saas_commercial_price_components", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AccountReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("account_reference");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("EmailNormalized")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("email_normalized");
+
+                    b.Property<DateTimeOffset?>("EmailVerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("email_verified_at_utc");
+
+                    b.Property<int>("FailedSignInCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_sign_in_count");
+
+                    b.Property<Guid>("IdentitySubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("identity_subject_id");
+
+                    b.Property<string>("LifecycleStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("lifecycle_status");
+
+                    b.Property<DateTimeOffset?>("LockoutUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lockout_until_utc");
+
+                    b.Property<Guid>("SecurityStamp")
+                        .HasColumnType("uuid")
+                        .HasColumnName("security_stamp");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountReference")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_accounts_account_reference");
+
+                    b.HasIndex("EmailNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_accounts_email_normalized");
+
+                    b.HasIndex("IdentitySubjectId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_accounts_identity_subject_id");
+
+                    b.ToTable("saas_identity_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityEmailVerificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("token_hash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_email_verification_tokens_token_hash");
+
+                    b.HasIndex("AccountId", "ConsumedAtUtc")
+                        .HasDatabaseName("ix_saas_identity_email_verification_tokens_account_consumed");
+
+                    b.ToTable("saas_identity_email_verification_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("IntendedEmailNormalized")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("intended_email_normalized");
+
+                    b.Property<Guid?>("IntendedRoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intended_role_id");
+
+                    b.Property<string>("InvitationReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("invitation_reference");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("token_hash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitationReference")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_invitations_invitation_reference");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_invitations_token_hash");
+
+                    b.HasIndex("TenantId", "IntendedEmailNormalized", "ConsumedAtUtc")
+                        .HasDatabaseName("ix_saas_identity_invitations_tenant_email_consumed");
+
+                    b.ToTable("saas_identity_invitations", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityMfaMethod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<string>("EncryptedSecret")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("encrypted_secret");
+
+                    b.Property<DateTimeOffset>("EnrolledAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("enrolled_at_utc");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_required");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_mfa_methods_account_id");
+
+                    b.ToTable("saas_identity_mfa_methods", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityPasswordCredential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<int>("PasswordHashVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("password_hash_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_password_credentials_account_id");
+
+                    b.ToTable("saas_identity_password_credentials", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityPasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("token_hash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_password_reset_tokens_token_hash");
+
+                    b.HasIndex("AccountId", "ConsumedAtUtc")
+                        .HasDatabaseName("ix_saas_identity_password_reset_tokens_account_consumed");
+
+                    b.ToTable("saas_identity_password_reset_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityRecoveryCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTimeOffset?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("MfaMethodId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mfa_method_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MfaMethodId", "CodeHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_recovery_codes_method_hash");
+
+                    b.ToTable("saas_identity_recovery_codes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentitySecurityAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OccurredAtUtc")
+                        .HasDatabaseName("ix_saas_identity_security_audit_events_occurred_at_utc");
+
+                    b.HasIndex("AccountId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_saas_identity_security_audit_events_account_occurred");
+
+                    b.HasIndex("TenantId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_saas_identity_security_audit_events_tenant_occurred");
+
+                    b.ToTable("saas_identity_security_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentitySession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AbsoluteExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("absolute_expires_at_utc");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DeviceLabel")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("device_label");
+
+                    b.Property<DateTimeOffset>("IdleExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("idle_expires_at_utc");
+
+                    b.Property<DateTimeOffset>("LastSeenAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at_utc");
+
+                    b.Property<bool>("MfaSatisfied")
+                        .HasColumnType("boolean")
+                        .HasColumnName("mfa_satisfied");
+
+                    b.Property<bool>("PendingMfa")
+                        .HasColumnType("boolean")
+                        .HasColumnName("pending_mfa");
+
+                    b.Property<DateTimeOffset?>("RevokedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at_utc");
+
+                    b.Property<string>("RevokedReason")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("revoked_reason");
+
+                    b.Property<Guid>("SecurityStampSnapshot")
+                        .HasColumnType("uuid")
+                        .HasColumnName("security_stamp_snapshot");
+
+                    b.Property<string>("SessionReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("session_reference");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("TenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_membership_id");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("token_hash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionReference")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_sessions_session_reference");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_saas_identity_sessions_tenant_id");
+
+                    b.HasIndex("TenantMembershipId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_identity_sessions_token_hash");
+
+                    b.HasIndex("AccountId", "RevokedAtUtc")
+                        .HasDatabaseName("ix_saas_identity_sessions_account_revoked");
+
+                    b.ToTable("saas_identity_sessions", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -18281,6 +18753,103 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("PlanVersion");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Identity.IdentitySubject", null)
+                        .WithMany()
+                        .HasForeignKey("IdentitySubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityEmailVerificationToken", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityInvitation", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityMfaMethod", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityPasswordCredential", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityPasswordResetToken", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityRecoveryCode", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityMfaMethod", null)
+                        .WithMany()
+                        .HasForeignKey("MfaMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentitySecurityAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasIdentity.SaasIdentitySession", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasIdentity.SaasIdentityAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Identity.TenantMembership", null)
+                        .WithMany()
+                        .HasForeignKey("TenantMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>

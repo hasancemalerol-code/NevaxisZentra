@@ -5,4 +5,5 @@ public enum AuthenticationMode
     Disabled,
     Development,
     JwtBearer,
+    SessionCookie,
 }
