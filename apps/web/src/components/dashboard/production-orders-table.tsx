@@ -11,6 +11,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
+import { DASHBOARD_PRODUCTION_WORKSPACE_TARGET } from "@/components/dashboard/dashboard-navigation";
 
 interface ProductionOrdersTableProps {
   grantedPermissionKeys?: readonly string[];
@@ -264,8 +265,11 @@ const styles: Record<string, CSSProperties> = {
     font: "inherit",
     fontSize: "0.42rem",
     fontWeight: 750,
-    cursor: "not-allowed",
+    cursor: "pointer",
     opacity: 0.9,
+  },
+  actionDisabled: {
+    cursor: "not-allowed",
   },
 };
 
@@ -643,7 +647,20 @@ export function ProductionOrdersTable({
                     }}
                   >
                     <strong style={styles.orderNumber}>
-                      {order.orderNumber}
+                      {canOpenProduction ? (
+                        <Link
+                          aria-label={`${order.orderNumber} üretim emrini incele`}
+                          href={DASHBOARD_PRODUCTION_WORKSPACE_TARGET.href}
+                          style={{
+                            color: "inherit",
+                            textDecoration: "none",
+                          }}
+                        >
+                          {order.orderNumber}
+                        </Link>
+                      ) : (
+                        order.orderNumber
+                      )}
                     </strong>
                   </td>
 
@@ -802,7 +819,10 @@ export function ProductionOrdersTable({
       ) : (
         <button
           disabled
-          style={styles.action}
+          style={{
+            ...styles.action,
+            ...styles.actionDisabled,
+          }}
           title="Üretim emirlerini görüntüleme yetkiniz yok."
           type="button"
         >

@@ -11,8 +11,12 @@ import {
 
 import type { CSSProperties } from "react";
 
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
+import { DASHBOARD_MACHINE_WORKSPACE_TARGET } from "./dashboard-navigation";
+
 interface MachineStatusPanelProps {
   machines: readonly unknown[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 type MachineState =
@@ -171,6 +175,9 @@ const styles: Record<string, CSSProperties> = {
     border: "1px solid #dce5f0",
     borderRadius: 9,
     background: "#f8fafc",
+    color: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
   },
   top: {
     display: "flex",
@@ -276,6 +283,29 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 740,
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+  },
+  panelFooter: {
+    display: "flex",
+    minHeight: 29,
+    flex: "0 0 29px",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    padding: "0 12px",
+    borderTop: "1px solid #dce5f0",
+    color: "#75839a",
+    fontSize: "0.38rem",
+  },
+  footerAction: {
+    color: "#1769e0",
+    fontWeight: 750,
+    border: 0,
+    background: "transparent",
+    font: "inherit",
+    fontSize: "inherit",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
   },
 };
 
@@ -499,6 +529,7 @@ function normalizeMachine(
 
 export function MachineStatusPanel({
   machines,
+  grantedPermissionKeys = [],
 }: MachineStatusPanelProps) {
   const sourceMachines =
     machines.length > 0 ? machines : fallbackMachines;
@@ -551,10 +582,12 @@ export function MachineStatusPanel({
           const tone = getStateTone(machine.state);
 
           return (
-            <article
-              className={`locked-machine-card locked-machine-card--${machine.state}`}
+            <DashboardNavigationAction
+              ariaLabel={`${machine.code} makine durumunu incele`}
+              grantedPermissionKeys={grantedPermissionKeys}
               key={machine.id}
               style={styles.card}
+              target={DASHBOARD_MACHINE_WORKSPACE_TARGET}
             >
               <div style={styles.top}>
                 <div style={styles.identity}>
@@ -625,9 +658,22 @@ export function MachineStatusPanel({
                   {machine.outputLabel}
                 </strong>
               </div>
-            </article>
+            </DashboardNavigationAction>
           );
         })}
+      </div>
+
+      <div style={styles.panelFooter}>
+        <span>{visibleMachines.length} makine izleniyor</span>
+
+        <DashboardNavigationAction
+          ariaLabel="Tüm makineleri görüntüle"
+          grantedPermissionKeys={grantedPermissionKeys}
+          style={styles.footerAction}
+          target={DASHBOARD_MACHINE_WORKSPACE_TARGET}
+        >
+          Tüm makineleri görüntüle
+        </DashboardNavigationAction>
       </div>
     </section>
   );

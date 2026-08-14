@@ -3,19 +3,25 @@ import {
   Box,
   Clock3,
   ShieldAlert,
-  Sparkles,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
 
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
+import {
+  resolveCriticalRiskTarget,
+} from "./dashboard-navigation";
+
 interface CriticalRisksPanelProps {
   risks: readonly unknown[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 interface NormalizedRisk {
   id: string;
+  category: string;
   title: string;
   description: string;
   severity: "critical" | "high" | "medium" | "low";
@@ -25,6 +31,7 @@ interface NormalizedRisk {
 const fallbackRisks: NormalizedRisk[] = [
   {
     id: "risk-delivery",
+    category: "delivery",
     title: "SO-260804-18 termin riski",
     description:
       "M-04 arızası üretim tamamlama tahminini müşteri termininden 6 saat sonraya taşıyor.",
@@ -33,6 +40,7 @@ const fallbackRisks: NormalizedRisk[] = [
   },
   {
     id: "risk-material",
+    category: "material",
     title: "PP GF30 kapsama açığı",
     description:
       "Mevcut ve teyitli tedarik miktarı iki aktif emir için yeterli görünmüyor.",
@@ -41,6 +49,7 @@ const fallbackRisks: NormalizedRisk[] = [
   },
   {
     id: "risk-mold",
+    category: "mold",
     title: "KLP-204 bakım eşiğine yaklaştı",
     description:
       "Çevrim sayısı bakım eşiğinin yüzde 96 seviyesine ulaştı.",
@@ -49,6 +58,7 @@ const fallbackRisks: NormalizedRisk[] = [
   },
   {
     id: "risk-quality",
+    category: "quality",
     title: "P-118 yüzey hatası artışı",
     description:
       "Son üç kontrolde yüzey hatası oranı vardiya ortalamasının üzerine çıktı.",
@@ -137,6 +147,25 @@ const styles: Record<string, CSSProperties> = {
   footerAction: {
     color: "#1769e0",
     fontWeight: 750,
+    border: 0,
+    background: "transparent",
+    font: "inherit",
+    fontSize: "inherit",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
+  },
+  riskLink: {
+    display: "grid",
+    minWidth: 0,
+    gridTemplateColumns: "28px minmax(0, 1fr) auto",
+    alignItems: "start",
+    gap: 8,
+    padding: "8px 0",
+    borderBottom: "1px solid #dce5f0",
+    color: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
   },
 };
 
@@ -243,6 +272,11 @@ function normalizeRisk(
       ["id", "riskId", "code"],
       `critical-risk-${index + 1}`,
     ),
+    category: readString(
+      source,
+      ["category", "riskCategory", "type"],
+      fallback.category,
+    ),
     title,
     description: readString(
       source,
@@ -298,6 +332,7 @@ function getSeverityStyle(
 
 export function CriticalRisksPanel({
   risks,
+  grantedPermissionKeys = [],
 }: CriticalRisksPanelProps) {
   const sourceRisks =
     risks.length > 0 ? risks : fallbackRisks;
@@ -344,17 +379,21 @@ export function CriticalRisksPanel({
         {visibleRisks.map((risk, index) => {
           const Icon = risk.icon;
           const tone = getSeverityStyle(risk.severity);
+          const target = resolveCriticalRiskTarget(risk.category);
 
           return (
-            <article
+            <DashboardNavigationAction
+              ariaLabel={`${risk.title} riskini incele`}
+              grantedPermissionKeys={grantedPermissionKeys}
               key={risk.id}
               style={{
-                ...styles.item,
+                ...styles.riskLink,
                 borderBottom:
                   index === visibleRisks.length - 1
                     ? 0
-                    : styles.item.borderBottom,
+                    : styles.riskLink.borderBottom,
               }}
+              target={target}
             >
               <span
                 aria-hidden="true"
@@ -384,7 +423,7 @@ export function CriticalRisksPanel({
               >
                 {getSeverityLabel(risk.severity)}
               </span>
-            </article>
+            </DashboardNavigationAction>
           );
         })}
       </div>
@@ -394,9 +433,14 @@ export function CriticalRisksPanel({
           Riskler AI tarafından önceliklendirildi
         </span>
 
-        <span style={styles.footerAction}>
+        <DashboardNavigationAction
+          ariaLabel="Tüm kritik uyarıları görüntüle"
+          grantedPermissionKeys={grantedPermissionKeys}
+          style={styles.footerAction}
+          target={resolveCriticalRiskTarget("delivery")}
+        >
           Tüm uyarıları görüntüle
-        </span>
+        </DashboardNavigationAction>
       </div>
     </section>
   );

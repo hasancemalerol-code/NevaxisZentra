@@ -335,8 +335,8 @@ export const shiftSummaries: ShiftSummary[] = [
 
 export const aiTasks: AiTaskSummary[] = [
   {
-    id: "task-material-review",
-    title: "PP GF30 malzeme riskini incele",
+    id: "ai-task-001",
+    title: "Hammadde stoğu üretim planını karşılamıyor",
     description:
       "Mevcut kapsama süresi iki aktif üretim emrinin planlanan tüketimini karşılamıyor.",
     source: "Malzeme Risk Analizi",
@@ -348,10 +348,10 @@ export const aiTasks: AiTaskSummary[] = [
     statusLabel: "Onay bekliyor",
   },
   {
-    id: "task-plan-adjustment",
-    title: "M-07 üretim sırasını yeniden değerlendir",
+    id: "ai-task-002",
+    title: "Enjeksiyon makinesinde çevrim süresi sapması",
     description:
-      "Kalıp değişim süresi ve termin baskısı nedeniyle alternatif üretim sırası önerildi.",
+      "M-12 çevrim süresi son 90 dakikada hedef değerin yüzde 14 üzerine çıktı.",
     source: "AI Üretim Planlayıcı",
     responsibleDepartment: "Planlama",
     priority: "high",
@@ -361,10 +361,10 @@ export const aiTasks: AiTaskSummary[] = [
     statusLabel: "İnceleniyor",
   },
   {
-    id: "task-maintenance-review",
-    title: "KLP-204 bakım önerisini değerlendir",
+    id: "ai-task-003",
+    title: "Kalıp için kestirimci bakım önerisi",
     description:
-      "Çevrim sayısı bakım eşiğinin %96'sına ulaştı ve kalite sapması artış gösteriyor.",
+      "KLP-104 kalıbında bakım ihtimalini yükselten basınç ve çevrim anomalileri tespit edildi.",
     source: "Kalıp Yaşam Döngüsü",
     responsibleDepartment: "Bakım",
     priority: "high",
@@ -374,7 +374,7 @@ export const aiTasks: AiTaskSummary[] = [
     statusLabel: "İnceleme gerekli",
   },
   {
-    id: "task-delivery-risk",
+    id: "ai-task-004",
     title: "SO-260804-18 teslimat riskini yönlendir",
     description:
       "Makine duruşu nedeniyle mevcut planda tahmini 6 saatlik termin sapması oluşuyor.",

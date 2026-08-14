@@ -47,7 +47,7 @@ const classifications = {
   "CTL-D-08 Malzeme Riski": "WORKING_NAVIGATION (honest placeholder)",
   "CTL-D-09 Termin Riski": "WORKING_NAVIGATION (honest placeholder)",
   "CTL-D-10 ERP Senkronizasyonu": "WORKING_NAVIGATION + PERMISSION_HIDDEN",
-  "CTL-D-11 AI inspect": "DISABLED_WITH_REASON unless catalog id",
+  "CTL-D-11 AI inspect": "WORKING_NAVIGATION (canonical catalog id or honest list fallback)",
   "CTL-D-12 üretim footer": "WORKING_NAVIGATION or DISABLED_WITH_REASON",
   "CTL-D-13 bakım footer": "WORKING_NAVIGATION or DISABLED_WITH_REASON",
   "CTL-D-14 plan footer": "WORKING_NAVIGATION or DISABLED_WITH_REASON",
@@ -109,13 +109,14 @@ assert(
   /description:\s*"AI görevlerini incele"/.test(quickActions) && /href:\s*"\/"/.test(quickActions),
 );
 assert(
-  "AI inspect resolves catalog ids only",
-  aiSummary.includes("getAiTaskPreviewById")
-    && aiSummary.includes("Bu görev için açılabilir bir kayıt bulunmuyor."),
+  "AI inspect resolves canonical ids or list fallback",
+  aiSummary.includes("resolveAiTaskNavTarget")
+    && aiSummary.includes("AI Görev Merkezi'nde incele"),
 );
 assert(
   "AI footer navigates to Task Center",
-  /<Link href="\/"[\s\S]{0,80}Tüm AI görevlerini görüntüle/.test(aiSummary),
+  aiSummary.includes("DASHBOARD_AI_TASK_CENTER_HREF")
+    && /<Link href=\{DASHBOARD_AI_TASK_CENTER_HREF\}[\s\S]{0,80}Tüm AI görevlerini görüntüle/.test(aiSummary),
 );
 assert(
   "production footer uses existing list route",

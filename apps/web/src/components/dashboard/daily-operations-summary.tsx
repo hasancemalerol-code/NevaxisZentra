@@ -11,9 +11,16 @@ import {
 
 import type { CSSProperties } from "react";
 
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
+import {
+  DASHBOARD_OPERATIONAL_SUMMARY_TARGET,
+  resolveDailyOperationMetricTarget,
+} from "./dashboard-navigation";
+
 interface DailyOperationsSummaryProps {
   metrics: readonly unknown[];
   shifts: readonly unknown[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 interface NormalizedOperationMetric {
@@ -139,6 +146,43 @@ const styles: Record<string, CSSProperties> = {
   footerAction: {
     color: "#1769e0",
     fontWeight: 750,
+    border: 0,
+    background: "transparent",
+    font: "inherit",
+    fontSize: "inherit",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
+  },
+  metricLink: {
+    display: "grid",
+    minWidth: 0,
+    gridTemplateColumns: "28px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 39,
+    padding: "6px 0",
+    borderBottom: "1px solid #dce5f0",
+    color: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
+  },
+  metricButton: {
+    display: "grid",
+    width: "100%",
+    minWidth: 0,
+    gridTemplateColumns: "28px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 39,
+    padding: "6px 0",
+    border: 0,
+    borderBottom: "1px solid #dce5f0",
+    background: "transparent",
+    color: "inherit",
+    font: "inherit",
+    textAlign: "left",
+    cursor: "not-allowed",
   },
 };
 
@@ -307,6 +351,7 @@ function getToneStyle(
 export function DailyOperationsSummary({
   metrics,
   shifts,
+  grantedPermissionKeys = [],
 }: DailyOperationsSummaryProps) {
   const sourceMetrics =
     metrics.length > 0 ? metrics : fallbackMetrics;
@@ -353,17 +398,23 @@ export function DailyOperationsSummary({
       <div style={styles.list}>
         {visibleMetrics.map((metric, index) => {
           const Icon = metric.icon;
+          const target = resolveDailyOperationMetricTarget(metric.id);
+          const rowStyle = {
+            ...(index === visibleMetrics.length - 1
+              ? { borderBottom: 0 }
+              : {}),
+          };
 
           return (
-            <div
+            <DashboardNavigationAction
+              ariaLabel={`${metric.label} özeti: ${metric.value}`}
+              grantedPermissionKeys={grantedPermissionKeys}
               key={metric.id}
               style={{
-                ...styles.row,
-                borderBottom:
-                  index === visibleMetrics.length - 1
-                    ? 0
-                    : styles.row.borderBottom,
+                ...styles.metricLink,
+                ...rowStyle,
               }}
+              target={target}
             >
               <span
                 aria-hidden="true"
@@ -382,7 +433,7 @@ export function DailyOperationsSummary({
               <strong style={styles.value}>
                 {metric.value}
               </strong>
-            </div>
+            </DashboardNavigationAction>
           );
         })}
       </div>
@@ -399,9 +450,14 @@ export function DailyOperationsSummary({
             : "Operasyon akışı izleniyor"}
         </span>
 
-        <span style={styles.footerAction}>
+        <DashboardNavigationAction
+          ariaLabel="Detaylı operasyon özetini görüntüle"
+          grantedPermissionKeys={grantedPermissionKeys}
+          style={styles.footerAction}
+          target={DASHBOARD_OPERATIONAL_SUMMARY_TARGET}
+        >
           Detaylı özeti görüntüle
-        </span>
+        </DashboardNavigationAction>
       </div>
     </section>
   );

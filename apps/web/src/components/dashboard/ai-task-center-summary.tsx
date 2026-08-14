@@ -13,8 +13,15 @@ import type { CSSProperties } from "react";
 
 import { getAiTaskPreviewById } from "@/features/ai-task-center/data/ai-task-preview-data";
 
+import {
+  DASHBOARD_AI_TASK_CENTER_HREF,
+  resolveAiTaskNavTarget,
+} from "./dashboard-navigation";
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
+
 interface AiTaskCenterSummaryProps {
   tasks: readonly unknown[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 interface NormalizedTask {
@@ -178,12 +185,12 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: 8,
     background: "#ffffff",
     color: "#1769e0",
-    cursor: "not-allowed",
+    cursor: "pointer",
     opacity: 1,
     textDecoration: "none",
   },
-  inspectButtonActive: {
-    cursor: "pointer",
+  inspectButtonDisabled: {
+    cursor: "not-allowed",
   },
   footer: {
     display: "flex",
@@ -289,6 +296,7 @@ function normalizeTask(
     [
       "categoryLabel",
       "category",
+      "source",
       "sourceLabel",
       "typeLabel",
       "agentLabel",
@@ -367,6 +375,7 @@ function getPriorityStyle(
 
 export function AiTaskCenterSummary({
   tasks,
+  grantedPermissionKeys = [],
 }: AiTaskCenterSummaryProps) {
   const sourceTasks =
     tasks.length > 0 ? tasks : fallbackTasks;
@@ -408,10 +417,11 @@ export function AiTaskCenterSummary({
       <div style={styles.list}>
         {visibleTasks.map((task, index) => {
           const Icon = task.icon;
-          const openableTask = getAiTaskPreviewById(task.id);
-          const detailHref = openableTask
-            ? `/ai-gorevleri/${openableTask.id}`
-            : null;
+          const navTarget = resolveAiTaskNavTarget(task.id);
+          const catalogTask = getAiTaskPreviewById(task.id);
+          const inspectLabel = catalogTask
+            ? `${task.title} görevini incele`
+            : `${task.title}. AI Görev Merkezi'nde incele`;
 
           return (
             <article
@@ -477,43 +487,25 @@ export function AiTaskCenterSummary({
                   {getPriorityLabel(task.priority)}
                 </span>
 
-                {detailHref ? (
-                  <Link
-                    aria-label={`${task.title} görevini incele`}
-                    href={detailHref}
-                    style={{
-                      ...styles.inspectButton,
-                      ...styles.inspectButtonActive,
-                    }}
-                  >
-                    <ArrowUpRight
-                      aria-hidden="true"
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-                  </Link>
-                ) : (
-                  <button
-                    aria-label={`${task.title} görevini incele. Bu görev için açılabilir bir kayıt bulunmuyor.`}
-                    disabled
-                    style={styles.inspectButton}
-                    title="Bu görev için açılabilir bir kayıt bulunmuyor."
-                    type="button"
-                  >
-                    <ArrowUpRight
-                      aria-hidden="true"
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-                  </button>
-                )}
+                <DashboardNavigationAction
+                  ariaLabel={inspectLabel}
+                  grantedPermissionKeys={grantedPermissionKeys}
+                  style={styles.inspectButton}
+                  target={navTarget}
+                >
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    size={16}
+                    strokeWidth={1.8}
+                  />
+                </DashboardNavigationAction>
               </div>
             </article>
           );
         })}
       </div>
 
-      <Link href="/" style={styles.footer}>
+      <Link href={DASHBOARD_AI_TASK_CENTER_HREF} style={styles.footer}>
         Tüm AI görevlerini görüntüle
         <ArrowUpRight
           aria-hidden="true"

@@ -259,8 +259,10 @@ async function inspectDashboard(jar, viewport) {
         const teams = document.querySelector(".command-center__teams-button");
         const quickHrefs = [...document.querySelectorAll("a.locked-quick-action")].map((node) => node.getAttribute("href"));
         const hashLinks = [...document.querySelectorAll("a[href='#']")].length;
-        const inspectButtons = [...document.querySelectorAll(".dashboard-panel--ai-task-center button")];
+        const inspectButtons = [...document.querySelectorAll(".dashboard-panel--ai-task-center button[disabled]")];
         const inspectLinks = [...document.querySelectorAll(".dashboard-panel--ai-task-center a[href^='/ai-gorevleri/']")].map((node) => node.getAttribute("href"));
+        const operationalSummary = [...document.querySelectorAll("a")].find((node) => (node.textContent || "").includes("Detaylı özeti görüntüle"));
+        const prohibitedCursor = [...document.querySelectorAll(".dashboard-panel--ai-task-center a, .dashboard-panel--ai-task-center button")].some((node) => getComputedStyle(node).cursor === "not-allowed" && !node.disabled);
         const footer = [...document.querySelectorAll("a")].find((node) => (node.textContent || "").includes("Tüm AI görevlerini görüntüle"));
         const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
         const rawUuid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(commandCenter?.innerText || "");
@@ -286,8 +288,10 @@ async function inspectDashboard(jar, viewport) {
           cssDefinesFocus,
           quickHrefs,
           hashLinks,
-          inspectDisabled: inspectButtons.every((button) => button.disabled),
+          inspectDisabled: inspectButtons.length > 0,
           inspectLinks,
+          operationalSummaryHref: operationalSummary?.getAttribute("href") || "",
+          prohibitedCursor,
           footerHref: footer?.getAttribute("href") || "",
           overflow,
           rawUuid,
@@ -348,7 +352,13 @@ for (const persona of personas) {
     );
     assert(`${persona.name} ${viewport.width}x${viewport.height} Teams href is /teams`, page.teamsHref === "/teams");
     assert(`${persona.name} ${viewport.width}x${viewport.height} no href-hash`, page.hashLinks === 0);
-    assert(`${persona.name} ${viewport.width}x${viewport.height} AI inspect stays non-404`, page.inspectLinks.length === 0 && page.inspectDisabled);
+    if (persona.name === "tenant-owner") {
+      assert(`${persona.name} ${viewport.width}x${viewport.height} AI inspect links are canonical`, page.inspectLinks.length >= 3);
+      assert(`${persona.name} ${viewport.width}x${viewport.height} no prohibited cursor on authorized navigation`, page.prohibitedCursor === false);
+      assert(`${persona.name} ${viewport.width}x${viewport.height} operational summary links to proses-oee`, page.operationalSummaryHref === "/proses-oee");
+    } else {
+      assert(`${persona.name} ${viewport.width}x${viewport.height} AI inspect has no broken detail links`, page.inspectLinks.every((href) => href.startsWith("/ai-gorevleri/ai-task-")));
+    }
     assert(`${persona.name} ${viewport.width}x${viewport.height} AI footer goes to Task Center`, page.footerHref === "/");
     const operational = page.quickHrefs.filter((href) =>
       ["/uretim", "/planlama", "/bakim", "/kalite", "/erp-entegrasyonlari/senkronizasyonlar"].includes(href));

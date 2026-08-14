@@ -11,8 +11,12 @@ import type {
   RiskLevel,
 } from "@/lib/mock-data/dashboard";
 
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
+import { DASHBOARD_MOLD_WORKSPACE_TARGET } from "./dashboard-navigation";
+
 interface MoldStatusPanelProps {
   molds: MoldStatusItem[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 const styles: Record<string, CSSProperties> = {
@@ -125,6 +129,9 @@ const styles: Record<string, CSSProperties> = {
     gap: 7,
     padding: "6px 0",
     borderBottom: "1px solid #dce5f0",
+    color: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
   },
   identity: {
     display: "flex",
@@ -216,6 +223,13 @@ const styles: Record<string, CSSProperties> = {
     color: "#1769e0",
     fontWeight: 750,
     whiteSpace: "nowrap",
+    border: 0,
+    background: "transparent",
+    font: "inherit",
+    fontSize: "inherit",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
   },
 };
 
@@ -272,6 +286,7 @@ function calculateMaintenanceProgress(mold: MoldStatusItem) {
 
 export function MoldStatusPanel({
   molds,
+  grantedPermissionKeys = [],
 }: MoldStatusPanelProps) {
   const visibleMolds = molds.slice(0, 4);
 
@@ -409,7 +424,9 @@ export function MoldStatusPanel({
               calculateMaintenanceProgress(mold);
 
             return (
-              <article
+              <DashboardNavigationAction
+                ariaLabel={`${mold.moldCode} kalıp durumunu incele`}
+                grantedPermissionKeys={grantedPermissionKeys}
                 key={mold.id}
                 style={{
                   ...styles.row,
@@ -418,6 +435,7 @@ export function MoldStatusPanel({
                       ? 0
                       : styles.row.borderBottom,
                 }}
+                target={DASHBOARD_MOLD_WORKSPACE_TARGET}
               >
                 <div style={styles.identity}>
                   <span
@@ -469,7 +487,7 @@ export function MoldStatusPanel({
                 >
                   {getRiskLabel(mold.riskLevel)}
                 </span>
-              </article>
+              </DashboardNavigationAction>
             );
           })}
         </div>
@@ -485,9 +503,14 @@ export function MoldStatusPanel({
           Toplam çevrim: {formatQuantity(totalCycles)}
         </span>
 
-        <span style={styles.footerAction}>
+        <DashboardNavigationAction
+          ariaLabel="Tüm kalıpları görüntüle"
+          grantedPermissionKeys={grantedPermissionKeys}
+          style={styles.footerAction}
+          target={DASHBOARD_MOLD_WORKSPACE_TARGET}
+        >
           Tüm kalıpları görüntüle
-        </span>
+        </DashboardNavigationAction>
       </div>
     </section>
   );

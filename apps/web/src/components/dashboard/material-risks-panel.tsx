@@ -6,10 +6,19 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import Link from "next/link";
+
 import type { CSSProperties } from "react";
+
+import {
+  canOpenDashboardTarget,
+  DASHBOARD_MATERIAL_WORKSPACE_TARGET,
+} from "./dashboard-navigation";
+import { DashboardNavigationAction } from "./dashboard-navigation-action";
 
 interface MaterialRisksPanelProps {
   risks: readonly unknown[];
+  grantedPermissionKeys?: readonly string[];
 }
 
 type MaterialRiskLevel =
@@ -204,6 +213,21 @@ const styles: Record<string, CSSProperties> = {
     color: "#1769e0",
     fontWeight: 750,
     whiteSpace: "nowrap",
+    border: 0,
+    background: "transparent",
+    font: "inherit",
+    fontSize: "inherit",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
+  },
+  rowLink: {
+    display: "grid",
+    minWidth: 0,
+    gap: 2,
+    color: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
   },
 };
 
@@ -403,6 +427,7 @@ function getIconStyle(
 
 export function MaterialRisksPanel({
   risks,
+  grantedPermissionKeys = [],
 }: MaterialRisksPanelProps) {
   const sourceRisks =
     risks.length > 0 ? risks : fallbackRisks;
@@ -410,6 +435,11 @@ export function MaterialRisksPanel({
   const visibleRisks = sourceRisks
     .slice(0, 4)
     .map(normalizeRisk);
+
+  const canOpenMaterials = canOpenDashboardTarget(
+    grantedPermissionKeys,
+    DASHBOARD_MATERIAL_WORKSPACE_TARGET,
+  );
 
   return (
     <section
@@ -520,13 +550,29 @@ export function MaterialRisksPanel({
                       </span>
 
                       <div style={styles.identityText}>
-                        <strong style={styles.code}>
-                          {risk.materialCode}
-                        </strong>
-
-                        <span style={styles.name}>
-                          {risk.materialName}
-                        </span>
+                        {canOpenMaterials ? (
+                          <Link
+                            aria-label={`${risk.materialName} malzeme riskini incele`}
+                            href={DASHBOARD_MATERIAL_WORKSPACE_TARGET.href}
+                            style={styles.rowLink}
+                          >
+                            <strong style={styles.code}>
+                              {risk.materialCode}
+                            </strong>
+                            <span style={styles.name}>
+                              {risk.materialName}
+                            </span>
+                          </Link>
+                        ) : (
+                          <>
+                            <strong style={styles.code}>
+                              {risk.materialCode}
+                            </strong>
+                            <span style={styles.name}>
+                              {risk.materialName}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -622,9 +668,14 @@ export function MaterialRisksPanel({
           ERP ve tedarik verisi önizlemesi
         </span>
 
-        <span style={styles.footerAction}>
+        <DashboardNavigationAction
+          ariaLabel="Malzeme risk analizini görüntüle"
+          grantedPermissionKeys={grantedPermissionKeys}
+          style={styles.footerAction}
+          target={DASHBOARD_MATERIAL_WORKSPACE_TARGET}
+        >
           Risk analizini görüntüle
-        </span>
+        </DashboardNavigationAction>
       </div>
     </section>
   );

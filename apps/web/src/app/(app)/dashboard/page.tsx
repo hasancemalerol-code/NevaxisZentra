@@ -17,6 +17,7 @@ import { dashboardPreviewData } from "@/lib/mock-data/dashboard";
 
 export default async function DashboardPage() {
   const access = await fetchCurrentEffectiveAccess();
+  const grantedPermissionKeys = access?.grantedPermissionKeys ?? [];
   const {
     aiTasks,
     criticalRisks,
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
     molds,
     planConfidence,
     productionOrders,
+    maintenance,
   } = dashboardPreviewData;
 
   return (
@@ -147,7 +149,7 @@ export default async function DashboardPage() {
         className="command-center__quick-actions-strip"
       >
         <QuickActionsPanel
-          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+          grantedPermissionKeys={grantedPermissionKeys}
         />
       </section>
 
@@ -155,14 +157,21 @@ export default async function DashboardPage() {
         aria-label="Karar ve risk merkezi"
         className="command-center__decision-grid"
       >
-        <AiTaskCenterSummary tasks={aiTasks} />
+        <AiTaskCenterSummary
+          grantedPermissionKeys={grantedPermissionKeys}
+          tasks={aiTasks}
+        />
 
         <DailyOperationsSummary
+          grantedPermissionKeys={grantedPermissionKeys}
           metrics={dailyOperations}
           shifts={[]}
         />
 
-        <CriticalRisksPanel risks={criticalRisks} />
+        <CriticalRisksPanel
+          grantedPermissionKeys={grantedPermissionKeys}
+          risks={criticalRisks}
+        />
 
       </section>
 
@@ -170,10 +179,13 @@ export default async function DashboardPage() {
         aria-label="Canlı üretim operasyonları"
         className="command-center__operations-grid"
       >
-        <MachineStatusPanel machines={machines} />
+        <MachineStatusPanel
+          grantedPermissionKeys={grantedPermissionKeys}
+          machines={machines}
+        />
 
         <ProductionOrdersTable
-          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+          grantedPermissionKeys={grantedPermissionKeys}
           orders={productionOrders}
         />
 
@@ -184,18 +196,24 @@ export default async function DashboardPage() {
         aria-label="Destek operasyonları"
         className="command-center__support-grid"
       >
-        <MaterialRisksPanel risks={materialRisks} />
+        <MaterialRisksPanel
+          grantedPermissionKeys={grantedPermissionKeys}
+          risks={materialRisks}
+        />
 
-        <MoldStatusPanel molds={molds} />
+        <MoldStatusPanel
+          grantedPermissionKeys={grantedPermissionKeys}
+          molds={molds}
+        />
 
         <MaintenanceStatusPanel
-          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
-          items={[]}
+          grantedPermissionKeys={grantedPermissionKeys}
+          items={maintenance}
         />
 
         <PlanConfidencePanel
           data={planConfidence}
-          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+          grantedPermissionKeys={grantedPermissionKeys}
         />
       </section>
 
