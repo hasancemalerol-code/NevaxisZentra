@@ -119,19 +119,19 @@ assert(
     && /<Link href=\{DASHBOARD_AI_TASK_CENTER_HREF\}[\s\S]{0,80}Tüm AI görevlerini görüntüle/.test(aiSummary),
 );
 assert(
-  "production footer uses existing list route",
+  "production footer uses permission-gated list route",
   production.includes('href="/uretim"')
-    && production.includes("Üretim emirlerini görüntüleme yetkiniz yok."),
+    && production.includes("canOpenProduction"),
 );
 assert(
-  "maintenance footer uses existing list route",
+  "maintenance footer uses permission-gated list route",
   maintenance.includes('href="/bakim"')
-    && maintenance.includes("Bakım planını görüntüleme yetkiniz yok."),
+    && maintenance.includes("canOpenMaintenance"),
 );
 assert(
-  "planning footer uses existing list route",
+  "planning footer uses permission-gated list route",
   planning.includes('href="/planlama"')
-    && planning.includes("Üretim planlarını görüntüleme yetkiniz yok."),
+    && planning.includes("canOpenPlanning"),
 );
 assert(
   "permission helper is deny-by-key",

@@ -205,9 +205,9 @@ assert(
     && !hasActiveFooterLink(sales.html, "/bakim", "Bakım planını görüntüle"),
 );
 assert(
-  "machine/materials see a disabled production reason",
-  machine.html.includes("Üretim emirlerini görüntüleme yetkiniz yok.")
-    && sales.html.includes("Üretim emirlerini görüntüleme yetkiniz yok."),
+  "restricted personas do not see production footer markup",
+  !machine.html.includes("Tüm üretim emirlerini görüntüle")
+    && !sales.html.includes("Tüm üretim emirlerini görüntüle"),
 );
 assert(
   "invalid dashboard AI references are not linked",
