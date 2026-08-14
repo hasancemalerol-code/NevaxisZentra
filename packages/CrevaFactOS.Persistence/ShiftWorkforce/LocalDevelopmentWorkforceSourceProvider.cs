@@ -59,7 +59,7 @@ public sealed class LocalDevelopmentWorkforceSourceProvider : IWorkforceSourcePr
                 "SHIFT-B",
                 "CAL-2026-W33",
                 now.AddHours(-1),
-                "pilot-swf-003-v1",
+                "pilot-swf-003-v2",
                 ShiftWorkforceFreshnessStates.Stale,
                 []),
             new(
