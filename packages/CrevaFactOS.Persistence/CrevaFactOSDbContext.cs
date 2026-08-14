@@ -20,6 +20,7 @@ using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasIdentity;
+using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -170,6 +171,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<SaasIdentityMfaMethod> SaasIdentityMfaMethods => Set<SaasIdentityMfaMethod>();
     public DbSet<SaasIdentityRecoveryCode> SaasIdentityRecoveryCodes => Set<SaasIdentityRecoveryCode>();
     public DbSet<SaasIdentitySecurityAuditEvent> SaasIdentitySecurityAuditEvents => Set<SaasIdentitySecurityAuditEvent>();
+
+    public DbSet<TenantMembershipPermissionOverride> TenantMembershipPermissionOverrides => Set<TenantMembershipPermissionOverride>();
+    public DbSet<AuthorizationAuditEvent> AuthorizationAuditEvents => Set<AuthorizationAuditEvent>();
+    public DbSet<AdminAccessIdempotencyRecord> AdminAccessIdempotencyRecords => Set<AdminAccessIdempotencyRecord>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -364,14 +369,22 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.Property(membership => membership.Id).HasColumnName("id");
             entity.Property(membership => membership.TenantId).HasColumnName("tenant_id");
             entity.Property(membership => membership.IdentitySubjectId).HasColumnName("identity_subject_id");
+            entity.Property(membership => membership.MembershipReference)
+                .HasColumnName("membership_reference")
+                .HasMaxLength(100);
             entity.Property(membership => membership.Status)
                 .HasColumnName("status")
                 .HasConversion<string>()
                 .HasMaxLength(20);
+            entity.Property(membership => membership.AuthorizationVersion)
+                .HasColumnName("authorization_version")
+                .IsConcurrencyToken();
             entity.Property(membership => membership.CreatedAtUtc).HasColumnName("created_at_utc");
             entity.HasIndex(membership => new { membership.TenantId, membership.IdentitySubjectId })
                 .IsUnique();
             entity.HasIndex(membership => new { membership.TenantId, membership.Id })
+                .IsUnique();
+            entity.HasIndex(membership => new { membership.TenantId, membership.MembershipReference })
                 .IsUnique();
             entity.HasIndex(membership => membership.IdentitySubjectId);
             entity.HasOne<Tenant>()
@@ -397,16 +410,27 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.HasKey(permission => permission.Id);
             entity.Property(permission => permission.Id).HasColumnName("id");
             entity.Property(permission => permission.Key).HasColumnName("key").HasMaxLength(150);
+            entity.Property(permission => permission.NormalizedKey).HasColumnName("normalized_key").HasMaxLength(150);
             entity.Property(permission => permission.Description).HasColumnName("description").HasMaxLength(300);
+            entity.Property(permission => permission.TurkishLabel).HasColumnName("turkish_label").HasMaxLength(200);
+            entity.Property(permission => permission.ModuleResourceCode).HasColumnName("module_resource_code").HasMaxLength(80);
+            entity.Property(permission => permission.ActionCode).HasColumnName("action_code").HasMaxLength(40);
+            entity.Property(permission => permission.SensitivityClassification).HasColumnName("sensitivity_classification").HasMaxLength(20);
+            entity.Property(permission => permission.RequiresRecentAuth).HasColumnName("requires_recent_auth");
+            entity.Property(permission => permission.SupportedRecordScopes).HasColumnName("supported_record_scopes").HasMaxLength(80);
             entity.Property(permission => permission.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
             entity.Property(permission => permission.CreatedAtUtc).HasColumnName("created_at_utc");
             entity.HasIndex(permission => permission.Key).IsUnique();
+            entity.HasIndex(permission => permission.NormalizedKey).IsUnique();
             entity.ToTable(table =>
             {
-                table.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
+                table.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive', 'Retired')");
                 table.HasCheckConstraint(
                     "ck_permission_definitions_key",
                     "key ~ '^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$'");
+                table.HasCheckConstraint(
+                    "ck_permission_definitions_sensitivity",
+                    "sensitivity_classification IN ('standard', 'sensitive')");
             });
         });
 
@@ -418,14 +442,21 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.Property(role => role.TenantId).HasColumnName("tenant_id");
             entity.Property(role => role.Key).HasColumnName("key").HasMaxLength(100);
             entity.Property(role => role.DisplayName).HasColumnName("display_name").HasMaxLength(200);
+            entity.Property(role => role.Description).HasColumnName("description").HasMaxLength(400);
+            entity.Property(role => role.SystemTemplateOrigin).HasColumnName("system_template_origin").HasMaxLength(80);
+            entity.Property(role => role.IsProtected).HasColumnName("is_protected");
             entity.Property(role => role.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(role => role.Version).HasColumnName("version").IsConcurrencyToken();
+            entity.Property(role => role.CreatedByActorReference).HasColumnName("created_by_actor_reference").HasMaxLength(120);
+            entity.Property(role => role.UpdatedByActorReference).HasColumnName("updated_by_actor_reference").HasMaxLength(120);
             entity.Property(role => role.CreatedAtUtc).HasColumnName("created_at_utc");
+            entity.Property(role => role.UpdatedAtUtc).HasColumnName("updated_at_utc");
             entity.HasIndex(role => new { role.TenantId, role.Key }).IsUnique();
             entity.HasIndex(role => new { role.TenantId, role.Id }).IsUnique();
             entity.HasOne<Tenant>().WithMany().HasForeignKey(role => role.TenantId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint(
                 "ck_tenant_roles_status",
-                "status IN ('Active', 'Inactive')"));
+                "status IN ('Active', 'Inactive', 'Retired')"));
             entity.HasQueryFilter(role => tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && role.TenantId == tenantContextAccessor.Current!.TenantId);
@@ -438,6 +469,9 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.Property(item => item.TenantId).HasColumnName("tenant_id");
             entity.Property(item => item.TenantRoleId).HasColumnName("tenant_role_id");
             entity.Property(item => item.PermissionDefinitionId).HasColumnName("permission_definition_id");
+            entity.Property(item => item.RecordScope).HasColumnName("record_scope").HasMaxLength(20);
+            entity.Property(item => item.EffectiveFromUtc).HasColumnName("effective_from_utc");
+            entity.Property(item => item.EffectiveUntilUtc).HasColumnName("effective_until_utc");
             entity.HasIndex(item => item.TenantId);
             entity.HasIndex(item => item.PermissionDefinitionId);
             entity.HasOne<TenantRole>().WithMany()
@@ -447,6 +481,9 @@ public sealed class CrevaFactOSDbContext : DbContext
             entity.HasOne<PermissionDefinition>().WithMany()
                 .HasForeignKey(item => item.PermissionDefinitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_tenant_role_permissions_scope",
+                "record_scope IS NULL OR record_scope IN ('own', 'assigned', 'facility', 'tenant')"));
             entity.HasQueryFilter(item => tenantContextAccessor != null
                 && tenantContextAccessor.IsAvailable
                 && item.TenantId == tenantContextAccessor.Current!.TenantId);
@@ -1491,6 +1528,24 @@ public sealed class CrevaFactOSDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SaasIdentityMfaMethodEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasIdentityRecoveryCodeEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasIdentitySecurityAuditEventEntityConfiguration());
+
+        modelBuilder.ApplyConfiguration(new TenantMembershipPermissionOverrideEntityConfiguration());
+        modelBuilder.Entity<TenantMembershipPermissionOverride>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AuthorizationAuditEventEntityConfiguration());
+        modelBuilder.Entity<AuthorizationAuditEvent>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AdminAccessIdempotencyRecordEntityConfiguration());
+        modelBuilder.Entity<AdminAccessIdempotencyRecord>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

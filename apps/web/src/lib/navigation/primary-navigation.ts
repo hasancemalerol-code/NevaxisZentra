@@ -67,6 +67,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Makineler",
         href: "/makineler",
         iconKey: "cpu",
+        permissionKey: "edge.read",
       },
       {
         label: "Kalıplar",
@@ -84,6 +85,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Bakım",
         href: "/bakim",
         iconKey: "wrench",
+        permissionKey: "maintenance.read",
       },
       {
         label: "Kalite Kontrol",

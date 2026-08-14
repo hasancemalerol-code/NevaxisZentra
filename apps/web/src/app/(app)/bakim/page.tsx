@@ -1,10 +1,17 @@
 import { Wrench } from "lucide-react";
+import { forbidden } from "next/navigation";
 
+import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { MaintenanceDashboardView } from "@/features/maintenance/components/maintenance-dashboard-view";
 import { readMaintenanceConditionOverviewSnapshot } from "@/features/maintenance/server/maintenance-condition-reader";
 import { readMaintenanceDashboard } from "@/features/maintenance/server/maintenance-reader";
 
 export default async function MaintenancePage() {
+  const access = await fetchCurrentEffectiveAccess();
+  if (!hasGrantedPermission(access, "maintenance.read")) {
+    forbidden();
+  }
+
   const [result, conditionResult] = await Promise.all([
     readMaintenanceDashboard(),
     readMaintenanceConditionOverviewSnapshot(),

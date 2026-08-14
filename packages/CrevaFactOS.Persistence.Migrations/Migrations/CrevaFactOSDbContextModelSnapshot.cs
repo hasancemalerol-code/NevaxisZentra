@@ -22,6 +22,188 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.AdminAccessIdempotencyRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("operation");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("request_hash");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_admin_access_idempotency_key");
+
+                    b.ToTable("admin_access_idempotency_records", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.AuthorizationAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorReference")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("actor_reference");
+
+                    b.Property<string>("AfterJson")
+                        .HasColumnType("text")
+                        .HasColumnName("after_json");
+
+                    b.Property<string>("BeforeJson")
+                        .HasColumnType("text")
+                        .HasColumnName("before_json");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("EntityReference")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("entity_reference");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreatedAtUtc")
+                        .HasDatabaseName("ix_authorization_audit_events_tenant_created");
+
+                    b.HasIndex("TenantId", "EntityType", "EntityReference")
+                        .HasDatabaseName("ix_authorization_audit_events_entity");
+
+                    b.ToTable("authorization_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.TenantMembershipPermissionOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Effect")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("effect");
+
+                    b.Property<DateTimeOffset?>("EffectiveFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from_utc");
+
+                    b.Property<DateTimeOffset?>("EffectiveUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_until_utc");
+
+                    b.Property<Guid>("PermissionDefinitionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("permission_definition_id");
+
+                    b.Property<string>("RecordScope")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("record_scope");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("TenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_membership_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionDefinitionId");
+
+                    b.HasIndex("TenantId", "TenantMembershipId", "PermissionDefinitionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_tenant_membership_permission_overrides_grant");
+
+                    b.HasIndex("TenantId", "TenantMembershipId", "Effect", "Status")
+                        .HasDatabaseName("ix_tenant_membership_permission_overrides_lookup");
+
+                    b.ToTable("tenant_membership_permission_overrides", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenant_membership_permission_overrides_effect", "effect IN ('allow', 'deny')");
+
+                            t.HasCheckConstraint("ck_tenant_membership_permission_overrides_scope", "record_scope IS NULL OR record_scope IN ('own', 'assigned', 'facility', 'tenant')");
+
+                            t.HasCheckConstraint("ck_tenant_membership_permission_overrides_status", "status IN ('Active', 'Inactive', 'Retired')");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.AiDecisions.AiDecisionRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -437,6 +619,12 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("ActionCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("action_code");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
@@ -453,22 +641,61 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(150)")
                         .HasColumnName("key");
 
+                    b.Property<string>("ModuleResourceCode")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("module_resource_code");
+
+                    b.Property<string>("NormalizedKey")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("normalized_key");
+
+                    b.Property<bool>("RequiresRecentAuth")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_recent_auth");
+
+                    b.Property<string>("SensitivityClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("sensitivity_classification");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
 
+                    b.Property<string>("SupportedRecordScopes")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("supported_record_scopes");
+
+                    b.Property<string>("TurkishLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("turkish_label");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedKey")
                         .IsUnique();
 
                     b.ToTable("permission_definitions", null, t =>
                         {
                             t.HasCheckConstraint("ck_permission_definitions_key", "key ~ '^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$'");
 
-                            t.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive')");
+                            t.HasCheckConstraint("ck_permission_definitions_sensitivity", "sensitivity_classification IN ('standard', 'sensitive')");
+
+                            t.HasCheckConstraint("ck_permission_definitions_status", "status IN ('Active', 'Inactive', 'Retired')");
                         });
                 });
 
@@ -523,11 +750,25 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
 
+                    b.Property<string>("CreatedByActorReference")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("created_by_actor_reference");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)")
+                        .HasColumnName("description");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("display_name");
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_protected");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -541,9 +782,28 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
 
+                    b.Property<string>("SystemTemplateOrigin")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("system_template_origin");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedByActorReference")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("updated_by_actor_reference");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.HasKey("Id");
 
@@ -555,7 +815,7 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.ToTable("tenant_roles", null, t =>
                         {
-                            t.HasCheckConstraint("ck_tenant_roles_status", "status IN ('Active', 'Inactive')");
+                            t.HasCheckConstraint("ck_tenant_roles_status", "status IN ('Active', 'Inactive', 'Retired')");
                         });
                 });
 
@@ -569,6 +829,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("permission_definition_id");
 
+                    b.Property<DateTimeOffset?>("EffectiveFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from_utc");
+
+                    b.Property<DateTimeOffset?>("EffectiveUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_until_utc");
+
+                    b.Property<string>("RecordScope")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("record_scope");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
@@ -581,7 +854,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "TenantRoleId");
 
-                    b.ToTable("tenant_role_permissions", (string)null);
+                    b.ToTable("tenant_role_permissions", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenant_role_permissions_scope", "record_scope IS NULL OR record_scope IN ('own', 'assigned', 'facility', 'tenant')");
+                        });
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Edge.EdgeGateway", b =>
@@ -6631,6 +6907,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<long>("AuthorizationVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("authorization_version");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
@@ -6638,6 +6919,12 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Property<Guid>("IdentitySubjectId")
                         .HasColumnType("uuid")
                         .HasColumnName("identity_subject_id");
+
+                    b.Property<string>("MembershipReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("membership_reference");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -6657,6 +6944,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsUnique();
 
                     b.HasIndex("TenantId", "IdentitySubjectId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "MembershipReference")
                         .IsUnique();
 
                     b.ToTable("tenant_memberships", null, t =>
@@ -16266,6 +16556,46 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("tenant_isolation_probes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.AdminAccessIdempotencyRecord", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.AuthorizationAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AdminAccess.TenantMembershipPermissionOverride", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Authorization.PermissionDefinition", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Identity.TenantMembership", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "TenantMembershipId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.AiDecisions.AiDecisionRecord", b =>

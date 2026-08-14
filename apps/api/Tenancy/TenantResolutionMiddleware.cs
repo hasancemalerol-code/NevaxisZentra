@@ -1,3 +1,5 @@
+using CrevaFactOS.Api.SaasIdentity;
+using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.Tenancy;
 using CrevaFactOS.Persistence.Identity;
 
@@ -20,6 +22,25 @@ public sealed class TenantResolutionMiddleware(
         TenantContextAccessor tenantContextAccessor,
         ICurrentIdentityAccessor currentIdentityAccessor)
     {
+        var session = SaasIdentityEndpointHelpers.GetSessionContext(httpContext);
+        if (session is not null)
+        {
+            if (httpContext.Request.Headers.TryGetValue(HeaderName, out var sessionHeaderValues)
+                && !HeaderMatchesTrustedSession(sessionHeaderValues, session))
+            {
+                await WriteProblemAsync(
+                    httpContext,
+                    StatusCodes.Status403Forbidden,
+                    "Tenant access denied.");
+                return;
+            }
+
+            tenantContextAccessor.Set(
+                new TenantContext(session.TenantId, session.TenantKey, session.TenantMembershipId));
+            await next(httpContext);
+            return;
+        }
+
         if (!httpContext.Request.Headers.TryGetValue(HeaderName, out var values))
         {
             await next(httpContext);
@@ -85,6 +106,25 @@ public sealed class TenantResolutionMiddleware(
 
         tenantContextAccessor.Set(context);
         await next(httpContext);
+    }
+
+    private static bool HeaderMatchesTrustedSession(
+        Microsoft.Extensions.Primitives.StringValues values,
+        SaasIdentitySessionContext session)
+    {
+        if (values.Count == 0)
+        {
+            return true;
+        }
+
+        if (values.Count != 1 || string.IsNullOrWhiteSpace(values[0]) || values[0]!.Length > 100)
+        {
+            return false;
+        }
+
+        var requested = values[0]!.Trim();
+        return string.Equals(requested, session.TenantKey, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(requested, session.TenantId.ToString("D"), StringComparison.OrdinalIgnoreCase);
     }
 
     private static Task WriteProblemAsync(HttpContext context, int statusCode, string title)

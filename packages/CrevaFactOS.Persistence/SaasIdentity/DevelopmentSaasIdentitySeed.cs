@@ -304,7 +304,9 @@ internal static class DevelopmentSaasIdentitySeed
             Id = membershipId,
             TenantId = tenantId,
             IdentitySubjectId = identitySubjectId,
+            MembershipReference = TenantMembership.CreateReference(membershipId),
             Status = TenantMembershipStatus.Active,
+            AuthorizationVersion = 1,
             CreatedAtUtc = seedTimestampUtc,
         });
     }

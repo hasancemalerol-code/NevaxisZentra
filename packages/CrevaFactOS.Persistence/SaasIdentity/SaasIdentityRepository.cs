@@ -814,7 +814,9 @@ public sealed class SaasIdentityRepository(
                 Id = membershipId,
                 TenantId = invitation.TenantId,
                 IdentitySubjectId = account.IdentitySubjectId,
+                MembershipReference = TenantMembership.CreateReference(membershipId),
                 Status = TenantMembershipStatus.Active,
+                AuthorizationVersion = 1,
                 CreatedAtUtc = now,
             });
         }

@@ -4,4 +4,5 @@ public enum AuthorizationStatus
 {
     Active,
     Inactive,
+    Retired,
 }

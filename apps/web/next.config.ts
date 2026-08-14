@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   agentRules: false,
   output: "standalone",
   reactStrictMode: true,
+  experimental: {
+    authInterrupts: true,
+  },
   async rewrites() {
     if (!apiBaseUrl) {
       return [];
@@ -15,6 +18,10 @@ const nextConfig: NextConfig = {
       {
         source: "/api/identity/:path*",
         destination: `${apiBaseUrl}/api/identity/:path*`,
+      },
+      {
+        source: "/api/admin-access/:path*",
+        destination: `${apiBaseUrl}/api/admin-access/:path*`,
       },
     ];
   },

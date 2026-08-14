@@ -11,6 +11,7 @@ using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasIdentity;
+using CrevaFactOS.Persistence.AdminAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -633,6 +634,11 @@ internal sealed class DevelopmentPilotBootstrapService(
             saasIdentityOptions,
             seedTimestampUtc,
             cancellationToken);
+        await DevelopmentAdminAccessSeed.EnsureDevelopmentAdminAccessFoundationAsync(
+            dbContext,
+            saasIdentityOptions,
+            seedTimestampUtc,
+            cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -736,7 +742,9 @@ internal sealed class DevelopmentPilotBootstrapService(
             Id = DevelopmentPilotIds.TenantMembershipId,
             TenantId = tenantId,
             IdentitySubjectId = identitySubjectId,
+            MembershipReference = TenantMembership.CreateReference(DevelopmentPilotIds.TenantMembershipId),
             Status = TenantMembershipStatus.Active,
+            AuthorizationVersion = 1,
             CreatedAtUtc = seedTimestampUtc,
         };
 
@@ -1302,7 +1310,9 @@ internal sealed class DevelopmentPilotBootstrapService(
             Id = DevelopmentPilotIds.ReviewerTenantMembershipId,
             TenantId = tenantId,
             IdentitySubjectId = identitySubjectId,
+            MembershipReference = TenantMembership.CreateReference(DevelopmentPilotIds.ReviewerTenantMembershipId),
             Status = TenantMembershipStatus.Active,
+            AuthorizationVersion = 1,
             CreatedAtUtc = seedTimestampUtc,
         };
 
@@ -2014,7 +2024,9 @@ internal sealed class DevelopmentPilotBootstrapService(
             Id = DevelopmentPilotIds.OperatorTenantMembershipId,
             TenantId = tenantId,
             IdentitySubjectId = identitySubjectId,
+            MembershipReference = TenantMembership.CreateReference(DevelopmentPilotIds.OperatorTenantMembershipId),
             Status = TenantMembershipStatus.Active,
+            AuthorizationVersion = 1,
             CreatedAtUtc = seedTimestampUtc,
         };
 
@@ -2155,7 +2167,9 @@ internal sealed class DevelopmentPilotBootstrapService(
             Id = DevelopmentPilotIds.QualityNegativeTestTenantMembershipId,
             TenantId = tenantId,
             IdentitySubjectId = identitySubjectId,
+            MembershipReference = TenantMembership.CreateReference(DevelopmentPilotIds.QualityNegativeTestTenantMembershipId),
             Status = TenantMembershipStatus.Active,
+            AuthorizationVersion = 1,
             CreatedAtUtc = seedTimestampUtc,
         };
 
