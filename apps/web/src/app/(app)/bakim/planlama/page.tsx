@@ -1,5 +1,9 @@
 import { CalendarClock } from "lucide-react";
 
+import {
+  fetchCurrentEffectiveAccess,
+  hasGrantedPermission,
+} from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenancePlanningView } from "@/features/maintenance/components/maintenance-planning-view";
 import "@/features/maintenance/components/maintenance-workspace.css";
@@ -12,6 +16,7 @@ import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maint
 
 export default async function MaintenancePlanningPage() {
   await forbidUnlessGranted("maintenance.read");
+  const access = await fetchCurrentEffectiveAccess();
 
   const result = await readMaintenancePlanning();
 
@@ -38,6 +43,7 @@ export default async function MaintenancePlanningPage() {
 
   return (
     <MaintenancePlanningView
+      canManage={hasGrantedPermission(access, "maintenance.manage")}
       dues={result.dues}
       plans={result.plans}
       onGenerateNextDue={generatePreventiveNextDueAction}

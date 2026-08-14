@@ -88,6 +88,7 @@ type MaintenanceSectionHeaderProps = Readonly<{
   subtitle?: string;
   actionHref?: string;
   actionLabel?: string;
+  actionDisabledReason?: string;
   className?: string;
 }>;
 
@@ -96,6 +97,7 @@ export function MaintenanceSectionHeader({
   subtitle,
   actionHref,
   actionLabel,
+  actionDisabledReason,
   className = "maintenance-dashboard-section__header",
 }: MaintenanceSectionHeaderProps) {
   return (
@@ -104,7 +106,17 @@ export function MaintenanceSectionHeader({
         <h2>{title}</h2>
         {subtitle ? <p>{subtitle}</p> : null}
       </div>
-      {actionHref && actionLabel ? (
+      {actionLabel && actionDisabledReason ? (
+        <button
+          aria-label={`${actionLabel}. ${actionDisabledReason}`}
+          className="maintenance-section-action"
+          disabled
+          title={actionDisabledReason}
+          type="button"
+        >
+          {actionLabel}
+        </button>
+      ) : actionHref && actionLabel ? (
         <Link href={actionHref} className="maintenance-section-action">
           {actionLabel}
         </Link>

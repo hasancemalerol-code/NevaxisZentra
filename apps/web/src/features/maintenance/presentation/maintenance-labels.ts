@@ -339,7 +339,7 @@ export function buildMaintenanceCriticalAlerts(input: Readonly<{
         reference: request.requestNumber,
         reason: request.title,
         statusLabel: getMaintenancePriorityLabel(request.priority),
-        href: `/bakim`,
+        href: `/bakim/arizalar/${request.id}`,
         tone: "danger",
       });
     }

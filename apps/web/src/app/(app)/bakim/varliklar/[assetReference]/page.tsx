@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Factory, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import {
@@ -29,6 +30,8 @@ type PageProps = Readonly<{
 }>;
 
 export default async function MaintenanceAssetHistoryPage({ params }: PageProps) {
+  await forbidUnlessGranted("maintenance.read");
+
   const { assetReference: rawReference } = await params;
   const assetReference = decodeURIComponent(rawReference);
   const [result, reliabilityResult] = await Promise.all([

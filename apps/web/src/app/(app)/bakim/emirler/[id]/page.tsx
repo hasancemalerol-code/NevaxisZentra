@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Factory, Wrench } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { isMaintenanceRecordId } from "@/features/maintenance/lib/maintenance-record-id";
+
 import { Badge } from "@/components/ui/badge";
 import {
   MaintenanceWorkOrderCostSummaryPanel,
@@ -50,13 +53,23 @@ function formatDateTime(iso?: string): string {
 }
 
 export default async function MaintenanceWorkOrderDetailPage({ params }: PageProps) {
+  await forbidUnlessGranted("maintenance.read");
+
   const { id } = await params;
+  if (id === "yeni" || !isMaintenanceRecordId(id)) {
+    notFound();
+  }
+
   const [result, executionResult] = await Promise.all([
     readMaintenanceWorkOrderDetail(id),
     readMaintenanceWorkOrderExecution(id),
   ]);
 
   if (result.status === "failure") {
+    if (result.code === "not-found" || result.code === "permission-denied") {
+      notFound();
+    }
+
     return (
       <main className="production-execution-page maintenance-page">
         <header className="maintenance-page-header production-execution-header">

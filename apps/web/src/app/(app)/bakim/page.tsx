@@ -37,6 +37,7 @@ export default async function MaintenancePage() {
 
   return (
     <MaintenanceDashboardView
+      canManage={hasGrantedPermission(access, "maintenance.manage")}
       summary={result.summary}
       requests={result.requests}
       workOrders={result.workOrders}

@@ -1,11 +1,14 @@
 import { BarChart3 } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenanceReportingView } from "@/features/maintenance/components/maintenance-reporting-view";
 import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import { readMaintenanceReporting } from "@/features/maintenance/server/maintenance-reader";
 
 export default async function MaintenanceReportingPage() {
+  await forbidUnlessGranted("maintenance.read");
+
   const result = await readMaintenanceReporting();
 
   if (result.status === "failure") {

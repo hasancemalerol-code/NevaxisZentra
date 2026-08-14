@@ -37,6 +37,7 @@ import {
   isOpenMaintenanceRequest,
   isOverduePreventivePlan,
 } from "../presentation/maintenance-labels";
+import { MaintenanceCreateAction } from "./maintenance-create-action";
 import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
 import {
   MaintenanceAssetCell,
@@ -50,6 +51,7 @@ import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 import "./maintenance-workspace.css";
 
 type MaintenanceDashboardViewProps = Readonly<{
+  canManage: boolean;
   summary: MaintenanceWorkspaceSummary;
   requests: readonly MaintenanceRequestSummary[];
   workOrders: readonly MaintenanceWorkOrderSummary[];
@@ -102,6 +104,7 @@ function formatDate(iso?: string): string {
 }
 
 export function MaintenanceDashboardView({
+  canManage,
   summary,
   requests,
   workOrders,
@@ -144,27 +147,30 @@ export function MaintenanceDashboardView({
           </span>
         </div>
         <div className="maintenance-dashboard-header__actions">
-          <Link
+          <MaintenanceCreateAction
+            canManage={canManage}
+            deniedReason="Arıza kaydı oluşturma yetkiniz yok."
             href="/bakim/arizalar/yeni"
-            className="maintenance-dashboard-action maintenance-dashboard-action--primary"
-          >
-            <AlertTriangle aria-hidden="true" />
-            Yeni Arıza Kaydı
-          </Link>
-          <Link
+            icon={<AlertTriangle aria-hidden="true" />}
+            label="Yeni Arıza Kaydı"
+            variant="primary"
+          />
+          <MaintenanceCreateAction
+            canManage={canManage}
+            deniedReason="Bakım emri oluşturma yetkiniz yok."
             href="/bakim/emirler/yeni"
-            className="maintenance-dashboard-action maintenance-dashboard-action--secondary"
-          >
-            <Wrench aria-hidden="true" />
-            Yeni Bakım Emri
-          </Link>
-          <Link
+            icon={<Wrench aria-hidden="true" />}
+            label="Yeni Bakım Emri"
+            variant="secondary"
+          />
+          <MaintenanceCreateAction
+            canManage={canManage}
+            deniedReason="Periyodik bakım planı oluşturma yetkiniz yok."
             href="/bakim/planlar/yeni"
-            className="maintenance-dashboard-action maintenance-dashboard-action--tertiary"
-          >
-            <CalendarClock aria-hidden="true" />
-            Periyodik Bakım Planı
-          </Link>
+            icon={<CalendarClock aria-hidden="true" />}
+            label="Periyodik Bakım Planı"
+            variant="tertiary"
+          />
         </div>
       </header>
 
@@ -428,6 +434,9 @@ export function MaintenanceDashboardView({
             title="Arıza Kayıtları"
             actionHref="/bakim/arizalar/yeni"
             actionLabel="Yeni Arıza Kaydı"
+            actionDisabledReason={
+              canManage ? undefined : "Arıza kaydı oluşturma yetkiniz yok."
+            }
           />
           {openRequests.length === 0 ? (
             <MaintenanceEmptyState
@@ -497,7 +506,7 @@ export function MaintenanceDashboardView({
                           <MaintenanceTableActionLink href={`/bakim/arizalar/${request.id}`}>
                             İncele
                           </MaintenanceTableActionLink>
-                          {request.status === "open" || request.status === "triaged" ? (
+                          {canManage && (request.status === "open" || request.status === "triaged") ? (
                             <MaintenanceTableActionLink
                               href={`/bakim/arizalar/${request.id}?convert=1`}
                               title="Bakım Emrine Dönüştür"
@@ -522,6 +531,9 @@ export function MaintenanceDashboardView({
             title="Periyodik Bakım Planları"
             actionHref="/bakim/planlar/yeni"
             actionLabel="Yeni Plan"
+            actionDisabledReason={
+              canManage ? undefined : "Periyodik bakım planı oluşturma yetkiniz yok."
+            }
           />
           {activePlans.length === 0 ? (
             <MaintenanceEmptyState

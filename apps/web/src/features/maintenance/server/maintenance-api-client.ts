@@ -107,11 +107,20 @@ async function getJsonWithQuery<T>(
       };
     }
 
+    if (response.status === 404) {
+      return {
+        status: "failure",
+        code: "not-found",
+        message: "Maintenance record was not found.",
+        retryable: false,
+      };
+    }
+
     if (!response.ok) {
       return {
         status: "failure",
         code: "source-unavailable",
-        message: `Maintenance request failed (${response.status}).`,
+        message: "Maintenance request failed.",
         retryable: response.status >= 500,
       };
     }
@@ -177,11 +186,29 @@ async function postJson<T>(
       };
     }
 
+    if (response.status === 400) {
+      return {
+        status: "failure",
+        code: "invalid-request",
+        message: "Geçersiz bakım kaydı. Zorunlu alanları kontrol edin.",
+        retryable: false,
+      };
+    }
+
+    if (response.status === 404) {
+      return {
+        status: "failure",
+        code: "not-found",
+        message: "Maintenance record was not found.",
+        retryable: false,
+      };
+    }
+
     if (!response.ok) {
       return {
         status: "failure",
         code: "source-unavailable",
-        message: `Maintenance write failed (${response.status}).`,
+        message: "Maintenance write failed.",
         retryable: response.status >= 500,
       };
     }
@@ -417,6 +444,134 @@ export function createWorkOrderFromPreventiveDue(
   return postJson(
     context,
     `/api/maintenance/preventive-dues/${dueId}/create-work-order`,
+    body,
+    parseMaintenanceWriteApiResponse,
+  );
+}
+
+export function createMaintenanceRequest(
+  context: ProductionOrderRequestContext,
+  body: Readonly<{
+    assetType: string;
+    assetId?: string;
+    assetReference: string;
+    assetName?: string;
+    productionOrderId?: string;
+    type: string;
+    priority: string;
+    title: string;
+    description: string;
+    source?: string;
+  }>,
+): Promise<MaintenanceApiResult<Readonly<{ id: string; version: number }>>> {
+  return postJson(
+    context,
+    "/api/maintenance/requests",
+    {
+      assetType: body.assetType,
+      assetId: body.assetId,
+      assetReference: body.assetReference,
+      assetName: body.assetName,
+      productionOrderId: body.productionOrderId,
+      type: body.type,
+      priority: body.priority,
+      title: body.title,
+      description: body.description,
+      source: body.source,
+    },
+    parseMaintenanceWriteApiResponse,
+  );
+}
+
+export function createMaintenanceWorkOrder(
+  context: ProductionOrderRequestContext,
+  body: Readonly<{
+    assetType: string;
+    assetId?: string;
+    assetReference: string;
+    assetName?: string;
+    productionOrderId?: string;
+    maintenanceRequestId?: string;
+    type: string;
+    priority: string;
+    title: string;
+    description: string;
+    assignedTechnicianSubjectId?: string;
+    plannedStartUtc?: string;
+    plannedEndUtc?: string;
+    initialStatus: string;
+  }>,
+): Promise<MaintenanceApiResult<Readonly<{ id: string; version: number }>>> {
+  return postJson(
+    context,
+    "/api/maintenance/work-orders",
+    {
+      assetType: body.assetType,
+      assetId: body.assetId,
+      assetReference: body.assetReference,
+      assetName: body.assetName,
+      productionOrderId: body.productionOrderId,
+      maintenanceRequestId: body.maintenanceRequestId,
+      type: body.type,
+      priority: body.priority,
+      title: body.title,
+      description: body.description,
+      assignedTechnicianSubjectId: body.assignedTechnicianSubjectId,
+      plannedStartUtc: body.plannedStartUtc,
+      plannedEndUtc: body.plannedEndUtc,
+      initialStatus: body.initialStatus,
+    },
+    parseMaintenanceWriteApiResponse,
+  );
+}
+
+export function createPreventiveMaintenancePlan(
+  context: ProductionOrderRequestContext,
+  body: Readonly<{
+    code: string;
+    name: string;
+    assetType: string;
+    assetId?: string;
+    assetReference: string;
+    intervalType: string;
+    intervalValue: number;
+    nextDueAtUtc?: string;
+    status: string;
+    description?: string;
+  }>,
+): Promise<MaintenanceApiResult<Readonly<{ id: string; version: number }>>> {
+  return postJson(
+    context,
+    "/api/maintenance/preventive-plans",
+    {
+      code: body.code,
+      name: body.name,
+      assetType: body.assetType,
+      assetId: body.assetId,
+      assetReference: body.assetReference,
+      intervalType: body.intervalType,
+      intervalValue: body.intervalValue,
+      nextDueAtUtc: body.nextDueAtUtc,
+      status: body.status,
+      description: body.description,
+    },
+    parseMaintenanceWriteApiResponse,
+  );
+}
+
+export function convertMaintenanceRequestToWorkOrder(
+  context: ProductionOrderRequestContext,
+  requestId: string,
+  body: Readonly<{
+    expectedVersion: number;
+    assignedTechnicianSubjectId?: string;
+    plannedStartUtc?: string;
+    plannedEndUtc?: string;
+  }>,
+): Promise<MaintenanceApiResult<Readonly<{ id: string; version: number }>>> {
+  return postJson(
+    context,
+    `/api/maintenance/requests/${requestId}/convert-to-work-order`,
     body,
     parseMaintenanceWriteApiResponse,
   );

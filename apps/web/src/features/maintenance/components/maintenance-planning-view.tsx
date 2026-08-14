@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Wrench } from "lucide-react";
 import { useState } from "react";
@@ -24,6 +23,7 @@ import type {
   createWorkOrderFromPreventiveDueAction,
   generatePreventiveNextDueAction,
 } from "../server/maintenance-writer";
+import { MaintenanceCreateAction } from "./maintenance-create-action";
 import {
   MaintenanceAssetCell,
   MaintenanceEmptyState,
@@ -36,6 +36,7 @@ import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 import "./maintenance-workspace.css";
 
 type MaintenancePlanningViewProps = Readonly<{
+  canManage: boolean;
   dues: readonly PreventiveMaintenanceDueSummary[];
   plans: readonly PreventiveMaintenancePlanSummary[];
   onGenerateNextDue: typeof generatePreventiveNextDueAction;
@@ -144,6 +145,7 @@ function renderDueTable(
 }
 
 export function MaintenancePlanningView({
+  canManage,
   dues,
   plans,
   onGenerateNextDue,
@@ -199,13 +201,14 @@ export function MaintenancePlanningView({
           <span>Periyodik bakım vadelerini izleyin ve bakım emirlerini planlayın.</span>
         </div>
         <div className="maintenance-page-header__actions">
-          <Link
+          <MaintenanceCreateAction
+            canManage={canManage}
+            deniedReason="Periyodik bakım planı oluşturma yetkiniz yok."
             href="/bakim/planlar/yeni"
-            className="maintenance-dashboard-action maintenance-dashboard-action--secondary"
-          >
-            <CalendarClock aria-hidden="true" />
-            Yeni Periyodik Plan
-          </Link>
+            icon={<CalendarClock aria-hidden="true" />}
+            label="Yeni Periyodik Plan"
+            variant="secondary"
+          />
         </div>
       </header>
 
@@ -261,6 +264,9 @@ export function MaintenancePlanningView({
             title="Planlar"
             actionHref="/bakim/planlar/yeni"
             actionLabel="Yeni Plan"
+            actionDisabledReason={
+              canManage ? undefined : "Periyodik bakım planı oluşturma yetkiniz yok."
+            }
             className="maintenance-section__header"
           />
           {activePlans.length === 0 ? (

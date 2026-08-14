@@ -1,5 +1,6 @@
 import { Activity } from "lucide-react";
 
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenanceConditionView } from "@/features/maintenance/components/maintenance-condition-view";
 import { readMaintenanceConditionWorkspace } from "@/features/maintenance/server/maintenance-condition-reader";
 
@@ -8,6 +9,8 @@ type MaintenanceConditionPageProps = Readonly<{
 }>;
 
 export default async function MaintenanceConditionPage({ searchParams }: MaintenanceConditionPageProps) {
+  await forbidUnlessGranted("maintenance.read");
+
   const params = await searchParams;
   const result = await readMaintenanceConditionWorkspace(params.asset);
 

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import {
   Plus,
@@ -38,13 +37,19 @@ export default function HomePage() {
       <PageHeader
         actions={
           <>
-            <Link
+            <button
+              aria-label="AI'ya Görev Ver. AI görev oluşturma akışı henüz kullanıma hazır değil."
               className="ai-task-create-button"
-              href="/ai-gorevleri/yeni"
+              disabled
+              title="AI görev oluşturma akışı henüz kullanıma hazır değil."
+              type="button"
             >
               <Plus aria-hidden="true" />
-              <span>AI&apos;ya Görev Ver</span>
-            </Link>
+              <span>
+                <strong>AI&apos;ya Görev Ver</strong>
+                <small>AI görev oluşturma akışı henüz kullanıma hazır değil.</small>
+              </span>
+            </button>
 
             <Button
               disabled

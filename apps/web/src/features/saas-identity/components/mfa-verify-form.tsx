@@ -53,7 +53,12 @@ export function MfaVerifyForm() {
   );
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+    <form
+      className="auth-form"
+      method="post"
+      noValidate
+      onSubmit={handleSubmit}
+    >
       <div className="auth-form__mode-switch" role="tablist" aria-label="Doğrulama yöntemi">
         <button
           type="button"

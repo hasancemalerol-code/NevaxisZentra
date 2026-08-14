@@ -101,6 +101,30 @@
   color: #155eef;
 }
 
+.maintenance-dashboard-action span {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.maintenance-dashboard-action small {
+  font-size: 11px;
+  font-weight: 500;
+  white-space: normal;
+}
+
+.maintenance-dashboard-action:disabled,
+.maintenance-section-action:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.maintenance-dashboard-action:focus-visible,
+.maintenance-section-action:focus-visible {
+  outline: 3px solid rgb(21 94 239 / 38%);
+  outline-offset: 2px;
+}
+
 /* ─── Sub-navigation ─── */
 
 .maintenance-workspace-nav {

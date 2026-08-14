@@ -6,6 +6,7 @@ import {
   getMaintenanceFailureBreakdown,
   getMaintenanceReliabilityOverview,
   getMaintenanceReliabilityReport,
+  getMaintenanceRequest,
   getMaintenanceWorkOrder,
   getMaintenanceWorkOrderCostSummary,
   getMaintenanceWorkOrderTimeline,
@@ -27,6 +28,7 @@ import type {
   MaintenancePartUsage,
   MaintenanceReliabilityOverview,
   MaintenanceReliabilityReport,
+  MaintenanceRequestDetail,
   MaintenanceRequestSummary,
   MaintenanceTimelineEntry,
   MaintenanceWorkNote,
@@ -40,6 +42,7 @@ import type {
 type ReadFailure = Readonly<{
   status: "failure";
   message: string;
+  code?: string;
 }>;
 
 export type MaintenanceDashboardResult =
@@ -115,10 +118,35 @@ export async function readMaintenanceWorkOrderDetail(
 
   const result = await getMaintenanceWorkOrder(contextResult.context, workOrderId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", workOrder: result.value };
+}
+
+export type MaintenanceRequestDetailResult =
+  | Readonly<{ status: "success"; request: MaintenanceRequestDetail }>
+  | ReadFailure;
+
+export async function readMaintenanceRequestDetail(
+  requestId: string,
+): Promise<MaintenanceRequestDetailResult> {
+  const configResult = parseProductionExecutionRuntimeConfig();
+  if (configResult.status !== "success") {
+    return { status: "failure", message: configResult.message };
+  }
+
+  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await getMaintenanceRequest(contextResult.context, requestId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message, code: result.code };
+  }
+
+  return { status: "success", request: result.value };
 }
 
 export type MaintenanceWorkOrderExecutionResult =

@@ -31,6 +31,11 @@ export const SAAS_IDENTITY_MESSAGES = {
   resetPasswordTitle: "Parolayı sıfırla",
   invitationTitle: "Daveti kabul et",
   mfaTitle: "Çok faktörlü doğrulama",
+  mfaSwitchAccount: "Başka hesapla giriş yap",
+  mfaCancelSession: "İptal et ve oturumu kapat",
+  mfaExitPending: "Oturum kapatılıyor…",
+  mfaExitFailed:
+    "Bekleyen oturum kapatılamadı. Lütfen tekrar deneyin.",
 } as const;
 
 export function mapSaasIdentityFailureMessage(
