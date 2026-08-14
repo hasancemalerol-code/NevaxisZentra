@@ -6,6 +6,7 @@ import { Activity } from "lucide-react";
 import HomePage from "../src/app/(app)/page";
 import { GET as getHealth } from "../src/app/health/route";
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
+import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
 import { Sidebar } from "../src/components/app-shell/sidebar";
 import { KpiCard } from "../src/components/ui/card";
 import { PageHeader } from "../src/components/ui/page";
@@ -25,7 +26,7 @@ test("renders the polished shell preview without implying real operational data"
 
 test("app shell renders landmarks, skip link, top bar, and content viewport", () => {
   const markup = renderToStaticMarkup(
-    <AppShellFrame navigation={primaryNavigation}>
+    <AppShellFrame navigation={primaryNavigation} searchItems={buildShellSearchItems(primaryNavigation)}>
       <p>Shell content</p>
     </AppShellFrame>,
   );
@@ -99,7 +100,7 @@ test("page header and KPI variants render typed foundational treatments", () => 
 
 test("all interactive shell controls use keyboard-focusable native elements", () => {
   const markup = renderToStaticMarkup(
-    <AppShellFrame navigation={primaryNavigation}>Content</AppShellFrame>,
+    <AppShellFrame navigation={primaryNavigation} searchItems={buildShellSearchItems(primaryNavigation)}>Content</AppShellFrame>,
   );
 
   assert.match(markup, /<a class="navigation-link"/);

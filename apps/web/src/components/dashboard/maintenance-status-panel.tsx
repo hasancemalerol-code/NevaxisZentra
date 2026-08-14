@@ -415,16 +415,7 @@ export function MaintenanceStatusPanel({
         >
           Bakım planını görüntüle
         </Link>
-      ) : (
-        <button
-          disabled
-          style={styles.action}
-          title="Bakım planını görüntüleme yetkiniz yok."
-          type="button"
-        >
-          Bakım planını görüntüle
-        </button>
-      )}
+      ) : null}
     </section>
   );
 }

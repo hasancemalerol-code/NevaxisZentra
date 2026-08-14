@@ -29,21 +29,7 @@ export function DashboardNavigationAction({
   );
 
   if (!canNavigate) {
-    return (
-      <button
-        aria-label={`${ariaLabel}. ${target.deniedReason}`}
-        className={className}
-        disabled
-        style={{
-          ...style,
-          cursor: "not-allowed",
-        }}
-        title={target.deniedReason}
-        type="button"
-      >
-        {children}
-      </button>
-    );
+    return null;
   }
 
   return (

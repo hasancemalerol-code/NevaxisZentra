@@ -32,6 +32,9 @@ export async function resolvePermissionAwareNavigation(): Promise<readonly Seria
   }));
 }
 
+export type { ShellSearchItem } from "@/components/app-shell/shell-types";
+export { buildShellSearchItems, resolveSettingsHref } from "@/components/app-shell/shell-navigation";
+
 export function flattenNavigationItems(
   groups: readonly SerializableNavigationGroup[],
 ): readonly SerializableNavigationItem[] {

@@ -816,19 +816,7 @@ export function ProductionOrdersTable({
         >
           Tüm üretim emirlerini görüntüle
         </Link>
-      ) : (
-        <button
-          disabled
-          style={{
-            ...styles.action,
-            ...styles.actionDisabled,
-          }}
-          title="Üretim emirlerini görüntüleme yetkiniz yok."
-          type="button"
-        >
-          Tüm üretim emirlerini görüntüle
-        </button>
-      )}
+      ) : null}
     </section>
   );
 }

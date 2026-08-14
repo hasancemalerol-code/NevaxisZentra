@@ -434,16 +434,7 @@ export function PlanConfidencePanel({
         >
           {data.expectedCompletionLabel}
         </Link>
-      ) : (
-        <button
-          disabled
-          style={styles.action}
-          title="Üretim planlarını görüntüleme yetkiniz yok."
-          type="button"
-        >
-          {data.expectedCompletionLabel}
-        </button>
-      )}
+      ) : null}
     </section>
   );
 }

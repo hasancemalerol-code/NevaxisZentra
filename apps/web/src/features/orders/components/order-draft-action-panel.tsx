@@ -23,6 +23,14 @@ import {
   getOrderTransferStatusLabel,
 } from "../presentation/order-draft-labels";
 
+const ORDER_APPROVAL_SERVICE_READY = false;
+const ORDER_ERP_TRANSFER_SERVICE_READY = false;
+
+const ORDER_APPROVAL_UNAVAILABLE_REASON =
+  "Onay gönderme servisi henüz kullanıma hazır değil.";
+const ORDER_ERP_TRANSFER_UNAVAILABLE_REASON =
+  "ERP aktarım servisi henüz kullanıma hazır değil.";
+
 type OrderDraftActionPanelProps = Readonly<{
   orderDraft: OrderDraft;
 }>;
@@ -85,6 +93,23 @@ export function OrderDraftActionPanel({
 
   const canTransfer =
     canTransferOrderDraft(orderDraft);
+
+  const approvalDisabledReason = !ORDER_APPROVAL_SERVICE_READY
+    ? ORDER_APPROVAL_UNAVAILABLE_REASON
+    : !canSubmitForApproval
+      ? "Onaya gönderilebilmesi için engelleyici sorunlar çözülmeli ve taslak onaya hazır olmalıdır."
+      : undefined;
+
+  const transferDisabledReason = !ORDER_ERP_TRANSFER_SERVICE_READY
+    ? ORDER_ERP_TRANSFER_UNAVAILABLE_REASON
+    : !canTransfer
+      ? "ERP aktarımı için yetkili onayı ve tamamlanmış doğrulama kontrolleri gereklidir."
+      : undefined;
+
+  const approvalDisabled =
+    !ORDER_APPROVAL_SERVICE_READY || !canSubmitForApproval;
+  const transferDisabled =
+    !ORDER_ERP_TRANSFER_SERVICE_READY || !canTransfer;
 
   return (
     <Card className="order-draft-action-panel">
@@ -149,26 +174,18 @@ export function OrderDraftActionPanel({
 
       <div className="order-draft-action-panel__actions">
         <Button
-          disabled={!canSubmitForApproval}
+          disabled={approvalDisabled}
           leadingIcon={<ShieldCheck />}
-          title={
-            canSubmitForApproval
-              ? "Sipariş taslağını yetkili onayına gönder"
-              : "Onaya gönderilebilmesi için engelleyici sorunlar çözülmeli ve taslak onaya hazır olmalıdır."
-          }
+          title={approvalDisabledReason}
           variant="secondary"
         >
           Onaya gönder
         </Button>
 
         <Button
-          disabled={!canTransfer}
+          disabled={transferDisabled}
           leadingIcon={<Send />}
-          title={
-            canTransfer
-              ? "Onaylanan siparişi ERP sistemine aktar"
-              : "ERP aktarımı için yetkili onayı ve tamamlanmış doğrulama kontrolleri gereklidir."
-          }
+          title={transferDisabledReason}
           variant="primary"
         >
           ERP&apos;ye aktar
