@@ -27,7 +27,7 @@ type QuickAction = Readonly<{
 const quickActions: readonly QuickAction[] = [
   {
     label: "AI Görevi",
-    description: "Yeni AI inceleme görevi oluştur",
+    description: "AI görevlerini incele",
     href: "/",
     icon: Bot,
     tone: "blue",
@@ -37,18 +37,20 @@ const quickActions: readonly QuickAction[] = [
     description: "Aktif üretim emirlerini incele",
     href: "/uretim",
     icon: Factory,
+    permissionKey: "production.execution.read",
     tone: "blue",
   },
   {
     label: "Plan Revizyonu",
-    description: "Üretim planı revizyonu başlat",
+    description: "Üretim planlarını incele",
     href: "/planlama",
     icon: CalendarClock,
+    permissionKey: "production.planning.read",
     tone: "orange",
   },
   {
     label: "Bakım Talebi",
-    description: "Makine veya kalıp talebi aç",
+    description: "Bakım emirlerini incele",
     href: "/bakim",
     icon: Wrench,
     permissionKey: "maintenance.read",
@@ -56,9 +58,10 @@ const quickActions: readonly QuickAction[] = [
   },
   {
     label: "Kalite Kaydı",
-    description: "Kontrol veya uygunsuzluk aç",
+    description: "Kalite kayıtlarını incele",
     href: "/kalite",
     icon: ClipboardCheck,
+    permissionKey: "quality.read",
     tone: "green",
   },
   {
@@ -80,6 +83,7 @@ const quickActions: readonly QuickAction[] = [
     description: "Entegrasyon durumunu kontrol et",
     href: "/erp-entegrasyonlari/senkronizasyonlar",
     icon: RefreshCw,
+    permissionKey: "erp.read",
     tone: "green",
   },
 ];

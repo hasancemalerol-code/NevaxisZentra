@@ -8,8 +8,10 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-
+import Link from "next/link";
 import type { CSSProperties } from "react";
+
+import { getAiTaskPreviewById } from "@/features/ai-task-center/data/ai-task-preview-data";
 
 interface AiTaskCenterSummaryProps {
   tasks: readonly unknown[];
@@ -178,6 +180,10 @@ const styles: Record<string, CSSProperties> = {
     color: "#1769e0",
     cursor: "not-allowed",
     opacity: 1,
+    textDecoration: "none",
+  },
+  inspectButtonActive: {
+    cursor: "pointer",
   },
   footer: {
     display: "flex",
@@ -190,6 +196,7 @@ const styles: Record<string, CSSProperties> = {
     color: "#1769e0",
     fontSize: 10,
     fontWeight: 750,
+    textDecoration: "none",
   },
 };
 
@@ -401,6 +408,10 @@ export function AiTaskCenterSummary({
       <div style={styles.list}>
         {visibleTasks.map((task, index) => {
           const Icon = task.icon;
+          const openableTask = getAiTaskPreviewById(task.id);
+          const detailHref = openableTask
+            ? `/ai-gorevleri/${openableTask.id}`
+            : null;
 
           return (
             <article
@@ -466,33 +477,50 @@ export function AiTaskCenterSummary({
                   {getPriorityLabel(task.priority)}
                 </span>
 
-                <button
-                  aria-label={`${task.title} görevini incele`}
-                  disabled
-                  style={styles.inspectButton}
-                  title="Görev inceleme akışı sonraki geliştirme paketlerinde etkinleştirilecektir."
-                  type="button"
-                >
-                  <ArrowUpRight
-                    aria-hidden="true"
-                    size={16}
-                    strokeWidth={1.8}
-                  />
-                </button>
+                {detailHref ? (
+                  <Link
+                    aria-label={`${task.title} görevini incele`}
+                    href={detailHref}
+                    style={{
+                      ...styles.inspectButton,
+                      ...styles.inspectButtonActive,
+                    }}
+                  >
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      size={16}
+                      strokeWidth={1.8}
+                    />
+                  </Link>
+                ) : (
+                  <button
+                    aria-label={`${task.title} görevini incele. Bu görev için açılabilir bir kayıt bulunmuyor.`}
+                    disabled
+                    style={styles.inspectButton}
+                    title="Bu görev için açılabilir bir kayıt bulunmuyor."
+                    type="button"
+                  >
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      size={16}
+                      strokeWidth={1.8}
+                    />
+                  </button>
+                )}
               </div>
             </article>
           );
         })}
       </div>
 
-      <div style={styles.footer}>
+      <Link href="/" style={styles.footer}>
         Tüm AI görevlerini görüntüle
         <ArrowUpRight
           aria-hidden="true"
           size={14}
           strokeWidth={1.8}
         />
-      </div>
+      </Link>
     </section>
   );
 }

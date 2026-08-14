@@ -8,8 +8,12 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
+
+import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
 
 interface ProductionOrdersTableProps {
+  grantedPermissionKeys?: readonly string[];
   orders: readonly unknown[];
 }
 
@@ -550,8 +554,13 @@ function calculateProgress(order: NormalizedProductionOrder) {
 }
 
 export function ProductionOrdersTable({
+  grantedPermissionKeys = [],
   orders,
 }: ProductionOrdersTableProps) {
+  const canOpenProduction = hasDashboardPermission(
+    grantedPermissionKeys,
+    "production.execution.read",
+  );
   const sourceOrders =
     orders.length > 0 ? orders : fallbackOrders;
 
@@ -779,14 +788,27 @@ export function ProductionOrdersTable({
         </table>
       </div>
 
-      <button
-        disabled
-        style={styles.action}
-        title="Üretim emri detayları sonraki geliştirme paketlerinde etkinleştirilecektir."
-        type="button"
-      >
-        Tüm üretim emirlerini görüntüle
-      </button>
+      {canOpenProduction ? (
+        <Link
+          href="/uretim"
+          style={{
+            ...styles.action,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+        >
+          Tüm üretim emirlerini görüntüle
+        </Link>
+      ) : (
+        <button
+          disabled
+          style={styles.action}
+          title="Üretim emirlerini görüntüleme yetkiniz yok."
+          type="button"
+        >
+          Tüm üretim emirlerini görüntüle
+        </button>
+      )}
     </section>
   );
 }

@@ -6,13 +6,16 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
+import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
 import type {
   MaintenanceStatusItem,
   OperationalStatus,
 } from "@/lib/mock-data/dashboard";
 
 interface MaintenanceStatusPanelProps {
+  grantedPermissionKeys?: readonly string[];
   items: MaintenanceStatusItem[];
 }
 
@@ -242,8 +245,13 @@ function getStatusTone(status: OperationalStatus) {
 }
 
 export function MaintenanceStatusPanel({
+  grantedPermissionKeys = [],
   items,
 }: MaintenanceStatusPanelProps) {
+  const canOpenMaintenance = hasDashboardPermission(
+    grantedPermissionKeys,
+    "maintenance.read",
+  );
   const sourceItems =
     items.length > 0 ? items : previewMaintenanceItems;
 
@@ -396,14 +404,27 @@ export function MaintenanceStatusPanel({
         })}
       </div>
 
-      <button
-        disabled
-        style={styles.action}
-        title="Bakım ve arıza detayları sonraki paketlerde etkinleştirilecektir."
-        type="button"
-      >
-        Bakım planını görüntüle
-      </button>
+      {canOpenMaintenance ? (
+        <Link
+          href="/bakim"
+          style={{
+            ...styles.action,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+        >
+          Bakım planını görüntüle
+        </Link>
+      ) : (
+        <button
+          disabled
+          style={styles.action}
+          title="Bakım planını görüntüleme yetkiniz yok."
+          type="button"
+        >
+          Bakım planını görüntüle
+        </button>
+      )}
     </section>
   );
 }

@@ -9088,3 +9088,28 @@ body:has(.command-center) .command-center {
 }
 
 /* DASHBOARD ACTION CARDS WIDTH FIX END */
+
+/* DASHBOARD-ACTION-WIRING-1 interaction states */
+.command-center__ai-task-button {
+  font: inherit;
+  text-align: left;
+}
+
+.command-center__ai-task-button:disabled,
+.command-center__ai-task-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.82;
+  transform: none !important;
+}
+
+.command-center__ai-task-button:disabled:hover,
+.command-center__ai-task-button[aria-disabled="true"]:hover {
+  transform: none !important;
+  box-shadow:
+    0 10px 24px rgba(17, 101, 232, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.command-center__teams-button {
+  text-decoration: none !important;
+}

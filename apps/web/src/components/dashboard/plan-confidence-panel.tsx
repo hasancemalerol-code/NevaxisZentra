@@ -6,13 +6,16 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
+import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
 import type {
   PlanConfidenceData,
 } from "@/lib/mock-data/dashboard";
 
 interface PlanConfidencePanelProps {
   data: PlanConfidenceData;
+  grantedPermissionKeys?: readonly string[];
 }
 
 const styles: Record<string, CSSProperties> = {
@@ -204,7 +207,12 @@ const styles: Record<string, CSSProperties> = {
 
 export function PlanConfidencePanel({
   data,
+  grantedPermissionKeys = [],
 }: PlanConfidencePanelProps) {
+  const canOpenPlanning = hasDashboardPermission(
+    grantedPermissionKeys,
+    "production.planning.read",
+  );
   const normalizedScore = Math.max(
     0,
     Math.min(100, data.score),
@@ -415,14 +423,27 @@ export function PlanConfidencePanel({
         </div>
       </div>
 
-      <button
-        disabled
-        style={styles.action}
-        title="Plan güvenilirliği detayları sonraki paketlerde etkinleştirilecektir."
-        type="button"
-      >
-        {data.expectedCompletionLabel}
-      </button>
+      {canOpenPlanning ? (
+        <Link
+          href="/planlama"
+          style={{
+            ...styles.action,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+        >
+          {data.expectedCompletionLabel}
+        </Link>
+      ) : (
+        <button
+          disabled
+          style={styles.action}
+          title="Üretim planlarını görüntüleme yetkiniz yok."
+          type="button"
+        >
+          {data.expectedCompletionLabel}
+        </button>
+      )}
     </section>
   );
 }

@@ -46,9 +46,12 @@ export default async function DashboardPage() {
         </div>
 
         <div className="command-center__titlebar-actions">
-          <Link
+          <button
+            aria-label="AI'ya Görev Ver. AI görev oluşturma akışı henüz kullanıma hazır değil."
             className="command-center__ai-task-button"
-            href="/ai-gorevleri/yeni"
+            disabled
+            title="AI görev oluşturma akışı henüz kullanıma hazır değil."
+            type="button"
           >
             <span
               aria-hidden="true"
@@ -71,13 +74,13 @@ export default async function DashboardPage() {
 
             <span className="command-center__ai-task-button-copy">
               <strong>AI&apos;ya Görev Ver</strong>
-              <span>Yeni analiz veya işlem başlat</span>
+              <span>AI görev oluşturma akışı henüz kullanıma hazır değil.</span>
             </span>
-          </Link>
-          <button
-            aria-label="CrevaFact Teams mesajlarını görüntüle"
+          </button>
+          <Link
+            aria-label="CrevaFact Teams çalışma alanını aç"
             className="command-center__teams-button"
-            type="button"
+            href="/teams"
           >
             <span
               aria-hidden="true"
@@ -116,7 +119,7 @@ export default async function DashboardPage() {
             >
               3
             </span>
-          </button>
+          </Link>
 
           <div className="command-center__titlebar-status">
             <span
@@ -169,7 +172,10 @@ export default async function DashboardPage() {
       >
         <MachineStatusPanel machines={machines} />
 
-        <ProductionOrdersTable orders={productionOrders} />
+        <ProductionOrdersTable
+          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+          orders={productionOrders}
+        />
 
         <LiveAlarmsPanel />
       </section>
@@ -182,9 +188,15 @@ export default async function DashboardPage() {
 
         <MoldStatusPanel molds={molds} />
 
-        <MaintenanceStatusPanel items={[]} />
+        <MaintenanceStatusPanel
+          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+          items={[]}
+        />
 
-        <PlanConfidencePanel data={planConfidence} />
+        <PlanConfidencePanel
+          data={planConfidence}
+          grantedPermissionKeys={access?.grantedPermissionKeys ?? []}
+        />
       </section>
 
       <section
