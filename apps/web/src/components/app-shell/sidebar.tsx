@@ -64,9 +64,9 @@ export function Sidebar({
           }
         >
           {collapsed ? (
-            <PanelLeftOpen />
+            <PanelLeftOpen aria-hidden="true" />
           ) : (
-            <PanelLeftClose />
+            <PanelLeftClose aria-hidden="true" />
           )}
         </IconButton>
       </div>
@@ -76,15 +76,18 @@ export function Sidebar({
         className="sidebar-navigation"
         data-collapsed={collapsed}
       >
-        {navigation.map((group) => (
+        {navigation.map((group, groupIndex) => {
+          const groupLabelId = `navigation-group-${groupIndex}`;
+
+          return (
           <section
-            aria-labelledby={`navigation-group-${group.label}`}
+            aria-labelledby={groupLabelId}
             className="navigation-group"
             key={group.label}
           >
             <p
               className="navigation-group-label"
-              id={`navigation-group-${group.label}`}
+              id={groupLabelId}
             >
               {group.label}
             </p>
@@ -126,7 +129,8 @@ export function Sidebar({
               })}
             </ul>
           </section>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="sidebar-footer">

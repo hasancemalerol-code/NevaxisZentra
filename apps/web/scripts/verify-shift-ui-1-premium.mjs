@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { existsSync } from "node:fs";
 import { mkdirSync } from "node:fs";
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -123,6 +124,24 @@ async function assertNoHorizontalOverflow(pageRef, label) {
   return overflow ? "YES" : "NO";
 }
 
+function resolveChromiumExecutable() {
+  const candidates = [
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
+}
+
 try {
   const { chromium } = await import("playwright");
   const ready = await fetch(`${WEB}/vardiyalar`, { redirect: "manual" });
@@ -130,7 +149,11 @@ try {
     fail(`web server not reachable at ${WEB}/vardiyalar (status=${ready.status})`);
   }
 
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = resolveChromiumExecutable();
+  const browser = await chromium.launch({
+    headless: true,
+    ...(executablePath ? { executablePath } : {}),
+  });
   const consoleErrors = [];
 
   async function openPage(width, height) {
