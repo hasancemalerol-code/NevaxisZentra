@@ -660,4 +660,122 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid ShiftContinuityPilotCompetencyClearAssignmentId =
         Guid.Parse("bb000001-0150-4000-8000-000000000150");
+
+    // SaaS commercial foundation (SAAS-COMMERCIAL-1)
+    public static readonly Guid SaasCommercialReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000071");
+
+    public static readonly Guid SaasCommercialDevPlanId =
+        Guid.Parse("bb000001-00e0-4000-8000-0000000000e0");
+
+    public static readonly Guid SaasCommercialDevPlanAuditEventId =
+        Guid.Parse("bb000001-00e1-4000-8000-0000000000e1");
+
+    public static readonly Guid SaasCommercialDevMonthlyVersionId =
+        Guid.Parse("bb000001-00e2-4000-8000-0000000000e2");
+
+    public static readonly Guid SaasCommercialDevAnnualVersionId =
+        Guid.Parse("bb000001-00e3-4000-8000-0000000000e3");
+
+    public static readonly Guid SaasCommercialFacilityLimitEntitlementId =
+        Guid.Parse("bb000001-00e4-4000-8000-0000000000e4");
+
+    public static readonly Guid SaasCommercialConnectedMachineLimitEntitlementId =
+        Guid.Parse("bb000001-00e5-4000-8000-0000000000e5");
+
+    public static readonly Guid SaasCommercialUserLimitEntitlementId =
+        Guid.Parse("bb000001-00e6-4000-8000-0000000000e6");
+
+    public static readonly Guid SaasCommercialShiftWorkforceModuleEntitlementId =
+        Guid.Parse("bb000001-00e7-4000-8000-0000000000e7");
+
+    public static readonly Guid SaasCommercialDevMonthlyTenantBaseComponentId =
+        Guid.Parse("bb000001-00e8-4000-8000-0000000000e8");
+
+    public static readonly Guid SaasCommercialDevMonthlyIncludedFacilityComponentId =
+        Guid.Parse("bb000001-00e9-4000-8000-0000000000e9");
+
+    public static readonly Guid SaasCommercialDevMonthlyAdditionalFacilityComponentId =
+        Guid.Parse("bb000001-00ea-4000-8000-0000000000ea");
+
+    public static readonly Guid SaasCommercialDevMonthlyIncludedMachineComponentId =
+        Guid.Parse("bb000001-00eb-4000-8000-0000000000eb");
+
+    public static readonly Guid SaasCommercialDevMonthlyAdditionalMachineComponentId =
+        Guid.Parse("bb000001-00ec-4000-8000-0000000000ec");
+
+    public static readonly Guid SaasCommercialDevMonthlyIncludedUserComponentId =
+        Guid.Parse("bb000001-00ed-4000-8000-0000000000ed");
+
+    public static readonly Guid SaasCommercialDevMonthlyAdditionalUserComponentId =
+        Guid.Parse("bb000001-00ee-4000-8000-0000000000ee");
+
+    public static readonly Guid SaasCommercialDevMonthlyFacilityGrantId =
+        Guid.Parse("bb000001-00ef-4000-8000-0000000000ef");
+
+    public static readonly Guid SaasCommercialDevMonthlyMachineGrantId =
+        Guid.Parse("bb000001-00f0-4000-8000-0000000000f0");
+
+    public static readonly Guid SaasCommercialDevMonthlyUserGrantId =
+        Guid.Parse("bb000001-00f1-4000-8000-0000000000f1");
+
+    public static readonly Guid SaasCommercialDevMonthlyModuleGrantId =
+        Guid.Parse("bb000001-00f2-4000-8000-0000000000f2");
+
+    public static readonly Guid SaasCommercialDevMonthlyCardCapabilityId =
+        Guid.Parse("bb000001-00f3-4000-8000-0000000000f3");
+
+    public static readonly Guid SaasCommercialDevMonthlyBankTransferCapabilityId =
+        Guid.Parse("bb000001-00f4-4000-8000-0000000000f4");
+
+    public static readonly Guid SaasCommercialDevMonthlyEnterpriseInvoiceCapabilityId =
+        Guid.Parse("bb000001-00f5-4000-8000-0000000000f5");
+
+    public static readonly Guid SaasCommercialDevMonthlyGracePolicyId =
+        Guid.Parse("bb000001-00f6-4000-8000-0000000000f6");
+
+    public static readonly Guid SaasCommercialDevAnnualTenantBaseComponentId =
+        Guid.Parse("bb000001-00f7-4000-8000-0000000000f7");
+
+    public static readonly Guid SaasCommercialDevAnnualIncludedFacilityComponentId =
+        Guid.Parse("bb000001-00f8-4000-8000-0000000000f8");
+
+    public static readonly Guid SaasCommercialDevAnnualAdditionalFacilityComponentId =
+        Guid.Parse("bb000001-00f9-4000-8000-0000000000f9");
+
+    public static readonly Guid SaasCommercialDevAnnualIncludedMachineComponentId =
+        Guid.Parse("bb000001-00fa-4000-8000-0000000000fa");
+
+    public static readonly Guid SaasCommercialDevAnnualAdditionalMachineComponentId =
+        Guid.Parse("bb000001-00fb-4000-8000-0000000000fb");
+
+    public static readonly Guid SaasCommercialDevAnnualIncludedUserComponentId =
+        Guid.Parse("bb000001-00fc-4000-8000-0000000000fc");
+
+    public static readonly Guid SaasCommercialDevAnnualAdditionalUserComponentId =
+        Guid.Parse("bb000001-00fd-4000-8000-0000000000fd");
+
+    public static readonly Guid SaasCommercialDevAnnualFacilityGrantId =
+        Guid.Parse("bb000001-00fe-4000-8000-0000000000fe");
+
+    public static readonly Guid SaasCommercialDevAnnualMachineGrantId =
+        Guid.Parse("bb000001-00ff-4000-8000-0000000000ff");
+
+    public static readonly Guid SaasCommercialDevAnnualUserGrantId =
+        Guid.Parse("bb000001-0100-4000-8000-000000000100");
+
+    public static readonly Guid SaasCommercialDevAnnualModuleGrantId =
+        Guid.Parse("bb000001-0101-4000-8000-000000000101");
+
+    public static readonly Guid SaasCommercialDevAnnualCardCapabilityId =
+        Guid.Parse("bb000001-0102-4000-8000-000000000102");
+
+    public static readonly Guid SaasCommercialDevAnnualBankTransferCapabilityId =
+        Guid.Parse("bb000001-0103-4000-8000-000000000103");
+
+    public static readonly Guid SaasCommercialDevAnnualEnterpriseInvoiceCapabilityId =
+        Guid.Parse("bb000001-0104-4000-8000-000000000104");
+
+    public static readonly Guid SaasCommercialDevAnnualGracePolicyId =
+        Guid.Parse("bb000001-0105-4000-8000-000000000105");
 }

@@ -14007,6 +14007,421 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("quality_nonconformances", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorSubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_subject_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OccurredAtUtc")
+                        .HasDatabaseName("ix_saas_commercial_audit_events_occurred_at_utc");
+
+                    b.ToTable("saas_commercial_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialEntitlementDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("CodeNormalized")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code_normalized");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DescriptionTr")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description_tr");
+
+                    b.Property<string>("DisplayNameTr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name_tr");
+
+                    b.Property<string>("ValueKind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("value_kind");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CodeNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_entitlement_definitions_code_normalized");
+
+                    b.ToTable("saas_commercial_entitlement_definitions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialGracePeriodPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("GracePeriodDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("grace_period_days");
+
+                    b.Property<string>("OperatorExplanationTr")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("operator_explanation_tr");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<string>("RestrictedBehaviorToken")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("restricted_behavior_token");
+
+                    b.Property<string>("SuspensionEligibilityPolicy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("suspension_eligibility_policy");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanVersionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_grace_period_policies_plan_version");
+
+                    b.ToTable("saas_commercial_grace_period_policies", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPaymentMethodCapability", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
+                    b.Property<DateTimeOffset?>("EffectiveFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from_utc");
+
+                    b.Property<DateTimeOffset?>("EffectiveUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_until_utc");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<bool>("ManualVerificationRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("manual_verification_required");
+
+                    b.Property<string>("MethodType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("method_type");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<bool>("RecurringCapable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("recurring_capable");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanVersionId", "MethodType")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_payment_method_capabilities_version_type");
+
+                    b.ToTable("saas_commercial_payment_method_capabilities", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AvailabilityState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("availability_state");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DescriptionTr")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description_tr");
+
+                    b.Property<string>("DisplayNameTr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name_tr");
+
+                    b.Property<string>("LifecycleState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("lifecycle_state");
+
+                    b.Property<string>("PlanCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("plan_code");
+
+                    b.Property<string>("PlanCodeNormalized")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("plan_code_normalized");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanCodeNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_plans_plan_code_normalized");
+
+                    b.ToTable("saas_commercial_plans", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BillingCadence")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("billing_cadence");
+
+                    b.Property<string>("CommercialNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("commercial_notes");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<DateTimeOffset>("EffectiveFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from_utc");
+
+                    b.Property<DateTimeOffset?>("EffectiveUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_until_utc");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
+
+                    b.Property<string>("Provenance")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("provenance");
+
+                    b.Property<string>("PublicationStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("publication_status");
+
+                    b.Property<bool>("Sellable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("sellable");
+
+                    b.Property<int>("TrialDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("trial_days");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_number");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "VersionNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_plan_versions_plan_version");
+
+                    b.HasIndex("PlanId", "BillingCadence", "EffectiveFromUtc")
+                        .HasDatabaseName("ix_saas_commercial_plan_versions_plan_cadence_effective");
+
+                    b.ToTable("saas_commercial_plan_versions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersionEntitlement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool?>("BooleanValue")
+                        .HasColumnType("boolean")
+                        .HasColumnName("boolean_value");
+
+                    b.Property<Guid>("EntitlementDefinitionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entitlement_definition_id");
+
+                    b.Property<int?>("IntegerLimitValue")
+                        .HasColumnType("integer")
+                        .HasColumnName("integer_limit_value");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<string>("Semantics")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("semantics");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntitlementDefinitionId");
+
+                    b.HasIndex("PlanVersionId", "EntitlementDefinitionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_plan_version_entitlements_version_definition");
+
+                    b.ToTable("saas_commercial_plan_version_entitlements", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPriceComponent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ComponentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("component_type");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanVersionId", "ComponentType")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saas_commercial_price_components_version_type");
+
+                    b.ToTable("saas_commercial_price_components", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -17805,6 +18220,69 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialGracePeriodPolicy", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", "PlanVersion")
+                        .WithOne("GracePeriodPolicy")
+                        .HasForeignKey("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialGracePeriodPolicy", "PlanVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlanVersion");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPaymentMethodCapability", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", "PlanVersion")
+                        .WithMany("PaymentMethodCapabilities")
+                        .HasForeignKey("PlanVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlanVersion");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlan", "Plan")
+                        .WithMany("Versions")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersionEntitlement", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialEntitlementDefinition", "EntitlementDefinition")
+                        .WithMany("Grants")
+                        .HasForeignKey("EntitlementDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", "PlanVersion")
+                        .WithMany("EntitlementGrants")
+                        .HasForeignKey("PlanVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EntitlementDefinition");
+
+                    b.Navigation("PlanVersion");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPriceComponent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", "PlanVersion")
+                        .WithMany("PriceComponents")
+                        .HasForeignKey("PlanVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlanVersion");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", null)
@@ -18167,6 +18645,27 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("CorrectiveActions");
 
                     b.Navigation("Holds");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialEntitlementDefinition", b =>
+                {
+                    b.Navigation("Grants");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlan", b =>
+                {
+                    b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasCommercial.SaasCommercialPlanVersion", b =>
+                {
+                    b.Navigation("EntitlementGrants");
+
+                    b.Navigation("GracePeriodPolicy");
+
+                    b.Navigation("PaymentMethodCapabilities");
+
+                    b.Navigation("PriceComponents");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityAssessment", b =>

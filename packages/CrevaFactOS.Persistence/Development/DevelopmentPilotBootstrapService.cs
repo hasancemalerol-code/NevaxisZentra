@@ -9,6 +9,7 @@ using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
+using CrevaFactOS.Persistence.SaasCommercial;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -437,6 +438,12 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftRiskManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasCommercialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasCommercialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasCommercialReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -594,6 +601,11 @@ internal sealed class DevelopmentPilotBootstrapService(
                 dbContext,
                 tenant.Id,
                 facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
+                dbContext,
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
@@ -2526,5 +2538,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ShiftRiskPermissionKeys.Manage,
             DevelopmentPilotIds.ShiftRiskManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureSaasCommercialReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            SaasCommercialPermissionKeys.Read,
+            DevelopmentPilotIds.SaasCommercialReadPermissionDefinitionId,
             cancellationToken);
 }

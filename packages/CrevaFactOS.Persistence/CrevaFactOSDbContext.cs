@@ -18,6 +18,7 @@ using CrevaFactOS.Persistence.ProcessOee;
 using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
+using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Configurations;
@@ -147,6 +148,16 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ShiftRiskAssessment> ShiftRiskAssessments => Set<ShiftRiskAssessment>();
     public DbSet<ShiftRiskDriver> ShiftRiskDrivers => Set<ShiftRiskDriver>();
     public DbSet<ShiftRiskAuditEvent> ShiftRiskAuditEvents => Set<ShiftRiskAuditEvent>();
+
+    // SaaS commercial foundation (SAAS-COMMERCIAL-1)
+    public DbSet<SaasCommercialPlan> SaasCommercialPlans => Set<SaasCommercialPlan>();
+    public DbSet<SaasCommercialPlanVersion> SaasCommercialPlanVersions => Set<SaasCommercialPlanVersion>();
+    public DbSet<SaasCommercialPriceComponent> SaasCommercialPriceComponents => Set<SaasCommercialPriceComponent>();
+    public DbSet<SaasCommercialEntitlementDefinition> SaasCommercialEntitlementDefinitions => Set<SaasCommercialEntitlementDefinition>();
+    public DbSet<SaasCommercialPlanVersionEntitlement> SaasCommercialPlanVersionEntitlements => Set<SaasCommercialPlanVersionEntitlement>();
+    public DbSet<SaasCommercialPaymentMethodCapability> SaasCommercialPaymentMethodCapabilities => Set<SaasCommercialPaymentMethodCapability>();
+    public DbSet<SaasCommercialGracePeriodPolicy> SaasCommercialGracePeriodPolicies => Set<SaasCommercialGracePeriodPolicy>();
+    public DbSet<SaasCommercialAuditEvent> SaasCommercialAuditEvents => Set<SaasCommercialAuditEvent>();
 
     // Mold registry & lifecycle (MOLD-1)
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
@@ -1447,6 +1458,16 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // SaaS commercial foundation (SAAS-COMMERCIAL-1) — platform catalog, no tenant query filter
+        modelBuilder.ApplyConfiguration(new SaasCommercialPlanEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialPlanVersionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialPriceComponentEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialEntitlementDefinitionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialPlanVersionEntitlementEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialPaymentMethodCapabilityEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialGracePeriodPolicyEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new SaasCommercialAuditEventEntityConfiguration());
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
