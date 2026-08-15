@@ -19,6 +19,8 @@ using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasSubscription;
+using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Erp;
@@ -160,6 +162,22 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<SaasCommercialPaymentMethodCapability> SaasCommercialPaymentMethodCapabilities => Set<SaasCommercialPaymentMethodCapability>();
     public DbSet<SaasCommercialGracePeriodPolicy> SaasCommercialGracePeriodPolicies => Set<SaasCommercialGracePeriodPolicy>();
     public DbSet<SaasCommercialAuditEvent> SaasCommercialAuditEvents => Set<SaasCommercialAuditEvent>();
+
+    // SaaS subscription foundation (SAAS-SUBSCRIPTION-1)
+    public DbSet<SaasTenantSubscription> SaasTenantSubscriptions => Set<SaasTenantSubscription>();
+    public DbSet<SaasTenantSubscriptionTransitionHistory> SaasTenantSubscriptionTransitionHistory =>
+        Set<SaasTenantSubscriptionTransitionHistory>();
+    public DbSet<SaasSubscriptionIdempotencyRecord> SaasSubscriptionIdempotencyRecords =>
+        Set<SaasSubscriptionIdempotencyRecord>();
+    public DbSet<SaasSubscriptionAuditEvent> SaasSubscriptionAuditEvents => Set<SaasSubscriptionAuditEvent>();
+
+    // SaaS billing foundation (SAAS-BILLING-1)
+    public DbSet<SaasTenantBillingAccount> SaasTenantBillingAccounts => Set<SaasTenantBillingAccount>();
+    public DbSet<SaasBillingInvoice> SaasBillingInvoices => Set<SaasBillingInvoice>();
+    public DbSet<SaasBillingInvoiceLine> SaasBillingInvoiceLines => Set<SaasBillingInvoiceLine>();
+    public DbSet<SaasBillingPaymentAttempt> SaasBillingPaymentAttempts => Set<SaasBillingPaymentAttempt>();
+    public DbSet<SaasBillingIdempotencyRecord> SaasBillingIdempotencyRecords => Set<SaasBillingIdempotencyRecord>();
+    public DbSet<SaasBillingAuditEvent> SaasBillingAuditEvents => Set<SaasBillingAuditEvent>();
 
     // SaaS identity foundation (SAAS-IDENTITY-1)
     public DbSet<SaasIdentityAccount> SaasIdentityAccounts => Set<SaasIdentityAccount>();
@@ -1517,6 +1535,68 @@ public sealed class CrevaFactOSDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SaasCommercialPaymentMethodCapabilityEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasCommercialGracePeriodPolicyEntityConfiguration());
         modelBuilder.ApplyConfiguration(new SaasCommercialAuditEventEntityConfiguration());
+
+        // SaaS subscription foundation (SAAS-SUBSCRIPTION-1) — tenant-scoped subscriptions
+        modelBuilder.ApplyConfiguration(new SaasTenantSubscriptionEntityConfiguration());
+        modelBuilder.Entity<SaasTenantSubscription>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasTenantSubscriptionTransitionHistoryEntityConfiguration());
+        modelBuilder.Entity<SaasTenantSubscriptionTransitionHistory>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasSubscriptionIdempotencyRecordEntityConfiguration());
+        modelBuilder.Entity<SaasSubscriptionIdempotencyRecord>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasSubscriptionAuditEventEntityConfiguration());
+        modelBuilder.Entity<SaasSubscriptionAuditEvent>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // SaaS billing foundation (SAAS-BILLING-1) — tenant-scoped billing
+        modelBuilder.ApplyConfiguration(new SaasTenantBillingAccountEntityConfiguration());
+        modelBuilder.Entity<SaasTenantBillingAccount>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingInvoiceEntityConfiguration());
+        modelBuilder.Entity<SaasBillingInvoice>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingInvoiceLineEntityConfiguration());
+        modelBuilder.Entity<SaasBillingInvoiceLine>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingPaymentAttemptEntityConfiguration());
+        modelBuilder.Entity<SaasBillingPaymentAttempt>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingIdempotencyRecordEntityConfiguration());
+        modelBuilder.Entity<SaasBillingIdempotencyRecord>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingAuditEventEntityConfiguration());
+        modelBuilder.Entity<SaasBillingAuditEvent>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // SaaS identity foundation (SAAS-IDENTITY-1) — platform-global accounts, tenant-scoped sessions
         modelBuilder.ApplyConfiguration(new SaasIdentityAccountEntityConfiguration());

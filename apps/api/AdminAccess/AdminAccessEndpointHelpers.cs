@@ -103,6 +103,21 @@ internal static class AdminAccessEndpointHelpers
             _ => Forbidden(result.FailureCode ?? AdminAccessFailureCodes.Forbidden, result.FailureMessage ?? "Authorization denied."),
         };
 
+    internal static IResult MapInvitationFailure(CreateAdminAccessInvitationResult result) =>
+        result.FailureCode switch
+        {
+            AdminAccessFailureCodes.ValidationFailed or AdminAccessFailureCodes.InvalidGrant => TypedResults.Json(
+                Problem(400, result.FailureCode, result.FailureMessage),
+                statusCode: StatusCodes.Status400BadRequest),
+            AdminAccessFailureCodes.NotFound => TypedResults.Json(
+                Problem(404, result.FailureCode, result.FailureMessage),
+                statusCode: StatusCodes.Status404NotFound),
+            AdminAccessFailureCodes.IdempotencyConflict => TypedResults.Json(
+                Problem(409, result.FailureCode, result.FailureMessage),
+                statusCode: StatusCodes.Status409Conflict),
+            _ => Forbidden(result.FailureCode ?? AdminAccessFailureCodes.Forbidden, result.FailureMessage ?? "Authorization denied."),
+        };
+
     internal static IResult Forbidden(string code, string title) =>
         TypedResults.Json(Problem(403, code, title), statusCode: StatusCodes.Status403Forbidden);
 

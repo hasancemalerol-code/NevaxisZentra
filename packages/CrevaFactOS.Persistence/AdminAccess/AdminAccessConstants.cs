@@ -97,6 +97,7 @@ public static class AdminAccessFailureCodes
     public const string RetiredPermission = "admin-access.retired-permission";
     public const string RetiredRole = "admin-access.retired-role";
     public const string Unavailable = "admin-access.unavailable";
+    public const string SubscriptionLimitExceeded = "admin-access.subscription-limit-exceeded";
 }
 
 public static class AdminAccessAuditEventTypes
@@ -108,6 +109,24 @@ public static class AdminAccessAuditEventTypes
     public const string MemberRolesChanged = "admin-access.member.roles-changed";
     public const string MemberFacilitiesChanged = "admin-access.member.facilities-changed";
     public const string MemberOverridesChanged = "admin-access.member.overrides-changed";
+    public const string InvitationCreated = "admin-access.invitation.created";
+    public const string MembershipSuspended = "admin-access.membership.suspended";
+    public const string MembershipReactivated = "admin-access.membership.reactivated";
+    public const string SessionRevoked = "admin-access.session.revoked";
+    public const string SensitiveOperationDenied = "admin-access.operation.denied";
+}
+
+public static class AdminAccessInvitationDeliveryStatuses
+{
+    public const string CreatedDelivered = "created-delivered";
+    public const string CreatedNotDelivered = "created-not-delivered";
+}
+
+public static class AdminAccessMembershipDisplayStatuses
+{
+    public const string Active = "active";
+    public const string Suspended = "suspended";
+    public const string Invited = "invited";
 }
 
 public static class AdminAccessAuditEntityTypes

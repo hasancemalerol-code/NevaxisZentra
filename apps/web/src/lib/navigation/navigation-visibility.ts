@@ -1,4 +1,9 @@
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import {
+  isModuleEntitled,
+  resolveEntitlementCodeFromPath,
+} from "@/features/saas-subscription/domain/saas-subscription-labels";
+import { fetchCurrentTenantSubscription } from "@/features/saas-subscription/server/saas-subscription-queries";
 import { primaryNavigation } from "@/lib/navigation/primary-navigation";
 import type {
   SerializableNavigationGroup,
@@ -15,18 +20,46 @@ function toSerializableItem(item: SerializableNavigationItem): SerializableNavig
   };
 }
 
+function hasSubscriptionModuleAccess(
+  modulePath: string | undefined,
+  subscription: Awaited<ReturnType<typeof fetchCurrentTenantSubscription>>,
+): boolean {
+  if (!modulePath) {
+    return true;
+  }
+
+  if (subscription.status !== "success") {
+    return true;
+  }
+
+  const entitlementCode = resolveEntitlementCodeFromPath(modulePath);
+  if (!entitlementCode) {
+    return true;
+  }
+
+  return isModuleEntitled(subscription.value, entitlementCode);
+}
+
 export async function resolvePermissionAwareNavigation(): Promise<readonly SerializableNavigationGroup[]> {
-  const access = await fetchCurrentEffectiveAccess();
+  const [access, subscription] = await Promise.all([
+    fetchCurrentEffectiveAccess(),
+    fetchCurrentTenantSubscription(),
+  ]);
 
   return primaryNavigation.map((group) => ({
     label: group.label,
     items: group.items
       .filter((item) => {
-        if (!item.permissionKey) {
-          return true;
+        if (item.permissionKey && !hasGrantedPermission(access, item.permissionKey)) {
+          return false;
         }
 
-        return hasGrantedPermission(access, item.permissionKey);
+        const modulePath = item.subscriptionModulePath ?? item.href;
+        if (item.subscriptionModulePath || resolveEntitlementCodeFromPath(item.href)) {
+          return hasSubscriptionModuleAccess(modulePath, subscription);
+        }
+
+        return true;
       })
       .map(toSerializableItem),
   }));

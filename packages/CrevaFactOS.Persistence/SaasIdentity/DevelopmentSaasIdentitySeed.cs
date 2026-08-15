@@ -320,20 +320,29 @@ internal static class DevelopmentSaasIdentitySeed
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
     {
-        if (await dbContext.SaasIdentityMfaMethods.AsNoTracking()
-                .AnyAsync(m => m.Id == mfaMethodId, cancellationToken))
+        var normalizedSecret = mfaSecret.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedSecret))
         {
             return;
         }
 
-        dbContext.SaasIdentityMfaMethods.Add(new SaasIdentityMfaMethod
+        var existing = await dbContext.SaasIdentityMfaMethods
+            .SingleOrDefaultAsync(m => m.Id == mfaMethodId, cancellationToken);
+        if (existing is null)
         {
-            Id = mfaMethodId,
-            AccountId = accountId,
-            EncryptedSecret = mfaSecretProtector.Protect(mfaSecret.Trim()),
-            IsRequired = true,
-            EnrolledAtUtc = seedTimestampUtc,
-        });
+            dbContext.SaasIdentityMfaMethods.Add(new SaasIdentityMfaMethod
+            {
+                Id = mfaMethodId,
+                AccountId = accountId,
+                EncryptedSecret = mfaSecretProtector.Protect(normalizedSecret),
+                IsRequired = true,
+                EnrolledAtUtc = seedTimestampUtc,
+            });
+            return;
+        }
+
+        existing.EncryptedSecret = mfaSecretProtector.Protect(normalizedSecret);
+        existing.IsRequired = true;
     }
 
     private static async Task EnsurePendingInvitationAsync(

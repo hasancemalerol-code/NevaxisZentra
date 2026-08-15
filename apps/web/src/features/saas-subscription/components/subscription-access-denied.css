@@ -1,0 +1,94 @@
+.subscription-access-denied {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 1.5rem 1rem 2rem;
+  overflow-x: clip;
+}
+
+.subscription-access-denied__card {
+  box-sizing: border-box;
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 40rem);
+  min-width: 0;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.subscription-access-denied__eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: #b45309;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.subscription-access-denied__card h1 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  line-height: 1.2;
+  color: #12263a;
+}
+
+.subscription-access-denied__summary,
+.subscription-access-denied__meta {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+
+.subscription-access-denied__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.82rem;
+  font-weight: 600;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.subscription-access-denied__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.subscription-access-denied__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.subscription-access-denied__link:hover {
+  background: #f1f5f9;
+}
+
+.subscription-access-denied__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}

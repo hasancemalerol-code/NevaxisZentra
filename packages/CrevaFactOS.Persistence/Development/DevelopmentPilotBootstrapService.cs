@@ -10,6 +10,8 @@ using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasSubscription;
+using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
 using Microsoft.EntityFrameworkCore;
@@ -448,6 +450,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureSaasCommercialReadPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasSubscriptionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasSubscriptionManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasBillingReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureSaasBillingManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsurePilotProductionShiftsAsync(
             dbContext, tenant.Id, DevelopmentPilotIds.FacilityId, seedTimestampUtc, cancellationToken);
         await EnsureExportPilotCaseAsync(
@@ -610,6 +620,18 @@ internal sealed class DevelopmentPilotBootstrapService(
                 cancellationToken);
             await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
                 dbContext,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotSaasSubscriptionSeed.EnsureDevelopmentSubscriptionAsync(
+                dbContext,
+                tenant.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotSaasBillingSeed.EnsureDevelopmentBillingAsync(
+                dbContext,
+                tenant.Id,
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
@@ -2571,5 +2593,41 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             SaasCommercialPermissionKeys.Read,
             DevelopmentPilotIds.SaasCommercialReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureSaasSubscriptionReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            SaasSubscriptionPermissionKeys.Read,
+            DevelopmentPilotIds.SaasSubscriptionReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureSaasSubscriptionManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            SaasSubscriptionPermissionKeys.Manage,
+            DevelopmentPilotIds.SaasSubscriptionManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureSaasBillingReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            SaasBillingPermissionKeys.Read,
+            DevelopmentPilotIds.SaasBillingReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureSaasBillingManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            SaasBillingPermissionKeys.Manage,
+            DevelopmentPilotIds.SaasBillingManagePermissionDefinitionId,
             cancellationToken);
 }

@@ -4,6 +4,8 @@ using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.SaasIdentity;
+using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +19,11 @@ public static class AdminAccessEndpointRouteBuilderExtensions
 
         group.MapGet("/permissions", ListPermissionsAsync);
         group.MapGet("/roles", ListRolesAsync);
+        group.MapGet("/workspace-summary", GetWorkspaceSummaryAsync);
+        group.MapGet("/members", ListMembersAsync);
+        group.MapGet("/invitations", ListInvitationsAsync);
+        group.MapGet("/facilities", ListFacilitiesAsync);
+        group.MapGet("/sessions", ListTenantSessionsAsync);
         group.MapPost("/roles", CreateRoleAsync);
         group.MapPatch("/roles/{roleReference}", PatchRoleAsync);
         group.MapPost("/roles/{roleReference}/permissions", SetRolePermissionsAsync);
@@ -25,6 +32,11 @@ public static class AdminAccessEndpointRouteBuilderExtensions
         group.MapPut("/members/{memberReference}/roles", PutMemberRolesAsync);
         group.MapPut("/members/{memberReference}/facilities", PutMemberFacilitiesAsync);
         group.MapPut("/members/{memberReference}/permission-overrides", PutMemberOverridesAsync);
+        group.MapPost("/invitations", CreateInvitationAsync);
+        group.MapPost("/members/{memberReference}/suspend", SuspendMemberAsync);
+        group.MapPost("/members/{memberReference}/reactivate", ReactivateMemberAsync);
+        group.MapPost("/sessions/{sessionReference}/revoke", RevokeSessionAsync);
+        group.MapPost("/members/{memberReference}/sessions/revoke-all", RevokeAllMemberSessionsAsync);
         group.MapGet("/audit-events", ListAuditEventsAsync);
 
         return endpoints;
@@ -291,6 +303,7 @@ public static class AdminAccessEndpointRouteBuilderExtensions
     }
 
     private static async Task<IResult> ListAuditEventsAsync(
+        int? limit,
         HttpContext httpContext,
         IAdminAccessRepository repository,
         IPermissionEvaluator permissionEvaluator,
@@ -305,8 +318,240 @@ public static class AdminAccessEndpointRouteBuilderExtensions
             authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
         if (actor is null) return failure!;
 
-        var events = await repository.ListAuditEventsAsync(cancellationToken);
+        var events = await repository.ListAuditEventsAsync(limit ?? 50, cancellationToken);
         return TypedResults.Ok(new { events });
+    }
+
+    private static async Task<IResult> GetWorkspaceSummaryAsync(
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveReadAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
+        if (actor is null) return failure!;
+
+        var summary = await repository.GetWorkspaceSummaryAsync(cancellationToken);
+        return summary is null
+            ? AdminAccessEndpointHelpers.Forbidden(AdminAccessFailureCodes.Forbidden, "Workspace summary could not be resolved.")
+            : TypedResults.Ok(summary);
+    }
+
+    private static async Task<IResult> ListMembersAsync(
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveReadAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
+        if (actor is null) return failure!;
+
+        var members = await repository.ListMembersAsync(cancellationToken);
+        return TypedResults.Ok(new { members });
+    }
+
+    private static async Task<IResult> ListInvitationsAsync(
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveReadAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
+        if (actor is null) return failure!;
+
+        var invitations = await repository.ListInvitationsAsync(cancellationToken);
+        return TypedResults.Ok(new { invitations });
+    }
+
+    private static async Task<IResult> ListFacilitiesAsync(
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveReadAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
+        if (actor is null) return failure!;
+
+        var facilities = await repository.ListFacilitiesAsync(cancellationToken);
+        return TypedResults.Ok(new { facilities });
+    }
+
+    private static async Task<IResult> ListTenantSessionsAsync(
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveReadAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, requireAdminAccessRead: true, cancellationToken);
+        if (actor is null) return failure!;
+
+        var sessions = await repository.ListTenantSessionsAsync(cancellationToken);
+        return TypedResults.Ok(new { sessions });
+    }
+
+    private static async Task<IResult> CreateInvitationAsync(
+        [FromBody] CreateAdminAccessInvitationRequest request,
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveMutationAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, cancellationToken);
+        if (actor is null) return failure!;
+
+        var result = await repository.CreateInvitationAsync(
+            new CreateAdminAccessInvitationCommand(request.Email, request.IntendedRoleReference, request.IdempotencyKey),
+            actor,
+            cancellationToken);
+        return result.Succeeded
+            ? TypedResults.Ok(new
+            {
+                created = true,
+                invitationReference = result.InvitationReference,
+                deliveryStatus = result.DeliveryStatus,
+                idempotentReplay = result.IdempotentReplay,
+            })
+            : AdminAccessEndpointHelpers.MapInvitationFailure(result);
+    }
+
+    private static async Task<IResult> SuspendMemberAsync(
+        string memberReference,
+        [FromBody] SuspendAdminAccessMemberRequest request,
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveMutationAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, cancellationToken);
+        if (actor is null) return failure!;
+
+        var result = await repository.SuspendMemberAsync(
+            new SuspendAdminAccessMemberCommand(memberReference, request.ExpectedAuthorizationVersion, request.IdempotencyKey),
+            actor,
+            cancellationToken);
+        return result.Succeeded
+            ? TypedResults.Ok(new { updated = true, idempotentReplay = result.IdempotentReplay })
+            : AdminAccessEndpointHelpers.MapWriteFailure(result);
+    }
+
+    private static async Task<IResult> ReactivateMemberAsync(
+        string memberReference,
+        [FromBody] ReactivateAdminAccessMemberRequest request,
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveMutationAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, cancellationToken);
+        if (actor is null) return failure!;
+
+        var result = await repository.ReactivateMemberAsync(
+            new ReactivateAdminAccessMemberCommand(memberReference, request.ExpectedAuthorizationVersion, request.IdempotencyKey),
+            actor,
+            cancellationToken);
+        return result.Succeeded
+            ? TypedResults.Ok(new { updated = true, idempotentReplay = result.IdempotentReplay })
+            : AdminAccessEndpointHelpers.MapWriteFailure(result);
+    }
+
+    private static async Task<IResult> RevokeSessionAsync(
+        string sessionReference,
+        [FromBody] RevokeAdminAccessSessionRequest request,
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveMutationAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, cancellationToken);
+        if (actor is null) return failure!;
+
+        var result = await repository.RevokeSessionAsync(
+            new RevokeAdminAccessSessionCommand(sessionReference, request.IdempotencyKey),
+            actor,
+            cancellationToken);
+        return result.Succeeded
+            ? TypedResults.Ok(new { revoked = true, idempotentReplay = result.IdempotentReplay })
+            : AdminAccessEndpointHelpers.MapWriteFailure(result);
+    }
+
+    private static async Task<IResult> RevokeAllMemberSessionsAsync(
+        string memberReference,
+        [FromBody] RevokeAllAdminAccessMemberSessionsRequest request,
+        HttpContext httpContext,
+        IAdminAccessRepository repository,
+        IPermissionEvaluator permissionEvaluator,
+        ICurrentIdentityAccessor identityAccessor,
+        ITenantContextAccessor tenantContextAccessor,
+        IAuthorizationContext authorizationContext,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (actor, failure) = await AdminAccessEndpointHelpers.ResolveMutationAccessAsync(
+            httpContext, permissionEvaluator, identityAccessor, tenantContextAccessor,
+            authorizationContext, correlationContext, cancellationToken);
+        if (actor is null) return failure!;
+
+        var result = await repository.RevokeAllMemberSessionsAsync(
+            new RevokeAllAdminAccessMemberSessionsCommand(memberReference, request.IdempotencyKey),
+            actor,
+            cancellationToken);
+        return result.Succeeded
+            ? TypedResults.Ok(new { revoked = true, idempotentReplay = result.IdempotentReplay })
+            : AdminAccessEndpointHelpers.MapWriteFailure(result);
     }
 }
 
@@ -321,7 +566,11 @@ public static class AdminAccessServiceCollectionExtensions
                 ? new UnavailableAdminAccessRepository()
                 : new AdminAccessRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetService<IIdentityEmailDeliveryProvider>()
+                        ?? new UnavailableIdentityEmailDeliveryProvider(),
+                    serviceProvider.GetRequiredService<ITenantEntitlementEvaluator>(),
+                    serviceProvider.GetService<IDevelopmentTokenDeliverySink>());
         });
 
         return services;
@@ -370,3 +619,20 @@ public sealed record AdminAccessPermissionOverrideRequest(
     string PermissionKey,
     string Effect,
     string? RecordScope);
+
+public sealed record CreateAdminAccessInvitationRequest(
+    string Email,
+    string? IntendedRoleReference,
+    string? IdempotencyKey);
+
+public sealed record SuspendAdminAccessMemberRequest(
+    uint ExpectedAuthorizationVersion,
+    string? IdempotencyKey);
+
+public sealed record ReactivateAdminAccessMemberRequest(
+    uint ExpectedAuthorizationVersion,
+    string? IdempotencyKey);
+
+public sealed record RevokeAdminAccessSessionRequest(string? IdempotencyKey);
+
+public sealed record RevokeAllAdminAccessMemberSessionsRequest(string? IdempotencyKey);

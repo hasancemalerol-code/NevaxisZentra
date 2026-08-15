@@ -35,6 +35,7 @@ export type SerializableNavigationItem = Readonly<{
   iconKey: NavigationIconKey;
   exact?: boolean;
   permissionKey?: string;
+  subscriptionModulePath?: string;
 }>;
 
 export type SerializableNavigationGroup = Readonly<{

@@ -778,4 +778,45 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid SaasCommercialDevAnnualGracePolicyId =
         Guid.Parse("bb000001-0105-4000-8000-000000000105");
+
+    // SaaS subscription foundation (SAAS-SUBSCRIPTION-1)
+    public static readonly Guid SaasSubscriptionReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000072");
+
+    public static readonly Guid SaasSubscriptionManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000073");
+
+    public static readonly Guid DevPilotTenantSubscriptionId =
+        Guid.Parse("bb000002-00e0-4000-8000-0000000000e0");
+
+    public static readonly Guid DevPilotTenantSubscriptionHistoryId =
+        Guid.Parse("bb000002-00e1-4000-8000-0000000000e1");
+
+    // SaaS billing foundation (SAAS-BILLING-1)
+    public static readonly Guid SaasBillingReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000074");
+
+    public static readonly Guid SaasBillingManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000075");
+
+    public static readonly Guid DevPilotBillingAccountId =
+        Guid.Parse("bb000003-00a0-4000-8000-0000000000a0");
+
+    public static readonly Guid DevPilotBillingInvoiceDraftId =
+        Guid.Parse("bb000003-00b0-4000-8000-0000000000b0");
+
+    public static readonly Guid DevPilotBillingInvoiceOpenId =
+        Guid.Parse("bb000003-00b1-4000-8000-0000000000b1");
+
+    public static readonly Guid DevPilotBillingInvoicePaidId =
+        Guid.Parse("bb000003-00b2-4000-8000-0000000000b2");
+
+    public static readonly Guid DevPilotBillingInvoiceOverdueId =
+        Guid.Parse("bb000003-00b3-4000-8000-0000000000b3");
+
+    public static readonly Guid DevPilotBillingPaymentAwaitingId =
+        Guid.Parse("bb000003-00c0-4000-8000-0000000000c0");
+
+    public static readonly Guid DevPilotBillingPaymentSucceededId =
+        Guid.Parse("bb000003-00c1-4000-8000-0000000000c1");
 }

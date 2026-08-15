@@ -24,7 +24,22 @@ public static class PersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        services.AddDataProtection();
+        var dataProtectionBuilder = services.AddDataProtection()
+            .SetApplicationName("CrevaFactOS");
+        if (environment?.IsDevelopment() == true)
+        {
+            var keyRingDirectory = new DirectoryInfo(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "CrevaFactOS",
+                "DataProtection-Keys"));
+            Directory.CreateDirectory(keyRingDirectory.FullName);
+            dataProtectionBuilder.PersistKeysToFileSystem(keyRingDirectory);
+            if (OperatingSystem.IsWindows())
+            {
+                dataProtectionBuilder.ProtectKeysWithDpapi();
+            }
+        }
+
         services.AddScoped<SaasIdentityMfaSecretProtector>();
         services.AddScoped<IIdentityEmailDeliveryProvider, UnavailableIdentityEmailDeliveryProvider>();
         services.AddScoped<ISaasIdentityRepository, UnavailableSaasIdentityRepository>();

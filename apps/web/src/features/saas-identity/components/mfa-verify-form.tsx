@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { AuthFeedback } from "./auth-feedback";
 type MfaMode = "totp" | "recovery";
 
 export function MfaVerifyForm() {
-  const router = useRouter();
   const [mode, setMode] = useState<MfaMode>("totp");
   const [totpCode, setTotpCode] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
@@ -46,10 +44,9 @@ export function MfaVerifyForm() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      window.location.assign("/dashboard");
     },
-    [mode, recoveryCode, router, totpCode],
+    [mode, recoveryCode, totpCode],
   );
 
   return (

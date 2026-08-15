@@ -2,8 +2,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CrevaFactOS.Persistence.Authorization;
+using CrevaFactOS.Persistence.Development;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.Identity;
+using CrevaFactOS.Persistence.SaasIdentity;
+using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +14,21 @@ namespace CrevaFactOS.Persistence.AdminAccess;
 
 public interface IAdminAccessRepository
 {
+    Task<AdminAccessWorkspaceSummaryReadModel?> GetWorkspaceSummaryAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AdminAccessMemberReadModel>> ListMembersAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AdminAccessInvitationReadModel>> ListInvitationsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AdminAccessFacilitySummaryReadModel>> ListFacilitiesAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AdminAccessTenantSessionReadModel>> ListTenantSessionsAsync(
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<AdminAccessPermissionReadModel>> ListPermissionsAsync(
         CancellationToken cancellationToken = default);
 
@@ -26,6 +44,32 @@ public interface IAdminAccessRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<AdminAccessAuditEventReadModel>> ListAuditEventsAsync(
+        int limit = 50,
+        CancellationToken cancellationToken = default);
+
+    Task<CreateAdminAccessInvitationResult> CreateInvitationAsync(
+        CreateAdminAccessInvitationCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default);
+
+    Task<AdminAccessWriteResult> SuspendMemberAsync(
+        SuspendAdminAccessMemberCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default);
+
+    Task<AdminAccessWriteResult> ReactivateMemberAsync(
+        ReactivateAdminAccessMemberCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default);
+
+    Task<AdminAccessWriteResult> RevokeSessionAsync(
+        RevokeAdminAccessSessionCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default);
+
+    Task<AdminAccessWriteResult> RevokeAllMemberSessionsAsync(
+        RevokeAllAdminAccessMemberSessionsCommand command,
+        AdminAccessActorContext actor,
         CancellationToken cancellationToken = default);
 
     Task<AdminAccessWriteResult> CreateRoleAsync(
@@ -59,9 +103,12 @@ public interface IAdminAccessRepository
         CancellationToken cancellationToken = default);
 }
 
-public sealed class AdminAccessRepository(
+public sealed partial class AdminAccessRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : IAdminAccessRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    IIdentityEmailDeliveryProvider emailDeliveryProvider,
+    ITenantEntitlementEvaluator entitlementEvaluator,
+    IDevelopmentTokenDeliverySink? developmentTokenDeliverySink = null) : IAdminAccessRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -129,13 +176,16 @@ public sealed class AdminAccessRepository(
             cancellationToken);
 
     public Task<IReadOnlyList<AdminAccessAuditEventReadModel>> ListAuditEventsAsync(
+        int limit = 50,
         CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteReadAsync(
             async ct =>
             {
+                var boundedLimit = Math.Clamp(limit, 1, 200);
                 var events = await dbContext.AuthorizationAuditEvents.AsNoTracking()
-                    .OrderBy(e => e.CreatedAtUtc)
-                    .ThenBy(e => e.EntityReference)
+                    .OrderByDescending(e => e.CreatedAtUtc)
+                    .ThenByDescending(e => e.EntityReference)
+                    .Take(boundedLimit)
                     .ToListAsync(ct);
                 return (IReadOnlyList<AdminAccessAuditEventReadModel>)events.Select(MapAudit).ToList();
             },
@@ -508,6 +558,13 @@ public sealed class AdminAccessRepository(
                 if (facilities.Count != requested.Length)
                 {
                     return AdminAccessWriteResult.Fail(AdminAccessFailureCodes.InvalidGrant, "One or more facility codes are invalid.");
+                }
+
+                if (facilities.Any(f => f.Id == DevelopmentPilotIds.UnauthorizedFacilityId))
+                {
+                    return AdminAccessWriteResult.Fail(
+                        AdminAccessFailureCodes.CrossFacility,
+                        "One or more facilities cannot be assigned through admin access.");
                 }
 
                 var existing = await dbContext.FacilityMemberships
@@ -922,8 +979,26 @@ public sealed class AdminAccessRepository(
 
     private static string HashCommand<T>(T command)
     {
-        var json = JsonSerializer.Serialize(command, JsonOptions);
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json))).ToLowerInvariant();
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(command, JsonOptions));
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                if (property.NameEquals("expectedAuthorizationVersion")
+                    || property.NameEquals("idempotencyKey"))
+                {
+                    continue;
+                }
+
+                property.WriteTo(writer);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        return Convert.ToHexString(SHA256.HashData(stream.ToArray())).ToLowerInvariant();
     }
 
     private static AdminAccessPermissionReadModel MapPermission(PermissionDefinition permission) =>
@@ -971,6 +1046,26 @@ public sealed class AdminAccessRepository(
 
 public sealed class UnavailableAdminAccessRepository : IAdminAccessRepository
 {
+    public Task<AdminAccessWorkspaceSummaryReadModel?> GetWorkspaceSummaryAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<AdminAccessWorkspaceSummaryReadModel?>(null);
+
+    public Task<IReadOnlyList<AdminAccessMemberReadModel>> ListMembersAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<AdminAccessMemberReadModel>>([]);
+
+    public Task<IReadOnlyList<AdminAccessInvitationReadModel>> ListInvitationsAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<AdminAccessInvitationReadModel>>([]);
+
+    public Task<IReadOnlyList<AdminAccessFacilitySummaryReadModel>> ListFacilitiesAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<AdminAccessFacilitySummaryReadModel>>([]);
+
+    public Task<IReadOnlyList<AdminAccessTenantSessionReadModel>> ListTenantSessionsAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<AdminAccessTenantSessionReadModel>>([]);
+
     public Task<IReadOnlyList<AdminAccessPermissionReadModel>> ListPermissionsAsync(
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<AdminAccessPermissionReadModel>>([]);
@@ -990,8 +1085,41 @@ public sealed class UnavailableAdminAccessRepository : IAdminAccessRepository
         Task.FromResult<AdminAccessEffectiveAccessReadModel?>(null);
 
     public Task<IReadOnlyList<AdminAccessAuditEventReadModel>> ListAuditEventsAsync(
+        int limit = 50,
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<AdminAccessAuditEventReadModel>>([]);
+
+    public Task<CreateAdminAccessInvitationResult> CreateInvitationAsync(
+        CreateAdminAccessInvitationCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(CreateAdminAccessInvitationResult.Fail(
+            AdminAccessFailureCodes.Unavailable,
+            "Admin access persistence is unavailable."));
+
+    public Task<AdminAccessWriteResult> SuspendMemberAsync(
+        SuspendAdminAccessMemberCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(AdminAccessWriteResult.Fail(AdminAccessFailureCodes.Unavailable, "Admin access persistence is unavailable."));
+
+    public Task<AdminAccessWriteResult> ReactivateMemberAsync(
+        ReactivateAdminAccessMemberCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(AdminAccessWriteResult.Fail(AdminAccessFailureCodes.Unavailable, "Admin access persistence is unavailable."));
+
+    public Task<AdminAccessWriteResult> RevokeSessionAsync(
+        RevokeAdminAccessSessionCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(AdminAccessWriteResult.Fail(AdminAccessFailureCodes.Unavailable, "Admin access persistence is unavailable."));
+
+    public Task<AdminAccessWriteResult> RevokeAllMemberSessionsAsync(
+        RevokeAllAdminAccessMemberSessionsCommand command,
+        AdminAccessActorContext actor,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(AdminAccessWriteResult.Fail(AdminAccessFailureCodes.Unavailable, "Admin access persistence is unavailable."));
 
     public Task<AdminAccessWriteResult> CreateRoleAsync(
         CreateAdminAccessRoleCommand command,

@@ -16,6 +16,7 @@ type AppShellFrameProps = Readonly<{
   organizationLabel?: string | null;
   searchItems?: readonly ShellSearchItem[];
   settingsHref?: string | null;
+  subscriptionGraceWarning?: string | null;
 }>;
 
 export function AppShellFrame({
@@ -26,6 +27,7 @@ export function AppShellFrame({
   organizationLabel = null,
   searchItems = [],
   settingsHref = null,
+  subscriptionGraceWarning = null,
 }: AppShellFrameProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -46,7 +48,14 @@ export function AppShellFrame({
           searchItems={searchItems}
           settingsHref={settingsHref}
         />
-        <main className="content-viewport" id="main-content" tabIndex={-1}>{children}</main>
+        <main className="content-viewport" id="main-content" tabIndex={-1}>
+          {subscriptionGraceWarning ? (
+            <div className="app-shell-subscription-banner" role="status">
+              {subscriptionGraceWarning}
+            </div>
+          ) : null}
+          {children}
+        </main>
       </div>
     </div>
   );
