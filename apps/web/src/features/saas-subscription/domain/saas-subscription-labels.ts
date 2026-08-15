@@ -57,6 +57,7 @@ const LIMIT_LABELS: Record<string, string> = {
 
 const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: string }>[] = [
   { prefix: "/dashboard", code: "module.dashboard" },
+  { prefix: "/fabrika-vitrini", code: "module.dashboard" },
   { prefix: "/teams", code: "module.teams" },
   { prefix: "/siparisler", code: "module.orders" },
   { prefix: "/planlama", code: "module.planning" },
@@ -118,6 +119,10 @@ export function resolveEntitlementCodeFromPath(routePath: string): string | null
   }
 
   return null;
+}
+
+export function resolveSubscriptionAccessPathname(routePath: string): string {
+  return normalizeSubscriptionRoute(routePath);
 }
 
 export function formatSubscriptionStatus(status: string | null | undefined): string {

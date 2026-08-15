@@ -259,6 +259,8 @@ const migration = readRequired(
   "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814220344_AddSaasTenantSubscriptionEntitlementEnforcement.cs",
 );
 const evaluator = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/TenantEntitlementEvaluator.cs");
+const moduleEntitlements = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
+const webSubscriptionLabels = readRequired("apps/web/src/features/saas-subscription/domain/saas-subscription-labels.ts");
 
 assert("subscription status conversions", conversions.includes("SaasSubscriptionStatuses.Active"));
 assert("valid transition guard", conversions.includes("IsValidTransition"));
@@ -268,6 +270,14 @@ assert("repository concurrency conflict", repository.includes("SaasSubscriptionF
 assert("limit evaluator usage", evaluator.includes("ResolveUsageAsync"));
 assert("unique current subscription index", migration.includes("ux_saas_tenant_subscriptions_tenant_current"));
 assert("bootstrap seed idempotency guard", readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotSaasSubscriptionSeed.cs").includes("DevPilotTenantSubscriptionId"));
+assert(
+  "factory showcase shares dashboard module mapping",
+  moduleEntitlements.includes('("/fabrika-vitrini", EntitlementCodes.Dashboard)'),
+);
+assert(
+  "web route maps factory showcase to module.dashboard",
+  webSubscriptionLabels.includes('{ prefix: "/fabrika-vitrini", code: "module.dashboard" }'),
+);
 
 previewClosureFixtures();
 removeClosureFixtures();
@@ -303,6 +313,31 @@ assert("connected machines limit evidence configured", machinesLimit?.limit?.lim
 assert("connected machine cap", machinesLimit?.limit?.limitValue === 5, JSON.stringify(machinesLimit?.limit));
 
 assert("paid application allowed", current.json?.paidApplicationAccess?.allowed === true);
+
+const dashboardAccess = await api(
+  "GET",
+  "/api/saas-subscription/access-status?routePath=%2Fdashboard",
+  undefined,
+  owner,
+);
+assert(
+  "dashboard access-status allowed",
+  dashboardAccess.status === 200 && dashboardAccess.json?.allowed === true,
+  dashboardAccess.raw.slice(0, 180),
+);
+
+const showcaseAccess = await api(
+  "GET",
+  "/api/saas-subscription/access-status?routePath=%2Ffabrika-vitrini",
+  undefined,
+  owner,
+);
+assert(
+  "factory showcase access-status allowed",
+  showcaseAccess.status === 200 && showcaseAccess.json?.allowed === true,
+  showcaseAccess.raw.slice(0, 180),
+);
+
 assert("shift module access denied", current.json?.moduleAccess?.shiftWorkforce?.allowed === false);
 assert(
   "shift module unavailable reason",

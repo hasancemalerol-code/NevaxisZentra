@@ -8271,6 +8271,37 @@ body:has(.command-center) .command-center {
 
 /* CREVAFACT TEAMS BUTTON START */
 
+.command-center__showcase-tv-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  border: 1px solid #d7e1ed !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: #1769e0 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%) !important;
+}
+
+.command-center__showcase-tv-button:focus-visible {
+  outline: 3px solid rgb(23 105 224 / 22%) !important;
+  outline-offset: 2px !important;
+}
+
+@media (hover: hover) {
+  .command-center__showcase-tv-button:hover {
+    border-color: #b8cce6 !important;
+    background: #f8fbff !important;
+  }
+}
+
 .command-center__titlebar-actions {
   display: flex !important;
   min-width: 0 !important;

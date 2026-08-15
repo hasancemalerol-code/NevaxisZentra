@@ -140,6 +140,11 @@ export const DASHBOARD_PRODUCTION_WORKSPACE_TARGET: DashboardNavTarget = {
   deniedReason: "Üretim emirlerini görüntüleme yetkiniz yok.",
 };
 
+export const DASHBOARD_SHOWCASE_TV_TARGET: DashboardNavTarget = {
+  href: "/fabrika-vitrini",
+  deniedReason: "",
+};
+
 export function canOpenDashboardTarget(
   grantedPermissionKeys: readonly string[],
   target: DashboardNavTarget,

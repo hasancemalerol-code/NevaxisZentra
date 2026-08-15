@@ -9,6 +9,7 @@ import {
   isModuleEntitled,
   isSubscriptionRecoveryRoute,
   resolveEntitlementCodeFromPath,
+  resolveSubscriptionAccessPathname,
 } from "../domain/saas-subscription-labels";
 import type { SubscriptionAccessEvaluation } from "../domain/saas-subscription-types";
 import { fetchCurrentTenantSubscription } from "./saas-subscription-queries";
@@ -22,6 +23,8 @@ export async function resolveRequestPathname(): Promise<string> {
 export async function evaluateSubscriptionAccess(
   pathname: string,
 ): Promise<SubscriptionAccessEvaluation> {
+  const subscriptionPathname = resolveSubscriptionAccessPathname(pathname);
+
   if (isSubscriptionRecoveryRoute(pathname)) {
     const subscriptionResult = await fetchCurrentTenantSubscription();
     const subscription =
@@ -34,7 +37,7 @@ export async function evaluateSubscriptionAccess(
     };
   }
 
-  const accessStatus = await fetchSubscriptionAccessStatus(pathname);
+  const accessStatus = await fetchSubscriptionAccessStatus(subscriptionPathname);
   if (accessStatus.status === "success") {
     const subscriptionResult = await fetchCurrentTenantSubscription();
     const subscription =
@@ -82,7 +85,7 @@ export async function evaluateSubscriptionAccess(
     };
   }
 
-  const entitlementCode = resolveEntitlementCodeFromPath(pathname);
+  const entitlementCode = resolveEntitlementCodeFromPath(subscriptionPathname);
   if (entitlementCode && !isModuleEntitled(subscription, entitlementCode)) {
     return {
       allowed: false,

@@ -11,6 +11,7 @@ import { MoldStatusPanel } from "@/components/dashboard/mold-status-panel";
 import { PlanConfidencePanel } from "@/components/dashboard/plan-confidence-panel";
 import { ProductionOrdersTable } from "@/components/dashboard/production-orders-table";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
+import { DashboardShowcaseTvAction } from "@/components/dashboard/dashboard-showcase-tv-action";
 import { SystemHealthPanel } from "@/components/dashboard/system-health-panel";
 import { fetchCurrentEffectiveAccess } from "@/features/admin-access/server/admin-access-effective-access";
 import { dashboardPreviewData } from "@/lib/mock-data/dashboard";
@@ -79,6 +80,7 @@ export default async function DashboardPage() {
               <span>AI görev oluşturma akışı henüz kullanıma hazır değil.</span>
             </span>
           </button>
+          <DashboardShowcaseTvAction />
           <Link
             aria-label="CrevaFact Teams çalışma alanını aç"
             className="command-center__teams-button"

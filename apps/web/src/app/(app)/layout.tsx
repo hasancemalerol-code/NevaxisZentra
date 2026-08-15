@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AppShellFrame } from "@/components/app-shell/app-shell-frame";
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { FactoryShowcaseShell } from "@/features/dashboard-showcase/components/factory-showcase-shell";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
 import { SubscriptionRecoveryShell } from "@/features/saas-subscription/components/subscription-recovery-shell";
 import { normalizeSubscriptionRoute } from "@/features/saas-subscription/domain/saas-subscription-labels";
@@ -50,6 +51,10 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
         {children}
       </SubscriptionRecoveryShell>
     );
+  }
+
+  if (pathname === "/fabrika-vitrini") {
+    return <FactoryShowcaseShell>{children}</FactoryShowcaseShell>;
   }
 
   const navigation = await resolvePermissionAwareNavigation();

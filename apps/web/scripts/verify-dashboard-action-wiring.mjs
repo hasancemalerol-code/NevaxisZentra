@@ -20,6 +20,7 @@ function read(relativePath) {
 }
 
 const dashboardPage = read("src/app/(app)/dashboard/page.tsx");
+const showcaseTvAction = read("src/components/dashboard/dashboard-showcase-tv-action.tsx");
 const quickActions = read("src/components/dashboard/quick-actions-panel.tsx");
 const aiSummary = read("src/components/dashboard/ai-task-center-summary.tsx");
 const production = read("src/components/dashboard/production-orders-table.tsx");
@@ -39,6 +40,7 @@ const sources = [
 const classifications = {
   "CTL-D-01 AI'ya Görev Ver": "DISABLED_WITH_REASON",
   "CTL-D-02 CrevaFact Teams": "WORKING_NAVIGATION",
+  "CTL-D-02A TV Görünümünü Aç": "WORKING_NAVIGATION + SUBSCRIPTION_GATED",
   "CTL-D-03 AI Görevi": "WORKING_NAVIGATION",
   "CTL-D-04 Üretim Emri": "WORKING_NAVIGATION + PERMISSION_HIDDEN",
   "CTL-D-05 Plan Revizyonu": "WORKING_NAVIGATION + PERMISSION_HIDDEN",
@@ -54,7 +56,7 @@ const classifications = {
   "CTL-D-15 AI footer": "WORKING_NAVIGATION",
 };
 
-assert("every dashboard control has a classification", Object.keys(classifications).length === 15);
+assert("every dashboard control has a classification", Object.keys(classifications).length === 16);
 for (const [id, classification] of Object.entries(classifications)) {
   assert(`${id} classified`, Boolean(classification));
 }
@@ -79,6 +81,29 @@ assert(
 assert(
   "Teams navigates to existing placeholder",
   dashboardPage.includes('href="/teams"') && dashboardPage.includes("command-center__teams-button"),
+);
+assert(
+  "showcase TV is wired in dashboard titlebar",
+  dashboardPage.includes("DashboardShowcaseTvAction")
+    && dashboardPage.includes("command-center__titlebar-actions"),
+);
+assert(
+  "showcase TV opens fabrika vitrini in new tab",
+  showcaseTvAction.includes('href={DASHBOARD_SHOWCASE_TV_TARGET.href}')
+    && showcaseTvAction.includes('target="_blank"')
+    && showcaseTvAction.includes('rel="noopener noreferrer"')
+    && showcaseTvAction.includes("command-center__showcase-tv-button")
+    && showcaseTvAction.includes("Fabrika vitrini TV görünümünü aç")
+    && showcaseTvAction.includes("TV Görünümünü Aç"),
+);
+assert(
+  "showcase TV uses dashboard subscription gate",
+  showcaseTvAction.includes("evaluateSubscriptionAccess")
+    && showcaseTvAction.includes("DASHBOARD_SHOWCASE_TV_TARGET"),
+);
+assert(
+  "showcase TV is not in quick actions",
+  !quickActions.includes("fabrika-vitrini") && !quickActions.includes("TV Görünümünü Aç"),
 );
 assert(
   "Teams is not a no-op button",

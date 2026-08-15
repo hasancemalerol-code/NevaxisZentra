@@ -1,10 +1,12 @@
 import "./production-reporting-server-boundary";
 
 import type {
+  ProductionCycleAnalytics,
   ProductionDowntimeReportingSummary,
   ProductionExceptionReportingSummary,
   ProductionOrderPerformanceRow,
   ProductionReportingOverview,
+  ProductionScrapAnalytics,
   ProductionShiftReportingRow,
 } from "../domain/production-reporting";
 import {
@@ -13,6 +15,8 @@ import {
   parseProductionShiftReportingListApiResponse,
   parseProductionDowntimeReportingApiResponse,
   parseProductionExceptionReportingApiResponse,
+  parseProductionScrapAnalyticsApiResponse,
+  parseProductionCycleAnalyticsApiResponse,
 } from "./production-reporting-api-contracts";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 
@@ -146,5 +150,25 @@ export function getProductionExceptionReporting(
     context,
     "/api/production/reporting/exceptions",
     parseProductionExceptionReportingApiResponse,
+  );
+}
+
+export function getProductionScrapAnalytics(
+  context: ProductionOrderRequestContext,
+): Promise<ProductionReportingApiResult<ProductionScrapAnalytics>> {
+  return getJson(
+    context,
+    "/api/production/reporting/scrap",
+    parseProductionScrapAnalyticsApiResponse,
+  );
+}
+
+export function getProductionCycleAnalytics(
+  context: ProductionOrderRequestContext,
+): Promise<ProductionReportingApiResult<ProductionCycleAnalytics>> {
+  return getJson(
+    context,
+    "/api/production/reporting/cycles",
+    parseProductionCycleAnalyticsApiResponse,
   );
 }

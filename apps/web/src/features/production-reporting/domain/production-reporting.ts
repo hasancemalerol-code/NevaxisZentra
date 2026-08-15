@@ -115,3 +115,16 @@ export type ProductionExceptionReportingSummary = Readonly<{
     ageMinutes: number;
   }>[];
 }>;
+
+export type ProductionScrapAnalytics = Readonly<{
+  scrapQuantity: number;
+  goodQuantity: number;
+  totalProcessedQuantity: number;
+  scrapRatePercent?: number;
+}>;
+
+export type ProductionCycleAnalytics = Readonly<{
+  cycleCount: number;
+  averageCycleDurationMilliseconds?: number;
+  recentCycleDurationMilliseconds?: number;
+}>;

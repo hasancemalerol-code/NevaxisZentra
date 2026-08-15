@@ -229,3 +229,28 @@ export function parseProductionExceptionReportingApiResponse(payload: unknown) {
     items,
   };
 }
+
+export function parseProductionScrapAnalyticsApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid scrap analytics payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    scrapQuantity: readNumber(record.scrapQuantity, "scrapQuantity"),
+    goodQuantity: readNumber(record.goodQuantity, "goodQuantity"),
+    totalProcessedQuantity: readNumber(record.totalProcessedQuantity, "totalProcessedQuantity"),
+    scrapRatePercent: readOptionalNumber(record.scrapRatePercent),
+  };
+}
+
+export function parseProductionCycleAnalyticsApiResponse(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid cycle analytics payload.");
+  }
+  const record = payload as Record<string, unknown>;
+  return {
+    cycleCount: readNumber(record.cycleCount, "cycleCount"),
+    averageCycleDurationMilliseconds: readOptionalNumber(record.averageCycleDurationMilliseconds),
+    recentCycleDurationMilliseconds: readOptionalNumber(record.recentCycleDurationMilliseconds),
+  };
+}

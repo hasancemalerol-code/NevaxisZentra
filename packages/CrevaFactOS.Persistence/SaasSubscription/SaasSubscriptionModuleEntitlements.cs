@@ -28,6 +28,7 @@ public static class SaasSubscriptionModuleEntitlements
     private static readonly IReadOnlyList<(string RoutePrefix, string EntitlementCode)> RouteMappings =
     [
         ("/dashboard", EntitlementCodes.Dashboard),
+        ("/fabrika-vitrini", EntitlementCodes.Dashboard),
         ("/teams", EntitlementCodes.Teams),
         ("/siparisler", EntitlementCodes.Orders),
         ("/planlama", EntitlementCodes.Planning),
