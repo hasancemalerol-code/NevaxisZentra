@@ -9,6 +9,7 @@ using CrevaFactOS.Persistence.Quality;
 using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
+using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.SaasBilling;
@@ -444,6 +445,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftRiskManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEnergyReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEnergyReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEnergyReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureEnergyManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureSaasCommercialReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureSaasCommercialReadPermissionAssignmentAsync(
@@ -612,6 +621,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotShiftRiskSeed.EnsureShiftRiskPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotEnergySeed.EnsureEnergyPilotRecordsAsync(
                 dbContext,
                 tenant.Id,
                 facility.Id,
@@ -2584,6 +2600,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ShiftRiskPermissionKeys.Manage,
             DevelopmentPilotIds.ShiftRiskManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureEnergyReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            EnergyPermissionKeys.Read,
+            DevelopmentPilotIds.EnergyReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureEnergyManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            EnergyPermissionKeys.Manage,
+            DevelopmentPilotIds.EnergyManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureSaasCommercialReadPermissionAssignmentAsync(

@@ -819,4 +819,63 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid DevPilotBillingPaymentSucceededId =
         Guid.Parse("bb000003-00c1-4000-8000-0000000000c1");
+
+    // Energy permission definitions (076–077)
+    public static readonly Guid EnergyReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000076");
+
+    public static readonly Guid EnergyManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000077");
+
+    // Energy pilot fixtures (0160–0189)
+    public static readonly Guid EnergyPilotPointInj1Id =
+        Guid.Parse("bb000001-0160-4000-8000-000000000160");
+
+    public static readonly Guid EnergyPilotPointInj2Id =
+        Guid.Parse("bb000001-0161-4000-8000-000000000161");
+
+    public static readonly Guid EnergyPilotPointInj3Id =
+        Guid.Parse("bb000001-0162-4000-8000-000000000162");
+
+    public static readonly Guid EnergyPilotPointChillerId =
+        Guid.Parse("bb000001-0163-4000-8000-000000000163");
+
+    public static readonly Guid EnergyPilotPointCompressorId =
+        Guid.Parse("bb000001-0164-4000-8000-000000000164");
+
+    public static readonly Guid EnergyPilotPointDryerId =
+        Guid.Parse("bb000001-0165-4000-8000-000000000165");
+
+    public static readonly Guid EnergyPilotTariffId =
+        Guid.Parse("bb000001-0166-4000-8000-000000000166");
+
+    public static readonly Guid EnergyPilotWindowCalculatedId =
+        Guid.Parse("bb000001-0167-4000-8000-000000000167");
+
+    public static readonly Guid EnergyPilotWindowInsufficientId =
+        Guid.Parse("bb000001-0168-4000-8000-000000000168");
+
+    public static readonly Guid EnergyPilotWindowConflictId =
+        Guid.Parse("bb000001-0169-4000-8000-000000000169");
+
+    public static readonly Guid EnergyPilotAllocationMachineId =
+        Guid.Parse("bb000001-016a-4000-8000-00000000016a");
+
+    public static readonly Guid EnergyPilotAllocationResidualId =
+        Guid.Parse("bb000001-016b-4000-8000-00000000016b");
+
+    public static readonly Guid EnergyPilotReadingInj1Interval1Id =
+        Guid.Parse("bb000001-016c-4000-8000-00000000016c");
+
+    public static readonly Guid EnergyPilotReadingInj1Interval2Id =
+        Guid.Parse("bb000001-016d-4000-8000-00000000016d");
+
+    public static readonly Guid EnergyPilotReadingInj1Interval3Id =
+        Guid.Parse("bb000001-016e-4000-8000-00000000016e");
+
+    public static readonly Guid EnergyPilotReadingConflict1Id =
+        Guid.Parse("bb000001-016f-4000-8000-00000000016f");
+
+    public static readonly Guid EnergyPilotReadingConflict2Id =
+        Guid.Parse("bb000001-0170-4000-8000-000000000170");
 }

@@ -18,6 +18,7 @@ using CrevaFactOS.Persistence.ProcessOee;
 using CrevaFactOS.Persistence.ShiftWorkforce;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
+using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.SaasBilling;
@@ -152,6 +153,14 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ShiftRiskAssessment> ShiftRiskAssessments => Set<ShiftRiskAssessment>();
     public DbSet<ShiftRiskDriver> ShiftRiskDrivers => Set<ShiftRiskDriver>();
     public DbSet<ShiftRiskAuditEvent> ShiftRiskAuditEvents => Set<ShiftRiskAuditEvent>();
+
+    // Energy measurement foundation (ENERGY-1)
+    public DbSet<EnergyMeasurementPoint> EnergyMeasurementPoints => Set<EnergyMeasurementPoint>();
+    public DbSet<EnergyReading> EnergyReadings => Set<EnergyReading>();
+    public DbSet<EnergyConsumptionWindow> EnergyConsumptionWindows => Set<EnergyConsumptionWindow>();
+    public DbSet<EnergyAllocation> EnergyAllocations => Set<EnergyAllocation>();
+    public DbSet<EnergyTariffSnapshot> EnergyTariffSnapshots => Set<EnergyTariffSnapshot>();
+    public DbSet<EnergyAuditEvent> EnergyAuditEvents => Set<EnergyAuditEvent>();
 
     // SaaS commercial foundation (SAAS-COMMERCIAL-1)
     public DbSet<SaasCommercialPlan> SaasCommercialPlans => Set<SaasCommercialPlan>();
@@ -1036,6 +1045,42 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ShiftRiskAuditEventEntityConfiguration());
         modelBuilder.Entity<ShiftRiskAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyMeasurementPointEntityConfiguration());
+        modelBuilder.Entity<EnergyMeasurementPoint>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyReadingEntityConfiguration());
+        modelBuilder.Entity<EnergyReading>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyConsumptionWindowEntityConfiguration());
+        modelBuilder.Entity<EnergyConsumptionWindow>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyAllocationEntityConfiguration());
+        modelBuilder.Entity<EnergyAllocation>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyTariffSnapshotEntityConfiguration());
+        modelBuilder.Entity<EnergyTariffSnapshot>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyAuditEventEntityConfiguration());
+        modelBuilder.Entity<EnergyAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
