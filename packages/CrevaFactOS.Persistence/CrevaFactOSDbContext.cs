@@ -162,6 +162,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<EnergyTariffSnapshot> EnergyTariffSnapshots => Set<EnergyTariffSnapshot>();
     public DbSet<EnergyAuditEvent> EnergyAuditEvents => Set<EnergyAuditEvent>();
 
+    // Energy intelligence foundation (ENERGY-2)
+    public DbSet<EnergyBaselineProfile> EnergyBaselineProfiles => Set<EnergyBaselineProfile>();
+    public DbSet<EnergyTarget> EnergyTargets => Set<EnergyTarget>();
+    public DbSet<EnergyIntelligenceAssessment> EnergyIntelligenceAssessments => Set<EnergyIntelligenceAssessment>();
+    public DbSet<EnergyIntelligenceDriver> EnergyIntelligenceDrivers => Set<EnergyIntelligenceDriver>();
+
     // SaaS commercial foundation (SAAS-COMMERCIAL-1)
     public DbSet<SaasCommercialPlan> SaasCommercialPlans => Set<SaasCommercialPlan>();
     public DbSet<SaasCommercialPlanVersion> SaasCommercialPlanVersions => Set<SaasCommercialPlanVersion>();
@@ -1084,6 +1090,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyBaselineProfileEntityConfiguration());
+        modelBuilder.Entity<EnergyBaselineProfile>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyTargetEntityConfiguration());
+        modelBuilder.Entity<EnergyTarget>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyIntelligenceAssessmentEntityConfiguration());
+        modelBuilder.Entity<EnergyIntelligenceAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnergyIntelligenceDriverEntityConfiguration());
+        modelBuilder.Entity<EnergyIntelligenceDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Mold registry & lifecycle
         modelBuilder.ApplyConfiguration(new MoldRegistryEntryEntityConfiguration());

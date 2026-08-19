@@ -99,7 +99,11 @@ internal static class EnergyEndpointHelpers
     internal static IResult MapFailure(string failureCode, string? reason) =>
         failureCode switch
         {
-            EnergyFailureCodes.NotFound or EnergyFailureCodes.MeasurementPointNotFound => TypedResults.Problem(
+            EnergyFailureCodes.NotFound
+                or EnergyFailureCodes.MeasurementPointNotFound
+                or EnergyIntelligenceFailureCodes.BaselineNotFound
+                or EnergyIntelligenceFailureCodes.TargetNotFound
+                or EnergyIntelligenceFailureCodes.AssessmentNotFound => TypedResults.Problem(
                 title: reason ?? "Record not found.",
                 statusCode: StatusCodes.Status404NotFound,
                 extensions: FailureExt(failureCode)),

@@ -2710,6 +2710,202 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("energy_audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyBaselineProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("BaselineConsumedKwh")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("baseline_consumed_kwh");
+
+                    b.Property<decimal?>("BaselineKwhPer1000GoodParts")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("baseline_kwh_per_1000_good_parts");
+
+                    b.Property<decimal?>("BaselineKwhPer1000Parts")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("baseline_kwh_per_1000_parts");
+
+                    b.Property<decimal?>("BaselineKwhPerKg")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("baseline_kwh_per_kg");
+
+                    b.Property<decimal?>("BaselineMaximumDemandKw")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("baseline_maximum_demand_kw");
+
+                    b.Property<string>("BaselineReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("baseline_reference");
+
+                    b.Property<string>("CalculationMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("calculation_method");
+
+                    b.Property<string>("ComparisonDimension")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("comparison_dimension");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvaluateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("evaluate_idempotency_key");
+
+                    b.Property<string>("EvaluateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evaluate_idempotency_payload_fingerprint");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid?>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<decimal>("MadDispersion")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("mad_dispersion");
+
+                    b.Property<Guid?>("MeasurementPointId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("measurement_point_id");
+
+                    b.Property<decimal>("MedianCenter")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("median_center");
+
+                    b.Property<decimal>("NormalizedDispersion")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("normalized_dispersion");
+
+                    b.Property<string>("ProductionContextReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("production_context_reference");
+
+                    b.Property<string>("Provenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("provenance");
+
+                    b.Property<decimal>("RelativeTolerance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("relative_tolerance");
+
+                    b.Property<int>("ReportingWindowDurationSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("reporting_window_duration_seconds");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sample_count");
+
+                    b.Property<string>("ShiftReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("shift_reference");
+
+                    b.Property<string>("SourceWindowReferencesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_window_references_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<decimal>("UpperThresholdConsumedKwh")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("upper_threshold_consumed_kwh");
+
+                    b.Property<decimal?>("UpperThresholdDemandKw")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("upper_threshold_demand_kw");
+
+                    b.Property<DateTimeOffset>("ValidFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_from_utc");
+
+                    b.Property<DateTimeOffset>("ValidToUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_to_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeasurementPointId");
+
+                    b.HasIndex("TenantId", "EvaluateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_baseline_profiles_tenant_evaluate_idempotency")
+                        .HasFilter("evaluate_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "BaselineReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_baseline_profiles_tenant_facility_reference");
+
+                    b.ToTable("energy_baseline_profiles", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyConsumptionWindow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2847,6 +3043,305 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ux_energy_consumption_windows_point_window_ruleset");
 
                     b.ToTable("energy_consumption_windows", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyIntelligenceAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActualConsumedKwh")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("actual_consumed_kwh");
+
+                    b.Property<decimal?>("ActualKwhPer1000GoodParts")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("actual_kwh_per_1000_good_parts");
+
+                    b.Property<decimal?>("ActualMaximumDemandKw")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("actual_maximum_demand_kw");
+
+                    b.Property<string>("AssessmentReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("assessment_reference");
+
+                    b.Property<Guid?>("BaselineProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("baseline_profile_id");
+
+                    b.Property<string>("CalculationMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("calculation_method");
+
+                    b.Property<string>("ComparisonDimension")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("comparison_dimension");
+
+                    b.Property<Guid?>("ConsumptionWindowId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("consumption_window_id");
+
+                    b.Property<string>("CostCurrencyCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("cost_currency_code");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal?>("EstimatedCostImpact")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("estimated_cost_impact");
+
+                    b.Property<string>("EvaluateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("evaluate_idempotency_key");
+
+                    b.Property<string>("EvaluateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evaluate_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_end_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_start_utc");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid?>("LeadingDriverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("leading_driver_id");
+
+                    b.Property<Guid?>("MeasurementPointId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("measurement_point_id");
+
+                    b.Property<string>("OpportunityLabel")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("opportunity_label");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("outcome");
+
+                    b.Property<decimal?>("PotentialReducibleKwh")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("potential_reducible_kwh");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<Guid?>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal?>("VarianceConsumedKwh")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("variance_consumed_kwh");
+
+                    b.Property<decimal?>("VariancePercent")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("variance_percent");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BaselineProfileId");
+
+                    b.HasIndex("ConsumptionWindowId");
+
+                    b.HasIndex("TargetId");
+
+                    b.HasIndex("TenantId", "EvaluateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_intelligence_assessments_tenant_evaluate_idempotency")
+                        .HasFilter("evaluate_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "AssessmentReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_intelligence_assessments_tenant_facility_reference");
+
+                    b.HasIndex("TenantId", "FacilityId", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_energy_intelligence_assessments_tenant_facility_evaluated");
+
+                    b.ToTable("energy_intelligence_assessments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyIntelligenceDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActualUnit")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("actual_unit");
+
+                    b.Property<string>("ActualValue")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("actual_value");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("ComparisonUnit")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("comparison_unit");
+
+                    b.Property<string>("ComparisonValue")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("comparison_value");
+
+                    b.Property<string>("EvidenceSource")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("evidence_source");
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("explanation");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessState")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<bool>("IsLeadingDriver")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_leading_driver");
+
+                    b.Property<string>("LabelTr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("label_tr");
+
+                    b.Property<decimal?>("NormalizedVariance")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("normalized_variance");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<string>("StructuredEvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("structured_evidence_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.HasIndex("TenantId", "AssessmentId", "ReasonCode")
+                        .HasDatabaseName("ix_energy_intelligence_drivers_assessment_reason");
+
+                    b.ToTable("energy_intelligence_drivers", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyMeasurementPoint", b =>
@@ -3056,6 +3551,130 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ix_energy_readings_tenant_facility_point_occurred");
 
                     b.ToTable("energy_readings", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyTarget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CreateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("create_idempotency_key");
+
+                    b.Property<string>("CreateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("create_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("EffectiveFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from_utc");
+
+                    b.Property<DateTimeOffset>("EffectiveToUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_to_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("ScopeReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("scope_reference");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetMetric")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("target_metric");
+
+                    b.Property<string>("TargetReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("target_reference");
+
+                    b.Property<string>("TargetScope")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("target_scope");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("target_value");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("Tolerance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("tolerance");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("unit");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_targets_tenant_create_idempotency")
+                        .HasFilter("create_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "TargetReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_energy_targets_tenant_facility_reference");
+
+                    b.ToTable("energy_targets", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyTariffSnapshot", b =>
@@ -18506,6 +19125,27 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyBaselineProfile", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Energy.EnergyMeasurementPoint", null)
+                        .WithMany()
+                        .HasForeignKey("MeasurementPointId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyConsumptionWindow", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Energy.EnergyMeasurementPoint", null)
@@ -18531,6 +19171,61 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyIntelligenceAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Energy.EnergyBaselineProfile", null)
+                        .WithMany()
+                        .HasForeignKey("BaselineProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Energy.EnergyConsumptionWindow", null)
+                        .WithMany()
+                        .HasForeignKey("ConsumptionWindowId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Energy.EnergyTarget", null)
+                        .WithMany()
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyIntelligenceDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Energy.EnergyIntelligenceAssessment", "Assessment")
+                        .WithMany("Drivers")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyMeasurementPoint", b =>
@@ -18576,6 +19271,22 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("MeasurementPoint");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyTarget", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyTariffSnapshot", b =>
@@ -21181,6 +21892,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyConsumptionWindow", b =>
                 {
                     b.Navigation("Allocations");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Energy.EnergyIntelligenceAssessment", b =>
+                {
+                    b.Navigation("Drivers");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Erp.CanonicalErpOrder", b =>

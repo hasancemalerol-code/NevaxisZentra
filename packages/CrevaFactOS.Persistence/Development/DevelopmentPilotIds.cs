@@ -878,4 +878,71 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid EnergyPilotReadingConflict2Id =
         Guid.Parse("bb000001-0170-4000-8000-000000000170");
+
+    // Energy intelligence pilot fixtures (0171–0189)
+    public static readonly Guid Energy2PilotBaselineInj1Id =
+        Guid.Parse("bb000001-0171-4000-8000-000000000171");
+
+    public static readonly Guid Energy2PilotTargetConsumptionInj1Id =
+        Guid.Parse("bb000001-0172-4000-8000-000000000172");
+
+    public static readonly Guid Energy2PilotAssessmentWithinTargetId =
+        Guid.Parse("bb000001-0173-4000-8000-000000000173");
+
+    public static readonly Guid Energy2PilotTargetDemandCompressorId =
+        Guid.Parse("bb000001-0174-4000-8000-000000000174");
+
+    public static readonly Guid Energy2PilotWindowPeakCompressorId =
+        Guid.Parse("bb000001-0175-4000-8000-000000000175");
+
+    public static readonly Guid Energy2PilotAssessmentPeakDemandId =
+        Guid.Parse("bb000001-0176-4000-8000-000000000176");
+
+    public static readonly Guid Energy2PilotTargetIdleDryerId =
+        Guid.Parse("bb000001-0177-4000-8000-000000000177");
+
+    public static readonly Guid Energy2PilotWindowIdleDryerId =
+        Guid.Parse("bb000001-0178-4000-8000-000000000178");
+
+    public static readonly Guid Energy2PilotAssessmentIdleId =
+        Guid.Parse("bb000001-0179-4000-8000-000000000179");
+
+    public static readonly Guid Energy2PilotTargetIntensityId =
+        Guid.Parse("bb000001-017a-4000-8000-00000000017a");
+
+    public static readonly Guid Energy2PilotWindowIntensityId =
+        Guid.Parse("bb000001-017b-4000-8000-00000000017b");
+
+    public static readonly Guid Energy2PilotAssessmentIntensityId =
+        Guid.Parse("bb000001-017c-4000-8000-00000000017c");
+
+    public static readonly Guid Energy2PilotAssessmentInsufficientId =
+        Guid.Parse("bb000001-017d-4000-8000-00000000017d");
+
+    public static readonly Guid Energy2PilotAssessmentSourceConflictId =
+        Guid.Parse("bb000001-017e-4000-8000-00000000017e");
+
+    public static readonly Guid Energy2PilotWindowBaselineSample1Id =
+        Guid.Parse("bb000001-017f-4000-8000-00000000017f");
+
+    public static readonly Guid Energy2PilotWindowBaselineSample2Id =
+        Guid.Parse("bb000001-0180-4000-8000-000000000180");
+
+    public static readonly Guid Energy2PilotWindowBaselineSample3Id =
+        Guid.Parse("bb000001-0181-4000-8000-000000000181");
+
+    public static readonly Guid Energy2PilotWindowBaselineSample4Id =
+        Guid.Parse("bb000001-0182-4000-8000-000000000182");
+
+    public static readonly Guid Energy2PilotWindowBaselineSample5Id =
+        Guid.Parse("bb000001-0183-4000-8000-000000000183");
+
+    public const string Energy2PilotProductionContext = "CTX-PILOT-INJ-001";
+
+    public const string Energy2PilotAssessmentWithinTargetRef = "ASSESS-WITHIN-TARGET";
+    public const string Energy2PilotAssessmentPeakDemandRef = "ASSESS-PEAK-DEMAND";
+    public const string Energy2PilotAssessmentIdleRef = "ASSESS-IDLE-CONSUMPTION";
+    public const string Energy2PilotAssessmentIntensityRef = "ASSESS-ENERGY-INTENSITY";
+    public const string Energy2PilotAssessmentInsufficientRef = "ASSESS-INSUFFICIENT-DATA";
+    public const string Energy2PilotAssessmentSourceConflictRef = "ASSESS-SOURCE-CONFLICT";
 }
