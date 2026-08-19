@@ -1,6 +1,13 @@
 "use server";
 
-import { fetchBillingWorkspace, fetchBillingProviderStatus } from "./saas-billing-api-client";
+import {
+  fetchBillingWorkspace,
+  fetchBillingProviderStatus,
+  initializeCardCheckout,
+  verifyCheckoutReturn,
+  fetchPaymentAttemptDetail,
+  fetchBillingInvoiceDetail,
+} from "./saas-billing-api-client";
 
 export async function loadBillingWorkspaceAction() {
   const [workspaceResult, providerResult] = await Promise.all([
@@ -17,4 +24,28 @@ export async function loadBillingWorkspaceAction() {
     workspace: workspaceResult.value,
     provider: providerResult.status === "success" ? providerResult.value : null,
   };
+}
+
+export async function initializeCardCheckoutAction(
+  invoiceId: string,
+  invoiceExpectedVersion: number,
+  idempotencyKey: string,
+) {
+  return initializeCardCheckout(invoiceId, invoiceExpectedVersion, idempotencyKey);
+}
+
+export async function verifyCheckoutReturnAction(
+  paymentAttemptId: string,
+  checkoutSessionToken: string,
+  idempotencyKey: string,
+) {
+  return verifyCheckoutReturn(paymentAttemptId, checkoutSessionToken, idempotencyKey);
+}
+
+export async function loadPaymentAttemptDetailAction(paymentAttemptId: string) {
+  return fetchPaymentAttemptDetail(paymentAttemptId);
+}
+
+export async function loadBillingInvoiceDetailAction(invoiceId: string) {
+  return fetchBillingInvoiceDetail(invoiceId);
 }

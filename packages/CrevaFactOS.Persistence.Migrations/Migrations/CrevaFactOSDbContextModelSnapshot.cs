@@ -14353,6 +14353,90 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("saas_billing_audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingCheckoutSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CheckoutSessionReferenceMasked")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("checkout_session_reference_masked");
+
+                    b.Property<string>("ConversationId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("conversation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("HostedCheckoutUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("hosted_checkout_url");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<Guid>("PaymentAttemptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_attempt_id");
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("provider_key");
+
+                    b.Property<string>("SessionStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("session_status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("PaymentAttemptId");
+
+                    b.HasIndex("TenantId", "CheckoutSessionReferenceMasked")
+                        .IsUnique()
+                        .HasDatabaseName("ux_saas_billing_checkout_sessions_reference");
+
+                    b.HasIndex("TenantId", "PaymentAttemptId")
+                        .HasDatabaseName("ix_saas_billing_checkout_sessions_attempt");
+
+                    b.ToTable("saas_billing_checkout_sessions", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_saas_billing_checkout_sessions_status", "session_status IN ('pending', 'completed', 'expired', 'cancelled')");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingIdempotencyRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -14670,6 +14754,78 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                             t.HasCheckConstraint("ck_saas_billing_payment_attempts_status", "payment_status IN ('pending', 'awaiting-manual-verification', 'succeeded', 'failed', 'cancelled', 'refunded')");
                         });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingProviderEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("CurrencyCode")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<Guid?>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<string>("NormalizedStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("normalized_status");
+
+                    b.Property<Guid?>("PaymentAttemptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_attempt_id");
+
+                    b.Property<DateTimeOffset>("ProcessedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at_utc");
+
+                    b.Property<string>("ProviderEventIdentityHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("provider_event_identity_hash");
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("provider_key");
+
+                    b.Property<string>("SanitizedEvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sanitized_evidence_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PaymentAttemptId")
+                        .HasDatabaseName("ix_saas_billing_provider_events_attempt");
+
+                    b.HasIndex("TenantId", "ProviderEventIdentityHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_saas_billing_provider_events_identity");
+
+                    b.ToTable("saas_billing_provider_events", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasTenantBillingAccount", b =>
@@ -19750,6 +19906,27 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingCheckoutSession", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.SaasBilling.SaasBillingInvoice", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.SaasBilling.SaasBillingPaymentAttempt", null)
+                        .WithMany()
+                        .HasForeignKey("PaymentAttemptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingIdempotencyRecord", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -19797,6 +19974,15 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.SaasBilling.SaasBillingProviderEvent", b =>
+                {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")

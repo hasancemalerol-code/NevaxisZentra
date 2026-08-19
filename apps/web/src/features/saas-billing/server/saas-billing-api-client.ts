@@ -10,6 +10,8 @@ import type {
   BillingPaymentAttempt,
   BillingProviderCapability,
   BillingWorkspaceSummary,
+  InitializeCardCheckoutResult,
+  PaymentAttemptDetail,
 } from "../domain/saas-billing-types";
 
 type ApiResult<T> =
@@ -100,4 +102,32 @@ export async function fetchBillingPaymentAttempts(
 
 export async function fetchBillingProviderStatus(): Promise<ApiResult<BillingProviderCapability>> {
   return requestJson<BillingProviderCapability>("/api/saas-billing/provider-status");
+}
+
+export async function initializeCardCheckout(
+  invoiceId: string,
+  invoiceExpectedVersion: number,
+  idempotencyKey: string,
+): Promise<ApiResult<InitializeCardCheckoutResult>> {
+  return requestJson<InitializeCardCheckoutResult>("/api/saas-billing/payments/checkout/initialize", {
+    method: "POST",
+    body: JSON.stringify({ invoiceId, invoiceExpectedVersion, idempotencyKey }),
+  });
+}
+
+export async function verifyCheckoutReturn(
+  paymentAttemptId: string,
+  checkoutSessionToken: string,
+  idempotencyKey: string,
+): Promise<ApiResult<{ entityId?: string; idempotentReplay?: boolean }>> {
+  return requestJson("/api/saas-billing/payments/checkout/verify-return", {
+    method: "POST",
+    body: JSON.stringify({ paymentAttemptId, checkoutSessionToken, idempotencyKey }),
+  });
+}
+
+export async function fetchPaymentAttemptDetail(
+  paymentAttemptId: string,
+): Promise<ApiResult<PaymentAttemptDetail>> {
+  return requestJson<PaymentAttemptDetail>(`/api/saas-billing/payment-attempts/${paymentAttemptId}`);
 }

@@ -98,6 +98,7 @@ public sealed record SaasBillingInvoiceSummaryReadModel(
 
 public sealed record SaasBillingProviderStatusReadModel(
     string ProviderKey,
+    string ProviderMode,
     bool IsProduction,
     bool CardCheckoutAvailable,
     string CardCheckoutStatus,
@@ -140,6 +141,49 @@ public sealed record VerifySaasBillingBankTransferCommand(
     long ExpectedVersion,
     string? IdempotencyKey);
 
+public sealed record InitializeCardCheckoutCommand(
+    Guid InvoiceId,
+    long InvoiceExpectedVersion,
+    string? IdempotencyKey);
+
+public sealed record InitializeCardCheckoutResult(
+    Guid PaymentAttemptId,
+    Guid CheckoutSessionId,
+    string HostedCheckoutUrl,
+    long PaymentAttemptVersion);
+
+public sealed record VerifyCheckoutReturnCommand(
+    Guid PaymentAttemptId,
+    string CheckoutSessionToken,
+    string? IdempotencyKey);
+
+public sealed record ProcessProviderWebhookCommand(
+    string ProviderKey,
+    string ProviderEventIdentityHash,
+    string NormalizedStatus,
+    string? ProviderPaymentReferenceMasked,
+    string? CheckoutSessionReferenceMasked,
+    decimal? Amount,
+    string? CurrencyCode,
+    string SanitizedEvidenceJson,
+    string? IdempotencyKey);
+
+public sealed record SaasBillingPaymentAttemptDetailReadModel(
+    Guid PaymentAttemptId,
+    Guid InvoiceId,
+    string PaymentMethod,
+    string? ProviderKey,
+    string? ExternalReferenceMasked,
+    decimal Amount,
+    string CurrencyCode,
+    string PaymentStatus,
+    string? FailureCode,
+    long Version,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    Guid? CheckoutSessionId,
+    string? CheckoutSessionStatus);
+
 public sealed record SaasBillingWriteResult(
     bool Succeeded,
     string? FailureCode = null,
@@ -152,6 +196,22 @@ public sealed record SaasBillingWriteResult(
 
     public static SaasBillingWriteResult Fail(string failureCode, string failureMessage) =>
         new(false, failureCode, failureMessage);
+}
+
+public sealed record SaasBillingWriteResult<T>(
+    bool Succeeded,
+    T? Value,
+    string? FailureCode = null,
+    string? FailureMessage = null,
+    bool IdempotentReplay = false)
+{
+#pragma warning disable CA1000 // Do not declare static members on generic types
+    public static SaasBillingWriteResult<T> Ok(T value, bool idempotentReplay = false) =>
+        new(true, value, IdempotentReplay: idempotentReplay);
+
+    public static SaasBillingWriteResult<T> Fail(string failureCode, string failureMessage) =>
+        new(false, default, failureCode, failureMessage);
+#pragma warning restore CA1000
 }
 
 public sealed record BillingPaymentProviderResult(

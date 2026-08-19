@@ -1,7 +1,9 @@
+using CrevaFactOS.Api.SaasBilling.Payments;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.SaasBilling;
+using CrevaFactOS.Persistence.SaasBilling.Payments;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +32,7 @@ public static class SaasBillingEndpointRouteBuilderExtensions
 
     private static async Task<IResult> GetWorkspaceSummaryAsync(
         ISaasBillingRepository repository,
+        ISaasPaymentProvider paymentProvider,
         IPermissionEvaluator permissionEvaluator,
         ICurrentIdentityAccessor identityAccessor,
         ITenantContextAccessor tenantContextAccessor,
@@ -49,8 +52,31 @@ public static class SaasBillingEndpointRouteBuilderExtensions
             return failResult!;
         }
 
-        var summary = await repository.GetWorkspaceSummaryAsync(cancellationToken);
+        var providerStatus = BuildProviderStatus(paymentProvider);
+        var summary = await repository.GetWorkspaceSummaryAsync(providerStatus, cancellationToken);
         return TypedResults.Ok(summary);
+    }
+
+    private static SaasBillingProviderStatusReadModel BuildProviderStatus(ISaasPaymentProvider paymentProvider)
+    {
+        var status = paymentProvider.GetStatus();
+        var methods = new List<string>
+        {
+            SaasBillingPaymentMethods.BankTransfer,
+            SaasBillingPaymentMethods.EnterpriseInvoice,
+        };
+        if (status.CardCheckoutAvailable)
+        {
+            methods.Insert(0, SaasBillingPaymentMethods.Card);
+        }
+
+        return new SaasBillingProviderStatusReadModel(
+            status.ProviderKey,
+            status.Mode,
+            status.IsProduction,
+            status.CardCheckoutAvailable,
+            status.CardCheckoutStatus,
+            methods);
     }
 
     private static async Task<IResult> GetBillingAccountAsync(
@@ -352,7 +378,7 @@ public static class SaasBillingEndpointRouteBuilderExtensions
     }
 
     private static async Task<IResult> GetProviderStatusAsync(
-        IBillingPaymentProvider paymentProvider,
+        ISaasPaymentProvider paymentProvider,
         ISaasBillingRepository repository,
         IPermissionEvaluator permissionEvaluator,
         ICurrentIdentityAccessor identityAccessor,
@@ -373,21 +399,24 @@ public static class SaasBillingEndpointRouteBuilderExtensions
             return failResult!;
         }
 
-        var summary = await repository.GetWorkspaceSummaryAsync(cancellationToken);
+        var providerStatus = BuildProviderStatus(paymentProvider);
+        var summary = await repository.GetWorkspaceSummaryAsync(providerStatus, cancellationToken);
         return TypedResults.Ok(new
         {
             provider = summary.ProviderStatus,
             providerKey = paymentProvider.ProviderKey,
-            isProduction = paymentProvider.IsProduction,
+            isProduction = providerStatus.IsProduction,
+            providerMode = providerStatus.ProviderMode,
         });
     }
 }
 
 public static class SaasBillingApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSSaasBillingApi(this IServiceCollection services)
+    public static IServiceCollection AddCrevaFactOSSaasBillingApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddCrevaFactOSSaasBilling();
+        services.AddCrevaFactOSSaasPayments(configuration);
         return services;
     }
 }

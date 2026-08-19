@@ -58,6 +58,7 @@ import type {
 import {
   BILLING_DEVELOPMENT_NOTICE,
   CARD_PROVIDER_NOT_CONFIGURED_MESSAGE,
+  CARD_PROVIDER_SANDBOX_MESSAGE,
   formatBillingDateTime,
   formatInvoiceStatus,
   formatMoney,
@@ -66,7 +67,7 @@ import {
   invoiceStatusBadgeClass,
   paymentStatusBadgeClass,
 } from "@/features/saas-billing/domain/saas-billing-labels";
-import { loadBillingWorkspaceAction } from "@/features/saas-billing/server/saas-billing-actions";
+import { loadBillingWorkspaceAction, initializeCardCheckoutAction, loadBillingInvoiceDetailAction } from "@/features/saas-billing/server/saas-billing-actions";
 import {
   inviteSaasAdminUserAction,
   loadSaasAdminEffectiveAccessAction,
@@ -1419,6 +1420,8 @@ function BillingWorkspace({
   const [loadedWorkspace, setLoadedWorkspace] = useState(billingWorkspace);
   const [loadedProvider, setLoadedProvider] = useState(billingProvider);
   const [billingLoading, setBillingLoading] = useState(!billingWorkspace);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (billingWorkspace) {
@@ -1482,6 +1485,42 @@ function BillingWorkspace({
 
   const account = activeWorkspace?.billingAccount;
   const providerStatus = activeProvider?.provider ?? activeWorkspace?.providerStatus;
+  const providerMode = activeProvider?.providerMode ?? providerStatus?.providerMode ?? "not-configured";
+  const cardCheckoutAvailable = providerStatus?.cardCheckoutAvailable === true;
+  const selectedInvoicePayable = selectedInvoice
+    ? selectedInvoice.invoiceStatus === "open" || selectedInvoice.invoiceStatus === "overdue"
+    : false;
+
+  async function handleCardCheckout() {
+    if (!selectedInvoice || checkoutBusy || !canManage || !cardCheckoutAvailable) {
+      return;
+    }
+
+    setCheckoutBusy(true);
+    setCheckoutMessage(null);
+    try {
+      const detail = await loadBillingInvoiceDetailAction(selectedInvoice.invoiceId);
+      if (detail.status === "failure") {
+        setCheckoutMessage(detail.message);
+        return;
+      }
+
+      const idempotencyKey = createIdempotencyKey("SAAS-PAYMENTS-1-CLOSURE-CHECKOUT");
+      const init = await initializeCardCheckoutAction(
+        selectedInvoice.invoiceId,
+        detail.value.version,
+        idempotencyKey,
+      );
+      if (init.status === "failure") {
+        setCheckoutMessage(init.message);
+        return;
+      }
+
+      window.location.assign(init.value.hostedCheckoutUrl);
+    } finally {
+      setCheckoutBusy(false);
+    }
+  }
 
   return (
     <section className="saas-admin-panel" role="tabpanel" id="saas-admin-panel-billing" aria-labelledby="saas-admin-tab-billing">
@@ -1735,11 +1774,11 @@ function BillingWorkspace({
           <dl className="saas-admin-billing-grid">
             <div>
               <dt>Sağlayıcı</dt>
-              <dd>{providerStatus.isProduction ? "Üretim" : "Geliştirme"}</dd>
+              <dd>{providerStatus.isProduction ? "Üretim" : providerMode === "sandbox" ? "Test" : "Yapılandırılmadı"}</dd>
             </div>
             <div>
               <dt>Kart ödemesi</dt>
-              <dd>{providerStatus.cardCheckoutAvailable ? "Kullanılabilir" : CARD_PROVIDER_NOT_CONFIGURED_MESSAGE}</dd>
+              <dd>{cardCheckoutAvailable ? "Kullanılabilir" : CARD_PROVIDER_NOT_CONFIGURED_MESSAGE}</dd>
             </div>
             <div>
               <dt>Desteklenen yöntemler</dt>
@@ -1753,9 +1792,26 @@ function BillingWorkspace({
         ) : (
           <p className="saas-admin-billing-muted">Ödeme sağlayıcı durumu yüklenemedi.</p>
         )}
-        <button type="button" className="saas-admin-button" disabled>
-          {CARD_PROVIDER_NOT_CONFIGURED_MESSAGE}
-        </button>
+        {providerMode === "sandbox" ? (
+          <p className="saas-admin-billing-muted" role="status">{CARD_PROVIDER_SANDBOX_MESSAGE}</p>
+        ) : null}
+        {!cardCheckoutAvailable ? (
+          <button type="button" className="saas-admin-button" disabled>
+            {CARD_PROVIDER_NOT_CONFIGURED_MESSAGE}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="saas-admin-button"
+            disabled={!canManage || !selectedInvoicePayable || checkoutBusy}
+            onClick={() => void handleCardCheckout()}
+          >
+            {checkoutBusy ? "Yönlendiriliyor..." : "Kartla öde"}
+          </button>
+        )}
+        {checkoutMessage ? (
+          <p className="saas-admin-billing-warning" role="alert">{checkoutMessage}</p>
+        ) : null}
         {!canManage ? (
           <p className="saas-admin-billing-muted" role="status">Salt okunur görünüm — faturalandırma yönetim yetkisi yok.</p>
         ) : null}

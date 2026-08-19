@@ -75,6 +75,7 @@ export type BillingPaymentAttempt = Readonly<{
 
 export type BillingProviderStatus = Readonly<{
   providerKey: string;
+  providerMode: string;
   isProduction: boolean;
   cardCheckoutAvailable: boolean;
   cardCheckoutStatus: string;
@@ -94,5 +95,31 @@ export type BillingWorkspaceSummary = Readonly<{
 export type BillingProviderCapability = Readonly<{
   provider: BillingProviderStatus;
   providerKey: string;
+  providerMode?: string;
   isProduction: boolean;
+}>;
+
+export type InitializeCardCheckoutResult = Readonly<{
+  paymentAttemptId: string;
+  checkoutSessionId: string;
+  hostedCheckoutUrl: string;
+  paymentAttemptVersion: number;
+  idempotentReplay?: boolean;
+}>;
+
+export type PaymentAttemptDetail = Readonly<{
+  paymentAttemptId: string;
+  invoiceId: string;
+  paymentMethod: string;
+  providerKey: string | null;
+  externalReferenceMasked: string | null;
+  amount: number;
+  currencyCode: string;
+  paymentStatus: string;
+  failureCode: string | null;
+  version: number;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  checkoutSessionId: string | null;
+  checkoutSessionStatus: string | null;
 }>;

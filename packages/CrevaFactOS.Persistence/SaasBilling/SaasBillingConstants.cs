@@ -68,6 +68,9 @@ public static class SaasBillingAuditEventTypes
     public const string PaymentAttemptCreated = "saas-billing.payment-attempt.created";
     public const string PaymentAttemptVerified = "saas-billing.payment-attempt.verified";
     public const string PaymentAttemptFailed = "saas-billing.payment-attempt.failed";
+    public const string CheckoutInitialized = "saas-billing.checkout.initialized";
+    public const string CheckoutVerified = "saas-billing.checkout.verified";
+    public const string ProviderWebhookProcessed = "saas-billing.provider-webhook.processed";
 }
 
 public static class SaasBillingAuditEntityTypes

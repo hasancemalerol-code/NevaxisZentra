@@ -94,5 +94,10 @@ export function paymentStatusBadgeClass(status: string): string {
 export const CARD_PROVIDER_NOT_CONFIGURED_MESSAGE =
   "Kartla ödeme sağlayıcısı henüz yapılandırılmadı.";
 
+export const CARD_PROVIDER_SANDBOX_MESSAGE =
+  "Test ortamı — gerçek tahsilat yapılmaz";
+
+export const CHECKOUT_VERIFICATION_MESSAGE = "Ödeme sonucu doğrulanıyor";
+
 export const BILLING_DEVELOPMENT_NOTICE =
   "Geliştirme ortamı — üretim fiyatlandırması veya gerçek ödeme toplama bu pakette sunulmaz.";

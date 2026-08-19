@@ -176,6 +176,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<SaasBillingInvoice> SaasBillingInvoices => Set<SaasBillingInvoice>();
     public DbSet<SaasBillingInvoiceLine> SaasBillingInvoiceLines => Set<SaasBillingInvoiceLine>();
     public DbSet<SaasBillingPaymentAttempt> SaasBillingPaymentAttempts => Set<SaasBillingPaymentAttempt>();
+    public DbSet<SaasBillingCheckoutSession> SaasBillingCheckoutSessions => Set<SaasBillingCheckoutSession>();
+    public DbSet<SaasBillingProviderEvent> SaasBillingProviderEvents => Set<SaasBillingProviderEvent>();
     public DbSet<SaasBillingIdempotencyRecord> SaasBillingIdempotencyRecords => Set<SaasBillingIdempotencyRecord>();
     public DbSet<SaasBillingAuditEvent> SaasBillingAuditEvents => Set<SaasBillingAuditEvent>();
 
@@ -1582,6 +1584,18 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new SaasBillingPaymentAttemptEntityConfiguration());
         modelBuilder.Entity<SaasBillingPaymentAttempt>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingCheckoutSessionEntityConfiguration());
+        modelBuilder.Entity<SaasBillingCheckoutSession>().HasQueryFilter(item =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SaasBillingProviderEventEntityConfiguration());
+        modelBuilder.Entity<SaasBillingProviderEvent>().HasQueryFilter(item =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && item.TenantId == tenantContextAccessor.Current!.TenantId);

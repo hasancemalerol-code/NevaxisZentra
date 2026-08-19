@@ -3,6 +3,7 @@ using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Identity;
 using CrevaFactOS.Persistence.SaasBilling;
+using CrevaFactOS.Persistence.SaasBilling.Payments;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Http;
 
@@ -139,24 +140,60 @@ internal static class SaasBillingEndpointHelpers
                 : TypedResults.Created("/api/saas-billing/workspace", result);
         }
 
-        return result.FailureCode switch
+        return MapFailureResult(result.FailureCode, result.FailureMessage);
+    }
+
+    public static IResult MapWriteResult<T>(SaasBillingWriteResult<T> result, Func<T, object> mapSuccess)
+    {
+        if (result.Succeeded && result.Value is not null)
+        {
+            return result.IdempotentReplay
+                ? TypedResults.Ok(mapSuccess(result.Value))
+                : TypedResults.Created("/api/saas-billing/payments/checkout/initialize", mapSuccess(result.Value));
+        }
+
+        return MapFailureResult(result.FailureCode, result.FailureMessage);
+    }
+
+    private static IResult MapFailureResult(string? failureCode, string? failureMessage) =>
+        failureCode switch
         {
             SaasBillingFailureCodes.ConcurrencyConflict
                 or SaasBillingFailureCodes.IdempotencyConflict
                 or SaasBillingFailureCodes.Conflict
                 or SaasBillingFailureCodes.InvalidTransition
-                or SaasBillingFailureCodes.IdempotencyUnverifiable =>
-                TypedResults.Conflict(new { failureCode = result.FailureCode, message = result.FailureMessage }),
+                or SaasBillingFailureCodes.IdempotencyUnverifiable
+                or SaasPaymentFailureCodes.IdempotencyConflict
+                or SaasPaymentFailureCodes.IdempotencyUnverifiable
+                or SaasPaymentFailureCodes.Conflict
+                or SaasPaymentFailureCodes.ConcurrencyConflict =>
+                TypedResults.Conflict(new { failureCode, message = failureMessage }),
             SaasBillingFailureCodes.ValidationFailed
                 or SaasBillingFailureCodes.AmountExceeded
                 or SaasBillingFailureCodes.CurrencyMismatch
-                or SaasBillingFailureCodes.ReconciliationFailed =>
-                TypedResults.UnprocessableEntity(new { failureCode = result.FailureCode, message = result.FailureMessage }),
-            SaasBillingFailureCodes.NotFound =>
-                TypedResults.NotFound(new { failureCode = result.FailureCode, message = result.FailureMessage }),
+                or SaasBillingFailureCodes.ReconciliationFailed
+                or SaasPaymentFailureCodes.ValidationFailed
+                or SaasPaymentFailureCodes.AmountMismatch
+                or SaasPaymentFailureCodes.CurrencyMismatch
+                or SaasPaymentFailureCodes.ReconciliationReviewRequired
+                or SaasPaymentFailureCodes.ProviderNotConfigured
+                or SaasPaymentFailureCodes.ProviderUnavailable
+                or SaasPaymentFailureCodes.CheckoutVerificationFailed
+                or SaasPaymentFailureCodes.CheckoutExpired
+                or SaasPaymentFailureCodes.WebhookRejected =>
+                TypedResults.UnprocessableEntity(new { failureCode, message = failureMessage }),
+            SaasBillingFailureCodes.NotFound
+                or SaasPaymentFailureCodes.NotFound =>
+                TypedResults.NotFound(new { failureCode, message = failureMessage }),
+            SaasPaymentFailureCodes.WebhookSignatureInvalid
+                or SaasPaymentFailureCodes.Unauthorized =>
+                TypedResults.Unauthorized(),
+            SaasPaymentFailureCodes.Forbidden =>
+                TypedResults.Json(
+                    new { failureCode, message = failureMessage },
+                    statusCode: StatusCodes.Status403Forbidden),
             _ => TypedResults.Json(
-                new { failureCode = result.FailureCode, message = result.FailureMessage },
+                new { failureCode, message = failureMessage },
                 statusCode: StatusCodes.Status403Forbidden),
         };
-    }
 }

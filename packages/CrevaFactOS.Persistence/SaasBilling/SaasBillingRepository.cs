@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasBilling.Payments;
 using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using Npgsql;
 
 namespace CrevaFactOS.Persistence.SaasBilling;
 
-public sealed class SaasBillingRepository(
+public sealed partial class SaasBillingRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession) : ISaasBillingRepository
 {
@@ -19,6 +20,7 @@ public sealed class SaasBillingRepository(
     };
 
     public Task<SaasBillingWorkspaceSummaryReadModel> GetWorkspaceSummaryAsync(
+        SaasBillingProviderStatusReadModel providerStatus,
         CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteReadAsync(
             async ct =>
@@ -38,12 +40,7 @@ public sealed class SaasBillingRepository(
                     account is null ? null : MapAccount(account),
                     invoices.Select(MapInvoiceSummary).ToList(),
                     payments.Select(MapPayment).ToList(),
-                    new SaasBillingProviderStatusReadModel(
-                        DevelopmentBillingPaymentProvider.ProviderKeyValue,
-                        false,
-                        false,
-                        "provider-not-configured",
-                        [SaasBillingPaymentMethods.BankTransfer, SaasBillingPaymentMethods.EnterpriseInvoice]),
+                    providerStatus,
                     invoices.Count(item => item.InvoiceStatus == SaasBillingInvoiceStatuses.Open),
                     invoices.Count(item => item.InvoiceStatus == SaasBillingInvoiceStatuses.Overdue),
                     payments.Count(item =>
@@ -720,6 +717,115 @@ public sealed class SaasBillingRepository(
         return result;
     }
 
+    private async Task<SaasBillingWriteResult<TValue>> ExecuteMutationAsync<TCommand, TValue>(
+        string? idempotencyKey,
+        string operation,
+        TCommand command,
+        Func<CancellationToken, Task<SaasBillingWriteResult<TValue>>> action,
+        Func<CancellationToken, Task<SaasBillingWriteResult<TValue>>> replayAction,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            return SaasBillingWriteResult<TValue>.Fail(
+                SaasBillingFailureCodes.IdempotencyUnverifiable,
+                "Idempotency key is required for billing mutations.");
+        }
+
+        return await tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                try
+                {
+                    return await ExecuteMutationCoreAsync(
+                        idempotencyKey,
+                        operation,
+                        command,
+                        action,
+                        replayAction,
+                        ct);
+                }
+                catch (DbUpdateException exception) when (IsUniqueViolation(exception))
+                {
+                    dbContext.ChangeTracker.Clear();
+                    var hash = HashCommand(command);
+                    var existing = await dbContext.SaasBillingIdempotencyRecords
+                        .SingleOrDefaultAsync(record => record.IdempotencyKey == idempotencyKey, ct);
+                    if (existing is null)
+                    {
+                        throw;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(existing.RequestHash))
+                    {
+                        return SaasBillingWriteResult<TValue>.Fail(
+                            SaasBillingFailureCodes.IdempotencyUnverifiable,
+                            "Idempotent retry cannot be verified.");
+                    }
+
+                    return existing.RequestHash == hash
+                        ? await replayAction(ct)
+                        : SaasBillingWriteResult<TValue>.Fail(
+                            SaasBillingFailureCodes.IdempotencyConflict,
+                            "Idempotent retry conflicts with the original request.");
+                }
+            },
+            cancellationToken);
+    }
+
+    private async Task<SaasBillingWriteResult<TValue>> ExecuteMutationCoreAsync<TCommand, TValue>(
+        string? idempotencyKey,
+        string operation,
+        TCommand command,
+        Func<CancellationToken, Task<SaasBillingWriteResult<TValue>>> action,
+        Func<CancellationToken, Task<SaasBillingWriteResult<TValue>>> replayAction,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            return SaasBillingWriteResult<TValue>.Fail(
+                SaasBillingFailureCodes.IdempotencyUnverifiable,
+                "Idempotency key is required for billing mutations.");
+        }
+
+        var hash = HashCommand(command);
+        var existing = await dbContext.SaasBillingIdempotencyRecords
+            .SingleOrDefaultAsync(record => record.IdempotencyKey == idempotencyKey, cancellationToken);
+        if (existing is not null)
+        {
+            if (string.IsNullOrWhiteSpace(existing.RequestHash))
+            {
+                return SaasBillingWriteResult<TValue>.Fail(
+                    SaasBillingFailureCodes.IdempotencyUnverifiable,
+                    "Idempotent retry cannot be verified.");
+            }
+
+            return existing.RequestHash == hash
+                ? await replayAction(cancellationToken)
+                : SaasBillingWriteResult<TValue>.Fail(
+                    SaasBillingFailureCodes.IdempotencyConflict,
+                    "Idempotent retry conflicts with the original request.");
+        }
+
+        dbContext.SaasBillingIdempotencyRecords.Add(new SaasBillingIdempotencyRecord
+        {
+            Id = Guid.NewGuid(),
+            TenantId = await ResolveTenantIdAsync(cancellationToken),
+            IdempotencyKey = idempotencyKey,
+            RequestHash = hash,
+            Operation = operation,
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+        });
+
+        var result = await action(cancellationToken);
+        if (!result.Succeeded)
+        {
+            dbContext.ChangeTracker.Clear();
+        }
+
+        return result;
+    }
+
     private static bool IsUniqueViolation(DbUpdateException exception) =>
         exception.InnerException is PostgresException postgresException
         && postgresException.SqlState == "23505";
@@ -842,10 +948,17 @@ public sealed class UnavailableSaasBillingRepository : ISaasBillingRepository
             "SaaS billing persistence is unavailable.");
 
     public Task<SaasBillingWorkspaceSummaryReadModel> GetWorkspaceSummaryAsync(
+        SaasBillingProviderStatusReadModel providerStatus,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(new SaasBillingWorkspaceSummaryReadModel(
             null, [], [],
-            new SaasBillingProviderStatusReadModel("unavailable", false, false, "unavailable", []),
+            new SaasBillingProviderStatusReadModel(
+                "unavailable",
+                Payments.SaasPaymentProviderModes.NotConfigured,
+                false,
+                false,
+                "unavailable",
+                []),
             0, 0, 0));
 
     public Task<SaasBillingAccountReadModel?> GetBillingAccountAsync(
@@ -904,4 +1017,39 @@ public sealed class UnavailableSaasBillingRepository : ISaasBillingRepository
         Guid? correlationId = null,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
+
+    public Task<SaasBillingWriteResult<InitializeCardCheckoutResult>> InitializeCardCheckoutAsync(
+        InitializeCardCheckoutCommand command,
+        ISaasPaymentProvider paymentProvider,
+        string actorReference,
+        Guid? correlationId = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(SaasBillingWriteResult<InitializeCardCheckoutResult>.Fail(
+            SaasBillingFailureCodes.Unavailable,
+            "SaaS billing persistence is unavailable."));
+
+    public Task<SaasBillingWriteResult> VerifyCheckoutReturnAsync(
+        VerifyCheckoutReturnCommand command,
+        ISaasPaymentProvider paymentProvider,
+        string actorReference,
+        Guid? correlationId = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
+
+    public Task<SaasBillingWriteResult> ProcessProviderWebhookAsync(
+        ProcessProviderWebhookCommand command,
+        string actorReference,
+        Guid? correlationId = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
+
+    public Task<SaasBillingPaymentAttemptDetailReadModel?> GetPaymentAttemptDetailAsync(
+        Guid paymentAttemptId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<SaasBillingPaymentAttemptDetailReadModel?>(null);
+
+    public Task<SaasBillingCheckoutSession?> FindCheckoutSessionByReferenceAsync(
+        string checkoutSessionReferenceMasked,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<SaasBillingCheckoutSession?>(null);
 }
