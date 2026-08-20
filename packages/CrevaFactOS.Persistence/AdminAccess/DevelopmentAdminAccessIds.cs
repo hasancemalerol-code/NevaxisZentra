@@ -33,4 +33,7 @@ public static class DevelopmentAdminAccessIds
     public static readonly Guid MaintenanceTeamAccountId = Guid.Parse("bb000003-0221-4000-8000-000000000221");
     public static readonly Guid MaintenanceTeamIdentitySubjectId = Guid.Parse("bb000003-0222-4000-8000-000000000222");
     public static readonly Guid MaintenanceTeamMembershipId = Guid.Parse("bb000003-0223-4000-8000-000000000223");
+
+    public static readonly Guid TenantOwnerFacilityMembershipId =
+        Guid.Parse("bb000003-0231-4000-8000-000000000231");
 }

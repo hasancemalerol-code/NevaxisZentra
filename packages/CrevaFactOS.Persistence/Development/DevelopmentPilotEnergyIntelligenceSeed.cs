@@ -31,6 +31,16 @@ internal static class DevelopmentPilotEnergyIntelligenceSeed
             durationSeconds,
             cancellationToken);
 
+        await EnsureCanonicalFacilityTrendWindowsAsync(
+            dbContext,
+            tenantId,
+            facilityId,
+            actorSubjectId,
+            seedTimestampUtc,
+            anchor,
+            durationSeconds,
+            cancellationToken);
+
         await EnsureAuxiliaryWindowsAsync(
             dbContext,
             tenantId,
@@ -115,6 +125,194 @@ internal static class DevelopmentPilotEnergyIntelligenceSeed
                 actorSubjectId,
                 seedTimestampUtc,
                 cancellationToken);
+        }
+    }
+
+    private static async Task EnsureCanonicalFacilityTrendWindowsAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        string actorSubjectId,
+        DateTimeOffset seedTimestampUtc,
+        DateTime anchor,
+        int durationSeconds,
+        CancellationToken cancellationToken)
+    {
+        var windowIds = new[]
+        {
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow1Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow2Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow3Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow4Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow5Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow6Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow7Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendWindow8Id,
+        };
+        var machineAllocationIds = new[]
+        {
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine1Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine2Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine3Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine4Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine5Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine6Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine7Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationMachine8Id,
+        };
+        var residualAllocationIds = new[]
+        {
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual1Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual2Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual3Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual4Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual5Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual6Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual7Id,
+            DevelopmentPilotIds.Energy2PilotCanonicalTrendAllocationResidual8Id,
+        };
+        var bucketValues = new[] { 31.6m, 32.4m, 33.1m, 33.8m, 34.2m, 33.5m, 32.9m, 34.0m };
+
+        for (var index = 0; index < windowIds.Length; index += 1)
+        {
+            var start = new DateTimeOffset(anchor.AddDays(-28 + index).AddHours(6), TimeSpan.Zero);
+            var end = start.AddSeconds(durationSeconds);
+            var consumedKwh = EnergyCalculator.RoundEnergy(bucketValues[index]);
+            await EnsureCanonicalTrendWindowAsync(
+                dbContext,
+                windowIds[index],
+                tenantId,
+                facilityId,
+                DevelopmentPilotIds.EnergyPilotPointInj1Id,
+                start,
+                end,
+                consumedKwh,
+                actorSubjectId,
+                seedTimestampUtc,
+                cancellationToken);
+            await EnsureCanonicalTrendAllocationsAsync(
+                dbContext,
+                tenantId,
+                facilityId,
+                windowIds[index],
+                machineAllocationIds[index],
+                residualAllocationIds[index],
+                consumedKwh,
+                seedTimestampUtc,
+                cancellationToken);
+        }
+    }
+
+    private static async Task EnsureCanonicalTrendWindowAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid id,
+        Guid tenantId,
+        Guid facilityId,
+        Guid measurementPointId,
+        DateTimeOffset windowStartUtc,
+        DateTimeOffset windowEndUtc,
+        decimal consumedKwh,
+        string actorSubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var exists = await dbContext.EnergyConsumptionWindows
+            .IgnoreQueryFilters()
+            .AnyAsync(w => w.Id == id, cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        var durationHours = (decimal)(windowEndUtc - windowStartUtc).TotalHours;
+        decimal? averagePower = durationHours > 0 && consumedKwh > 0
+            ? EnergyCalculator.RoundEnergy(consumedKwh / durationHours)
+            : null;
+
+        dbContext.EnergyConsumptionWindows.Add(new EnergyConsumptionWindow
+        {
+            Id = id,
+            TenantId = tenantId,
+            FacilityId = facilityId,
+            MeasurementPointId = measurementPointId,
+            WindowStartUtc = windowStartUtc,
+            WindowEndUtc = windowEndUtc,
+            ConsumedKwh = consumedKwh,
+            AveragePowerKw = averagePower,
+            MaximumDemandKw = 18.5m,
+            CalculationMethod = EnergyCalculationMethods.IntervalSum,
+            EvidenceStatus = EnergyEvidenceStates.Simulated,
+            ReadingCount = 3,
+            FreshnessState = EnergyFreshnessStates.Fresh,
+            SourceReferencesJson = "[\"development-pilot-canonical-facility-trend\"]",
+            RuleSetVersion = EnergyConstants.RuleSetVersion,
+            CalculatedAtUtc = seedTimestampUtc,
+            CreatedAtUtc = seedTimestampUtc,
+            CreatedBy = actorSubjectId,
+        });
+    }
+
+    private static async Task EnsureCanonicalTrendAllocationsAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        Guid windowId,
+        Guid machineAllocationId,
+        Guid residualAllocationId,
+        decimal consumedKwh,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var machineExists = await dbContext.EnergyAllocations
+            .IgnoreQueryFilters()
+            .AnyAsync(a => a.Id == machineAllocationId, cancellationToken);
+
+        if (!machineExists)
+        {
+            var allocated = EnergyCalculator.RoundEnergy(consumedKwh * 0.85m);
+            dbContext.EnergyAllocations.Add(new EnergyAllocation
+            {
+                Id = machineAllocationId,
+                TenantId = tenantId,
+                FacilityId = facilityId,
+                ConsumptionWindowId = windowId,
+                TargetType = EnergyAllocationTargetTypes.Machine,
+                TargetReference = DevelopmentPilotIds.EdgePilotPressMachineId.ToString(),
+                AllocatedKwh = allocated,
+                AllocationMethod = EnergyAllocationMethods.DirectAssignment,
+                EvidenceSource = "development-pilot-canonical-facility-trend",
+                ConfidenceStatus = EnergyEvidenceStates.Simulated,
+                RuleSetVersion = EnergyConstants.RuleSetVersion,
+                CalculatedAtUtc = seedTimestampUtc,
+                CreatedAtUtc = seedTimestampUtc,
+            });
+        }
+
+        var residualExists = await dbContext.EnergyAllocations
+            .IgnoreQueryFilters()
+            .AnyAsync(a => a.Id == residualAllocationId, cancellationToken);
+
+        if (!residualExists)
+        {
+            var allocated = EnergyCalculator.RoundEnergy(consumedKwh * 0.85m);
+            var residual = EnergyCalculator.RoundEnergy(consumedKwh - allocated);
+            dbContext.EnergyAllocations.Add(new EnergyAllocation
+            {
+                Id = residualAllocationId,
+                TenantId = tenantId,
+                FacilityId = facilityId,
+                ConsumptionWindowId = windowId,
+                TargetType = EnergyAllocationTargetTypes.Unallocated,
+                TargetReference = null,
+                AllocatedKwh = residual,
+                AllocationMethod = EnergyAllocationMethods.Residual,
+                EvidenceSource = "development-pilot-canonical-facility-trend",
+                ConfidenceStatus = EnergyEvidenceStates.Simulated,
+                RuleSetVersion = EnergyConstants.RuleSetVersion,
+                CalculatedAtUtc = seedTimestampUtc,
+                CreatedAtUtc = seedTimestampUtc,
+            });
         }
     }
 

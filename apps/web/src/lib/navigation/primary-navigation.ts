@@ -107,6 +107,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Enerji",
         href: "/enerji",
         iconKey: "zap",
+        permissionKey: "energy.read",
         subscriptionModulePath: "/enerji",
       },
       {

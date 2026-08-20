@@ -937,6 +937,78 @@ public static class DevelopmentPilotIds
     public static readonly Guid Energy2PilotWindowBaselineSample5Id =
         Guid.Parse("bb000001-0183-4000-8000-000000000183");
 
+    public static readonly Guid Energy2PilotCanonicalTrendWindow1Id =
+        Guid.Parse("bb000001-0190-4000-8000-000000000190");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow2Id =
+        Guid.Parse("bb000001-0191-4000-8000-000000000191");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow3Id =
+        Guid.Parse("bb000001-0192-4000-8000-000000000192");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow4Id =
+        Guid.Parse("bb000001-0193-4000-8000-000000000193");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow5Id =
+        Guid.Parse("bb000001-0194-4000-8000-000000000194");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow6Id =
+        Guid.Parse("bb000001-0195-4000-8000-000000000195");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow7Id =
+        Guid.Parse("bb000001-0196-4000-8000-000000000196");
+
+    public static readonly Guid Energy2PilotCanonicalTrendWindow8Id =
+        Guid.Parse("bb000001-0197-4000-8000-000000000197");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine1Id =
+        Guid.Parse("bb000001-01a0-4000-8000-0000000001a0");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine2Id =
+        Guid.Parse("bb000001-01a1-4000-8000-0000000001a1");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine3Id =
+        Guid.Parse("bb000001-01a2-4000-8000-0000000001a2");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine4Id =
+        Guid.Parse("bb000001-01a3-4000-8000-0000000001a3");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine5Id =
+        Guid.Parse("bb000001-01a4-4000-8000-0000000001a4");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine6Id =
+        Guid.Parse("bb000001-01a5-4000-8000-0000000001a5");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine7Id =
+        Guid.Parse("bb000001-01a6-4000-8000-0000000001a6");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationMachine8Id =
+        Guid.Parse("bb000001-01a7-4000-8000-0000000001a7");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual1Id =
+        Guid.Parse("bb000001-01a8-4000-8000-0000000001a8");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual2Id =
+        Guid.Parse("bb000001-01a9-4000-8000-0000000001a9");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual3Id =
+        Guid.Parse("bb000001-01aa-4000-8000-0000000001aa");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual4Id =
+        Guid.Parse("bb000001-01ab-4000-8000-0000000001ab");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual5Id =
+        Guid.Parse("bb000001-01ac-4000-8000-0000000001ac");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual6Id =
+        Guid.Parse("bb000001-01ad-4000-8000-0000000001ad");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual7Id =
+        Guid.Parse("bb000001-01ae-4000-8000-0000000001ae");
+
+    public static readonly Guid Energy2PilotCanonicalTrendAllocationResidual8Id =
+        Guid.Parse("bb000001-01af-4000-8000-0000000001af");
+
     public const string Energy2PilotProductionContext = "CTX-PILOT-INJ-001";
 
     public const string Energy2PilotAssessmentWithinTargetRef = "ASSESS-WITHIN-TARGET";

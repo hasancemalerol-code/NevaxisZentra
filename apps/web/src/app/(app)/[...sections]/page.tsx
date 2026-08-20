@@ -15,7 +15,12 @@ type RouteParams = Readonly<{
 
 export function generateStaticParams() {
   return navigationItems
-    .filter((item) => item.href !== "/" && item.href !== "/ayarlar")
+    .filter(
+      (item) =>
+        item.href !== "/"
+        && item.href !== "/ayarlar"
+        && item.href !== "/enerji",
+    )
     .map((item) => ({
       sections: item.href
         .split("/")

@@ -32,6 +32,10 @@ internal static class DevelopmentAdminAccessSeed
             DevelopmentAdminAccessIds.TenantOwnerRoleId,
             seedTimestampUtc,
             cancellationToken);
+        await EnsureTenantOwnerFacilityMembershipAsync(
+            dbContext,
+            seedTimestampUtc,
+            cancellationToken);
 
         if (!identityOptions.Value.Enabled || string.IsNullOrWhiteSpace(identityOptions.Value.ActiveUserPassword))
         {
@@ -294,6 +298,41 @@ internal static class DevelopmentAdminAccessSeed
                 PermissionDefinitionId = permission.Id,
             });
         }
+    }
+
+    private static async Task EnsureTenantOwnerFacilityMembershipAsync(
+        CrevaFactOSDbContext dbContext,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = DevelopmentPilotIds.TenantId;
+        var membershipId = DevelopmentSaasIdentityIds.TenantOwnerMembershipId;
+        var existing = await dbContext.FacilityMemberships.IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                membership =>
+                    membership.TenantId == tenantId
+                    && membership.FacilityId == DevelopmentPilotIds.FacilityId
+                    && membership.TenantMembershipId == membershipId,
+                cancellationToken);
+
+        if (existing is not null)
+        {
+            existing.Status = FacilityMembershipStatus.Active;
+            existing.UpdatedAtUtc = seedTimestampUtc;
+            return;
+        }
+
+        dbContext.FacilityMemberships.Add(new FacilityMembership
+        {
+            Id = DevelopmentAdminAccessIds.TenantOwnerFacilityMembershipId,
+            TenantId = tenantId,
+            FacilityId = DevelopmentPilotIds.FacilityId,
+            TenantMembershipId = membershipId,
+            Status = FacilityMembershipStatus.Active,
+            CreatedAtUtc = seedTimestampUtc,
+            UpdatedAtUtc = seedTimestampUtc,
+            Version = 1,
+        });
     }
 
     private static async Task EnsureMembershipRoleAsync(
