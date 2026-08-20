@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         source: "/api/admin-access/:path*",
         destination: `${apiBaseUrl}/api/admin-access/:path*`,
       },
+      {
+        source: "/api/saas-subscription/:path*",
+        destination: `${apiBaseUrl}/api/saas-subscription/:path*`,
+      },
     ];
   },
 };

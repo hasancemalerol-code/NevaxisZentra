@@ -1,8 +1,6 @@
 import "./saas-subscription-server-boundary";
 
-import { cookies } from "next/headers";
-
-import { resolveSaasIdentityRuntimeConfig } from "@/features/saas-identity/server/saas-identity-runtime-config";
+import { fetchTrustedApi } from "@/features/saas-identity/server/authenticated-server-fetch";
 
 import type { TenantSubscriptionCurrent } from "../domain/saas-subscription-types";
 
@@ -10,34 +8,29 @@ type ApiResult<T> =
   | Readonly<{ status: "success"; value: T }>
   | Readonly<{ status: "failure"; message: string; code?: string; httpStatus?: number }>;
 
-async function readCookieHeader(): Promise<string> {
-  const cookieStore = await cookies();
-  return cookieStore
-    .getAll()
-    .map((entry) => `${entry.name}=${entry.value}`)
-    .join("; ");
-}
-
 async function requestJson<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<ApiResult<T>> {
-  const config = resolveSaasIdentityRuntimeConfig();
-  if (config.status === "failure") {
-    return { status: "failure", message: config.message, code: "configuration-error" };
+  const requestHeaders = new Headers(init.headers ?? undefined);
+  if (init.body !== undefined && !requestHeaders.has("Content-Type")) {
+    requestHeaders.set("Content-Type", "application/json");
+  }
+
+  const fetchResult = await fetchTrustedApi(path, {
+    ...init,
+    headers: requestHeaders,
+  });
+  if (fetchResult.status === "failure") {
+    return {
+      status: "failure",
+      message: fetchResult.message,
+      code: fetchResult.code,
+    };
   }
 
   try {
-    const response = await fetch(`${config.config.apiBaseUrl}${path}`, {
-      ...init,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Cookie: await readCookieHeader(),
-        ...(init.headers ?? {}),
-      },
-      cache: "no-store",
-    });
+    const response = fetchResult.response;
 
     if (!response.ok) {
       let message = "İstek başarısız oldu.";

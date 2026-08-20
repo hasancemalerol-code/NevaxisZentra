@@ -1,7 +1,5 @@
 import "./saas-identity-server-boundary";
 
-import { cookies } from "next/headers";
-
 import type {
   SaasIdentityAccountSummary,
   SaasIdentityApiFailure,
@@ -22,7 +20,10 @@ import {
   parseSaasIdentityMeResponse,
   parseSaasIdentitySignInResponse,
 } from "../lib/saas-identity-api-contracts";
-import { resolveSaasIdentityRuntimeConfig } from "./saas-identity-runtime-config";
+import {
+  fetchTrustedApi,
+  readIncomingRequestCookieHeader,
+} from "./authenticated-server-fetch";
 
 type ServerFetchOptions = Readonly<{
   method?: "GET" | "POST";
@@ -43,17 +44,25 @@ function createFailure(
   };
 }
 
-async function readServerCookieHeader(): Promise<string> {
-  const cookieStore = await cookies();
-  return cookieStore
-    .getAll()
-    .map((entry) => `${entry.name}=${entry.value}`)
-    .join("; ");
-}
-
 async function readServerCsrfToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get(SAAS_IDENTITY_CSRF_COOKIE)?.value ?? null;
+  const cookieHeader = await readIncomingRequestCookieHeader();
+  if (!cookieHeader) {
+    return null;
+  }
+
+  for (const part of cookieHeader.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator <= 0) {
+      continue;
+    }
+
+    const cookieName = part.slice(0, separator).trim();
+    if (cookieName === SAAS_IDENTITY_CSRF_COOKIE) {
+      return part.slice(separator + 1).trim();
+    }
+  }
+
+  return null;
 }
 
 async function serverIdentityFetch<T>(
@@ -61,43 +70,40 @@ async function serverIdentityFetch<T>(
   options: ServerFetchOptions,
   parser: (payload: unknown) => T | null,
 ): Promise<SaasIdentityApiResult<T>> {
-  const configResult = resolveSaasIdentityRuntimeConfig();
-  if (configResult.status === "failure") {
-    return createFailure(
-      "configuration-error",
-      configResult.message,
-    );
-  }
-
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    Cookie: await readServerCookieHeader(),
-  };
+  const requestHeaders = new Headers();
+  requestHeaders.set("Accept", "application/json");
 
   if (options.body !== undefined) {
-    headers["Content-Type"] = "application/json";
+    requestHeaders.set("Content-Type", "application/json");
   }
 
   if (options.mutation) {
     const csrfToken = await readServerCsrfToken();
     if (csrfToken) {
-      headers[SAAS_IDENTITY_CSRF_HEADER] = csrfToken;
+      requestHeaders.set(SAAS_IDENTITY_CSRF_HEADER, csrfToken);
     }
   }
 
   try {
-    const response = await fetch(
-      `${configResult.config.apiBaseUrl}${SAAS_IDENTITY_API_PREFIX}${path}`,
-      {
-        method: options.method ?? "GET",
-        headers,
-        body:
-          options.body !== undefined
-            ? JSON.stringify(options.body)
-            : undefined,
-        cache: "no-store",
-      },
-    );
+    const fetchResult = await fetchTrustedApi(`${SAAS_IDENTITY_API_PREFIX}${path}`, {
+      method: options.method ?? "GET",
+      headers: requestHeaders,
+      body:
+        options.body !== undefined
+          ? JSON.stringify(options.body)
+          : undefined,
+    });
+    if (fetchResult.status === "failure") {
+      return createFailure(
+        fetchResult.code === "network-error"
+          ? "source-unavailable"
+          : "configuration-error",
+        fetchResult.message,
+        fetchResult.code === "network-error",
+      );
+    }
+
+    const response = fetchResult.response;
 
     if (response.status === 401) {
       return createFailure(
