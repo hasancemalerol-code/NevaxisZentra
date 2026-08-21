@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="$(var.ProductName)"
+           Manufacturer="$(var.Publisher)"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="$(var.UpgradeCode)"
+           Scope="perMachine"
+           Compressed="yes"
+           Codepage="65001">
+
+    <MajorUpgrade DowngradeErrorMessage="CrevaFactOS'in daha yeni bir sürümü zaten yüklü. Kurulum durduruldu." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="DISABLEADVTSHORTCUTS" Value="1" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <Property Id="WEBVIEW2RUNTIMEINSTALLED" Secure="yes">
+      <RegistrySearch Id="WebView2RuntimeSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                      Name="pv"
+                      Type="raw" />
+    </Property>
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <ui:WixUI Id="WixUI_InstallDir" />
+
+    <Feature Id="MainFeature" Title="CrevaFactOS Desktop" Level="1">
+      <ComponentRef Id="MainExecutableComponent" />
+      <ComponentRef Id="StartMenuCleanupComponent" />
+      <ComponentGroupRef Id="PublishedApplicationSupportFiles" />
+      <ComponentRef Id="WebView2BootstrapperComponent" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="CrevaFactOS">
+        <Directory Id="DesktopAppFolder" Name="Desktop" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="CrevaFactOS" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Component Id="MainExecutableComponent" Directory="DesktopAppFolder" Guid="*">
+      <File Id="CrevaFactOSDesktopExe"
+            Source="$(var.PublishDir)\CrevaFactOS.Desktop.exe"
+            KeyPath="yes">
+        <Shortcut Id="StartMenuShortcut"
+                  Directory="ApplicationProgramsFolder"
+                  Advertise="yes"
+                  Name="CrevaFactOS"
+                  Description="CrevaFactOS fabrika operasyonlari masaustu uygulamasi"
+                  WorkingDirectory="DesktopAppFolder" />
+        <Shortcut Id="DesktopShortcut"
+                  Directory="DesktopFolder"
+                  Advertise="yes"
+                  Name="CrevaFactOS"
+                  Description="CrevaFactOS fabrika operasyonlari masaustu uygulamasi"
+                  WorkingDirectory="DesktopAppFolder" />
+      </File>
+    </Component>
+
+    <Component Id="StartMenuCleanupComponent"
+               Directory="DesktopAppFolder"
+               Guid="B4E8C2A1-7F3D-4E56-9C0A-1D2E3F4A5B6C">
+      <RegistryValue Root="HKLM"
+                     Key="Software\CrevaFactOS\Desktop"
+                     Name="StartMenuCleanup"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+    </Component>
+
+    <ComponentGroup Id="PublishedApplicationSupportFiles" Directory="DesktopAppFolder">
+      <Files Include="$(var.SupportPublishDir)\**" />
+    </ComponentGroup>
+
+    <Component Id="WebView2BootstrapperComponent" Directory="DesktopAppFolder" Guid="*">
+      <File Id="WebView2Bootstrapper"
+            Source="$(var.WebView2BootstrapperPath)"
+            KeyPath="yes" />
+    </Component>
+
+    <CustomAction Id="SetInstallWebView2Command"
+                  Property="WixQuietExecCmdLine"
+                  Value="&quot;[#WebView2Bootstrapper]&quot; /silent /install"
+                  Execute="immediate" />
+
+    <CustomAction Id="InstallWebView2Runtime"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixQuietExec"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SetInstallWebView2Command" Before="InstallWebView2Runtime" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
+      <Custom Action="InstallWebView2Runtime" After="InstallFiles" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
+    </InstallExecuteSequence>
+
+    <util:CloseApplication Id="CloseCrevaFactOSDesktop"
+                           Target="CrevaFactOS.Desktop.exe"
+                           Description="CrevaFactOS calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
+                           CloseMessage="yes"
+                           RebootPrompt="no"
+                           TerminateProcess="0"
+                           PromptToContinue="yes" />
+  </Package>
+</Wix>

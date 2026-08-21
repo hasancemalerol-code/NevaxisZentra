@@ -1,3 +1,5 @@
+using CrevaFactOS.Desktop.Configuration;
+
 namespace CrevaFactOS.Desktop.Services;
 
 public static class DesktopEnvironment
@@ -8,7 +10,7 @@ public static class DesktopEnvironment
 #if DEBUG
         true;
 #else
-        false;
+        DesktopBuildConfiguration.DevelopmentDistribution;
 #endif
 
     public static bool IsDevToolsEnabled =>

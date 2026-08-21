@@ -1,3 +1,5 @@
+using CrevaFactOS.Desktop.Configuration;
+
 namespace CrevaFactOS.Desktop.Security;
 
 public enum WebUrlValidationResult
@@ -28,6 +30,11 @@ public static class DesktopWebUrlPolicy
     public static WebUrlResolution Resolve(bool isDevelopment, string? configuredValue = null)
     {
         configuredValue ??= Environment.GetEnvironmentVariable(EnvironmentVariableName);
+        if (!isDevelopment && string.IsNullOrWhiteSpace(configuredValue))
+        {
+            configuredValue = DesktopBuildConfiguration.EmbeddedProductionWebUrl;
+        }
+
         var effectiveValue = string.IsNullOrWhiteSpace(configuredValue)
             ? isDevelopment ? DevelopmentDefaultUrl : null
             : configuredValue.Trim();

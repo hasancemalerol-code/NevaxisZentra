@@ -88,3 +88,7 @@ ios/.symlinks/
 
 # Generated files
 generated/
+
+# Desktop distribution packaging (local caches and generated binaries)
+.wix/
+apps/desktop/installer/.cache/
