@@ -31,6 +31,7 @@ using CrevaFactOS.Api.SaasBilling;
 using CrevaFactOS.Api.AdminAccess;
 using CrevaFactOS.Api.Erp;
 using CrevaFactOS.Api.Edge;
+using CrevaFactOS.Api.IotPlc;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
@@ -72,6 +73,7 @@ builder.Services.AddCrevaFactOSMaintenance();
 builder.Services.AddCrevaFactOSExport();
 builder.Services.AddCrevaFactOSErp();
 builder.Services.AddCrevaFactOSEdge();
+builder.Services.AddCrevaFactOSIotPlc();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -132,6 +134,7 @@ app.MapMoldCompatibilityEndpoints();
 app.MapMaintenanceEndpoints();
 app.MapErpEndpoints();
 app.MapEdgeEndpoints();
+app.MapIotPlcEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();

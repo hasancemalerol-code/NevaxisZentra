@@ -26,6 +26,7 @@ using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
+using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -266,6 +267,13 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MachineSetupEpisode> MachineSetupEpisodes => Set<MachineSetupEpisode>();
     public DbSet<MachineSetupObservation> MachineSetupObservations => Set<MachineSetupObservation>();
     public DbSet<MachineScrapObservation> MachineScrapObservations => Set<MachineScrapObservation>();
+
+    // IoT & PLC industrial connectivity foundation (IOT-PLC-1)
+    public DbSet<IotPlcEndpoint> IotPlcEndpoints => Set<IotPlcEndpoint>();
+    public DbSet<IotPlcSignal> IotPlcSignals => Set<IotPlcSignal>();
+    public DbSet<IotPlcSignalObservation> IotPlcSignalObservations => Set<IotPlcSignalObservation>();
+    public DbSet<IotPlcConnectionHealthObservation> IotPlcConnectionHealthObservations => Set<IotPlcConnectionHealthObservation>();
+    public DbSet<IotPlcAuditEvent> IotPlcAuditEvents => Set<IotPlcAuditEvent>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1364,6 +1372,37 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // IoT & PLC industrial connectivity foundation (IOT-PLC-1)
+        modelBuilder.ApplyConfiguration(new IotPlcEndpointEntityConfiguration());
+        modelBuilder.Entity<IotPlcEndpoint>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcSignalEntityConfiguration());
+        modelBuilder.Entity<IotPlcSignal>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcSignalObservationEntityConfiguration());
+        modelBuilder.Entity<IotPlcSignalObservation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcConnectionHealthObservationEntityConfiguration());
+        modelBuilder.Entity<IotPlcConnectionHealthObservation>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcAuditEventEntityConfiguration());
+        modelBuilder.Entity<IotPlcAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());

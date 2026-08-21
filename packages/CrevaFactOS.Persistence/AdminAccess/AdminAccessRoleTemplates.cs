@@ -1,6 +1,7 @@
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Energy;
+using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
@@ -170,6 +171,7 @@ internal static class CustomerCatalogKeys
         ProductionPlanningPermissionKeys.Read, ProductionExecutionPermissionKeys.Read,
         QualityPermissionKeys.Read, ExportPermissionKeys.Read, ErpPermissionKeys.Read,
         EnergyPermissionKeys.Read,
+        IotPlcPermissionKeys.Read,
         SaasCommercialPermissionKeys.Read,
     ];
 
@@ -194,6 +196,7 @@ internal static class CustomerCatalogKeys
         QualityPermissionKeys.Read, QualityPermissionKeys.Manage, QualityPermissionKeys.Inspect,
         ExportPermissionKeys.Read, ExportPermissionKeys.Write,
         EnergyPermissionKeys.Read, EnergyPermissionKeys.Manage,
+        IotPlcPermissionKeys.Read, IotPlcPermissionKeys.Manage,
         ErpPermissionKeys.Read, ErpPermissionKeys.Manage,
         ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove, ErpPermissionKeys.WritebackExecute,
         SaasCommercialPermissionKeys.Read,
