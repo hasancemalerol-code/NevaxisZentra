@@ -6,18 +6,73 @@ import { redirect } from "next/navigation";
 import {
   formatGraceWarning,
   isGraceWarningActive,
-  isModuleEntitled,
   isSubscriptionRecoveryRoute,
-  resolveEntitlementCodeFromPath,
   resolveSubscriptionAccessPathname,
 } from "../domain/saas-subscription-labels";
-import type { SubscriptionAccessEvaluation } from "../domain/saas-subscription-types";
+import type {
+  SubscriptionAccessDenialReason,
+  SubscriptionAccessEvaluation,
+  SubscriptionAccessFailureKind,
+} from "../domain/saas-subscription-types";
 import { fetchCurrentTenantSubscription } from "./saas-subscription-queries";
 import { fetchSubscriptionAccessStatus } from "./saas-subscription-api-client";
+
+type SubscriptionApiFailure = Readonly<{
+  status: "failure";
+  message: string;
+  code?: string;
+  httpStatus?: number;
+}>;
+
+function classifySubscriptionApiFailure(
+  result: SubscriptionApiFailure,
+): SubscriptionAccessFailureKind | "service-unavailable" {
+  if (result.httpStatus === 401) {
+    return "session-expired";
+  }
+
+  if (result.httpStatus === 403) {
+    return "forbidden";
+  }
+
+  return "service-unavailable";
+}
+
+function buildDeniedEvaluation(
+  input: Readonly<{
+    denialReason: SubscriptionAccessDenialReason;
+    subscription?: SubscriptionAccessEvaluation["subscription"];
+    graceWarning?: boolean;
+    failureKind?: SubscriptionAccessFailureKind;
+  }>,
+): SubscriptionAccessEvaluation {
+  return {
+    allowed: false,
+    graceWarning: input.graceWarning ?? false,
+    denialReason: input.denialReason,
+    subscription: input.subscription ?? null,
+    failureKind: input.failureKind ?? null,
+  };
+}
 
 export async function resolveRequestPathname(): Promise<string> {
   const headerList = await headers();
   return headerList.get("x-pathname") ?? "/";
+}
+
+export function resolveSubscriptionAccessRedirect(
+  evaluation: SubscriptionAccessEvaluation,
+): string {
+  if (evaluation.failureKind === "session-expired") {
+    return "/giris?reason=session-expired";
+  }
+
+  if (evaluation.failureKind === "forbidden") {
+    return "/giris?auth=denied";
+  }
+
+  const reason = evaluation.denialReason ?? "service-unavailable";
+  return `/abonelik-erisimi?reason=${reason}`;
 }
 
 export async function evaluateSubscriptionAccess(
@@ -34,6 +89,7 @@ export async function evaluateSubscriptionAccess(
       graceWarning: isGraceWarningActive(subscription),
       denialReason: null,
       subscription,
+      failureKind: null,
     };
   }
 
@@ -50,65 +106,38 @@ export async function evaluateSubscriptionAccess(
         ? null
         : (accessStatus.value.denialReason ?? "paid-application"),
       subscription,
+      failureKind: null,
     };
   }
 
-  const subscriptionResult = await fetchCurrentTenantSubscription();
-  const subscription =
-    subscriptionResult.status === "success" ? subscriptionResult.value : null;
-  const graceWarning = isGraceWarningActive(subscription);
-
-  if (isSubscriptionRecoveryRoute(pathname)) {
-    return {
-      allowed: true,
-      graceWarning,
+  const accessFailureKind = classifySubscriptionApiFailure(accessStatus);
+  if (accessFailureKind === "session-expired") {
+    return buildDeniedEvaluation({
       denialReason: null,
-      subscription,
-    };
+      failureKind: "session-expired",
+    });
   }
 
-  if (!subscription) {
-    return {
-      allowed: false,
-      graceWarning: false,
-      denialReason: "paid-application",
-      subscription: null,
-    };
+  if (accessFailureKind === "forbidden") {
+    return buildDeniedEvaluation({
+      denialReason: null,
+      failureKind: "forbidden",
+    });
   }
 
-  if (!subscription.paidApplicationAccess.allowed) {
-    return {
-      allowed: false,
-      graceWarning,
-      denialReason: "paid-application",
-      subscription,
-    };
-  }
-
-  const entitlementCode = resolveEntitlementCodeFromPath(subscriptionPathname);
-  if (entitlementCode && !isModuleEntitled(subscription, entitlementCode)) {
-    return {
-      allowed: false,
-      graceWarning,
-      denialReason: "module",
-      subscription,
-    };
-  }
-
-  return {
-    allowed: true,
-    graceWarning,
-    denialReason: null,
-    subscription,
-  };
+  return buildDeniedEvaluation({
+    denialReason: "service-unavailable",
+  });
 }
 
-export async function requireSubscriptionAccess(pathname?: string): Promise<SubscriptionAccessEvaluation> {
+export async function requireSubscriptionAccess(
+  pathname?: string,
+): Promise<SubscriptionAccessEvaluation> {
   const resolvedPathname = pathname ?? await resolveRequestPathname();
   const evaluation = await evaluateSubscriptionAccess(resolvedPathname);
 
   if (!evaluation.allowed) {
-    redirect("/abonelik-erisimi");
+    redirect(resolveSubscriptionAccessRedirect(evaluation));
   }
 
   return evaluation;

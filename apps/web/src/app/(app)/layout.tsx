@@ -10,6 +10,7 @@ import { normalizeSubscriptionRoute } from "@/features/saas-subscription/domain/
 import {
   evaluateSubscriptionAccess,
   resolveRequestPathname,
+  resolveSubscriptionAccessRedirect,
   resolveSubscriptionGraceBanner,
 } from "@/features/saas-subscription/server/require-subscription-access";
 import {
@@ -25,11 +26,14 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     redirect("/mfa-dogrula");
   }
 
+  if (session.status === "session_expired") {
+    redirect("/giris?reason=session-expired");
+  }
+
   const pathname = await resolveRequestPathname();
   const subscriptionAccess = await evaluateSubscriptionAccess(pathname);
   if (!subscriptionAccess.allowed) {
-    const reason = subscriptionAccess.denialReason ?? "paid-application";
-    redirect(`/abonelik-erisimi?reason=${reason}`);
+    redirect(resolveSubscriptionAccessRedirect(subscriptionAccess));
   }
 
   const accountDisplayName =

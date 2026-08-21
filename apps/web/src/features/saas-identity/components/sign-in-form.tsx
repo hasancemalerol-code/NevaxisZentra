@@ -16,11 +16,13 @@ import { AuthFeedback } from "./auth-feedback";
 
 type SignInFormProps = Readonly<{
   initialError?: string | null;
+  initialNotice?: string | null;
   returnUrl?: string | null;
 }>;
 
 export function SignInForm({
   initialError = null,
+  initialNotice = null,
   returnUrl = null,
 }: SignInFormProps) {
   const router = useRouter();
@@ -128,6 +130,8 @@ export function SignInForm({
           disabled={pending}
         />
       </div>
+
+      {initialNotice ? <AuthFeedback tone="info" message={initialNotice} /> : null}
 
       {error ? <AuthFeedback tone="error" message={error} /> : null}
 

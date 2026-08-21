@@ -39,6 +39,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   }
 
   const authDenied = firstQueryValue(params.auth) === "denied";
+  const sessionExpired = firstQueryValue(params.reason) === "session-expired";
 
   return (
     <AuthShell
@@ -48,6 +49,9 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       <SignInForm
         initialError={
           authDenied ? SAAS_IDENTITY_MESSAGES.genericInvalidCredentials : null
+        }
+        initialNotice={
+          sessionExpired ? SAAS_IDENTITY_MESSAGES.sessionExpired : null
         }
         returnUrl={isSafeAppReturnUrl(returnUrl) ? returnUrl : null}
       />

@@ -26,6 +26,8 @@ export const SAAS_IDENTITY_MESSAGES = {
   configurationError:
     "Kimlik doğrulama yapılandırması eksik.",
   signOutLabel: "Oturumu kapat",
+  sessionExpired:
+    "Oturumunuzun süresi doldu. Lütfen yeniden giriş yapın.",
   signInTitle: "Oturum aç",
   forgotPasswordTitle: "Parolamı unuttum",
   resetPasswordTitle: "Parolayı sıfırla",

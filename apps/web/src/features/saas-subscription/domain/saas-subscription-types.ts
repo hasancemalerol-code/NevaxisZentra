@@ -74,11 +74,18 @@ export type TenantSubscriptionCurrent = Readonly<{
   evaluatedAtUtc: string;
 }>;
 
-export type SubscriptionAccessDenialReason = "paid-application" | "module" | null;
+export type SubscriptionAccessDenialReason =
+  | "paid-application"
+  | "module"
+  | "service-unavailable"
+  | null;
+
+export type SubscriptionAccessFailureKind = "session-expired" | "forbidden" | null;
 
 export type SubscriptionAccessEvaluation = Readonly<{
   allowed: boolean;
   graceWarning: boolean;
   denialReason: SubscriptionAccessDenialReason;
   subscription: TenantSubscriptionCurrent | null;
+  failureKind: SubscriptionAccessFailureKind;
 }>;

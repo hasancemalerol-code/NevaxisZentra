@@ -20,6 +20,10 @@ export async function resolveSaasIdentitySession(): Promise<SaasIdentitySessionS
       return { status: "mfa_pending" };
     }
 
+    if (meResult.code === "unauthenticated") {
+      return { status: "session_expired" };
+    }
+
     return { status: "unauthenticated" };
   }
 

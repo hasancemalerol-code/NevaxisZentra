@@ -11,6 +11,10 @@ function resolveDenialReason(value: string | undefined): SubscriptionAccessDenia
     return "module";
   }
 
+  if (value === "service-unavailable") {
+    return "service-unavailable";
+  }
+
   return "paid-application";
 }
 

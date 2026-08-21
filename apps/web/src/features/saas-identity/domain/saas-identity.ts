@@ -11,6 +11,7 @@ export type SaasIdentityAccountSummary = Readonly<{
 
 export type SaasIdentitySessionState =
   | Readonly<{ status: "unauthenticated" }>
+  | Readonly<{ status: "session_expired" }>
   | Readonly<{ status: "mfa_pending"; displayName?: string }>
   | Readonly<{ status: "authenticated"; account: SaasIdentityAccountSummary }>;
 

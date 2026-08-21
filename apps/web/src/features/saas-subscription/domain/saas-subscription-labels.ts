@@ -232,10 +232,14 @@ export function formatInsufficientData(): string {
 }
 
 export function formatAccessDeniedHeadline(
-  denialReason: "paid-application" | "module" | null,
+  denialReason: "paid-application" | "module" | "service-unavailable" | null,
 ): string {
   if (denialReason === "module") {
     return "Bu modüle erişim aboneliğinizde tanımlı değil";
+  }
+
+  if (denialReason === "service-unavailable") {
+    return "Abonelik bilgisi şu anda yüklenemedi";
   }
 
   return "Uygulama erişimi şu anda kullanılamıyor";
@@ -243,8 +247,12 @@ export function formatAccessDeniedHeadline(
 
 export function formatAccessDeniedSummary(
   subscription: TenantSubscriptionCurrent | null,
-  denialReason: "paid-application" | "module" | null,
+  denialReason: "paid-application" | "module" | "service-unavailable" | null,
 ): string {
+  if (denialReason === "service-unavailable") {
+    return formatInsufficientData();
+  }
+
   if (!subscription) {
     return formatInsufficientData();
   }
