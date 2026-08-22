@@ -124,6 +124,22 @@ internal static class IotPlcEndpointHelpers
                     title: reason ?? "Scope denied.",
                     statusCode: StatusCodes.Status403Forbidden,
                     extensions: FailureExt(failureCode)),
+            IotPlcIntelligenceFailureCodes.ProfileNotFound
+                or IotPlcIntelligenceFailureCodes.AssessmentNotFound
+                or IotPlcIntelligenceFailureCodes.TargetNotFound => TypedResults.Problem(
+                title: reason ?? "Record not found.",
+                statusCode: StatusCodes.Status404NotFound,
+                extensions: FailureExt(failureCode)),
+            IotPlcIntelligenceFailureCodes.ConcurrencyConflict
+                or IotPlcIntelligenceFailureCodes.IdempotencyConflict
+                or IotPlcIntelligenceFailureCodes.IdempotencyLegacyUnverifiable => TypedResults.Problem(
+                title: reason ?? "Request conflict.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(failureCode)),
+            IotPlcIntelligenceFailureCodes.ValidationFailed => TypedResults.Problem(
+                title: reason ?? "Validation failed.",
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: FailureExt(failureCode)),
             _ => TypedResults.Problem(
                 title: reason ?? "Request failed.",
                 statusCode: StatusCodes.Status400BadRequest,

@@ -1073,4 +1073,80 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid IotPlcPilotHealthOfflineId =
         Guid.Parse("bb000001-01cf-4000-8000-0000000001cf");
+
+    // IoT & PLC intelligence pilot fixtures (01e0–01ff)
+    public static readonly Guid IotPlc2PilotProfileStandardId =
+        Guid.Parse("bb000001-01e0-4000-8000-0000000001e0");
+
+    public static readonly Guid IotPlc2PilotProfileStrictId =
+        Guid.Parse("bb000001-01e1-4000-8000-0000000001e1");
+
+    public static readonly Guid IotPlc2PilotAssessHealthyConnectivityId =
+        Guid.Parse("bb000001-01e2-4000-8000-0000000001e2");
+
+    public static readonly Guid IotPlc2PilotAssessStaleSignalId =
+        Guid.Parse("bb000001-01e3-4000-8000-0000000001e3");
+
+    public static readonly Guid IotPlc2PilotAssessOfflineEndpointId =
+        Guid.Parse("bb000001-01e4-4000-8000-0000000001e4");
+
+    public static readonly Guid IotPlc2PilotAssessDegradedConnectionId =
+        Guid.Parse("bb000001-01e5-4000-8000-0000000001e5");
+
+    public static readonly Guid IotPlc2PilotAssessClockSkewId =
+        Guid.Parse("bb000001-01e6-4000-8000-0000000001e6");
+
+    public static readonly Guid IotPlc2PilotAssessSequenceGapId =
+        Guid.Parse("bb000001-01e7-4000-8000-0000000001e7");
+
+    public static readonly Guid IotPlc2PilotAssessSourceConflictId =
+        Guid.Parse("bb000001-01e8-4000-8000-0000000001e8");
+
+    public static readonly Guid IotPlc2PilotAssessInsufficientDataId =
+        Guid.Parse("bb000001-01e9-4000-8000-0000000001e9");
+
+    public static readonly Guid IotPlc2PilotScenarioObsHealthy1Id =
+        Guid.Parse("bb000001-01ea-4000-8000-0000000001ea");
+
+    public static readonly Guid IotPlc2PilotScenarioObsHealthy2Id =
+        Guid.Parse("bb000001-01eb-4000-8000-0000000001eb");
+
+    public static readonly Guid IotPlc2PilotScenarioObsStaleId =
+        Guid.Parse("bb000001-01ec-4000-8000-0000000001ec");
+
+    public static readonly Guid IotPlc2PilotScenarioObsStale2Id =
+        Guid.Parse("bb000001-01f6-4000-8000-0000000001f6");
+
+    public static readonly Guid IotPlc2PilotScenarioObsClockSkewId =
+        Guid.Parse("bb000001-01ed-4000-8000-0000000001ed");
+
+    public static readonly Guid IotPlc2PilotScenarioObsClockSkewCompanionId =
+        Guid.Parse("bb000001-01f7-4000-8000-0000000001f7");
+
+    public static readonly Guid IotPlc2PilotScenarioObsSeq1Id =
+        Guid.Parse("bb000001-01ee-4000-8000-0000000001ee");
+
+    public static readonly Guid IotPlc2PilotScenarioObsSeq2Id =
+        Guid.Parse("bb000001-01ef-4000-8000-0000000001ef");
+
+    public static readonly Guid IotPlc2PilotScenarioObsSeq4Id =
+        Guid.Parse("bb000001-01f0-4000-8000-0000000001f0");
+
+    public static readonly Guid IotPlc2PilotScenarioObsConflict1Id =
+        Guid.Parse("bb000001-01f1-4000-8000-0000000001f1");
+
+    public static readonly Guid IotPlc2PilotScenarioObsConflict2Id =
+        Guid.Parse("bb000001-01f2-4000-8000-0000000001f2");
+
+    public static readonly Guid IotPlc2PilotHealthOnlineFreshId =
+        Guid.Parse("bb000001-01f3-4000-8000-0000000001f3");
+
+    public static readonly Guid IotPlc2PilotHealthDegradedFreshId =
+        Guid.Parse("bb000001-01f4-4000-8000-0000000001f4");
+
+    public static readonly Guid IotPlc2PilotHealthOfflineFreshId =
+        Guid.Parse("bb000001-01f5-4000-8000-0000000001f5");
+
+    public static readonly DateTimeOffset IotPlc2PilotEvaluationTimeUtc =
+        new(2026, 8, 21, 12, 0, 0, TimeSpan.Zero);
 }

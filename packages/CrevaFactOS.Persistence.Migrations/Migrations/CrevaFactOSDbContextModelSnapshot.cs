@@ -8276,6 +8276,131 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("iot_plc_connection_health_observations", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcConnectivityAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvaluateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("evaluate_idempotency_key");
+
+                    b.Property<string>("EvaluateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evaluate_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_end_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_start_utc");
+
+                    b.Property<string>("EvidenceMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("evidence_mode");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int?>("FreshnessSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("freshness_seconds");
+
+                    b.Property<decimal?>("HealthObservationAvailabilityRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("health_observation_availability_ratio");
+
+                    b.Property<string>("LatestHealthState")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("latest_health_state");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid?>("LeadingDriverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("leading_driver_id");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("outcome");
+
+                    b.Property<Guid?>("QualityProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("quality_profile_id");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("target_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QualityProfileId");
+
+                    b.HasIndex("TargetId", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_iot_plc_connectivity_assessments_target_evaluated");
+
+                    b.HasIndex("TenantId", "EvaluateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_iot_plc_connectivity_assessments_tenant_idempotency")
+                        .HasFilter("evaluate_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.ToTable("iot_plc_connectivity_assessments", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcEndpoint", b =>
                 {
                     b.Property<Guid>("Id")
@@ -8378,6 +8503,206 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ux_iot_plc_endpoints_tenant_facility_code");
 
                     b.ToTable("iot_plc_endpoints", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcIntelligenceDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AffectedObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_observation_count");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("AssessmentKind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("assessment_kind");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("explanation");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsLeadingDriver")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_leading_driver");
+
+                    b.Property<int>("OutcomeSeverity")
+                        .HasColumnType("integer")
+                        .HasColumnName("outcome_severity");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("StructuredEvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("structured_evidence_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("ThresholdVariance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("threshold_variance");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentKind", "AssessmentId")
+                        .HasDatabaseName("ix_iot_plc_intelligence_drivers_assessment");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.ToTable("iot_plc_intelligence_drivers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcQualityProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
+                    b.Property<int>("ExpectedObservationIntervalSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("expected_observation_interval_seconds");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int>("FreshnessToleranceSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("freshness_tolerance_seconds");
+
+                    b.Property<decimal>("MaximumBadQualityRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("maximum_bad_quality_ratio");
+
+                    b.Property<int>("MaximumClockSkewToleranceSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("maximum_clock_skew_tolerance_seconds");
+
+                    b.Property<decimal>("MaximumSourceConflictRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("maximum_source_conflict_ratio");
+
+                    b.Property<decimal>("MaximumUncertainQualityRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("maximum_uncertain_quality_ratio");
+
+                    b.Property<int>("MinimumExpectedObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum_expected_observation_count");
+
+                    b.Property<decimal>("MinimumGoodQualityRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("minimum_good_quality_ratio");
+
+                    b.Property<string>("ProfileCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("profile_code");
+
+                    b.Property<bool>("SequenceGapEvaluationEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("sequence_gap_evaluation_enabled");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<int>("StaleThresholdSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("stale_threshold_seconds");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "ProfileCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_iot_plc_quality_profiles_tenant_facility_code");
+
+                    b.ToTable("iot_plc_quality_profiles", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcSignal", b =>
@@ -8619,6 +8944,195 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasFilter("idempotency_key IS NOT NULL");
 
                     b.ToTable("iot_plc_signal_observations", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcSignalQualityAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("ActualObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("actual_observation_count");
+
+                    b.Property<int>("BadCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("bad_count");
+
+                    b.Property<decimal?>("BadRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("bad_ratio");
+
+                    b.Property<decimal?>("CompletenessRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("completeness_ratio");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("EndpointId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("endpoint_id");
+
+                    b.Property<string>("EvaluateIdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("evaluate_idempotency_key");
+
+                    b.Property<string>("EvaluateIdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("evaluate_idempotency_payload_fingerprint");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_end_utc");
+
+                    b.Property<DateTimeOffset>("EvaluationWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluation_window_start_utc");
+
+                    b.Property<string>("EvidenceMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("evidence_mode");
+
+                    b.Property<int?>("ExpectedObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("expected_observation_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int?>("FreshnessSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("freshness_seconds");
+
+                    b.Property<int>("GoodCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("good_count");
+
+                    b.Property<decimal?>("GoodRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("good_ratio");
+
+                    b.Property<DateTimeOffset?>("LatestValidObservedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("latest_valid_observed_at_utc");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid?>("LeadingDriverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("leading_driver_id");
+
+                    b.Property<int?>("MaxClockSkewSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_clock_skew_seconds");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("outcome");
+
+                    b.Property<Guid?>("QualityProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("quality_profile_id");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<Guid?>("SignalDefinitionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("signal_definition_id");
+
+                    b.Property<int>("SourceConflictCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_conflict_count");
+
+                    b.Property<decimal?>("SourceConflictRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("source_conflict_ratio");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<int>("StaleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("stale_count");
+
+                    b.Property<decimal?>("StaleRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("stale_ratio");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("target_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("UncertainCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("uncertain_count");
+
+                    b.Property<decimal?>("UncertainRatio")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("uncertain_ratio");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QualityProfileId");
+
+                    b.HasIndex("SignalDefinitionId", "EvaluatedAtUtc")
+                        .HasDatabaseName("ix_iot_plc_signal_quality_assessments_signal_evaluated");
+
+                    b.HasIndex("TenantId", "EvaluateIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_iot_plc_signal_quality_assessments_tenant_idempotency")
+                        .HasFilter("evaluate_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.ToTable("iot_plc_signal_quality_assessments", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenanceAiActionDraft", b =>
@@ -20621,7 +21135,60 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Endpoint");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcConnectivityAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.IotPlc.IotPlcQualityProfile", null)
+                        .WithMany()
+                        .HasForeignKey("QualityProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcEndpoint", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcIntelligenceDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcQualityProfile", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
                         .WithMany()
@@ -20683,6 +21250,32 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Signal");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcSignalQualityAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.IotPlc.IotPlcQualityProfile", null)
+                        .WithMany()
+                        .HasForeignKey("QualityProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.IotPlc.IotPlcSignal", null)
+                        .WithMany()
+                        .HasForeignKey("SignalDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenanceAiActionDraft", b =>

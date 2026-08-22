@@ -650,14 +650,21 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
-            await DevelopmentPilotIotPlcSeed.EnsureIotPlcPilotRecordsAsync(
-                dbContext,
-                tenant.Id,
-                facility.Id,
-                operatorIdentity.Id.ToString(),
-                seedTimestampUtc,
-                cancellationToken);
-            await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
+        await DevelopmentPilotIotPlcSeed.EnsureIotPlcPilotRecordsAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
+        await DevelopmentPilotIotPlcIntelligenceSeed.EnsureIotPlcIntelligencePilotRecordsAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
+        await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
                 dbContext,
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,

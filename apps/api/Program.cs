@@ -74,6 +74,7 @@ builder.Services.AddCrevaFactOSExport();
 builder.Services.AddCrevaFactOSErp();
 builder.Services.AddCrevaFactOSEdge();
 builder.Services.AddCrevaFactOSIotPlc();
+builder.Services.AddCrevaFactOSIotPlcIntelligence();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -135,6 +136,7 @@ app.MapMaintenanceEndpoints();
 app.MapErpEndpoints();
 app.MapEdgeEndpoints();
 app.MapIotPlcEndpoints();
+app.MapIotPlcIntelligenceEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();

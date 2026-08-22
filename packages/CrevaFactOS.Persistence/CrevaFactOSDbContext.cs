@@ -275,6 +275,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<IotPlcConnectionHealthObservation> IotPlcConnectionHealthObservations => Set<IotPlcConnectionHealthObservation>();
     public DbSet<IotPlcAuditEvent> IotPlcAuditEvents => Set<IotPlcAuditEvent>();
 
+    // IoT & PLC intelligence foundation (IOT-PLC-2)
+    public DbSet<IotPlcQualityProfile> IotPlcQualityProfiles => Set<IotPlcQualityProfile>();
+    public DbSet<IotPlcConnectivityAssessment> IotPlcConnectivityAssessments => Set<IotPlcConnectivityAssessment>();
+    public DbSet<IotPlcSignalQualityAssessment> IotPlcSignalQualityAssessments => Set<IotPlcSignalQualityAssessment>();
+    public DbSet<IotPlcIntelligenceDriver> IotPlcIntelligenceDrivers => Set<IotPlcIntelligenceDriver>();
+
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
     public DbSet<ErpSyncRun> ErpSyncRuns => Set<ErpSyncRun>();
@@ -1403,6 +1409,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcQualityProfileEntityConfiguration());
+        modelBuilder.Entity<IotPlcQualityProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcConnectivityAssessmentEntityConfiguration());
+        modelBuilder.Entity<IotPlcConnectivityAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcSignalQualityAssessmentEntityConfiguration());
+        modelBuilder.Entity<IotPlcSignalQualityAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IotPlcIntelligenceDriverEntityConfiguration());
+        modelBuilder.Entity<IotPlcIntelligenceDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());
