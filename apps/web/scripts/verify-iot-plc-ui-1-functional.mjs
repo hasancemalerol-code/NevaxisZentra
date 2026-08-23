@@ -5,7 +5,9 @@ import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001")
+  .replace("127.0.0.1", "localhost")
+  .replace(/\/$/, "");
 const ORGANIZATION = "dev-pilot-tenant";
 const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-iot-plc-ui-1-screenshots");
 const OWNER_SCREENSHOTS = [
@@ -111,16 +113,27 @@ function resolveChromiumExecutable() {
   return undefined;
 }
 
-async function signInThroughForm(page, { organization, email, password }) {
-  await page.goto(`${WEB}/giris`, { waitUntil: "networkidle", timeout: 90000 });
-  await page.locator("#sign-in-organization").fill(organization);
-  await page.locator("#sign-in-email").fill(email);
-  await page.locator("#sign-in-password").fill(password);
-  await page.getByRole("button", { name: "Oturum aç" }).click();
+async function signInThroughForm(page, { organization, email, password }, options = {}) {
+  const { expectMfa = false } = options;
+  await page.goto(`${WEB}/giris`, { waitUntil: "domcontentloaded", timeout: 90000 });
+  const response = await page.request.post(`${WEB}/giris/oturum`, {
+    form: {
+      organizationContext: organization,
+      email,
+      password,
+    },
+  });
+  assert("sign-in route HTTP success", response.ok(), `status=${response.status()} url=${response.url()}`);
+  if (expectMfa) {
+    assert("sign-in MFA redirect", response.url().includes("/mfa-dogrula"), response.url());
+    await page.goto(`${WEB}/mfa-dogrula`, { waitUntil: "domcontentloaded", timeout: 90000 });
+    return;
+  }
+  assert("sign-in dashboard redirect", response.url().includes("/dashboard"), response.url());
+  await page.goto(`${WEB}/dashboard`, { waitUntil: "domcontentloaded", timeout: 90000 });
 }
 
 async function completeOwnerMfa(page, mfaSecret) {
-  await page.waitForURL("**/mfa-dogrula", { timeout: 30000 });
   const totpCode = generateTotp(mfaSecret);
   await page.locator("#mfa-totp").fill(totpCode);
   const [verifyResponse] = await Promise.all([
@@ -132,12 +145,10 @@ async function completeOwnerMfa(page, mfaSecret) {
 }
 
 async function signInPersona(page, email, password, mfaSecret = null) {
-  await signInThroughForm(page, { organization: ORGANIZATION, email, password });
+  await signInThroughForm(page, { organization: ORGANIZATION, email, password }, { expectMfa: Boolean(mfaSecret) });
   if (mfaSecret) {
     await completeOwnerMfa(page, mfaSecret);
-    return;
   }
-  await page.waitForURL("**/dashboard", { timeout: 30000 });
 }
 
 async function assertNoHorizontalOverflow(page, label) {
@@ -155,6 +166,65 @@ async function clickIotPlcTab(page, tabId, tabName) {
   await tab.click();
   await page.locator(`#iot-plc-tab-panel-${tabId}`).waitFor({ state: "visible", timeout: 30000 });
   assert(`${tabName} tab selected`, await tab.getAttribute("aria-selected") === "true");
+}
+
+async function waitForStableQualityHero(page, label) {
+  const hero = page.locator('[data-testid="iot-plc-quality-hero-intelligence"]');
+  const distribution = page.locator('[data-testid="iot-plc-quality-hero-distribution"]');
+  const loading = page.locator(".iot-plc-quality-hero__loading");
+
+  await hero.waitFor({ state: "visible", timeout: 30000 });
+  await loading.waitFor({ state: "hidden", timeout: 30000 }).catch(() => {});
+
+  if (await distribution.count() === 0) {
+    return;
+  }
+
+  await distribution.waitFor({ state: "visible", timeout: 30000 });
+  await page.locator('[data-testid^="iot-plc-quality-hero-row-"]').first().waitFor({
+    state: "visible",
+    timeout: 30000,
+  });
+  await page.locator('[data-testid="iot-plc-quality-hero-reconciliation"]').waitFor({
+    state: "visible",
+    timeout: 30000,
+  });
+
+  let previous = null;
+  let stableSamples = 0;
+  for (let attempt = 0; attempt < 30 && stableSamples < 2; attempt += 1) {
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
+    const box = await hero.boundingBox();
+    if (
+      box
+      && box.height >= 120
+      && previous
+      && Math.abs(box.height - previous.height) < 0.5
+      && Math.abs(box.width - previous.width) < 0.5
+    ) {
+      stableSamples += 1;
+    } else {
+      stableSamples = 0;
+    }
+    previous = box;
+  }
+
+  assert(`${label} quality hero layout stable`, stableSamples >= 2, JSON.stringify(previous));
+}
+
+async function selectQualityTab(page, label) {
+  await page.locator('[data-testid="iot-plc-tab-rail"]').scrollIntoViewIfNeeded();
+  const tab = page.getByRole("tab", { name: "Veri Kalitesi" });
+  await tab.waitFor({ state: "visible", timeout: 30000 });
+  await tab.click();
+  await page.locator("#iot-plc-tab-panel-quality").waitFor({ state: "visible", timeout: 30000 });
+  assert(
+    `${label} Veri Kalitesi tab selected`,
+    await page.locator("#iot-plc-tab-quality").getAttribute("aria-selected") === "true",
+  );
+  await waitForStableQualityHero(page, label);
 }
 
 function readPngDimensions(filePath) {
@@ -177,7 +247,11 @@ async function captureScreenshot(page, spec) {
   await page.setViewportSize({ width: spec.width, height: spec.height });
   await assertBrowserZoom(page, spec.label);
   await page.locator('[data-testid="iot-plc-workspace"]').waitFor({ state: "visible", timeout: 30000 });
-  await clickIotPlcTab(page, spec.tabId, `${spec.label} screenshot tab`);
+  if (spec.tabId === "quality") {
+    await selectQualityTab(page, spec.label);
+  } else {
+    await clickIotPlcTab(page, spec.tabId, `${spec.label} screenshot tab`);
+  }
 
   mkdirSync(SCREENSHOT_DIR, { recursive: true });
   const screenshotPath = join(SCREENSHOT_DIR, spec.filename);
@@ -327,7 +401,7 @@ async function assertDataSemantics(page, label) {
 }
 
 async function assertQualityWorkspaceGeometry(page, label) {
-  await clickIotPlcTab(page, "quality", `${label} quality geometry`);
+  await selectQualityTab(page, `${label} quality geometry`);
 
   const hero = page.locator('[data-testid="iot-plc-quality-hero-intelligence"]');
   if (await hero.count() > 0) {
@@ -531,7 +605,6 @@ const activePassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassword")
 const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 
 removeIotPlcReadOverrideForMaintenance();
-seedIotPlcReadOverrideForMaintenance();
 
 const { chromium } = await import("playwright");
 const browser = await chromium.launch({
@@ -572,6 +645,8 @@ try {
   readonlyPage.on("pageerror", (err) => consoleErrors.push(String(err)));
 
   await signInPersona(readonlyPage, "maintenance-team@dev.local", activePassword);
+  removeIotPlcReadOverrideForMaintenance();
+  seedIotPlcReadOverrideForMaintenance();
   const readonlyResponse = await readonlyPage.goto(`${WEB}/iot-plc`, { waitUntil: "networkidle", timeout: 90000 });
   assert("readonly /iot-plc HTTP 200", readonlyResponse?.status() === 200);
   await assertWorkspaceStructure(readonlyPage, "readonly", { expectManageControls: false });
