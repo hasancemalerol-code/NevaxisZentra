@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "CrevaFactOS.Configuration/1.0.0": {
+        "runtime": {
+          "CrevaFactOS.Configuration.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "CrevaFactOS.Configuration/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

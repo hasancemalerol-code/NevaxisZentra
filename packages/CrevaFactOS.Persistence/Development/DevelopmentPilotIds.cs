@@ -1149,4 +1149,42 @@ public static class DevelopmentPilotIds
 
     public static readonly DateTimeOffset IotPlc2PilotEvaluationTimeUtc =
         new(2026, 8, 21, 12, 0, 0, TimeSpan.Zero);
+
+    // Operational risk permission definitions (080–081)
+    public static readonly Guid OperationalRiskReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000080");
+
+    public static readonly Guid OperationalRiskManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000081");
+
+    // Operational risk pilot fixtures (0200–020f)
+    public static readonly Guid OperationalRiskPilotMaterialCaseId =
+        Guid.Parse("bb000001-0200-4000-8000-000000000200");
+
+    public static readonly Guid OperationalRiskPilotSupplierCaseId =
+        Guid.Parse("bb000001-0201-4000-8000-000000000201");
+
+    public static readonly Guid OperationalRiskPilotOrderDeliveryCaseId =
+        Guid.Parse("bb000001-0202-4000-8000-000000000202");
+
+    public static readonly Guid OperationalRiskPilotCostDeviationCaseId =
+        Guid.Parse("bb000001-0203-4000-8000-000000000203");
+
+    public static readonly Guid OperationalRiskPilotInsufficientDataCaseId =
+        Guid.Parse("bb000001-0204-4000-8000-000000000204");
+
+    public static readonly Guid OperationalRiskPilotSourceConflictCaseId =
+        Guid.Parse("bb000001-0205-4000-8000-000000000205");
+
+    public static readonly Guid OperationalRiskPilotResolvedCaseId =
+        Guid.Parse("bb000001-0206-4000-8000-000000000206");
+
+    public static readonly Guid OperationalRiskPilotMaterialEvidenceId =
+        Guid.Parse("bb000001-0207-4000-8000-000000000207");
+
+    public static readonly Guid OperationalRiskPilotResolvedHistoryId =
+        Guid.Parse("bb000001-0208-4000-8000-000000000208");
+
+    public static readonly DateTimeOffset OperationalRiskPilotSeedTimeUtc =
+        new(2026, 8, 23, 11, 0, 0, TimeSpan.Zero);
 }

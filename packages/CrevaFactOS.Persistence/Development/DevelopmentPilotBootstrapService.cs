@@ -11,6 +11,7 @@ using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.IotPlc;
+using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.SaasBilling;
@@ -462,6 +463,14 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureIotPlcManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalRiskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalRiskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalRiskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalRiskManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureSaasCommercialReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureSaasCommercialReadPermissionAssignmentAsync(
@@ -658,6 +667,13 @@ internal sealed class DevelopmentPilotBootstrapService(
             seedTimestampUtc,
             cancellationToken);
         await DevelopmentPilotIotPlcIntelligenceSeed.EnsureIotPlcIntelligencePilotRecordsAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
+        await DevelopmentPilotOperationalRiskSeed.EnsureOperationalRiskPilotRecordsAsync(
             dbContext,
             tenant.Id,
             facility.Id,
@@ -2666,6 +2682,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             IotPlcPermissionKeys.Manage,
             DevelopmentPilotIds.IotPlcManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureOperationalRiskReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            OperationalRiskPermissionKeys.Read,
+            DevelopmentPilotIds.OperationalRiskReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureOperationalRiskManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            OperationalRiskPermissionKeys.Manage,
+            DevelopmentPilotIds.OperationalRiskManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureSaasCommercialReadPermissionAssignmentAsync(

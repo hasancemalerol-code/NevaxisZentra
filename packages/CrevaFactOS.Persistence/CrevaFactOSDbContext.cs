@@ -27,6 +27,7 @@ using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.IotPlc;
+using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -280,6 +281,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<IotPlcConnectivityAssessment> IotPlcConnectivityAssessments => Set<IotPlcConnectivityAssessment>();
     public DbSet<IotPlcSignalQualityAssessment> IotPlcSignalQualityAssessments => Set<IotPlcSignalQualityAssessment>();
     public DbSet<IotPlcIntelligenceDriver> IotPlcIntelligenceDrivers => Set<IotPlcIntelligenceDriver>();
+
+    // Operational risk foundation (OPERATIONAL-RISK-1)
+    public DbSet<OperationalRiskCase> OperationalRiskCases => Set<OperationalRiskCase>();
+    public DbSet<OperationalRiskEvidence> OperationalRiskEvidence => Set<OperationalRiskEvidence>();
+    public DbSet<OperationalRiskStatusHistory> OperationalRiskStatusHistory => Set<OperationalRiskStatusHistory>();
+    public DbSet<OperationalRiskAuditEvent> OperationalRiskAuditEvents => Set<OperationalRiskAuditEvent>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1433,6 +1440,31 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Operational risk foundation (OPERATIONAL-RISK-1)
+        modelBuilder.ApplyConfiguration(new OperationalRiskCaseEntityConfiguration());
+        modelBuilder.Entity<OperationalRiskCase>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperationalRiskEvidenceEntityConfiguration());
+        modelBuilder.Entity<OperationalRiskEvidence>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperationalRiskStatusHistoryEntityConfiguration());
+        modelBuilder.Entity<OperationalRiskStatusHistory>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperationalRiskAuditEventEntityConfiguration());
+        modelBuilder.Entity<OperationalRiskAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());
