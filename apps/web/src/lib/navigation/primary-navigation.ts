@@ -114,6 +114,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "IoT & PLC",
         href: "/iot-plc",
         iconKey: "cable",
+        permissionKey: "iot-plc.read",
         subscriptionModulePath: "/iot-plc",
       },
     ],

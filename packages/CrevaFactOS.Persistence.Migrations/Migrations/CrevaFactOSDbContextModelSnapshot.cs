@@ -8398,7 +8398,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "FacilityId");
 
-                    b.ToTable("iot_plc_connectivity_assessments", (string)null);
+                    b.ToTable("iot_plc_connectivity_assessments", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_iot_plc_connectivity_assessments_health_observation_availability_ratio", "health_observation_availability_ratio IS NULL OR (health_observation_availability_ratio >= 0 AND health_observation_availability_ratio <= 1)");
+                        });
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcEndpoint", b =>
@@ -9132,7 +9135,18 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "FacilityId");
 
-                    b.ToTable("iot_plc_signal_quality_assessments", (string)null);
+                    b.ToTable("iot_plc_signal_quality_assessments", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_iot_plc_signal_quality_assessments_bad_ratio", "bad_ratio IS NULL OR (bad_ratio >= 0 AND bad_ratio <= 1)");
+
+                            t.HasCheckConstraint("ck_iot_plc_signal_quality_assessments_good_ratio", "good_ratio IS NULL OR (good_ratio >= 0 AND good_ratio <= 1)");
+
+                            t.HasCheckConstraint("ck_iot_plc_signal_quality_assessments_source_conflict_ratio", "source_conflict_ratio IS NULL OR (source_conflict_ratio >= 0 AND source_conflict_ratio <= 1)");
+
+                            t.HasCheckConstraint("ck_iot_plc_signal_quality_assessments_stale_ratio", "stale_ratio IS NULL OR (stale_ratio >= 0 AND stale_ratio <= 1)");
+
+                            t.HasCheckConstraint("ck_iot_plc_signal_quality_assessments_uncertain_ratio", "uncertain_ratio IS NULL OR (uncertain_ratio >= 0 AND uncertain_ratio <= 1)");
+                        });
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenanceAiActionDraft", b =>
