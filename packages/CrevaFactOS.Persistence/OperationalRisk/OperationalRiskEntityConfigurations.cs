@@ -31,6 +31,9 @@ internal sealed class OperationalRiskCaseEntityConfiguration : IEntityTypeConfig
         entity.Property(c => c.SourceModule).HasColumnName("source_module").HasMaxLength(100);
         entity.Property(c => c.SourceReference).HasColumnName("source_reference").HasMaxLength(200);
         entity.Property(c => c.SourceProvenance).HasColumnName("source_provenance").HasMaxLength(500).IsRequired();
+        entity.Property(c => c.DetectionKey).HasColumnName("detection_key").HasMaxLength(64);
+        entity.Property(c => c.OccurrenceSequence).HasColumnName("occurrence_sequence");
+        entity.Property(c => c.DetectionRuleCode).HasColumnName("detection_rule_code").HasMaxLength(100);
         entity.Property(c => c.FirstDetectedAtUtc).HasColumnName("first_detected_at_utc");
         entity.Property(c => c.LastObservedAtUtc).HasColumnName("last_observed_at_utc");
         entity.Property(c => c.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128);
@@ -66,6 +69,10 @@ internal sealed class OperationalRiskCaseEntityConfiguration : IEntityTypeConfig
             .HasDatabaseName("ix_operational_risk_cases_tenant_facility_first_detected");
         entity.HasIndex(c => new { c.TenantId, c.FacilityId, c.LastObservedAtUtc })
             .HasDatabaseName("ix_operational_risk_cases_tenant_facility_last_observed");
+        entity.HasIndex(c => new { c.TenantId, c.DetectionKey })
+            .HasDatabaseName("ux_operational_risk_cases_tenant_detection_key_open")
+            .IsUnique()
+            .HasFilter("detection_key IS NOT NULL AND lifecycle_status NOT IN ('resolved','dismissed')");
     }
 }
 

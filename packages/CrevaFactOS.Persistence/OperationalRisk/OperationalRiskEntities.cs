@@ -22,6 +22,9 @@ public sealed class OperationalRiskCase
     public string? SourceModule { get; set; }
     public string? SourceReference { get; set; }
     public string SourceProvenance { get; set; } = string.Empty;
+    public string? DetectionKey { get; set; }
+    public int OccurrenceSequence { get; set; } = 1;
+    public string? DetectionRuleCode { get; set; }
     public DateTimeOffset FirstDetectedAtUtc { get; set; }
     public DateTimeOffset LastObservedAtUtc { get; set; }
     public string? IdempotencyKey { get; set; }

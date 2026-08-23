@@ -1187,4 +1187,38 @@ public static class DevelopmentPilotIds
 
     public static readonly DateTimeOffset OperationalRiskPilotSeedTimeUtc =
         new(2026, 8, 23, 11, 0, 0, TimeSpan.Zero);
+
+    // Operational risk detection pilot fixtures (0210–021f)
+    public static readonly Guid OperationalRiskDetectionPilotProfileId =
+        Guid.Parse("bb000001-0210-4000-8000-000000000210");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleEnergyAttentionId =
+        Guid.Parse("bb000001-0211-4000-8000-000000000211");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleEnergyWithinTargetId =
+        Guid.Parse("bb000001-0212-4000-8000-000000000212");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleIotHealthyId =
+        Guid.Parse("bb000001-0213-4000-8000-000000000213");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleIotUnavailableId =
+        Guid.Parse("bb000001-0214-4000-8000-000000000214");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleMaintenanceHighId =
+        Guid.Parse("bb000001-0215-4000-8000-000000000215");
+
+    public static readonly Guid OperationalRiskDetectionPilotRuleMaintenanceCriticalId =
+        Guid.Parse("bb000001-0216-4000-8000-000000000216");
+
+    public static readonly Guid OperationalRiskDetectionPilotMaintenanceAssessmentId =
+        Guid.Parse("bb000001-0217-4000-8000-000000000217");
+
+    public static readonly Guid OperationalRiskDetectionPilotTerminalCaseId =
+        Guid.Parse("bb000001-0218-4000-8000-000000000218");
+
+    public static readonly Guid OperationalRiskDetectionPilotBaselineRunId =
+        Guid.Parse("bb000001-0219-4000-8000-000000000219");
+
+    public const string OperationalRiskDetectionPilotProfileCode = "OPR2-PILOT-CROSS-MODULE";
+    public const string OperationalRiskDetectionPilotTerminalCaseReference = "OR-PILOT-DET-TERM-001";
 }
