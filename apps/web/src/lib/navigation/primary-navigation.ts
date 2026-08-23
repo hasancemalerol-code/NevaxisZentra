@@ -123,6 +123,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     label: "Operasyonel riskler",
     items: [
       {
+        label: "Operasyonel Riskler",
+        href: "/operasyonel-riskler",
+        iconKey: "triangle-alert",
+        permissionKey: "operational-risk.read",
+        subscriptionModulePath: "/riskler",
+      },
+      {
         label: "Malzeme Uygunluğu",
         href: "/riskler/malzeme-uygunlugu",
         iconKey: "package-search",

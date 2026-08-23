@@ -46,6 +46,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/raporlar", EntitlementCodes.Reporting),
         ("/erp-entegrasyonlari", EntitlementCodes.ErpIntegration),
         ("/ticari-zeka", EntitlementCodes.CommercialIntelligence),
+        ("/operasyonel-riskler", EntitlementCodes.OperationalRisk),
         ("/riskler", EntitlementCodes.OperationalRisk),
     ];
 

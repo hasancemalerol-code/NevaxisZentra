@@ -20,7 +20,8 @@ export function generateStaticParams() {
         item.href !== "/"
         && item.href !== "/ayarlar"
         && item.href !== "/enerji"
-        && item.href !== "/iot-plc",
+        && item.href !== "/iot-plc"
+        && item.href !== "/operasyonel-riskler",
     )
     .map((item) => ({
       sections: item.href
