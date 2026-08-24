@@ -31,6 +31,7 @@ assert("refresh action requires read", actions.includes('refreshCommercialSuppli
 assert("evaluation uses manage permission via shared action", actions.includes('evaluateCommercialIntelligenceComparisonAction'));
 assert("navigation permission key", navigation.includes('permissionKey: "commercial-intelligence.read"') && navigation.includes("/ticari-zeka/tedarikci-karsilastirmasi"));
 assert("navigation subscription boundary", navigation.includes('subscriptionModulePath: "/ticari-zeka"') && navigation.includes("/ticari-zeka/tedarikci-karsilastirmasi"));
+assert("subscription module mapping", subscription.includes('prefix: "/ticari-zeka"') && subscription.includes("module.commercial-intelligence"));
 assert("supplier route revalidated", actions.includes('"/ticari-zeka/tedarikci-karsilastirmasi"'));
 assert("readonly note in view", read("apps/web/src/features/commercial-intelligence/components/commercial-supplier-comparison-workspace-view.tsx").includes("COMMERCIAL_INTELLIGENCE_READONLY_NOTE"));
 
