@@ -28,6 +28,7 @@ using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
+using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -292,6 +293,14 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<OperationalRiskDetectionRun> OperationalRiskDetectionRuns => Set<OperationalRiskDetectionRun>();
     public DbSet<OperationalRiskDetectionResult> OperationalRiskDetectionResults => Set<OperationalRiskDetectionResult>();
     public DbSet<OperationalRiskDetectionDriver> OperationalRiskDetectionDrivers => Set<OperationalRiskDetectionDriver>();
+
+    // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
+    public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
+    public DbSet<CommercialPurchasePriceEvidenceObservation> CommercialPurchasePriceEvidenceObservations =>
+        Set<CommercialPurchasePriceEvidenceObservation>();
+    public DbSet<CommercialPurchasePriceAssessment> CommercialPurchasePriceAssessments => Set<CommercialPurchasePriceAssessment>();
+    public DbSet<CommercialPurchasePriceAssessmentDriver> CommercialPurchasePriceAssessmentDrivers =>
+        Set<CommercialPurchasePriceAssessmentDriver>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1497,6 +1506,30 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new OperationalRiskDetectionDriverEntityConfiguration());
         modelBuilder.Entity<OperationalRiskDetectionDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceProfileEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceEvidenceObservationEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceEvidenceObservation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceAssessmentEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceAssessmentDriverEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceAssessmentDriver>().HasQueryFilter(d =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);

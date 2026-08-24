@@ -1221,4 +1221,94 @@ public static class DevelopmentPilotIds
 
     public const string OperationalRiskDetectionPilotProfileCode = "OPR2-PILOT-CROSS-MODULE";
     public const string OperationalRiskDetectionPilotTerminalCaseReference = "OR-PILOT-DET-TERM-001";
+
+    // Commercial intelligence permission definitions (082–083)
+    public static readonly Guid CommercialIntelligenceReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000082");
+
+    public static readonly Guid CommercialIntelligenceManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000083");
+
+    // Commercial intelligence pilot fixtures (0220–024f)
+    public static readonly Guid CommercialIntelligencePilotProfileId =
+        Guid.Parse("bb000001-0220-4000-8000-000000000220");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation1Id =
+        Guid.Parse("bb000001-0221-4000-8000-000000000221");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation2Id =
+        Guid.Parse("bb000001-0222-4000-8000-000000000222");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation3Id =
+        Guid.Parse("bb000001-0223-4000-8000-000000000223");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation4Id =
+        Guid.Parse("bb000001-0224-4000-8000-000000000224");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation5Id =
+        Guid.Parse("bb000001-0225-4000-8000-000000000225");
+
+    public static readonly Guid CommercialIntelligencePilotWithinRangeObservation6Id =
+        Guid.Parse("bb000001-0226-4000-8000-000000000226");
+
+    public static readonly Guid CommercialIntelligencePilotInsufficientObservation1Id =
+        Guid.Parse("bb000001-0227-4000-8000-000000000227");
+
+    public static readonly Guid CommercialIntelligencePilotInsufficientObservation2Id =
+        Guid.Parse("bb000001-0228-4000-8000-000000000228");
+
+    public static readonly Guid CommercialIntelligencePilotInsufficientObservation3Id =
+        Guid.Parse("bb000001-0229-4000-8000-000000000229");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation1Id =
+        Guid.Parse("bb000001-0230-4000-8000-000000000230");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation2Id =
+        Guid.Parse("bb000001-0231-4000-8000-000000000231");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation3Id =
+        Guid.Parse("bb000001-0232-4000-8000-000000000232");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation4Id =
+        Guid.Parse("bb000001-0233-4000-8000-000000000233");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation5Id =
+        Guid.Parse("bb000001-0234-4000-8000-000000000234");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup001Observation6Id =
+        Guid.Parse("bb000001-0235-4000-8000-000000000235");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation1Id =
+        Guid.Parse("bb000001-0236-4000-8000-000000000236");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation2Id =
+        Guid.Parse("bb000001-0237-4000-8000-000000000237");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation3Id =
+        Guid.Parse("bb000001-0238-4000-8000-000000000238");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation4Id =
+        Guid.Parse("bb000001-0239-4000-8000-000000000239");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation5Id =
+        Guid.Parse("bb000001-023a-4000-8000-00000000023a");
+
+    public static readonly Guid CommercialIntelligencePilotSupplierSpreadSup002Observation6Id =
+        Guid.Parse("bb000001-023b-4000-8000-00000000023b");
+
+    public static readonly Guid CommercialIntelligencePilotConflictCurrencyObservationId =
+        Guid.Parse("bb000001-023c-4000-8000-00000000023c");
+
+    public static readonly Guid CommercialIntelligencePilotConflictUnitObservationId =
+        Guid.Parse("bb000001-023d-4000-8000-00000000023d");
+
+    public static readonly Guid CommercialIntelligencePilotConflictBasisObservationId =
+        Guid.Parse("bb000001-023e-4000-8000-00000000023e");
+
+    public static readonly DateTimeOffset CommercialIntelligencePilotSeedTimeUtc =
+        new(2026, 8, 24, 12, 15, 0, TimeSpan.Zero);
+
+    public const string CommercialIntelligencePilotProfileCode = "COMMINT1-PILOT-PP";
+    public const string CommercialIntelligencePilotSupplierReferencePrimary = "SUP-001";
+    public const string CommercialIntelligencePilotSupplierReferenceSecondary = "SUP-002";
 }

@@ -33,6 +33,7 @@ using CrevaFactOS.Api.Erp;
 using CrevaFactOS.Api.Edge;
 using CrevaFactOS.Api.IotPlc;
 using CrevaFactOS.Api.OperationalRisk;
+using CrevaFactOS.Api.CommercialIntelligence;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.AiDecisions;
 using CrevaFactOS.Persistence.Outbox;
@@ -77,6 +78,7 @@ builder.Services.AddCrevaFactOSEdge();
 builder.Services.AddCrevaFactOSIotPlc();
 builder.Services.AddCrevaFactOSIotPlcIntelligence();
 builder.Services.AddCrevaFactOSOperationalRisk();
+builder.Services.AddCrevaFactOSCommercialIntelligence();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -140,6 +142,7 @@ app.MapEdgeEndpoints();
 app.MapIotPlcEndpoints();
 app.MapIotPlcIntelligenceEndpoints();
 app.MapOperationalRiskEndpoints();
+app.MapCommercialIntelligenceEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();
