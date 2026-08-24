@@ -51,6 +51,29 @@ internal static class CommercialIntelligenceIdempotencyFingerprint
             sourceProvenance = Normalize(command.SourceProvenance),
         }, JsonOptions));
 
+    public static string ComputeComparisonFingerprint(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialPurchasePriceComparisonCommand command) =>
+        ComputeHex(JsonSerializer.Serialize(new
+        {
+            context.TenantId,
+            context.FacilityId,
+            command.ProfileId,
+            command.ExpectedProfileVersion,
+            comparisonType = Normalize(command.ComparisonType),
+            command.MaterialId,
+            currentWindowStartUtc = command.CurrentWindowStartUtc,
+            currentWindowEndUtc = command.CurrentWindowEndUtc,
+            referenceWindowStartUtc = command.ReferenceWindowStartUtc,
+            referenceWindowEndUtc = command.ReferenceWindowEndUtc,
+            currencyCode = Normalize(command.CurrencyCode),
+            normalizedUnit = Normalize(command.NormalizedUnit),
+            priceBasisTaxInclusion = Normalize(command.PriceBasisTaxInclusion),
+            priceBasisDiscountInclusion = Normalize(command.PriceBasisDiscountInclusion),
+            priceBasisFreightInclusion = Normalize(command.PriceBasisFreightInclusion),
+            sourceProvenance = Normalize(command.SourceProvenance),
+        }, JsonOptions));
+
     private static string ComputeHex(string payload)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(payload));

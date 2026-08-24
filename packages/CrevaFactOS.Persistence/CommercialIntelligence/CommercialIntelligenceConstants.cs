@@ -3,6 +3,7 @@ namespace CrevaFactOS.Persistence.CommercialIntelligence;
 public static class CommercialIntelligenceConstants
 {
     public const string RuleSetVersion = "COMMERCIAL-INTELLIGENCE-1.0";
+    public const string ComparisonRuleSetVersion = "COMMERCIAL-INTELLIGENCE-2.0";
     public const string DevelopmentPilotProvenance =
         "Deterministic local Development commercial-intelligence data — simulated, non-production, not real customer evidence, market prices, or guaranteed savings.";
     public const int DefaultMinimumComparableObservations = 6;

@@ -51,6 +51,63 @@ public static class CommercialIntelligencePriceEvidenceReader
         return new CommercialPurchasePriceEvidenceReadResult(comparable, excluded);
     }
 
+    public static async Task<CommercialPurchasePriceEvidenceReadResult> ReadForComparisonAsync(
+        CrevaFactOSDbContext dbContext,
+        CommercialIntelligenceOperationContext context,
+        CommercialPurchasePriceProfile profile,
+        Guid materialId,
+        DateTimeOffset windowStartUtc,
+        DateTimeOffset windowEndUtc,
+        string currencyCode,
+        string normalizedUnit,
+        string priceBasisTaxInclusion,
+        string priceBasisDiscountInclusion,
+        string priceBasisFreightInclusion,
+        CancellationToken cancellationToken)
+    {
+        var observations = await dbContext.CommercialPurchasePriceEvidenceObservations.AsNoTracking()
+            .Where(o => o.TenantId == context.TenantId
+                        && o.FacilityId == context.FacilityId
+                        && o.MaterialId == materialId
+                        && o.CommercialEventAtUtc >= windowStartUtc
+                        && o.CommercialEventAtUtc <= windowEndUtc)
+            .OrderBy(o => o.CommercialEventAtUtc)
+            .ThenBy(o => o.SourceDocumentReference)
+            .ToListAsync(cancellationToken);
+
+        var allowedStatuses = ParseAllowedStatuses(profile.AllowedEvidenceStatuses);
+        var comparable = new List<CommercialPurchasePriceComparableObservation>();
+        var excluded = new List<CommercialPurchasePriceExcludedObservation>();
+        var seenFingerprints = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var observation in observations)
+        {
+            var exclusion = EvaluateComparisonCompatibility(
+                observation,
+                currencyCode,
+                normalizedUnit,
+                priceBasisTaxInclusion,
+                priceBasisDiscountInclusion,
+                priceBasisFreightInclusion,
+                allowedStatuses,
+                seenFingerprints);
+
+            if (exclusion is not null)
+            {
+                excluded.Add(new CommercialPurchasePriceExcludedObservation(observation.Id, exclusion));
+                continue;
+            }
+
+            seenFingerprints.Add(observation.SourceFingerprint);
+            comparable.Add(new CommercialPurchasePriceComparableObservation(
+                observation.Id,
+                observation.UnitPrice,
+                observation.SupplierReference));
+        }
+
+        return new CommercialPurchasePriceEvidenceReadResult(comparable, excluded);
+    }
+
     public static Dictionary<string, int> SummarizeExclusions(
         IReadOnlyList<CommercialPurchasePriceExcludedObservation> excluded)
     {
@@ -103,6 +160,52 @@ public static class CommercialIntelligencePriceEvidenceReader
             && !string.Equals(observation.SupplierReference, command.SupplierReference, StringComparison.Ordinal))
         {
             return CommercialIntelligenceExclusionReasonCodes.SupplierMismatch;
+        }
+
+        if (seenFingerprints.Contains(observation.SourceFingerprint))
+        {
+            return CommercialIntelligenceExclusionReasonCodes.DuplicateSourceEvidence;
+        }
+
+        return null;
+    }
+
+    private static string? EvaluateComparisonCompatibility(
+        CommercialPurchasePriceEvidenceObservation observation,
+        string currencyCode,
+        string normalizedUnit,
+        string priceBasisTaxInclusion,
+        string priceBasisDiscountInclusion,
+        string priceBasisFreightInclusion,
+        IReadOnlySet<string> allowedStatuses,
+        HashSet<string> seenFingerprints)
+    {
+        if (observation.Quantity <= 0m || observation.UnitPrice <= 0m)
+        {
+            return CommercialIntelligenceExclusionReasonCodes.InvalidQuantityOrPrice;
+        }
+
+        if (!allowedStatuses.Contains(observation.EvidenceStatus))
+        {
+            return CommercialIntelligenceExclusionReasonCodes.DisallowedEvidenceStatus;
+        }
+
+        if (!string.Equals(observation.CurrencyCode, currencyCode, StringComparison.OrdinalIgnoreCase))
+        {
+            return CommercialIntelligenceExclusionReasonCodes.IncompatibleCurrency;
+        }
+
+        var observationUnit = observation.NormalizedUnit ?? observation.SourceUnit;
+        if (!string.Equals(observationUnit, normalizedUnit, StringComparison.OrdinalIgnoreCase))
+        {
+            return CommercialIntelligenceExclusionReasonCodes.IncompatibleUnit;
+        }
+
+        if (!PriceBasisMatches(observation.PriceBasisTaxInclusion, priceBasisTaxInclusion)
+            || !PriceBasisMatches(observation.PriceBasisDiscountInclusion, priceBasisDiscountInclusion)
+            || !PriceBasisMatches(observation.PriceBasisFreightInclusion, priceBasisFreightInclusion))
+        {
+            return CommercialIntelligenceExclusionReasonCodes.IncompatiblePriceBasis;
         }
 
         if (seenFingerprints.Contains(observation.SourceFingerprint))

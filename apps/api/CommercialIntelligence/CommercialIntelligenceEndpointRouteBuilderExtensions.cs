@@ -7,8 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CrevaFactOS.Api.CommercialIntelligence;
 
-public static class CommercialIntelligenceEndpointRouteBuilderExtensions
+internal static class CommercialIntelligenceEndpointRouteBuilderExtensions
 {
+    private static readonly string[] UnavailableComparisonDimensions =
+    [
+        "delivery",
+        "quality",
+        "service",
+        "credit-terms",
+        "lead-time",
+    ];
+
     public static IEndpointRouteBuilder MapCommercialIntelligenceEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/commercial-intelligence/purchase-prices").RequireAuthorization();
@@ -20,6 +29,9 @@ public static class CommercialIntelligenceEndpointRouteBuilderExtensions
         group.MapGet("/assessments", ListAssessmentsAsync);
         group.MapGet("/assessments/{assessmentId:guid}", GetAssessmentAsync);
         group.MapPost("/assessments/evaluate", EvaluateAssessmentAsync);
+        group.MapGet("/comparisons", ListComparisonsAsync);
+        group.MapGet("/comparisons/{comparisonRunId:guid}", GetComparisonAsync);
+        group.MapPost("/comparisons/evaluate", EvaluateComparisonAsync);
 
         return endpoints;
     }
@@ -219,6 +231,104 @@ public static class CommercialIntelligenceEndpointRouteBuilderExtensions
         return CommercialIntelligenceEndpointHelpers.MapWriteResult(result, isCreate: true);
     }
 
+    private static async Task<IResult> ListComparisonsAsync(
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? comparisonType,
+        [FromQuery] Guid? materialId,
+        [FromQuery] string? supplierReference,
+        [FromQuery] string? outcome,
+        [FromQuery] DateTimeOffset? windowFromUtc,
+        [FromQuery] DateTimeOffset? windowToUtc,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        IFacilityAccessResolver facilityAccessResolver = null!,
+        ICommercialIntelligenceRepository repository = null!,
+        CorrelationContext correlationContext = null!,
+        CancellationToken cancellationToken = default)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparisons = await repository.ListComparisonsAsync(
+            context,
+            new CommercialPurchasePriceComparisonListFilters(
+                comparisonType,
+                materialId,
+                supplierReference,
+                outcome,
+                windowFromUtc,
+                windowToUtc,
+                page,
+                pageSize),
+            cancellationToken);
+
+        return TypedResults.Ok(new
+        {
+            items = comparisons.Select(MapComparisonSummary),
+            page,
+            pageSize,
+            ruleSetVersion = CommercialIntelligenceConstants.ComparisonRuleSetVersion,
+            provenanceDisclaimer = CommercialIntelligenceConstants.DevelopmentPilotProvenance,
+            unavailableDimensions = UnavailableComparisonDimensions,
+        });
+    }
+
+    private static async Task<IResult> GetComparisonAsync(
+        Guid comparisonRunId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialIntelligenceRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparison = await repository.GetComparisonByIdAsync(context, comparisonRunId, cancellationToken);
+        return comparison is null
+            ? CommercialIntelligenceEndpointHelpers.MapFailure(
+                CommercialIntelligenceFailureCodes.NotFound,
+                "Purchase price comparison not found.")
+            : TypedResults.Ok(CommercialIntelligenceEndpointHelpers.MapComparisonDetail(comparison));
+    }
+
+    private static async Task<IResult> EvaluateComparisonAsync(
+        [FromQuery] Guid? facilityId,
+        [FromBody] EvaluateCommercialPurchasePriceComparisonRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialIntelligenceRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveManageAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.EvaluateComparisonAsync(
+            context,
+            new EvaluateCommercialPurchasePriceComparisonCommand(
+                body.ProfileId,
+                body.ExpectedProfileVersion,
+                body.ComparisonType,
+                body.MaterialId,
+                body.CurrentWindowStartUtc,
+                body.CurrentWindowEndUtc,
+                body.ReferenceWindowStartUtc,
+                body.ReferenceWindowEndUtc,
+                body.CurrencyCode,
+                body.NormalizedUnit,
+                body.PriceBasisTaxInclusion,
+                body.PriceBasisDiscountInclusion,
+                body.PriceBasisFreightInclusion,
+                body.SourceProvenance,
+                body.IdempotencyKey),
+            cancellationToken);
+
+        return CommercialIntelligenceEndpointHelpers.MapWriteResult(result, isCreate: true);
+    }
+
     private static object MapProfile(CommercialPurchasePriceProfileReadModel profile) => new
     {
         id = profile.Id,
@@ -266,6 +376,34 @@ public static class CommercialIntelligenceEndpointRouteBuilderExtensions
         createdAtUtc = assessment.CreatedAtUtc,
         isPilotData = assessment.IsPilotData,
     };
+
+    private static object MapComparisonSummary(CommercialPurchasePriceComparisonSummaryReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        currentMedianUnitPrice = comparison.CurrentMedianUnitPrice,
+        referenceMedianUnitPrice = comparison.ReferenceMedianUnitPrice,
+        signedVarianceRatio = comparison.SignedVarianceRatio,
+        supplierSpreadRatio = comparison.SupplierSpreadRatio,
+        comparableObservationCount = comparison.ComparableObservationCount,
+        excludedObservationCount = comparison.ExcludedObservationCount,
+        currencyCode = comparison.CurrencyCode,
+        normalizedUnit = comparison.NormalizedUnit,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        isPilotData = comparison.IsPilotData,
+    };
 }
 
 public sealed record CreateCommercialPurchasePriceProfileRequest(
@@ -308,6 +446,23 @@ public sealed record EvaluateCommercialPurchasePriceAssessmentRequest(
     string NormalizedUnit,
     DateTimeOffset WindowStartUtc,
     DateTimeOffset WindowEndUtc,
+    string PriceBasisTaxInclusion,
+    string PriceBasisDiscountInclusion,
+    string PriceBasisFreightInclusion,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+public sealed record EvaluateCommercialPurchasePriceComparisonRequest(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid MaterialId,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string CurrencyCode,
+    string NormalizedUnit,
     string PriceBasisTaxInclusion,
     string PriceBasisDiscountInclusion,
     string PriceBasisFreightInclusion,

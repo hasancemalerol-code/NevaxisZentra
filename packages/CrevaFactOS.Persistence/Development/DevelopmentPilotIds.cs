@@ -1311,4 +1311,56 @@ public static class DevelopmentPilotIds
     public const string CommercialIntelligencePilotProfileCode = "COMMINT1-PILOT-PP";
     public const string CommercialIntelligencePilotSupplierReferencePrimary = "SUP-001";
     public const string CommercialIntelligencePilotSupplierReferenceSecondary = "SUP-002";
+    public const string CommercialIntelligencePilotSupplierReferenceTie = "SUP-003";
+
+    // Commercial intelligence comparison pilot fixtures (0260–027f)
+    public static readonly Guid CommercialIntelligenceComparisonPilotStableTemporalRunId =
+        Guid.Parse("bb000001-0260-4000-8000-000000000260");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotUpwardTemporalRunId =
+        Guid.Parse("bb000001-0261-4000-8000-000000000261");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotFavorableTemporalRunId =
+        Guid.Parse("bb000001-0262-4000-8000-000000000262");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotSupplierSpreadRunId =
+        Guid.Parse("bb000001-0263-4000-8000-000000000263");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotSupplierTieRunId =
+        Guid.Parse("bb000001-0264-4000-8000-000000000264");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotInsufficientTemporalRunId =
+        Guid.Parse("bb000001-0265-4000-8000-000000000265");
+
+    public static readonly Guid CommercialIntelligenceComparisonPilotSourceConflictRunId =
+        Guid.Parse("bb000001-0266-4000-8000-000000000266");
+
+    public static readonly IReadOnlySet<Guid> CommercialIntelligenceComparisonPilotRunIds = new HashSet<Guid>
+    {
+        CommercialIntelligenceComparisonPilotStableTemporalRunId,
+        CommercialIntelligenceComparisonPilotUpwardTemporalRunId,
+        CommercialIntelligenceComparisonPilotFavorableTemporalRunId,
+        CommercialIntelligenceComparisonPilotSupplierSpreadRunId,
+        CommercialIntelligenceComparisonPilotSupplierTieRunId,
+        CommercialIntelligenceComparisonPilotInsufficientTemporalRunId,
+        CommercialIntelligenceComparisonPilotSourceConflictRunId,
+    };
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotCurrentWindowStartUtc =
+        new(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotCurrentWindowEndUtc =
+        new(2026, 8, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotReferenceWindowStartUtc =
+        new(2026, 4, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotReferenceWindowEndUtc =
+        new(2026, 6, 30, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotSupplierWindowStartUtc =
+        new(2026, 5, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialIntelligenceComparisonPilotSupplierWindowEndUtc =
+        new(2026, 8, 24, 0, 0, 0, TimeSpan.Zero);
 }

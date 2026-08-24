@@ -301,6 +301,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<CommercialPurchasePriceAssessment> CommercialPurchasePriceAssessments => Set<CommercialPurchasePriceAssessment>();
     public DbSet<CommercialPurchasePriceAssessmentDriver> CommercialPurchasePriceAssessmentDrivers =>
         Set<CommercialPurchasePriceAssessmentDriver>();
+    public DbSet<CommercialPurchasePriceComparisonRun> CommercialPurchasePriceComparisonRuns =>
+        Set<CommercialPurchasePriceComparisonRun>();
+    public DbSet<CommercialPurchasePriceComparisonResult> CommercialPurchasePriceComparisonResults =>
+        Set<CommercialPurchasePriceComparisonResult>();
+    public DbSet<CommercialPurchasePriceComparisonDriver> CommercialPurchasePriceComparisonDrivers =>
+        Set<CommercialPurchasePriceComparisonDriver>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1530,6 +1536,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new CommercialPurchasePriceAssessmentDriverEntityConfiguration());
         modelBuilder.Entity<CommercialPurchasePriceAssessmentDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceComparisonRunEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceComparisonRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceComparisonResultEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceComparisonResult>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPurchasePriceComparisonDriverEntityConfiguration());
+        modelBuilder.Entity<CommercialPurchasePriceComparisonDriver>().HasQueryFilter(d =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);

@@ -7,6 +7,15 @@ namespace CrevaFactOS.Api.CommercialIntelligence;
 
 internal static class CommercialIntelligenceEndpointHelpers
 {
+    private static readonly string[] UnavailableComparisonDimensions =
+    [
+        "delivery",
+        "quality",
+        "service",
+        "credit-terms",
+        "lead-time",
+    ];
+
     internal static async Task<(CommercialIntelligenceOperationContext? Context, IResult? Failure)> ResolveReadAccessAsync(
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
@@ -116,6 +125,34 @@ internal static class CommercialIntelligenceEndpointHelpers
                 });
         }
 
+        if (result.Comparison is not null)
+        {
+            var comparisonDto = MapComparisonDetail(result.Comparison);
+            if (result.IdempotentReplay)
+            {
+                return TypedResults.Ok(new
+                {
+                    id = result.EntityId,
+                    idempotentReplay = true,
+                    comparison = comparisonDto,
+                });
+            }
+
+            return isCreate
+                ? TypedResults.Created((string?)null, new
+                {
+                    id = result.EntityId,
+                    idempotentReplay = false,
+                    comparison = comparisonDto,
+                })
+                : TypedResults.Ok(new
+                {
+                    id = result.EntityId,
+                    idempotentReplay = false,
+                    comparison = comparisonDto,
+                });
+        }
+
         var dto = new CommercialIntelligenceWriteSuccessDto(result.EntityId!.Value, result.Version, result.IdempotentReplay);
         if (result.IdempotentReplay)
         {
@@ -169,6 +206,70 @@ internal static class CommercialIntelligenceEndpointHelpers
             isLeadingDriver = d.IsLeadingDriver,
         }),
         isPilotData = assessment.IsPilotData,
+    };
+
+    internal static object MapComparisonDetail(CommercialPurchasePriceComparisonDetailReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        profileVersion = comparison.ProfileVersion,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        currentMedianUnitPrice = comparison.CurrentMedianUnitPrice,
+        referenceMedianUnitPrice = comparison.ReferenceMedianUnitPrice,
+        signedVarianceRatio = comparison.SignedVarianceRatio,
+        supplierSpreadRatio = comparison.SupplierSpreadRatio,
+        comparableObservationCount = comparison.ComparableObservationCount,
+        excludedObservationCount = comparison.ExcludedObservationCount,
+        currencyCode = comparison.CurrencyCode,
+        normalizedUnit = comparison.NormalizedUnit,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        priceBasisTaxInclusion = comparison.PriceBasisTaxInclusion,
+        priceBasisDiscountInclusion = comparison.PriceBasisDiscountInclusion,
+        priceBasisFreightInclusion = comparison.PriceBasisFreightInclusion,
+        evidenceStatus = comparison.EvidenceStatus,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        sourceProvenance = comparison.SourceProvenance,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        supplierResults = comparison.SupplierResults.Select(r => new
+        {
+            id = r.Id,
+            supplierReference = r.SupplierReference,
+            comparableObservationCount = r.ComparableObservationCount,
+            supplierMedianUnitPrice = r.SupplierMedianUnitPrice,
+            lowestComparableMedianUnitPrice = r.LowestComparableMedianUnitPrice,
+            relativePricePositionRatio = r.RelativePricePositionRatio,
+            priceRank = r.PriceRank,
+            isTied = r.IsTied,
+            positionState = r.PositionState,
+            evidenceStatus = r.EvidenceStatus,
+        }),
+        drivers = comparison.Drivers.Select(d => new
+        {
+            id = d.Id,
+            comparisonResultId = d.ComparisonResultId,
+            reasonCode = d.ReasonCode,
+            severity = d.Severity,
+            actualValue = d.ActualValue,
+            referenceValue = d.ReferenceValue,
+            thresholdValue = d.ThresholdValue,
+            unit = d.Unit,
+            normalizedVariance = d.NormalizedVariance,
+            affectedObservationCount = d.AffectedObservationCount,
+            supportingText = d.SupportingText,
+            sortOrder = d.SortOrder,
+            isLeadingDriver = d.IsLeadingDriver,
+        }),
+        unavailableDimensions = UnavailableComparisonDimensions,
+        isPilotData = comparison.IsPilotData,
     };
 
     internal static IResult MapFailure(string? failureCode, string? reason) =>

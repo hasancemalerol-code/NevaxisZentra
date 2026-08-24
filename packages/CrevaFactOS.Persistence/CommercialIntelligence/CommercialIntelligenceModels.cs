@@ -157,6 +157,120 @@ public sealed record CommercialPurchasePriceAssessmentListFilters(
     int Page,
     int PageSize);
 
+public sealed record CommercialPurchasePriceComparisonSummaryReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ComparisonType,
+    Guid MaterialId,
+    string ComparisonOutcome,
+    decimal? CurrentMedianUnitPrice,
+    decimal? ReferenceMedianUnitPrice,
+    decimal? SignedVarianceRatio,
+    decimal? SupplierSpreadRatio,
+    int ComparableObservationCount,
+    int ExcludedObservationCount,
+    string CurrencyCode,
+    string NormalizedUnit,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    bool IsPilotData);
+
+public sealed record CommercialPurchasePriceComparisonResultReadModel(
+    Guid Id,
+    string? SupplierReference,
+    int ComparableObservationCount,
+    decimal? SupplierMedianUnitPrice,
+    decimal? LowestComparableMedianUnitPrice,
+    decimal? RelativePricePositionRatio,
+    int PriceRank,
+    bool IsTied,
+    string PositionState,
+    string EvidenceStatus);
+
+public sealed record CommercialPurchasePriceComparisonDriverReadModel(
+    Guid Id,
+    Guid? ComparisonResultId,
+    string ReasonCode,
+    string Severity,
+    decimal? ActualValue,
+    decimal? ReferenceValue,
+    decimal? ThresholdValue,
+    string? Unit,
+    decimal? NormalizedVariance,
+    int AffectedObservationCount,
+    string SupportingText,
+    int SortOrder,
+    bool IsLeadingDriver);
+
+public sealed record CommercialPurchasePriceComparisonDetailReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ProfileVersion,
+    string ComparisonType,
+    Guid MaterialId,
+    decimal? CurrentMedianUnitPrice,
+    decimal? ReferenceMedianUnitPrice,
+    decimal? SignedVarianceRatio,
+    decimal? SupplierSpreadRatio,
+    int ComparableObservationCount,
+    int ExcludedObservationCount,
+    string CurrencyCode,
+    string NormalizedUnit,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string PriceBasisTaxInclusion,
+    string PriceBasisDiscountInclusion,
+    string PriceBasisFreightInclusion,
+    string EvidenceStatus,
+    string ComparisonOutcome,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    string SourceProvenance,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    IReadOnlyList<CommercialPurchasePriceComparisonResultReadModel> SupplierResults,
+    IReadOnlyList<CommercialPurchasePriceComparisonDriverReadModel> Drivers,
+    bool IsPilotData);
+
+public sealed record EvaluateCommercialPurchasePriceComparisonCommand(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid MaterialId,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string CurrencyCode,
+    string NormalizedUnit,
+    string PriceBasisTaxInclusion,
+    string PriceBasisDiscountInclusion,
+    string PriceBasisFreightInclusion,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+public sealed record CommercialPurchasePriceComparisonListFilters(
+    string? ComparisonType,
+    Guid? MaterialId,
+    string? SupplierReference,
+    string? Outcome,
+    DateTimeOffset? WindowFromUtc,
+    DateTimeOffset? WindowToUtc,
+    int Page,
+    int PageSize);
+
 public sealed class CommercialIntelligenceWriteResult
 {
     public bool Succeeded { get; init; }
@@ -166,12 +280,14 @@ public sealed class CommercialIntelligenceWriteResult
     public string? FailureCode { get; init; }
     public string? FailureReason { get; init; }
     public CommercialPurchasePriceAssessmentDetailReadModel? Assessment { get; init; }
+    public CommercialPurchasePriceComparisonDetailReadModel? Comparison { get; init; }
 
     public static CommercialIntelligenceWriteResult Success(
         Guid entityId,
         uint version,
         bool idempotentReplay = false,
-        CommercialPurchasePriceAssessmentDetailReadModel? assessment = null) =>
+        CommercialPurchasePriceAssessmentDetailReadModel? assessment = null,
+        CommercialPurchasePriceComparisonDetailReadModel? comparison = null) =>
         new()
         {
             Succeeded = true,
@@ -179,6 +295,7 @@ public sealed class CommercialIntelligenceWriteResult
             Version = version,
             IdempotentReplay = idempotentReplay,
             Assessment = assessment,
+            Comparison = comparison,
         };
 
     public static CommercialIntelligenceWriteResult Fail(string code, string reason) =>
@@ -229,5 +346,20 @@ public interface ICommercialIntelligenceRepository
     Task<CommercialIntelligenceWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialPurchasePriceAssessmentCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CommercialPurchasePriceComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialPurchasePriceComparisonListFilters filters,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialPurchasePriceComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialIntelligenceWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialPurchasePriceComparisonCommand command,
         CancellationToken cancellationToken = default);
 }
