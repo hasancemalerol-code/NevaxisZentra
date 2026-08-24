@@ -21,7 +21,8 @@ export function generateStaticParams() {
         && item.href !== "/ayarlar"
         && item.href !== "/enerji"
         && item.href !== "/iot-plc"
-        && item.href !== "/operasyonel-riskler",
+        && item.href !== "/operasyonel-riskler"
+        && item.href !== "/ticari-zeka/satin-alma-fiyat-analizi",
     )
     .map((item) => ({
       sections: item.href

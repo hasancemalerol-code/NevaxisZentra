@@ -162,12 +162,14 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "Ticari zekâ",
+    label: "TİCARİ ZEKÂ",
     items: [
       {
         label: "Satın Alma Fiyat Analizi",
         href: "/ticari-zeka/satin-alma-fiyat-analizi",
         iconKey: "shopping-basket",
+        permissionKey: "commercial-intelligence.read",
+        subscriptionModulePath: "/ticari-zeka",
       },
       {
         label: "Tedarikçi Karşılaştırması",
