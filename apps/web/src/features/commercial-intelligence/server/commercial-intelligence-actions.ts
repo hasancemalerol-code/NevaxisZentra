@@ -17,7 +17,13 @@ import {
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { resolveCommercialIntelligenceRequestContext } from "./commercial-intelligence-request-context";
 
-const ROUTE_PATH = "/ticari-zeka/satin-alma-fiyat-analizi";
+const PURCHASE_PRICE_ROUTE_PATH = "/ticari-zeka/satin-alma-fiyat-analizi";
+const SUPPLIER_COMPARISON_ROUTE_PATH = "/ticari-zeka/tedarikci-karsilastirmasi";
+
+function revalidateCommercialIntelligenceRoutes() {
+  revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
+  revalidatePath(SUPPLIER_COMPARISON_ROUTE_PATH);
+}
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
 
@@ -40,7 +46,7 @@ export async function refreshCommercialIntelligenceWorkspaceAction() {
   const authorization = await denyUnlessGranted("commercial-intelligence.read");
   if (authorization.status === "failure") return authorization;
 
-  revalidatePath(ROUTE_PATH);
+  revalidateCommercialIntelligenceRoutes();
   const result = await readCommercialIntelligenceWorkspace();
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message };
@@ -107,12 +113,30 @@ export async function updateCommercialIntelligenceProfileAction(input: Readonly<
     };
   }
 
-  revalidatePath(ROUTE_PATH);
+  revalidateCommercialIntelligenceRoutes();
   return {
     status: "success" as const,
     entityId: result.value.entityId,
     version: result.value.version,
     idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function refreshCommercialSupplierComparisonWorkspaceAction(comparisonId?: string | null) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialSupplierComparisonWorkspace } = await import("./commercial-supplier-comparison-queries");
+  const result = await readCommercialSupplierComparisonWorkspace(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
   };
 }
 
@@ -146,7 +170,7 @@ export async function evaluateCommercialIntelligenceAssessmentAction(input: Read
     };
   }
 
-  revalidatePath(ROUTE_PATH);
+  revalidateCommercialIntelligenceRoutes();
   return {
     status: "success" as const,
     entityId: result.value.entityId,
@@ -185,7 +209,7 @@ export async function evaluateCommercialIntelligenceComparisonAction(input: Read
     };
   }
 
-  revalidatePath(ROUTE_PATH);
+  revalidateCommercialIntelligenceRoutes();
   return {
     status: "success" as const,
     entityId: result.value.entityId,

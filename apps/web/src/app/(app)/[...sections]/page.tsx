@@ -22,7 +22,8 @@ export function generateStaticParams() {
         && item.href !== "/enerji"
         && item.href !== "/iot-plc"
         && item.href !== "/operasyonel-riskler"
-        && item.href !== "/ticari-zeka/satin-alma-fiyat-analizi",
+        && item.href !== "/ticari-zeka/satin-alma-fiyat-analizi"
+        && item.href !== "/ticari-zeka/tedarikci-karsilastirmasi",
     )
     .map((item) => ({
       sections: item.href

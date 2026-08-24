@@ -1,5 +1,6 @@
 import {
   COMMERCIAL_INTELLIGENCE_KPI_ORDER,
+  COMMERCIAL_SUPPLIER_COMPARISON_KPI_ORDER,
   getCommercialIntelligenceComparisonTypeLabel,
   getCommercialIntelligenceEvidenceStatusLabel,
   getCommercialIntelligenceOutcomeLabel,
@@ -552,3 +553,196 @@ export const COMMERCIAL_INTELLIGENCE_FORBIDDEN_UI_TERMS = [
   "automatic procurement",
   "best supplier",
 ] as const;
+
+export function filterCommercialIntelligenceSupplierComparisons(
+  comparisons: readonly CommercialIntelligenceComparisonSummary[],
+): CommercialIntelligenceComparisonSummary[] {
+  return comparisons
+    .filter((item) => item.comparisonType === COMMERCIAL_INTELLIGENCE_SUPPLIER_COMPARISON_TYPE)
+    .slice()
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc));
+}
+
+export function isCompatibleSupplierComparison(
+  comparison: CommercialIntelligenceComparisonSummary,
+): boolean {
+  return comparison.comparableObservationCount > 0
+    && comparison.comparisonOutcome !== "source-conflict"
+    && comparison.comparisonOutcome !== "insufficient-data";
+}
+
+export function countSupplierComparisonAttentionRecords(
+  comparisons: readonly CommercialIntelligenceComparisonSummary[],
+): number {
+  return filterCommercialIntelligenceSupplierComparisons(comparisons).filter(
+    (item) => item.comparisonOutcome === "attention"
+      || item.comparisonOutcome === "insufficient-data"
+      || item.comparisonOutcome === "source-conflict",
+  ).length;
+}
+
+export function buildCommercialSupplierComparisonKpiCards(input: Readonly<{
+  selectedComparison: CommercialIntelligenceComparisonSummary | null;
+  supplierRows: readonly CommercialIntelligenceSupplierResult[];
+  supplierComparisons: readonly CommercialIntelligenceComparisonSummary[];
+  isCompatibleSelection: boolean;
+}>): CommercialIntelligenceKpiCard[] {
+  const { selectedComparison, supplierRows, supplierComparisons, isCompatibleSelection } = input;
+  const scopeLabel = selectedComparison
+    ? `${selectedComparison.materialLabel} · ${selectedComparison.currentWindowLabel}`
+    : "Seçili karşılaştırma yok";
+  const sourceDataset = "commercial_purchase_price_comparison_runs";
+  const evidenceLabel = "Tedarikçi fiyat kanıtı";
+  const tiedCount = supplierRows.filter((row) => row.isTied).length;
+  const attentionRecordCount = countSupplierComparisonAttentionRecords(supplierComparisons);
+  const spreadValue = selectedComparison?.supplierSpreadRatio ?? null;
+  const spreadLabel = formatRatioAsPercent(spreadValue);
+  const supplierCount = isCompatibleSelection ? supplierRows.length : 0;
+  const comparableTotal = selectedComparison?.comparableObservationCount ?? 0;
+  const excludedTotal = selectedComparison?.excludedObservationCount ?? 0;
+
+  const unavailable = (id: string, label: string, detail: string): CommercialIntelligenceKpiCard => ({
+    id,
+    label,
+    value: "—",
+    detail,
+    tone: "neutral",
+    scopeLabel,
+    evidenceLabel,
+    stateBadge: "Yok",
+    sourceDataset,
+    accessibleSummary: detail,
+    unavailableReason: detail,
+  });
+
+  const cards: Record<string, CommercialIntelligenceKpiCard> = {
+    "comparable-suppliers": isCompatibleSelection && supplierCount > 0
+      ? {
+          id: "comparable-suppliers",
+          label: "Karşılaştırılabilir tedarikçiler",
+          value: formatCount(supplierCount),
+          detail: "Seçili uyumlu karşılaştırmadaki tedarikçi satırı",
+          tone: "controlled",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: "Aktif",
+          sourceDataset,
+          accessibleSummary: `${supplierCount} karşılaştırılabilir tedarikçi satırı`,
+        }
+      : {
+          id: "comparable-suppliers",
+          label: "Karşılaştırılabilir tedarikçiler",
+          value: "—",
+          detail: "Uyumlu tedarikçi karşılaştırması seçilmedi",
+          tone: "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: "Yok",
+          sourceDataset,
+          accessibleSummary: "Karşılaştırılabilir tedarikçi sıralaması üretilemedi",
+          unavailableReason: "Uyumlu karşılaştırma yok",
+        },
+    "comparable-observations": selectedComparison
+      ? {
+          id: "comparable-observations",
+          label: "Karşılaştırılabilir gözlemler",
+          value: formatCount(comparableTotal),
+          detail: "Seçili karşılaştırmanın dahil ettiği gözlem sayısı",
+          tone: comparableTotal > 0 ? "controlled" : "insufficient",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: comparableTotal > 0 ? "Aktif" : "Eksik",
+          sourceDataset,
+          accessibleSummary: `${comparableTotal} karşılaştırılabilir gözlem`,
+        }
+      : unavailable(
+          "comparable-observations",
+          "Karşılaştırılabilir gözlemler",
+          "Karşılaştırılabilir gözlem bağlamı yok",
+        ),
+    "excluded-observations": selectedComparison
+      ? {
+          id: "excluded-observations",
+          label: "Dışlanan gözlemler",
+          value: formatCount(excludedTotal),
+          detail: "Aynı karşılaştırmada dışlanan gözlem sayısı",
+          tone: excludedTotal > 0 ? "attention" : "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: excludedTotal > 0 ? "Dışlanan" : "Yok",
+          sourceDataset,
+          accessibleSummary: `${excludedTotal} dışlanan gözlem`,
+        }
+      : unavailable(
+          "excluded-observations",
+          "Dışlanan gözlemler",
+          "Dışlanan gözlem bağlamı yok",
+        ),
+    "price-spread": selectedComparison && spreadValue !== null
+      ? {
+          id: "price-spread",
+          label: "Fiyat yayılımı",
+          value: spreadLabel,
+          detail: "Seçili çalıştırmanın tedarikçi yayılım oranı",
+          tone: spreadValue > 0 ? "informational" : "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: spreadValue > 0 ? "Yayılım" : "Düz",
+          sourceDataset,
+          accessibleSummary: `Tedarikçi yayılımı ${spreadLabel}`,
+        }
+      : {
+          id: "price-spread",
+          label: "Fiyat yayılımı",
+          value: "—",
+          detail: "Yayılım oranı hesaplanamadı",
+          tone: "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: "Yok",
+          sourceDataset,
+          accessibleSummary: "Fiyat yayılımı mevcut değil",
+          unavailableReason: "Yayılım oranı yok",
+        },
+    "tied-positions": isCompatibleSelection
+      ? {
+          id: "tied-positions",
+          label: "Eşit fiyat konumları",
+          value: formatCount(tiedCount),
+          detail: "Seçili karşılaştırmadaki açık eşit sıra durumu",
+          tone: tiedCount > 0 ? "informational" : "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: tiedCount > 0 ? "Eşit" : "Yok",
+          sourceDataset,
+          accessibleSummary: `${tiedCount} eşit fiyat konumu`,
+        }
+      : {
+          id: "tied-positions",
+          label: "Eşit fiyat konumları",
+          value: "—",
+          detail: "Eşit sıra durumu üretilemedi",
+          tone: "neutral",
+          scopeLabel,
+          evidenceLabel,
+          stateBadge: "Yok",
+          sourceDataset,
+          accessibleSummary: "Eşit fiyat konumu yok",
+          unavailableReason: "Uyumlu karşılaştırma yok",
+        },
+    "attention-evidence-issues": {
+      id: "attention-evidence-issues",
+      label: "Dikkat / kanıt sorunu",
+      value: formatCount(attentionRecordCount),
+      detail: "Dikkat, yetersiz kanıt veya kaynak çelişkisi veren kayıtlı karşılaştırmalar",
+      tone: attentionRecordCount > 0 ? "attention" : "neutral",
+      scopeLabel: "Kayıtlı tedarikçi karşılaştırmaları",
+      evidenceLabel,
+      stateBadge: attentionRecordCount > 0 ? "Kayıt" : "Yok",
+      sourceDataset,
+      accessibleSummary: `${attentionRecordCount} kayıtlı karşılaştırma dikkat veya kanıt sorunu bildirdi`,
+    },
+  };
+
+  return COMMERCIAL_SUPPLIER_COMPARISON_KPI_ORDER.map((id) => cards[id]);
+}

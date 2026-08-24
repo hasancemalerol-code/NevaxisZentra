@@ -4,6 +4,11 @@ export type CommercialIntelligenceTabId =
   | "suppliers"
   | "profiles";
 
+export type CommercialSupplierComparisonTabId =
+  | "overview"
+  | "ranking"
+  | "history";
+
 export type CommercialIntelligenceKpiTone =
   | "critical"
   | "attention"
@@ -287,6 +292,41 @@ export type CommercialIntelligenceWorkspacePayload = Readonly<{
   priorityDeviations: readonly CommercialIntelligencePriorityDeviation[];
   evidenceSummary: CommercialIntelligenceEvidenceSummary;
   assessments: readonly CommercialIntelligenceAssessmentSummary[];
+  comparisons: readonly CommercialIntelligenceComparisonSummary[];
+  profiles: readonly CommercialIntelligenceProfileSummary[];
+}>;
+
+export type CommercialSupplierComparisonWorkspacePayload = Readonly<{
+  facilityLabel: string;
+  reportingPeriodLabel: string;
+  freshnessLabel: string;
+  evidenceLabel: string;
+  provenanceDisclaimer: string;
+  ruleSetVersion: string;
+  defaultMinimumComparableObservations: number;
+  hasDevelopmentPilotData: boolean;
+  supplierSpreadThreshold: number | null;
+  supplierSpreadThresholdLabel: string;
+  selectedComparisonId: string | null;
+  isCompatibleSelection: boolean;
+  supplierPosition: Readonly<{
+    rows: readonly CommercialIntelligenceSupplierResult[];
+    spreadLabel: string;
+    comparisonId: string | null;
+    comparisonReference: string | null;
+    primaryLabel: string | null;
+    secondaryLabel: string | null;
+    materialLabel: string | null;
+    outcomeLabel: string | null;
+    comparableObservationCount: number;
+    excludedObservationCount: number;
+    currencyCode: string | null;
+    normalizedUnit: string | null;
+    evaluatedLabel: string | null;
+    leadingDriverLabel: string | null;
+    unavailableReason: string | null;
+  }>;
+  kpis: readonly CommercialIntelligenceKpiCard[];
   comparisons: readonly CommercialIntelligenceComparisonSummary[];
   profiles: readonly CommercialIntelligenceProfileSummary[];
 }>;

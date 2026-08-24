@@ -1,4 +1,7 @@
-import type { CommercialIntelligenceTabId } from "../types/commercial-intelligence-types";
+import type {
+  CommercialIntelligenceTabId,
+  CommercialSupplierComparisonTabId,
+} from "../types/commercial-intelligence-types";
 
 export const COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER =
   "Yerel geliştirme / simülasyon kanıtı — gerçek müşteri tedarik fiyatı veya piyasa kanıtı değildir.";
@@ -8,6 +11,29 @@ export const COMMERCIAL_INTELLIGENCE_READONLY_NOTE =
 
 export const COMMERCIAL_INTELLIGENCE_CURRENT_EVIDENCE_SCOPE =
   "Mevcut satın alma fiyat kanıtı penceresi";
+
+export const COMMERCIAL_SUPPLIER_COMPARISON_SUBTITLE =
+  "Karşılaştırılabilir satın alma fiyat kanıtına göre tedarikçi medyan konumlarını, yayılımı ve kanıt bağlamını izleyin.";
+
+export const COMMERCIAL_SUPPLIER_COMPARISON_EVIDENCE_SCOPE =
+  "Seçili tedarikçi karşılaştırma penceresi";
+
+export const COMMERCIAL_SUPPLIER_COMPARISON_TAB_OPTIONS: ReadonlyArray<
+  Readonly<{ id: CommercialSupplierComparisonTabId; label: string }>
+> = [
+  { id: "overview", label: "Genel Bakış" },
+  { id: "ranking", label: "Tedarikçi Sıralaması" },
+  { id: "history", label: "Karşılaştırma Geçmişi" },
+];
+
+export const COMMERCIAL_SUPPLIER_COMPARISON_KPI_ORDER = [
+  "comparable-suppliers",
+  "comparable-observations",
+  "excluded-observations",
+  "price-spread",
+  "tied-positions",
+  "attention-evidence-issues",
+] as const;
 
 export const COMMERCIAL_INTELLIGENCE_TAB_OPTIONS: ReadonlyArray<
   Readonly<{ id: CommercialIntelligenceTabId; label: string }>
