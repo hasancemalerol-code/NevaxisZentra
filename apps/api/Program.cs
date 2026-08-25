@@ -79,6 +79,7 @@ builder.Services.AddCrevaFactOSIotPlc();
 builder.Services.AddCrevaFactOSIotPlcIntelligence();
 builder.Services.AddCrevaFactOSOperationalRisk();
 builder.Services.AddCrevaFactOSCommercialIntelligence();
+builder.Services.AddCrevaFactOSCommercialSalesPrice();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -143,6 +144,7 @@ app.MapIotPlcEndpoints();
 app.MapIotPlcIntelligenceEndpoints();
 app.MapOperationalRiskEndpoints();
 app.MapCommercialIntelligenceEndpoints();
+app.MapCommercialSalesPriceEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();

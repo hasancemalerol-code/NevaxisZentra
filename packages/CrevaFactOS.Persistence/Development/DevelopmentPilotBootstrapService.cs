@@ -710,6 +710,13 @@ internal sealed class DevelopmentPilotBootstrapService(
             operatorIdentity.Id.ToString(),
             seedTimestampUtc,
             cancellationToken);
+        await DevelopmentPilotCommercialSalesPriceSeed.EnsureCommercialSalesPricePilotRecordsAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
         await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
                 dbContext,
                 operatorIdentity.Id.ToString(),
