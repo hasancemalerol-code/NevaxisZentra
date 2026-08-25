@@ -69,6 +69,8 @@ function readRequired(relativePath) {
   return readFileSync(resolve(ROOT, relativePath), "utf8").replaceAll("\r\n", "\n");
 }
 
+const FIXTURE_PREFIXES = [CLOSURE_PREFIX, BOUNDARY_PREFIX];
+
 function db(sql) {
   const result = spawnSync(
     "docker",
@@ -77,6 +79,29 @@ function db(sql) {
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
+}
+
+function dbExec(sql) {
+  const result = spawnSync(
+    "docker",
+    [
+      "exec",
+      "crevafactos-local-postgres-1",
+      "psql",
+      "-U",
+      "crevafactos",
+      "-d",
+      "crevafactos_local",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      sql,
+    ],
+    { encoding: "utf8" },
+  );
+  if (result.status !== 0) {
+    fail(`db exec failed: ${result.stderr || result.stdout || sql}`);
+  }
 }
 
 function actorHeaders(actor) {
@@ -125,20 +150,63 @@ function assertCandidateCounts(run, label) {
   );
 }
 
-function removeFixtures(prefix) {
-  db(`
+function removeFixturePrefix(prefix) {
+  dbExec(`
     DELETE FROM commercial_sales_price_comparison_drivers
     WHERE comparison_run_id IN (
       SELECT id FROM commercial_sales_price_comparison_runs WHERE idempotency_key LIKE '${prefix}%'
-    );
+    )
+  `);
+  dbExec(`
     DELETE FROM commercial_sales_price_comparison_results
     WHERE comparison_run_id IN (
       SELECT id FROM commercial_sales_price_comparison_runs WHERE idempotency_key LIKE '${prefix}%'
-    );
-    DELETE FROM commercial_sales_price_comparison_runs WHERE idempotency_key LIKE '${prefix}%';
-    DELETE FROM commercial_sales_price_evidence_observations
-    WHERE observation_set_code LIKE '${prefix}%';
+    )
   `);
+  dbExec(`DELETE FROM commercial_sales_price_comparison_runs WHERE idempotency_key LIKE '${prefix}%'`);
+  dbExec(`DELETE FROM commercial_sales_price_evidence_observations WHERE observation_set_code LIKE '${prefix}%'`);
+}
+
+function cleanupVerifierFixtures() {
+  for (const prefix of FIXTURE_PREFIXES) {
+    removeFixturePrefix(prefix);
+  }
+}
+
+function fixtureCounts() {
+  const runs = Number(db(`
+    SELECT COUNT(*)
+    FROM commercial_sales_price_comparison_runs
+    WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%'
+       OR idempotency_key LIKE '${BOUNDARY_PREFIX}%'
+  `));
+  const observations = Number(db(`
+    SELECT COUNT(*)
+    FROM commercial_sales_price_evidence_observations
+    WHERE observation_set_code LIKE '${CLOSURE_PREFIX}%'
+       OR observation_set_code LIKE '${BOUNDARY_PREFIX}%'
+  `));
+  const orphanResults = Number(db(`
+    SELECT COUNT(*)
+    FROM commercial_sales_price_comparison_results r
+    LEFT JOIN commercial_sales_price_comparison_runs cr ON cr.id = r.comparison_run_id
+    WHERE cr.id IS NULL
+  `));
+  const orphanDrivers = Number(db(`
+    SELECT COUNT(*)
+    FROM commercial_sales_price_comparison_drivers d
+    LEFT JOIN commercial_sales_price_comparison_runs cr ON cr.id = d.comparison_run_id
+    WHERE cr.id IS NULL
+  `));
+  return { runs, observations, orphanResults, orphanDrivers };
+}
+
+function assertFixtureIsolation(label) {
+  const counts = fixtureCounts();
+  assert(`${label} closure/boundary runs zero`, counts.runs === 0, `runs=${counts.runs}`);
+  assert(`${label} closure/boundary observations zero`, counts.observations === 0, `observations=${counts.observations}`);
+  assert(`${label} orphan results zero`, counts.orphanResults === 0, `count=${counts.orphanResults}`);
+  assert(`${label} orphan drivers zero`, counts.orphanDrivers === 0, `count=${counts.orphanDrivers}`);
 }
 
 function insertObservations({
@@ -174,7 +242,15 @@ function insertObservations({
         ${prices[index]}, ${prices[index]}, '${currencyCode}', '${grossNet}', 'excluded', 'excluded', 'excluded',
         false, 'simulated', '${setCode.toLowerCase()}-${index}', 'closure fixture', '${setCode}',
         '${eventAt}', 'closure-verifier')
-      ON CONFLICT (id) DO NOTHING;
+      ON CONFLICT (id) DO UPDATE SET
+        material_id = EXCLUDED.material_id,
+        customer_reference = EXCLUDED.customer_reference,
+        commercial_event_at_utc = EXCLUDED.commercial_event_at_utc,
+        received_at_utc = EXCLUDED.received_at_utc,
+        original_unit_price = EXCLUDED.original_unit_price,
+        comparable_unit_price = EXCLUDED.comparable_unit_price,
+        observation_set_code = EXCLUDED.observation_set_code,
+        source_fingerprint = EXCLUDED.source_fingerprint;
     `);
   }
   db(rows.join("\n"));
@@ -265,16 +341,20 @@ forbidText(evaluator, "recommended customer", "evaluator");
 forbidText(seed, "recommended customer", "seed");
 assert("comparison seed stable pilot", comparisonSeed.includes("COMMSALE2-CMP-PILOT-STABLE"));
 assert("comparison seed seven scenarios", comparisonSeed.includes("commsale2-pilot-source-conflict"));
+assert("position ratio uses highest median denominator", evaluator.includes("(ranked.Median - lowestMedian) / highestMedian"));
+assert("spread ratio uses lowest median denominator", evaluator.includes("(highestMedian - lowestMedian) / lowestMedian"));
 
 assertNear("median calculation", median([100, 100, 101, 101, 102, 102]), 101);
 assertNear("signed variance ratio >1", signedVarianceRatio(303, 101), 2.0);
 assert("non-overlapping windows", !windowsOverlap(CUR_START, CUR_END, REF_START, REF_END));
 
-const ready = await fetch(`${BASE}/health/ready`);
-assert("API ready", ready.status === 200, `status=${ready.status}`);
+async function main() {
+  cleanupVerifierFixtures();
+  assertFixtureIsolation("pre-run");
 
-removeFixtures(CLOSURE_PREFIX);
-removeFixtures(BOUNDARY_PREFIX);
+  try {
+  const ready = await fetch(`${BASE}/health/ready`);
+  assert("API ready", ready.status === 200, `status=${ready.status}`);
 
 const provenance =
   "Deterministic local Development sales-price evidence — simulated, non-production, not real customer, invoice, quotation, or market evidence.";
@@ -1003,6 +1083,104 @@ const highSpread = await evaluateComparison(
   ),
 );
 assert("customer spread may exceed 1", highSpread.customerSpreadRatio > 1, String(highSpread.customerSpreadRatio));
+const highSpreadResults = highSpread.customerResults.slice().sort((left, right) => left.priceRank - right.priceRank);
+const highSpreadHigher = highSpreadResults.find((item) => item.customerReference === "CUST-HIGH-SPREAD-B");
+assertNear("high spread higher customer position", highSpreadHigher?.relativePricePositionRatio, 0.75);
+assertNear("high spread ratio", highSpread.customerSpreadRatio, 3.0);
+
+insertObservations({
+  setCode: `${BOUNDARY_PREFIX}-POS-100-200-A`,
+  materialId: BOUNDARY_MATERIAL,
+  prices: [100, 100, 100, 100, 100, 100],
+  observationIds: [
+    "bb000001-05e0-4000-8000-0000000005e0",
+    "bb000001-05e1-4000-8000-0000000005e1",
+    "bb000001-05e2-4000-8000-0000000005e2",
+    "bb000001-05e3-4000-8000-0000000005e3",
+    "bb000001-05e4-4000-8000-0000000005e4",
+    "bb000001-05e5-4000-8000-0000000005e5",
+  ],
+  windowStartUtc: "2026-12-01T00:00:00.000Z",
+  windowEndUtc: "2026-12-31T23:59:59.000Z",
+  customerReference: "CUST-POS-100-200-A",
+});
+insertObservations({
+  setCode: `${BOUNDARY_PREFIX}-POS-100-200-B`,
+  materialId: BOUNDARY_MATERIAL,
+  prices: [200, 200, 200, 200, 200, 200],
+  observationIds: [
+    "bb000001-05f0-4000-8000-0000000005f0",
+    "bb000001-05f1-4000-8000-0000000005f1",
+    "bb000001-05f2-4000-8000-0000000005f2",
+    "bb000001-05f3-4000-8000-0000000005f3",
+    "bb000001-05f4-4000-8000-0000000005f4",
+    "bb000001-05f5-4000-8000-0000000005f5",
+  ],
+  windowStartUtc: "2026-12-01T00:00:00.000Z",
+  windowEndUtc: "2026-12-31T23:59:59.000Z",
+  customerReference: "CUST-POS-100-200-B",
+});
+const position100200 = await evaluateComparison(
+  "position-ratio-100-200",
+  customerBody(
+    BOUNDARY_MATERIAL,
+    "2026-12-01T00:00:00.000Z",
+    "2026-12-31T23:59:59.000Z",
+    `${BOUNDARY_PREFIX}-POS-100-200`,
+  ),
+);
+assertNear("position 100/200 spread ratio", position100200.customerSpreadRatio, 1.0);
+const position100200Results = position100200.customerResults.slice().sort((left, right) => left.priceRank - right.priceRank);
+assert("position 100/200 lowest rank", position100200Results[0]?.priceRank === 1, JSON.stringify(position100200Results));
+assert("position 100/200 higher rank", position100200Results[1]?.priceRank === 2, JSON.stringify(position100200Results));
+assertNear("position 100/200 lowest customer position", position100200Results[0]?.relativePricePositionRatio, 0);
+assertNear("position 100/200 higher customer position", position100200Results[1]?.relativePricePositionRatio, 0.5);
+
+insertObservations({
+  setCode: `${BOUNDARY_PREFIX}-POS-100-250-A`,
+  materialId: BOUNDARY_MATERIAL,
+  prices: [100, 100, 100, 100, 100, 100],
+  observationIds: [
+    "bb000001-0600-4000-8000-000000000600",
+    "bb000001-0601-4000-8000-000000000601",
+    "bb000001-0602-4000-8000-000000000602",
+    "bb000001-0603-4000-8000-000000000603",
+    "bb000001-0604-4000-8000-000000000604",
+    "bb000001-0605-4000-8000-000000000605",
+  ],
+  windowStartUtc: "2027-01-01T00:00:00.000Z",
+  windowEndUtc: "2027-01-31T23:59:59.000Z",
+  customerReference: "CUST-POS-100-250-A",
+});
+insertObservations({
+  setCode: `${BOUNDARY_PREFIX}-POS-100-250-B`,
+  materialId: BOUNDARY_MATERIAL,
+  prices: [250, 250, 250, 250, 250, 250],
+  observationIds: [
+    "bb000001-0610-4000-8000-000000000610",
+    "bb000001-0611-4000-8000-000000000611",
+    "bb000001-0612-4000-8000-000000000612",
+    "bb000001-0613-4000-8000-000000000613",
+    "bb000001-0614-4000-8000-000000000614",
+    "bb000001-0615-4000-8000-000000000615",
+  ],
+  windowStartUtc: "2027-01-01T00:00:00.000Z",
+  windowEndUtc: "2027-01-31T23:59:59.000Z",
+  customerReference: "CUST-POS-100-250-B",
+});
+const position100250 = await evaluateComparison(
+  "position-ratio-100-250",
+  customerBody(
+    BOUNDARY_MATERIAL,
+    "2027-01-01T00:00:00.000Z",
+    "2027-01-31T23:59:59.000Z",
+    `${BOUNDARY_PREFIX}-POS-100-250`,
+  ),
+);
+assertNear("position 100/250 spread ratio", position100250.customerSpreadRatio, 1.5);
+const position100250Results = position100250.customerResults.slice().sort((left, right) => left.priceRank - right.priceRank);
+assertNear("position 100/250 lowest customer position", position100250Results[0]?.relativePricePositionRatio, 0);
+assertNear("position 100/250 higher customer position", position100250Results[1]?.relativePricePositionRatio, 0.6);
 
 insertObservations({
   setCode: `${BOUNDARY_PREFIX}-POSITION-A`,
@@ -1079,12 +1257,15 @@ const overlapReject = await evaluateComparison(
   { expectReject: true },
 );
 assert("overlap windows rejected", overlapReject.status === 400, `status=${overlapReject.status}`);
-
-removeFixtures(CLOSURE_PREFIX);
-removeFixtures(BOUNDARY_PREFIX);
-const closureRuns = Number(db(`SELECT COUNT(*) FROM commercial_sales_price_comparison_runs WHERE idempotency_key LIKE '${CLOSURE_PREFIX}%' OR idempotency_key LIKE '${BOUNDARY_PREFIX}%'`));
-const closureObservations = Number(db(`SELECT COUNT(*) FROM commercial_sales_price_evidence_observations WHERE observation_set_code LIKE '${CLOSURE_PREFIX}%' OR observation_set_code LIKE '${BOUNDARY_PREFIX}%'`));
-assert("closure runs cleaned", closureRuns === 0, `count=${closureRuns}`);
-assert("closure observations cleaned", closureObservations === 0, `count=${closureObservations}`);
+} finally {
+  cleanupVerifierFixtures();
+  assertFixtureIsolation("post-cleanup");
+}
 
 console.log("COMMERCIAL-SALES-PRICE-2 deviation/customer-comparison verification passed.");
+}
+
+main().catch((error) => {
+  console.error(`COMMERCIAL-SALES-PRICE-2 deviation/customer-comparison verification failed: ${error?.message ?? error}`);
+  process.exit(1);
+});
