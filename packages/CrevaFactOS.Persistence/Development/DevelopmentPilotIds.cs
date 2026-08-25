@@ -1403,10 +1403,101 @@ public static class DevelopmentPilotIds
     public static readonly Guid CommercialSalesPricePilotConflictBasisObservationId =
         Guid.Parse("bb000001-0282-4000-8000-000000000282");
 
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation1Id =
+        Guid.Parse("bb000001-0283-4000-8000-000000000283");
+
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation2Id =
+        Guid.Parse("bb000001-0284-4000-8000-000000000284");
+
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation3Id =
+        Guid.Parse("bb000001-0285-4000-8000-000000000285");
+
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation4Id =
+        Guid.Parse("bb000001-0286-4000-8000-000000000286");
+
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation5Id =
+        Guid.Parse("bb000001-0287-4000-8000-000000000287");
+
+    public static readonly Guid CommercialSalesPricePilotCustomerPositionSecondaryObservation6Id =
+        Guid.Parse("bb000001-0288-4000-8000-000000000288");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation1Id =
+        Guid.Parse("bb000001-0289-4000-8000-000000000289");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation2Id =
+        Guid.Parse("bb000001-028a-4000-8000-00000000028a");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation3Id =
+        Guid.Parse("bb000001-028b-4000-8000-00000000028b");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation4Id =
+        Guid.Parse("bb000001-028c-4000-8000-00000000028c");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation5Id =
+        Guid.Parse("bb000001-028d-4000-8000-00000000028d");
+
+    public static readonly Guid CommercialSalesPricePilotTemporalCurrentObservation6Id =
+        Guid.Parse("bb000001-028e-4000-8000-00000000028e");
+
     public static readonly DateTimeOffset CommercialSalesPricePilotSeedTimeUtc =
         new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
 
     public const string CommercialSalesPricePilotProfileCode = "COMMSALE1-PILOT-SP";
     public const string CommercialSalesPricePilotCustomerReferencePrimary = "CUST-001";
     public const string CommercialSalesPricePilotCustomerReferenceSecondary = "CUST-002";
+    public const string CommercialSalesPricePilotCustomerReferenceSpreadPrimary = "CUST-SPREAD-A";
+    public const string CommercialSalesPricePilotCustomerReferenceSpreadSecondary = "CUST-SPREAD-B";
+    public const string CommercialSalesPricePilotCustomerReferenceTiePrimary = "CUST-TIE-001";
+    public const string CommercialSalesPricePilotCustomerReferenceTieSecondary = "CUST-TIE-002";
+
+    // Commercial sales price comparison pilot fixtures (02f0–02f6)
+    public static readonly Guid CommercialSalesPriceComparisonPilotStableTemporalRunId =
+        Guid.Parse("bb000001-02f0-4000-8000-0000000002f0");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotDecreaseTemporalRunId =
+        Guid.Parse("bb000001-02f1-4000-8000-0000000002f1");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotPositiveVarianceTemporalRunId =
+        Guid.Parse("bb000001-02f2-4000-8000-0000000002f2");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotCustomerSpreadRunId =
+        Guid.Parse("bb000001-02f3-4000-8000-0000000002f3");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotCustomerTieRunId =
+        Guid.Parse("bb000001-02f4-4000-8000-0000000002f4");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotInsufficientTemporalRunId =
+        Guid.Parse("bb000001-02f5-4000-8000-0000000002f5");
+
+    public static readonly Guid CommercialSalesPriceComparisonPilotSourceConflictRunId =
+        Guid.Parse("bb000001-02f6-4000-8000-0000000002f6");
+
+    public static readonly IReadOnlySet<Guid> CommercialSalesPriceComparisonPilotRunIds = new HashSet<Guid>
+    {
+        CommercialSalesPriceComparisonPilotStableTemporalRunId,
+        CommercialSalesPriceComparisonPilotDecreaseTemporalRunId,
+        CommercialSalesPriceComparisonPilotPositiveVarianceTemporalRunId,
+        CommercialSalesPriceComparisonPilotCustomerSpreadRunId,
+        CommercialSalesPriceComparisonPilotCustomerTieRunId,
+        CommercialSalesPriceComparisonPilotInsufficientTemporalRunId,
+        CommercialSalesPriceComparisonPilotSourceConflictRunId,
+    };
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotCurrentWindowStartUtc =
+        new(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotCurrentWindowEndUtc =
+        new(2026, 8, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotReferenceWindowStartUtc =
+        new(2026, 2, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotReferenceWindowEndUtc =
+        new(2026, 6, 30, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotCustomerWindowStartUtc =
+        new(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotCustomerWindowEndUtc =
+        new(2026, 10, 24, 0, 0, 0, TimeSpan.Zero);
 }

@@ -9,6 +9,7 @@ public sealed record CommercialSalesPriceProfileReadModel(
     int ReferenceWindowDurationDays,
     int MinimumComparableObservations,
     decimal MaximumPositiveVarianceRatio,
+    decimal? CustomerSpreadThreshold,
     string AllowedEvidenceStatuses,
     string AllowedSourceEvidenceKinds,
     string RequiredTaxInclusion,
@@ -110,6 +111,7 @@ public sealed record CreateCommercialSalesPriceProfileCommand(
     int ReferenceWindowDurationDays,
     int MinimumComparableObservations,
     decimal MaximumPositiveVarianceRatio,
+    decimal? CustomerSpreadThreshold,
     string AllowedEvidenceStatuses,
     string AllowedSourceEvidenceKinds,
     string RequiredTaxInclusion,
@@ -128,6 +130,7 @@ public sealed record UpdateCommercialSalesPriceProfileCommand(
     int ReferenceWindowDurationDays,
     int MinimumComparableObservations,
     decimal MaximumPositiveVarianceRatio,
+    decimal? CustomerSpreadThreshold,
     string AllowedEvidenceStatuses,
     string AllowedSourceEvidenceKinds,
     string RequiredTaxInclusion,
@@ -160,6 +163,129 @@ public sealed record CommercialSalesPriceAssessmentListFilters(
     int Page,
     int PageSize);
 
+public sealed record CommercialSalesPriceComparisonSummaryReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ComparisonType,
+    Guid MaterialId,
+    string? CustomerReference,
+    string ComparisonOutcome,
+    decimal? CurrentMedianUnitPrice,
+    decimal? ReferenceMedianUnitPrice,
+    decimal? SignedVarianceRatio,
+    decimal? CustomerSpreadRatio,
+    int CandidateObservationCount,
+    int ComparableObservationCount,
+    int ExcludedObservationCount,
+    string CurrencyCode,
+    string NormalizedUnit,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    bool IsPilotData);
+
+public sealed record CommercialSalesPriceComparisonResultReadModel(
+    Guid Id,
+    string? CustomerReference,
+    int ComparableObservationCount,
+    decimal? CustomerMedianUnitPrice,
+    decimal? LowestComparableMedianUnitPrice,
+    decimal? RelativePricePositionRatio,
+    int PriceRank,
+    bool IsTied,
+    string PositionState,
+    string EvidenceStatus);
+
+public sealed record CommercialSalesPriceComparisonDriverReadModel(
+    Guid Id,
+    Guid? ComparisonResultId,
+    string ReasonCode,
+    string Severity,
+    decimal? ActualValue,
+    decimal? ReferenceValue,
+    decimal? ThresholdValue,
+    string? Unit,
+    decimal? NormalizedVariance,
+    int AffectedObservationCount,
+    string SupportingText,
+    int SortOrder,
+    bool IsLeadingDriver);
+
+public sealed record CommercialSalesPriceComparisonDetailReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ProfileVersion,
+    string ComparisonType,
+    Guid MaterialId,
+    string? CustomerReference,
+    string SourceEvidenceKind,
+    decimal? CurrentMedianUnitPrice,
+    decimal? ReferenceMedianUnitPrice,
+    decimal? SignedVarianceRatio,
+    decimal? CustomerSpreadRatio,
+    int CandidateObservationCount,
+    int ComparableObservationCount,
+    int ExcludedObservationCount,
+    string CurrencyCode,
+    string NormalizedUnit,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string PriceBasisGrossNet,
+    string PriceBasisTaxInclusion,
+    string PriceBasisDiscountInclusion,
+    string PriceBasisFreightInclusion,
+    string EvidenceStatus,
+    string ComparisonOutcome,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    string SourceProvenance,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    IReadOnlyList<CommercialSalesPriceComparisonResultReadModel> CustomerResults,
+    IReadOnlyList<CommercialSalesPriceComparisonDriverReadModel> Drivers,
+    bool IsPilotData);
+
+public sealed record EvaluateCommercialSalesPriceComparisonCommand(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid MaterialId,
+    string? CustomerReference,
+    string SourceEvidenceKind,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string CurrencyCode,
+    string NormalizedUnit,
+    string PriceBasisGrossNet,
+    string PriceBasisTaxInclusion,
+    string PriceBasisDiscountInclusion,
+    string PriceBasisFreightInclusion,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+public sealed record CommercialSalesPriceComparisonListFilters(
+    string? ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string? Outcome,
+    DateTimeOffset? WindowFromUtc,
+    DateTimeOffset? WindowToUtc,
+    int Page,
+    int PageSize);
+
 public sealed class CommercialSalesPriceWriteResult
 {
     public bool Succeeded { get; init; }
@@ -169,12 +295,14 @@ public sealed class CommercialSalesPriceWriteResult
     public string? FailureCode { get; init; }
     public string? FailureReason { get; init; }
     public CommercialSalesPriceAssessmentDetailReadModel? Assessment { get; init; }
+    public CommercialSalesPriceComparisonDetailReadModel? Comparison { get; init; }
 
     public static CommercialSalesPriceWriteResult Success(
         Guid entityId,
         uint version,
         bool idempotentReplay = false,
-        CommercialSalesPriceAssessmentDetailReadModel? assessment = null) =>
+        CommercialSalesPriceAssessmentDetailReadModel? assessment = null,
+        CommercialSalesPriceComparisonDetailReadModel? comparison = null) =>
         new()
         {
             Succeeded = true,
@@ -182,6 +310,7 @@ public sealed class CommercialSalesPriceWriteResult
             Version = version,
             IdempotentReplay = idempotentReplay,
             Assessment = assessment,
+            Comparison = comparison,
         };
 
     public static CommercialSalesPriceWriteResult Fail(string code, string reason) =>
@@ -232,5 +361,20 @@ public interface ICommercialSalesPriceRepository
     Task<CommercialSalesPriceWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialSalesPriceAssessmentCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CommercialSalesPriceComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialSalesPriceComparisonListFilters filters,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialSalesPriceComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialSalesPriceWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialSalesPriceComparisonCommand command,
         CancellationToken cancellationToken = default);
 }

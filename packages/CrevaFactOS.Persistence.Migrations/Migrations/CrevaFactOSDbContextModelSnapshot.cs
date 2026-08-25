@@ -2100,6 +2100,397 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("commercial_sales_price_assessment_drivers", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActualValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_value");
+
+                    b.Property<int>("AffectedObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_observation_count");
+
+                    b.Property<Guid?>("ComparisonResultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_result_id");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsLeadingDriver")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_leading_driver");
+
+                    b.Property<decimal?>("NormalizedVariance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("normalized_variance");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<decimal?>("ReferenceValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_value");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<string>("SupportingText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("supporting_text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal?>("ThresholdValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("threshold_value");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonResultId");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "SortOrder")
+                        .HasDatabaseName("ix_commsale2_driver_tenant_facility_run");
+
+                    b.ToTable("commercial_sales_price_comparison_drivers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("ComparableObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_observation_count");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<decimal?>("CustomerMedianUnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("customer_median_unit_price");
+
+                    b.Property<string>("CustomerReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsTied")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_tied");
+
+                    b.Property<decimal?>("LowestComparableMedianUnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lowest_comparable_median_unit_price");
+
+                    b.Property<string>("PositionState")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("position_state");
+
+                    b.Property<int>("PriceRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("price_rank");
+
+                    b.Property<decimal?>("RelativePricePositionRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("relative_price_position_ratio");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "CustomerReference")
+                        .HasDatabaseName("ix_commsale2_result_tenant_facility_run_customer");
+
+                    b.ToTable("commercial_sales_price_comparison_results", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("CandidateObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("candidate_observation_count");
+
+                    b.Property<int>("ComparableObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_observation_count");
+
+                    b.Property<string>("ComparisonOutcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("comparison_outcome");
+
+                    b.Property<string>("ComparisonReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("comparison_reference");
+
+                    b.Property<string>("ComparisonType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("comparison_type");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<decimal?>("CurrentMedianUnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_unit_price");
+
+                    b.Property<DateTimeOffset>("CurrentWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_end_utc");
+
+                    b.Property<DateTimeOffset>("CurrentWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_start_utc");
+
+                    b.Property<string>("CustomerReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<decimal?>("CustomerSpreadRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("customer_spread_ratio");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<int>("ExcludedObservationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("excluded_observation_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_payload_fingerprint");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
+
+                    b.Property<string>("NormalizedUnit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("normalized_unit");
+
+                    b.Property<string>("PriceBasisDiscountInclusion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("price_basis_discount_inclusion");
+
+                    b.Property<string>("PriceBasisFreightInclusion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("price_basis_freight_inclusion");
+
+                    b.Property<string>("PriceBasisGrossNet")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("price_basis_gross_net");
+
+                    b.Property<string>("PriceBasisTaxInclusion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("price_basis_tax_inclusion");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("ProfileVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("profile_version");
+
+                    b.Property<decimal?>("ReferenceMedianUnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_unit_price");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_end_utc");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_start_utc");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<decimal?>("SignedVarianceRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("signed_variance_ratio");
+
+                    b.Property<string>("SourceEvidenceKind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source_evidence_kind");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("TenantId", "ComparisonReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commercial_sales_price_comparison_runs_tenant_reference");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commercial_sales_price_comparison_runs_tenant_idempotency")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonType", "ComparisonOutcome")
+                        .HasDatabaseName("ix_commsale2_comparison_tenant_facility_type_outcome");
+
+                    b.HasIndex("TenantId", "FacilityId", "MaterialId", "CurrentWindowStartUtc", "CurrentWindowEndUtc")
+                        .HasDatabaseName("ix_commsale2_comparison_tenant_facility_material_window");
+
+                    b.ToTable("commercial_sales_price_comparison_runs", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_commercial_sales_price_comparison_runs_signed_variance", "signed_variance_ratio IS NULL OR signed_variance_ratio > -1");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceEvidenceObservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2308,6 +2699,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("created_by");
+
+                    b.Property<decimal?>("CustomerSpreadThreshold")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("customer_spread_threshold");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -22514,6 +22910,86 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Assessment");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonResult", "ComparisonResult")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonResultId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonRun", "ComparisonRun")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_commercial_sales_price_comparison_drivers_commercial_sales~1");
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonResult");
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonResult", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonRun", "ComparisonRun")
+                        .WithMany("Results")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonRun", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceEvidenceObservation", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -26076,6 +26552,18 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceAssessment", b =>
                 {
                     b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonResult", b =>
+                {
+                    b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceComparisonRun", b =>
+                {
+                    b.Navigation("Drivers");
+
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Edge.EdgeGateway", b =>

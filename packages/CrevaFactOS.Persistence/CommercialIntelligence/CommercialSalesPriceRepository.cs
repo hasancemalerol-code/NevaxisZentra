@@ -94,6 +94,7 @@ public sealed class CommercialSalesPriceRepository(
                     ReferenceWindowDurationDays = command.ReferenceWindowDurationDays,
                     MinimumComparableObservations = command.MinimumComparableObservations,
                     MaximumPositiveVarianceRatio = command.MaximumPositiveVarianceRatio,
+                    CustomerSpreadThreshold = command.CustomerSpreadThreshold,
                     AllowedEvidenceStatuses = command.AllowedEvidenceStatuses.Trim(),
                     AllowedSourceEvidenceKinds = command.AllowedSourceEvidenceKinds.Trim(),
                     RequiredTaxInclusion = command.RequiredTaxInclusion.Trim(),
@@ -162,6 +163,7 @@ public sealed class CommercialSalesPriceRepository(
                 profile.ReferenceWindowDurationDays = command.ReferenceWindowDurationDays;
                 profile.MinimumComparableObservations = command.MinimumComparableObservations;
                 profile.MaximumPositiveVarianceRatio = command.MaximumPositiveVarianceRatio;
+                profile.CustomerSpreadThreshold = command.CustomerSpreadThreshold;
                 profile.AllowedEvidenceStatuses = command.AllowedEvidenceStatuses.Trim();
                 profile.AllowedSourceEvidenceKinds = command.AllowedSourceEvidenceKinds.Trim();
                 profile.RequiredTaxInclusion = command.RequiredTaxInclusion.Trim();
@@ -373,6 +375,33 @@ public sealed class CommercialSalesPriceRepository(
             },
             cancellationToken);
 
+    public Task<IReadOnlyList<CommercialSalesPriceComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialSalesPriceComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct => await CommercialSalesPriceComparisonOperations.ListComparisonsAsync(
+                dbContext, context, filters, ct),
+            cancellationToken);
+
+    public Task<CommercialSalesPriceComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct => await CommercialSalesPriceComparisonOperations.GetComparisonByIdAsync(
+                dbContext, context, comparisonRunId, ct),
+            cancellationToken);
+
+    public Task<CommercialSalesPriceWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialSalesPriceComparisonCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct => await CommercialSalesPriceComparisonOperations.EvaluateComparisonAsync(
+                dbContext, context, command, ct),
+            cancellationToken);
+
     private async Task<string> GenerateAssessmentReferenceAsync(
         CommercialIntelligenceOperationContext context,
         CancellationToken cancellationToken)
@@ -492,6 +521,7 @@ public sealed class CommercialSalesPriceRepository(
             profile.ReferenceWindowDurationDays,
             profile.MinimumComparableObservations,
             profile.MaximumPositiveVarianceRatio,
+            profile.CustomerSpreadThreshold,
             profile.AllowedEvidenceStatuses,
             profile.AllowedSourceEvidenceKinds,
             profile.RequiredTaxInclusion,
@@ -646,6 +676,24 @@ public sealed class UnavailableCommercialSalesPriceRepository : ICommercialSales
     public Task<CommercialSalesPriceWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialSalesPriceAssessmentCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
+
+    public Task<IReadOnlyList<CommercialSalesPriceComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialSalesPriceComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<CommercialSalesPriceComparisonSummaryReadModel>>([]);
+
+    public Task<CommercialSalesPriceComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<CommercialSalesPriceComparisonDetailReadModel?>(null);
+
+    public Task<CommercialSalesPriceWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialSalesPriceComparisonCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
 }

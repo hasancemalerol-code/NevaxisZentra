@@ -87,6 +87,44 @@ internal static class DevelopmentPilotCommercialSalesPriceSeed
             eventTime.AddDays(-8), 10m, 100m, 100m, provenance, actorSubjectId, seedTimestampUtc,
             cancellationToken, grossNet: CommercialSalesPriceGrossNetBasis.Gross);
 
+        foreach (var (id, daysAgo, price) in new[]
+        {
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation1Id, 18, 110m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation2Id, 17, 111m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation3Id, 16, 112m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation4Id, 15, 113m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation5Id, 14, 114m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotCustomerPositionSecondaryObservation6Id, 13, 115m),
+        })
+        {
+            await EnsureObservationAsync(
+                dbContext, id, tenantId, facilityId, DevelopmentPilotIds.MaterialPilotPpId,
+                DevelopmentPilotIds.CommercialSalesPricePilotCustomerReferenceSecondary,
+                kind, "COMMSALE2-SET-CUSTOMER-POSITION", $"SO-SIM-CP2-{id:N}".Substring(0, 20),
+                "LINE-001", eventTime.AddDays(-daysAgo), 10m, price, price, provenance,
+                actorSubjectId, seedTimestampUtc, cancellationToken);
+        }
+
+        foreach (var (id, index, price) in new[]
+        {
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation1Id, 0, 115m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation2Id, 1, 116m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation3Id, 2, 117m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation4Id, 3, 118m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation5Id, 4, 119m),
+            (DevelopmentPilotIds.CommercialSalesPricePilotTemporalCurrentObservation6Id, 5, 120m),
+        })
+        {
+            await EnsureObservationAsync(
+                dbContext, id, tenantId, facilityId, DevelopmentPilotIds.MaterialPilotPpId,
+                DevelopmentPilotIds.CommercialSalesPricePilotCustomerReferencePrimary,
+                kind, "COMMSALE2-SET-TEMPORAL-CURRENT", $"SO-SIM-TC-{id:N}".Substring(0, 20),
+                "LINE-001",
+                DevelopmentPilotIds.CommercialSalesPriceComparisonPilotCurrentWindowStartUtc.AddDays(index * 3),
+                10m, price, price, provenance,
+                actorSubjectId, seedTimestampUtc, cancellationToken);
+        }
+
         _ = windowStart;
     }
 
@@ -103,6 +141,14 @@ internal static class DevelopmentPilotCommercialSalesPriceSeed
             .SingleOrDefaultAsync(p => p.Id == DevelopmentPilotIds.CommercialSalesPricePilotProfileId, cancellationToken);
         if (profile is not null)
         {
+            if (profile.CustomerSpreadThreshold != CommercialIntelligenceConstants.DefaultCustomerSpreadThreshold)
+            {
+                profile.CustomerSpreadThreshold = CommercialIntelligenceConstants.DefaultCustomerSpreadThreshold;
+                profile.UpdatedAtUtc = seedTimestampUtc;
+                profile.UpdatedBy = actorSubjectId;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             return;
         }
 
@@ -118,6 +164,7 @@ internal static class DevelopmentPilotCommercialSalesPriceSeed
             ReferenceWindowDurationDays = 120,
             MinimumComparableObservations = CommercialIntelligenceConstants.DefaultMinimumComparableObservations,
             MaximumPositiveVarianceRatio = CommercialIntelligenceConstants.DefaultMaximumPositiveVarianceRatio,
+            CustomerSpreadThreshold = CommercialIntelligenceConstants.DefaultCustomerSpreadThreshold,
             AllowedEvidenceStatuses = CommercialIntelligenceEvidenceStatuses.Simulated,
             AllowedSourceEvidenceKinds = CommercialSalesPriceEvidenceKinds.ManualDevelopmentSimulator,
             RequiredTaxInclusion = CommercialIntelligencePriceBasisInclusionStates.Excluded,
@@ -162,10 +209,36 @@ internal static class DevelopmentPilotCommercialSalesPriceSeed
         string grossNet = CommercialSalesPriceGrossNetBasis.Net,
         string? freightInclusion = null)
     {
-        var exists = await dbContext.CommercialSalesPriceEvidenceObservations
-            .AnyAsync(o => o.Id == id, cancellationToken);
-        if (exists)
+        var existing = await dbContext.CommercialSalesPriceEvidenceObservations
+            .SingleOrDefaultAsync(o => o.Id == id, cancellationToken);
+        if (existing is not null)
         {
+            var changed = false;
+            if (existing.CommercialEventAtUtc != commercialEventAtUtc)
+            {
+                existing.CommercialEventAtUtc = commercialEventAtUtc;
+                existing.ReceivedAtUtc = commercialEventAtUtc;
+                changed = true;
+            }
+
+            if (!string.Equals(existing.ObservationSetCode, observationSetCode, StringComparison.Ordinal))
+            {
+                existing.ObservationSetCode = observationSetCode;
+                changed = true;
+            }
+
+            if (existing.ComparableUnitPrice != comparableUnitPrice)
+            {
+                existing.ComparableUnitPrice = comparableUnitPrice;
+                existing.OriginalUnitPrice = comparableUnitPrice;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             return;
         }
 

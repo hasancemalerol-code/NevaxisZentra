@@ -21,6 +21,7 @@ internal static class CommercialSalesPriceIdempotencyFingerprint
             command.ReferenceWindowDurationDays,
             command.MinimumComparableObservations,
             command.MaximumPositiveVarianceRatio,
+            command.CustomerSpreadThreshold,
             allowedEvidenceStatuses = Normalize(command.AllowedEvidenceStatuses),
             allowedSourceEvidenceKinds = Normalize(command.AllowedSourceEvidenceKinds),
             requiredTaxInclusion = Normalize(command.RequiredTaxInclusion),
@@ -47,6 +48,32 @@ internal static class CommercialSalesPriceIdempotencyFingerprint
             normalizedUnit = Normalize(command.NormalizedUnit),
             windowStartUtc = command.WindowStartUtc,
             windowEndUtc = command.WindowEndUtc,
+            priceBasisGrossNet = Normalize(command.PriceBasisGrossNet),
+            priceBasisTaxInclusion = Normalize(command.PriceBasisTaxInclusion),
+            priceBasisDiscountInclusion = Normalize(command.PriceBasisDiscountInclusion),
+            priceBasisFreightInclusion = Normalize(command.PriceBasisFreightInclusion),
+            sourceProvenance = Normalize(command.SourceProvenance),
+        }, JsonOptions));
+
+    public static string ComputeComparisonFingerprint(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialSalesPriceComparisonCommand command) =>
+        ComputeHex(JsonSerializer.Serialize(new
+        {
+            context.TenantId,
+            context.FacilityId,
+            command.ProfileId,
+            command.ExpectedProfileVersion,
+            comparisonType = Normalize(command.ComparisonType),
+            command.MaterialId,
+            customerReference = Normalize(command.CustomerReference),
+            sourceEvidenceKind = Normalize(command.SourceEvidenceKind),
+            currentWindowStartUtc = command.CurrentWindowStartUtc,
+            currentWindowEndUtc = command.CurrentWindowEndUtc,
+            referenceWindowStartUtc = command.ReferenceWindowStartUtc,
+            referenceWindowEndUtc = command.ReferenceWindowEndUtc,
+            currencyCode = Normalize(command.CurrencyCode),
+            normalizedUnit = Normalize(command.NormalizedUnit),
             priceBasisGrossNet = Normalize(command.PriceBasisGrossNet),
             priceBasisTaxInclusion = Normalize(command.PriceBasisTaxInclusion),
             priceBasisDiscountInclusion = Normalize(command.PriceBasisDiscountInclusion),
