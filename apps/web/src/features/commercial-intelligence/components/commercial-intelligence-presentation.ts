@@ -1,5 +1,6 @@
 import {
   COMMERCIAL_INTELLIGENCE_KPI_ORDER,
+  COMMERCIAL_SALES_PRICE_KPI_ORDER,
   COMMERCIAL_SUPPLIER_COMPARISON_KPI_ORDER,
   getCommercialIntelligenceComparisonTypeLabel,
   getCommercialIntelligenceEvidenceStatusLabel,
@@ -20,14 +21,19 @@ import type {
   CommercialIntelligencePriorityDeviation,
   CommercialIntelligenceSupplierResult,
   CommercialIntelligenceTemporalChartPoint,
+  CommercialSalesPriceAssessmentSummary,
+  CommercialSalesPriceComparisonSummary,
+  CommercialSalesPriceCustomerResult,
 } from "../types/commercial-intelligence-types";
 
 const PILOT_MATERIAL_LABELS: Record<string, string> = {
   "bb000001-00a2-4000-8000-0000000000a2": "PILOT-PP-001 · PP-H110",
   "bb000001-00a3-4000-8000-0000000000a3": "PILOT-PP-002 · Sınır malzemesi",
+  "bb000001-00b4-4000-8000-0000000000b4": "PILOT-SP-001 · Satış malzemesi",
 };
 
 export const COMMERCIAL_INTELLIGENCE_PILOT_MATERIAL_ID = "bb000001-00a2-4000-8000-0000000000a2";
+export const COMMERCIAL_SALES_PRICE_PILOT_MATERIAL_ID = "bb000001-00b4-4000-8000-0000000000b4";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TECHNICAL_RUN_REFERENCE_PATTERN = /^CI-(CMP|ASSESS)-PILOT-/i;
@@ -35,6 +41,9 @@ const TECHNICAL_RUN_REFERENCE_PATTERN = /^CI-(CMP|ASSESS)-PILOT-/i;
 export const COMMERCIAL_INTELLIGENCE_SUPPLIER_COMPARISON_TYPE = "supplier-price-position";
 export const COMMERCIAL_INTELLIGENCE_TEMPORAL_COMPARISON_TYPE = "temporal-price-deviation";
 export const COMMERCIAL_INTELLIGENCE_SUPPLIER_SPREAD_DRIVER = "supplier-price-spread";
+export const COMMERCIAL_SALES_PRICE_TEMPORAL_TYPE = "temporal-sales-price-deviation";
+export const COMMERCIAL_SALES_PRICE_CUSTOMER_POSITION_TYPE = "customer-price-position";
+export const COMMERCIAL_SALES_PRICE_CUSTOMER_SPREAD_DRIVER = "customer-price-spread";
 
 export function localizeCommercialIntelligenceMaterialLabel(materialId: string): string {
   const normalized = materialId.trim().toLowerCase();
@@ -46,6 +55,13 @@ export function localizeCommercialIntelligenceSupplierLabel(
 ): string {
   if (!supplierReference?.trim()) return "Tedarikçi belirtilmedi";
   return supplierReference.trim();
+}
+
+export function localizeCommercialIntelligenceCustomerLabel(
+  customerReference: string | null | undefined,
+): string {
+  if (!customerReference?.trim()) return "Müşteri belirtilmedi";
+  return customerReference.trim();
 }
 
 export function isTechnicalRunReference(value: string | null | undefined): boolean {
@@ -745,4 +761,399 @@ export function buildCommercialSupplierComparisonKpiCards(input: Readonly<{
   };
 
   return COMMERCIAL_SUPPLIER_COMPARISON_KPI_ORDER.map((id) => cards[id]);
+}
+
+export function buildCommercialSalesPriceComparisonSecondaryLabel(
+  comparison: Pick<
+    CommercialSalesPriceComparisonSummary,
+    | "comparisonType"
+    | "materialLabel"
+    | "currentWindowLabel"
+    | "referenceWindowLabel"
+    | "comparableObservationCount"
+  >,
+): string {
+  if (comparison.comparisonType === COMMERCIAL_SALES_PRICE_TEMPORAL_TYPE) {
+    return `${comparison.materialLabel} · ${comparison.referenceWindowLabel} / ${comparison.currentWindowLabel}`;
+  }
+  const customerCount = Math.max(0, Math.floor(comparison.comparableObservationCount / 6));
+  const customerLabel = customerCount > 0
+    ? `${customerCount} karşılaştırılabilir müşteri`
+    : "Müşteri penceresi";
+  return `${comparison.materialLabel} · ${customerLabel} · ${comparison.currentWindowLabel}`;
+}
+
+export function buildCommercialSalesPriceAssessmentSecondaryLabel(
+  assessment: Pick<
+    CommercialSalesPriceAssessmentSummary,
+    "materialLabel" | "customerLabel" | "windowLabel" | "evaluatedLabel"
+  >,
+): string {
+  return `${assessment.materialLabel} · ${assessment.customerLabel} · ${assessment.windowLabel}`;
+}
+
+export function selectLatestCompatibleTemporalSalesComparison(
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): CommercialSalesPriceComparisonSummary | null {
+  const temporalRuns = filterCommercialSalesPriceTemporalComparisons(comparisons);
+  const compatible = temporalRuns.filter(
+    (item) => item.comparableObservationCount > 0
+      && item.comparisonOutcome !== "source-conflict"
+      && item.comparisonOutcome !== "insufficient-data",
+  );
+  return compatible[0] ?? temporalRuns[0] ?? null;
+}
+
+export function selectLatestCompatibleCustomerSalesComparison(
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): CommercialSalesPriceComparisonSummary | null {
+  const customerRuns = filterCommercialSalesPriceCustomerComparisons(comparisons);
+  const compatible = customerRuns.filter(
+    (item) => item.comparableObservationCount > 0
+      && item.comparisonOutcome !== "source-conflict"
+      && item.comparisonOutcome !== "insufficient-data",
+  );
+  return compatible[0] ?? customerRuns[0] ?? null;
+}
+
+export function selectLatestSalesAssessment(
+  assessments: readonly CommercialSalesPriceAssessmentSummary[],
+): CommercialSalesPriceAssessmentSummary | null {
+  const ordered = assessments
+    .slice()
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc));
+  return ordered[0] ?? null;
+}
+
+export function resolveCommercialSalesPriceEvidenceContext(
+  assessments: readonly CommercialSalesPriceAssessmentSummary[],
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): Readonly<{
+  comparableTotal: number;
+  excludedTotal: number;
+  candidateTotal: number;
+  scopeLabel: string;
+  sourceDataset: string;
+  accessibleSummary: string;
+}> {
+  const latestTemporal = selectLatestCompatibleTemporalSalesComparison(comparisons);
+  if (latestTemporal) {
+    return {
+      comparableTotal: latestTemporal.comparableObservationCount,
+      excludedTotal: latestTemporal.excludedObservationCount,
+      candidateTotal: latestTemporal.candidateObservationCount,
+      scopeLabel: "Son dönemsel satış karşılaştırması",
+      sourceDataset: "commercial_sales_price_comparison_runs",
+      accessibleSummary: `${getCommercialIntelligenceComparisonTypeLabel(latestTemporal.comparisonType)}: ${latestTemporal.comparableObservationCount} karşılaştırılabilir, ${latestTemporal.excludedObservationCount} dışlanan gözlem`,
+    };
+  }
+
+  const latestAssessment = selectLatestSalesAssessment(assessments);
+  if (latestAssessment) {
+    return {
+      comparableTotal: latestAssessment.comparableObservationCount,
+      excludedTotal: latestAssessment.excludedObservationCount,
+      candidateTotal: latestAssessment.candidateObservationCount,
+      scopeLabel: "Son satış fiyat analizi",
+      sourceDataset: "commercial_sales_price_assessments",
+      accessibleSummary: `${latestAssessment.materialLabel}: ${latestAssessment.comparableObservationCount} karşılaştırılabilir, ${latestAssessment.excludedObservationCount} dışlanan gözlem`,
+    };
+  }
+
+  return {
+    comparableTotal: 0,
+    excludedTotal: 0,
+    candidateTotal: 0,
+    scopeLabel: "Kanıt bağlamı yok",
+    sourceDataset: "—",
+    accessibleSummary: "Karşılaştırılabilir gözlem bağlamı bulunamadı",
+  };
+}
+
+export function countCustomerSpreadFindings(
+  assessments: readonly CommercialSalesPriceAssessmentSummary[],
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+  customerSpreadThreshold: number | null,
+): number {
+  const assessmentBreaches = assessments.filter(
+    (item) => item.leadingDriverCode === COMMERCIAL_SALES_PRICE_CUSTOMER_SPREAD_DRIVER,
+  ).length;
+  const comparisonBreaches = comparisons.filter((item) => {
+    if (item.leadingDriverCode === COMMERCIAL_SALES_PRICE_CUSTOMER_SPREAD_DRIVER) return true;
+    if (
+      item.comparisonType === COMMERCIAL_SALES_PRICE_CUSTOMER_POSITION_TYPE
+      && customerSpreadThreshold !== null
+      && item.customerSpreadRatio !== null
+      && item.customerSpreadRatio > customerSpreadThreshold
+      && item.comparisonOutcome === "attention"
+    ) {
+      return true;
+    }
+    return false;
+  }).length;
+  return assessmentBreaches + comparisonBreaches;
+}
+
+export function buildCommercialSalesPriceKpiCards(input: Readonly<{
+  assessments: readonly CommercialSalesPriceAssessmentSummary[];
+  comparisons: readonly CommercialSalesPriceComparisonSummary[];
+  customerSpreadThreshold: number | null;
+  comparedCustomerCount?: number;
+}>): CommercialIntelligenceKpiCard[] {
+  const { assessments, comparisons, comparedCustomerCount = 0 } = input;
+  const selectedTemporal = selectLatestCompatibleTemporalSalesComparison(comparisons);
+  const selectedCustomer = selectLatestCompatibleCustomerSalesComparison(comparisons);
+  const selectedAssessment = selectLatestSalesAssessment(assessments);
+
+  const scopeLabel = selectedTemporal
+    ? "Son dönemsel satış karşılaştırması"
+    : selectedAssessment
+      ? "Son satış fiyat analizi"
+      : "Kanıt bağlamı yok";
+  const sourceDataset = selectedTemporal
+    ? "commercial_sales_price_comparison_runs"
+    : selectedAssessment
+      ? "commercial_sales_price_assessments"
+      : "—";
+
+  const evidenceLabel = "Satış fiyat kanıtı";
+  const unavailableValue = "—";
+  const hasEvidenceScope = selectedTemporal !== null || selectedAssessment !== null;
+
+  const comparableTotal = selectedTemporal?.comparableObservationCount
+    ?? selectedAssessment?.comparableObservationCount
+    ?? 0;
+  const excludedTotal = selectedTemporal?.excludedObservationCount
+    ?? selectedAssessment?.excludedObservationCount
+    ?? 0;
+  const candidateTotal = selectedTemporal?.candidateObservationCount
+    ?? selectedAssessment?.candidateObservationCount
+    ?? comparableTotal + excludedTotal;
+
+  const currentMedian = selectedTemporal?.currentMedianUnitPrice ?? selectedAssessment?.currentUnitPrice ?? null;
+  const referenceMedian = selectedTemporal?.referenceMedianUnitPrice ?? selectedAssessment?.referenceMedianUnitPrice ?? null;
+  const currencyCode = selectedTemporal?.currencyCode ?? selectedAssessment?.currencyCode ?? null;
+  const normalizedUnit = selectedTemporal?.normalizedUnit ?? selectedAssessment?.normalizedUnit ?? null;
+
+  const attentionCount = [
+    selectedTemporal?.comparisonOutcome === "attention" ? selectedTemporal : null,
+    selectedCustomer?.comparisonOutcome === "attention" ? selectedCustomer : null,
+    selectedAssessment?.assessmentOutcome === "attention" ? selectedAssessment : null,
+  ].filter(Boolean).length;
+
+  const medianDetail = currencyCode && normalizedUnit
+    ? `${currencyCode} / ${normalizedUnit}`
+    : currencyCode ?? normalizedUnit ?? "Birim bağlamı yok";
+
+  const cards: Record<string, CommercialIntelligenceKpiCard> = {
+    "comparable-sales-evidence": {
+      id: "comparable-sales-evidence",
+      label: "Karşılaştırılabilir satış kanıtı",
+      value: comparableTotal > 0 ? formatCount(comparableTotal) : unavailableValue,
+      detail: "Seçili uyumlu çalıştırmadaki dahil edilen gözlemler",
+      tone: comparableTotal > 0 ? "controlled" : "insufficient",
+      scopeLabel,
+      evidenceLabel,
+      stateBadge: comparableTotal > 0 ? "Aktif" : "Eksik",
+      sourceDataset,
+      accessibleSummary: comparableTotal > 0
+        ? `${scopeLabel}: ${comparableTotal} karşılaştırılabilir gözlem`
+        : "Karşılaştırılabilir satış kanıtı yok",
+    },
+    "excluded-evidence": {
+      id: "excluded-evidence",
+      label: "Hariç tutulan kanıt",
+      value: hasEvidenceScope ? formatCount(excludedTotal) : unavailableValue,
+      detail: "Aynı kanıt bağlamında dışlanan gözlemler",
+      tone: hasEvidenceScope && excludedTotal > 0 ? "attention" : hasEvidenceScope ? "neutral" : "insufficient",
+      scopeLabel,
+      evidenceLabel,
+      stateBadge: hasEvidenceScope ? (excludedTotal > 0 ? "Dışlanan" : "Yok") : "Eksik",
+      sourceDataset,
+      accessibleSummary: `${scopeLabel}: ${excludedTotal} hariç tutulan gözlem; aday ${formatCount(candidateTotal)}`,
+    },
+    "current-median-sales-price": {
+      id: "current-median-sales-price",
+      label: "Güncel medyan satış fiyatı",
+      value: currentMedian !== null ? formatCurrency(currentMedian, currencyCode) : unavailableValue,
+      detail: medianDetail,
+      tone: currentMedian !== null ? "informational" : "insufficient",
+      scopeLabel,
+      evidenceLabel,
+      stateBadge: currentMedian !== null ? "Güncel" : "Yok",
+      sourceDataset,
+      accessibleSummary: currentMedian !== null
+        ? `Güncel medyan ${formatCurrency(currentMedian, currencyCode)}`
+        : "Güncel medyan satış fiyatı mevcut değil",
+    },
+    "reference-median-sales-price": {
+      id: "reference-median-sales-price",
+      label: "Referans medyan satış fiyatı",
+      value: referenceMedian !== null ? formatCurrency(referenceMedian, currencyCode) : unavailableValue,
+      detail: medianDetail,
+      tone: referenceMedian !== null ? "informational" : "insufficient",
+      scopeLabel,
+      evidenceLabel,
+      stateBadge: referenceMedian !== null ? "Referans" : "Yok",
+      sourceDataset,
+      accessibleSummary: referenceMedian !== null
+        ? `Referans medyan ${formatCurrency(referenceMedian, currencyCode)}`
+        : "Referans medyan satış fiyatı mevcut değil",
+    },
+    "attention-deviations": {
+      id: "attention-deviations",
+      label: "Dikkat gerektiren sapmalar",
+      value: attentionCount > 0 ? formatCount(attentionCount) : unavailableValue,
+      detail: "Seçili uyumlu çalıştırmalarda dikkat sonucu",
+      tone: attentionCount > 0 ? "attention" : "controlled",
+      scopeLabel,
+      evidenceLabel,
+      stateBadge: attentionCount > 0 ? "Dikkat" : "Düşük",
+      sourceDataset: "commercial_sales_price_assessments, commercial_sales_price_comparison_runs",
+      accessibleSummary: attentionCount > 0
+        ? `${attentionCount} kayıt dikkat gerektiren sapma bildirdi`
+        : "Seçili bağlamda dikkat gerektiren sapma yok",
+    },
+    "compared-customers": {
+      id: "compared-customers",
+      label: "Karşılaştırılan müşteriler",
+      value: comparedCustomerCount > 0 ? formatCount(comparedCustomerCount) : unavailableValue,
+      detail: selectedCustomer?.materialLabel ?? "Müşteri karşılaştırma çalıştırması",
+      tone: comparedCustomerCount > 0 ? "controlled" : "insufficient",
+      scopeLabel: selectedCustomer ? "Son müşteri karşılaştırması" : "Müşteri bağlamı yok",
+      evidenceLabel,
+      stateBadge: comparedCustomerCount > 0 ? "Sıralı" : "Eksik",
+      sourceDataset: "commercial_sales_price_comparison_runs",
+      accessibleSummary: comparedCustomerCount > 0
+        ? `${comparedCustomerCount} müşteri karşılaştırılabilir medyan ile sıralandı`
+        : "Karşılaştırılan müşteri yok",
+    },
+  };
+
+  return COMMERCIAL_SALES_PRICE_KPI_ORDER.map((id) => cards[id]);
+}
+
+export function buildCommercialSalesPriceTemporalChartData(
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): Readonly<{
+  points: readonly CommercialIntelligenceTemporalChartPoint[];
+  unavailableReason: string | null;
+}> {
+  const temporal = filterCommercialSalesPriceTemporalComparisons(comparisons).slice(0, 6);
+
+  if (temporal.length === 0) {
+    return {
+      points: [],
+      unavailableReason: "Karşılaştırılabilir dönemsel satış sapma çalıştırması yok",
+    };
+  }
+
+  const points = temporal.map((item) => ({
+    id: item.id,
+    label: buildCommercialSalesPriceComparisonSecondaryLabel(item),
+    primaryLabel: getCommercialIntelligenceComparisonTypeLabel(item.comparisonType),
+    secondaryLabel: buildCommercialSalesPriceComparisonSecondaryLabel(item),
+    traceReference: item.comparisonReference,
+    currentMedian: item.currentMedianUnitPrice,
+    referenceMedian: item.referenceMedianUnitPrice,
+    signedVarianceRatio: item.signedVarianceRatio,
+    signedVarianceLabel: item.signedVarianceLabel,
+    outcome: item.comparisonOutcome,
+    outcomeLabel: item.outcomeLabel,
+    currencyCode: item.currencyCode,
+    normalizedUnit: item.normalizedUnit,
+  }));
+
+  return { points, unavailableReason: null };
+}
+
+export function buildCommercialSalesPriceCustomerPositionRows(
+  customerResults: readonly CommercialSalesPriceCustomerResult[],
+): readonly CommercialSalesPriceCustomerResult[] {
+  return [...customerResults].sort((left, right) => {
+    if (left.priceRank !== right.priceRank) return left.priceRank - right.priceRank;
+    return left.customerLabel.localeCompare(right.customerLabel, "tr");
+  });
+}
+
+export function reconcileCommercialSalesPriceCustomerSpread(
+  rows: readonly CommercialSalesPriceCustomerResult[],
+  spreadRatio: number | null | undefined,
+): string {
+  if (!rows.length) return "—";
+  const medians = rows
+    .map((row) => row.customerMedianUnitPrice)
+    .filter((value): value is number => value !== null && !Number.isNaN(value));
+  if (medians.length < 2) {
+    return spreadRatio === null || spreadRatio === undefined
+      ? "Tek müşteri — yayılım hesaplanamaz"
+      : formatRatioAsPercent(spreadRatio);
+  }
+  const min = Math.min(...medians);
+  const max = Math.max(...medians);
+  const computed = min > 0 ? (max - min) / min : null;
+  if (spreadRatio !== null && spreadRatio !== undefined && computed !== null) {
+    const delta = Math.abs(spreadRatio - computed);
+    if (delta > 0.0001) {
+      return `${formatRatioAsPercent(spreadRatio)} (medyan aralığı: ${formatRatioAsPercent(computed)})`;
+    }
+  }
+  return formatRatioAsPercent(spreadRatio ?? computed);
+}
+
+export function mapCommercialSalesPriceCustomerResult(input: Readonly<{
+  id: string;
+  customerReference: string | null;
+  comparableObservationCount: number;
+  customerMedianUnitPrice: number | null;
+  lowestComparableMedianUnitPrice: number | null;
+  relativePricePositionRatio: number | null;
+  priceRank: number;
+  isTied: boolean;
+  positionState: string;
+  evidenceStatus: string;
+}>, currencyCode: string): CommercialSalesPriceCustomerResult {
+  return {
+    id: input.id,
+    customerReference: input.customerReference,
+    customerLabel: localizeCommercialIntelligenceCustomerLabel(input.customerReference),
+    comparableObservationCount: input.comparableObservationCount,
+    customerMedianUnitPrice: input.customerMedianUnitPrice,
+    customerMedianLabel: formatCurrency(input.customerMedianUnitPrice, currencyCode),
+    lowestComparableMedianUnitPrice: input.lowestComparableMedianUnitPrice,
+    relativePricePositionRatio: input.relativePricePositionRatio,
+    relativePositionLabel: formatRatioAsPercent(input.relativePricePositionRatio),
+    priceRank: input.priceRank,
+    isTied: input.isTied,
+    positionState: input.positionState,
+    positionStateLabel: getCommercialIntelligencePositionStateLabel(input.positionState),
+    evidenceStatus: input.evidenceStatus,
+    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel(input.evidenceStatus),
+  };
+}
+
+export function filterCommercialSalesPriceTemporalComparisons(
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): CommercialSalesPriceComparisonSummary[] {
+  return comparisons
+    .filter((item) => item.comparisonType === COMMERCIAL_SALES_PRICE_TEMPORAL_TYPE)
+    .slice()
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc));
+}
+
+export function filterCommercialSalesPriceCustomerComparisons(
+  comparisons: readonly CommercialSalesPriceComparisonSummary[],
+): CommercialSalesPriceComparisonSummary[] {
+  return comparisons
+    .filter((item) => item.comparisonType === COMMERCIAL_SALES_PRICE_CUSTOMER_POSITION_TYPE)
+    .slice()
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc));
+}
+
+export function isCompatibleCustomerSalesComparison(
+  comparison: CommercialSalesPriceComparisonSummary,
+): boolean {
+  return comparison.comparableObservationCount > 0
+    && comparison.comparisonOutcome !== "source-conflict"
+    && comparison.comparisonOutcome !== "insufficient-data";
 }

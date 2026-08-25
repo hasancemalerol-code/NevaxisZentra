@@ -19,10 +19,12 @@ import { resolveCommercialIntelligenceRequestContext } from "./commercial-intell
 
 const PURCHASE_PRICE_ROUTE_PATH = "/ticari-zeka/satin-alma-fiyat-analizi";
 const SUPPLIER_COMPARISON_ROUTE_PATH = "/ticari-zeka/tedarikci-karsilastirmasi";
+const SALES_PRICE_ROUTE_PATH = "/ticari-zeka/satis-fiyat-analizi";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
   revalidatePath(SUPPLIER_COMPARISON_ROUTE_PATH);
+  revalidatePath(SALES_PRICE_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -199,6 +201,96 @@ export async function evaluateCommercialIntelligenceComparisonAction(input: Read
   if (resolved.status === "failure") return resolved;
 
   const result = await evaluateCommercialIntelligenceComparison(resolved.context, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "idempotency-conflict" || result.code === "concurrency-conflict"
+        ? "Karşılaştırma çakıştı. Aynı anahtar farklı yük ile kullanılamaz veya kayıt güncellendi."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function refreshCommercialSalesPriceWorkspaceAction(
+  assessmentId?: string | null,
+  comparisonId?: string | null,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialSalesPriceWorkspace } = await import("./commercial-sales-price-queries");
+  const result = await readCommercialSalesPriceWorkspace(assessmentId, comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadCommercialSalesPriceAssessmentDetailAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialSalesPriceAssessmentDetail } = await import("./commercial-sales-price-queries");
+  const result = await readCommercialSalesPriceAssessmentDetail(assessmentId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function loadCommercialSalesPriceComparisonDetailAction(comparisonId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialSalesPriceComparisonDetail } = await import("./commercial-sales-price-queries");
+  const result = await readCommercialSalesPriceComparisonDetail(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function evaluateCommercialSalesPriceComparisonAction(input: Readonly<{
+  profileId: string;
+  expectedProfileVersion: number;
+  comparisonType: string;
+  materialId: string;
+  customerReference?: string | null;
+  sourceEvidenceKind: string;
+  currentWindowStartUtc: string;
+  currentWindowEndUtc: string;
+  referenceWindowStartUtc?: string | null;
+  referenceWindowEndUtc?: string | null;
+  currencyCode: string;
+  normalizedUnit: string;
+  priceBasisGrossNet: string;
+  priceBasisTaxInclusion: string;
+  priceBasisDiscountInclusion: string;
+  priceBasisFreightInclusion: string;
+  sourceProvenance: string;
+  idempotencyKey: string;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { evaluateCommercialSalesPriceComparison } = await import("./commercial-sales-price-api-client");
+  const result = await evaluateCommercialSalesPriceComparison(resolved.context, input);
   if (result.status === "failure") {
     return {
       status: "failure" as const,

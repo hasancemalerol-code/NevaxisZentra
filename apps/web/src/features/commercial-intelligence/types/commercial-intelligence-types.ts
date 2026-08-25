@@ -9,6 +9,12 @@ export type CommercialSupplierComparisonTabId =
   | "ranking"
   | "history";
 
+export type CommercialSalesPriceTabId =
+  | "overview"
+  | "temporal"
+  | "customers"
+  | "history";
+
 export type CommercialIntelligenceKpiTone =
   | "critical"
   | "attention"
@@ -294,6 +300,265 @@ export type CommercialIntelligenceWorkspacePayload = Readonly<{
   assessments: readonly CommercialIntelligenceAssessmentSummary[];
   comparisons: readonly CommercialIntelligenceComparisonSummary[];
   profiles: readonly CommercialIntelligenceProfileSummary[];
+}>;
+
+export type CommercialSalesPriceCustomerResult = Readonly<{
+  id: string;
+  customerReference: string | null;
+  customerLabel: string;
+  comparableObservationCount: number;
+  customerMedianUnitPrice: number | null;
+  customerMedianLabel: string;
+  lowestComparableMedianUnitPrice: number | null;
+  relativePricePositionRatio: number | null;
+  relativePositionLabel: string;
+  priceRank: number;
+  isTied: boolean;
+  positionState: string;
+  positionStateLabel: string;
+  evidenceStatus: string;
+  evidenceLabel: string;
+}>;
+
+export type CommercialSalesPriceAssessmentSummary = Readonly<{
+  id: string;
+  assessmentReference: string;
+  profileId: string;
+  profileCode: string;
+  materialId: string;
+  materialLabel: string;
+  customerReference: string | null;
+  customerLabel: string;
+  sourceEvidenceKind: string;
+  sourceEvidenceLabel: string;
+  comparisonDimension: string;
+  comparisonDimensionLabel: string;
+  assessmentOutcome: string;
+  outcomeLabel: string;
+  currentUnitPrice: number;
+  referenceMedianUnitPrice: number | null;
+  varianceRatio: number | null;
+  varianceLabel: string;
+  candidateObservationCount: number;
+  comparableObservationCount: number;
+  excludedObservationCount: number;
+  currencyCode: string;
+  normalizedUnit: string;
+  windowStartUtc: string;
+  windowEndUtc: string;
+  windowLabel: string;
+  leadingDriverCode: string | null;
+  leadingDriverLabel: string;
+  evidenceStatus: string;
+  evidenceLabel: string;
+  ruleSetVersion: string;
+  evaluatedAtUtc: string;
+  evaluatedLabel: string;
+  isPilotData: boolean;
+}>;
+
+export type CommercialSalesPriceAssessmentDriver = Readonly<{
+  id: string;
+  reasonCode: string;
+  reasonLabel: string;
+  severity: string;
+  severityLabel: string;
+  actualValue: number | null;
+  thresholdValue: number | null;
+  unit: string | null;
+  normalizedVariance: number | null;
+  normalizedVarianceLabel: string;
+  affectedObservationCount: number;
+  supportingText: string;
+  sortOrder: number;
+  isLeadingDriver: boolean;
+}>;
+
+export type CommercialSalesPriceAssessmentDetail = Readonly<{
+  summary: CommercialSalesPriceAssessmentSummary;
+  absoluteVariance: number | null;
+  priceBasisGrossNet: string;
+  priceBasisGrossNetLabel: string;
+  priceBasisTaxInclusion: string;
+  priceBasisTaxLabel: string;
+  priceBasisDiscountInclusion: string;
+  priceBasisDiscountLabel: string;
+  priceBasisFreightInclusion: string;
+  priceBasisFreightLabel: string;
+  sourceProvenance: string;
+  drivers: readonly CommercialSalesPriceAssessmentDriver[];
+  exclusionReasons: readonly string[];
+}>;
+
+export type CommercialSalesPriceComparisonSummary = Readonly<{
+  id: string;
+  comparisonReference: string;
+  profileId: string;
+  profileCode: string;
+  comparisonType: string;
+  comparisonTypeLabel: string;
+  materialId: string;
+  materialLabel: string;
+  customerReference: string | null;
+  customerLabel: string;
+  comparisonOutcome: string;
+  outcomeLabel: string;
+  currentMedianUnitPrice: number | null;
+  referenceMedianUnitPrice: number | null;
+  signedVarianceRatio: number | null;
+  signedVarianceLabel: string;
+  customerSpreadRatio: number | null;
+  customerSpreadLabel: string;
+  candidateObservationCount: number;
+  comparableObservationCount: number;
+  excludedObservationCount: number;
+  currencyCode: string;
+  normalizedUnit: string;
+  currentWindowStartUtc: string;
+  currentWindowEndUtc: string;
+  currentWindowLabel: string;
+  referenceWindowStartUtc: string | null;
+  referenceWindowEndUtc: string | null;
+  referenceWindowLabel: string;
+  leadingDriverCode: string | null;
+  leadingDriverLabel: string;
+  evidenceStatus: string;
+  evidenceLabel: string;
+  ruleSetVersion: string;
+  evaluatedAtUtc: string;
+  evaluatedLabel: string;
+  isPilotData: boolean;
+}>;
+
+export type CommercialSalesPriceComparisonDriver = Readonly<{
+  id: string;
+  comparisonResultId: string | null;
+  reasonCode: string;
+  reasonLabel: string;
+  severity: string;
+  severityLabel: string;
+  actualValue: number | null;
+  referenceValue: number | null;
+  thresholdValue: number | null;
+  unit: string | null;
+  normalizedVariance: number | null;
+  normalizedVarianceLabel: string;
+  affectedObservationCount: number;
+  supportingText: string;
+  sortOrder: number;
+  isLeadingDriver: boolean;
+}>;
+
+export type CommercialSalesPriceComparisonDetail = Readonly<{
+  summary: CommercialSalesPriceComparisonSummary;
+  profileVersion: string;
+  sourceEvidenceKind: string;
+  sourceEvidenceLabel: string;
+  priceBasisGrossNet: string;
+  priceBasisGrossNetLabel: string;
+  priceBasisTaxInclusion: string;
+  priceBasisTaxLabel: string;
+  priceBasisDiscountInclusion: string;
+  priceBasisDiscountLabel: string;
+  priceBasisFreightInclusion: string;
+  priceBasisFreightLabel: string;
+  sourceProvenance: string;
+  customerResults: readonly CommercialSalesPriceCustomerResult[];
+  drivers: readonly CommercialSalesPriceComparisonDriver[];
+}>;
+
+export type CommercialSalesPriceProfileSummary = Readonly<{
+  id: string;
+  profileCode: string;
+  displayName: string;
+  status: string;
+  statusLabel: string;
+  comparisonDimension: string;
+  comparisonDimensionLabel: string;
+  referenceWindowDurationDays: number;
+  minimumComparableObservations: number;
+  maximumPositiveVarianceRatio: number;
+  maximumPositiveVarianceLabel: string;
+  customerSpreadThreshold: number | null;
+  customerSpreadThresholdLabel: string;
+  allowedEvidenceStatuses: string;
+  allowedEvidenceLabels: readonly string[];
+  allowedSourceEvidenceKinds: string;
+  allowedSourceEvidenceLabels: readonly string[];
+  requiredTaxInclusion: string;
+  requiredTaxLabel: string;
+  requiredDiscountInclusion: string;
+  requiredDiscountLabel: string;
+  requiredFreightInclusion: string;
+  requiredFreightLabel: string;
+  requiredGrossNetBasis: string;
+  requiredGrossNetLabel: string;
+  referenceCenter: string;
+  ruleSetVersion: string;
+  sourceProvenance: string;
+  version: number;
+  isExecutable: boolean;
+  isPilotData: boolean;
+  compatibilitySummary: string;
+}>;
+
+export type CommercialSalesPriceWorkspacePayload = Readonly<{
+  facilityLabel: string;
+  reportingPeriodLabel: string;
+  freshnessLabel: string;
+  evidenceLabel: string;
+  provenanceDisclaimer: string;
+  ruleSetVersion: string;
+  referenceCenter: string;
+  defaultMinimumComparableObservations: number;
+  hasDevelopmentPilotData: boolean;
+  realTransactionMappingComplete: boolean;
+  customerSpreadThreshold: number | null;
+  customerSpreadThresholdLabel: string;
+  selectedTemporalComparisonId: string | null;
+  selectedCustomerComparisonId: string | null;
+  kpis: readonly CommercialIntelligenceKpiCard[];
+  temporalChart: Readonly<{
+    points: readonly CommercialIntelligenceTemporalChartPoint[];
+    unavailableReason: string | null;
+  }>;
+  temporalComparison: Readonly<{
+    comparisonId: string | null;
+    comparisonReference: string | null;
+    primaryLabel: string | null;
+    secondaryLabel: string | null;
+    outcomeLabel: string | null;
+    signedVarianceLabel: string | null;
+    comparableObservationCount: number;
+    excludedObservationCount: number;
+    candidateObservationCount: number;
+    currencyCode: string | null;
+    normalizedUnit: string | null;
+    evaluatedLabel: string | null;
+    unavailableReason: string | null;
+  }>;
+  customerComparison: Readonly<{
+    rows: readonly CommercialSalesPriceCustomerResult[];
+    spreadLabel: string;
+    comparisonId: string | null;
+    comparisonReference: string | null;
+    primaryLabel: string | null;
+    secondaryLabel: string | null;
+    materialLabel: string | null;
+    outcomeLabel: string | null;
+    comparableObservationCount: number;
+    excludedObservationCount: number;
+    candidateObservationCount: number;
+    currencyCode: string | null;
+    normalizedUnit: string | null;
+    evaluatedLabel: string | null;
+    leadingDriverLabel: string | null;
+    isCompatibleSelection: boolean;
+    unavailableReason: string | null;
+  }>;
+  assessments: readonly CommercialSalesPriceAssessmentSummary[];
+  comparisons: readonly CommercialSalesPriceComparisonSummary[];
+  profiles: readonly CommercialSalesPriceProfileSummary[];
 }>;
 
 export type CommercialSupplierComparisonWorkspacePayload = Readonly<{
