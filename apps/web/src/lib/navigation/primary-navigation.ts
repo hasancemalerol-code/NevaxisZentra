@@ -182,6 +182,8 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Satış Fiyat Analizi",
         href: "/ticari-zeka/satis-fiyat-analizi",
         iconKey: "badge-dollar-sign",
+        permissionKey: "commercial-intelligence.read",
+        subscriptionModulePath: "/ticari-zeka",
       },
       {
         label: "Ürün Kârlılığı",

@@ -46,23 +46,25 @@ export async function resolvePermissionAwareNavigation(): Promise<readonly Seria
     fetchCurrentTenantSubscription(),
   ]);
 
-  return primaryNavigation.map((group) => ({
-    label: group.label,
-    items: group.items
-      .filter((item) => {
-        if (item.permissionKey && !hasGrantedPermission(access, item.permissionKey)) {
-          return false;
-        }
+  return primaryNavigation
+    .map((group) => ({
+      label: group.label,
+      items: group.items
+        .filter((item) => {
+          if (item.permissionKey && !hasGrantedPermission(access, item.permissionKey)) {
+            return false;
+          }
 
-        const modulePath = item.subscriptionModulePath ?? item.href;
-        if (item.subscriptionModulePath || resolveEntitlementCodeFromPath(item.href)) {
-          return hasSubscriptionModuleAccess(modulePath, subscription);
-        }
+          const modulePath = item.subscriptionModulePath ?? item.href;
+          if (item.subscriptionModulePath || resolveEntitlementCodeFromPath(item.href)) {
+            return hasSubscriptionModuleAccess(modulePath, subscription);
+          }
 
-        return true;
-      })
-      .map(toSerializableItem),
-  }));
+          return true;
+        })
+        .map(toSerializableItem),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 export type { ShellSearchItem } from "@/components/app-shell/shell-types";
