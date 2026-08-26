@@ -1500,4 +1500,111 @@ public static class DevelopmentPilotIds
 
     public static readonly DateTimeOffset CommercialSalesPriceComparisonPilotCustomerWindowEndUtc =
         new(2026, 10, 24, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly Guid CommercialQuotationRiskPilotProfileId =
+        Guid.Parse("bb000001-0280-4000-8000-000000000280");
+
+    public const string CommercialQuotationRiskPilotProfileCode = "COMMQUOTE1-PILOT-QRP";
+
+    public static readonly DateTimeOffset CommercialQuotationRiskPilotSeedTimeUtc =
+        new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialQuotationRiskPilotReferenceWindowStartUtc =
+        new(2026, 2, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialQuotationRiskPilotReferenceWindowEndUtc =
+        new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialWithinThresholdId =
+        Guid.Parse("bb000001-0281-4000-8000-000000000281");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialBelowReferenceId =
+        Guid.Parse("bb000001-0282-4000-8000-000000000282");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialAboveReferenceId =
+        Guid.Parse("bb000001-0283-4000-8000-000000000283");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialExpiringSoonId =
+        Guid.Parse("bb000001-0284-4000-8000-000000000284");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialExpiredId =
+        Guid.Parse("bb000001-0285-4000-8000-000000000285");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialPaymentExceededId =
+        Guid.Parse("bb000001-0286-4000-8000-000000000286");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialInsufficientId =
+        Guid.Parse("bb000001-0287-4000-8000-000000000287");
+
+    public static readonly Guid CommercialQuotationRiskPilotMaterialSourceConflictId =
+        Guid.Parse("bb000001-0288-4000-8000-000000000288");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceWithinThresholdId =
+        Guid.Parse("bb000001-0291-4000-8000-000000000291");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceBelowReferenceId =
+        Guid.Parse("bb000001-0292-4000-8000-000000000292");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceAboveReferenceId =
+        Guid.Parse("bb000001-0293-4000-8000-000000000293");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceExpiringSoonId =
+        Guid.Parse("bb000001-0294-4000-8000-000000000294");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceExpiredId =
+        Guid.Parse("bb000001-0295-4000-8000-000000000295");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidencePaymentExceededId =
+        Guid.Parse("bb000001-0296-4000-8000-000000000296");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceInsufficientId =
+        Guid.Parse("bb000001-0297-4000-8000-000000000297");
+
+    public static readonly Guid CommercialQuotationRiskPilotEvidenceSourceConflictId =
+        Guid.Parse("bb000001-0298-4000-8000-000000000298");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentWithinThresholdId =
+        Guid.Parse("bb000001-02a1-4000-8000-0000000002a1");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentBelowReferenceId =
+        Guid.Parse("bb000001-02a2-4000-8000-0000000002a2");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentAboveReferenceId =
+        Guid.Parse("bb000001-02a3-4000-8000-0000000002a3");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentExpiringSoonId =
+        Guid.Parse("bb000001-02a4-4000-8000-0000000002a4");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentExpiredId =
+        Guid.Parse("bb000001-02a5-4000-8000-0000000002a5");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentPaymentExceededId =
+        Guid.Parse("bb000001-02a6-4000-8000-0000000002a6");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentInsufficientId =
+        Guid.Parse("bb000001-02a7-4000-8000-0000000002a7");
+
+    public static readonly Guid CommercialQuotationRiskPilotAssessmentSourceConflictId =
+        Guid.Parse("bb000001-02a8-4000-8000-0000000002a8");
+
+    public static readonly IReadOnlySet<Guid> CommercialQuotationRiskPilotAssessmentIds = new HashSet<Guid>
+    {
+        CommercialQuotationRiskPilotAssessmentWithinThresholdId,
+        CommercialQuotationRiskPilotAssessmentBelowReferenceId,
+        CommercialQuotationRiskPilotAssessmentAboveReferenceId,
+        CommercialQuotationRiskPilotAssessmentExpiringSoonId,
+        CommercialQuotationRiskPilotAssessmentExpiredId,
+        CommercialQuotationRiskPilotAssessmentPaymentExceededId,
+        CommercialQuotationRiskPilotAssessmentInsufficientId,
+        CommercialQuotationRiskPilotAssessmentSourceConflictId,
+    };
+
+    public const string CommercialQuotationRiskPilotCustomerWithin = "COMMQUOTE1-CUST-WITHIN";
+    public const string CommercialQuotationRiskPilotCustomerBelow = "COMMQUOTE1-CUST-BELOW";
+    public const string CommercialQuotationRiskPilotCustomerAbove = "COMMQUOTE1-CUST-ABOVE";
+    public const string CommercialQuotationRiskPilotCustomerExpiring = "COMMQUOTE1-CUST-EXPIRING";
+    public const string CommercialQuotationRiskPilotCustomerExpired = "COMMQUOTE1-CUST-EXPIRED";
+    public const string CommercialQuotationRiskPilotCustomerPayment = "COMMQUOTE1-CUST-PAYMENT";
+    public const string CommercialQuotationRiskPilotCustomerInsufficient = "COMMQUOTE1-CUST-INSUFFICIENT";
+    public const string CommercialQuotationRiskPilotCustomerConflict = "COMMQUOTE1-CUST-CONFLICT";
 }
