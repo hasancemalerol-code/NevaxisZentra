@@ -21,12 +21,14 @@ const PURCHASE_PRICE_ROUTE_PATH = "/ticari-zeka/satin-alma-fiyat-analizi";
 const SUPPLIER_COMPARISON_ROUTE_PATH = "/ticari-zeka/tedarikci-karsilastirmasi";
 const SALES_PRICE_ROUTE_PATH = "/ticari-zeka/satis-fiyat-analizi";
 const QUOTATION_RISK_ROUTE_PATH = "/ticari-zeka/teklif-riskleri";
+const PROFITABILITY_ROUTE_PATH = "/ticari-zeka/urun-karliligi";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
   revalidatePath(SUPPLIER_COMPARISON_ROUTE_PATH);
   revalidatePath(SALES_PRICE_ROUTE_PATH);
   revalidatePath(QUOTATION_RISK_ROUTE_PATH);
+  revalidatePath(PROFITABILITY_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -400,4 +402,38 @@ export async function updateCommercialQuotationRiskProfileAction(input: Readonly
     version: result.value.version,
     idempotentReplay: result.value.idempotentReplay,
   };
+}
+
+export async function refreshCommercialProfitabilityWorkspaceAction(
+  comparisonId?: string | null,
+  filters?: import("./commercial-profitability-queries").CommercialProfitabilityComparisonApiFilters,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialProfitabilityWorkspace } = await import("./commercial-profitability-queries");
+  const result = await readCommercialProfitabilityWorkspace(comparisonId, filters);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadCommercialProfitabilityComparisonDetailAction(comparisonId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialProfitabilityComparisonDetail } = await import("./commercial-profitability-queries");
+  const result = await readCommercialProfitabilityComparisonDetail(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
 }
