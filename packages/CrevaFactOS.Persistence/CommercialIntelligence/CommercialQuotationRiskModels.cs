@@ -12,6 +12,7 @@ public sealed record CommercialQuotationRiskProfileReadModel(
     int MaximumPaymentTermDays,
     int ExpiryWarningDays,
     int MaximumEvidenceAgeDays,
+    decimal MaximumRiskIncidenceDelta,
     string AllowedEvidenceStatuses,
     string AllowedSalesEvidenceKinds,
     string RequiredTaxInclusion,
@@ -166,6 +167,132 @@ public sealed record CommercialQuotationRiskAssessmentListFilters(
     int Page,
     int PageSize);
 
+public sealed record CommercialQuotationRiskComparisonSummaryReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string ComparisonOutcome,
+    string EvidenceStatus,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    decimal? ReferenceRiskIncidence,
+    decimal? CurrentRiskIncidence,
+    decimal? RiskIncidenceDelta,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    bool IsPilotData);
+
+public sealed record CommercialQuotationRiskComparisonResultReadModel(
+    Guid Id,
+    string CustomerReference,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    int RiskBearingAssessmentCount,
+    decimal? RiskIncidenceFraction,
+    int PriceRiskCount,
+    int ExpiryRiskCount,
+    int PaymentTermRiskCount,
+    string PositionState,
+    int? RiskRank,
+    bool IsTied,
+    string EvidenceStatus);
+
+public sealed record CommercialQuotationRiskComparisonDriverReadModel(
+    Guid Id,
+    Guid? ComparisonResultId,
+    string ReasonCode,
+    string Severity,
+    decimal? ActualValue,
+    decimal? ReferenceValue,
+    decimal? ThresholdValue,
+    string? Unit,
+    decimal? NormalizedVariance,
+    int AffectedAssessmentCount,
+    string SupportingText,
+    int SortOrder,
+    bool IsLeadingDriver);
+
+public sealed record CommercialQuotationRiskComparisonDetailReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    int RiskBearingAssessmentCount,
+    int InsufficientDataCount,
+    int SourceConflictCount,
+    int PriceRiskCount,
+    int ExpiryRiskCount,
+    int PaymentTermRiskCount,
+    int? ReferenceCandidateAssessmentCount,
+    int? ReferenceComparableAssessmentCount,
+    int? ReferenceExcludedAssessmentCount,
+    int? ReferenceRiskBearingAssessmentCount,
+    int? CurrentCandidateAssessmentCount,
+    int? CurrentComparableAssessmentCount,
+    int? CurrentExcludedAssessmentCount,
+    int? CurrentRiskBearingAssessmentCount,
+    decimal? ReferenceRiskIncidence,
+    decimal? CurrentRiskIncidence,
+    decimal? RiskIncidenceDelta,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    string EvidenceStatus,
+    string ComparisonOutcome,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    string SourceProvenance,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    IReadOnlyList<CommercialQuotationRiskComparisonResultReadModel> CustomerResults,
+    IReadOnlyList<CommercialQuotationRiskComparisonDriverReadModel> Drivers,
+    bool IsPilotData);
+
+public sealed record EvaluateCommercialQuotationRiskComparisonCommand(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+public sealed record CommercialQuotationRiskComparisonListFilters(
+    string? ComparisonType,
+    Guid? ProfileId,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string? Outcome,
+    string? EvidenceStatus,
+    DateTimeOffset? WindowFromUtc,
+    DateTimeOffset? WindowToUtc,
+    int Page,
+    int PageSize);
+
 public sealed class CommercialQuotationRiskWriteResult
 {
     public bool Succeeded { get; init; }
@@ -175,12 +302,14 @@ public sealed class CommercialQuotationRiskWriteResult
     public string? FailureCode { get; init; }
     public string? FailureReason { get; init; }
     public CommercialQuotationRiskAssessmentDetailReadModel? Assessment { get; init; }
+    public CommercialQuotationRiskComparisonDetailReadModel? Comparison { get; init; }
 
     public static CommercialQuotationRiskWriteResult Success(
         Guid entityId,
         uint version,
         bool idempotentReplay = false,
-        CommercialQuotationRiskAssessmentDetailReadModel? assessment = null) =>
+        CommercialQuotationRiskAssessmentDetailReadModel? assessment = null,
+        CommercialQuotationRiskComparisonDetailReadModel? comparison = null) =>
         new()
         {
             Succeeded = true,
@@ -188,6 +317,7 @@ public sealed class CommercialQuotationRiskWriteResult
             Version = version,
             IdempotentReplay = idempotentReplay,
             Assessment = assessment,
+            Comparison = comparison,
         };
 
     public static CommercialQuotationRiskWriteResult Fail(string code, string reason) =>
@@ -238,5 +368,20 @@ public interface ICommercialQuotationRiskRepository
     Task<CommercialQuotationRiskWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialQuotationRiskAssessmentCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CommercialQuotationRiskComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialQuotationRiskComparisonListFilters filters,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialQuotationRiskComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialQuotationRiskWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialQuotationRiskComparisonCommand command,
         CancellationToken cancellationToken = default);
 }

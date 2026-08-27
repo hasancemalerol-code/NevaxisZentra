@@ -24,6 +24,7 @@ internal sealed class CommercialQuotationRiskProfileEntityConfiguration : IEntit
         entity.Property(p => p.MaximumPaymentTermDays).HasColumnName("maximum_payment_term_days");
         entity.Property(p => p.ExpiryWarningDays).HasColumnName("expiry_warning_days");
         entity.Property(p => p.MaximumEvidenceAgeDays).HasColumnName("maximum_evidence_age_days");
+        entity.Property(p => p.MaximumRiskIncidenceDelta).HasColumnName("maximum_risk_incidence_delta").HasPrecision(18, 6);
         entity.Property(p => p.AllowedEvidenceStatuses).HasColumnName("allowed_evidence_statuses").HasMaxLength(200).IsRequired();
         entity.Property(p => p.AllowedSalesEvidenceKinds).HasColumnName("allowed_sales_evidence_kinds").HasMaxLength(200).IsRequired();
         entity.Property(p => p.RequiredTaxInclusion).HasColumnName("required_tax_inclusion").HasMaxLength(20).IsRequired();

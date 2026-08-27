@@ -21,6 +21,9 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
         group.MapGet("/assessments", ListAssessmentsAsync);
         group.MapGet("/assessments/{assessmentId:guid}", GetAssessmentAsync);
         group.MapPost("/assessments/evaluate", EvaluateAssessmentAsync);
+        group.MapGet("/comparisons", ListComparisonsAsync);
+        group.MapGet("/comparisons/{comparisonRunId:guid}", GetComparisonAsync);
+        group.MapPost("/comparisons/evaluate", EvaluateComparisonAsync);
 
         return endpoints;
     }
@@ -49,6 +52,7 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
             defaultMaximumPaymentTermDays = workspace.DefaultMaximumPaymentTermDays,
             defaultExpiryWarningDays = workspace.DefaultExpiryWarningDays,
             realQuotationMappingComplete = workspace.RealQuotationMappingComplete,
+            comparisonRuleSetVersion = CommercialIntelligenceConstants.QuotationRiskComparisonRuleSetVersion,
             capabilities = new { canRead = workspace.CanRead, canManage = workspace.CanManage },
         });
     }
@@ -225,6 +229,103 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
         return MapWriteResult(result, isCreate: true);
     }
 
+    private static async Task<IResult> ListComparisonsAsync(
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? comparisonType,
+        [FromQuery] Guid? profileId,
+        [FromQuery] Guid? materialId,
+        [FromQuery] string? customerReference,
+        [FromQuery] string? outcome,
+        [FromQuery] string? evidenceStatus,
+        [FromQuery] DateTimeOffset? windowFromUtc,
+        [FromQuery] DateTimeOffset? windowToUtc,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        IFacilityAccessResolver facilityAccessResolver = null!,
+        ICommercialQuotationRiskRepository repository = null!,
+        CorrelationContext correlationContext = null!,
+        CancellationToken cancellationToken = default)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparisons = await repository.ListComparisonsAsync(
+            context,
+            new CommercialQuotationRiskComparisonListFilters(
+                comparisonType,
+                profileId,
+                materialId,
+                customerReference,
+                outcome,
+                evidenceStatus,
+                windowFromUtc,
+                windowToUtc,
+                page,
+                pageSize),
+            cancellationToken);
+
+        return TypedResults.Ok(new
+        {
+            items = comparisons.Select(MapComparisonSummary),
+            page,
+            pageSize,
+            ruleSetVersion = CommercialIntelligenceConstants.QuotationRiskComparisonRuleSetVersion,
+            realQuotationMappingComplete = false,
+        });
+    }
+
+    private static async Task<IResult> GetComparisonAsync(
+        Guid comparisonRunId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialQuotationRiskRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparison = await repository.GetComparisonByIdAsync(context, comparisonRunId, cancellationToken);
+        return comparison is null
+            ? CommercialIntelligenceEndpointHelpers.MapFailure(
+                CommercialIntelligenceFailureCodes.NotFound,
+                "Quotation risk comparison not found.")
+            : TypedResults.Ok(MapComparisonDetail(comparison));
+    }
+
+    private static async Task<IResult> EvaluateComparisonAsync(
+        [FromQuery] Guid? facilityId,
+        [FromBody] EvaluateCommercialQuotationRiskComparisonRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialQuotationRiskRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveManageAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.EvaluateComparisonAsync(
+            context,
+            new EvaluateCommercialQuotationRiskComparisonCommand(
+                body.ProfileId,
+                body.ExpectedProfileVersion,
+                body.ComparisonType,
+                body.MaterialId,
+                body.CustomerReference,
+                body.CurrentWindowStartUtc,
+                body.CurrentWindowEndUtc,
+                body.ReferenceWindowStartUtc,
+                body.ReferenceWindowEndUtc,
+                body.SourceProvenance,
+                body.IdempotencyKey),
+            cancellationToken);
+
+        return MapWriteResult(result, isCreate: true);
+    }
+
     private static IResult MapWriteResult(CommercialQuotationRiskWriteResult result, bool isCreate = false)
     {
         if (!result.Succeeded)
@@ -243,6 +344,19 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
             return isCreate
                 ? TypedResults.Created((string?)null, new { id = result.EntityId, idempotentReplay = false, assessment = assessmentDto })
                 : TypedResults.Ok(new { id = result.EntityId, version = result.Version, idempotentReplay = false, assessment = assessmentDto });
+        }
+
+        if (result.Comparison is not null)
+        {
+            var comparisonDto = MapComparisonDetail(result.Comparison);
+            if (result.IdempotentReplay)
+            {
+                return TypedResults.Ok(new { id = result.EntityId, idempotentReplay = true, comparison = comparisonDto });
+            }
+
+            return isCreate
+                ? TypedResults.Created((string?)null, new { id = result.EntityId, idempotentReplay = false, comparison = comparisonDto })
+                : TypedResults.Ok(new { id = result.EntityId, version = result.Version, idempotentReplay = false, comparison = comparisonDto });
         }
 
         var dto = new CommercialIntelligenceWriteSuccessDto(result.EntityId!.Value, result.Version, result.IdempotentReplay);
@@ -264,6 +378,7 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
         maximumPaymentTermDays = profile.MaximumPaymentTermDays,
         expiryWarningDays = profile.ExpiryWarningDays,
         maximumEvidenceAgeDays = profile.MaximumEvidenceAgeDays,
+        maximumRiskIncidenceDelta = profile.MaximumRiskIncidenceDelta,
         allowedEvidenceStatuses = profile.AllowedEvidenceStatuses,
         allowedSalesEvidenceKinds = profile.AllowedSalesEvidenceKinds,
         requiredTaxInclusion = profile.RequiredTaxInclusion,
@@ -356,6 +471,113 @@ internal static class CommercialQuotationRiskEndpointRouteBuilderExtensions
         }),
         isPilotData = assessment.IsPilotData,
     };
+
+    private static object MapComparisonSummary(CommercialQuotationRiskComparisonSummaryReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        customerReference = comparison.CustomerReference,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        evidenceStatus = comparison.EvidenceStatus,
+        candidateAssessmentCount = comparison.CandidateAssessmentCount,
+        comparableAssessmentCount = comparison.ComparableAssessmentCount,
+        excludedAssessmentCount = comparison.ExcludedAssessmentCount,
+        referenceRiskIncidence = comparison.ReferenceRiskIncidence,
+        currentRiskIncidence = comparison.CurrentRiskIncidence,
+        riskIncidenceDelta = comparison.RiskIncidenceDelta,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        isPilotData = comparison.IsPilotData,
+        realQuotationMappingComplete = false,
+    };
+
+    private static object MapComparisonDetail(CommercialQuotationRiskComparisonDetailReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        profileVersion = comparison.ProfileVersion,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        customerReference = comparison.CustomerReference,
+        candidateAssessmentCount = comparison.CandidateAssessmentCount,
+        comparableAssessmentCount = comparison.ComparableAssessmentCount,
+        excludedAssessmentCount = comparison.ExcludedAssessmentCount,
+        riskBearingAssessmentCount = comparison.RiskBearingAssessmentCount,
+        insufficientDataCount = comparison.InsufficientDataCount,
+        sourceConflictCount = comparison.SourceConflictCount,
+        priceRiskCount = comparison.PriceRiskCount,
+        expiryRiskCount = comparison.ExpiryRiskCount,
+        paymentTermRiskCount = comparison.PaymentTermRiskCount,
+        referenceCandidateAssessmentCount = comparison.ReferenceCandidateAssessmentCount,
+        referenceComparableAssessmentCount = comparison.ReferenceComparableAssessmentCount,
+        referenceExcludedAssessmentCount = comparison.ReferenceExcludedAssessmentCount,
+        referenceRiskBearingAssessmentCount = comparison.ReferenceRiskBearingAssessmentCount,
+        currentCandidateAssessmentCount = comparison.CurrentCandidateAssessmentCount,
+        currentComparableAssessmentCount = comparison.CurrentComparableAssessmentCount,
+        currentExcludedAssessmentCount = comparison.CurrentExcludedAssessmentCount,
+        currentRiskBearingAssessmentCount = comparison.CurrentRiskBearingAssessmentCount,
+        referenceRiskIncidence = comparison.ReferenceRiskIncidence,
+        currentRiskIncidence = comparison.CurrentRiskIncidence,
+        riskIncidenceDelta = comparison.RiskIncidenceDelta,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        evidenceStatus = comparison.EvidenceStatus,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        sourceProvenance = comparison.SourceProvenance,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        customerResults = comparison.CustomerResults.Select(r => new
+        {
+            id = r.Id,
+            customerReference = r.CustomerReference,
+            candidateAssessmentCount = r.CandidateAssessmentCount,
+            comparableAssessmentCount = r.ComparableAssessmentCount,
+            excludedAssessmentCount = r.ExcludedAssessmentCount,
+            riskBearingAssessmentCount = r.RiskBearingAssessmentCount,
+            riskIncidenceFraction = r.RiskIncidenceFraction,
+            priceRiskCount = r.PriceRiskCount,
+            expiryRiskCount = r.ExpiryRiskCount,
+            paymentTermRiskCount = r.PaymentTermRiskCount,
+            positionState = r.PositionState,
+            riskRank = r.RiskRank,
+            isTied = r.IsTied,
+            evidenceStatus = r.EvidenceStatus,
+        }),
+        drivers = comparison.Drivers.Select(d => new
+        {
+            id = d.Id,
+            comparisonResultId = d.ComparisonResultId,
+            reasonCode = d.ReasonCode,
+            severity = d.Severity,
+            actualValue = d.ActualValue,
+            referenceValue = d.ReferenceValue,
+            thresholdValue = d.ThresholdValue,
+            unit = d.Unit,
+            normalizedVariance = d.NormalizedVariance,
+            affectedAssessmentCount = d.AffectedAssessmentCount,
+            supportingText = d.SupportingText,
+            sortOrder = d.SortOrder,
+            isLeadingDriver = d.IsLeadingDriver,
+        }),
+        isPilotData = comparison.IsPilotData,
+        realQuotationMappingComplete = false,
+    };
 }
 
 internal sealed record CreateCommercialQuotationRiskProfileRequest(
@@ -402,6 +624,19 @@ internal sealed record EvaluateCommercialQuotationRiskAssessmentRequest(
     Guid EvidenceObservationId,
     DateTimeOffset ReferenceWindowStartUtc,
     DateTimeOffset ReferenceWindowEndUtc,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+internal sealed record EvaluateCommercialQuotationRiskComparisonRequest(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
     string SourceProvenance,
     string IdempotencyKey);
 

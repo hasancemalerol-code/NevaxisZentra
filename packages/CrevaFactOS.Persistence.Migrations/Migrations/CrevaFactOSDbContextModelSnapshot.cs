@@ -2104,6 +2104,430 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("commercial_quotation_risk_assessment_drivers", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActualValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_value");
+
+                    b.Property<int>("AffectedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_assessment_count");
+
+                    b.Property<Guid?>("ComparisonResultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_result_id");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsLeadingDriver")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_leading_driver");
+
+                    b.Property<decimal?>("NormalizedVariance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("normalized_variance");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<decimal?>("ReferenceValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_value");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<string>("SupportingText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("supporting_text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal?>("ThresholdValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("threshold_value");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonResultId");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "SortOrder")
+                        .HasDatabaseName("ix_commquote2_comparison_drivers_tenant_facility_run_sort");
+
+                    b.ToTable("commercial_quotation_risk_comparison_drivers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("CandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("candidate_assessment_count");
+
+                    b.Property<int>("ComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_assessment_count");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CustomerReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<int>("ExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("excluded_assessment_count");
+
+                    b.Property<int>("ExpiryRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("expiry_risk_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsTied")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_tied");
+
+                    b.Property<int>("PaymentTermRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_term_risk_count");
+
+                    b.Property<string>("PositionState")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("position_state");
+
+                    b.Property<int>("PriceRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("price_risk_count");
+
+                    b.Property<int>("RiskBearingAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("risk_bearing_assessment_count");
+
+                    b.Property<decimal?>("RiskIncidenceFraction")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("risk_incidence_fraction");
+
+                    b.Property<int?>("RiskRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("risk_rank");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "CustomerReference")
+                        .HasDatabaseName("ix_commquote2_comparison_results_tenant_facility_run_customer");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "RiskRank")
+                        .HasDatabaseName("ix_commquote2_comparison_results_tenant_facility_run_rank");
+
+                    b.ToTable("commercial_quotation_risk_comparison_results", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_commquote2_comparison_results_assessment_counts", "candidate_assessment_count = comparable_assessment_count + excluded_assessment_count");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("CandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("candidate_assessment_count");
+
+                    b.Property<int>("ComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_assessment_count");
+
+                    b.Property<string>("ComparisonOutcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("comparison_outcome");
+
+                    b.Property<string>("ComparisonReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("comparison_reference");
+
+                    b.Property<string>("ComparisonType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("comparison_type");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<int?>("CurrentCandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_candidate_assessment_count");
+
+                    b.Property<int?>("CurrentComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_comparable_assessment_count");
+
+                    b.Property<int?>("CurrentExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_excluded_assessment_count");
+
+                    b.Property<int?>("CurrentRiskBearingAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_risk_bearing_assessment_count");
+
+                    b.Property<decimal?>("CurrentRiskIncidence")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_risk_incidence");
+
+                    b.Property<DateTimeOffset>("CurrentWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_end_utc");
+
+                    b.Property<DateTimeOffset>("CurrentWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_start_utc");
+
+                    b.Property<string>("CustomerReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<int>("ExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("excluded_assessment_count");
+
+                    b.Property<int>("ExpiryRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("expiry_risk_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_payload_fingerprint");
+
+                    b.Property<int>("InsufficientDataCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("insufficient_data_count");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid?>("MaterialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
+
+                    b.Property<int>("PaymentTermRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_term_risk_count");
+
+                    b.Property<int>("PriceRiskCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("price_risk_count");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("ProfileVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("profile_version");
+
+                    b.Property<int?>("ReferenceCandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_candidate_assessment_count");
+
+                    b.Property<int?>("ReferenceComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_comparable_assessment_count");
+
+                    b.Property<int?>("ReferenceExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_excluded_assessment_count");
+
+                    b.Property<int?>("ReferenceRiskBearingAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_risk_bearing_assessment_count");
+
+                    b.Property<decimal?>("ReferenceRiskIncidence")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_risk_incidence");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_end_utc");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_start_utc");
+
+                    b.Property<int>("RiskBearingAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("risk_bearing_assessment_count");
+
+                    b.Property<decimal?>("RiskIncidenceDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("risk_incidence_delta");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int>("SourceConflictCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_conflict_count");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("TenantId", "ComparisonReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commquote2_comparison_runs_tenant_reference");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commquote2_comparison_runs_tenant_idempotency")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonType", "ComparisonOutcome")
+                        .HasDatabaseName("ix_commquote2_comparison_runs_tenant_facility_type_outcome");
+
+                    b.ToTable("commercial_quotation_risk_comparison_runs", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_commquote2_comparison_runs_assessment_counts", "candidate_assessment_count = comparable_assessment_count + excluded_assessment_count");
+
+                            t.HasCheckConstraint("ck_commquote2_comparison_runs_current_incidence", "current_risk_incidence IS NULL OR (current_risk_incidence >= 0 AND current_risk_incidence <= 1)");
+
+                            t.HasCheckConstraint("ck_commquote2_comparison_runs_incidence_delta", "risk_incidence_delta IS NULL OR (risk_incidence_delta >= -1 AND risk_incidence_delta <= 1)");
+
+                            t.HasCheckConstraint("ck_commquote2_comparison_runs_reference_incidence", "reference_risk_incidence IS NULL OR (reference_risk_incidence >= 0 AND reference_risk_incidence <= 1)");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskEvidenceObservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2318,6 +2742,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("maximum_positive_price_variance_ratio");
+
+                    b.Property<decimal>("MaximumRiskIncidenceDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("maximum_risk_incidence_delta");
 
                     b.Property<int>("MinimumComparableObservations")
                         .HasColumnType("integer")
@@ -23531,6 +23960,86 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Assessment");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonResult", "ComparisonResult")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonResultId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonRun", "ComparisonRun")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_commercial_quotation_risk_comparison_drivers_commercial_qu~1");
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonResult");
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonResult", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonRun", "ComparisonRun")
+                        .WithMany("Results")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonRun", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskEvidenceObservation", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -27253,6 +27762,18 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskAssessment", b =>
                 {
                     b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonResult", b =>
+                {
+                    b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialQuotationRiskComparisonRun", b =>
+                {
+                    b.Navigation("Drivers");
+
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialSalesPriceAssessment", b =>

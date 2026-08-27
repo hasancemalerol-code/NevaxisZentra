@@ -547,6 +547,7 @@ public sealed class CommercialQuotationRiskRepository(
             profile.MaximumPaymentTermDays,
             profile.ExpiryWarningDays,
             profile.MaximumEvidenceAgeDays,
+            profile.MaximumRiskIncidenceDelta,
             profile.AllowedEvidenceStatuses,
             profile.AllowedSalesEvidenceKinds,
             profile.RequiredTaxInclusion,
@@ -645,6 +646,33 @@ public sealed class CommercialQuotationRiskRepository(
 
     private static bool IsPilotAssessment(Guid assessmentId) =>
         DevelopmentPilotIds.CommercialQuotationRiskPilotAssessmentIds.Contains(assessmentId);
+
+    public Task<IReadOnlyList<CommercialQuotationRiskComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialQuotationRiskComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => CommercialQuotationRiskComparisonOperations.ListComparisonsAsync(
+                dbContext, context, filters, ct),
+            cancellationToken);
+
+    public Task<CommercialQuotationRiskComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => CommercialQuotationRiskComparisonOperations.GetComparisonByIdAsync(
+                dbContext, context, comparisonRunId, ct),
+            cancellationToken);
+
+    public Task<CommercialQuotationRiskWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialQuotationRiskComparisonCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => CommercialQuotationRiskComparisonOperations.EvaluateComparisonAsync(
+                dbContext, context, command, ct),
+            cancellationToken);
 }
 
 public sealed class UnavailableCommercialQuotationRiskRepository : ICommercialQuotationRiskRepository
@@ -698,6 +726,24 @@ public sealed class UnavailableCommercialQuotationRiskRepository : ICommercialQu
     public Task<CommercialQuotationRiskWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialQuotationRiskAssessmentCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
+
+    public Task<IReadOnlyList<CommercialQuotationRiskComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialQuotationRiskComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("Commercial quotation risk persistence is unavailable.");
+
+    public Task<CommercialQuotationRiskComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("Commercial quotation risk persistence is unavailable.");
+
+    public Task<CommercialQuotationRiskWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialQuotationRiskComparisonCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
 }

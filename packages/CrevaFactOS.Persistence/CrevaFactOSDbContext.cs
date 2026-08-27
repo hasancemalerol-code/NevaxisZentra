@@ -330,6 +330,12 @@ public sealed class CrevaFactOSDbContext : DbContext
         Set<CommercialQuotationRiskAssessment>();
     public DbSet<CommercialQuotationRiskAssessmentDriver> CommercialQuotationRiskAssessmentDrivers =>
         Set<CommercialQuotationRiskAssessmentDriver>();
+    public DbSet<CommercialQuotationRiskComparisonRun> CommercialQuotationRiskComparisonRuns =>
+        Set<CommercialQuotationRiskComparisonRun>();
+    public DbSet<CommercialQuotationRiskComparisonResult> CommercialQuotationRiskComparisonResults =>
+        Set<CommercialQuotationRiskComparisonResult>();
+    public DbSet<CommercialQuotationRiskComparisonDriver> CommercialQuotationRiskComparisonDrivers =>
+        Set<CommercialQuotationRiskComparisonDriver>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1643,6 +1649,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new CommercialQuotationRiskAssessmentDriverEntityConfiguration());
         modelBuilder.Entity<CommercialQuotationRiskAssessmentDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialQuotationRiskComparisonRunEntityConfiguration());
+        modelBuilder.Entity<CommercialQuotationRiskComparisonRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialQuotationRiskComparisonResultEntityConfiguration());
+        modelBuilder.Entity<CommercialQuotationRiskComparisonResult>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialQuotationRiskComparisonDriverEntityConfiguration());
+        modelBuilder.Entity<CommercialQuotationRiskComparisonDriver>().HasQueryFilter(d =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);

@@ -1607,4 +1607,88 @@ public static class DevelopmentPilotIds
     public const string CommercialQuotationRiskPilotCustomerPayment = "COMMQUOTE1-CUST-PAYMENT";
     public const string CommercialQuotationRiskPilotCustomerInsufficient = "COMMQUOTE1-CUST-INSUFFICIENT";
     public const string CommercialQuotationRiskPilotCustomerConflict = "COMMQUOTE1-CUST-CONFLICT";
+
+    public static readonly DateTimeOffset CommercialQuotationRiskComparisonPilotReferenceWindowStartUtc =
+        new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialQuotationRiskComparisonPilotReferenceWindowEndUtc =
+        new(2026, 6, 30, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialQuotationRiskComparisonPilotCurrentWindowStartUtc =
+        new(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialQuotationRiskComparisonPilotCurrentWindowEndUtc =
+        new(2026, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotStableTrendRunId =
+        Guid.Parse("bb000001-02c1-4000-8000-0000000002c1");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotRiskIncreaseRunId =
+        Guid.Parse("bb000001-02c2-4000-8000-0000000002c2");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotRiskDecreaseRunId =
+        Guid.Parse("bb000001-02c3-4000-8000-0000000002c3");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotExpiryConcentrationRunId =
+        Guid.Parse("bb000001-02c4-4000-8000-0000000002c4");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotPaymentConcentrationRunId =
+        Guid.Parse("bb000001-02c5-4000-8000-0000000002c5");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotCustomerPositionRunId =
+        Guid.Parse("bb000001-02c6-4000-8000-0000000002c6");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotCustomerTieRunId =
+        Guid.Parse("bb000001-02c7-4000-8000-0000000002c7");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotInsufficientRunId =
+        Guid.Parse("bb000001-02c8-4000-8000-0000000002c8");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotSourceConflictRunId =
+        Guid.Parse("bb000001-02c9-4000-8000-0000000002c9");
+
+    public static readonly IReadOnlySet<Guid> CommercialQuotationRiskComparisonPilotRunIds = new HashSet<Guid>
+    {
+        CommercialQuotationRiskComparisonPilotStableTrendRunId,
+        CommercialQuotationRiskComparisonPilotRiskIncreaseRunId,
+        CommercialQuotationRiskComparisonPilotRiskDecreaseRunId,
+        CommercialQuotationRiskComparisonPilotExpiryConcentrationRunId,
+        CommercialQuotationRiskComparisonPilotPaymentConcentrationRunId,
+        CommercialQuotationRiskComparisonPilotCustomerPositionRunId,
+        CommercialQuotationRiskComparisonPilotCustomerTieRunId,
+        CommercialQuotationRiskComparisonPilotInsufficientRunId,
+        CommercialQuotationRiskComparisonPilotSourceConflictRunId,
+    };
+
+    public const string CommercialQuotationRiskComparisonPilotCustomerPrimary = "COMMQUOTE2-CUST-PRIMARY";
+    public const string CommercialQuotationRiskComparisonPilotCustomerSecondary = "COMMQUOTE2-CUST-SECONDARY";
+    public const string CommercialQuotationRiskComparisonPilotCustomerTieA = "COMMQUOTE2-CUST-TIE-A";
+    public const string CommercialQuotationRiskComparisonPilotCustomerTieB = "COMMQUOTE2-CUST-TIE-B";
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialStableTrendId =
+        Guid.Parse("bb000001-02d1-4000-8000-0000000002d1");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialRiskIncreaseId =
+        Guid.Parse("bb000001-02d2-4000-8000-0000000002d2");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialRiskDecreaseId =
+        Guid.Parse("bb000001-02d3-4000-8000-0000000002d3");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialExpiryConcentrationId =
+        Guid.Parse("bb000001-02d4-4000-8000-0000000002d4");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialPaymentConcentrationId =
+        Guid.Parse("bb000001-02d5-4000-8000-0000000002d5");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialCustomerPositionId =
+        Guid.Parse("bb000001-02d6-4000-8000-0000000002d6");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialCustomerTieId =
+        Guid.Parse("bb000001-02d7-4000-8000-0000000002d7");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialInsufficientId =
+        Guid.Parse("bb000001-02d8-4000-8000-0000000002d8");
+
+    public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialSourceConflictId =
+        Guid.Parse("bb000001-02d9-4000-8000-0000000002d9");
 }

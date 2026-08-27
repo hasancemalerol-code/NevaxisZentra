@@ -7,6 +7,8 @@ public static class CommercialIntelligenceConstants
     public const string SalesRuleSetVersion = "COMMERCIAL-SALES-PRICE-1.0";
     public const string SalesComparisonRuleSetVersion = "COMMERCIAL-SALES-PRICE-2.0";
     public const string QuotationRiskRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-1.0";
+    public const string QuotationRiskComparisonRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-2.0";
+    public const decimal DefaultQuotationRiskMaximumRiskIncidenceDelta = 0.10m;
     public const string QuotationRiskDevelopmentPilotProvenance =
         "Deterministic local Development quotation-risk evidence — simulated, non-production, not real customer, quotation, invoice, order, or market evidence.";
     public const int DefaultQuotationRiskExpiryWarningDays = 7;
