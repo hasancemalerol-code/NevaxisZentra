@@ -223,12 +223,14 @@ async function completeOwnerMfa(page, mfaSecret) {
     const totpCode = generateTotp(mfaSecret, counterOffset);
     await totpInput.fill(totpCode, { timeout: 5000 }).catch(() => undefined);
     if (page.url().includes("/dashboard")) return;
-    const verifyResponse = await Promise.all([
-      page.waitForResponse((response) => response.url().includes("/api/identity/mfa/verify"), { timeout: 15000 }).catch(() => null),
-      page.getByRole("button", { name: "Doğrula" }).click(),
-    ]).then(([, response]) => response);
-    if (verifyResponse?.status() === 200) {
-      await page.waitForURL("**/dashboard", { timeout: 90000 });
+    const verifyResponse = page.url().includes("/dashboard")
+      ? { status: () => 200 }
+      : await Promise.all([
+        page.waitForResponse((response) => response.url().includes("/api/identity/mfa/verify"), { timeout: 15000 }).catch(() => null),
+        page.getByRole("button", { name: "Doğrula" }).click({ timeout: 5000 }).catch(() => null),
+      ]).then(([, response]) => response);
+    if (verifyResponse?.status?.() === 200) {
+      await page.waitForURL("**/dashboard", { timeout: 90000 }).catch(() => undefined);
       return;
     }
     await page.waitForTimeout(400);

@@ -1691,4 +1691,56 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid CommercialQuotationRiskComparisonPilotMaterialSourceConflictId =
         Guid.Parse("bb000001-02d9-4000-8000-0000000002d9");
+
+    public static readonly Guid CommercialProfitabilityPilotProfileId =
+        Guid.Parse("bb000001-0310-4000-8000-000000000310");
+
+    public const string CommercialProfitabilityPilotProfileCode = "COMMPROFIT1-PILOT";
+
+    public static readonly DateTimeOffset CommercialProfitabilityPilotSeedTimeUtc =
+        new(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentWithinThresholdId =
+        Guid.Parse("bb000001-0391-4000-8000-000000000391");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentExactThresholdId =
+        Guid.Parse("bb000001-0392-4000-8000-000000000392");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentBelowThresholdId =
+        Guid.Parse("bb000001-0393-4000-8000-000000000393");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentZeroContributionId =
+        Guid.Parse("bb000001-0394-4000-8000-000000000394");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentNegativeContributionId =
+        Guid.Parse("bb000001-0395-4000-8000-000000000395");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentMissingCostId =
+        Guid.Parse("bb000001-0396-4000-8000-000000000396");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentSourceConflictId =
+        Guid.Parse("bb000001-0397-4000-8000-000000000397");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentIncompatibleId =
+        Guid.Parse("bb000001-0398-4000-8000-000000000398");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentStaleEvidenceId =
+        Guid.Parse("bb000001-0399-4000-8000-000000000399");
+
+    public static readonly Guid CommercialProfitabilityPilotAssessmentMarginMarkupId =
+        Guid.Parse("bb000001-039a-4000-8000-00000000039a");
+
+    public static readonly IReadOnlySet<Guid> CommercialProfitabilityPilotAssessmentIds = new HashSet<Guid>
+    {
+        CommercialProfitabilityPilotAssessmentWithinThresholdId,
+        CommercialProfitabilityPilotAssessmentExactThresholdId,
+        CommercialProfitabilityPilotAssessmentBelowThresholdId,
+        CommercialProfitabilityPilotAssessmentZeroContributionId,
+        CommercialProfitabilityPilotAssessmentNegativeContributionId,
+        CommercialProfitabilityPilotAssessmentMissingCostId,
+        CommercialProfitabilityPilotAssessmentSourceConflictId,
+        CommercialProfitabilityPilotAssessmentIncompatibleId,
+        CommercialProfitabilityPilotAssessmentStaleEvidenceId,
+        CommercialProfitabilityPilotAssessmentMarginMarkupId,
+    };
 }

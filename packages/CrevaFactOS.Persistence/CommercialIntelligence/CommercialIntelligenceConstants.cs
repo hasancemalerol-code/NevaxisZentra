@@ -8,6 +8,11 @@ public static class CommercialIntelligenceConstants
     public const string SalesComparisonRuleSetVersion = "COMMERCIAL-SALES-PRICE-2.0";
     public const string QuotationRiskRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-1.0";
     public const string QuotationRiskComparisonRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-2.0";
+    public const string ProfitabilityRuleSetVersion = "COMMERCIAL-PROFITABILITY-1.0";
+    public const string ProfitabilityDevelopmentPilotProvenance =
+        "Deterministic local Development contribution evidence — simulated, non-production, not real customer, quotation, invoice, order, production, cost, accounting, or market evidence.";
+    public const decimal DefaultProfitabilityMinimumContributionMarginRatio = 0.15m;
+    public const int DefaultProfitabilityMaximumEvidenceAgeDays = 180;
     public const decimal DefaultQuotationRiskMaximumRiskIncidenceDelta = 0.10m;
     public const string QuotationRiskDevelopmentPilotProvenance =
         "Deterministic local Development quotation-risk evidence — simulated, non-production, not real customer, quotation, invoice, order, or market evidence.";

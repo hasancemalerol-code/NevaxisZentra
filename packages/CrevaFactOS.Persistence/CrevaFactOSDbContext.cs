@@ -337,6 +337,17 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<CommercialQuotationRiskComparisonDriver> CommercialQuotationRiskComparisonDrivers =>
         Set<CommercialQuotationRiskComparisonDriver>();
 
+    // Commercial profitability foundation (COMMERCIAL-PROFITABILITY-1)
+    public DbSet<CommercialProfitabilityProfile> CommercialProfitabilityProfiles => Set<CommercialProfitabilityProfile>();
+    public DbSet<CommercialProfitabilityEvidenceObservation> CommercialProfitabilityEvidenceObservations =>
+        Set<CommercialProfitabilityEvidenceObservation>();
+    public DbSet<CommercialProfitabilityAssessment> CommercialProfitabilityAssessments =>
+        Set<CommercialProfitabilityAssessment>();
+    public DbSet<CommercialProfitabilityAssessmentCostComponent> CommercialProfitabilityAssessmentCostComponents =>
+        Set<CommercialProfitabilityAssessmentCostComponent>();
+    public DbSet<CommercialProfitabilityAssessmentDriver> CommercialProfitabilityAssessmentDrivers =>
+        Set<CommercialProfitabilityAssessmentDriver>();
+
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
     public DbSet<ErpSyncRun> ErpSyncRuns => Set<ErpSyncRun>();
@@ -1667,6 +1678,36 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new CommercialQuotationRiskComparisonDriverEntityConfiguration());
         modelBuilder.Entity<CommercialQuotationRiskComparisonDriver>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityProfileEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityEvidenceObservationEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityEvidenceObservation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityAssessmentEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityAssessmentCostComponentEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityAssessmentCostComponent>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityAssessmentDriverEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityAssessmentDriver>().HasQueryFilter(d =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);

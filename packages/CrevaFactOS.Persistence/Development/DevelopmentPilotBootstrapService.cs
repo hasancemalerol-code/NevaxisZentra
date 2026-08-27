@@ -738,6 +738,13 @@ internal sealed class DevelopmentPilotBootstrapService(
             operatorIdentity.Id.ToString(),
             seedTimestampUtc,
             cancellationToken);
+        await DevelopmentPilotCommercialProfitabilitySeed.EnsureCommercialProfitabilityPilotRecordsAsync(
+            dbContext,
+            tenant.Id,
+            facility.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
         await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
                 dbContext,
                 operatorIdentity.Id.ToString(),
