@@ -22,11 +22,17 @@ export default async function MfaVerifyPage({ searchParams }: MfaVerifyPageProps
     redirect("/dashboard");
   }
 
+  if (session.status === "session_expired") {
+    redirect("/giris");
+  }
+
+  const displayName = session.displayName;
+
   return (
     <AuthShell
       description={
-        session.displayName
-          ? `${session.displayName}, kimlik doğrulama uygulamanızdaki kodu girin.`
+        displayName
+          ? `${displayName}, kimlik doğrulama uygulamanızdaki kodu girin.`
           : "Kimlik doğrulama uygulamanızdaki kodu girin."
       }
       title={SAAS_IDENTITY_MESSAGES.mfaTitle}
