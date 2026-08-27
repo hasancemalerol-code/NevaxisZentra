@@ -18,6 +18,10 @@ internal sealed class CommercialProfitabilityProfileEntityConfiguration : IEntit
         entity.Property(p => p.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
         entity.Property(p => p.Status).HasColumnName("status").HasMaxLength(20).IsRequired();
         entity.Property(p => p.MinimumContributionMarginRatio).HasColumnName("minimum_contribution_margin_ratio").HasPrecision(18, 6);
+        entity.Property(p => p.MinimumComparableAssessmentCountPerWindow).HasColumnName("minimum_comparable_assessment_count_per_window");
+        entity.Property(p => p.MaximumAdverseContributionMarginDelta).HasColumnName("maximum_adverse_contribution_margin_delta").HasPrecision(18, 6);
+        entity.Property(p => p.MinimumFavorableContributionMarginDelta).HasColumnName("minimum_favorable_contribution_margin_delta").HasPrecision(18, 6);
+        entity.Property(p => p.MaximumCostShareIncrease).HasColumnName("maximum_cost_share_increase").HasPrecision(18, 6);
         entity.Property(p => p.MaximumEvidenceAgeDays).HasColumnName("maximum_evidence_age_days");
         entity.Property(p => p.RequiredCostComponentKinds).HasColumnName("required_cost_component_kinds").HasMaxLength(500).IsRequired();
         entity.Property(p => p.RequiredCurrencyCode).HasColumnName("required_currency_code").HasMaxLength(10).IsRequired();

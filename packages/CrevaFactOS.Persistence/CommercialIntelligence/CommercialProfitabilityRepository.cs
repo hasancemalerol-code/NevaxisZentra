@@ -691,6 +691,33 @@ public sealed class CommercialProfitabilityRepository(
 
     private static bool IsPilotAssessment(Guid assessmentId) =>
         DevelopmentPilotIds.CommercialProfitabilityPilotAssessmentIds.Contains(assessmentId);
+
+    public Task<IReadOnlyList<CommercialProfitabilityComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialProfitabilityComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => CommercialProfitabilityComparisonOperations.ListComparisonsAsync(
+                dbContext, context, filters, ct),
+            cancellationToken);
+
+    public Task<CommercialProfitabilityComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => CommercialProfitabilityComparisonOperations.GetComparisonByIdAsync(
+                dbContext, context, comparisonRunId, ct),
+            cancellationToken);
+
+    public Task<CommercialProfitabilityWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialProfitabilityComparisonCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => CommercialProfitabilityComparisonOperations.EvaluateComparisonAsync(
+                dbContext, context, command, ct),
+            cancellationToken);
 }
 
 public sealed class UnavailableCommercialProfitabilityRepository : ICommercialProfitabilityRepository
@@ -744,6 +771,24 @@ public sealed class UnavailableCommercialProfitabilityRepository : ICommercialPr
     public Task<CommercialProfitabilityWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialProfitabilityAssessmentCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Unavailable());
+
+    public Task<IReadOnlyList<CommercialProfitabilityComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialProfitabilityComparisonListFilters filters,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("Commercial profitability persistence is unavailable.");
+
+    public Task<CommercialProfitabilityComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("Commercial profitability persistence is unavailable.");
+
+    public Task<CommercialProfitabilityWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialProfitabilityComparisonCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
 }

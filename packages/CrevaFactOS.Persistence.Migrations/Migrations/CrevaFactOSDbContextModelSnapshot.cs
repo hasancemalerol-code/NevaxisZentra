@@ -1300,6 +1300,597 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("commercial_profitability_assessment_drivers", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonDriver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActualValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_value");
+
+                    b.Property<int>("AffectedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_assessment_count");
+
+                    b.Property<Guid?>("ComparisonResultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_result_id");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsLeadingDriver")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_leading_driver");
+
+                    b.Property<decimal?>("NormalizedVariance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("normalized_variance");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<decimal?>("ReferenceValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_value");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<string>("SupportingText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("supporting_text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal?>("ThresholdValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("threshold_value");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonResultId");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "SortOrder")
+                        .HasDatabaseName("ix_commprofit2_comparison_drivers_tenant_facility_run_sort");
+
+                    b.ToTable("commercial_profitability_comparison_drivers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("BelowThresholdCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("below_threshold_count");
+
+                    b.Property<int>("CandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("candidate_assessment_count");
+
+                    b.Property<string>("CanonicalResultReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("canonical_result_reference");
+
+                    b.Property<int>("ComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_assessment_count");
+
+                    b.Property<Guid>("ComparisonRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comparison_run_id");
+
+                    b.Property<int>("CompleteCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete_coverage_count");
+
+                    b.Property<string>("ComponentKind")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("component_kind");
+
+                    b.Property<decimal?>("ContributionMarginDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("contribution_margin_delta");
+
+                    b.Property<int?>("ContributionRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("contribution_rank");
+
+                    b.Property<decimal?>("CostShareDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("cost_share_delta");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<int?>("CurrentComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_comparable_assessment_count");
+
+                    b.Property<int?>("CurrentExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_excluded_assessment_count");
+
+                    b.Property<decimal?>("CurrentMedianContributionMarginRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_contribution_margin_ratio");
+
+                    b.Property<decimal?>("CurrentMedianCostShare")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_cost_share");
+
+                    b.Property<decimal?>("CurrentMedianUnitContribution")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_unit_contribution");
+
+                    b.Property<decimal?>("CurrentMedianUnitCost")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_unit_cost");
+
+                    b.Property<string>("CustomerReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<int>("ExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("excluded_assessment_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsTied")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_tied");
+
+                    b.Property<Guid?>("MaterialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
+
+                    b.Property<int>("NegativeContributionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("negative_contribution_count");
+
+                    b.Property<int>("PartialCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("partial_coverage_count");
+
+                    b.Property<string>("PositionState")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("position_state");
+
+                    b.Property<int?>("ReferenceComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_comparable_assessment_count");
+
+                    b.Property<int?>("ReferenceExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_excluded_assessment_count");
+
+                    b.Property<decimal?>("ReferenceMedianContributionMarginRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_contribution_margin_ratio");
+
+                    b.Property<decimal?>("ReferenceMedianCostShare")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_cost_share");
+
+                    b.Property<decimal?>("ReferenceMedianUnitContribution")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_unit_contribution");
+
+                    b.Property<decimal?>("ReferenceMedianUnitCost")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_unit_cost");
+
+                    b.Property<string>("ResultDimension")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("result_dimension");
+
+                    b.Property<decimal?>("SignedUnitCostChange")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("signed_unit_cost_change");
+
+                    b.Property<decimal?>("SignedUnitCostChangeRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("signed_unit_cost_change_ratio");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComparisonRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "ContributionRank")
+                        .HasDatabaseName("ix_commprofit2_comparison_results_tenant_facility_run_rank");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonRunId", "ResultDimension", "CanonicalResultReference")
+                        .HasDatabaseName("ix_commprofit2_comparison_results_tenant_facility_run_dimension_ref");
+
+                    b.ToTable("commercial_profitability_comparison_results", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_assessment_counts", "candidate_assessment_count = comparable_assessment_count + excluded_assessment_count");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_current_margin", "current_median_contribution_margin_ratio IS NULL OR current_median_contribution_margin_ratio < 1");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_current_share", "current_median_cost_share IS NULL OR (current_median_cost_share >= 0 AND current_median_cost_share <= 1)");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_reference_margin", "reference_median_contribution_margin_ratio IS NULL OR reference_median_contribution_margin_ratio < 1");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_reference_share", "reference_median_cost_share IS NULL OR (reference_median_cost_share >= 0 AND reference_median_cost_share <= 1)");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_share_delta", "cost_share_delta IS NULL OR (cost_share_delta >= -1 AND cost_share_delta <= 1)");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_results_unit_cost_ratio", "signed_unit_cost_change_ratio IS NULL OR signed_unit_cost_change_ratio > -1");
+                        });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AggregationMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("aggregation_method");
+
+                    b.Property<int>("BelowThresholdCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("below_threshold_count");
+
+                    b.Property<int>("CandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("candidate_assessment_count");
+
+                    b.Property<int>("ComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comparable_assessment_count");
+
+                    b.Property<string>("ComparisonOutcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("comparison_outcome");
+
+                    b.Property<string>("ComparisonReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("comparison_reference");
+
+                    b.Property<string>("ComparisonType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("comparison_type");
+
+                    b.Property<int>("CompleteCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete_coverage_count");
+
+                    b.Property<decimal?>("ContributionMarginDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("contribution_margin_delta");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<int?>("CurrentBelowThresholdCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_below_threshold_count");
+
+                    b.Property<int?>("CurrentCandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_candidate_assessment_count");
+
+                    b.Property<int?>("CurrentComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_comparable_assessment_count");
+
+                    b.Property<int?>("CurrentCompleteCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_complete_coverage_count");
+
+                    b.Property<int?>("CurrentExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_excluded_assessment_count");
+
+                    b.Property<int?>("CurrentInsufficientDataCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_insufficient_data_count");
+
+                    b.Property<decimal?>("CurrentMedianContributionMarginRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_contribution_margin_ratio");
+
+                    b.Property<decimal?>("CurrentMedianUnitContribution")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_median_unit_contribution");
+
+                    b.Property<int?>("CurrentNegativeContributionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_negative_contribution_count");
+
+                    b.Property<int?>("CurrentPartialCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_partial_coverage_count");
+
+                    b.Property<int?>("CurrentSourceConflictCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_source_conflict_count");
+
+                    b.Property<DateTimeOffset>("CurrentWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_end_utc");
+
+                    b.Property<DateTimeOffset>("CurrentWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_window_start_utc");
+
+                    b.Property<string>("CustomerReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_reference");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<int>("ExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("excluded_assessment_count");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_payload_fingerprint");
+
+                    b.Property<int>("InsufficientDataCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("insufficient_data_count");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<Guid?>("MaterialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
+
+                    b.Property<int>("NegativeContributionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("negative_contribution_count");
+
+                    b.Property<int>("PartialCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("partial_coverage_count");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("ProfileVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("profile_version");
+
+                    b.Property<int?>("ReferenceBelowThresholdCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_below_threshold_count");
+
+                    b.Property<int?>("ReferenceCandidateAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_candidate_assessment_count");
+
+                    b.Property<int?>("ReferenceComparableAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_comparable_assessment_count");
+
+                    b.Property<int?>("ReferenceCompleteCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_complete_coverage_count");
+
+                    b.Property<int?>("ReferenceExcludedAssessmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_excluded_assessment_count");
+
+                    b.Property<int?>("ReferenceInsufficientDataCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_insufficient_data_count");
+
+                    b.Property<decimal?>("ReferenceMedianContributionMarginRatio")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_contribution_margin_ratio");
+
+                    b.Property<decimal?>("ReferenceMedianUnitContribution")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("reference_median_unit_contribution");
+
+                    b.Property<int?>("ReferenceNegativeContributionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_negative_contribution_count");
+
+                    b.Property<int?>("ReferencePartialCoverageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_partial_coverage_count");
+
+                    b.Property<int?>("ReferenceSourceConflictCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_source_conflict_count");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_end_utc");
+
+                    b.Property<DateTimeOffset?>("ReferenceWindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reference_window_start_utc");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<int>("SourceConflictCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_conflict_count");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("TenantId", "ComparisonReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commprofit2_comparison_runs_tenant_reference");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commprofit2_comparison_runs_tenant_idempotency")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "ComparisonType", "ComparisonOutcome")
+                        .HasDatabaseName("ix_commprofit2_comparison_runs_tenant_facility_type_outcome");
+
+                    b.ToTable("commercial_profitability_comparison_runs", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_commprofit2_comparison_runs_assessment_counts", "candidate_assessment_count = comparable_assessment_count + excluded_assessment_count");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_runs_current_margin", "current_median_contribution_margin_ratio IS NULL OR current_median_contribution_margin_ratio < 1");
+
+                            t.HasCheckConstraint("ck_commprofit2_comparison_runs_reference_margin", "reference_median_contribution_margin_ratio IS NULL OR reference_median_contribution_margin_ratio < 1");
+                        });
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityEvidenceObservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1519,14 +2110,33 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<decimal>("MaximumAdverseContributionMarginDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("maximum_adverse_contribution_margin_delta");
+
+                    b.Property<decimal>("MaximumCostShareIncrease")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("maximum_cost_share_increase");
+
                     b.Property<int>("MaximumEvidenceAgeDays")
                         .HasColumnType("integer")
                         .HasColumnName("maximum_evidence_age_days");
+
+                    b.Property<int>("MinimumComparableAssessmentCountPerWindow")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum_comparable_assessment_count_per_window");
 
                     b.Property<decimal>("MinimumContributionMarginRatio")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("minimum_contribution_margin_ratio");
+
+                    b.Property<decimal>("MinimumFavorableContributionMarginDelta")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("minimum_favorable_contribution_margin_delta");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -24600,6 +25210,86 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Assessment");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonDriver", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonResult", "ComparisonResult")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonResultId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", "ComparisonRun")
+                        .WithMany("Drivers")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_commercial_profitability_comparison_drivers_commercial_pro~1");
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonResult");
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonResult", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", "ComparisonRun")
+                        .WithMany("Results")
+                        .HasForeignKey("ComparisonRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ComparisonRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityEvidenceObservation", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -28636,6 +29326,18 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("CostComponents");
 
                     b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonResult", b =>
+                {
+                    b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", b =>
+                {
+                    b.Navigation("Drivers");
+
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialPurchasePriceAssessment", b =>

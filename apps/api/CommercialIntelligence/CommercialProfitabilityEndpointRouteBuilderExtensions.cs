@@ -21,6 +21,9 @@ internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
         group.MapGet("/assessments", ListAssessmentsAsync);
         group.MapGet("/assessments/{assessmentId:guid}", GetAssessmentAsync);
         group.MapPost("/assessments/evaluate", EvaluateAssessmentAsync);
+        group.MapGet("/comparisons", ListComparisonsAsync);
+        group.MapGet("/comparisons/{comparisonRunId:guid}", GetComparisonAsync);
+        group.MapPost("/comparisons/evaluate", EvaluateComparisonAsync);
 
         return endpoints;
     }
@@ -216,6 +219,103 @@ internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
         return MapWriteResult(result, isCreate: true);
     }
 
+    private static async Task<IResult> ListComparisonsAsync(
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? comparisonType,
+        [FromQuery] Guid? profileId,
+        [FromQuery] Guid? materialId,
+        [FromQuery] string? customerReference,
+        [FromQuery] string? outcome,
+        [FromQuery] string? evidenceStatus,
+        [FromQuery] DateTimeOffset? windowFromUtc,
+        [FromQuery] DateTimeOffset? windowToUtc,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        IFacilityAccessResolver facilityAccessResolver = null!,
+        ICommercialProfitabilityRepository repository = null!,
+        CorrelationContext correlationContext = null!,
+        CancellationToken cancellationToken = default)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparisons = await repository.ListComparisonsAsync(
+            context,
+            new CommercialProfitabilityComparisonListFilters(
+                comparisonType,
+                profileId,
+                materialId,
+                customerReference,
+                outcome,
+                evidenceStatus,
+                windowFromUtc,
+                windowToUtc,
+                page,
+                pageSize),
+            cancellationToken);
+
+        return TypedResults.Ok(new
+        {
+            items = comparisons.Select(MapComparisonSummary),
+            page,
+            pageSize,
+            ruleSetVersion = CommercialIntelligenceConstants.ProfitabilityComparisonRuleSetVersion,
+            realProfitabilityMappingComplete = false,
+        });
+    }
+
+    private static async Task<IResult> GetComparisonAsync(
+        Guid comparisonRunId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialProfitabilityRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var comparison = await repository.GetComparisonByIdAsync(context, comparisonRunId, cancellationToken);
+        return comparison is null
+            ? CommercialIntelligenceEndpointHelpers.MapFailure(
+                CommercialIntelligenceFailureCodes.NotFound,
+                "Profitability comparison not found.")
+            : TypedResults.Ok(MapComparisonDetail(comparison));
+    }
+
+    private static async Task<IResult> EvaluateComparisonAsync(
+        [FromQuery] Guid? facilityId,
+        [FromBody] EvaluateCommercialProfitabilityComparisonRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        ICommercialProfitabilityRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await CommercialIntelligenceEndpointHelpers.ResolveManageAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.EvaluateComparisonAsync(
+            context,
+            new EvaluateCommercialProfitabilityComparisonCommand(
+                body.ProfileId,
+                body.ExpectedProfileVersion,
+                body.ComparisonType,
+                body.MaterialId,
+                body.CustomerReference,
+                body.CurrentWindowStartUtc,
+                body.CurrentWindowEndUtc,
+                body.ReferenceWindowStartUtc,
+                body.ReferenceWindowEndUtc,
+                body.SourceProvenance,
+                body.IdempotencyKey),
+            cancellationToken);
+
+        return MapWriteResult(result, isCreate: true);
+    }
+
     private static IResult MapWriteResult(CommercialProfitabilityWriteResult result, bool isCreate = false)
     {
         if (!result.Succeeded)
@@ -240,6 +340,14 @@ internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
                         idempotentReplay = false,
                         assessment = MapAssessmentDetail(result.Assessment),
                     });
+        }
+
+        if (result.Comparison is not null)
+        {
+            var comparisonDto = MapComparisonDetail(result.Comparison);
+            return result.IdempotentReplay
+                ? TypedResults.Ok(new { id = result.EntityId, idempotentReplay = true, comparison = comparisonDto })
+                : TypedResults.Created((string?)null, new { id = result.EntityId, idempotentReplay = false, comparison = comparisonDto });
         }
 
         return result.IdempotentReplay
@@ -371,6 +479,147 @@ internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
         }),
         isPilotData = assessment.IsPilotData,
     };
+
+    private static object MapComparisonSummary(CommercialProfitabilityComparisonSummaryReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        customerReference = comparison.CustomerReference,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        evidenceStatus = comparison.EvidenceStatus,
+        aggregationMethod = comparison.AggregationMethod,
+        candidateAssessmentCount = comparison.CandidateAssessmentCount,
+        comparableAssessmentCount = comparison.ComparableAssessmentCount,
+        excludedAssessmentCount = comparison.ExcludedAssessmentCount,
+        referenceMedianContributionMarginRatio = comparison.ReferenceMedianContributionMarginRatio,
+        currentMedianContributionMarginRatio = comparison.CurrentMedianContributionMarginRatio,
+        contributionMarginDelta = comparison.ContributionMarginDelta,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        isPilotData = comparison.IsPilotData,
+        realProfitabilityMappingComplete = false,
+    };
+
+    private static object MapComparisonDetail(CommercialProfitabilityComparisonDetailReadModel comparison) => new
+    {
+        id = comparison.Id,
+        comparisonReference = comparison.ComparisonReference,
+        profileId = comparison.ProfileId,
+        profileCode = comparison.ProfileCode,
+        profileVersion = comparison.ProfileVersion,
+        comparisonType = comparison.ComparisonType,
+        materialId = comparison.MaterialId,
+        customerReference = comparison.CustomerReference,
+        aggregationMethod = comparison.AggregationMethod,
+        candidateAssessmentCount = comparison.CandidateAssessmentCount,
+        comparableAssessmentCount = comparison.ComparableAssessmentCount,
+        excludedAssessmentCount = comparison.ExcludedAssessmentCount,
+        completeCoverageCount = comparison.CompleteCoverageCount,
+        partialCoverageCount = comparison.PartialCoverageCount,
+        insufficientDataCount = comparison.InsufficientDataCount,
+        sourceConflictCount = comparison.SourceConflictCount,
+        negativeContributionCount = comparison.NegativeContributionCount,
+        belowThresholdCount = comparison.BelowThresholdCount,
+        referenceCandidateAssessmentCount = comparison.ReferenceCandidateAssessmentCount,
+        referenceComparableAssessmentCount = comparison.ReferenceComparableAssessmentCount,
+        referenceExcludedAssessmentCount = comparison.ReferenceExcludedAssessmentCount,
+        referenceCompleteCoverageCount = comparison.ReferenceCompleteCoverageCount,
+        referencePartialCoverageCount = comparison.ReferencePartialCoverageCount,
+        referenceInsufficientDataCount = comparison.ReferenceInsufficientDataCount,
+        referenceSourceConflictCount = comparison.ReferenceSourceConflictCount,
+        referenceNegativeContributionCount = comparison.ReferenceNegativeContributionCount,
+        referenceBelowThresholdCount = comparison.ReferenceBelowThresholdCount,
+        currentCandidateAssessmentCount = comparison.CurrentCandidateAssessmentCount,
+        currentComparableAssessmentCount = comparison.CurrentComparableAssessmentCount,
+        currentExcludedAssessmentCount = comparison.CurrentExcludedAssessmentCount,
+        currentCompleteCoverageCount = comparison.CurrentCompleteCoverageCount,
+        currentPartialCoverageCount = comparison.CurrentPartialCoverageCount,
+        currentInsufficientDataCount = comparison.CurrentInsufficientDataCount,
+        currentSourceConflictCount = comparison.CurrentSourceConflictCount,
+        currentNegativeContributionCount = comparison.CurrentNegativeContributionCount,
+        currentBelowThresholdCount = comparison.CurrentBelowThresholdCount,
+        referenceMedianContributionMarginRatio = comparison.ReferenceMedianContributionMarginRatio,
+        currentMedianContributionMarginRatio = comparison.CurrentMedianContributionMarginRatio,
+        contributionMarginDelta = comparison.ContributionMarginDelta,
+        referenceMedianUnitContribution = comparison.ReferenceMedianUnitContribution,
+        currentMedianUnitContribution = comparison.CurrentMedianUnitContribution,
+        referenceWindowStartUtc = comparison.ReferenceWindowStartUtc,
+        referenceWindowEndUtc = comparison.ReferenceWindowEndUtc,
+        currentWindowStartUtc = comparison.CurrentWindowStartUtc,
+        currentWindowEndUtc = comparison.CurrentWindowEndUtc,
+        evidenceStatus = comparison.EvidenceStatus,
+        comparisonOutcome = comparison.ComparisonOutcome,
+        leadingDriverCode = comparison.LeadingDriverCode,
+        ruleSetVersion = comparison.RuleSetVersion,
+        sourceProvenance = comparison.SourceProvenance,
+        evaluatedAtUtc = comparison.EvaluatedAtUtc,
+        createdAtUtc = comparison.CreatedAtUtc,
+        results = comparison.Results.Select(r => new
+        {
+            id = r.Id,
+            resultDimension = r.ResultDimension,
+            canonicalResultReference = r.CanonicalResultReference,
+            customerReference = r.CustomerReference,
+            materialId = r.MaterialId,
+            componentKind = r.ComponentKind,
+            candidateAssessmentCount = r.CandidateAssessmentCount,
+            comparableAssessmentCount = r.ComparableAssessmentCount,
+            excludedAssessmentCount = r.ExcludedAssessmentCount,
+            completeCoverageCount = r.CompleteCoverageCount,
+            partialCoverageCount = r.PartialCoverageCount,
+            negativeContributionCount = r.NegativeContributionCount,
+            belowThresholdCount = r.BelowThresholdCount,
+            referenceComparableAssessmentCount = r.ReferenceComparableAssessmentCount,
+            currentComparableAssessmentCount = r.CurrentComparableAssessmentCount,
+            referenceExcludedAssessmentCount = r.ReferenceExcludedAssessmentCount,
+            currentExcludedAssessmentCount = r.CurrentExcludedAssessmentCount,
+            referenceMedianContributionMarginRatio = r.ReferenceMedianContributionMarginRatio,
+            currentMedianContributionMarginRatio = r.CurrentMedianContributionMarginRatio,
+            contributionMarginDelta = r.ContributionMarginDelta,
+            referenceMedianUnitContribution = r.ReferenceMedianUnitContribution,
+            currentMedianUnitContribution = r.CurrentMedianUnitContribution,
+            referenceMedianUnitCost = r.ReferenceMedianUnitCost,
+            currentMedianUnitCost = r.CurrentMedianUnitCost,
+            signedUnitCostChange = r.SignedUnitCostChange,
+            signedUnitCostChangeRatio = r.SignedUnitCostChangeRatio,
+            referenceMedianCostShare = r.ReferenceMedianCostShare,
+            currentMedianCostShare = r.CurrentMedianCostShare,
+            costShareDelta = r.CostShareDelta,
+            positionState = r.PositionState,
+            contributionRank = r.ContributionRank,
+            isTied = r.IsTied,
+            evidenceStatus = r.EvidenceStatus,
+            sortOrder = r.SortOrder,
+        }),
+        drivers = comparison.Drivers.Select(d => new
+        {
+            id = d.Id,
+            comparisonResultId = d.ComparisonResultId,
+            reasonCode = d.ReasonCode,
+            severity = d.Severity,
+            actualValue = d.ActualValue,
+            referenceValue = d.ReferenceValue,
+            thresholdValue = d.ThresholdValue,
+            unit = d.Unit,
+            normalizedVariance = d.NormalizedVariance,
+            affectedAssessmentCount = d.AffectedAssessmentCount,
+            supportingText = d.SupportingText,
+            sortOrder = d.SortOrder,
+            isLeadingDriver = d.IsLeadingDriver,
+        }),
+        isPilotData = comparison.IsPilotData,
+        realProfitabilityMappingComplete = false,
+    };
 }
 
 internal sealed record CreateCommercialProfitabilityProfileRequest(
@@ -409,6 +658,19 @@ internal sealed record EvaluateCommercialProfitabilityAssessmentRequest(
     Guid ProfileId,
     uint ExpectedProfileVersion,
     Guid SalesEvidenceObservationId,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+internal sealed record EvaluateCommercialProfitabilityComparisonRequest(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
     string SourceProvenance,
     string IdempotencyKey);
 

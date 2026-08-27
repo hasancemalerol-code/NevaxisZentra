@@ -9,10 +9,17 @@ public static class CommercialIntelligenceConstants
     public const string QuotationRiskRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-1.0";
     public const string QuotationRiskComparisonRuleSetVersion = "COMMERCIAL-QUOTATION-RISK-2.0";
     public const string ProfitabilityRuleSetVersion = "COMMERCIAL-PROFITABILITY-1.0";
+    public const string ProfitabilityComparisonRuleSetVersion = "COMMERCIAL-PROFITABILITY-2.0";
     public const string ProfitabilityDevelopmentPilotProvenance =
         "Deterministic local Development contribution evidence — simulated, non-production, not real customer, quotation, invoice, order, production, cost, accounting, or market evidence.";
+    public const string ProfitabilityComparisonDevelopmentPilotProvenance =
+        "Deterministic local Development profitability comparison evidence — simulated, non-production, not real customer, quotation, invoice, order, production, cost, accounting, profit, or market evidence.";
     public const decimal DefaultProfitabilityMinimumContributionMarginRatio = 0.15m;
     public const int DefaultProfitabilityMaximumEvidenceAgeDays = 180;
+    public const int DefaultProfitabilityMinimumComparableAssessmentCountPerWindow = 3;
+    public const decimal DefaultProfitabilityMaximumAdverseContributionMarginDelta = 0.05m;
+    public const decimal DefaultProfitabilityMinimumFavorableContributionMarginDelta = 0.05m;
+    public const decimal DefaultProfitabilityMaximumCostShareIncrease = 0.10m;
     public const decimal DefaultQuotationRiskMaximumRiskIncidenceDelta = 0.10m;
     public const string QuotationRiskDevelopmentPilotProvenance =
         "Deterministic local Development quotation-risk evidence — simulated, non-production, not real customer, quotation, invoice, order, or market evidence.";

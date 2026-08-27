@@ -1743,4 +1743,119 @@ public static class DevelopmentPilotIds
         CommercialProfitabilityPilotAssessmentStaleEvidenceId,
         CommercialProfitabilityPilotAssessmentMarginMarkupId,
     };
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotReferenceWindowStartUtc =
+        new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotReferenceWindowEndUtc =
+        new(2026, 6, 30, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotCurrentWindowStartUtc =
+        new(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotCurrentWindowEndUtc =
+        new(2026, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotPositionWindowStartUtc =
+        new(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public static readonly DateTimeOffset CommercialProfitabilityComparisonPilotPositionWindowEndUtc =
+        new(2026, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+    public const string CommercialProfitabilityComparisonPilotCustomerPrimary = "COMMPROFIT2-CUST-PRIMARY";
+    public const string CommercialProfitabilityComparisonPilotCustomerSecondary = "COMMPROFIT2-CUST-SECONDARY";
+    public const string CommercialProfitabilityComparisonPilotCustomerTieA = "COMMPROFIT2-CUST-TIE-A";
+    public const string CommercialProfitabilityComparisonPilotCustomerTieB = "COMMPROFIT2-CUST-TIE-B";
+    public const string CommercialProfitabilityComparisonPilotCustomerMaterialPosition = "COMMPROFIT2-CUST-MAT-POS";
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotStableRunId =
+        Guid.Parse("bb000001-03b0-4000-8000-0000000003b0");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotDeteriorationRunId =
+        Guid.Parse("bb000001-03b1-4000-8000-0000000003b1");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotImprovementRunId =
+        Guid.Parse("bb000001-03b2-4000-8000-0000000003b2");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotExactThresholdRunId =
+        Guid.Parse("bb000001-03b3-4000-8000-0000000003b3");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotDirectMaterialRunId =
+        Guid.Parse("bb000001-03b4-4000-8000-0000000003b4");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotEnergyRunId =
+        Guid.Parse("bb000001-03b5-4000-8000-0000000003b5");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotCustomerPositionRunId =
+        Guid.Parse("bb000001-03b6-4000-8000-0000000003b6");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialPositionRunId =
+        Guid.Parse("bb000001-03b7-4000-8000-0000000003b7");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotTieRunId =
+        Guid.Parse("bb000001-03b8-4000-8000-0000000003b8");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotInsufficientRunId =
+        Guid.Parse("bb000001-03b9-4000-8000-0000000003b9");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotIncompleteCoverageRunId =
+        Guid.Parse("bb000001-03ba-4000-8000-0000000003ba");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotSourceConflictRunId =
+        Guid.Parse("bb000001-03bb-4000-8000-0000000003bb");
+
+    public static readonly IReadOnlySet<Guid> CommercialProfitabilityComparisonPilotRunIds = new HashSet<Guid>
+    {
+        CommercialProfitabilityComparisonPilotStableRunId,
+        CommercialProfitabilityComparisonPilotDeteriorationRunId,
+        CommercialProfitabilityComparisonPilotImprovementRunId,
+        CommercialProfitabilityComparisonPilotExactThresholdRunId,
+        CommercialProfitabilityComparisonPilotDirectMaterialRunId,
+        CommercialProfitabilityComparisonPilotEnergyRunId,
+        CommercialProfitabilityComparisonPilotCustomerPositionRunId,
+        CommercialProfitabilityComparisonPilotMaterialPositionRunId,
+        CommercialProfitabilityComparisonPilotTieRunId,
+        CommercialProfitabilityComparisonPilotInsufficientRunId,
+        CommercialProfitabilityComparisonPilotIncompleteCoverageRunId,
+        CommercialProfitabilityComparisonPilotSourceConflictRunId,
+    };
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialStableId =
+        Guid.Parse("bb000001-03c0-4000-8000-0000000003c0");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialDeteriorationId =
+        Guid.Parse("bb000001-03c1-4000-8000-0000000003c1");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialImprovementId =
+        Guid.Parse("bb000001-03c2-4000-8000-0000000003c2");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialExactThresholdId =
+        Guid.Parse("bb000001-03c3-4000-8000-0000000003c3");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialDirectMaterialId =
+        Guid.Parse("bb000001-03c4-4000-8000-0000000003c4");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialEnergyId =
+        Guid.Parse("bb000001-03c5-4000-8000-0000000003c5");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialCustomerPositionId =
+        Guid.Parse("bb000001-03c6-4000-8000-0000000003c6");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialPositionAId =
+        Guid.Parse("bb000001-03c7-4000-8000-0000000003c7");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialPositionBId =
+        Guid.Parse("bb000001-03c8-4000-8000-0000000003c8");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialTieId =
+        Guid.Parse("bb000001-03c9-4000-8000-0000000003c9");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialInsufficientId =
+        Guid.Parse("bb000001-03ca-4000-8000-0000000003ca");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialIncompleteId =
+        Guid.Parse("bb000001-03cb-4000-8000-0000000003cb");
+
+    public static readonly Guid CommercialProfitabilityComparisonPilotMaterialSourceConflictId =
+        Guid.Parse("bb000001-03cc-4000-8000-0000000003cc");
 }

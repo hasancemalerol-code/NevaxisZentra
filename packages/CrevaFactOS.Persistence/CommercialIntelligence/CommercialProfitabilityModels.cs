@@ -174,6 +174,166 @@ public sealed record CommercialProfitabilityAssessmentListFilters(
     int Page,
     int PageSize);
 
+public sealed record CommercialProfitabilityComparisonSummaryReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string ComparisonOutcome,
+    string EvidenceStatus,
+    string AggregationMethod,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    decimal? ReferenceMedianContributionMarginRatio,
+    decimal? CurrentMedianContributionMarginRatio,
+    decimal? ContributionMarginDelta,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    bool IsPilotData);
+
+public sealed record CommercialProfitabilityComparisonResultReadModel(
+    Guid Id,
+    string ResultDimension,
+    string CanonicalResultReference,
+    string? CustomerReference,
+    Guid? MaterialId,
+    string? ComponentKind,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    int CompleteCoverageCount,
+    int PartialCoverageCount,
+    int NegativeContributionCount,
+    int BelowThresholdCount,
+    int? ReferenceComparableAssessmentCount,
+    int? CurrentComparableAssessmentCount,
+    int? ReferenceExcludedAssessmentCount,
+    int? CurrentExcludedAssessmentCount,
+    decimal? ReferenceMedianContributionMarginRatio,
+    decimal? CurrentMedianContributionMarginRatio,
+    decimal? ContributionMarginDelta,
+    decimal? ReferenceMedianUnitContribution,
+    decimal? CurrentMedianUnitContribution,
+    decimal? ReferenceMedianUnitCost,
+    decimal? CurrentMedianUnitCost,
+    decimal? SignedUnitCostChange,
+    decimal? SignedUnitCostChangeRatio,
+    decimal? ReferenceMedianCostShare,
+    decimal? CurrentMedianCostShare,
+    decimal? CostShareDelta,
+    string PositionState,
+    int? ContributionRank,
+    bool IsTied,
+    string EvidenceStatus,
+    int SortOrder);
+
+public sealed record CommercialProfitabilityComparisonDriverReadModel(
+    Guid Id,
+    Guid? ComparisonResultId,
+    string ReasonCode,
+    string Severity,
+    decimal? ActualValue,
+    decimal? ReferenceValue,
+    decimal? ThresholdValue,
+    string? Unit,
+    decimal? NormalizedVariance,
+    int AffectedAssessmentCount,
+    string SupportingText,
+    int SortOrder,
+    bool IsLeadingDriver);
+
+public sealed record CommercialProfitabilityComparisonDetailReadModel(
+    Guid Id,
+    string ComparisonReference,
+    Guid ProfileId,
+    string ProfileCode,
+    string ProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string AggregationMethod,
+    int CandidateAssessmentCount,
+    int ComparableAssessmentCount,
+    int ExcludedAssessmentCount,
+    int CompleteCoverageCount,
+    int PartialCoverageCount,
+    int InsufficientDataCount,
+    int SourceConflictCount,
+    int NegativeContributionCount,
+    int BelowThresholdCount,
+    int? ReferenceCandidateAssessmentCount,
+    int? ReferenceComparableAssessmentCount,
+    int? ReferenceExcludedAssessmentCount,
+    int? ReferenceCompleteCoverageCount,
+    int? ReferencePartialCoverageCount,
+    int? ReferenceInsufficientDataCount,
+    int? ReferenceSourceConflictCount,
+    int? ReferenceNegativeContributionCount,
+    int? ReferenceBelowThresholdCount,
+    int? CurrentCandidateAssessmentCount,
+    int? CurrentComparableAssessmentCount,
+    int? CurrentExcludedAssessmentCount,
+    int? CurrentCompleteCoverageCount,
+    int? CurrentPartialCoverageCount,
+    int? CurrentInsufficientDataCount,
+    int? CurrentSourceConflictCount,
+    int? CurrentNegativeContributionCount,
+    int? CurrentBelowThresholdCount,
+    decimal? ReferenceMedianContributionMarginRatio,
+    decimal? CurrentMedianContributionMarginRatio,
+    decimal? ContributionMarginDelta,
+    decimal? ReferenceMedianUnitContribution,
+    decimal? CurrentMedianUnitContribution,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    string EvidenceStatus,
+    string ComparisonOutcome,
+    string? LeadingDriverCode,
+    string RuleSetVersion,
+    string SourceProvenance,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    IReadOnlyList<CommercialProfitabilityComparisonResultReadModel> Results,
+    IReadOnlyList<CommercialProfitabilityComparisonDriverReadModel> Drivers,
+    bool IsPilotData);
+
+public sealed record EvaluateCommercialProfitabilityComparisonCommand(
+    Guid ProfileId,
+    uint ExpectedProfileVersion,
+    string ComparisonType,
+    Guid? MaterialId,
+    string? CustomerReference,
+    DateTimeOffset CurrentWindowStartUtc,
+    DateTimeOffset CurrentWindowEndUtc,
+    DateTimeOffset? ReferenceWindowStartUtc,
+    DateTimeOffset? ReferenceWindowEndUtc,
+    string SourceProvenance,
+    string IdempotencyKey);
+
+public sealed record CommercialProfitabilityComparisonListFilters(
+    string? ComparisonType,
+    Guid? ProfileId,
+    Guid? MaterialId,
+    string? CustomerReference,
+    string? Outcome,
+    string? EvidenceStatus,
+    DateTimeOffset? WindowFromUtc,
+    DateTimeOffset? WindowToUtc,
+    int Page,
+    int PageSize);
+
 public sealed class CommercialProfitabilityWriteResult
 {
     public bool Succeeded { get; init; }
@@ -183,12 +343,14 @@ public sealed class CommercialProfitabilityWriteResult
     public string? FailureCode { get; init; }
     public string? FailureReason { get; init; }
     public CommercialProfitabilityAssessmentDetailReadModel? Assessment { get; init; }
+    public CommercialProfitabilityComparisonDetailReadModel? Comparison { get; init; }
 
     public static CommercialProfitabilityWriteResult Success(
         Guid entityId,
         uint version,
         bool idempotentReplay = false,
-        CommercialProfitabilityAssessmentDetailReadModel? assessment = null) =>
+        CommercialProfitabilityAssessmentDetailReadModel? assessment = null,
+        CommercialProfitabilityComparisonDetailReadModel? comparison = null) =>
         new()
         {
             Succeeded = true,
@@ -196,6 +358,7 @@ public sealed class CommercialProfitabilityWriteResult
             Version = version,
             IdempotentReplay = idempotentReplay,
             Assessment = assessment,
+            Comparison = comparison,
         };
 
     public static CommercialProfitabilityWriteResult Fail(string code, string reason) =>
@@ -246,5 +409,20 @@ public interface ICommercialProfitabilityRepository
     Task<CommercialProfitabilityWriteResult> EvaluateAssessmentAsync(
         CommercialIntelligenceOperationContext context,
         EvaluateCommercialProfitabilityAssessmentCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CommercialProfitabilityComparisonSummaryReadModel>> ListComparisonsAsync(
+        CommercialIntelligenceOperationContext context,
+        CommercialProfitabilityComparisonListFilters filters,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialProfitabilityComparisonDetailReadModel?> GetComparisonByIdAsync(
+        CommercialIntelligenceOperationContext context,
+        Guid comparisonRunId,
+        CancellationToken cancellationToken = default);
+
+    Task<CommercialProfitabilityWriteResult> EvaluateComparisonAsync(
+        CommercialIntelligenceOperationContext context,
+        EvaluateCommercialProfitabilityComparisonCommand command,
         CancellationToken cancellationToken = default);
 }
