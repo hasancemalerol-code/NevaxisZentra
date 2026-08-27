@@ -64,6 +64,38 @@ export function formatRatioAsPercent(ratio: number | null | undefined): string {
   return `${formatted}%`;
 }
 
+/** Incidence fraction 0–1 → display percent without inventing zero for null. */
+export function formatIncidenceFraction(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Hesaplanamadı";
+  const percent = value * 100;
+  return `${new Intl.NumberFormat("tr-TR", {
+    style: "decimal",
+    maximumFractionDigits: 0,
+  }).format(percent)}%`;
+}
+
+/** Signed incidence delta −1..1 as percentage points for display only. */
+export function formatIncidenceDeltaPoints(delta: number | null | undefined): string {
+  if (delta === null || delta === undefined || Number.isNaN(delta)) return "Hesaplanamadı";
+  const points = delta * 100;
+  const formatted = new Intl.NumberFormat("tr-TR", {
+    style: "decimal",
+    maximumFractionDigits: 1,
+    signDisplay: "exceptZero",
+  }).format(points);
+  return `${formatted} yüzde puan`;
+}
+
+export function formatNullableCount(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Hesaplanamadı";
+  return formatCount(value);
+}
+
+export function formatRemainingValidityDays(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Belirtilmemiş";
+  return `${formatCount(value)} gün`;
+}
+
 export function formatCurrency(
   value: number | null | undefined,
   currencyCode: string | null | undefined,

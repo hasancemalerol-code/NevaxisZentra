@@ -24,7 +24,8 @@ export function generateStaticParams() {
         && item.href !== "/operasyonel-riskler"
         && item.href !== "/ticari-zeka/satin-alma-fiyat-analizi"
         && item.href !== "/ticari-zeka/tedarikci-karsilastirmasi"
-        && item.href !== "/ticari-zeka/satis-fiyat-analizi",
+        && item.href !== "/ticari-zeka/satis-fiyat-analizi"
+        && item.href !== "/ticari-zeka/teklif-riskleri",
     )
     .map((item) => ({
       sections: item.href

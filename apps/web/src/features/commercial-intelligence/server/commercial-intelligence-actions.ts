@@ -20,11 +20,13 @@ import { resolveCommercialIntelligenceRequestContext } from "./commercial-intell
 const PURCHASE_PRICE_ROUTE_PATH = "/ticari-zeka/satin-alma-fiyat-analizi";
 const SUPPLIER_COMPARISON_ROUTE_PATH = "/ticari-zeka/tedarikci-karsilastirmasi";
 const SALES_PRICE_ROUTE_PATH = "/ticari-zeka/satis-fiyat-analizi";
+const QUOTATION_RISK_ROUTE_PATH = "/ticari-zeka/teklif-riskleri";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
   revalidatePath(SUPPLIER_COMPARISON_ROUTE_PATH);
   revalidatePath(SALES_PRICE_ROUTE_PATH);
+  revalidatePath(QUOTATION_RISK_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -305,6 +307,97 @@ export async function evaluateCommercialSalesPriceComparisonAction(input: Readon
   return {
     status: "success" as const,
     entityId: result.value.entityId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function refreshCommercialQuotationRiskWorkspaceAction(
+  assessmentId?: string | null,
+  comparisonId?: string | null,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialQuotationRiskWorkspace } = await import("./commercial-quotation-risk-queries");
+  const result = await readCommercialQuotationRiskWorkspace(assessmentId, comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadCommercialQuotationRiskAssessmentDetailAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialQuotationRiskAssessmentDetail } = await import("./commercial-quotation-risk-queries");
+  const result = await readCommercialQuotationRiskAssessmentDetail(assessmentId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function loadCommercialQuotationRiskComparisonDetailAction(comparisonId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialQuotationRiskComparisonDetail } = await import("./commercial-quotation-risk-queries");
+  const result = await readCommercialQuotationRiskComparisonDetail(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function updateCommercialQuotationRiskProfileAction(input: Readonly<{
+  profileId: string;
+  expectedVersion: number;
+  name: string;
+  status: string;
+  referenceWindowDurationDays: number;
+  minimumComparableObservations: number;
+  maximumNegativePriceVarianceRatio: number;
+  maximumPositivePriceVarianceRatio: number;
+  maximumPaymentTermDays: number;
+  expiryWarningDays: number;
+  maximumEvidenceAgeDays: number;
+  allowedEvidenceStatuses: string;
+  allowedSalesEvidenceKinds: string;
+  requiredTaxInclusion: string;
+  requiredDiscountInclusion: string;
+  requiredFreightInclusion: string;
+  requiredGrossNetBasis: string;
+  sourceProvenance: string;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { updateCommercialQuotationRiskProfile } = await import("./commercial-quotation-risk-api-client");
+  const result = await updateCommercialQuotationRiskProfile(resolved.context, input.profileId, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Profil başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
     idempotentReplay: result.value.idempotentReplay,
   };
 }
