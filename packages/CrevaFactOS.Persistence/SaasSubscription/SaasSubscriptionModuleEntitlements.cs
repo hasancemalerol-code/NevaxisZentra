@@ -23,6 +23,7 @@ public static class SaasSubscriptionModuleEntitlements
         public const string ErpIntegration = "module.erp-integration";
         public const string CommercialIntelligence = "module.commercial-intelligence";
         public const string OperationalRisk = "module.operational-risk";
+        public const string AiTaskCenter = "module.ai-task-center";
     }
 
     private static readonly IReadOnlyList<(string RoutePrefix, string EntitlementCode)> RouteMappings =
@@ -48,6 +49,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/ticari-zeka", EntitlementCodes.CommercialIntelligence),
         ("/operasyonel-riskler", EntitlementCodes.OperationalRisk),
         ("/riskler", EntitlementCodes.OperationalRisk),
+        ("/ai-gorevleri", EntitlementCodes.AiTaskCenter),
     ];
 
     private static readonly HashSet<string> RecoveryExemptRoutes = new(StringComparer.OrdinalIgnoreCase)
@@ -106,6 +108,7 @@ public static class SaasSubscriptionModuleEntitlements
             trimmed = "/" + trimmed;
         }
 
-        return trimmed.TrimEnd('/').ToLowerInvariant();
+        var normalized = trimmed.TrimEnd('/').ToLowerInvariant();
+        return normalized.Length == 0 ? "/" : normalized;
     }
 }

@@ -1,20 +1,3 @@
-import {
-  getAiTaskActorRoleDescription,
-  getAiTaskActorRoleLabel,
-} from "@/features/ai-task-center/presentation/ai-task-role-labels";
-import {
-  getAiTaskTargetSystemDescription,
-  getAiTaskTargetSystemLabel,
-} from "@/features/ai-task-center/presentation/ai-task-target-system-labels";
-import {
-  getAiTaskSourceTypeDescription,
-  getAiTaskSourceTypeLabel,
-} from "@/features/ai-task-center/presentation/ai-task-source-labels";
-import {
-  getAiTaskAuditActorTypeLabel,
-  getAiTaskAuditEventLabel,
-  getAiTaskAuditTransitionLabel,
-} from "@/features/ai-task-center/presentation/ai-task-audit-labels";
 import { notFound } from "next/navigation";
 import {
   Bot,
@@ -33,11 +16,27 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { AiTaskActionPanel } from "@/features/ai-task-center/components/ai-task-action-panel";
+import { EmptyState } from "@/components/ui/states";
+import { AiTaskActionPanelClient } from "@/features/ai-task-center/components/ai-task-action-panel-client";
 import { AiTaskExecutionPanel } from "@/features/ai-task-center/components/ai-task-execution-panel";
 import { AiTaskImpactPanel } from "@/features/ai-task-center/components/ai-task-impact-panel";
-import { getAiTaskPreviewById } from "@/features/ai-task-center/data/ai-task-preview-data";
-import { AI_TASK_PREVIEW_DATA } from "@/features/ai-task-center/data/ai-task-preview-data";
+import { AiTaskSourceReferenceSection } from "@/features/ai-task-center/components/ai-task-source-reference-section";
+import {
+  getAiTaskAuditTransitionLabel,
+  getAiTaskAuditEventLabel,
+} from "@/features/ai-task-center/presentation/ai-task-audit-labels";
+import {
+  getAiTaskActorRoleDescription,
+  getAiTaskActorRoleLabel,
+} from "@/features/ai-task-center/presentation/ai-task-role-labels";
+import {
+  getAiTaskSourceTypeDescription,
+  getAiTaskSourceTypeLabel,
+} from "@/features/ai-task-center/presentation/ai-task-source-labels";
+import {
+  getAiTaskTargetSystemDescription,
+  getAiTaskTargetSystemLabel,
+} from "@/features/ai-task-center/presentation/ai-task-target-system-labels";
 import {
   AI_TASK_PRIORITY_TONES,
   AI_TASK_RISK_LEVEL_TONES,
@@ -49,6 +48,7 @@ import {
   getAiTaskRiskLevelLabel,
   getAiTaskStatusLabel,
 } from "@/features/ai-task-center/presentation/ai-task-labels";
+import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
 
 type PageParams = Readonly<{
   taskId: string;
@@ -105,30 +105,42 @@ function formatMoney(
   return `${NUMBER_FORMATTER.format(amount)} ${currency}`;
 }
 
-export function generateStaticParams() {
-  return AI_TASK_PREVIEW_DATA.map((task) => ({
-    taskId: task.id,
-  }));
-}
-
 export default async function AiTaskDetailPage({
   params,
 }: Readonly<{
   params: Promise<PageParams>;
 }>) {
   const { taskId } = await params;
-  const task = getAiTaskPreviewById(taskId);
+  const result = await readAiTaskDetail(taskId);
 
-  if (!task) {
-    notFound();
+  if (result.status === "failure") {
+    if (result.code === "not-found") {
+      notFound();
+    }
+
+    return (
+      <PageContent>
+        <PageHeader
+          description="AI görev detayı yüklenemedi."
+          eyebrow="AI Görev Merkezi"
+          title="Görev detayı"
+        />
+
+        <EmptyState
+          description={result.message}
+          title="Görev yüklenemedi"
+        />
+      </PageContent>
+    );
   }
 
+  const { task, version, taskReference, sourceModule, sourceEntityId } = result.detail;
+
   return (
-    <PageContent>
+    <PageContent data-testid="ai-task-detail-page">
       <PageHeader
         description={task.summary}
         eyebrow={getAiTaskCategoryLabel(task.category)}
-        preview
         title={task.title}
         actions={
           <div className="ai-task-detail__badges">
@@ -147,11 +159,22 @@ export default async function AiTaskDetailPage({
         }
       />
 
-      <AiTaskActionPanel task={task} />
+      <AiTaskActionPanelClient
+        canReview={result.canReview}
+        task={task}
+        version={version}
+      />
+
+      <AiTaskSourceReferenceSection
+        sourceEntityId={sourceEntityId}
+        sourceModule={sourceModule}
+        taskReference={taskReference}
+      />
 
       <AiTaskExecutionPanel task={task} />
 
       <AiTaskImpactPanel impact={task.impact} />
+
       <div className="ai-task-detail__summary-grid">
         <Card className="ai-task-detail__summary-card">
           <span>
@@ -337,7 +360,9 @@ export default async function AiTaskDetailPage({
                 {source.valueSummary ?? "Değer özeti bulunmuyor"}
               </p>
 
-              <small>
+              <small
+                title={getAiTaskSourceTypeDescription(source.sourceType)}
+              >
                 Gözlem zamanı:{" "}
                 {formatDateTime(source.observedAt)}
               </small>
@@ -356,7 +381,10 @@ export default async function AiTaskDetailPage({
         description="Görevin oluşturulmasından son durumuna kadar değiştirilemez işlem geçmişi."
         title="Denetim geçmişi"
       >
-        <div className="ai-task-detail__audit-list">
+        <div
+          className="ai-task-detail__audit-list"
+          data-testid="ai-task-audit-timeline"
+        >
           {task.auditTrail.map((event) => (
             <Card
               className="ai-task-detail__audit-card"
@@ -373,7 +401,7 @@ export default async function AiTaskDetailPage({
               </div>
 
               <p>
-                {event.eventType}
+                {getAiTaskAuditEventLabel(event.eventType)}
               </p>
 
               {event.note ? (

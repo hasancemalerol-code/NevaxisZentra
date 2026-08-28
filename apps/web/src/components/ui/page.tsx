@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { Badge } from "./badge";
 
@@ -49,8 +49,15 @@ export function Section({ title, description, action, children, className = "" }
   );
 }
 
-export function PageContent({ children }: Readonly<{ children: ReactNode }>) {
-  return <div className="page-content">{children}</div>;
+export function PageContent({
+  children,
+  ...props
+}: Readonly<{ children: ReactNode } & ComponentPropsWithoutRef<"div">>) {
+  return (
+    <div className="page-content" {...props}>
+      {children}
+    </div>
+  );
 }
 
 export function Divider() {

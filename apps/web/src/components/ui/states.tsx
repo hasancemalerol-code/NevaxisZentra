@@ -1,5 +1,5 @@
 import { CircleAlert, Inbox } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { Button } from "./button";
 
@@ -11,11 +11,11 @@ type StateProps = Readonly<{
   title: string;
   description: string;
   action?: ReactNode;
-}>;
+}> & ComponentPropsWithoutRef<"div">;
 
-export function EmptyState({ title, description, action }: StateProps) {
+export function EmptyState({ title, description, action, ...props }: StateProps) {
   return (
-    <div className="state-panel empty-state">
+    <div className="state-panel empty-state" {...props}>
       <span className="state-icon" aria-hidden="true"><Inbox /></span>
       <div><h3>{title}</h3><p>{description}</p></div>
       {action ? <div>{action}</div> : null}

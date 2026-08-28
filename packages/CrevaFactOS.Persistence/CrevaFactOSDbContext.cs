@@ -29,6 +29,7 @@ using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.CommercialIntelligence;
+using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -293,6 +294,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<OperationalRiskDetectionRun> OperationalRiskDetectionRuns => Set<OperationalRiskDetectionRun>();
     public DbSet<OperationalRiskDetectionResult> OperationalRiskDetectionResults => Set<OperationalRiskDetectionResult>();
     public DbSet<OperationalRiskDetectionDriver> OperationalRiskDetectionDrivers => Set<OperationalRiskDetectionDriver>();
+
+    // AI task center foundation (AI-TASK-CENTER-1)
+    public DbSet<AiTask> AiTasks => Set<AiTask>();
+    public DbSet<AiTaskAuditEvent> AiTaskAuditEvents => Set<AiTaskAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1561,6 +1566,19 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // AI task center foundation (AI-TASK-CENTER-1)
+        modelBuilder.ApplyConfiguration(new AiTaskEntityConfiguration());
+        modelBuilder.Entity<AiTask>().HasQueryFilter(t =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && t.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAuditEventEntityConfiguration());
+        modelBuilder.Entity<AiTaskAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new CommercialPurchasePriceProfileEntityConfiguration());
         modelBuilder.Entity<CommercialPurchasePriceProfile>().HasQueryFilter(p =>

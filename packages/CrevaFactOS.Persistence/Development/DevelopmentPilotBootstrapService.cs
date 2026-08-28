@@ -12,6 +12,7 @@ using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
+using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasSubscription;
@@ -472,6 +473,22 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureOperationalRiskManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskCreatePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReviewPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReviewPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskCreatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskReviewPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureCommercialIntelligenceReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureCommercialIntelligenceReadPermissionAssignmentAsync(
@@ -2772,6 +2789,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             OperationalRiskPermissionKeys.Manage,
             DevelopmentPilotIds.OperationalRiskManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.Read,
+            DevelopmentPilotIds.AiTaskReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskCreatePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.Create,
+            DevelopmentPilotIds.AiTaskCreatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskReviewPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.Review,
+            DevelopmentPilotIds.AiTaskReviewPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureCommercialIntelligenceReadPermissionAssignmentAsync(

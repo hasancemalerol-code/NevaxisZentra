@@ -47,6 +47,7 @@ const MODULE_ENTITLEMENT_LABELS: Record<string, string> = {
   "module.erp-integration": "ERP entegrasyonları",
   "module.commercial-intelligence": "Ticari zekâ",
   "module.operational-risk": "Operasyonel riskler",
+  "module.ai-task-center": "AI Görev Merkezi",
 };
 
 const LIMIT_LABELS: Record<string, string> = {
@@ -77,6 +78,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/ticari-zeka", code: "module.commercial-intelligence" },
   { prefix: "/operasyonel-riskler", code: "module.operational-risk" },
   { prefix: "/riskler", code: "module.operational-risk" },
+  { prefix: "/ai-gorevleri", code: "module.ai-task-center" },
 ];
 
 export const SUBSCRIPTION_RECOVERY_ROUTES = ["/ayarlar", "/abonelik-erisimi"] as const;

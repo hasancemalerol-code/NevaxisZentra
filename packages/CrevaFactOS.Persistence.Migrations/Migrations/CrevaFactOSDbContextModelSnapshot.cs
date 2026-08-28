@@ -388,6 +388,343 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ApprovalDecidedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approval_decided_at_utc");
+
+                    b.Property<string>("ApprovalDecidedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("approval_decided_by");
+
+                    b.Property<string>("ApprovalDecisionNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("approval_decision_note");
+
+                    b.Property<DateTimeOffset?>("ApprovalRequestedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approval_requested_at_utc");
+
+                    b.Property<string>("ApprovalRequestedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("approval_requested_by");
+
+                    b.Property<string>("ApprovalState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("approval_state");
+
+                    b.Property<string>("AssigneeJson")
+                        .HasColumnType("text")
+                        .HasColumnName("assignee_json");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<string>("ConfidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("confidence_json");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CustomerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("DetectedIssue")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("detected_issue");
+
+                    b.Property<DateTimeOffset?>("DueAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("due_at_utc");
+
+                    b.Property<string>("ExecutionJson")
+                        .HasColumnType("text")
+                        .HasColumnName("execution_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPayloadFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_payload_fingerprint");
+
+                    b.Property<string>("ImpactJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("impact_json");
+
+                    b.Property<string>("MachineId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("machine_id");
+
+                    b.Property<string>("MaterialId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("material_id");
+
+                    b.Property<string>("MoldId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("mold_id");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("priority");
+
+                    b.Property<string>("ProductionLineId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("production_line_id");
+
+                    b.Property<string>("ProductionOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("production_order_id");
+
+                    b.Property<string>("Reasoning")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)")
+                        .HasColumnName("reasoning");
+
+                    b.Property<string>("RecommendationJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recommendation_json");
+
+                    b.Property<string>("RiskLevel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("risk_level");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("SalesOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("sales_order_id");
+
+                    b.Property<string>("SiteId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("SourceEntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_entity_id");
+
+                    b.Property<string>("SourceModule")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_module");
+
+                    b.Property<string>("SourcesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sources_json");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("summary");
+
+                    b.Property<string>("SupplierId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("supplier_id");
+
+                    b.Property<string>("TaskReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("task_reference");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_ai_tasks_tenant_idempotency")
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "TaskReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_ai_tasks_tenant_reference");
+
+                    b.HasIndex("TenantId", "FacilityId", "Category")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_category");
+
+                    b.HasIndex("TenantId", "FacilityId", "CreatedAtUtc")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_created");
+
+                    b.HasIndex("TenantId", "FacilityId", "Priority")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_priority");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_status");
+
+                    b.HasIndex("TenantId", "FacilityId", "SourceModule", "SourceEntityId")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_source");
+
+                    b.ToTable("ai_tasks", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_id");
+
+                    b.Property<string>("ActorLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_label");
+
+                    b.Property<string>("ActorType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("actor_type");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("NextStatus")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("next_status");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("note");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PreviousStatus")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("previous_status");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("task_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("TenantId", "FacilityId", "TaskId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_ai_task_audit_events_tenant_facility_task");
+
+                    b.ToTable("ai_task_audit_events", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.AiUsage.AiUsageRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -25053,6 +25390,46 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTask", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.AiTasks.AiTask", "Task")
+                        .WithMany("AuditEvents")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.AiUsage.AiUsageRecord", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -29319,6 +29696,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTask", b =>
+                {
+                    b.Navigation("AuditEvents");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAssessment", b =>

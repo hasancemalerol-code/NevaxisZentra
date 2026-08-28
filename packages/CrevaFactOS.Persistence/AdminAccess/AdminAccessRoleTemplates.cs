@@ -1,3 +1,4 @@
+using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Authorization;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.Energy;
@@ -157,6 +158,7 @@ public static class AdminAccessRoleTemplates
         EnergyPermissionKeys.Manage,
         OperationalRiskPermissionKeys.Manage,
         CommercialIntelligencePermissionKeys.Manage,
+        AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
         ProductionPlanningPermissionKeys.Write, ProductionPlanningPermissionKeys.Approve,
         ProductionExecutionPermissionKeys.Write, QualityPermissionKeys.Manage,
         ErpPermissionKeys.Manage, ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove,
@@ -178,6 +180,7 @@ internal static class CustomerCatalogKeys
         IotPlcPermissionKeys.Read,
         OperationalRiskPermissionKeys.Read,
         CommercialIntelligencePermissionKeys.Read,
+        AiTaskPermissionKeys.Read,
         SaasCommercialPermissionKeys.Read,
     ];
 
@@ -205,6 +208,7 @@ internal static class CustomerCatalogKeys
         IotPlcPermissionKeys.Read, IotPlcPermissionKeys.Manage,
         OperationalRiskPermissionKeys.Read, OperationalRiskPermissionKeys.Manage,
         CommercialIntelligencePermissionKeys.Read, CommercialIntelligencePermissionKeys.Manage,
+        AiTaskPermissionKeys.Read, AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
         ErpPermissionKeys.Read, ErpPermissionKeys.Manage,
         ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove, ErpPermissionKeys.WritebackExecute,
         SaasCommercialPermissionKeys.Read,
