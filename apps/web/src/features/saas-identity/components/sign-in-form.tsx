@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { signInSaasIdentityBrowser } from "../client/saas-identity-browser-client";
@@ -20,64 +27,142 @@ type SignInFormProps = Readonly<{
   returnUrl?: string | null;
 }>;
 
+type SignInCredentials = Readonly<{
+  organizationContext: string;
+  email: string;
+  password: string;
+}>;
+
+function readSignInCredentials(
+  form: HTMLFormElement,
+): SignInCredentials {
+  const formData = new FormData(form);
+  return {
+    organizationContext: String(formData.get("organizationContext") ?? "").trim(),
+    email: String(formData.get("email") ?? "").trim(),
+    password: String(formData.get("password") ?? ""),
+  };
+}
+
 export function SignInForm({
   initialError = null,
   initialNotice = null,
   returnUrl = null,
 }: SignInFormProps) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const submittingRef = useRef(false);
   const [organizationContext, setOrganizationContext] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
+  const [clientReady, setClientReady] = useState(false);
 
   useEffect(() => {
     stripSensitiveQueryParam("password");
     stripSensitiveQueryParam("email");
     stripSensitiveQueryParam("organizationContext");
+    setClientReady(true);
   }, []);
 
-  const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+  const authenticate = useCallback(
+    async (credentials: SignInCredentials) => {
+      if (submittingRef.current) {
+        return;
+      }
+
+      if (
+        !credentials.organizationContext ||
+        !credentials.email ||
+        !credentials.password
+      ) {
+        setError(SAAS_IDENTITY_MESSAGES.signInMissingFields);
+        return;
+      }
+
+      submittingRef.current = true;
       setPending(true);
       setError(null);
 
-      const result = await signInSaasIdentityBrowser({
-        organizationContext: organizationContext.trim(),
-        email: email.trim(),
-        password,
-      });
+      try {
+        const result = await signInSaasIdentityBrowser({
+          organizationContext: credentials.organizationContext,
+          email: credentials.email,
+          password: credentials.password,
+        });
 
-      if (result.status === "failure") {
-        setError(mapSaasIdentityFailureMessage(result.code));
-        setPending(false);
-        return;
-      }
+        if (result.status === "failure") {
+          setError(mapSaasIdentityFailureMessage(result.code));
+          submittingRef.current = false;
+          setPending(false);
+          return;
+        }
 
-      if (result.value === "mfa_required") {
-        router.push("/mfa-dogrula");
+        if (result.value === "mfa_required") {
+          router.push("/mfa-dogrula");
+          router.refresh();
+          return;
+        }
+
+        const requestedReturnUrl =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("returnUrl")
+            : returnUrl;
+        router.push(
+          isSafeAppReturnUrl(requestedReturnUrl)
+            ? requestedReturnUrl
+            : "/dashboard",
+        );
         router.refresh();
+      } catch {
+        setError(SAAS_IDENTITY_MESSAGES.unexpectedError);
+        submittingRef.current = false;
+        setPending(false);
+      }
+    },
+    [returnUrl, router],
+  );
+
+  const handleSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.nativeEvent.stopImmediatePropagation();
+      void authenticate(readSignInCredentials(event.currentTarget));
+    },
+    [authenticate],
+  );
+
+  const handleSubmitClick = useCallback(() => {
+    const form = formRef.current;
+    if (!form) {
+      return;
+    }
+
+    void authenticate(readSignInCredentials(form));
+  }, [authenticate]);
+
+  const handleFieldKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== "Enter") {
         return;
       }
 
-      const requestedReturnUrl =
-        typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search).get("returnUrl")
-          : returnUrl;
-      router.push(
-        isSafeAppReturnUrl(requestedReturnUrl)
-          ? requestedReturnUrl
-          : "/dashboard",
-      );
-      router.refresh();
+      event.preventDefault();
+      const form = formRef.current;
+      if (!form) {
+        return;
+      }
+
+      void authenticate(readSignInCredentials(form));
     },
-    [email, organizationContext, password, returnUrl, router],
+    [authenticate],
   );
 
   return (
     <form
+      ref={formRef}
       action="/giris/oturum"
       autoComplete="on"
       className="auth-form"
@@ -98,6 +183,7 @@ export function SignInForm({
           required
           value={organizationContext}
           onChange={(event) => setOrganizationContext(event.target.value)}
+          onKeyDown={handleFieldKeyDown}
           disabled={pending}
         />
       </div>
@@ -113,6 +199,7 @@ export function SignInForm({
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          onKeyDown={handleFieldKeyDown}
           disabled={pending}
         />
       </div>
@@ -127,6 +214,7 @@ export function SignInForm({
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          onKeyDown={handleFieldKeyDown}
           disabled={pending}
         />
       </div>
@@ -138,8 +226,10 @@ export function SignInForm({
       <Button
         className="auth-form__submit"
         disabled={pending}
-        type="submit"
+        aria-busy={pending}
+        type={clientReady ? "button" : "submit"}
         variant="primary"
+        onClick={clientReady ? handleSubmitClick : undefined}
       >
         {pending ? "Oturum açılıyor…" : SAAS_IDENTITY_MESSAGES.signInTitle}
       </Button>

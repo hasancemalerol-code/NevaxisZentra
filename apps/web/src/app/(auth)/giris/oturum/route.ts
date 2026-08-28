@@ -15,11 +15,17 @@ function readFormText(formData: FormData, name: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function resolveRedirectUrl(request: Request, path: string): URL {
+  const incoming = new URL(request.url);
+  const host = request.headers.get("host") ?? incoming.host;
+  return new URL(path, `${incoming.protocol}//${host}`);
+}
+
 function deniedSignInRedirect(
   request: Request,
   returnUrl: string | null,
 ): NextResponse {
-  const target = new URL(buildCleanSignInPath(returnUrl), request.url);
+  const target = resolveRedirectUrl(request, buildCleanSignInPath(returnUrl));
   target.searchParams.set("auth", "denied");
   return NextResponse.redirect(target, 303);
 }
@@ -29,7 +35,7 @@ function safeRedirect(
   path: string,
   setCookies: string[],
 ): NextResponse {
-  const response = NextResponse.redirect(new URL(path, request.url), 303);
+  const response = NextResponse.redirect(resolveRedirectUrl(request, path), 303);
   for (const cookie of setCookies) {
     response.headers.append("Set-Cookie", cookie);
   }
@@ -110,5 +116,5 @@ export async function POST(request: Request): Promise<NextResponse> {
 }
 
 export function GET(request: Request): NextResponse {
-  return NextResponse.redirect(new URL("/giris", request.url), 303);
+  return NextResponse.redirect(resolveRedirectUrl(request, "/giris"), 303);
 }

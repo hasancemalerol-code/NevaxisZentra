@@ -25,6 +25,8 @@ export const SAAS_IDENTITY_MESSAGES = {
     "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
   configurationError:
     "Kimlik doğrulama yapılandırması eksik.",
+  signInMissingFields:
+    "Kuruluş kodu, e-posta ve parola zorunludur.",
   signOutLabel: "Oturumu kapat",
   sessionExpired:
     "Oturumunuzun süresi doldu. Lütfen yeniden giriş yapın.",
@@ -57,6 +59,11 @@ export function mapSaasIdentityFailureMessage(
       return SAAS_IDENTITY_MESSAGES.resetPasswordExpired;
     case "invalid-token":
       return SAAS_IDENTITY_MESSAGES.resetPasswordExpired;
+    case "configuration-error":
+      return SAAS_IDENTITY_MESSAGES.configurationError;
+    case "csrf-denied":
+    case "source-unavailable":
+      return SAAS_IDENTITY_MESSAGES.unexpectedError;
     default:
       return fallback;
   }
