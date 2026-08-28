@@ -196,6 +196,11 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "users-round",
       },
       {
+        label: "Malzeme ve Maliyet Kârlılığı",
+        href: "/ticari-zeka/malzeme-ve-maliyet-karliligi",
+        iconKey: "boxes",
+      },
+      {
         label: "Teklif Riskleri",
         href: "/ticari-zeka/teklif-riskleri",
         iconKey: "file-warning",

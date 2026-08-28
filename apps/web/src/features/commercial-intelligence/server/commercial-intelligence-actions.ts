@@ -23,6 +23,7 @@ const SALES_PRICE_ROUTE_PATH = "/ticari-zeka/satis-fiyat-analizi";
 const QUOTATION_RISK_ROUTE_PATH = "/ticari-zeka/teklif-riskleri";
 const PROFITABILITY_ROUTE_PATH = "/ticari-zeka/urun-karliligi";
 const CUSTOMER_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/musteri-karliligi";
+const MATERIAL_COST_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/malzeme-ve-maliyet-karliligi";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
@@ -31,6 +32,7 @@ function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(QUOTATION_RISK_ROUTE_PATH);
   revalidatePath(PROFITABILITY_ROUTE_PATH);
   revalidatePath(CUSTOMER_PROFITABILITY_ROUTE_PATH);
+  revalidatePath(MATERIAL_COST_PROFITABILITY_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -467,6 +469,41 @@ export async function loadCommercialCustomerProfitabilityComparisonDetailAction(
 
   const { readCommercialCustomerProfitabilityComparisonDetail } = await import("./commercial-customer-profitability-queries");
   const result = await readCommercialCustomerProfitabilityComparisonDetail(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function refreshCommercialMaterialCostProfitabilityWorkspaceAction(
+  comparisonId?: string | null,
+  filters?: import("./commercial-material-cost-profitability-queries").CommercialMaterialCostProfitabilityApiFilters,
+  activeLens: "material" | "cost-driver" = "material",
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialMaterialCostProfitabilityWorkspace } = await import("./commercial-material-cost-profitability-queries");
+  const result = await readCommercialMaterialCostProfitabilityWorkspace(comparisonId, filters, activeLens);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadCommercialMaterialCostProfitabilityComparisonDetailAction(comparisonId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialMaterialCostProfitabilityComparisonDetail } = await import("./commercial-material-cost-profitability-queries");
+  const result = await readCommercialMaterialCostProfitabilityComparisonDetail(comparisonId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message, code: result.code };
   }

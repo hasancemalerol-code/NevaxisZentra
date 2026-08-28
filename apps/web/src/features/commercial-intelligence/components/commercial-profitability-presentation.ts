@@ -5,7 +5,11 @@ import type {
   CommercialProfitabilityTemporalChartPoint,
 } from "../types/commercial-profitability-types";
 import type { CommercialCustomerProfitabilityTableRow } from "../types/commercial-customer-profitability-types";
-import { formatCount, formatDateTime } from "../domain/commercial-intelligence-formatters";
+import type {
+  CommercialCostDriverProfitabilityTableRow,
+  CommercialMaterialProfitabilityTableRow,
+} from "../types/commercial-material-cost-profitability-types";
+import { formatCount, formatDateTime, formatRatioAsPercent } from "../domain/commercial-intelligence-formatters";
 import {
   getCommercialProfitabilityComparisonTypeLabel,
   getCommercialProfitabilityOutcomeLabel,
@@ -20,6 +24,8 @@ const CUSTOMER_POSITION_TYPE = "customer-contribution-position";
 const MATERIAL_POSITION_TYPE = "material-contribution-position";
 
 export const PROFITABILITY_CUSTOMER_CONTRIBUTION_TYPE = CUSTOMER_POSITION_TYPE;
+export const PROFITABILITY_MATERIAL_CONTRIBUTION_TYPE = MATERIAL_POSITION_TYPE;
+export const PROFITABILITY_COST_COMPONENT_MIX_TYPE = COST_MIX_TYPE;
 
 export function filterProfitabilityCustomerComparisons(
   comparisons: readonly CommercialProfitabilityComparisonSummary[],
@@ -39,6 +45,12 @@ export function filterProfitabilityCostMixComparisons(
   return comparisons.filter((item) => item.comparisonType === COST_MIX_TYPE);
 }
 
+export function filterProfitabilityMaterialComparisons(
+  comparisons: readonly CommercialProfitabilityComparisonSummary[],
+): readonly CommercialProfitabilityComparisonSummary[] {
+  return comparisons.filter((item) => item.comparisonType === MATERIAL_POSITION_TYPE);
+}
+
 export function filterProfitabilityPositionComparisons(
   comparisons: readonly CommercialProfitabilityComparisonSummary[],
 ): readonly CommercialProfitabilityComparisonSummary[] {
@@ -52,6 +64,132 @@ export function selectLatestProfitabilityComparison(
 ): CommercialProfitabilityComparisonSummary | null {
   if (comparisons.length === 0) return null;
   return [...comparisons].sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc))[0] ?? null;
+}
+
+export function buildMaterialCostProfitabilityKpiCards(
+  materialComparisons: readonly CommercialProfitabilityComparisonSummary[],
+  costMixComparisons: readonly CommercialProfitabilityComparisonSummary[],
+): readonly CommercialProfitabilityKpiCard[] {
+  const allComparisons = [...materialComparisons, ...costMixComparisons];
+  const improvement = allComparisons.filter((item) => item.comparisonOutcome === "contribution-improvement").length;
+  const deterioration = allComparisons.filter((item) => item.comparisonOutcome === "contribution-deterioration").length;
+  const stable = allComparisons.filter((item) => item.comparisonOutcome === "within-comparison-band").length;
+  const insufficient = allComparisons.filter((item) => item.comparisonOutcome === "insufficient-data").length;
+  const conflict = allComparisons.filter((item) => item.comparisonOutcome === "source-conflict").length;
+
+  let largestCostDriverLabel = "—";
+  let largestCostDriverDelta: number | null = null;
+  for (const comparison of costMixComparisons) {
+    const delta = comparison.contributionMarginDelta;
+    if (delta === null || delta === undefined) continue;
+    const magnitude = Math.abs(delta);
+    if (largestCostDriverDelta === null || magnitude > Math.abs(largestCostDriverDelta)) {
+      largestCostDriverDelta = delta;
+      largestCostDriverLabel = comparison.leadingDriverLabel !== "—"
+        ? comparison.leadingDriverLabel
+        : comparison.comparisonReference;
+    }
+  }
+
+  return [
+    {
+      id: "material-comparisons",
+      label: "Malzeme karşılaştırması",
+      value: formatCount(materialComparisons.length),
+      hint: "Bu sayfadaki malzeme lens sonucu",
+      tone: "neutral",
+    },
+    {
+      id: "cost-driver-comparisons",
+      label: "Maliyet bileşeni karşılaştırması",
+      value: formatCount(costMixComparisons.length),
+      hint: "Bu sayfadaki maliyet lens sonucu",
+      tone: "neutral",
+    },
+    {
+      id: "combined-improvement",
+      label: "Katkı iyileşmesi",
+      value: formatCount(improvement),
+      hint: "Her iki lens sonucu",
+      tone: improvement > 0 ? "positive" : "neutral",
+    },
+    {
+      id: "combined-deterioration",
+      label: "Katkı bozulması",
+      value: formatCount(deterioration),
+      hint: "Her iki lens sonucu",
+      tone: deterioration > 0 ? "negative" : "neutral",
+    },
+    {
+      id: "combined-stable",
+      label: "Kararlı / nötr",
+      value: formatCount(stable),
+      hint: "Karşılaştırma bandı içinde",
+      tone: "neutral",
+    },
+    {
+      id: "combined-insufficient-disputed",
+      label: "Yetersiz / çakışma",
+      value: formatCount(insufficient + conflict),
+      hint: "Sıfır olarak gösterilmez",
+      tone: insufficient + conflict > 0 ? "warning" : "neutral",
+    },
+    {
+      id: "largest-cost-driver",
+      label: "En büyük maliyet sürücüsü",
+      value: largestCostDriverLabel,
+      hint: largestCostDriverDelta === null
+        ? "Hesaplanamadı"
+        : formatRatioAsPercent(largestCostDriverDelta),
+      tone: largestCostDriverDelta !== null && largestCostDriverDelta < 0 ? "negative" : "neutral",
+    },
+  ];
+}
+
+export function buildMaterialProfitabilityTableRows(
+  comparisons: readonly CommercialProfitabilityComparisonSummary[],
+): readonly CommercialMaterialProfitabilityTableRow[] {
+  return [...comparisons]
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc))
+    .map((item) => ({
+      id: item.id,
+      materialLabel: item.materialLabel !== "—" ? item.materialLabel : item.comparisonReference,
+      materialId: item.materialId,
+      referenceMarginLabel: item.referenceMarginLabel,
+      currentMarginLabel: item.currentMarginLabel,
+      marginDeltaLabel: item.marginDeltaLabel,
+      positionStateLabel: getCommercialProfitabilityOutcomeLabel(item.comparisonOutcome),
+      outcomeLabel: item.outcomeLabel,
+      evidenceLabel: item.evidenceLabel,
+      coverageLabel: `${formatCount(item.comparableAssessmentCount)} / ${formatCount(item.excludedAssessmentCount)}`,
+      evaluatedLabel: item.evaluatedLabel || formatDateTime(item.evaluatedAtUtc),
+      comparisonOutcome: item.comparisonOutcome,
+      evidenceStatus: item.evidenceStatus,
+      leadingDriverLabel: item.leadingDriverLabel,
+    }));
+}
+
+export function buildCostDriverProfitabilityTableRows(
+  comparisons: readonly CommercialProfitabilityComparisonSummary[],
+): readonly CommercialCostDriverProfitabilityTableRow[] {
+  return [...comparisons]
+    .sort((left, right) => Date.parse(right.evaluatedAtUtc) - Date.parse(left.evaluatedAtUtc))
+    .map((item) => ({
+      id: item.id,
+      comparisonReference: item.comparisonReference,
+      materialLabel: item.materialLabel !== "—" ? item.materialLabel : "—",
+      leadingDriverLabel: item.leadingDriverLabel,
+      referenceCostShareLabel: "—",
+      currentCostShareLabel: "—",
+      costShareDeltaLabel: "—",
+      marginDeltaLabel: item.marginDeltaLabel,
+      outcomeLabel: item.outcomeLabel,
+      evidenceLabel: item.evidenceLabel,
+      coverageLabel: `${formatCount(item.comparableAssessmentCount)} / ${formatCount(item.excludedAssessmentCount)}`,
+      evaluatedLabel: item.evaluatedLabel || formatDateTime(item.evaluatedAtUtc),
+      comparisonOutcome: item.comparisonOutcome,
+      evidenceStatus: item.evidenceStatus,
+    }));
 }
 
 export function buildCustomerProfitabilityKpiCards(
