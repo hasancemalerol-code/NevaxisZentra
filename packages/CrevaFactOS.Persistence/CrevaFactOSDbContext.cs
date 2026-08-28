@@ -358,6 +358,10 @@ public sealed class CrevaFactOSDbContext : DbContext
         Set<CommercialProfitabilityComparisonResult>();
     public DbSet<CommercialProfitabilityComparisonDriver> CommercialProfitabilityComparisonDrivers =>
         Set<CommercialProfitabilityComparisonDriver>();
+    public DbSet<CommercialProfitabilityAlert> CommercialProfitabilityAlerts =>
+        Set<CommercialProfitabilityAlert>();
+    public DbSet<CommercialProfitabilityAlertAuditEvent> CommercialProfitabilityAlertAuditEvents =>
+        Set<CommercialProfitabilityAlertAuditEvent>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1753,6 +1757,18 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityAlertEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityAlert>().HasQueryFilter(alert =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && alert.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialProfitabilityAlertAuditEventEntityConfiguration());
+        modelBuilder.Entity<CommercialProfitabilityAlertAuditEvent>().HasQueryFilter(auditEvent =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && auditEvent.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // ERP integration foundation
         modelBuilder.ApplyConfiguration(new ErpConnectionProfileEntityConfiguration());

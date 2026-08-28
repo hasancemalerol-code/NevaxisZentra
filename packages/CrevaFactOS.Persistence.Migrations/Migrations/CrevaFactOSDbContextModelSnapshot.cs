@@ -1197,6 +1197,221 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AlertCategory")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("alert_category");
+
+                    b.Property<string>("AlertReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("alert_reference");
+
+                    b.Property<string>("ComparisonOutcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("comparison_outcome");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_status");
+
+                    b.Property<string>("EvidenceSummary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("evidence_summary");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPayloadFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_payload_fingerprint");
+
+                    b.Property<string>("LeadingDriverCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("leading_driver_code");
+
+                    b.Property<string>("LifecycleStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("lifecycle_status");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
+
+                    b.Property<DateTimeOffset>("MaterializedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("materialized_at_utc");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<Guid>("SourceComparisonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_comparison_id");
+
+                    b.Property<string>("SourceComparisonType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source_comparison_type");
+
+                    b.Property<string>("SourceProvenance")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("source_provenance");
+
+                    b.Property<string>("SourceSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("source_snapshot_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SourceComparisonId");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commprofit6_alerts_tenant_idempotency");
+
+                    b.HasIndex("TenantId", "FacilityId", "AlertCategory")
+                        .HasDatabaseName("ix_commprofit6_alerts_tenant_facility_category");
+
+                    b.HasIndex("TenantId", "FacilityId", "LifecycleStatus")
+                        .HasDatabaseName("ix_commprofit6_alerts_tenant_facility_lifecycle");
+
+                    b.HasIndex("TenantId", "FacilityId", "Severity")
+                        .HasDatabaseName("ix_commprofit6_alerts_tenant_facility_severity");
+
+                    b.HasIndex("TenantId", "FacilityId", "SourceComparisonId", "AlertCategory")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commprofit6_alerts_active_comparison_category")
+                        .HasFilter("lifecycle_status = 'active'");
+
+                    b.ToTable("commercial_profitability_alerts", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlertAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorSubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_subject_id");
+
+                    b.Property<Guid>("AlertId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alert_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlertId");
+
+                    b.HasIndex("TenantId", "FacilityId", "AlertId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_commprofit6_alert_audit_tenant_facility_alert_occurred");
+
+                    b.ToTable("commercial_profitability_alert_audit_events", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAssessment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -25506,6 +25721,54 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlert", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityComparisonRun", "SourceComparison")
+                        .WithMany()
+                        .HasForeignKey("SourceComparisonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SourceComparison");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlertAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlert", "Alert")
+                        .WithMany("AuditEvents")
+                        .HasForeignKey("AlertId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Alert");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAssessment", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityProfile", "Profile")
@@ -29699,6 +29962,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTask", b =>
+                {
+                    b.Navigation("AuditEvents");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialProfitabilityAlert", b =>
                 {
                     b.Navigation("AuditEvents");
                 });

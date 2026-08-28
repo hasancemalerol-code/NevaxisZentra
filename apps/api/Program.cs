@@ -84,6 +84,7 @@ builder.Services.AddCrevaFactOSCommercialIntelligence();
 builder.Services.AddCrevaFactOSCommercialSalesPrice();
 builder.Services.AddCrevaFactOSCommercialQuotationRisk();
 builder.Services.AddCrevaFactOSCommercialProfitability();
+builder.Services.AddCrevaFactOSCommercialProfitabilityAlerts();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
 CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
@@ -152,6 +153,7 @@ app.MapCommercialIntelligenceEndpoints();
 app.MapCommercialSalesPriceEndpoints();
 app.MapCommercialQuotationRiskEndpoints();
 app.MapCommercialProfitabilityEndpoints();
+app.MapCommercialProfitabilityAlertEndpoints();
 
 app.MapExportEndpoints();
 app.MapExport3LEndpoints();

@@ -201,6 +201,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "boxes",
       },
       {
+        label: "Kârlılık Uyarıları",
+        href: "/ticari-zeka/karlilik-uyarilari",
+        iconKey: "triangle-alert",
+        permissionKey: "commercial-intelligence.read",
+        subscriptionModulePath: "/ticari-zeka",
+      },
+      {
         label: "Teklif Riskleri",
         href: "/ticari-zeka/teklif-riskleri",
         iconKey: "file-warning",

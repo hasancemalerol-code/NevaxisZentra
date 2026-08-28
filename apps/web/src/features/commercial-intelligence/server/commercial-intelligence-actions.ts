@@ -24,6 +24,7 @@ const QUOTATION_RISK_ROUTE_PATH = "/ticari-zeka/teklif-riskleri";
 const PROFITABILITY_ROUTE_PATH = "/ticari-zeka/urun-karliligi";
 const CUSTOMER_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/musteri-karliligi";
 const MATERIAL_COST_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/malzeme-ve-maliyet-karliligi";
+const PROFITABILITY_ALERT_ROUTE_PATH = "/ticari-zeka/karlilik-uyarilari";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
@@ -33,6 +34,7 @@ function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PROFITABILITY_ROUTE_PATH);
   revalidatePath(CUSTOMER_PROFITABILITY_ROUTE_PATH);
   revalidatePath(MATERIAL_COST_PROFITABILITY_ROUTE_PATH);
+  revalidatePath(PROFITABILITY_ALERT_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -509,4 +511,124 @@ export async function loadCommercialMaterialCostProfitabilityComparisonDetailAct
   }
 
   return { status: "success" as const, detail: result.detail };
+}
+
+export async function refreshCommercialProfitabilityAlertWorkspaceAction(
+  alertId?: string | null,
+  filters?: import("./commercial-profitability-alert-queries").CommercialProfitabilityAlertApiFilters,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialProfitabilityAlertWorkspace } = await import("./commercial-profitability-alert-queries");
+  const result = await readCommercialProfitabilityAlertWorkspace(alertId, filters);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+  };
+}
+
+export async function loadCommercialProfitabilityAlertDetailAction(alertId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialProfitabilityAlertDetail } = await import("./commercial-profitability-alert-queries");
+  const result = await readCommercialProfitabilityAlertDetail(alertId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function materializeCommercialProfitabilityAlertsAction(input: Readonly<{ idempotencyKey?: string | null }> = {}) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { materializeCommercialProfitabilityAlerts } = await import("./commercial-profitability-alert-api-client");
+  const result = await materializeCommercialProfitabilityAlerts(resolved.context, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "idempotency-conflict" || result.code === "concurrency-conflict"
+        ? "Uyarı materyalizasyonu çakıştı. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    materialization: result.value.materialization,
+  };
+}
+
+export async function transitionCommercialProfitabilityAlertAction(input: Readonly<{
+  alertId: string;
+  expectedVersion: number;
+  targetLifecycleStatus: string;
+  note?: string | null;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { transitionCommercialProfitabilityAlert } = await import("./commercial-profitability-alert-api-client");
+  const result = await transitionCommercialProfitabilityAlert(resolved.context, input.alertId, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Uyarı başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    alert: result.value.alert,
+  };
+}
+
+export async function createCommercialProfitabilityAlertTaskDraftAction(alertId: string) {
+  const authorization = await denyUnlessGranted("ai-task.create");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = resolveCommercialIntelligenceRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
+  }
+
+  const { createCommercialProfitabilityAlertTaskDraft } = await import("./commercial-profitability-alert-api-client");
+  const result = await createCommercialProfitabilityAlertTaskDraft(contextResult.context, alertId);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Görev taslağı oluşturulurken uyarı güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    taskId: result.value.taskId,
+    alertId: result.value.alertId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
 }

@@ -1,0 +1,111 @@
+import type { CommercialProfitabilityComparisonDetail } from "./commercial-profitability-types";
+import type { CommercialProfitabilityKpiCard } from "./commercial-profitability-types";
+
+export type CommercialProfitabilityAlertSummary = Readonly<{
+  id: string;
+  alertReference: string;
+  alertCategory: string;
+  alertCategoryLabel: string;
+  severity: string;
+  severityLabel: string;
+  lifecycleStatus: string;
+  lifecycleStatusLabel: string;
+  sourceComparisonId: string;
+  sourceComparisonType: string;
+  sourceComparisonTypeLabel: string;
+  title: string;
+  evidenceSummary: string;
+  evidenceStatus: string;
+  evidenceStatusLabel: string;
+  comparisonOutcome: string;
+  comparisonOutcomeLabel: string;
+  leadingDriverCode: string | null;
+  leadingDriverLabel: string;
+  linkedAiTaskId: string | null;
+  materializedAtUtc: string;
+  materializedLabel: string;
+  updatedAtUtc: string;
+  updatedLabel: string;
+  version: number;
+}>;
+
+export type CommercialProfitabilityAlertAuditEvent = Readonly<{
+  id: string;
+  eventType: string;
+  eventTypeLabel: string;
+  payloadJson: string;
+  actorSubjectId: string;
+  occurredAtUtc: string;
+  occurredLabel: string;
+}>;
+
+export type CommercialProfitabilityAlertDetail = Readonly<{
+  id: string;
+  alertReference: string;
+  alertCategory: string;
+  alertCategoryLabel: string;
+  severity: string;
+  severityLabel: string;
+  lifecycleStatus: string;
+  lifecycleStatusLabel: string;
+  sourceComparisonId: string;
+  sourceComparisonType: string;
+  sourceComparisonTypeLabel: string;
+  title: string;
+  evidenceSummary: string;
+  evidenceStatus: string;
+  evidenceStatusLabel: string;
+  comparisonOutcome: string;
+  comparisonOutcomeLabel: string;
+  leadingDriverCode: string | null;
+  leadingDriverLabel: string;
+  sourceSnapshotJson: string;
+  linkedAiTaskId: string | null;
+  ruleSetVersion: string;
+  sourceProvenance: string;
+  materializedAtUtc: string;
+  materializedLabel: string;
+  updatedAtUtc: string;
+  updatedLabel: string;
+  version: number;
+  automationDisclaimer: string;
+  sourceComparison: CommercialProfitabilityComparisonDetail;
+  auditEvents: readonly CommercialProfitabilityAlertAuditEvent[];
+}>;
+
+export type CommercialProfitabilityAlertTableRow = Readonly<{
+  id: string;
+  alertReference: string;
+  categoryLabel: string;
+  severityLabel: string;
+  lifecycleLabel: string;
+  title: string;
+  comparisonTypeLabel: string;
+  outcomeLabel: string;
+  evidenceLabel: string;
+  updatedLabel: string;
+  severity: string;
+  lifecycleStatus: string;
+  alertCategory: string;
+  comparisonOutcome: string;
+  evidenceStatus: string;
+}>;
+
+export type CommercialProfitabilityAlertWorkspacePayload = Readonly<{
+  facilityLabel: string;
+  ruleSetVersion: string;
+  provenanceDisclaimer: string;
+  automationDisclaimer: string;
+  reportingPeriodLabel: string;
+  freshnessLabel: string;
+  alerts: readonly CommercialProfitabilityAlertSummary[];
+  selectedAlertId: string | null;
+  kpiCards: readonly CommercialProfitabilityKpiCard[];
+  tableRows: readonly CommercialProfitabilityAlertTableRow[];
+  page: number;
+  pageSize: number;
+  returnedCount: number;
+  canRead: boolean;
+  canManage: boolean;
+  canCreateTask: boolean;
+}>;

@@ -166,7 +166,7 @@ function mapComparisonResultRow(
   };
 }
 
-function mapComparisonDetail(
+export function mapComparisonDetail(
   item: RawCommercialProfitabilityComparisonDetail,
   currencyCode: string,
 ): CommercialProfitabilityComparisonDetail {
