@@ -67,7 +67,7 @@ export type CommercialProfitabilityComparisonDetailResult =
   | Readonly<{ status: "success"; detail: CommercialProfitabilityComparisonDetail }>
   | ReadFailure;
 
-function mapComparisonSummary(
+export function mapComparisonSummary(
   item: RawCommercialProfitabilityComparisonSummary,
 ): CommercialProfitabilityComparisonSummary {
   return {
@@ -111,7 +111,7 @@ function mapComparisonSummary(
   };
 }
 
-function mapProfile(profile: RawCommercialProfitabilityProfile): CommercialProfitabilityProfileSummary {
+export function mapProfile(profile: RawCommercialProfitabilityProfile): CommercialProfitabilityProfileSummary {
   return {
     id: profile.id,
     profileCode: profile.profileCode,
@@ -220,7 +220,7 @@ function mapComparisonDetail(
   };
 }
 
-function reportingPeriodLabel(comparisons: readonly CommercialProfitabilityComparisonSummary[]): string {
+export function reportingPeriodLabel(comparisons: readonly CommercialProfitabilityComparisonSummary[]): string {
   const timestamps = comparisons.flatMap((item) => [
     Date.parse(item.currentWindowStartUtc),
     Date.parse(item.currentWindowEndUtc),
@@ -234,7 +234,7 @@ function reportingPeriodLabel(comparisons: readonly CommercialProfitabilityCompa
   );
 }
 
-function freshnessLabel(comparisons: readonly CommercialProfitabilityComparisonSummary[]): string {
+export function freshnessLabel(comparisons: readonly CommercialProfitabilityComparisonSummary[]): string {
   const timestamps = comparisons
     .map((item) => Date.parse(item.evaluatedAtUtc))
     .filter((value) => Number.isFinite(value));

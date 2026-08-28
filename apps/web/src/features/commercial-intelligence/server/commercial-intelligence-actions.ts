@@ -22,6 +22,7 @@ const SUPPLIER_COMPARISON_ROUTE_PATH = "/ticari-zeka/tedarikci-karsilastirmasi";
 const SALES_PRICE_ROUTE_PATH = "/ticari-zeka/satis-fiyat-analizi";
 const QUOTATION_RISK_ROUTE_PATH = "/ticari-zeka/teklif-riskleri";
 const PROFITABILITY_ROUTE_PATH = "/ticari-zeka/urun-karliligi";
+const CUSTOMER_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/musteri-karliligi";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
@@ -29,6 +30,7 @@ function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(SALES_PRICE_ROUTE_PATH);
   revalidatePath(QUOTATION_RISK_ROUTE_PATH);
   revalidatePath(PROFITABILITY_ROUTE_PATH);
+  revalidatePath(CUSTOMER_PROFITABILITY_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -431,6 +433,40 @@ export async function loadCommercialProfitabilityComparisonDetailAction(comparis
 
   const { readCommercialProfitabilityComparisonDetail } = await import("./commercial-profitability-queries");
   const result = await readCommercialProfitabilityComparisonDetail(comparisonId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function refreshCommercialCustomerProfitabilityWorkspaceAction(
+  comparisonId?: string | null,
+  filters?: import("./commercial-customer-profitability-queries").CommercialCustomerProfitabilityApiFilters,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialCustomerProfitabilityWorkspace } = await import("./commercial-customer-profitability-queries");
+  const result = await readCommercialCustomerProfitabilityWorkspace(comparisonId, filters);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+    canManage: result.canManage,
+  };
+}
+
+export async function loadCommercialCustomerProfitabilityComparisonDetailAction(comparisonId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialCustomerProfitabilityComparisonDetail } = await import("./commercial-customer-profitability-queries");
+  const result = await readCommercialCustomerProfitabilityComparisonDetail(comparisonId);
   if (result.status === "failure") {
     return { status: "failure" as const, message: result.message, code: result.code };
   }
