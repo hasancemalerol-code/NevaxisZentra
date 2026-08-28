@@ -3,7 +3,6 @@
 import "./ai-task-server-boundary";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import type { CreateAiTaskInput } from "../domain/ai-task";
 import {
@@ -129,7 +128,11 @@ export async function createAiTaskDraftAction(input: CreateAiTaskInput) {
   revalidatePath("/ai-gorevleri");
   revalidatePath(`/ai-gorevleri/${result.value.entityId}`);
 
-  redirect(`/ai-gorevleri/${result.value.entityId}`);
+  return {
+    status: "success" as const,
+    taskId: result.value.entityId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
 }
 
 export async function createSourceLinkedAiTaskAction(
@@ -147,7 +150,11 @@ export async function createSourceLinkedAiTaskAction(
   revalidatePath("/ai-gorevleri");
   revalidatePath(`/ai-gorevleri/${result.value.entityId}`);
 
-  redirect(`/ai-gorevleri/${result.value.entityId}`);
+  return {
+    status: "success" as const,
+    taskId: result.value.entityId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
 }
 
 export async function transitionAiTaskAction(input: Readonly<{

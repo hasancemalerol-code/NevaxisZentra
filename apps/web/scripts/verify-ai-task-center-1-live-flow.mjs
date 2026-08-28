@@ -236,6 +236,23 @@ try {
     30000,
   );
   assert("create page reachable", createSnap.hasCreate);
+  await new Promise((r) => setTimeout(r, 1500));
+
+  await ss("Runtime.evaluate", {
+    expression: `(() => {
+      document.querySelector('[data-testid="ai-task-create-form"] button[type="submit"]')?.click();
+    })()`,
+  });
+  const invalidSnap = await waitFor(
+    `({
+      hasError: Boolean(document.querySelector('[data-testid="ai-task-create-form-error"]')),
+      errorText: document.querySelector('[data-testid="ai-task-create-form-error"]')?.textContent || "",
+      onCreatePage: location.pathname.includes("/ai-gorevleri/yeni"),
+    })`,
+    (s) => s?.hasError && /Zorunlu alan/.test(s?.errorText || "") && s?.onCreatePage,
+    15000,
+  );
+  assert("invalid input shows Turkish validation error", invalidSnap.hasError);
 
   await ss("Runtime.evaluate", {
     expression: `(() => {
@@ -261,6 +278,15 @@ try {
       document.querySelector('[data-testid="ai-task-create-form"] button[type="submit"]')?.click();
     })()`,
   });
+
+  await waitFor(
+    `({
+      pending: document.querySelector('[data-testid="ai-task-create-form"]')?.getAttribute("data-pending") === "true",
+      href: location.href,
+    })`,
+    (s) => s?.pending || s?.href.includes("/ai-gorevleri/"),
+    10000,
+  );
 
   const createdDetailSnap = await waitFor(
     detailSnapExpr(),
@@ -310,6 +336,50 @@ try {
   );
   assert("detail refresh preserved source reference", persistedDetailSnap.sourceEntityText.includes(SOURCE_ENTITY_ID));
   assert("detail refresh preserved review state", persistedDetailSnap.auditCount >= 2 || /İnceleme Bekliyor/i.test(persistedDetailSnap.bodyText || ""));
+
+  await navigateTo("/ai-gorevleri/yeni");
+  await waitFor(
+    `({ hasForm: Boolean(document.querySelector('[data-testid="ai-task-create-form"]')) })`,
+    (s) => s?.hasForm,
+    30000,
+  );
+  await new Promise((r) => setTimeout(r, 1500));
+  await ss("Runtime.evaluate", {
+    expression: `(() => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      const setTextarea = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+      const fill = (sel, val) => {
+        const node = document.querySelector(sel);
+        if (!node) return;
+        const proto = node instanceof HTMLTextAreaElement ? setTextarea : setter;
+        proto.call(node, val);
+        node.dispatchEvent(new Event("input", { bubbles: true }));
+        node.dispatchEvent(new Event("change", { bubbles: true }));
+      };
+      fill('input[name="title"]', ${JSON.stringify(TASK_TITLE)});
+      fill('textarea[name="summary"]', "Live flow source-linked draft task");
+      fill('textarea[name="detectedIssue"]', "Live flow detected issue");
+      fill('textarea[name="reasoning"]', "Live flow reasoning");
+      fill('input[name="recommendationTitle"]', "Review profitability comparison");
+      fill('textarea[name="recommendationDescription"]', "Human review before operational action");
+      fill('input[name="sourceModule"]', "commercial-intelligence");
+      fill('input[name="sourceEntityId"]', ${JSON.stringify(SOURCE_ENTITY_ID)});
+      fill('input[name="idempotencyKey"]', ${JSON.stringify(IDEMPOTENCY_KEY)});
+      document.querySelector('[data-testid="ai-task-create-form"] button[type="submit"]')?.click();
+    })()`,
+  });
+  const replaySnap = await waitFor(
+    `({
+      href: location.href,
+      hasDetail: Boolean(document.querySelector('[data-testid="ai-task-detail-page"]')),
+      hasError: Boolean(document.querySelector('[data-testid="ai-task-create-form-error"]')),
+      errorText: document.querySelector('[data-testid="ai-task-create-form-error"]')?.textContent || "",
+      pending: document.querySelector('[data-testid="ai-task-create-form"]')?.getAttribute("data-pending") === "true",
+    })`,
+    (s) => (s?.hasDetail && s?.href.includes(createdTaskId)) || s?.hasError,
+    60000,
+  );
+  assert("idempotency replay navigates to existing task detail", replaySnap.hasDetail && replaySnap.href.includes(createdTaskId), replaySnap.errorText || replaySnap.href);
 
   const dashboardStart = Date.now();
   await navigateTo("/");
