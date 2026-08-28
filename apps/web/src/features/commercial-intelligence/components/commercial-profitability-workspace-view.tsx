@@ -61,6 +61,8 @@ import "./commercial-intelligence-workspace.css";
 type CommercialProfitabilityWorkspaceViewProps = Readonly<{
   workspace: CommercialProfitabilityWorkspacePayload;
   canManage: boolean;
+  initialComparisonDetail?: CommercialProfitabilityComparisonDetail | null;
+  initialDetailStatus?: "idle" | "ready" | "error";
 }>;
 
 const VALID_TAB_IDS = new Set(
@@ -104,6 +106,8 @@ function ComparisonSummaryCard({
 export function CommercialProfitabilityWorkspaceView({
   workspace: initialWorkspace,
   canManage: _canManage,
+  initialComparisonDetail = null,
+  initialDetailStatus = "idle",
 }: CommercialProfitabilityWorkspaceViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -112,8 +116,10 @@ export function CommercialProfitabilityWorkspaceView({
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
-  const [comparisonDetail, setComparisonDetail] = useState<CommercialProfitabilityComparisonDetail | null>(null);
-  const [detailStatus, setDetailStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [comparisonDetail, setComparisonDetail] = useState<CommercialProfitabilityComparisonDetail | null>(initialComparisonDetail);
+  const [detailStatus, setDetailStatus] = useState<"idle" | "loading" | "ready" | "error">(
+    initialDetailStatus === "ready" && initialComparisonDetail ? "ready" : initialDetailStatus,
+  );
 
   const filters = useMemo(
     () => readCommercialProfitabilityComparisonFilters(searchParams),
@@ -198,19 +204,6 @@ export function CommercialProfitabilityWorkspaceView({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
-  const setSelectedComparison = useCallback((comparisonId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("comparison", comparisonId);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    startTransition(async () => {
-      const result = await refreshCommercialProfitabilityWorkspaceAction(
-        comparisonId,
-        toCommercialProfitabilityApiFilters(filters),
-      );
-      if (result.status === "success") setWorkspace(result.workspace);
-    });
-  }, [filters, pathname, router, searchParams]);
-
   const loadComparisonDetail = useCallback((comparisonId: string) => {
     setComparisonDetail(null);
     setDetailStatus("loading");
@@ -225,6 +218,20 @@ export function CommercialProfitabilityWorkspaceView({
     })();
   }, []);
 
+  const setSelectedComparison = useCallback((comparisonId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("comparison", comparisonId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    loadComparisonDetail(comparisonId);
+    startTransition(async () => {
+      const result = await refreshCommercialProfitabilityWorkspaceAction(
+        comparisonId,
+        toCommercialProfitabilityApiFilters(filters),
+      );
+      if (result.status === "success") setWorkspace(result.workspace);
+    });
+  }, [filters, loadComparisonDetail, pathname, router, searchParams]);
+
   useEffect(() => {
     if (!selectedComparison) {
       setComparisonDetail(null);
@@ -232,10 +239,7 @@ export function CommercialProfitabilityWorkspaceView({
       return;
     }
     if (comparisonDetail?.summary.id === selectedComparison.id && detailStatus === "ready") return;
-    const comparisonId = selectedComparison.id;
-    queueMicrotask(() => {
-      loadComparisonDetail(comparisonId);
-    });
+    loadComparisonDetail(selectedComparison.id);
   }, [comparisonDetail?.summary.id, detailStatus, loadComparisonDetail, selectedComparison]);
 
   const onTabKeyDown = useCallback((event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {

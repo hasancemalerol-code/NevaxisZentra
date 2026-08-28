@@ -5,8 +5,10 @@ import { CommercialProfitabilityWorkspaceView } from "@/features/commercial-inte
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 import { COMMERCIAL_PROFITABILITY_SUBTITLE } from "@/features/commercial-intelligence/domain/commercial-profitability-labels";
 import {
+  readCommercialProfitabilityComparisonDetail,
   readCommercialProfitabilityWorkspace,
 } from "@/features/commercial-intelligence/server/commercial-profitability-queries";
+import type { CommercialProfitabilityComparisonDetail } from "@/features/commercial-intelligence/types/commercial-profitability-types";
 import {
   readCommercialProfitabilityComparisonFilters,
   toCommercialProfitabilityApiFilters,
@@ -70,10 +72,28 @@ export default async function CommercialProfitabilityPage({
     );
   }
 
+  let initialComparisonDetail: CommercialProfitabilityComparisonDetail | null = null;
+  let initialDetailStatus: "idle" | "ready" | "error" = "idle";
+
+  if (comparisonId) {
+    const comparisonAccessible = result.workspace.comparisons.some((item) => item.id === comparisonId);
+    if (comparisonAccessible) {
+      const detailResult = await readCommercialProfitabilityComparisonDetail(comparisonId);
+      if (detailResult.status === "success") {
+        initialComparisonDetail = detailResult.detail;
+        initialDetailStatus = "ready";
+      } else {
+        initialDetailStatus = "error";
+      }
+    }
+  }
+
   return (
     <CommercialProfitabilityWorkspaceView
       workspace={result.workspace}
       canManage={result.canManage}
+      initialComparisonDetail={initialComparisonDetail}
+      initialDetailStatus={initialDetailStatus}
     />
   );
 }
