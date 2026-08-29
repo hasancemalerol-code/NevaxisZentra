@@ -31,6 +31,7 @@ using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
+using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -311,6 +312,14 @@ public sealed class CrevaFactOSDbContext : DbContext
     // AI task center foundation (AI-TASK-CENTER-1)
     public DbSet<AiTask> AiTasks => Set<AiTask>();
     public DbSet<AiTaskAuditEvent> AiTaskAuditEvents => Set<AiTaskAuditEvent>();
+
+    // Teams foundation (TEAMS-FOUNDATION-1)
+    public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
+    public DbSet<TeamsChannelMember> TeamsChannelMembers => Set<TeamsChannelMember>();
+    public DbSet<TeamsMessage> TeamsMessages => Set<TeamsMessage>();
+    public DbSet<TeamsMessageMention> TeamsMessageMentions => Set<TeamsMessageMention>();
+    public DbSet<TeamsChannelReadState> TeamsChannelReadStates => Set<TeamsChannelReadState>();
+    public DbSet<TeamsMessageAuditEvent> TeamsMessageAuditEvents => Set<TeamsMessageAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1641,6 +1650,43 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new AiTaskAuditEventEntityConfiguration());
         modelBuilder.Entity<AiTaskAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Teams foundation (TEAMS-FOUNDATION-1)
+        modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());
+        modelBuilder.Entity<TeamsChannel>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsChannelMemberEntityConfiguration());
+        modelBuilder.Entity<TeamsChannelMember>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsMessageEntityConfiguration());
+        modelBuilder.Entity<TeamsMessage>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsMessageMentionEntityConfiguration());
+        modelBuilder.Entity<TeamsMessageMention>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsChannelReadStateEntityConfiguration());
+        modelBuilder.Entity<TeamsChannelReadState>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsMessageAuditEventEntityConfiguration());
+        modelBuilder.Entity<TeamsMessageAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

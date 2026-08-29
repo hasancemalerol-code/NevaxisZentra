@@ -13,6 +13,7 @@ using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.AiTasks;
+using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.SaasSubscription;
@@ -489,6 +490,22 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureAiTaskReviewPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsWritePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureTeamsManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureCommercialIntelligenceReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureCommercialIntelligenceReadPermissionAssignmentAsync(
@@ -821,6 +838,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 tenant.Id,
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotTeamsSeed.EnsureTeamsPilotDataAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
                 cancellationToken);
             await DevelopmentPilotSaasBillingSeed.EnsureDevelopmentBillingAsync(
                 dbContext,
@@ -2858,6 +2881,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             AiTaskPermissionKeys.Review,
             DevelopmentPilotIds.AiTaskReviewPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureTeamsReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            TeamsPermissionKeys.Read,
+            DevelopmentPilotIds.TeamsReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureTeamsWritePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            TeamsPermissionKeys.Write,
+            DevelopmentPilotIds.TeamsWritePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureTeamsManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            TeamsPermissionKeys.Manage,
+            DevelopmentPilotIds.TeamsManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureCommercialIntelligenceReadPermissionAssignmentAsync(

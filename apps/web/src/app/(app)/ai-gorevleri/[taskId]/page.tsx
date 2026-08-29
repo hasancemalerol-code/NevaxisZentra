@@ -21,6 +21,7 @@ import { AiTaskActionPanelClient } from "@/features/ai-task-center/components/ai
 import { AiTaskExecutionPanel } from "@/features/ai-task-center/components/ai-task-execution-panel";
 import { AiTaskImpactPanel } from "@/features/ai-task-center/components/ai-task-impact-panel";
 import { AiTaskSourceReferenceSection } from "@/features/ai-task-center/components/ai-task-source-reference-section";
+import { AiTaskTeamsContextSection } from "@/features/teams/components/ai-task-teams-context-section";
 import {
   getAiTaskAuditTransitionLabel,
   getAiTaskAuditEventLabel,
@@ -171,6 +172,8 @@ export default async function AiTaskDetailPage({
         taskReference={taskReference}
         taskTitle={task.title}
       />
+
+      <AiTaskTeamsContextSection taskId={taskId} />
 
       <AiTaskExecutionPanel task={task} />
 

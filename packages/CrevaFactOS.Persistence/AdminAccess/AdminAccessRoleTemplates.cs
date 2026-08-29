@@ -9,6 +9,7 @@ using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.ShiftWorkforce;
+using CrevaFactOS.Persistence.Teams;
 
 namespace CrevaFactOS.Persistence.AdminAccess;
 
@@ -159,6 +160,7 @@ public static class AdminAccessRoleTemplates
         OperationalRiskPermissionKeys.Manage,
         CommercialIntelligencePermissionKeys.Manage,
         AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
+        TeamsPermissionKeys.Write, TeamsPermissionKeys.Manage,
         ProductionPlanningPermissionKeys.Write, ProductionPlanningPermissionKeys.Approve,
         ProductionExecutionPermissionKeys.Write, QualityPermissionKeys.Manage,
         ErpPermissionKeys.Manage, ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove,
@@ -181,6 +183,7 @@ internal static class CustomerCatalogKeys
         OperationalRiskPermissionKeys.Read,
         CommercialIntelligencePermissionKeys.Read,
         AiTaskPermissionKeys.Read,
+        TeamsPermissionKeys.Read,
         SaasCommercialPermissionKeys.Read,
     ];
 
@@ -209,6 +212,7 @@ internal static class CustomerCatalogKeys
         OperationalRiskPermissionKeys.Read, OperationalRiskPermissionKeys.Manage,
         CommercialIntelligencePermissionKeys.Read, CommercialIntelligencePermissionKeys.Manage,
         AiTaskPermissionKeys.Read, AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
+        TeamsPermissionKeys.Read, TeamsPermissionKeys.Write, TeamsPermissionKeys.Manage,
         ErpPermissionKeys.Read, ErpPermissionKeys.Manage,
         ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove, ErpPermissionKeys.WritebackExecute,
         SaasCommercialPermissionKeys.Read,

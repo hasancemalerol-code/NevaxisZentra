@@ -1961,4 +1961,42 @@ public static class DevelopmentPilotIds
 
     public static readonly Guid CommercialProfitabilityComparisonPilotMaterialSourceConflictId =
         Guid.Parse("bb000001-03cc-4000-8000-0000000003cc");
+
+    // Teams foundation permission definitions (093–095)
+    public static readonly Guid TeamsReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000093");
+
+    public static readonly Guid TeamsWritePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000094");
+
+    public static readonly Guid TeamsManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000095");
+
+    // Teams foundation pilot fixtures (03d0–03d7)
+    public static readonly Guid TeamsPilotAiTaskId =
+        Guid.Parse("bb000001-03d0-4000-8000-0000000003d0");
+
+    public static readonly Guid TeamsPilotChannelUretimId =
+        Guid.Parse("bb000001-03d1-4000-8000-0000000003d1");
+
+    public static readonly Guid TeamsPilotChannelKaliteId =
+        Guid.Parse("bb000001-03d2-4000-8000-0000000003d2");
+
+    public static readonly Guid TeamsPilotChannelBakimId =
+        Guid.Parse("bb000001-03d3-4000-8000-0000000003d3");
+
+    public static readonly Guid TeamsPilotChannelStokDepoId =
+        Guid.Parse("bb000001-03d4-4000-8000-0000000003d4");
+
+    public static readonly Guid TeamsPilotChannelSatinAlmaId =
+        Guid.Parse("bb000001-03d5-4000-8000-0000000003d5");
+
+    public static readonly Guid TeamsPilotChannelYonetimId =
+        Guid.Parse("bb000001-03d6-4000-8000-0000000003d6");
+
+    public static readonly Guid TeamsPilotChannelTaskContextId =
+        Guid.Parse("bb000001-03d7-4000-8000-0000000003d7");
+
+    public static readonly DateTimeOffset TeamsPilotSeedTimeUtc =
+        new(2026, 8, 30, 9, 0, 0, TimeSpan.Zero);
 }
