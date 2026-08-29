@@ -22,6 +22,7 @@ import { AiTaskExecutionPanel } from "@/features/ai-task-center/components/ai-ta
 import { AiTaskImpactPanel } from "@/features/ai-task-center/components/ai-task-impact-panel";
 import { AiTaskSourceReferenceSection } from "@/features/ai-task-center/components/ai-task-source-reference-section";
 import { AiTaskTeamsContextSection } from "@/features/teams/components/ai-task-teams-context-section";
+import { AiTaskTeamsMessageSourceLink } from "@/features/teams/components/ai-task-teams-message-source-link";
 import {
   getAiTaskAuditTransitionLabel,
   getAiTaskAuditEventLabel,
@@ -171,6 +172,11 @@ export default async function AiTaskDetailPage({
         sourceModule={sourceModule}
         taskReference={taskReference}
         taskTitle={task.title}
+        teamsMessageSourceLink={
+          sourceModule === "teams" && sourceEntityId
+            ? <AiTaskTeamsMessageSourceLink messageId={sourceEntityId} />
+            : null
+        }
       />
 
       <AiTaskTeamsContextSection taskId={taskId} />

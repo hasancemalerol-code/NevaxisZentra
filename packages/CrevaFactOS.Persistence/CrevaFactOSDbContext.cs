@@ -320,6 +320,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsMessageMention> TeamsMessageMentions => Set<TeamsMessageMention>();
     public DbSet<TeamsChannelReadState> TeamsChannelReadStates => Set<TeamsChannelReadState>();
     public DbSet<TeamsMessageAuditEvent> TeamsMessageAuditEvents => Set<TeamsMessageAuditEvent>();
+    public DbSet<TeamsMessageTaskLink> TeamsMessageTaskLinks => Set<TeamsMessageTaskLink>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1690,6 +1691,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsMessageTaskLinkEntityConfiguration());
+        modelBuilder.Entity<TeamsMessageTaskLink>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new CommercialPurchasePriceProfileEntityConfiguration());
         modelBuilder.Entity<CommercialPurchasePriceProfile>().HasQueryFilter(p =>

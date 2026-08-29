@@ -20,6 +20,17 @@ public static class TeamsAuditEventTypes
     public const string MemberAdded = "member-added";
     public const string MemberRemoved = "member-removed";
     public const string MessageCreated = "message-created";
+    public const string MessageTaskDraftLinked = "message-task-draft-linked";
+}
+
+public static class TeamsMessageTaskLinkPurposes
+{
+    public const string HumanReviewDraft = "human-review-draft";
+}
+
+public static class TeamsSourceModules
+{
+    public const string Teams = "teams";
 }
 
 public static class TeamsFailureCodes
@@ -42,4 +53,12 @@ public static class TeamsConstants
 
     public const string DevelopmentPilotProvenance =
         "Bu alan operasyon iletişimi ve insan incelemesi içindir; mesaj göndermek otomatik üretim, satın alma, bakım veya kalite işlemi başlatmaz.";
+
+    public const string MessageTaskDraftDisclaimer =
+        "Görev taslağı yalnızca insan incelemesi için oluşturulur; mesaj otomatik üretim, satın alma, bakım, kalite veya başka bir operasyon işlemi başlatmaz.";
+
+    public const string TeamsSourceModule = "teams";
+
+    public static string BuildHumanReviewDraftIdempotencyKey(Guid messageId) =>
+        $"teams-message-task:{messageId:D}:human-review-draft";
 }

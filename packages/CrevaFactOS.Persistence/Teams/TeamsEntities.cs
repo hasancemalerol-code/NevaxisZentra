@@ -83,3 +83,18 @@ public sealed class TeamsMessageAuditEvent
     public string ActorLabel { get; set; } = string.Empty;
     public string PayloadJson { get; set; } = "{}";
 }
+
+public sealed class TeamsMessageTaskLink
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ChannelId { get; set; }
+    public Guid MessageId { get; set; }
+    public Guid AiTaskId { get; set; }
+    public string LinkPurpose { get; set; } = TeamsMessageTaskLinkPurposes.HumanReviewDraft;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string SourceContextReference { get; set; } = string.Empty;
+    public Guid CreatedByTenantMembershipId { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}

@@ -16,7 +16,7 @@ import { readTeamsWorkspace } from "@/features/teams/server/teams-queries";
 export const dynamic = "force-dynamic";
 
 type TeamsPageProps = Readonly<{
-  searchParams: Promise<Readonly<{ channel?: string }>>;
+  searchParams: Promise<Readonly<{ channel?: string; message?: string }>>;
 }>;
 
 export default async function TeamsPage({ searchParams }: TeamsPageProps) {
@@ -46,6 +46,7 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
   const effectiveAccess = await fetchCurrentEffectiveAccess();
   const canWrite =
     result.canWrite && hasGrantedPermission(effectiveAccess, "teams.write");
+  const canCreateTask = hasGrantedPermission(effectiveAccess, "ai-task.create");
 
   return (
     <PageContent>
@@ -57,10 +58,12 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
 
       <Section title="Çalışma alanı">
         <TeamsWorkspaceClient
+          canCreateTask={canCreateTask}
           canWrite={canWrite}
           channels={result.channels}
           selectedChannel={result.selectedChannel}
           selectedChannelId={params.channel ?? result.selectedChannel?.id ?? null}
+          selectedMessageId={params.message ?? null}
         />
       </Section>
     </PageContent>

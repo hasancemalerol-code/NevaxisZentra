@@ -15,12 +15,16 @@ import {
   markTeamsChannelReadAction,
   sendTeamsMessageAction,
 } from "@/features/teams/server/teams-actions";
+import { TeamsMessageTaskDraftForm } from "@/features/teams/components/teams-message-task-draft-form";
+import { TEAMS_MESSAGE_TASK_DRAFT_DISCLAIMER } from "@/features/teams/domain/teams-constants";
 
 type TeamsWorkspaceClientProps = Readonly<{
   channels: RawTeamsChannelListResponse;
   selectedChannel: RawTeamsChannelDetail | null;
   selectedChannelId: string | null;
+  selectedMessageId: string | null;
   canWrite: boolean;
+  canCreateTask: boolean;
 }>;
 
 const DATE_TIME = new Intl.DateTimeFormat("tr-TR", {
@@ -38,15 +42,19 @@ export function TeamsWorkspaceClient({
   channels,
   selectedChannel,
   selectedChannelId,
+  selectedMessageId,
   canWrite,
+  canCreateTask,
 }: TeamsWorkspaceClientProps) {
   const router = useRouter();
   const [messageBody, setMessageBody] = useState("");
   const [selectedMentions, setSelectedMentions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [showTaskDraftForm, setShowTaskDraftForm] = useState(false);
 
   const activeChannelId = selectedChannelId ?? selectedChannel?.id ?? null;
+  const activeMessage = selectedChannel?.messages.find((message) => message.id === selectedMessageId) ?? null;
 
   const mentionCandidates = useMemo(
     () => selectedChannel?.members ?? [],
@@ -55,6 +63,12 @@ export function TeamsWorkspaceClient({
 
   function selectChannel(channelId: string) {
     router.push(`/teams?channel=${encodeURIComponent(channelId)}`);
+  }
+
+  function selectMessage(channelId: string, messageId: string) {
+    router.push(
+      `/teams?channel=${encodeURIComponent(channelId)}&message=${encodeURIComponent(messageId)}`,
+    );
   }
 
   function toggleMention(membershipId: string) {
@@ -150,11 +164,18 @@ export function TeamsWorkspaceClient({
       </aside>
 
       <section className="teams-panel" data-testid="teams-selected-channel">
-        {!selectedChannel ? (
-          <div className="teams-empty">
-            <MessageSquare aria-hidden="true" />
-            <p>Bir kanal seçin veya erişilebilir kanal bekleyin.</p>
-          </div>
+        {!selectedChannel || (activeChannelId !== null && selectedChannel.id !== activeChannelId) ? (
+          activeChannelId ? (
+            <div className="teams-empty" data-testid="teams-selected-channel-loading">
+              <MessageSquare aria-hidden="true" />
+              <p>Kanal yükleniyor…</p>
+            </div>
+          ) : (
+            <div className="teams-empty" data-testid="teams-selected-channel-empty">
+              <MessageSquare aria-hidden="true" />
+              <p>Bir kanal seçin veya erişilebilir kanal bekleyin.</p>
+            </div>
+          )
         ) : (
           <>
             <div
@@ -191,12 +212,60 @@ export function TeamsWorkspaceClient({
                 <div className="teams-empty">Bu kanalda henüz mesaj yok.</div>
               ) : (
                 selectedChannel.messages.map((message) => (
-                  <article key={message.id} className="teams-message" data-testid={`teams-message-${message.id}`}>
+                  <article
+                    key={message.id}
+                    className="teams-message"
+                    data-selected={message.id === selectedMessageId ? "true" : "false"}
+                    data-testid={`teams-message-${message.id}`}
+                  >
                     <div className="teams-message__meta">
                       <strong>{message.authorLabel}</strong>
                       <span>{formatWhen(message.createdAt)}</span>
                     </div>
-                    <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{message.body}</p>
+                    <button
+                      type="button"
+                      className="teams-message__select"
+                      data-testid={`teams-message-select-${message.id}`}
+                      onClick={() => selectMessage(selectedChannel.id, message.id)}
+                    >
+                      <p style={{ margin: 0, whiteSpace: "pre-wrap", textAlign: "left" }}>{message.body}</p>
+                    </button>
+                    {message.linkedTask ? (
+                      <div
+                        className="teams-message__linked-task"
+                        data-testid={`teams-message-linked-task-${message.id}`}
+                      >
+                        {message.linkedTask.canOpenTask ? (
+                          <Link href={message.linkedTask.taskDeepLinkPath} className="teams-context-chip">
+                            Bağlı görevi aç
+                          </Link>
+                        ) : (
+                          <span>Bağlı görev: {message.linkedTask.taskReference}</span>
+                        )}
+                        <span>{message.linkedTask.taskReference}</span>
+                        <span>{message.linkedTask.taskStatus}</span>
+                      </div>
+                    ) : null}
+                    {message.id === selectedMessageId && !message.linkedTask ? (
+                      <div className="teams-message__actions">
+                        {canCreateTask ? (
+                          <Button
+                            type="button"
+                            data-testid="teams-message-convert-to-task"
+                            onClick={() => setShowTaskDraftForm(true)}
+                          >
+                            Göreve dönüştür
+                          </Button>
+                        ) : (
+                          <p
+                            style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }}
+                            data-testid="teams-message-task-create-denied"
+                          >
+                            Görev taslağı oluşturmak için ai-task.create yetkisi gerekir.
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
                     {message.sourceContext?.canOpen && message.sourceContext.deepLinkPath ? (
                       <div style={{ marginTop: "0.5rem" }}>
                         <Link href={message.sourceContext.deepLinkPath} className="teams-context-chip">
@@ -217,6 +286,15 @@ export function TeamsWorkspaceClient({
                 ))
               )}
             </div>
+
+            {showTaskDraftForm && activeMessage ? (
+              <TeamsMessageTaskDraftForm
+                channelName={selectedChannel.name}
+                disclaimer={TEAMS_MESSAGE_TASK_DRAFT_DISCLAIMER}
+                message={activeMessage}
+                onClose={() => setShowTaskDraftForm(false)}
+              />
+            ) : null}
 
             {canWrite ? (
               <form

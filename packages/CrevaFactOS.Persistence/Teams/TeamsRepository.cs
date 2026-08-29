@@ -63,11 +63,23 @@ public interface ITeamsRepository
         TeamsOperationContext context,
         MarkTeamsChannelReadCommand command,
         CancellationToken cancellationToken = default);
+
+    Task<TeamsMessageTaskDraftWriteResult> CreateMessageTaskDraftAsync(
+        TeamsOperationContext teamsContext,
+        AiTaskOperationContext aiTaskContext,
+        CreateMessageTaskDraftCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<TeamsMessageSourceContextReadModel?> GetMessageSourceContextAsync(
+        TeamsOperationContext context,
+        Guid messageId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class TeamsRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : ITeamsRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    IAiTaskRepository aiTaskRepository) : ITeamsRepository
 {
     public Task<TeamsChannelListReadModel> ListAccessibleChannelsAsync(
         TeamsOperationContext context,
@@ -188,8 +200,13 @@ public sealed class TeamsRepository(
             var members = await LoadChannelMembersAsync(context.TenantId, channelId, ct);
             var labelMap = await LoadMembershipLabelsAsync(context.TenantId, members.Select(m => m.TenantMembershipId), ct);
             var mentionMap = await LoadMentionsForMessagesAsync(context.TenantId, messages.Select(m => m.Id), ct);
+            var linkedTaskMap = await LoadLinkedTasksForMessagesAsync(
+                context,
+                capabilities,
+                messages.Select(m => m.Id).ToList(),
+                ct);
             var mappedMessages = messages
-                .Select(m => MapMessageWithMentions(m, labelMap, mentionMap, capabilities))
+                .Select(m => MapMessageWithMentions(m, labelMap, mentionMap, capabilities, linkedTaskMap))
                 .ToList();
 
             var readState = await dbContext.TeamsChannelReadStates.AsNoTracking()
@@ -754,7 +771,8 @@ public sealed class TeamsRepository(
     private static TeamsMessageReadModel MapMessageSync(
         TeamsMessage message,
         IReadOnlyDictionary<Guid, string> labelMap,
-        TeamsAccessCapabilities capabilities)
+        TeamsAccessCapabilities capabilities,
+        IReadOnlyDictionary<Guid, TeamsMessageLinkedTaskReadModel>? linkedTasks = null)
     {
         TeamsSourceContextReadModel? sourceContext = null;
         if (message.AiTaskId.HasValue)
@@ -773,6 +791,12 @@ public sealed class TeamsRepository(
                 CanOpenOperationalSource(message.SourceModule, capabilities));
         }
 
+        TeamsMessageLinkedTaskReadModel? linkedTask = null;
+        if (linkedTasks is not null && linkedTasks.TryGetValue(message.Id, out var resolvedLinkedTask))
+        {
+            linkedTask = resolvedLinkedTask;
+        }
+
         return new TeamsMessageReadModel(
             message.Id,
             message.ChannelId,
@@ -783,21 +807,23 @@ public sealed class TeamsRepository(
             message.Mentions.Select(m => new TeamsMessageMentionReadModel(
                 m.MentionedTenantMembershipId,
                 labelMap.GetValueOrDefault(m.MentionedTenantMembershipId, m.MentionedTenantMembershipId.ToString("D")))).ToList(),
-            message.CreatedAtUtc);
+            message.CreatedAtUtc,
+            linkedTask);
     }
 
     private static TeamsMessageReadModel MapMessageWithMentions(
         TeamsMessage message,
         IReadOnlyDictionary<Guid, string> labelMap,
         Dictionary<Guid, List<TeamsMessageMention>> mentionMap,
-        TeamsAccessCapabilities capabilities)
+        TeamsAccessCapabilities capabilities,
+        IReadOnlyDictionary<Guid, TeamsMessageLinkedTaskReadModel>? linkedTasks = null)
     {
         if (mentionMap.TryGetValue(message.Id, out var mentions))
         {
             message.Mentions = mentions;
         }
 
-        return MapMessageSync(message, labelMap, capabilities);
+        return MapMessageSync(message, labelMap, capabilities, linkedTasks);
     }
 
     private static bool CanOpenOperationalSource(string sourceModule, TeamsAccessCapabilities capabilities) =>
@@ -1023,6 +1049,289 @@ public sealed class TeamsRepository(
         var trimmed = body.Trim();
         return trimmed.Length <= 120 ? trimmed : trimmed[..117] + "...";
     }
+
+    public Task<TeamsMessageTaskDraftWriteResult> CreateMessageTaskDraftAsync(
+        TeamsOperationContext teamsContext,
+        AiTaskOperationContext aiTaskContext,
+        CreateMessageTaskDraftCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(async ct =>
+        {
+            var validationError = TeamsMessageTaskPresentationBuilder.ValidateDraftInput(
+                command.Title,
+                command.Category,
+                command.Priority);
+            if (validationError is not null)
+            {
+                return TeamsMessageTaskDraftWriteResult.Fail(
+                    TeamsFailureCodes.ValidationFailed,
+                    validationError);
+            }
+
+            var message = await dbContext.TeamsMessages.AsNoTracking()
+                .SingleOrDefaultAsync(
+                    m => m.TenantId == teamsContext.TenantId
+                         && m.FacilityId == teamsContext.FacilityId
+                         && m.Id == command.MessageId,
+                    ct);
+            if (message is null)
+            {
+                return TeamsMessageTaskDraftWriteResult.Fail(
+                    TeamsFailureCodes.NotFound,
+                    "Mesaj bulunamadı.");
+            }
+
+            var membership = await LoadMembershipAsync(teamsContext, message.ChannelId, ct);
+            if (membership is null)
+            {
+                return TeamsMessageTaskDraftWriteResult.Fail(
+                    TeamsFailureCodes.ChannelAccessDenied,
+                    "Kanala erişim yok.");
+            }
+
+            var channel = await dbContext.TeamsChannels.AsNoTracking()
+                .SingleOrDefaultAsync(
+                    c => c.TenantId == teamsContext.TenantId
+                         && c.FacilityId == teamsContext.FacilityId
+                         && c.Id == message.ChannelId,
+                    ct);
+            if (channel is null)
+            {
+                return TeamsMessageTaskDraftWriteResult.Fail(
+                    TeamsFailureCodes.NotFound,
+                    "Kanal bulunamadı.");
+            }
+
+            var existingLink = await dbContext.TeamsMessageTaskLinks.AsNoTracking()
+                .SingleOrDefaultAsync(
+                    l => l.TenantId == teamsContext.TenantId
+                         && l.MessageId == message.Id
+                         && l.LinkPurpose == TeamsMessageTaskLinkPurposes.HumanReviewDraft,
+                    ct);
+            if (existingLink is not null)
+            {
+                var linkedTask = await dbContext.AiTasks.AsNoTracking()
+                    .SingleOrDefaultAsync(
+                        t => t.TenantId == teamsContext.TenantId
+                             && t.FacilityId == teamsContext.FacilityId
+                             && t.Id == existingLink.AiTaskId,
+                        ct);
+                if (linkedTask is null)
+                {
+                    return TeamsMessageTaskDraftWriteResult.Fail(
+                        TeamsFailureCodes.NotFound,
+                        "Bağlı görev bulunamadı.");
+                }
+
+                return TeamsMessageTaskDraftWriteResult.Success(
+                    linkedTask.Id,
+                    linkedTask.TaskReference,
+                    linkedTask.Status,
+                    idempotentReplay: true);
+            }
+
+            var sourceLinkedCommand = TeamsMessageTaskPresentationBuilder.BuildSourceLinkedTaskCommand(
+                message,
+                channel.Name,
+                command);
+            var taskResult = await aiTaskRepository.CreateSourceLinkedTaskAsync(
+                aiTaskContext,
+                sourceLinkedCommand,
+                ct);
+            if (!taskResult.Succeeded)
+            {
+                var failureCode = taskResult.FailureCode switch
+                {
+                    AiTaskFailureCodes.IdempotencyConflict => TeamsFailureCodes.IdempotencyConflict,
+                    AiTaskFailureCodes.ValidationFailed => TeamsFailureCodes.ValidationFailed,
+                    AiTaskFailureCodes.FacilityScopeDenied => TeamsFailureCodes.FacilityScopeDenied,
+                    _ => TeamsFailureCodes.AccessDenied,
+                };
+
+                var failureReason = taskResult.FailureReason switch
+                {
+                    "Title is required." => "Görev başlığı zorunludur.",
+                    "A valid category is required." => "Geçerli bir görev kategorisi seçin.",
+                    "A valid priority is required." => "Geçerli bir öncelik seçin.",
+                    _ => taskResult.FailureReason ?? "Görev taslağı oluşturulamadı.",
+                };
+
+                return TeamsMessageTaskDraftWriteResult.Fail(failureCode, failureReason);
+            }
+
+            var createdTask = await dbContext.AiTasks.AsNoTracking()
+                .SingleAsync(
+                    t => t.TenantId == teamsContext.TenantId
+                         && t.FacilityId == teamsContext.FacilityId
+                         && t.Id == taskResult.EntityId!.Value,
+                    ct);
+
+            if (taskResult.IdempotentReplay)
+            {
+                var replayLink = await dbContext.TeamsMessageTaskLinks.AsNoTracking()
+                    .SingleOrDefaultAsync(
+                        l => l.TenantId == teamsContext.TenantId
+                             && l.MessageId == message.Id
+                             && l.LinkPurpose == TeamsMessageTaskLinkPurposes.HumanReviewDraft,
+                        ct);
+                if (replayLink is not null)
+                {
+                    return TeamsMessageTaskDraftWriteResult.Success(
+                        createdTask.Id,
+                        createdTask.TaskReference,
+                        createdTask.Status,
+                        idempotentReplay: true);
+                }
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            var actorLabel = teamsContext.MembershipId.ToString();
+            var link = new TeamsMessageTaskLink
+            {
+                Id = Guid.NewGuid(),
+                TenantId = teamsContext.TenantId,
+                FacilityId = teamsContext.FacilityId,
+                ChannelId = message.ChannelId,
+                MessageId = message.Id,
+                AiTaskId = createdTask.Id,
+                LinkPurpose = TeamsMessageTaskLinkPurposes.HumanReviewDraft,
+                IdempotencyKey = sourceLinkedCommand.IdempotencyKey,
+                SourceContextReference = TeamsMessageTaskPresentationBuilder.BuildSourceContextReference(
+                    message.ChannelId,
+                    message.Id),
+                CreatedByTenantMembershipId = teamsContext.MembershipId,
+                CreatedAtUtc = now,
+            };
+
+            dbContext.TeamsMessageTaskLinks.Add(link);
+            dbContext.TeamsMessageAuditEvents.Add(new TeamsMessageAuditEvent
+            {
+                Id = Guid.NewGuid(),
+                TenantId = teamsContext.TenantId,
+                FacilityId = teamsContext.FacilityId,
+                ChannelId = message.ChannelId,
+                MessageId = message.Id,
+                EventType = TeamsAuditEventTypes.MessageTaskDraftLinked,
+                OccurredAtUtc = now,
+                ActorTenantMembershipId = teamsContext.MembershipId.ToString(),
+                ActorLabel = actorLabel,
+                PayloadJson = JsonSerializer.Serialize(new
+                {
+                    linkPurpose = TeamsMessageTaskLinkPurposes.HumanReviewDraft,
+                    aiTaskId = createdTask.Id,
+                    idempotencyKey = sourceLinkedCommand.IdempotencyKey,
+                    sourceContextReference = link.SourceContextReference,
+                }),
+            });
+
+            await dbContext.SaveChangesAsync(ct);
+
+            return TeamsMessageTaskDraftWriteResult.Success(
+                createdTask.Id,
+                createdTask.TaskReference,
+                createdTask.Status,
+                idempotentReplay: taskResult.IdempotentReplay);
+        }, cancellationToken);
+
+    public Task<TeamsMessageSourceContextReadModel?> GetMessageSourceContextAsync(
+        TeamsOperationContext context,
+        Guid messageId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var message = await dbContext.TeamsMessages.AsNoTracking()
+                .SingleOrDefaultAsync(
+                    m => m.TenantId == context.TenantId
+                         && m.FacilityId == context.FacilityId
+                         && m.Id == messageId,
+                    ct);
+            if (message is null)
+            {
+                return null;
+            }
+
+            var membership = await LoadMembershipAsync(context, message.ChannelId, ct);
+            var channel = await dbContext.TeamsChannels.AsNoTracking()
+                .SingleOrDefaultAsync(
+                    c => c.TenantId == context.TenantId
+                         && c.FacilityId == context.FacilityId
+                         && c.Id == message.ChannelId,
+                    ct);
+            if (channel is null)
+            {
+                return null;
+            }
+
+            var deepLink = TeamsMessageTaskPresentationBuilder.BuildMessageDeepLink(
+                message.ChannelId,
+                message.Id);
+
+            if (membership is null)
+            {
+                return new TeamsMessageSourceContextReadModel(
+                    message.Id,
+                    message.ChannelId,
+                    channel.Name,
+                    TruncatePreview(message.Body),
+                    deepLink,
+                    CanOpen: false,
+                    UnavailableReason: "Teams mesaj bağlamına erişiminiz yok.");
+            }
+
+            return new TeamsMessageSourceContextReadModel(
+                message.Id,
+                message.ChannelId,
+                channel.Name,
+                TruncatePreview(message.Body),
+                deepLink,
+                CanOpen: true,
+                UnavailableReason: null);
+        }, cancellationToken);
+
+    private async Task<IReadOnlyDictionary<Guid, TeamsMessageLinkedTaskReadModel>> LoadLinkedTasksForMessagesAsync(
+        TeamsOperationContext context,
+        TeamsAccessCapabilities capabilities,
+        List<Guid> messageIds,
+        CancellationToken cancellationToken)
+    {
+        if (messageIds.Count == 0)
+        {
+            return new Dictionary<Guid, TeamsMessageLinkedTaskReadModel>();
+        }
+
+        var links = await dbContext.TeamsMessageTaskLinks.AsNoTracking()
+            .Where(l => l.TenantId == context.TenantId && messageIds.Contains(l.MessageId))
+            .ToListAsync(cancellationToken);
+        if (links.Count == 0)
+        {
+            return new Dictionary<Guid, TeamsMessageLinkedTaskReadModel>();
+        }
+
+        var taskIds = links.Select(l => l.AiTaskId).Distinct().ToList();
+        var tasks = await dbContext.AiTasks.AsNoTracking()
+            .Where(t => t.TenantId == context.TenantId
+                        && t.FacilityId == context.FacilityId
+                        && taskIds.Contains(t.Id))
+            .ToDictionaryAsync(t => t.Id, cancellationToken);
+
+        var result = new Dictionary<Guid, TeamsMessageLinkedTaskReadModel>();
+        foreach (var link in links)
+        {
+            if (!tasks.TryGetValue(link.AiTaskId, out var task))
+            {
+                continue;
+            }
+
+            result[link.MessageId] = new TeamsMessageLinkedTaskReadModel(
+                task.Id,
+                task.TaskReference,
+                task.Status,
+                TeamsPresentationBuilder.BuildAiTaskDeepLink(task.Id),
+                capabilities.CanReadAiTasks);
+        }
+
+        return result;
+    }
 }
 
 public sealed class UnavailableTeamsRepository : ITeamsRepository
@@ -1079,4 +1388,19 @@ public sealed class UnavailableTeamsRepository : ITeamsRepository
         MarkTeamsChannelReadCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(TeamsWriteResult.Fail(TeamsFailureCodes.AccessDenied, "Teams unavailable."));
+
+    public Task<TeamsMessageTaskDraftWriteResult> CreateMessageTaskDraftAsync(
+        TeamsOperationContext teamsContext,
+        AiTaskOperationContext aiTaskContext,
+        CreateMessageTaskDraftCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(TeamsMessageTaskDraftWriteResult.Fail(
+            TeamsFailureCodes.AccessDenied,
+            "Teams unavailable."));
+
+    public Task<TeamsMessageSourceContextReadModel?> GetMessageSourceContextAsync(
+        TeamsOperationContext context,
+        Guid messageId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<TeamsMessageSourceContextReadModel?>(null);
 }

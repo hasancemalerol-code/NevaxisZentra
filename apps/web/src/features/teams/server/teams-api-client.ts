@@ -59,6 +59,13 @@ export type RawTeamsMessage = Readonly<{
     tenantMembershipId: string;
     displayLabel: string;
   }>>;
+  linkedTask: Readonly<{
+    taskId: string;
+    taskReference: string;
+    taskStatus: string;
+    taskDeepLinkPath: string;
+    canOpenTask: boolean;
+  }> | null;
   createdAt: string;
 }>;
 
@@ -105,6 +112,24 @@ export type RawTeamsTaskContextChannel = Readonly<{
   canOpenTask: boolean;
   taskDeepLinkPath: string | null;
   taskTitle: string | null;
+}>;
+
+export type RawTeamsMessageSourceContext = Readonly<{
+  messageId: string;
+  channelId: string;
+  channelName: string;
+  messageBodyPreview: string;
+  teamsDeepLinkPath: string;
+  canOpen: boolean;
+  unavailableReason: string | null;
+}>;
+
+export type RawTeamsMessageTaskDraftResult = Readonly<{
+  taskId: string;
+  taskReference: string;
+  taskStatus: string;
+  idempotentReplay: boolean;
+  disclaimer: string;
 }>;
 
 function buildDevelopmentUrl(
@@ -386,6 +411,42 @@ export async function createTeamsChannel(
     "/api/teams/channels",
     payload,
     (value) => value as { id: string; idempotentReplay: boolean },
+  );
+}
+
+export async function createMessageTaskDraft(
+  context: TeamsRequestContext,
+  messageId: string,
+  body: Readonly<{
+    title: string;
+    category: string;
+    priority: string;
+    humanNote?: string | null;
+  }>,
+): Promise<TeamsApiResult<RawTeamsMessageTaskDraftResult>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/messages/${messageId}/task-draft`,
+    {
+      title: body.title,
+      category: body.category,
+      priority: body.priority,
+      humanNote: body.humanNote ?? null,
+    },
+    (payload) => payload as RawTeamsMessageTaskDraftResult,
+  );
+}
+
+export async function getTeamsMessageSourceContext(
+  context: TeamsRequestContext,
+  messageId: string,
+): Promise<TeamsApiResult<RawTeamsMessageSourceContext>> {
+  return getJson(
+    context,
+    `/api/teams/messages/${messageId}/source-context`,
+    undefined,
+    (payload) => payload as RawTeamsMessageSourceContext,
   );
 }
 

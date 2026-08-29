@@ -2,10 +2,12 @@ import "./teams-server-boundary";
 
 import {
   getTeamsChannelDetail,
+  getTeamsMessageSourceContext,
   getTeamsTaskContextChannel,
   listTeamsChannels,
   type RawTeamsChannelDetail,
   type RawTeamsChannelListResponse,
+  type RawTeamsMessageSourceContext,
   type RawTeamsTaskContextChannel,
   type TeamsApiResult,
 } from "./teams-api-client";
@@ -73,4 +75,20 @@ export async function readTeamsTaskContextLink(
   }
 
   return getTeamsTaskContextChannel(contextResult.context, taskId);
+}
+
+export async function readTeamsMessageSourceContext(
+  messageId: string,
+): Promise<TeamsApiResult<RawTeamsMessageSourceContext>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsMessageSourceContext(contextResult.context, messageId);
 }

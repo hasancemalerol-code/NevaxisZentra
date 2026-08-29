@@ -26,6 +26,13 @@ public sealed record TeamsSourceContextReadModel(
     string? SourceEntityId,
     bool CanOpen);
 
+public sealed record TeamsMessageLinkedTaskReadModel(
+    Guid TaskId,
+    string TaskReference,
+    string TaskStatus,
+    string TaskDeepLinkPath,
+    bool CanOpenTask);
+
 public sealed record TeamsMessageReadModel(
     Guid Id,
     Guid ChannelId,
@@ -34,7 +41,8 @@ public sealed record TeamsMessageReadModel(
     string Body,
     TeamsSourceContextReadModel? SourceContext,
     IReadOnlyList<TeamsMessageMentionReadModel> Mentions,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    TeamsMessageLinkedTaskReadModel? LinkedTask = null);
 
 public sealed record TeamsLatestMessagePreviewReadModel(
     Guid MessageId,
@@ -108,6 +116,42 @@ public sealed record PostTeamsMessageCommand(
 public sealed record MarkTeamsChannelReadCommand(
     Guid ChannelId,
     Guid? LastReadMessageId);
+
+public sealed record CreateMessageTaskDraftCommand(
+    Guid MessageId,
+    string Title,
+    string Category,
+    string Priority,
+    string? HumanNote);
+
+public sealed record TeamsMessageSourceContextReadModel(
+    Guid MessageId,
+    Guid ChannelId,
+    string ChannelName,
+    string MessageBodyPreview,
+    string TeamsDeepLinkPath,
+    bool CanOpen,
+    string? UnavailableReason);
+
+public sealed record TeamsMessageTaskDraftWriteResult(
+    bool Succeeded,
+    Guid? TaskId,
+    string? TaskReference,
+    string? TaskStatus,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason)
+{
+    public static TeamsMessageTaskDraftWriteResult Success(
+        Guid taskId,
+        string taskReference,
+        string taskStatus,
+        bool idempotentReplay = false) =>
+        new(true, taskId, taskReference, taskStatus, idempotentReplay, null, null);
+
+    public static TeamsMessageTaskDraftWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, null, null, false, failureCode, failureReason);
+}
 
 public sealed record TeamsWriteResult(
     bool Succeeded,

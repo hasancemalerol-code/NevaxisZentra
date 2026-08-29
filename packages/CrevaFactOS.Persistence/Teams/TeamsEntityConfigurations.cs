@@ -165,3 +165,35 @@ internal sealed class TeamsMessageAuditEventEntityConfiguration : IEntityTypeCon
             .HasDatabaseName("ix_teams_message_audit_events_tenant_facility_channel");
     }
 }
+
+internal sealed class TeamsMessageTaskLinkEntityConfiguration : IEntityTypeConfiguration<TeamsMessageTaskLink>
+{
+    public void Configure(EntityTypeBuilder<TeamsMessageTaskLink> entity)
+    {
+        entity.ToTable("teams_message_task_links");
+        entity.HasKey(l => l.Id);
+        entity.Property(l => l.Id).HasColumnName("id");
+        entity.Property(l => l.TenantId).HasColumnName("tenant_id");
+        entity.Property(l => l.FacilityId).HasColumnName("facility_id");
+        entity.Property(l => l.ChannelId).HasColumnName("channel_id");
+        entity.Property(l => l.MessageId).HasColumnName("message_id");
+        entity.Property(l => l.AiTaskId).HasColumnName("ai_task_id");
+        entity.Property(l => l.LinkPurpose).HasColumnName("link_purpose").HasMaxLength(60).IsRequired();
+        entity.Property(l => l.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128).IsRequired();
+        entity.Property(l => l.SourceContextReference).HasColumnName("source_context_reference").HasMaxLength(200).IsRequired();
+        entity.Property(l => l.CreatedByTenantMembershipId).HasColumnName("created_by_tenant_membership_id");
+        entity.Property(l => l.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(l => l.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(l => new { l.TenantId, l.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(l => new { l.TenantId, l.MessageId, l.LinkPurpose })
+            .HasDatabaseName("ux_teams_message_task_links_tenant_message_purpose")
+            .IsUnique();
+        entity.HasIndex(l => new { l.TenantId, l.AiTaskId })
+            .HasDatabaseName("ix_teams_message_task_links_tenant_task");
+        entity.HasIndex(l => new { l.TenantId, l.FacilityId, l.MessageId })
+            .HasDatabaseName("ix_teams_message_task_links_tenant_facility_message");
+    }
+}

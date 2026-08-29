@@ -5,6 +5,9 @@ public static class TeamsPresentationBuilder
     public static string BuildTeamsChannelDeepLink(Guid channelId) =>
         $"/teams?channel={channelId:D}";
 
+    public static string BuildTeamsMessageDeepLink(Guid channelId, Guid messageId) =>
+        TeamsMessageTaskPresentationBuilder.BuildMessageDeepLink(channelId, messageId);
+
     public static string BuildAiTaskDeepLink(Guid taskId) =>
         $"/ai-gorevleri/{taskId:D}";
 
@@ -62,6 +65,7 @@ public static class TeamsPresentationBuilder
             "production" => "Üretim",
             "procurement" => "Satın alma",
             "production-planning" => "Üretim planlama",
+            "teams" => "Teams mesajı",
             _ => sourceModule,
         };
 

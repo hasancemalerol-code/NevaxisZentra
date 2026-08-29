@@ -1,5 +1,6 @@
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence;
+using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.Tenancy;
@@ -21,6 +22,10 @@ public static class TeamsEndpointRouteBuilderExtensions
         group.MapDelete("/{channelId:guid}/members/{membershipId:guid}", RemoveMemberAsync);
         group.MapPost("/{channelId:guid}/messages", PostMessageAsync);
         group.MapPost("/{channelId:guid}/read", MarkReadAsync);
+
+        var messagesGroup = endpoints.MapGroup("/api/teams/messages").RequireAuthorization();
+        messagesGroup.MapPost("/{messageId:guid}/task-draft", CreateMessageTaskDraftAsync);
+        messagesGroup.MapGet("/{messageId:guid}/source-context", GetMessageSourceContextAsync);
 
         return endpoints;
     }
@@ -227,6 +232,68 @@ public static class TeamsEndpointRouteBuilderExtensions
         return TeamsEndpointHelpers.MapWriteResult(result);
     }
 
+    private static async Task<IResult> CreateMessageTaskDraftAsync(
+        Guid messageId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] CreateMessageTaskDraftRequest body,
+        IFacilityAccessResolver facilityAccessResolver,
+        ITeamsRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (teamsContext, teamsFailure) = await TeamsEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (teamsContext is null) return teamsFailure!;
+
+        var (aiTaskContext, aiTaskFailure) = await TeamsEndpointHelpers.ResolveAiTaskCreateAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (aiTaskContext is null) return aiTaskFailure!;
+
+        var result = await repository.CreateMessageTaskDraftAsync(
+            teamsContext,
+            aiTaskContext,
+            new CreateMessageTaskDraftCommand(
+                messageId,
+                body.Title,
+                body.Category,
+                body.Priority,
+                body.HumanNote),
+            cancellationToken);
+
+        return TeamsEndpointHelpers.MapMessageTaskDraftResult(result);
+    }
+
+    private static async Task<IResult> GetMessageSourceContextAsync(
+        Guid messageId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        ITeamsRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await TeamsEndpointHelpers.ResolveReadAccessAsync(
+            facilityId, facilityAccessResolver, correlationContext, cancellationToken);
+        if (context is null) return failResult!;
+
+        var sourceContext = await repository.GetMessageSourceContextAsync(
+            context,
+            messageId,
+            cancellationToken);
+
+        return sourceContext is null
+            ? TeamsEndpointHelpers.MapFailure(TeamsFailureCodes.NotFound, "Mesaj bulunamadı.")
+            : TypedResults.Ok(new
+            {
+                messageId = sourceContext.MessageId,
+                channelId = sourceContext.ChannelId,
+                channelName = sourceContext.ChannelName,
+                messageBodyPreview = sourceContext.MessageBodyPreview,
+                teamsDeepLinkPath = sourceContext.TeamsDeepLinkPath,
+                canOpen = sourceContext.CanOpen,
+                unavailableReason = sourceContext.UnavailableReason,
+            });
+    }
+
     private static object MapChannelSummary(TeamsChannelSummaryReadModel channel) => new
     {
         id = channel.Id,
@@ -294,6 +361,12 @@ public sealed record PostTeamsMessageRequest(
 
 public sealed record MarkTeamsChannelReadRequest(Guid? LastReadMessageId);
 
+public sealed record CreateMessageTaskDraftRequest(
+    string Title,
+    string Category,
+    string Priority,
+    string? HumanNote);
+
 public static class TeamsServiceCollectionExtensions
 {
     public static IServiceCollection AddCrevaFactOSTeams(this IServiceCollection services)
@@ -305,7 +378,8 @@ public static class TeamsServiceCollectionExtensions
                 ? new UnavailableTeamsRepository()
                 : new TeamsRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IAiTaskRepository>());
         });
 
         return services;

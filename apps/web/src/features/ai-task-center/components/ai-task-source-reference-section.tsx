@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ExternalLink, Link2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ type AiTaskSourceReferenceSectionProps = Readonly<{
   sourceEntityId: string | null;
   taskReference: string;
   taskTitle?: string | null;
+  teamsMessageSourceLink?: ReactNode;
 }>;
 
 function resolveCommercialIntelligenceSourceLink(
@@ -40,6 +42,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     production: "Üretim",
     procurement: "Satın alma",
     "production-planning": "Üretim planlama",
+    teams: "Teams mesajı",
   };
 
   return labels[sourceModule] ?? sourceModule;
@@ -50,6 +53,7 @@ export function AiTaskSourceReferenceSection({
   sourceEntityId,
   taskReference,
   taskTitle = null,
+  teamsMessageSourceLink = null,
 }: AiTaskSourceReferenceSectionProps) {
   const hasSourceLink = Boolean(sourceModule && sourceEntityId);
   const commercialIntelligenceLink = sourceModule === "commercial-intelligence" && sourceEntityId
@@ -148,6 +152,8 @@ export function AiTaskSourceReferenceSection({
               {sourceLink.label}
             </Link>
           ) : null}
+
+          {sourceModule === "teams" ? teamsMessageSourceLink : null}
         </div>
       ) : (
         <p className="ai-task-source-reference__empty">

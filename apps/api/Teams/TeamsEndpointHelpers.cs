@@ -118,6 +118,59 @@ internal static class TeamsEndpointHelpers
             CanReadMold: await HasPermissionAsync(facilityId, MoldPermissionKeys.Read, facilityAccessResolver, cancellationToken),
             CanReadOperationalRisk: await HasPermissionAsync(facilityId, OperationalRiskPermissionKeys.Read, facilityAccessResolver, cancellationToken));
 
+    internal static async Task<(AiTaskOperationContext? Context, IResult? Failure)> ResolveAiTaskCreateAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return (null, MapAccessDenied(
+                FacilityAccessFailureCodes.FacilityMissing,
+                "Tesis tanımlayıcısı gerekli."));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, AiTaskPermissionKeys.Create),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return (null, MapFacilityAccessFailure(accessResult));
+        }
+
+        var access = accessResult.Access;
+        return (new AiTaskOperationContext(
+            access.TenantId,
+            access.FacilityId,
+            access.MembershipId,
+            access.IdentitySubjectId,
+            access.PermissionKey,
+            correlationContext.IsAvailable ? correlationContext.CorrelationId : null), null);
+    }
+
+    internal static IResult MapMessageTaskDraftResult(TeamsMessageTaskDraftWriteResult result)
+    {
+        if (!result.Succeeded)
+        {
+            return MapFailure(result.FailureCode!, result.FailureReason);
+        }
+
+        var dto = new
+        {
+            taskId = result.TaskId!.Value,
+            taskReference = result.TaskReference,
+            taskStatus = result.TaskStatus,
+            idempotentReplay = result.IdempotentReplay,
+            disclaimer = TeamsConstants.MessageTaskDraftDisclaimer,
+        };
+
+        return result.IdempotentReplay
+            ? TypedResults.Ok(dto)
+            : TypedResults.Created((string?)null, dto);
+    }
+
     internal static TeamsOperationContext BuildContext(
         FacilityAccessContext access,
         CorrelationContext correlationContext) =>
@@ -245,6 +298,14 @@ internal static class TeamsEndpointHelpers
             tenantMembershipId = m.TenantMembershipId,
             displayLabel = m.DisplayLabel,
         }),
+        linkedTask = message.LinkedTask is null ? null : new
+        {
+            taskId = message.LinkedTask.TaskId,
+            taskReference = message.LinkedTask.TaskReference,
+            taskStatus = message.LinkedTask.TaskStatus,
+            taskDeepLinkPath = message.LinkedTask.TaskDeepLinkPath,
+            canOpenTask = message.LinkedTask.CanOpenTask,
+        },
         createdAt = message.CreatedAtUtc,
     };
 }
