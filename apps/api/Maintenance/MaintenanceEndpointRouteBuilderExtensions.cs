@@ -41,6 +41,7 @@ public static class MaintenanceEndpointRouteBuilderExtensions
         group.MapMaintenanceExecutionEndpoints();
         group.MapMaintenanceReportingEndpoints();
         group.MapMaintenanceConditionEndpoints();
+        group.MapMaintenancePredictiveRiskEndpoints();
         group.MapMaintenanceAiEndpoints();
 
         return endpoints;

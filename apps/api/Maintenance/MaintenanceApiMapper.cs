@@ -550,6 +550,7 @@ internal static class MaintenanceApiMapper
 
     public static object MapPredictiveRiskAssetRow(MaintenancePredictiveRiskAssetRowReadModel model) => new
     {
+        assessmentId = model.AssessmentId,
         assetReference = model.AssetReference,
         assetName = model.AssetName,
         machineCode = model.MachineCode,
@@ -559,10 +560,14 @@ internal static class MaintenanceApiMapper
         dataFreshness = model.DataFreshness,
         dataSufficiency = model.DataSufficiency,
         assessedAtUtc = model.AssessedAtUtc,
+        followUpStatus = model.FollowUpStatus,
+        linkedAiTaskId = model.LinkedAiTaskId,
     };
 
     public static object MapPredictiveRiskAssessment(MaintenancePredictiveRiskAssessmentReadModel model) => new
     {
+        id = model.Id,
+        machineId = model.MachineId,
         assetReference = model.AssetReference,
         assetName = model.AssetName,
         machineCode = model.MachineCode,
@@ -577,6 +582,9 @@ internal static class MaintenanceApiMapper
         maintenanceHistorySummary = model.MaintenanceHistorySummary,
         explanation = model.Explanation,
         assessedAtUtc = model.AssessedAtUtc,
+        followUpStatus = model.FollowUpStatus,
+        linkedAiTaskId = model.LinkedAiTaskId,
+        canCreateTaskDraft = MaintenancePredictiveRiskPresentationBuilder.CanCreateTaskDraft(model),
         riskDrivers = model.Drivers.Select(d => new
         {
             driverCode = d.DriverCode,

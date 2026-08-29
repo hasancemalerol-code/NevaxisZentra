@@ -8,7 +8,8 @@ type MaintenanceWorkspaceNavProps = Readonly<{
     | "preventive"
     | "planning"
     | "reporting"
-    | "condition";
+    | "condition"
+    | "predictive-risks";
 }>;
 
 const NAV_ITEMS = [
@@ -22,7 +23,8 @@ const NAV_ITEMS = [
   },
   { id: "planning" as const, href: "/bakim/planlama", label: "Bakım Planlama" },
   { id: "reporting" as const, href: "/bakim/raporlama", label: "Raporlama" },
-  { id: "condition" as const, href: "/bakim/durum-zekasi", label: "Kestirici Bakım" },
+  { id: "condition" as const, href: "/bakim/durum-zekasi", label: "Durum Zekâsı" },
+  { id: "predictive-risks" as const, href: "/bakim/kestirimci-riskler", label: "Kestirimci Riskler" },
 ];
 
 export function MaintenanceWorkspaceNav({ active }: MaintenanceWorkspaceNavProps) {

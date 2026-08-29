@@ -51,6 +51,13 @@ export function AiTaskSourceReferenceSection({
   const commercialIntelligenceLink = sourceModule === "commercial-intelligence" && sourceEntityId
     ? resolveCommercialIntelligenceSourceLink(sourceEntityId, taskTitle)
     : null;
+  const maintenanceLink = sourceModule === "maintenance" && sourceEntityId
+    ? {
+        href: `/bakim/kestirimci-riskler?assessment=${encodeURIComponent(sourceEntityId)}`,
+        label: "Kestirimci bakım riskini aç",
+      }
+    : null;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink;
 
   return (
     <Card
@@ -101,10 +108,10 @@ export function AiTaskSourceReferenceSection({
             {sourceEntityId}
           </span>
 
-          {commercialIntelligenceLink ? (
-            <Link href={commercialIntelligenceLink.href}>
+          {sourceLink ? (
+            <Link href={sourceLink.href}>
               <ExternalLink aria-hidden="true" />
-              {commercialIntelligenceLink.label}
+              {sourceLink.label}
             </Link>
           ) : null}
         </div>

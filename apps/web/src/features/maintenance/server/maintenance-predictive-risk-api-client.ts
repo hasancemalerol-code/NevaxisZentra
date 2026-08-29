@@ -1,12 +1,14 @@
 import type {
   MaintenancePredictiveRiskAssessment,
   MaintenancePredictiveRiskWorkspace,
+  MaintenancePredictiveRiskWorkspacePayload,
 } from "../domain/maintenance-predictive-risk";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 import type { MaintenanceApiResult } from "./maintenance-api-client";
 import {
   parseMaintenancePredictiveRiskAssessment,
   parseMaintenancePredictiveRiskWorkspace,
+  parseMaintenancePredictiveRiskWorkspacePayload,
 } from "./maintenance-predictive-risk-api-contracts";
 
 async function getJson<T>(
@@ -53,6 +55,12 @@ async function getJson<T>(
   }
 }
 
+export function getMaintenancePredictiveRiskWorkspace(
+  context: ProductionOrderRequestContext,
+): Promise<MaintenanceApiResult<MaintenancePredictiveRiskWorkspacePayload>> {
+  return getJson(context, "/api/maintenance/predictive-risk/workspace", parseMaintenancePredictiveRiskWorkspacePayload);
+}
+
 export function getMaintenancePredictiveRiskOverview(
   context: ProductionOrderRequestContext,
 ): Promise<MaintenanceApiResult<MaintenancePredictiveRiskWorkspace>> {
@@ -67,6 +75,111 @@ export function getMaintenancePredictiveRiskAssessment(
     context,
     `/api/maintenance/assets/${encodeURIComponent(assetReference)}/predictive-risk`,
     parseMaintenancePredictiveRiskAssessment,
+  );
+}
+
+async function postJson<T>(
+  context: ProductionOrderRequestContext,
+  path: string,
+  body: unknown,
+  parser: (payload: unknown) => T,
+): Promise<MaintenanceApiResult<T>> {
+  try {
+    const url = new URL(`${context.apiBaseUrl}${path}`);
+    url.searchParams.set("facilityId", context.facilityId);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { ...context.requestHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify(body ?? {}),
+      cache: "no-store",
+    });
+    if (response.status === 401) {
+      return { status: "failure", code: "unauthenticated", message: "Authentication required.", retryable: false };
+    }
+    if (response.status === 403) {
+      return { status: "failure", code: "permission-denied", message: "Authorization denied.", retryable: false };
+    }
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null) as { message?: string } | null;
+      return {
+        status: "failure",
+        code: "source-unavailable",
+        message: payload?.message ?? `Predictive risk request failed (${response.status}).`,
+        retryable: response.status >= 500,
+      };
+    }
+    const payload: unknown = await response.json();
+    return { status: "success", value: parser(payload) };
+  } catch {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: "Predictive risk API is unavailable.",
+      retryable: true,
+    };
+  }
+}
+
+export function getMaintenancePredictiveRiskAssessmentById(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<MaintenanceApiResult<MaintenancePredictiveRiskAssessment>> {
+  return getJson(
+    context,
+    `/api/maintenance/predictive-risk/${encodeURIComponent(assessmentId)}`,
+    parseMaintenancePredictiveRiskAssessment,
+  );
+}
+
+export function createMaintenancePredictiveRiskTaskDraft(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<MaintenanceApiResult<Readonly<{
+  taskId: string;
+  assessmentId: string;
+  idempotentReplay: boolean;
+  assessment: MaintenancePredictiveRiskAssessment;
+}>>> {
+  return postJson(
+    context,
+    `/api/maintenance/predictive-risk/${encodeURIComponent(assessmentId)}/task-draft`,
+    {},
+    (payload) => {
+      const data = payload as {
+        taskId: string;
+        assessmentId: string;
+        idempotentReplay?: boolean;
+        assessment: unknown;
+      };
+      const parsed = parseMaintenancePredictiveRiskAssessment(data.assessment);
+      if (parsed.status === "failure") {
+        throw new Error(parsed.message);
+      }
+      return {
+        taskId: data.taskId,
+        assessmentId: data.assessmentId,
+        idempotentReplay: data.idempotentReplay === true,
+        assessment: parsed.value,
+      };
+    },
+  );
+}
+
+export function transitionMaintenancePredictiveRiskFollowUp(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+  input: Readonly<{ targetFollowUpStatus: string; note?: string }>,
+): Promise<MaintenanceApiResult<MaintenancePredictiveRiskAssessment | null>> {
+  return postJson(
+    context,
+    `/api/maintenance/predictive-risk/${encodeURIComponent(assessmentId)}/follow-up`,
+    input,
+    (payload) => {
+      const data = payload as { assessment?: unknown };
+      if (!data.assessment) return null;
+      const parsed = parseMaintenancePredictiveRiskAssessment(data.assessment);
+      return parsed.status === "success" ? parsed.value : null;
+    },
   );
 }
 

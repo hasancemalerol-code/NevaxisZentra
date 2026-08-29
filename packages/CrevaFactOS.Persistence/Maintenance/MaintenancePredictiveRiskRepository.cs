@@ -57,6 +57,7 @@ public sealed class MaintenancePredictiveRiskRepository(
                     machines.TryGetValue(mapping.MachineId, out var machine);
                     currentAssessments.TryGetValue(mapping.AssetReference, out var assessment);
                     return new MaintenancePredictiveRiskAssetRowReadModel(
+                        assessment?.Id,
                         mapping.AssetReference,
                         mapping.AssetName,
                         machine?.MachineCode,
@@ -65,7 +66,9 @@ public sealed class MaintenancePredictiveRiskRepository(
                         assessment?.ReviewPriority ?? MaintenancePredictiveReviewPriorities.Routine,
                         assessment?.DataFreshness ?? MaintenanceConditionDataFreshnessLevels.Unknown,
                         assessment?.DataSufficiency ?? MaintenanceConditionDataSufficiencyLevels.Insufficient,
-                        assessment?.AssessedAtUtc);
+                        assessment?.AssessedAtUtc,
+                        assessment?.FollowUpStatus ?? MaintenancePredictiveRiskFollowUpStatuses.DataReviewNeeded,
+                        assessment?.LinkedAiTaskId);
                 })
                 .ToList();
         }, cancellationToken);
@@ -267,7 +270,12 @@ public sealed class MaintenancePredictiveRiskRepository(
             CreationSource = MaintenancePredictiveRiskCreationSources.DeterministicEvaluator,
             AssessedAtUtc = assessedAtUtc,
             IsCurrent = true,
+            FollowUpStatus = MaintenancePredictiveRiskPresentationBuilder.ResolveInitialFollowUpStatus(
+                evaluationResult.RiskBand,
+                evaluationResult.RecommendationCategory),
             CreatedAtUtc = assessedAtUtc,
+            UpdatedAtUtc = assessedAtUtc,
+            UpdatedBy = context.IdentitySubjectId.ToString(),
             Drivers = evaluationResult.Drivers
                 .Select((driver, index) => new MaintenancePredictiveRiskDriver
                 {
@@ -359,8 +367,22 @@ public sealed class MaintenancePredictiveRiskRepository(
             .OrderByDescending(r => r.GeneratedAtUtc)
             .FirstOrDefaultAsync(cancellationToken);
 
+        var drivers = MaintenancePredictiveRiskPresentationBuilder.BackfillDrivers(
+            assessment,
+            assessment.Drivers
+                .OrderBy(d => d.SortOrder)
+                .Select(d => new MaintenancePredictiveRiskDriverReadModel(d.DriverCode, d.Summary))
+                .ToList());
+        var evidence = MaintenancePredictiveRiskPresentationBuilder.BackfillEvidence(
+            assessment,
+            assessment.EvidenceItems
+                .OrderBy(e => e.SortOrder)
+                .Select(e => new MaintenancePredictiveRiskEvidenceReadModel(e.EvidenceType, e.EvidenceReference, e.Summary))
+                .ToList());
+
         return new MaintenancePredictiveRiskAssessmentReadModel(
             assessment.Id,
+            assessment.MachineId,
             assessment.AssetReference,
             mapping?.AssetName,
             machine?.MachineCode,
@@ -375,23 +397,219 @@ public sealed class MaintenancePredictiveRiskRepository(
             assessment.MaintenanceHistorySummary,
             assessment.Explanation,
             assessment.AssessedAtUtc,
-            assessment.Drivers
-                .OrderBy(d => d.SortOrder)
-                .Select(d => new MaintenancePredictiveRiskDriverReadModel(d.DriverCode, d.Summary))
-                .ToList(),
-            assessment.EvidenceItems
-                .OrderBy(e => e.SortOrder)
-                .Select(e => new MaintenancePredictiveRiskEvidenceReadModel(e.EvidenceType, e.EvidenceReference, e.Summary))
-                .ToList(),
-            recommendation is null
-                ? null
-                : new MaintenancePredictiveRecommendationReadModel(
-                    recommendation.Category,
-                    recommendation.ReviewPriority,
-                    recommendation.Explanation,
-                    recommendation.RuleSetVersion,
-                    recommendation.GeneratedAtUtc,
-                    recommendation.Status));
+            assessment.FollowUpStatus,
+            assessment.LinkedAiTaskId,
+            drivers,
+            evidence,
+            MaintenancePredictiveRiskPresentationBuilder.BackfillRecommendation(assessment, recommendation));
+    }
+
+    public Task<MaintenancePredictiveRiskWorkspaceReadModel> GetWorkspaceAsync(
+        MaintenanceOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var current = await dbContext.MaintenancePredictiveRiskAssessments
+                .AsNoTracking()
+                .Where(a => a.FacilityId == context.FacilityId && a.IsCurrent)
+                .ToListAsync(ct);
+
+            return new MaintenancePredictiveRiskWorkspaceReadModel(
+                MaintenancePredictiveRiskRuleSetVersions.V1,
+                MaintenancePredictiveRiskConstants.AutomationDisclaimer,
+                current.Count(a => MaintenancePredictiveRiskFollowUpStatuses.Open.Contains(a.FollowUpStatus)),
+                current.Count(a => a.LinkedAiTaskId.HasValue),
+                current.Count(a => a.FollowUpStatus == MaintenancePredictiveRiskFollowUpStatuses.HumanReviewed),
+                CanRead: true,
+                canManage,
+                canCreateTask);
+        }, cancellationToken);
+
+    public Task<MaintenancePredictiveRiskAssessmentReadModel?> GetAssessmentByIdAsync(
+        MaintenanceOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var assessment = await dbContext.MaintenancePredictiveRiskAssessments
+                .AsNoTracking()
+                .Include(a => a.Drivers)
+                .Include(a => a.EvidenceItems)
+                .Where(a => a.FacilityId == context.FacilityId && a.Id == assessmentId && a.IsCurrent)
+                .FirstOrDefaultAsync(ct);
+
+            return assessment is null ? null : await MapAssessmentReadModelAsync(context.FacilityId, assessment, ct);
+        }, cancellationToken);
+
+    public Task<MaintenancePredictiveRiskWriteResult> LinkTaskAsync(
+        MaintenanceOperationContext context,
+        LinkMaintenancePredictiveRiskTaskCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                var assessment = await dbContext.MaintenancePredictiveRiskAssessments
+                    .SingleOrDefaultAsync(
+                        a => a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId
+                             && a.Id == command.AssessmentId
+                             && a.IsCurrent,
+                        ct);
+
+                if (assessment is null)
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.NotFound,
+                        "Kestirimci bakım risk değerlendirmesi bulunamadı.");
+                }
+
+                if (assessment.LinkedAiTaskId.HasValue)
+                {
+                    if (assessment.LinkedAiTaskId.Value == command.AiTaskId)
+                    {
+                        var existingDetail = await GetAssessmentByIdAsync(context, assessment.Id, ct);
+                        return MaintenancePredictiveRiskWriteResult.Success(
+                            assessment.Id,
+                            idempotentReplay: true,
+                            assessment: existingDetail);
+                    }
+
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.ValidationFailed,
+                        "Risk değerlendirmesi zaten farklı bir göreve bağlı.");
+                }
+
+                var taskExists = await dbContext.AiTasks.AsNoTracking()
+                    .AnyAsync(
+                        task => task.TenantId == context.TenantId
+                                && task.FacilityId == context.FacilityId
+                                && task.Id == command.AiTaskId,
+                        ct);
+
+                if (!taskExists)
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.NotFound,
+                        "Bağlanacak AI görevi bulunamadı.");
+                }
+
+                var now = DateTimeOffset.UtcNow;
+                var actor = context.IdentitySubjectId.ToString();
+                assessment.LinkedAiTaskId = command.AiTaskId;
+                assessment.FollowUpStatus = MaintenancePredictiveRiskFollowUpStatuses.TaskDraftCreated;
+                assessment.UpdatedAtUtc = now;
+                assessment.UpdatedBy = actor;
+
+                await AppendAuditEventAsync(
+                    assessment,
+                    MaintenancePredictiveRiskAuditEventTypes.TaskLinked,
+                    new { aiTaskId = command.AiTaskId },
+                    actor,
+                    now,
+                    ct);
+
+                await dbContext.SaveChangesAsync(ct);
+
+                var detail = await GetAssessmentByIdAsync(context, assessment.Id, ct);
+                return MaintenancePredictiveRiskWriteResult.Success(assessment.Id, assessment: detail);
+            },
+            cancellationToken);
+
+    public Task<MaintenancePredictiveRiskWriteResult> TransitionFollowUpAsync(
+        MaintenanceOperationContext context,
+        TransitionMaintenancePredictiveRiskFollowUpCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                if (!MaintenancePredictiveRiskFollowUpStatuses.All.Contains(command.TargetFollowUpStatus))
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.ValidationFailed,
+                        "Geçersiz takip durumu.");
+                }
+
+                var assessment = await dbContext.MaintenancePredictiveRiskAssessments
+                    .SingleOrDefaultAsync(
+                        a => a.TenantId == context.TenantId
+                             && a.FacilityId == context.FacilityId
+                             && a.Id == command.AssessmentId
+                             && a.IsCurrent,
+                        ct);
+
+                if (assessment is null)
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.NotFound,
+                        "Kestirimci bakım risk değerlendirmesi bulunamadı.");
+                }
+
+                if (MaintenancePredictiveRiskFollowUpStatuses.Terminal.Contains(assessment.FollowUpStatus))
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.InvalidTransition,
+                        "Kapalı risk değerlendirmesi güncellenemez.");
+                }
+
+                if (command.TargetFollowUpStatus == MaintenancePredictiveRiskFollowUpStatuses.Resolved &&
+                    assessment.FollowUpStatus != MaintenancePredictiveRiskFollowUpStatuses.HumanReviewed &&
+                    assessment.FollowUpStatus != MaintenancePredictiveRiskFollowUpStatuses.TaskDraftCreated)
+                {
+                    return MaintenancePredictiveRiskWriteResult.Fail(
+                        MaintenanceFailureCodes.InvalidTransition,
+                        "Risk yalnızca insan incelemesi sonrası kapatılabilir.");
+                }
+
+                var now = DateTimeOffset.UtcNow;
+                var actor = context.IdentitySubjectId.ToString();
+                var previousStatus = assessment.FollowUpStatus;
+                assessment.FollowUpStatus = command.TargetFollowUpStatus;
+                assessment.UpdatedAtUtc = now;
+                assessment.UpdatedBy = actor;
+
+                await AppendAuditEventAsync(
+                    assessment,
+                    MaintenancePredictiveRiskAuditEventTypes.FollowUpTransitioned,
+                    new
+                    {
+                        previousStatus,
+                        targetStatus = command.TargetFollowUpStatus,
+                        note = command.Note?.Trim(),
+                    },
+                    actor,
+                    now,
+                    ct);
+
+                await dbContext.SaveChangesAsync(ct);
+
+                var detail = await GetAssessmentByIdAsync(context, assessment.Id, ct);
+                return MaintenancePredictiveRiskWriteResult.Success(assessment.Id, assessment: detail);
+            },
+            cancellationToken);
+
+    private async Task AppendAuditEventAsync(
+        MaintenancePredictiveRiskAssessment assessment,
+        string eventType,
+        object payload,
+        string actor,
+        DateTimeOffset occurredAtUtc,
+        CancellationToken cancellationToken)
+    {
+        dbContext.MaintenancePredictiveRiskAuditEvents.Add(new MaintenancePredictiveRiskAuditEvent
+        {
+            Id = Guid.NewGuid(),
+            TenantId = assessment.TenantId,
+            FacilityId = assessment.FacilityId,
+            AssessmentId = assessment.Id,
+            EventType = eventType,
+            PayloadJson = System.Text.Json.JsonSerializer.Serialize(payload),
+            Actor = actor,
+            OccurredAtUtc = occurredAtUtc,
+        });
+
+        await Task.CompletedTask;
     }
 
     private async Task<ConditionMaintenanceHistoryInput> LoadMaintenanceHistoryContextAsync(
@@ -495,4 +713,41 @@ public sealed class UnavailableMaintenancePredictiveRiskRepository : IMaintenanc
         MaintenanceOperationContext context,
         CancellationToken cancellationToken) =>
         Task.FromResult(false);
+
+    public Task<MaintenancePredictiveRiskWorkspaceReadModel> GetWorkspaceAsync(
+        MaintenanceOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new MaintenancePredictiveRiskWorkspaceReadModel(
+            MaintenancePredictiveRiskRuleSetVersions.V1,
+            MaintenancePredictiveRiskConstants.AutomationDisclaimer,
+            0,
+            0,
+            0,
+            false,
+            false,
+            false));
+
+    public Task<MaintenancePredictiveRiskAssessmentReadModel?> GetAssessmentByIdAsync(
+        MaintenanceOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<MaintenancePredictiveRiskAssessmentReadModel?>(null);
+
+    public Task<MaintenancePredictiveRiskWriteResult> LinkTaskAsync(
+        MaintenanceOperationContext context,
+        LinkMaintenancePredictiveRiskTaskCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(MaintenancePredictiveRiskWriteResult.Fail(
+            MaintenanceFailureCodes.SourceUnavailable,
+            "Predictive maintenance risk service is unavailable."));
+
+    public Task<MaintenancePredictiveRiskWriteResult> TransitionFollowUpAsync(
+        MaintenanceOperationContext context,
+        TransitionMaintenancePredictiveRiskFollowUpCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(MaintenancePredictiveRiskWriteResult.Fail(
+            MaintenanceFailureCodes.SourceUnavailable,
+            "Predictive maintenance risk service is unavailable."));
 }

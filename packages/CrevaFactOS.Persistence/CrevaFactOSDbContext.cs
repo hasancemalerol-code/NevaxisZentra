@@ -242,6 +242,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaintenancePredictiveRiskAssessment> MaintenancePredictiveRiskAssessments => Set<MaintenancePredictiveRiskAssessment>();
     public DbSet<MaintenancePredictiveRiskDriver> MaintenancePredictiveRiskDrivers => Set<MaintenancePredictiveRiskDriver>();
     public DbSet<MaintenancePredictiveRiskEvidence> MaintenancePredictiveRiskEvidenceItems => Set<MaintenancePredictiveRiskEvidence>();
+    public DbSet<MaintenancePredictiveRiskAuditEvent> MaintenancePredictiveRiskAuditEvents => Set<MaintenancePredictiveRiskAuditEvent>();
     public DbSet<MaintenancePredictiveRecommendation> MaintenancePredictiveRecommendations => Set<MaintenancePredictiveRecommendation>();
     public DbSet<MaintenanceAiActionDraft> MaintenanceAiActionDrafts => Set<MaintenanceAiActionDraft>();
     public DbSet<MaintenanceAiDraftAuditEvent> MaintenanceAiDraftAuditEvents => Set<MaintenanceAiDraftAuditEvent>();
@@ -1332,6 +1333,12 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new MaintenancePredictiveRiskEvidenceEntityConfiguration());
         modelBuilder.Entity<MaintenancePredictiveRiskEvidence>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaintenancePredictiveRiskAuditEventEntityConfiguration());
+        modelBuilder.Entity<MaintenancePredictiveRiskAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

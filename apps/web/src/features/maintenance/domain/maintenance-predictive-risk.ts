@@ -18,6 +18,14 @@ export type MaintenancePredictiveRecommendationCategory =
   | "plan-technical-review"
   | "urgent-authorized-technical-review";
 
+export type MaintenancePredictiveRiskFollowUpStatus =
+  | "active"
+  | "data-review-needed"
+  | "monitoring"
+  | "task-draft-created"
+  | "human-reviewed"
+  | "resolved";
+
 export type MaintenancePredictiveRiskOverview = Readonly<{
   monitoredAssetCount: number;
   insufficientDataCount: number;
@@ -29,6 +37,7 @@ export type MaintenancePredictiveRiskOverview = Readonly<{
 }>;
 
 export type MaintenancePredictiveRiskAssetRow = Readonly<{
+  assessmentId?: string;
   assetReference: string;
   assetName?: string;
   machineCode?: string;
@@ -38,6 +47,8 @@ export type MaintenancePredictiveRiskAssetRow = Readonly<{
   dataFreshness: string;
   dataSufficiency: string;
   assessedAtUtc?: string;
+  followUpStatus?: MaintenancePredictiveRiskFollowUpStatus;
+  linkedAiTaskId?: string;
 }>;
 
 export type MaintenancePredictiveRiskDriver = Readonly<{
@@ -61,6 +72,8 @@ export type MaintenancePredictiveRecommendation = Readonly<{
 }>;
 
 export type MaintenancePredictiveRiskAssessment = Readonly<{
+  id?: string;
+  machineId?: string;
   assetReference: string;
   assetName?: string;
   machineCode?: string;
@@ -75,12 +88,32 @@ export type MaintenancePredictiveRiskAssessment = Readonly<{
   maintenanceHistorySummary: string;
   explanation: string;
   assessedAtUtc: string;
+  followUpStatus?: MaintenancePredictiveRiskFollowUpStatus;
+  linkedAiTaskId?: string;
+  canCreateTaskDraft?: boolean;
   riskDrivers: readonly MaintenancePredictiveRiskDriver[];
   evidence: readonly MaintenancePredictiveRiskEvidence[];
   recommendation?: MaintenancePredictiveRecommendation;
 }>;
 
 export type MaintenancePredictiveRiskWorkspace = Readonly<{
+  overview: MaintenancePredictiveRiskOverview;
+  assets: readonly MaintenancePredictiveRiskAssetRow[];
+}>;
+
+export type MaintenancePredictiveRiskWorkspacePayload = Readonly<{
+  ruleSetVersion: string;
+  automationDisclaimer: string;
+  kpis: Readonly<{
+    activeRiskCount: number;
+    taskLinkedCount: number;
+    humanReviewedCount: number;
+  }>;
+  capabilities: Readonly<{
+    canRead: boolean;
+    canManage: boolean;
+    canCreateTask: boolean;
+  }>;
   overview: MaintenancePredictiveRiskOverview;
   assets: readonly MaintenancePredictiveRiskAssetRow[];
 }>;

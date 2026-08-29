@@ -15313,9 +15313,19 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<string>("FollowUpStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("follow_up_status");
+
                     b.Property<bool>("IsCurrent")
                         .HasColumnType("boolean")
                         .HasColumnName("is_current");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
 
                     b.Property<Guid>("MachineId")
                         .HasColumnType("uuid")
@@ -15349,6 +15359,16 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("updated_by");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId", "FacilityId", "AssetReference", "IsCurrent");
@@ -15358,6 +15378,55 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("IX_maintenance_predictive_risk_assessments_tenant_id_facility~1");
 
                     b.ToTable("maintenance_predictive_risk_assessments", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenancePredictiveRiskAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("TenantId", "FacilityId", "AssessmentId", "OccurredAtUtc");
+
+                    b.ToTable("maintenance_predictive_risk_audit_events", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenancePredictiveRiskDriver", b =>
@@ -28558,6 +28627,30 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenancePredictiveRiskAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Maintenance.MaintenancePredictiveRiskAssessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Maintenance.MaintenancePredictiveRiskDriver", b =>

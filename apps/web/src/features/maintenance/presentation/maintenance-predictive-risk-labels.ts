@@ -2,6 +2,7 @@ import type {
   MaintenancePredictiveRecommendationCategory,
   MaintenancePredictiveReviewPriority,
   MaintenancePredictiveRiskBand,
+  MaintenancePredictiveRiskFollowUpStatus,
 } from "../domain/maintenance-predictive-risk";
 
 export const MAINTENANCE_PREDICTIVE_RISK_RULE_SET_VERSION = "MAINT-PRED-RISK-V1";
@@ -11,6 +12,24 @@ export const MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY =
 
 export const MAINTENANCE_PREDICTIVE_RISK_SIMULATOR_COPY =
   "Simülatör tabanlı kanıtlar gerçek makine doğrulaması değildir.";
+
+export const MAINTENANCE_PREDICTIVE_RISK_TASK_DISCLAIMER =
+  "Bu görev taslağı otomatik bakım emri, duruş veya makine müdahalesi başlatmaz.";
+
+const FOLLOW_UP_STATUS_LABELS: Record<MaintenancePredictiveRiskFollowUpStatus, string> = {
+  active: "Aktif risk",
+  "data-review-needed": "Veri incelemesi gerekli",
+  monitoring: "İzlemede",
+  "task-draft-created": "Görev taslağı oluşturuldu",
+  "human-reviewed": "İnsan incelemesi yapıldı",
+  resolved: "Kapatıldı",
+};
+
+export function getMaintenancePredictiveRiskFollowUpStatusLabel(
+  status: MaintenancePredictiveRiskFollowUpStatus,
+): string {
+  return FOLLOW_UP_STATUS_LABELS[status] ?? status;
+}
 
 const RISK_BAND_LABELS: Record<MaintenancePredictiveRiskBand, string> = {
   "insufficient-data": "Yetersiz Veri",

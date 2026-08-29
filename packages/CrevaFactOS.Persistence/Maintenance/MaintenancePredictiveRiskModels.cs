@@ -58,6 +58,7 @@ public sealed record MaintenancePredictiveRiskOverviewReadModel(
     DateTimeOffset? LastAssessedAtUtc);
 
 public sealed record MaintenancePredictiveRiskAssetRowReadModel(
+    Guid? AssessmentId,
     string AssetReference,
     string? AssetName,
     string? MachineCode,
@@ -66,7 +67,9 @@ public sealed record MaintenancePredictiveRiskAssetRowReadModel(
     string ReviewPriority,
     string DataFreshness,
     string DataSufficiency,
-    DateTimeOffset? AssessedAtUtc);
+    DateTimeOffset? AssessedAtUtc,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId);
 
 public sealed record MaintenancePredictiveRiskDriverReadModel(
     string DriverCode,
@@ -87,6 +90,7 @@ public sealed record MaintenancePredictiveRecommendationReadModel(
 
 public sealed record MaintenancePredictiveRiskAssessmentReadModel(
     Guid Id,
+    Guid MachineId,
     string AssetReference,
     string? AssetName,
     string? MachineCode,
@@ -101,6 +105,8 @@ public sealed record MaintenancePredictiveRiskAssessmentReadModel(
     string MaintenanceHistorySummary,
     string Explanation,
     DateTimeOffset AssessedAtUtc,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId,
     IReadOnlyList<MaintenancePredictiveRiskDriverReadModel> Drivers,
     IReadOnlyList<MaintenancePredictiveRiskEvidenceReadModel> Evidence,
     MaintenancePredictiveRecommendationReadModel? Recommendation);
@@ -111,6 +117,50 @@ public sealed record MaintenancePredictiveRiskAssessmentSummaryReadModel(
     string ReviewPriority,
     DateTimeOffset AssessedAtUtc,
     string RuleSetVersion);
+
+public sealed record MaintenancePredictiveRiskWorkspaceReadModel(
+    string RuleSetVersion,
+    string AutomationDisclaimer,
+    int ActiveRiskCount,
+    int TaskLinkedCount,
+    int HumanReviewedCount,
+    bool CanRead,
+    bool CanManage,
+    bool CanCreateTask);
+
+public sealed record LinkMaintenancePredictiveRiskTaskCommand(
+    Guid AssessmentId,
+    Guid AiTaskId);
+
+public sealed record TransitionMaintenancePredictiveRiskFollowUpCommand(
+    Guid AssessmentId,
+    string TargetFollowUpStatus,
+    string? Note);
+
+public sealed class MaintenancePredictiveRiskWriteResult
+{
+    public bool Succeeded { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+    public Guid? EntityId { get; init; }
+    public bool IdempotentReplay { get; init; }
+    public MaintenancePredictiveRiskAssessmentReadModel? Assessment { get; init; }
+
+    public static MaintenancePredictiveRiskWriteResult Success(
+        Guid entityId,
+        bool idempotentReplay = false,
+        MaintenancePredictiveRiskAssessmentReadModel? assessment = null) =>
+        new()
+        {
+            Succeeded = true,
+            EntityId = entityId,
+            IdempotentReplay = idempotentReplay,
+            Assessment = assessment,
+        };
+
+    public static MaintenancePredictiveRiskWriteResult Fail(string code, string reason) =>
+        new() { Succeeded = false, FailureCode = code, FailureReason = reason };
+}
 
 public interface IPredictiveRiskEvaluationService
 {
@@ -141,4 +191,25 @@ public interface IMaintenancePredictiveRiskRepository
     Task<bool> EvaluateFacilityRiskAsync(
         MaintenanceOperationContext context,
         CancellationToken cancellationToken);
+
+    Task<MaintenancePredictiveRiskWorkspaceReadModel> GetWorkspaceAsync(
+        MaintenanceOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken);
+
+    Task<MaintenancePredictiveRiskAssessmentReadModel?> GetAssessmentByIdAsync(
+        MaintenanceOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken);
+
+    Task<MaintenancePredictiveRiskWriteResult> LinkTaskAsync(
+        MaintenanceOperationContext context,
+        LinkMaintenancePredictiveRiskTaskCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<MaintenancePredictiveRiskWriteResult> TransitionFollowUpAsync(
+        MaintenanceOperationContext context,
+        TransitionMaintenancePredictiveRiskFollowUpCommand command,
+        CancellationToken cancellationToken = default);
 }

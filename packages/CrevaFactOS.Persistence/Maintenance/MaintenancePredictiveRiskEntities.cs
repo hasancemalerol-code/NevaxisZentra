@@ -61,7 +61,11 @@ public sealed class MaintenancePredictiveRiskAssessment
     public string CreationSource { get; set; } = MaintenancePredictiveRiskCreationSources.DeterministicEvaluator;
     public DateTimeOffset AssessedAtUtc { get; set; }
     public bool IsCurrent { get; set; }
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = MaintenancePredictiveRiskFollowUpStatuses.Active;
     public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+    public string UpdatedBy { get; set; } = string.Empty;
     public ICollection<MaintenancePredictiveRiskDriver> Drivers { get; set; } = [];
     public ICollection<MaintenancePredictiveRiskEvidence> EvidenceItems { get; set; } = [];
 }
@@ -107,5 +111,18 @@ public sealed class MaintenancePredictiveRecommendation
     public string Status { get; set; } = MaintenancePredictiveRecommendationStatuses.Current;
     public DateTimeOffset GeneratedAtUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
+    public MaintenancePredictiveRiskAssessment? Assessment { get; set; }
+}
+
+public sealed class MaintenancePredictiveRiskAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid AssessmentId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
     public MaintenancePredictiveRiskAssessment? Assessment { get; set; }
 }

@@ -8,6 +8,7 @@ import type {
   MaintenancePredictiveRiskEvidence,
   MaintenancePredictiveRiskOverview,
   MaintenancePredictiveRiskWorkspace,
+  MaintenancePredictiveRiskWorkspacePayload,
 } from "../domain/maintenance-predictive-risk";
 
 export type ParseResult<T> =
@@ -213,6 +214,7 @@ export function parseMaintenancePredictiveRiskAssetRow(payload: unknown): ParseR
   return {
     status: "success",
     value: {
+      assessmentId: parseOptionalString(record.assessmentId),
       assetReference: assetReference.value,
       assetName: parseOptionalString(record.assetName),
       machineCode: parseOptionalString(record.machineCode),
@@ -222,6 +224,8 @@ export function parseMaintenancePredictiveRiskAssetRow(payload: unknown): ParseR
       dataFreshness: dataFreshness.value,
       dataSufficiency: dataSufficiency.value,
       assessedAtUtc: parseOptionalString(record.assessedAtUtc),
+      followUpStatus: parseOptionalString(record.followUpStatus) as MaintenancePredictiveRiskAssessment["followUpStatus"],
+      linkedAiTaskId: parseOptionalString(record.linkedAiTaskId),
     },
   };
 }
@@ -247,6 +251,48 @@ export function parseMaintenancePredictiveRiskWorkspace(payload: unknown): Parse
     assets.push(parsed.value);
   }
   return { status: "success", value: { overview: overview.value, assets } };
+}
+
+export function parseMaintenancePredictiveRiskWorkspacePayload(
+  payload: unknown,
+): ParseResult<MaintenancePredictiveRiskWorkspacePayload> {
+  if (typeof payload !== "object" || payload === null) {
+    return { status: "failure", message: "risk workspace payload is invalid." };
+  }
+  const record = payload as Record<string, unknown>;
+  const workspace = parseMaintenancePredictiveRiskWorkspace(record);
+  if (workspace.status === "failure") {
+    return workspace;
+  }
+  const ruleSetVersion = parseString(record.ruleSetVersion, "ruleSetVersion");
+  const automationDisclaimer = parseString(record.automationDisclaimer, "automationDisclaimer");
+  if (ruleSetVersion.status === "failure" || automationDisclaimer.status === "failure") {
+    return { status: "failure", message: "risk workspace payload is invalid." };
+  }
+  const kpisRecord = record.kpis as Record<string, unknown> | undefined;
+  const capabilitiesRecord = record.capabilities as Record<string, unknown> | undefined;
+  if (!kpisRecord || !capabilitiesRecord) {
+    return { status: "failure", message: "risk workspace payload is invalid." };
+  }
+  return {
+    status: "success",
+    value: {
+      ruleSetVersion: ruleSetVersion.value,
+      automationDisclaimer: automationDisclaimer.value,
+      kpis: {
+        activeRiskCount: typeof kpisRecord.activeRiskCount === "number" ? kpisRecord.activeRiskCount : 0,
+        taskLinkedCount: typeof kpisRecord.taskLinkedCount === "number" ? kpisRecord.taskLinkedCount : 0,
+        humanReviewedCount: typeof kpisRecord.humanReviewedCount === "number" ? kpisRecord.humanReviewedCount : 0,
+      },
+      capabilities: {
+        canRead: capabilitiesRecord.canRead === true,
+        canManage: capabilitiesRecord.canManage === true,
+        canCreateTask: capabilitiesRecord.canCreateTask === true,
+      },
+      overview: workspace.value.overview,
+      assets: workspace.value.assets,
+    },
+  };
 }
 
 export function parseMaintenancePredictiveRiskAssessment(
@@ -311,6 +357,8 @@ export function parseMaintenancePredictiveRiskAssessment(
   return {
     status: "success",
     value: {
+      id: parseOptionalString(record.id),
+      machineId: parseOptionalString(record.machineId),
       assetReference: assetReference.value,
       assetName: parseOptionalString(record.assetName),
       machineCode: parseOptionalString(record.machineCode),
@@ -325,6 +373,9 @@ export function parseMaintenancePredictiveRiskAssessment(
       maintenanceHistorySummary: maintenanceHistorySummary.value,
       explanation: explanation.value,
       assessedAtUtc: assessedAtUtc.value,
+      followUpStatus: parseOptionalString(record.followUpStatus) as MaintenancePredictiveRiskAssessment["followUpStatus"],
+      linkedAiTaskId: parseOptionalString(record.linkedAiTaskId),
+      canCreateTaskDraft: record.canCreateTaskDraft === true,
       riskDrivers: drivers,
       evidence,
       recommendation: recommendation.value,
