@@ -31,6 +31,8 @@ public static class QualityNcrEndpointRouteBuilderExtensions
         group.MapGet("/production-orders/{productionOrderId:guid}/signal", GetProductionQualitySignalAsync);
         group.MapGet("/inspection-results/{resultId:guid}/nonconformance", GetLinkedNonconformanceAsync);
 
+        group.MapQualityNcrFollowUpEndpoints();
+
         return endpoints;
     }
 

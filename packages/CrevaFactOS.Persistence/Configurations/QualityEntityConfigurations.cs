@@ -201,6 +201,9 @@ internal sealed class QualityNonconformanceEntityConfiguration : IEntityTypeConf
         entity.Property(n => n.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(n => n.UpdatedAtUtc).HasColumnName("updated_at_utc");
         entity.Property(n => n.Version).HasColumnName("version").IsConcurrencyToken();
+        entity.Property(n => n.LinkedAiTaskId).HasColumnName("linked_ai_task_id");
+        entity.Property(n => n.FollowUpStatus).HasColumnName("follow_up_status").HasMaxLength(30);
+        entity.Property(n => n.FollowUpUpdatedBy).HasColumnName("follow_up_updated_by").HasMaxLength(200);
 
         entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.NcrNumber }).IsUnique();
         entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.QualityInspectionResultId })
@@ -268,5 +271,33 @@ internal sealed class QualityCorrectiveActionEntityConfiguration : IEntityTypeCo
         entity.HasOne(a => a.Nonconformance).WithMany(n => n.CorrectiveActions)
             .HasForeignKey(a => a.NcrId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class QualityNcrFollowUpAuditEventEntityConfiguration
+    : IEntityTypeConfiguration<Quality.QualityNcrFollowUpAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<Quality.QualityNcrFollowUpAuditEvent> entity)
+    {
+        entity.ToTable("quality_ncr_follow_up_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.NcrId).HasColumnName("ncr_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(50);
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").HasColumnType("jsonb");
+        entity.Property(e => e.Actor).HasColumnName("actor").HasMaxLength(200);
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.NcrId, e.OccurredAtUtc });
+        entity.HasOne(e => e.Nonconformance).WithMany()
+            .HasForeignKey(e => e.NcrId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

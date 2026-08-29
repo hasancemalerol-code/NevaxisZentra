@@ -236,6 +236,12 @@ public static class DevelopmentPilotIds
     public static readonly Guid QualityPilotInspectionDefinitionId =
         Guid.Parse("bb000001-0061-4000-8000-000000000061");
 
+    public static readonly Guid QualityPilotNcrConfirmedId =
+        Guid.Parse("bb000001-0063-4000-8000-000000000063");
+
+    public static readonly Guid QualityPilotNcrInsufficientEvidenceId =
+        Guid.Parse("bb000001-0064-4000-8000-000000000064");
+
     // Maintenance permission definitions (053–055)
     public static readonly Guid MaintenanceReadPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000053");

@@ -57,7 +57,13 @@ export function AiTaskSourceReferenceSection({
         label: "Kestirimci bakım riskini aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink;
+  const qualityLink = sourceModule === "quality" && sourceEntityId
+    ? {
+        href: `/kalite/takip-ve-gorevler?finding=${encodeURIComponent(sourceEntityId)}`,
+        label: "Kalite uygunsuzluk kaydını aç",
+      }
+    : null;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink;
 
   return (
     <Card

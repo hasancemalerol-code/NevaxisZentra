@@ -83,4 +83,68 @@ internal static class DevelopmentPilotQualitySeed
 
         dbContext.QualityControlPlans.Add(plan);
     }
+
+    public static async Task EnsureQualityPilotNcrFollowUpFixturesAsync(
+        CrevaFactOSDbContext dbContext,
+        Guid tenantId,
+        Guid facilityId,
+        string createdBySubjectId,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.QualityNonconformances
+            .AsNoTracking()
+            .AnyAsync(
+                n => n.Id == DevelopmentPilotIds.QualityPilotNcrConfirmedId,
+                cancellationToken);
+
+        if (existing)
+        {
+            return;
+        }
+
+        dbContext.QualityNonconformances.AddRange(
+            new QualityNonconformance
+            {
+                Id = DevelopmentPilotIds.QualityPilotNcrConfirmedId,
+                TenantId = tenantId,
+                FacilityId = facilityId,
+                NcrNumber = "NCR-PILOT-001",
+                ProductReference = "POM-WHEEL-55",
+                OperationReference = "final-inspection",
+                Title = "Pilot çap tolerans aşımı",
+                Description = "Son muayenede nominal çap toleransı dışında ölçüm kaydı tespit edildi.",
+                Category = "measurement",
+                Severity = QualityNcrSeverity.Major,
+                Status = QualityNcrStatus.Open,
+                DetectedAtUtc = seedTimestampUtc,
+                DetectedBySubjectId = createdBySubjectId,
+                DispositionStatus = QualityNcrDispositionStatus.Pending,
+                HoldStatus = QualityNcrHoldStatus.None,
+                CreatedAtUtc = seedTimestampUtc,
+                UpdatedAtUtc = seedTimestampUtc,
+                Version = 1,
+                FollowUpStatus = QualityNcrFollowUpStatuses.RequiresReview,
+            },
+            new QualityNonconformance
+            {
+                Id = DevelopmentPilotIds.QualityPilotNcrInsufficientEvidenceId,
+                TenantId = tenantId,
+                FacilityId = facilityId,
+                NcrNumber = "NCR-PILOT-002",
+                Title = "Pilot eksik kanıt kaydı",
+                Description = "Muayene, üretim emri veya ürün referansı olmadan açılmış pilot uygunsuzluk kaydı.",
+                Category = "data-quality",
+                Severity = QualityNcrSeverity.Minor,
+                Status = QualityNcrStatus.Open,
+                DetectedAtUtc = seedTimestampUtc,
+                DetectedBySubjectId = createdBySubjectId,
+                DispositionStatus = QualityNcrDispositionStatus.Pending,
+                HoldStatus = QualityNcrHoldStatus.None,
+                CreatedAtUtc = seedTimestampUtc,
+                UpdatedAtUtc = seedTimestampUtc,
+                Version = 1,
+                FollowUpStatus = QualityNcrFollowUpStatuses.RequiresReview,
+            });
+    }
 }

@@ -22674,6 +22674,55 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("quality_inspection_results", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityNcrFollowUpAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("NcrId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ncr_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NcrId");
+
+                    b.HasIndex("TenantId", "FacilityId", "NcrId", "OccurredAtUtc");
+
+                    b.ToTable("quality_ncr_follow_up_audit_events", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityNonconformance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -22744,11 +22793,26 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<string>("FollowUpStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("follow_up_status");
+
+                    b.Property<string>("FollowUpUpdatedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("follow_up_updated_by");
+
                     b.Property<string>("HoldStatus")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("hold_status");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
 
                     b.Property<string>("NcrNumber")
                         .IsRequired()
@@ -29881,6 +29945,30 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasForeignKey("QualityInspectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityNcrFollowUpAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Quality.QualityNonconformance", "Nonconformance")
+                        .WithMany()
+                        .HasForeignKey("NcrId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Nonconformance");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityNonconformance", b =>

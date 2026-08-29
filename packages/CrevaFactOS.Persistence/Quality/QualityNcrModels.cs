@@ -155,6 +155,84 @@ public sealed record QualityNcrWorkspaceExtensionReadModel(
     int ActiveHoldCount,
     int ActionPendingCount);
 
+public sealed record QualityNcrFollowUpAuditEventReadModel(
+    string EventType,
+    string PayloadJson,
+    string Actor,
+    DateTimeOffset OccurredAtUtc);
+
+public sealed record QualityNcrFollowUpWorkspaceReadModel(
+    string AutomationDisclaimer,
+    int RequiresReviewCount,
+    int AcknowledgedCount,
+    int TaskLinkedCount,
+    int HighPriorityCount,
+    int DataReviewCount,
+    bool CanRead,
+    bool CanManage,
+    bool CanCreateTask);
+
+public sealed record QualityNcrFollowUpRowReadModel(
+    Guid Id,
+    string NcrNumber,
+    string Title,
+    string Severity,
+    string Status,
+    string FollowUpStatus,
+    string HoldStatus,
+    string DispositionStatus,
+    string? ProductReference,
+    Guid? ProductionOrderId,
+    string? ProductionOrderReference,
+    DateTimeOffset DetectedAtUtc,
+    Guid? LinkedAiTaskId,
+    bool CanCreateTaskDraft,
+    string TaskDraftPurpose,
+    bool HasInsufficientEvidence);
+
+public sealed record QualityNcrFollowUpDetailReadModel(
+    QualityNonconformanceDetailReadModel Detail,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId,
+    bool CanCreateTaskDraft,
+    string TaskDraftPurpose,
+    bool HasInsufficientEvidence,
+    string EvidenceSummary,
+    IReadOnlyList<QualityNcrFollowUpAuditEventReadModel> AuditEvents);
+
+public sealed record LinkQualityNcrFollowUpTaskCommand(Guid NcrId, Guid AiTaskId);
+
+public sealed record TransitionQualityNcrFollowUpCommand(
+    Guid NcrId,
+    uint ExpectedVersion,
+    string TargetFollowUpStatus,
+    string? Note);
+
+public sealed class QualityNcrFollowUpWriteResult
+{
+    public bool Succeeded { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+    public Guid? EntityId { get; init; }
+    public bool IdempotentReplay { get; init; }
+    public QualityNcrFollowUpDetailReadModel? Detail { get; init; }
+
+    public static QualityNcrFollowUpWriteResult Success(
+        Guid entityId,
+        bool idempotentReplay = false,
+        QualityNcrFollowUpDetailReadModel? detail = null) =>
+        new()
+        {
+            Succeeded = true,
+            EntityId = entityId,
+            IdempotentReplay = idempotentReplay,
+            Detail = detail,
+        };
+
+    public static QualityNcrFollowUpWriteResult Fail(string code, string reason) =>
+        new() { Succeeded = false, FailureCode = code, FailureReason = reason };
+}
+
 public sealed record LinkedNonconformanceReadModel(
     Guid Id,
     string NcrNumber,

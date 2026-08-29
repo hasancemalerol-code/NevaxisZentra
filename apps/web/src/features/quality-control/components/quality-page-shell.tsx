@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { QualityBackLink } from "./quality-back-link";
 import { QualityWorkspaceNav } from "./quality-workspace-nav";
 
-type QualityNavActive = "overview" | "ncr" | "reporting" | "none";
+type QualityNavActive = "overview" | "ncr" | "follow-up" | "reporting" | "none";
 
 export type QualityPageShellProps = Readonly<{
   backHref: string;

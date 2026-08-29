@@ -110,6 +110,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<QualityInspection> QualityInspections => Set<QualityInspection>();
     public DbSet<QualityInspectionResult> QualityInspectionResults => Set<QualityInspectionResult>();
     public DbSet<QualityNonconformance> QualityNonconformances => Set<QualityNonconformance>();
+    public DbSet<QualityNcrFollowUpAuditEvent> QualityNcrFollowUpAuditEvents => Set<QualityNcrFollowUpAuditEvent>();
     public DbSet<QualityHold> QualityHolds => Set<QualityHold>();
     public DbSet<QualityCorrectiveAction> QualityCorrectiveActions => Set<QualityCorrectiveAction>();
 
@@ -958,6 +959,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && n.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new QualityNcrFollowUpAuditEventEntityConfiguration());
+        modelBuilder.Entity<QualityNcrFollowUpAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new QualityHoldEntityConfiguration());
         modelBuilder.Entity<QualityHold>().HasQueryFilter(h =>

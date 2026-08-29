@@ -30,9 +30,25 @@ public sealed class QualityNonconformance
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
     public uint Version { get; set; } = 1;
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = QualityNcrFollowUpStatuses.RequiresReview;
+    public string? FollowUpUpdatedBy { get; set; }
 
     public ICollection<QualityHold> Holds { get; set; } = [];
     public ICollection<QualityCorrectiveAction> CorrectiveActions { get; set; } = [];
+}
+
+public sealed class QualityNcrFollowUpAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid NcrId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public QualityNonconformance? Nonconformance { get; set; }
 }
 
 public sealed class QualityHold

@@ -89,6 +89,33 @@ public interface IQualityNonconformanceRepository
         QualityOperationContext context,
         QualityNonconformanceLifecycleCommand command,
         CancellationToken cancellationToken = default);
+
+    Task<QualityNcrFollowUpWorkspaceReadModel> GetFollowUpWorkspaceAsync(
+        QualityOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<QualityNcrFollowUpRowReadModel>> ListFollowUpRowsAsync(
+        QualityOperationContext context,
+        string? followUpStatus = null,
+        string? severity = null,
+        CancellationToken cancellationToken = default);
+
+    Task<QualityNcrFollowUpDetailReadModel?> GetFollowUpDetailAsync(
+        QualityOperationContext context,
+        Guid ncrId,
+        CancellationToken cancellationToken = default);
+
+    Task<QualityNcrFollowUpWriteResult> LinkTaskAsync(
+        QualityOperationContext context,
+        LinkQualityNcrFollowUpTaskCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<QualityNcrFollowUpWriteResult> TransitionFollowUpAsync(
+        QualityOperationContext context,
+        TransitionQualityNcrFollowUpCommand command,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class QualityNonconformanceRepository(
@@ -299,6 +326,7 @@ public sealed class QualityNonconformanceRepository(
                 OwnerSubjectId = command.OwnerSubjectId?.Trim(),
                 DispositionStatus = QualityNcrDispositionStatus.Pending,
                 HoldStatus = QualityNcrHoldStatus.None,
+                FollowUpStatus = QualityNcrFollowUpStatuses.RequiresReview,
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now,
                 Version = 1,
@@ -1029,6 +1057,295 @@ public sealed class QualityNonconformanceRepository(
     private static bool IsUniqueViolation(DbUpdateException ex) =>
         ex.InnerException?.Message.Contains("23505", StringComparison.OrdinalIgnoreCase) == true
         || ex.InnerException?.Message.Contains("unique constraint", StringComparison.OrdinalIgnoreCase) == true;
+
+    public Task<QualityNcrFollowUpWorkspaceReadModel> GetFollowUpWorkspaceAsync(
+        QualityOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var ncrs = await dbContext.QualityNonconformances.AsNoTracking()
+                .Where(n => n.TenantId == context.TenantId && n.FacilityId == context.FacilityId)
+                .Where(n => n.Status != QualityNcrStatus.Closed
+                            && n.Status != QualityNcrStatus.Cancelled
+                            && n.Status != QualityNcrStatus.Resolved)
+                .ToListAsync(ct);
+
+            return new QualityNcrFollowUpWorkspaceReadModel(
+                QualityFollowUpConstants.AutomationDisclaimer,
+                ncrs.Count(n => n.FollowUpStatus == QualityNcrFollowUpStatuses.RequiresReview),
+                ncrs.Count(n => n.FollowUpStatus == QualityNcrFollowUpStatuses.Acknowledged),
+                ncrs.Count(n => n.LinkedAiTaskId.HasValue),
+                ncrs.Count(n => n.Severity is QualityNcrSeverity.Major or QualityNcrSeverity.Critical),
+                ncrs.Count(QualityFollowUpPresentationBuilder.HasInsufficientEvidence),
+                CanRead: true,
+                canManage,
+                canCreateTask);
+        }, cancellationToken);
+
+    public Task<IReadOnlyList<QualityNcrFollowUpRowReadModel>> ListFollowUpRowsAsync(
+        QualityOperationContext context,
+        string? followUpStatus = null,
+        string? severity = null,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var query = dbContext.QualityNonconformances.AsNoTracking()
+                .Where(n => n.TenantId == context.TenantId && n.FacilityId == context.FacilityId)
+                .Where(n => n.Status != QualityNcrStatus.Closed
+                            && n.Status != QualityNcrStatus.Cancelled
+                            && n.Status != QualityNcrStatus.Resolved);
+
+            if (!string.IsNullOrWhiteSpace(followUpStatus))
+            {
+                query = query.Where(n => n.FollowUpStatus == followUpStatus);
+            }
+
+            if (!string.IsNullOrWhiteSpace(severity))
+            {
+                var parsed = QualityValueConversions.NcrSeverityFromStorage(severity);
+                query = query.Where(n => n.Severity == parsed);
+            }
+
+            var items = await query.OrderByDescending(n => n.UpdatedAtUtc).ToListAsync(ct);
+            var orderIds = items.Where(n => n.ProductionOrderId.HasValue)
+                .Select(n => n.ProductionOrderId!.Value).Distinct().ToList();
+            var orders = orderIds.Count == 0
+                ? new Dictionary<Guid, Production.ProductionOrder>()
+                : await dbContext.ProductionOrders.AsNoTracking()
+                    .Where(o => orderIds.Contains(o.Id))
+                    .ToDictionaryAsync(o => o.Id, ct);
+
+            return (IReadOnlyList<QualityNcrFollowUpRowReadModel>)items.Select(n =>
+            {
+                var insufficient = QualityFollowUpPresentationBuilder.HasInsufficientEvidence(n);
+                var purpose = QualityFollowUpPresentationBuilder.ResolveTaskPurpose(n);
+                return new QualityNcrFollowUpRowReadModel(
+                    n.Id,
+                    n.NcrNumber,
+                    n.Title,
+                    QualityValueConversions.ToStorage(n.Severity),
+                    QualityValueConversions.ToStorage(n.Status),
+                    n.FollowUpStatus,
+                    QualityValueConversions.ToStorage(n.HoldStatus),
+                    QualityValueConversions.ToStorage(n.DispositionStatus),
+                    n.ProductReference,
+                    n.ProductionOrderId,
+                    n.ProductionOrderId.HasValue && orders.TryGetValue(n.ProductionOrderId.Value, out var order)
+                        ? order.ReferenceCode
+                        : null,
+                    n.DetectedAtUtc,
+                    n.LinkedAiTaskId,
+                    QualityFollowUpPresentationBuilder.CanCreateTaskDraft(n),
+                    purpose,
+                    insufficient);
+            }).ToList();
+        }, cancellationToken);
+
+    public Task<QualityNcrFollowUpDetailReadModel?> GetFollowUpDetailAsync(
+        QualityOperationContext context,
+        Guid ncrId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(async ct =>
+        {
+            var detail = await MapDetailAsync(context, ncrId, ct);
+            if (detail is null)
+            {
+                return null;
+            }
+
+            var ncr = await dbContext.QualityNonconformances.AsNoTracking()
+                .SingleAsync(
+                    n => n.TenantId == context.TenantId
+                         && n.FacilityId == context.FacilityId
+                         && n.Id == ncrId,
+                    ct);
+
+            var auditEvents = await dbContext.QualityNcrFollowUpAuditEvents.AsNoTracking()
+                .Where(e => e.TenantId == context.TenantId
+                            && e.FacilityId == context.FacilityId
+                            && e.NcrId == ncrId)
+                .OrderByDescending(e => e.OccurredAtUtc)
+                .Take(20)
+                .Select(e => new QualityNcrFollowUpAuditEventReadModel(
+                    e.EventType,
+                    e.PayloadJson,
+                    e.Actor,
+                    e.OccurredAtUtc))
+                .ToListAsync(ct);
+
+            var insufficient = QualityFollowUpPresentationBuilder.HasInsufficientEvidence(ncr);
+            return new QualityNcrFollowUpDetailReadModel(
+                detail,
+                ncr.FollowUpStatus,
+                ncr.LinkedAiTaskId,
+                QualityFollowUpPresentationBuilder.CanCreateTaskDraft(ncr),
+                QualityFollowUpPresentationBuilder.ResolveTaskPurpose(ncr),
+                insufficient,
+                QualityFollowUpPresentationBuilder.BuildEvidenceSummary(ncr),
+                auditEvents);
+        }, cancellationToken);
+
+    public Task<QualityNcrFollowUpWriteResult> LinkTaskAsync(
+        QualityOperationContext context,
+        LinkQualityNcrFollowUpTaskCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                var ncr = await LoadNcrForWriteAsync(context, command.NcrId, ct);
+                if (ncr is null)
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.NotFound,
+                        "Uygunsuzluk kaydı bulunamadı.");
+                }
+
+                if (ncr.LinkedAiTaskId.HasValue)
+                {
+                    if (ncr.LinkedAiTaskId.Value == command.AiTaskId)
+                    {
+                        var existing = await GetFollowUpDetailAsync(context, ncr.Id, ct);
+                        return QualityNcrFollowUpWriteResult.Success(
+                            ncr.Id,
+                            idempotentReplay: true,
+                            detail: existing);
+                    }
+
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.ValidationFailed,
+                        "Uygunsuzluk kaydı zaten farklı bir göreve bağlı.");
+                }
+
+                if (!QualityFollowUpPresentationBuilder.CanCreateTaskDraft(ncr))
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.ValidationFailed,
+                        "Bu uygunsuzluk kaydı için görev taslağı oluşturulamaz.");
+                }
+
+                var taskExists = await dbContext.AiTasks.AsNoTracking()
+                    .AnyAsync(
+                        task => task.TenantId == context.TenantId
+                                && task.FacilityId == context.FacilityId
+                                && task.Id == command.AiTaskId,
+                        ct);
+
+                if (!taskExists)
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.NotFound,
+                        "Bağlanacak AI görevi bulunamadı.");
+                }
+
+                var now = DateTimeOffset.UtcNow;
+                var actor = context.IdentitySubjectId.ToString();
+                ncr.LinkedAiTaskId = command.AiTaskId;
+                ncr.FollowUpStatus = QualityNcrFollowUpStatuses.TaskCreated;
+                ncr.FollowUpUpdatedBy = actor;
+                ncr.UpdatedAtUtc = now;
+                ncr.Version += 1;
+
+                await AppendFollowUpAuditEventAsync(ncr, QualityNcrFollowUpAuditEventTypes.TaskLinked,
+                    new { aiTaskId = command.AiTaskId }, actor, now, ct);
+
+                await dbContext.SaveChangesAsync(ct);
+
+                var detail = await GetFollowUpDetailAsync(context, ncr.Id, ct);
+                return QualityNcrFollowUpWriteResult.Success(ncr.Id, detail: detail);
+            },
+            cancellationToken);
+
+    public Task<QualityNcrFollowUpWriteResult> TransitionFollowUpAsync(
+        QualityOperationContext context,
+        TransitionQualityNcrFollowUpCommand command,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                var ncr = await LoadNcrForWriteAsync(context, command.NcrId, ct);
+                if (ncr is null)
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.NotFound,
+                        "Uygunsuzluk kaydı bulunamadı.");
+                }
+
+                if (ncr.Version != command.ExpectedVersion)
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.ConcurrencyConflict,
+                        "Kayıt başka bir kullanıcı tarafından güncellendi.");
+                }
+
+                if (command.TargetFollowUpStatus == QualityNcrFollowUpStatuses.Dismissed
+                    && string.IsNullOrWhiteSpace(command.Note))
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.ValidationFailed,
+                        "Red gerekçesi zorunludur.");
+                }
+
+                if (!QualityFollowUpPresentationBuilder.IsValidFollowUpTransition(
+                        ncr.FollowUpStatus,
+                        command.TargetFollowUpStatus))
+                {
+                    return QualityNcrFollowUpWriteResult.Fail(
+                        QualityFailureCodes.InvalidTransition,
+                        "Geçersiz takip durumu geçişi.");
+                }
+
+                var now = DateTimeOffset.UtcNow;
+                var actor = context.IdentitySubjectId.ToString();
+                var previous = ncr.FollowUpStatus;
+                ncr.FollowUpStatus = command.TargetFollowUpStatus;
+                ncr.FollowUpUpdatedBy = actor;
+                ncr.UpdatedAtUtc = now;
+                ncr.Version += 1;
+
+                await AppendFollowUpAuditEventAsync(
+                    ncr,
+                    QualityNcrFollowUpAuditEventTypes.FollowUpTransitioned,
+                    new
+                    {
+                        previousStatus = previous,
+                        targetStatus = command.TargetFollowUpStatus,
+                        note = command.Note,
+                    },
+                    actor,
+                    now,
+                    ct);
+
+                await dbContext.SaveChangesAsync(ct);
+
+                var detail = await GetFollowUpDetailAsync(context, ncr.Id, ct);
+                return QualityNcrFollowUpWriteResult.Success(ncr.Id, detail: detail);
+            },
+            cancellationToken);
+
+    private async Task AppendFollowUpAuditEventAsync(
+        QualityNonconformance ncr,
+        string eventType,
+        object payload,
+        string actor,
+        DateTimeOffset occurredAtUtc,
+        CancellationToken cancellationToken)
+    {
+        dbContext.QualityNcrFollowUpAuditEvents.Add(new QualityNcrFollowUpAuditEvent
+        {
+            Id = Guid.NewGuid(),
+            TenantId = ncr.TenantId,
+            FacilityId = ncr.FacilityId,
+            NcrId = ncr.Id,
+            EventType = eventType,
+            PayloadJson = JsonSerializer.Serialize(payload),
+            Actor = actor,
+            OccurredAtUtc = occurredAtUtc,
+        });
+
+        await Task.CompletedTask;
+    }
 }
 
 public sealed class UnavailableQualityNonconformanceRepository : IQualityNonconformanceRepository
@@ -1133,4 +1450,40 @@ public sealed class UnavailableQualityNonconformanceRepository : IQualityNonconf
         QualityNonconformanceLifecycleCommand command,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(Unavailable());
+
+    private static QualityNcrFollowUpWriteResult FollowUpUnavailable() =>
+        QualityNcrFollowUpWriteResult.Fail(QualityFailureCodes.SourceUnavailable, "Quality NCR follow-up service is unavailable.");
+
+    public Task<QualityNcrFollowUpWorkspaceReadModel> GetFollowUpWorkspaceAsync(
+        QualityOperationContext context,
+        bool canManage,
+        bool canCreateTask,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new QualityNcrFollowUpWorkspaceReadModel(
+            QualityFollowUpConstants.AutomationDisclaimer, 0, 0, 0, 0, 0, false, false, false));
+
+    public Task<IReadOnlyList<QualityNcrFollowUpRowReadModel>> ListFollowUpRowsAsync(
+        QualityOperationContext context,
+        string? followUpStatus = null,
+        string? severity = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<QualityNcrFollowUpRowReadModel>>([]);
+
+    public Task<QualityNcrFollowUpDetailReadModel?> GetFollowUpDetailAsync(
+        QualityOperationContext context,
+        Guid ncrId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<QualityNcrFollowUpDetailReadModel?>(null);
+
+    public Task<QualityNcrFollowUpWriteResult> LinkTaskAsync(
+        QualityOperationContext context,
+        LinkQualityNcrFollowUpTaskCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(FollowUpUnavailable());
+
+    public Task<QualityNcrFollowUpWriteResult> TransitionFollowUpAsync(
+        QualityOperationContext context,
+        TransitionQualityNcrFollowUpCommand command,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(FollowUpUnavailable());
 }
