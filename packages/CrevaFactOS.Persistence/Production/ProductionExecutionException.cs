@@ -53,6 +53,24 @@ public sealed class ProductionExecutionExceptionRecord : ITenantScopedEntity
     public string? AssignedToSubjectId { get; set; }
     public DateTimeOffset? AssignedAtUtc { get; set; }
     public string? AssignedBySubjectId { get; set; }
+
+    // ── AI Task Center follow-up integration ────────────────────────────────────
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = ProductionFollowUpStatuses.RequiresReview;
+    public string? FollowUpUpdatedBy { get; set; }
+}
+
+public sealed class ProductionFollowUpAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ExceptionId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public ProductionExecutionExceptionRecord? Exception { get; set; }
 }
 
 /// <summary>

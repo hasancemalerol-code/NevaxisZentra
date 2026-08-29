@@ -37,6 +37,7 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
         var group = endpoints.MapGroup("/api/production").RequireAuthorization();
         group.MapGet("/shifts/{shiftId:guid}/execution-summary", GetShiftExecutionSummaryAsync);
         group.MapGet("/operators/{subjectId}/execution-summary", GetOperatorExecutionSummaryAsync);
+        group.MapProductionFollowUpEndpoints();
         return endpoints;
     }
 
@@ -1777,6 +1778,16 @@ public static class ProductionExecutionServiceCollectionExtensions
             return dbContext is null
                 ? new UnavailableProductionExceptionRepository()
                 : new ProductionExceptionRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IProductionFollowUpRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableProductionFollowUpRepository()
+                : new ProductionFollowUpRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });

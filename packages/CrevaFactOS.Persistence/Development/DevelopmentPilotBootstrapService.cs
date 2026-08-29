@@ -633,6 +633,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotProductionExceptionSeed.EnsureProductionFollowUpPilotFixturesAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotMaterialSeed.EnsureMaterialPilotRecordsAsync(
                 dbContext,
                 tenant.Id,

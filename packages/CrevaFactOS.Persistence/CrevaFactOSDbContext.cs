@@ -97,6 +97,7 @@ public sealed class CrevaFactOSDbContext : DbContext
 
     // 4L — execution exceptions
     public DbSet<ProductionExecutionExceptionRecord> ProductionExecutionExceptions => Set<ProductionExecutionExceptionRecord>();
+    public DbSet<ProductionFollowUpAuditEvent> ProductionFollowUpAuditEvents => Set<ProductionFollowUpAuditEvent>();
 
     // 5L — shifts, operator assignments, handovers
     public DbSet<ProductionShift> ProductionShifts => Set<ProductionShift>();
@@ -904,6 +905,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && ex.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionFollowUpAuditEventEntityConfiguration());
+        modelBuilder.Entity<ProductionFollowUpAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // 5L
         modelBuilder.ApplyConfiguration(new ProductionShiftEntityConfiguration());

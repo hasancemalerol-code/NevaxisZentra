@@ -255,6 +255,25 @@ public static class DevelopmentPilotIds
     public static readonly Guid MoldPilotMaintenanceCounterSnapshotId =
         Guid.Parse("bb000001-0073-4000-8000-000000000073");
 
+    // PRODUCTION-AI-TASK-INTEGRATION-1 follow-up pilot fixtures
+    public static readonly Guid ProductionPilotFollowUpHandoffId =
+        Guid.Parse("bb000001-0074-4000-8000-000000000074");
+
+    public static readonly Guid ProductionPilotFollowUpOrderId =
+        Guid.Parse("bb000001-0075-4000-8000-000000000075");
+
+    public static readonly Guid ProductionPilotFollowUpInsufficientOrderId =
+        Guid.Parse("bb000001-0076-4000-8000-000000000076");
+
+    public static readonly Guid ProductionPilotExceptionFollowUpId =
+        Guid.Parse("bb000001-0077-4000-8000-000000000077");
+
+    public static readonly Guid ProductionPilotExceptionInsufficientEvidenceId =
+        Guid.Parse("bb000001-0078-4000-8000-000000000078");
+
+    public static readonly Guid ProductionPilotFollowUpInsufficientHandoffId =
+        Guid.Parse("bb000001-0079-4000-8000-000000000079");
+
     // Maintenance permission definitions (053–055)
     public static readonly Guid MaintenanceReadPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000053");

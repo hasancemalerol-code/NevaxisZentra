@@ -36,6 +36,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     maintenance: "Bakım",
     quality: "Kalite",
     mold: "Kalıp",
+    production: "Üretim",
     "production-planning": "Üretim planlama",
   };
 
@@ -70,7 +71,13 @@ export function AiTaskSourceReferenceSection({
         label: "Kalıp takip kaydını aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? moldLink;
+  const productionLink = sourceModule === "production" && sourceEntityId
+    ? {
+        href: `/uretim/istisnalar-ve-gorevler?exception=${encodeURIComponent(sourceEntityId)}`,
+        label: "Üretim istisna kaydını aç",
+      }
+    : null;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? moldLink ?? productionLink;
 
   return (
     <Card

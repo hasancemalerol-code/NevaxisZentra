@@ -20929,6 +20929,21 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<string>("FollowUpStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("follow_up_status");
+
+                    b.Property<string>("FollowUpUpdatedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("follow_up_updated_by");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -20992,6 +21007,55 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ix_production_exceptions_order_status");
 
                     b.ToTable("production_execution_exceptions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionFollowUpAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("ExceptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExceptionId");
+
+                    b.HasIndex("TenantId", "FacilityId", "ExceptionId", "OccurredAtUtc");
+
+                    b.ToTable("production_follow_up_audit_events", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOperatorAssignment", b =>
@@ -29821,6 +29885,30 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionFollowUpAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Production.ProductionExecutionExceptionRecord", "Exception")
+                        .WithMany()
+                        .HasForeignKey("ExceptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exception");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionOrder", b =>
