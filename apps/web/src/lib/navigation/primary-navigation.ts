@@ -215,6 +215,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/ticari-zeka",
       },
       {
+        label: "Kârlılık Yönetim Merkezi",
+        href: "/ticari-zeka/karlilik-yonetim-merkezi",
+        iconKey: "layout-dashboard",
+        permissionKey: "commercial-intelligence.read",
+        subscriptionModulePath: "/ticari-zeka",
+      },
+      {
         label: "Teklif Riskleri",
         href: "/ticari-zeka/teklif-riskleri",
         iconKey: "file-warning",

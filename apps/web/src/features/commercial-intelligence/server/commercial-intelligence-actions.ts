@@ -26,6 +26,7 @@ const CUSTOMER_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/musteri-karliligi";
 const MATERIAL_COST_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/malzeme-ve-maliyet-karliligi";
 const PROFITABILITY_ALERT_ROUTE_PATH = "/ticari-zeka/karlilik-uyarilari";
 const PRICING_SCENARIO_ROUTE_PATH = "/ticari-zeka/fiyat-koruma-ve-onay";
+const PROFITABILITY_COMMAND_CENTER_ROUTE_PATH = "/ticari-zeka/karlilik-yonetim-merkezi";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
@@ -37,6 +38,7 @@ function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(MATERIAL_COST_PROFITABILITY_ROUTE_PATH);
   revalidatePath(PROFITABILITY_ALERT_ROUTE_PATH);
   revalidatePath(PRICING_SCENARIO_ROUTE_PATH);
+  revalidatePath(PROFITABILITY_COMMAND_CENTER_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -845,5 +847,22 @@ export async function createCommercialPricingScenarioTaskDraftAction(scenarioId:
     taskId: result.value.taskId,
     scenarioId: result.value.scenarioId,
     idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function refreshCommercialProfitabilityCommandCenterAction() {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialProfitabilityCommandCenterWorkspace } = await import("./commercial-profitability-command-center-queries");
+  const result = await readCommercialProfitabilityCommandCenterWorkspace();
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
   };
 }
