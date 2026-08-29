@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const MIGRATION_ID = "20260829142514_AddMoldFollowUpTaskIntegration";
+
+function fail(message) {
+  console.error(`MOLD-AI-TASK-INTEGRATION-1 migration verification failed: ${message}`);
+  process.exit(1);
+}
+
+function assert(label, ok, detail = "") {
+  if (!ok) fail(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`✓ ${label}`);
+}
+
+function read(rel) {
+  return readFileSync(resolve(ROOT, rel), "utf8").replaceAll("\r\n", "\n");
+}
+
+function db(sql) {
+  const result = spawnSync(
+    "docker",
+    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    { encoding: "utf8" },
+  );
+  if (result.status !== 0) fail(result.stderr || result.stdout);
+  return result.stdout.trim();
+}
+
+function readMigrationConnectionEnv() {
+  const appsettings = JSON.parse(read("apps/api/appsettings.Development.json"));
+  const persistence = appsettings.Persistence ?? {};
+  return {
+    ...process.env,
+    CREVAFACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
+    CREVAFACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
+    CREVAFACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
+    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    CREVAFACTOS__MIGRATIONS__PASSWORD: process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+      ?? "local_dev_only_change_me",
+    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
+  };
+}
+
+console.log("Running MOLD-AI-TASK-INTEGRATION-1 migration verifier.");
+
+const migrationsDir = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations");
+const migrationFiles = readdirSync(migrationsDir);
+assert("migration class file exists", migrationFiles.includes(`${MIGRATION_ID}.cs`));
+assert("migration designer file exists", migrationFiles.includes(`${MIGRATION_ID}.Designer.cs`));
+
+const migration = read(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
+const designer = read(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.Designer.cs`);
+const entityConfig = read("packages/CrevaFactOS.Persistence/Configurations/MoldEntityConfigurations.cs");
+const snapshot = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
+
+assert("follow_up_status column on molds", migration.includes("follow_up_status") && migration.includes("table: \"molds\""));
+assert("linked_ai_task_id column on molds", migration.includes("linked_ai_task_id"));
+assert("audit events table", migration.includes("mold_follow_up_audit_events"));
+assert("follow-up backfill sql", migration.includes("requires-review"));
+assert("audit rls enable", migration.includes("ENABLE ROW LEVEL SECURITY"));
+assert("audit force rls", migration.includes("FORCE ROW LEVEL SECURITY"));
+assert("audit grants", migration.includes("GRANT SELECT, INSERT ON TABLE mold_follow_up_audit_events"));
+assert("audit rls select policy", migration.includes("rls_mfae_tenant_select"));
+assert("audit rls insert policy", migration.includes("rls_mfae_tenant_insert"));
+assert("entity config linked task", entityConfig.includes("LinkedAiTaskId"));
+assert("entity config follow up status", entityConfig.includes("FollowUpStatus"));
+assert("entity config audit table", entityConfig.includes("mold_follow_up_audit_events"));
+assert("designer references audit entity", designer.includes("MoldFollowUpAuditEvent"));
+assert("snapshot audit table", snapshot.includes("mold_follow_up_audit_events"));
+
+const applyResult = spawnSync(
+  "dotnet",
+  [
+    "tool", "run", "dotnet-ef", "--",
+    "database", "update",
+    "--project", resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj"),
+    "--startup-project", resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj"),
+    "--context", "CrevaFactOSDbContext",
+  ],
+  { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv() },
+);
+const applyOutput = `${applyResult.stdout}${applyResult.stderr}`;
+assert("migration apply succeeds", applyResult.status === 0, applyOutput.slice(-500));
+
+const historyCount = Number(db(`SELECT COUNT(*) FROM "__EFMigrationsHistory" WHERE "MigrationId" = '${MIGRATION_ID}'`));
+assert("migration history recorded", historyCount === 1);
+
+const auditTable = db("SELECT to_regclass('public.mold_follow_up_audit_events')");
+assert("audit table exists", auditTable === "mold_follow_up_audit_events");
+
+console.log("MOLD-AI-TASK-INTEGRATION-1 migration verification passed.");

@@ -202,3 +202,80 @@ public sealed record TransitionMoldLifecycleCommand(
     string Reason,
     string? SourceReference,
     string IdempotencyKey);
+
+public sealed record MoldFollowUpAuditEventReadModel(
+    string EventType,
+    string PayloadJson,
+    string Actor,
+    DateTimeOffset OccurredAtUtc);
+
+public sealed record MoldFollowUpWorkspaceReadModel(
+    string AutomationDisclaimer,
+    int RequiresReviewCount,
+    int AcknowledgedCount,
+    int TaskLinkedCount,
+    int MaintenanceStateCount,
+    int DataReviewCount,
+    bool CanRead,
+    bool CanManage,
+    bool CanCreateTask);
+
+public sealed record MoldFollowUpRowReadModel(
+    Guid Id,
+    string Code,
+    string Name,
+    string LifecycleState,
+    string FollowUpStatus,
+    long? CurrentShotCount,
+    long? NominalShotLife,
+    DateTimeOffset? CounterRecordedAtUtc,
+    string? PrimaryProductReference,
+    DateTimeOffset UpdatedAtUtc,
+    Guid? LinkedAiTaskId,
+    bool CanCreateTaskDraft,
+    string TaskDraftPurpose,
+    bool HasInsufficientEvidence);
+
+public sealed record MoldFollowUpDetailReadModel(
+    MoldDetailReadModel Detail,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId,
+    bool CanCreateTaskDraft,
+    string TaskDraftPurpose,
+    bool HasInsufficientEvidence,
+    string EvidenceSummary,
+    IReadOnlyList<MoldLifecycleEventReadModel> LifecycleEvents,
+    IReadOnlyList<MoldFollowUpAuditEventReadModel> AuditEvents);
+
+public sealed record LinkMoldFollowUpTaskCommand(Guid MoldId, Guid AiTaskId);
+
+public sealed record TransitionMoldFollowUpCommand(
+    Guid MoldId,
+    uint ExpectedVersion,
+    string TargetFollowUpStatus,
+    string? Note);
+
+public sealed class MoldFollowUpWriteResult
+{
+    public bool Succeeded { get; init; }
+    public string? FailureCode { get; init; }
+    public string? FailureReason { get; init; }
+    public Guid? EntityId { get; init; }
+    public bool IdempotentReplay { get; init; }
+    public MoldFollowUpDetailReadModel? Detail { get; init; }
+
+    public static MoldFollowUpWriteResult Success(
+        Guid entityId,
+        bool idempotentReplay = false,
+        MoldFollowUpDetailReadModel? detail = null) =>
+        new()
+        {
+            Succeeded = true,
+            EntityId = entityId,
+            IdempotentReplay = idempotentReplay,
+            Detail = detail,
+        };
+
+    public static MoldFollowUpWriteResult Fail(string code, string reason) =>
+        new() { Succeeded = false, FailureCode = code, FailureReason = reason };
+}

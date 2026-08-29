@@ -220,6 +220,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MoldRegistryEntry> Molds => Set<MoldRegistryEntry>();
     public DbSet<MoldLifecycleEvent> MoldLifecycleEvents => Set<MoldLifecycleEvent>();
     public DbSet<MoldCounterSnapshot> MoldCounterSnapshots => Set<MoldCounterSnapshot>();
+    public DbSet<MoldFollowUpAuditEvent> MoldFollowUpAuditEvents => Set<MoldFollowUpAuditEvent>();
     public DbSet<MoldMaintenanceRecord> MoldMaintenanceRecords => Set<MoldMaintenanceRecord>();
     public DbSet<MoldRevisionRecord> MoldRevisionRecords => Set<MoldRevisionRecord>();
     public DbSet<MoldTrialRecord> MoldTrialRecords => Set<MoldTrialRecord>();
@@ -1243,6 +1244,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MoldFollowUpAuditEventEntityConfiguration());
+        modelBuilder.Entity<MoldFollowUpAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MoldMaintenanceRecordEntityConfiguration());
         modelBuilder.Entity<MoldMaintenanceRecord>().HasQueryFilter(r =>

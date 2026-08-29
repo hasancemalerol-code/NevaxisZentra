@@ -35,6 +35,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     export: "Dışa aktarım",
     maintenance: "Bakım",
     quality: "Kalite",
+    mold: "Kalıp",
     "production-planning": "Üretim planlama",
   };
 
@@ -63,7 +64,13 @@ export function AiTaskSourceReferenceSection({
         label: "Kalite uygunsuzluk kaydını aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink;
+  const moldLink = sourceModule === "mold" && sourceEntityId
+    ? {
+        href: `/kaliplar/takip-ve-gorevler?mold=${encodeURIComponent(sourceEntityId)}`,
+        label: "Kalıp takip kaydını aç",
+      }
+    : null;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? moldLink;
 
   return (
     <Card

@@ -17724,6 +17724,55 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("mold_counter_snapshots", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldFollowUpAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("MoldId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mold_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MoldId");
+
+                    b.HasIndex("TenantId", "FacilityId", "MoldId", "OccurredAtUtc");
+
+                    b.ToTable("mold_follow_up_audit_events", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldLifecycleEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -18121,6 +18170,17 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<string>("FollowUpStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("follow_up_status");
+
+                    b.Property<string>("FollowUpUpdatedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("follow_up_updated_by");
+
                     b.Property<bool?>("HotRunnerPresent")
                         .HasColumnType("boolean")
                         .HasColumnName("hot_runner_present");
@@ -18130,6 +18190,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("lifecycle_state");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
 
                     b.Property<DateTimeOffset?>("LocationChangedAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -29156,6 +29220,30 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasForeignKey("MoldId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldFollowUpAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Mold.MoldRegistryEntry", "Mold")
+                        .WithMany()
+                        .HasForeignKey("MoldId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Mold");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Mold.MoldLifecycleEvent", b =>

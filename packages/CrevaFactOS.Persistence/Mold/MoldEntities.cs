@@ -48,6 +48,22 @@ public sealed class MoldRegistryEntry
     public string CreatedBySubjectId { get; set; } = string.Empty;
     public string UpdatedBySubjectId { get; set; } = string.Empty;
     public uint Version { get; set; } = 1;
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = MoldFollowUpStatuses.RequiresReview;
+    public string? FollowUpUpdatedBy { get; set; }
+}
+
+public sealed class MoldFollowUpAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid MoldId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public MoldRegistryEntry? Mold { get; set; }
 }
 
 public sealed class MoldLifecycleEvent

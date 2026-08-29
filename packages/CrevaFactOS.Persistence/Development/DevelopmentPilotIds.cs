@@ -242,6 +242,19 @@ public static class DevelopmentPilotIds
     public static readonly Guid QualityPilotNcrInsufficientEvidenceId =
         Guid.Parse("bb000001-0064-4000-8000-000000000064");
 
+    // MOLD-AI-TASK-INTEGRATION-1 follow-up pilot fixtures
+    public static readonly Guid MoldPilotMaintenanceFollowUpId =
+        Guid.Parse("bb000001-0070-4000-8000-000000000070");
+
+    public static readonly Guid MoldPilotInsufficientEvidenceFollowUpId =
+        Guid.Parse("bb000001-0071-4000-8000-000000000071");
+
+    public static readonly Guid MoldPilotMaintenanceLifecycleEventId =
+        Guid.Parse("bb000001-0072-4000-8000-000000000072");
+
+    public static readonly Guid MoldPilotMaintenanceCounterSnapshotId =
+        Guid.Parse("bb000001-0073-4000-8000-000000000073");
+
     // Maintenance permission definitions (053–055)
     public static readonly Guid MaintenanceReadPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000053");

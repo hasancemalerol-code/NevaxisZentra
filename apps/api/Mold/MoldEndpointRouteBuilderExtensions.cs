@@ -22,6 +22,8 @@ public static class MoldEndpointRouteBuilderExtensions
         group.MapGet("/{moldId:guid}/lifecycle-history", ListLifecycleHistoryAsync);
         group.MapPost("/{moldId:guid}/lifecycle-transitions", TransitionLifecycleAsync);
 
+        group.MapMoldFollowUpEndpoints();
+
         return endpoints;
     }
 
@@ -499,6 +501,17 @@ public static class MoldServiceCollectionExtensions
                 : new MoldCompatibilityRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IMoldFollowUpRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableMoldFollowUpRepository()
+                : new MoldFollowUpRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IMoldRepository>());
         });
 
         return services;

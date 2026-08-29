@@ -64,6 +64,9 @@ internal sealed class MoldRegistryEntryEntityConfiguration : IEntityTypeConfigur
         entity.Property(m => m.CreatedBySubjectId).HasColumnName("created_by_subject_id").HasMaxLength(200);
         entity.Property(m => m.UpdatedBySubjectId).HasColumnName("updated_by_subject_id").HasMaxLength(200);
         entity.Property(m => m.Version).HasColumnName("version").IsConcurrencyToken();
+        entity.Property(m => m.LinkedAiTaskId).HasColumnName("linked_ai_task_id");
+        entity.Property(m => m.FollowUpStatus).HasColumnName("follow_up_status").HasMaxLength(30);
+        entity.Property(m => m.FollowUpUpdatedBy).HasColumnName("follow_up_updated_by").HasMaxLength(200);
 
         entity.HasIndex(m => new { m.TenantId, m.CodeNormalized }).IsUnique();
         entity.HasIndex(m => new { m.TenantId, m.CreateIdempotencyKey }).IsUnique()
@@ -130,6 +133,34 @@ internal sealed class MoldCounterSnapshotEntityConfiguration : IEntityTypeConfig
         entity.HasIndex(s => new { s.TenantId, s.FacilityId, s.MoldId, s.RecordedAtUtc });
         entity.HasOne<Mold.MoldRegistryEntry>().WithMany()
             .HasForeignKey(s => s.MoldId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class MoldFollowUpAuditEventEntityConfiguration : IEntityTypeConfiguration<Mold.MoldFollowUpAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<Mold.MoldFollowUpAuditEvent> entity)
+    {
+        entity.ToTable("mold_follow_up_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.MoldId).HasColumnName("mold_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(50);
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").HasColumnType("jsonb");
+        entity.Property(e => e.Actor).HasColumnName("actor").HasMaxLength(200);
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+
+        entity.HasIndex(e => e.MoldId);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.MoldId, e.OccurredAtUtc });
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(e => e.Mold).WithMany()
+            .HasForeignKey(e => e.MoldId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
