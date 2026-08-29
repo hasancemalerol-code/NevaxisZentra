@@ -445,6 +445,24 @@ public static class DevelopmentPilotIds
     public static readonly Guid MaterialPilotConsumptionObservationId =
         Guid.Parse("bb000001-00b1-4000-8000-0000000000b1");
 
+    // Inventory availability risk pilot fixtures (INVENTORY-RISK-FOUNDATION-1)
+    public static readonly Guid ErpPilotPpInventoryBalanceId =
+        Guid.Parse("bb000001-00b2-4000-8000-0000000000b2");
+
+    public static readonly Guid MaterialPilotAvailabilityRiskShortageAssessmentId =
+        Guid.Parse("bb000001-00b3-4000-8000-0000000000b3");
+
+    public static readonly Guid MaterialPilotAvailabilityRiskInsufficientAssessmentId =
+        Guid.Parse("bb000001-00b4-4000-8000-0000000000b4");
+
+    public static readonly Guid MaterialPilotRequirementPpSmallId =
+        Guid.Parse("bb000001-00b5-4000-8000-0000000000b5");
+
+    public static readonly Guid MaterialPilotAvailabilityRiskSufficientAssessmentId =
+        Guid.Parse("bb000001-00b6-4000-8000-0000000000b6");
+
+    public const string MaterialPilotPpErpProductCode = "PILOT-PP-ERP";
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

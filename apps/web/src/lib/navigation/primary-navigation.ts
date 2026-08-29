@@ -91,6 +91,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/malzemeler",
       },
       {
+        label: "Malzeme Riskleri",
+        href: "/stok-ve-depo/malzeme-riskleri",
+        iconKey: "package-search",
+        permissionKey: "material.read",
+        subscriptionModulePath: "/malzemeler",
+      },
+      {
         label: "Bakım",
         href: "/bakim",
         iconKey: "wrench",

@@ -661,6 +661,20 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotErpInventorySeed.EnsureErpInventoryPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await DevelopmentPilotMaterialAvailabilityRiskSeed.EnsureMaterialAvailabilityRiskPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotProcessOeeFixtureHygiene.CleanAttributableVerifierFixturesAsync(
                 dbContext,
                 cancellationToken);

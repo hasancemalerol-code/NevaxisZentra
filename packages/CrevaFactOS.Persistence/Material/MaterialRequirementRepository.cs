@@ -673,43 +673,38 @@ public sealed class MaterialRequirementRepository(
                     return (null, MaterialRequirementWriteResult.Fail(MaterialRequirementFailureCodes.NotFound, "Material not found."));
                 }
 
-                decimal? lotObservedGrams = null;
-                var lots = await dbContext.MaterialLots.AsNoTracking()
-                    .Where(l => l.MaterialId == command.MaterialId
-                                && l.TenantId == context.TenantId
-                                && l.FacilityId == context.FacilityId
-                                && l.CurrentObservedQuantity != null)
-                    .ToListAsync(ct);
+                MaterialRequirementProfile? profileEntity = null;
+                MaterialRequirementProfileDetailReadModel? profileDetail = null;
+                MaterialRequirementCalculationResult? requirement = null;
 
-                if (lots.Count > 0)
-                {
-                    lotObservedGrams = lots.Sum(l =>
-                        MaterialRequirementCalculator.ConvertQuantityToGrams(
-                            l.CurrentObservedQuantity!.Value, l.UnitOfMeasure));
-                }
-
-                MaterialAvailabilityRiskAssessmentResult availability;
-                if (!hasErpReadAccess)
-                {
-                    availability = new MaterialAvailabilityRiskAssessmentResult(
-                        "insufficient-data", null, null, null, lotObservedGrams, [], []);
-                }
-                else
-                {
-                    availability = new MaterialAvailabilityRiskAssessmentResult(
-                        "insufficient-data", null, null, null, lotObservedGrams,
-                        [new MaterialAssessmentDriverReadModel("erp-unavailable", "ERP stok verisi yerelde mevcut değil", null, "unknown")],
-                        [new MaterialAssessmentEvidenceReadModel("erpBalance", null, "erp", null, true)]);
-                }
-
-                var inputJson = JsonSerializer.Serialize(availability, JsonOptions);
-                MaterialRequirementProfile? profile = null;
                 if (command.RequirementProfileId.HasValue)
                 {
-                    profile = await GetProfileEntityAsync(context, command.RequirementProfileId.Value, ct);
+                    profileEntity = await GetProfileEntityAsync(context, command.RequirementProfileId.Value, ct);
+                    if (profileEntity is null)
+                    {
+                        return (null, MaterialRequirementWriteResult.Fail(MaterialRequirementFailureCodes.NotFound, "Requirement profile not found."));
+                    }
+
+                    profileDetail = MapProfileDetail(profileEntity);
+                    requirement = MaterialRequirementCalculator.CalculateRequirement(profileDetail);
                 }
 
-                return (BuildAvailabilityAssessment(context, material.Id, profile?.Id, availability, inputJson), null);
+                var erpBalances = hasErpReadAccess
+                    ? await dbContext.CanonicalErpInventoryBalances.AsNoTracking()
+                        .Where(b => b.TenantId == context.TenantId && b.FacilityId == context.FacilityId)
+                        .ToListAsync(ct)
+                    : [];
+
+                var availability = MaterialAvailabilityRiskCalculator.AssessAvailabilityRisk(
+                    material,
+                    profileDetail,
+                    requirement,
+                    erpBalances,
+                    DateTimeOffset.UtcNow,
+                    hasErpReadAccess);
+
+                var inputJson = JsonSerializer.Serialize(availability, JsonOptions);
+                return (BuildAvailabilityAssessment(context, material.Id, profileEntity?.Id, availability, inputJson), null);
             },
             cancellationToken);
 
@@ -738,27 +733,15 @@ public sealed class MaterialRequirementRepository(
                         "Assessment could not be built.");
                 }
 
-                var existingByFingerprint = await dbContext.MaterialRequirementAssessments
-                    .FirstOrDefaultAsync(
-                        a => a.TenantId == context.TenantId
-                             && a.MaterialId == materialId
-                             && a.AssessmentType == assessmentType
-                             && a.InputFingerprint == assessment.InputFingerprint,
-                        ct);
-
-                if (existingByFingerprint is not null)
-                {
-                    return MaterialRequirementWriteResult.Success(
-                        existingByFingerprint.Id, existingByFingerprint.Version, idempotentReplay: true);
-                }
-
                 if (!string.IsNullOrWhiteSpace(idempotencyKey))
                 {
+                    var trimmedKey = idempotencyKey.Trim();
                     var existingByKey = await dbContext.MaterialRequirementAssessments
                         .FirstOrDefaultAsync(
                             a => a.TenantId == context.TenantId
                                  && a.MaterialId == materialId
-                                 && a.IdempotencyKey == idempotencyKey.Trim(),
+                                 && a.AssessmentType == assessmentType
+                                 && a.IdempotencyKey == trimmedKey,
                             ct);
 
                     if (existingByKey is not null)
@@ -773,7 +756,36 @@ public sealed class MaterialRequirementRepository(
                         return MaterialRequirementWriteResult.Success(
                             existingByKey.Id, existingByKey.Version, idempotentReplay: true);
                     }
+                }
 
+                var existingByFingerprint = await dbContext.MaterialRequirementAssessments
+                    .FirstOrDefaultAsync(
+                        a => a.TenantId == context.TenantId
+                             && a.MaterialId == materialId
+                             && a.AssessmentType == assessmentType
+                             && a.InputFingerprint == assessment.InputFingerprint,
+                        ct);
+
+                if (existingByFingerprint is not null)
+                {
+                    if (!string.IsNullOrWhiteSpace(idempotencyKey))
+                    {
+                        var trimmedKey = idempotencyKey.Trim();
+                        if (!string.IsNullOrWhiteSpace(existingByFingerprint.IdempotencyKey)
+                            && !string.Equals(existingByFingerprint.IdempotencyKey, trimmedKey, StringComparison.Ordinal))
+                        {
+                            return MaterialRequirementWriteResult.Fail(
+                                MaterialRequirementFailureCodes.AssessmentConcurrencyConflict,
+                                "The idempotency key was already used with a different evaluation input.");
+                        }
+                    }
+
+                    return MaterialRequirementWriteResult.Success(
+                        existingByFingerprint.Id, existingByFingerprint.Version, idempotentReplay: true);
+                }
+
+                if (!string.IsNullOrWhiteSpace(idempotencyKey))
+                {
                     assessment.IdempotencyKey = idempotencyKey.Trim();
                 }
 
@@ -962,7 +974,7 @@ public sealed class MaterialRequirementRepository(
             MaterialRequirementAssessmentType.AvailabilityRisk,
             materialId,
             profileId,
-            MaterialRequirementConstants.RuleSetVersion,
+            MaterialAvailabilityRiskConstants.RuleSetVersion,
             inputJson);
 
         return new MaterialRequirementAssessment
@@ -974,10 +986,18 @@ public sealed class MaterialRequirementRepository(
             RequirementProfileId = profileId,
             AssessmentType = MaterialRequirementAssessmentType.AvailabilityRisk,
             Status = availability.Status,
-            RuleSetVersion = MaterialRequirementConstants.RuleSetVersion,
+            RuleSetVersion = MaterialAvailabilityRiskConstants.RuleSetVersion,
             InputFingerprint = fingerprint,
             StructuredDrivers = JsonSerializer.Serialize(availability.Drivers, JsonOptions),
             StructuredEvidence = JsonSerializer.Serialize(availability.Evidence, JsonOptions),
+            TheoreticalRequirementGrams = availability.RequiredQuantityGrams,
+            ErpAvailableQuantity = availability.ErpAvailableQuantity,
+            ErpReservedQuantity = availability.ErpReservedQuantity,
+            ErpUnit = availability.ErpUnit,
+            AvailableAfterReservationQuantity = availability.AvailableAfterReservationQuantity,
+            ShortageQuantity = availability.ShortageQuantity,
+            ErpSourceUpdatedAtUtc = availability.ErpSourceUpdatedAtUtc,
+            SourceFreshness = availability.SourceFreshness,
             EvaluatedAtUtc = DateTimeOffset.UtcNow,
             CreatedAtUtc = DateTimeOffset.UtcNow,
             CreatedBySubjectId = actor,

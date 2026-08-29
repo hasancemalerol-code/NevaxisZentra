@@ -40,6 +40,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/makineler", EntitlementCodes.ConnectedMachines),
         ("/kaliplar", EntitlementCodes.Mold),
         ("/malzemeler", EntitlementCodes.Material),
+        ("/stok-ve-depo", EntitlementCodes.Material),
         ("/bakim", EntitlementCodes.Maintenance),
         ("/kalite", EntitlementCodes.Quality),
         ("/enerji", EntitlementCodes.Energy),

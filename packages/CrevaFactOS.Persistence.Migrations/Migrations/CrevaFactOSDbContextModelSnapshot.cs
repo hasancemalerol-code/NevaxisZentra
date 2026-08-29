@@ -16865,6 +16865,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("assessment_type");
 
+                    b.Property<decimal?>("AvailableAfterReservationQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("available_after_reservation_quantity");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
@@ -16874,6 +16879,25 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("created_by_subject_id");
+
+                    b.Property<decimal?>("ErpAvailableQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("erp_available_quantity");
+
+                    b.Property<decimal?>("ErpReservedQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("erp_reserved_quantity");
+
+                    b.Property<DateTimeOffset?>("ErpSourceUpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("erp_source_updated_at_utc");
+
+                    b.Property<string>("ErpUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("erp_unit");
 
                     b.Property<DateTimeOffset>("EvaluatedAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -16917,6 +16941,16 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("rule_set_version");
+
+                    b.Property<decimal?>("ShortageQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("shortage_quantity");
+
+                    b.Property<string>("SourceFreshness")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_freshness");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -16977,6 +17011,8 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
 
                     b.HasIndex("TenantId", "MaterialId", "AssessmentType", "InputFingerprint")
                         .IsUnique();
+
+                    b.HasIndex("TenantId", "FacilityId", "AssessmentType", "Status", "EvaluatedAtUtc");
 
                     b.ToTable("material_requirement_assessments", (string)null);
                 });

@@ -145,6 +145,13 @@ internal sealed class MaterialRequirementAssessmentEntityConfiguration : IEntity
         entity.Property(a => a.VariancePercent).HasColumnName("variance_percent").HasPrecision(8, 4);
         entity.Property(a => a.VirginRequirementGrams).HasColumnName("virgin_requirement_grams").HasPrecision(18, 4);
         entity.Property(a => a.RegrindRequirementGrams).HasColumnName("regrind_requirement_grams").HasPrecision(18, 4);
+        entity.Property(a => a.ErpAvailableQuantity).HasColumnName("erp_available_quantity").HasPrecision(18, 4);
+        entity.Property(a => a.ErpReservedQuantity).HasColumnName("erp_reserved_quantity").HasPrecision(18, 4);
+        entity.Property(a => a.ErpUnit).HasColumnName("erp_unit").HasMaxLength(20);
+        entity.Property(a => a.AvailableAfterReservationQuantity).HasColumnName("available_after_reservation_quantity").HasPrecision(18, 4);
+        entity.Property(a => a.ShortageQuantity).HasColumnName("shortage_quantity").HasPrecision(18, 4);
+        entity.Property(a => a.ErpSourceUpdatedAtUtc).HasColumnName("erp_source_updated_at_utc");
+        entity.Property(a => a.SourceFreshness).HasColumnName("source_freshness").HasMaxLength(20);
         entity.Property(a => a.EvaluatedAtUtc).HasColumnName("evaluated_at_utc");
         entity.Property(a => a.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128);
         entity.Property(a => a.CreatedAtUtc).HasColumnName("created_at_utc");
@@ -154,6 +161,7 @@ internal sealed class MaterialRequirementAssessmentEntityConfiguration : IEntity
         entity.HasIndex(a => new { a.TenantId, a.MaterialId, a.AssessmentType, a.InputFingerprint }).IsUnique();
         entity.HasIndex(a => new { a.TenantId, a.MaterialId, a.IdempotencyKey }).IsUnique()
             .HasFilter("idempotency_key IS NOT NULL");
+        entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.AssessmentType, a.Status, a.EvaluatedAtUtc });
         entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.MaterialId, a.EvaluatedAtUtc });
 
         entity.HasOne<Tenant>().WithMany().HasForeignKey(a => a.TenantId).OnDelete(DeleteBehavior.Restrict);

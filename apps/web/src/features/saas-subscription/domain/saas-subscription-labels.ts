@@ -69,6 +69,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/makineler", code: "module.connected-machines" },
   { prefix: "/kaliplar", code: "module.mold" },
   { prefix: "/malzemeler", code: "module.material" },
+  { prefix: "/stok-ve-depo", code: "module.material" },
   { prefix: "/bakim", code: "module.maintenance" },
   { prefix: "/kalite", code: "module.quality" },
   { prefix: "/enerji", code: "module.energy" },

@@ -34,6 +34,14 @@ internal static class DevelopmentPilotMaterialSeed
 
         if (exists)
         {
+            var tracked = await dbContext.Materials
+                .FirstOrDefaultAsync(m => m.Id == DevelopmentPilotIds.MaterialPilotPpId, cancellationToken);
+            if (tracked is not null && string.IsNullOrWhiteSpace(tracked.ExternalMaterialCode))
+            {
+                tracked.ExternalMaterialCode = DevelopmentPilotIds.MaterialPilotPpErpProductCode;
+                tracked.UpdatedAtUtc = seedTimestampUtc;
+            }
+
             return;
         }
 
@@ -58,6 +66,7 @@ internal static class DevelopmentPilotMaterialSeed
             SourceType = MaterialSourceType.DevelopmentPilot,
             SourceSystem = "development-pilot",
             SourceReference = "material-pilot-pp-001",
+            ExternalMaterialCode = DevelopmentPilotIds.MaterialPilotPpErpProductCode,
             DataRecordedAtUtc = seedTimestampUtc,
             CreatedAtUtc = seedTimestampUtc,
             UpdatedAtUtc = seedTimestampUtc,

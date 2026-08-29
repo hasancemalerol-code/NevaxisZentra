@@ -277,6 +277,12 @@ public static class MaterialRequirementEndpointRouteBuilderExtensions
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
         if (context is null) return failResult!;
 
+        if (!request.RequirementProfileId.HasValue)
+        {
+            return MaterialEndpointHelpers.MapRequirementFailure(
+                MaterialRequirementFailureCodes.ValidationFailed, "Requirement profile id is required.");
+        }
+
         var hasErpRead = await HasErpReadAccessAsync(context.FacilityId, facilityAccessResolver, cancellationToken);
 
         var result = await repository.EvaluateAvailabilityRiskAsync(

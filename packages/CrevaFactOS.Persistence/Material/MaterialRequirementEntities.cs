@@ -113,6 +113,13 @@ public sealed class MaterialRequirementAssessment
     public decimal? VariancePercent { get; set; }
     public decimal? VirginRequirementGrams { get; set; }
     public decimal? RegrindRequirementGrams { get; set; }
+    public decimal? ErpAvailableQuantity { get; set; }
+    public decimal? ErpReservedQuantity { get; set; }
+    public string? ErpUnit { get; set; }
+    public decimal? AvailableAfterReservationQuantity { get; set; }
+    public decimal? ShortageQuantity { get; set; }
+    public DateTimeOffset? ErpSourceUpdatedAtUtc { get; set; }
+    public string? SourceFreshness { get; set; }
     public DateTimeOffset EvaluatedAtUtc { get; set; }
     public string? IdempotencyKey { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }

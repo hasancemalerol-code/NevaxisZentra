@@ -282,9 +282,84 @@ public sealed record MaterialVarianceAssessmentResult(
 
 public sealed record MaterialAvailabilityRiskAssessmentResult(
     string Status,
-    decimal? ErpQuantityAvailable,
+    decimal? RequiredQuantityGrams,
+    string? RequiredQuantityUnit,
+    decimal? ErpAvailableQuantity,
+    decimal? ErpReservedQuantity,
     string? ErpUnit,
-    DateTimeOffset? ErpDataRecordedAtUtc,
+    decimal? AvailableAfterReservationQuantity,
+    decimal? ShortageQuantity,
+    DateTimeOffset? ErpSourceUpdatedAtUtc,
+    string? SourceFreshness,
     decimal? ObservedLotQuantityGrams,
     IReadOnlyList<MaterialAssessmentDriverReadModel> Drivers,
     IReadOnlyList<MaterialAssessmentEvidenceReadModel> Evidence);
+
+public sealed record MaterialAvailabilityRiskWorkspaceReadModel(
+    string RuleSetVersion,
+    string AutomationDisclaimer,
+    int ShortageCount,
+    int SufficientCount,
+    int InsufficientDataCount,
+    int SourceConflictCount,
+    DateTimeOffset? LatestEvaluatedAtUtc,
+    bool CanRead,
+    bool CanManage,
+    IReadOnlyList<MaterialAvailabilityRiskRowReadModel> Assessments);
+
+public sealed record MaterialAvailabilityRiskRowReadModel(
+    Guid Id,
+    Guid MaterialId,
+    string MaterialCode,
+    string MaterialName,
+    Guid? RequirementProfileId,
+    string? ProductionOrderReference,
+    string Status,
+    decimal? RequiredQuantityGrams,
+    decimal? ErpAvailableQuantity,
+    decimal? ErpReservedQuantity,
+    string? ErpUnit,
+    decimal? AvailableAfterReservationQuantity,
+    decimal? ShortageQuantity,
+    string? SourceFreshness,
+    DateTimeOffset EvaluatedAtUtc,
+    uint Version);
+
+public sealed record MaterialAvailabilityRiskDetailReadModel(
+    Guid Id,
+    Guid FacilityId,
+    Guid MaterialId,
+    string MaterialCode,
+    string MaterialName,
+    Guid? RequirementProfileId,
+    string? ProductionOrderReference,
+    string? ProductReference,
+    string? MoldReference,
+    string Status,
+    string RuleSetVersion,
+    string InputFingerprint,
+    decimal? RequiredQuantityGrams,
+    decimal? ErpAvailableQuantity,
+    decimal? ErpReservedQuantity,
+    string? ErpUnit,
+    decimal? AvailableAfterReservationQuantity,
+    decimal? ShortageQuantity,
+    DateTimeOffset? ErpSourceUpdatedAtUtc,
+    string? SourceFreshness,
+    IReadOnlyList<MaterialAssessmentDriverReadModel> Drivers,
+    IReadOnlyList<MaterialAssessmentEvidenceReadModel> Evidence,
+    DateTimeOffset EvaluatedAtUtc,
+    DateTimeOffset CreatedAtUtc,
+    uint Version);
+
+public sealed record MaterialAvailabilityRiskListFilters(
+    Guid? MaterialId,
+    string? Status,
+    int Page,
+    int PageSize);
+
+public sealed record MaterialAvailabilityRiskAssessmentSummaryReadModel(
+    Guid Id,
+    string Status,
+    DateTimeOffset EvaluatedAtUtc,
+    string RuleSetVersion);

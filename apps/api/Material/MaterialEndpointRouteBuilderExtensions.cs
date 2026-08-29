@@ -25,6 +25,7 @@ public static class MaterialEndpointRouteBuilderExtensions
 
         endpoints.MapMaterialLotEndpoints();
         endpoints.MapMaterialRequirementEndpoints();
+        endpoints.MapMaterialAvailabilityRiskEndpoints();
 
         return endpoints;
     }
@@ -543,6 +544,16 @@ public static class MaterialServiceCollectionExtensions
             return dbContext is null
                 ? new UnavailableMaterialRequirementRepository()
                 : new MaterialRequirementRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
+
+        services.AddScoped<IMaterialAvailabilityRiskRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableMaterialAvailabilityRiskRepository()
+                : new MaterialAvailabilityRiskRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
