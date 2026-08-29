@@ -34,4 +34,21 @@ public sealed class ProcurementDeliveryRiskAssessment
     public uint Version { get; set; } = 1;
     public DateTimeOffset CreatedAtUtc { get; set; }
     public string CreatedBySubjectId { get; set; } = string.Empty;
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = ProcurementDeliveryRiskFollowUpStatuses.RequiresReview;
+    public string? FollowUpUpdatedBy { get; set; }
+}
+
+public sealed class ProcurementDeliveryRiskFollowUpAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid AssessmentId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+
+    public ProcurementDeliveryRiskAssessment? Assessment { get; set; }
 }

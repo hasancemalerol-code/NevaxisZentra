@@ -59,3 +59,52 @@ export async function refreshProcurementDeliveryRiskWorkspaceAction() {
   revalidateProcurementDeliveryRiskRoutes();
   return { status: "success" as const };
 }
+
+export async function createProcurementDeliveryRiskTaskDraftAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("ai-task.create");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = await resolveContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message };
+  }
+
+  const { createProcurementDeliveryRiskTaskDraft } = await import("./procurement-delivery-risk-api-client");
+  const result = await createProcurementDeliveryRiskTaskDraft(contextResult.context, assessmentId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  revalidateProcurementDeliveryRiskRoutes();
+  return {
+    status: "success" as const,
+    taskId: result.value.taskId,
+    assessmentId: result.value.assessmentId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function acknowledgeProcurementDeliveryRiskFollowUpAction(
+  assessmentId: string,
+  expectedVersion: number,
+) {
+  const authorization = await denyUnlessGranted("erp.manage");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = await resolveContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message };
+  }
+
+  const { transitionProcurementDeliveryRiskFollowUp } = await import("./procurement-delivery-risk-api-client");
+  const result = await transitionProcurementDeliveryRiskFollowUp(contextResult.context, assessmentId, {
+    expectedVersion,
+    targetFollowUpStatus: "acknowledged",
+  });
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  revalidateProcurementDeliveryRiskRoutes();
+  return { status: "success" as const };
+}

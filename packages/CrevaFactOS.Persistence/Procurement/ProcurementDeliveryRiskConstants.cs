@@ -50,5 +50,6 @@ public static class ProcurementDeliveryRiskFailureCodes
     public const string NotFound = "not-found";
     public const string ValidationFailed = "validation-failed";
     public const string AssessmentConcurrencyConflict = "assessment-concurrency-conflict";
+    public const string InvalidTransition = "invalid-transition";
     public const string SourceUnavailable = "source-unavailable";
 }

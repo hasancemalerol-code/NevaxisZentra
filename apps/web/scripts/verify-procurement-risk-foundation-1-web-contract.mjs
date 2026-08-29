@@ -56,12 +56,11 @@ assert("turkish status labels", labels.includes("Gecikmiş") && labels.includes(
 assert("turkish kpi labels", view.includes("Gecikmiş") && view.includes("Plan dahilinde") && view.includes("Yetersiz veri"));
 assert("turkish evaluate label", view.includes("Değerlendir"));
 assert("turkish disclaimer constant", labels.includes("otomatik satın alma, tedarikçi iletişimi, stok veya üretim işlemi yapmaz"));
-assert("disclaimer rendered in view", view.includes("PROCUREMENT_DELIVERY_RISK_DISCLAIMER"));
+assert("disclaimer rendered in view", view.includes("workspace.automationDisclaimer"));
 
-forbid("feature bundle no ai task routes", featureBundle, "/ai-gorevleri/");
-forbid("feature bundle no task draft action", featureBundle, "görev taslağı");
-forbid("feature bundle no purchase order create", featureBundle, "satın alma emri oluştur");
-forbid("feature bundle no supplier contact action", featureBundle, "tedarikçi mesaj");
+assert("linked task navigation only", view.includes('data-testid="procurement-delivery-risk-linked-task-link"') && view.includes("Bağlı görevi aç"));
+assert("no automatic purchase order create", !view.includes("satın alma emri oluştur"));
+assert("no supplier contact action", !view.includes("tedarikçi mesaj"));
 
 assert("reader workspace loader", reader.includes("readProcurementDeliveryRiskWorkspace"));
 assert("reader uses workspace api", reader.includes("getProcurementDeliveryRiskWorkspace"));

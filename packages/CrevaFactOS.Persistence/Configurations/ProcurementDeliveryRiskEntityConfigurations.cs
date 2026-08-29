@@ -44,6 +44,9 @@ internal sealed class ProcurementDeliveryRiskAssessmentEntityConfiguration
         entity.Property(a => a.Version).HasColumnName("version").IsConcurrencyToken();
         entity.Property(a => a.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(a => a.CreatedBySubjectId).HasColumnName("created_by_subject_id").HasMaxLength(200).IsRequired();
+        entity.Property(a => a.LinkedAiTaskId).HasColumnName("linked_ai_task_id");
+        entity.Property(a => a.FollowUpStatus).HasColumnName("follow_up_status").HasMaxLength(30);
+        entity.Property(a => a.FollowUpUpdatedBy).HasColumnName("follow_up_updated_by").HasMaxLength(200);
 
         entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.Result, a.EvaluatedAtUtc });
         entity.HasIndex(a => new { a.TenantId, a.FacilityId, a.PurchaseOrderId, a.EvaluatedAtUtc });
@@ -60,6 +63,34 @@ internal sealed class ProcurementDeliveryRiskAssessmentEntityConfiguration
         entity.HasOne<Tenant>().WithMany().HasForeignKey(a => a.TenantId).OnDelete(DeleteBehavior.Restrict);
         entity.HasOne<Facility>().WithMany()
             .HasForeignKey(a => new { a.TenantId, a.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class ProcurementDeliveryRiskFollowUpAuditEventEntityConfiguration
+    : IEntityTypeConfiguration<Procurement.ProcurementDeliveryRiskFollowUpAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<Procurement.ProcurementDeliveryRiskFollowUpAuditEvent> entity)
+    {
+        entity.ToTable("procurement_delivery_risk_follow_up_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.AssessmentId).HasColumnName("assessment_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(50);
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").HasColumnType("jsonb");
+        entity.Property(e => e.Actor).HasColumnName("actor").HasMaxLength(200);
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.AssessmentId, e.OccurredAtUtc });
+        entity.HasOne(e => e.Assessment).WithMany()
+            .HasForeignKey(e => e.AssessmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
             .HasPrincipalKey(f => new { f.TenantId, f.Id })
             .OnDelete(DeleteBehavior.Restrict);
     }

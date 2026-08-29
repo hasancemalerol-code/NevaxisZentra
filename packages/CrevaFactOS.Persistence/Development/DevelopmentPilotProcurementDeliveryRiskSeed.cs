@@ -163,6 +163,7 @@ internal static class DevelopmentPilotProcurementDeliveryRiskSeed
             Version = 1,
             CreatedAtUtc = seedTimestampUtc,
             CreatedBySubjectId = actorSubjectId,
+            FollowUpStatus = ProcurementDeliveryRiskFollowUpStatuses.RequiresReview,
         });
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Procurement;
 
-public sealed class ProcurementDeliveryRiskRepository(
+public sealed partial class ProcurementDeliveryRiskRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession) : IProcurementDeliveryRiskRepository
 {
@@ -15,6 +15,7 @@ public sealed class ProcurementDeliveryRiskRepository(
         ErpOperationContext context,
         ProcurementDeliveryRiskListFilters filters,
         bool canManage,
+        bool canCreateTask,
         CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteReadAsync(async ct =>
         {
@@ -64,15 +65,19 @@ public sealed class ProcurementDeliveryRiskRepository(
 
             return new ProcurementDeliveryRiskWorkspaceReadModel(
                 ProcurementDeliveryRiskConstants.RuleSetVersion,
-                ProcurementDeliveryRiskConstants.WorkspaceDisclaimer,
+                ProcurementDeliveryRiskFollowUpConstants.AutomationDisclaimer,
                 allRows.Count(a => a.Result == ProcurementDeliveryRiskStatuses.Overdue),
                 allRows.Count(a => a.Result == ProcurementDeliveryRiskStatuses.DeliveryRisk),
                 allRows.Count(a => a.Result == ProcurementDeliveryRiskStatuses.OnTrack),
                 allRows.Count(a => a.Result == ProcurementDeliveryRiskStatuses.InsufficientData),
                 allRows.Count(a => a.Result == ProcurementDeliveryRiskStatuses.SourceConflict),
+                allRows.Count(a => a.FollowUpStatus == ProcurementDeliveryRiskFollowUpStatuses.RequiresReview),
+                allRows.Count(a => a.LinkedAiTaskId.HasValue),
+                allRows.Count(a => ProcurementDeliveryRiskFollowUpPresentationBuilder.IsDataReviewEligible(a)),
                 allRows.MaxBy(a => a.EvaluatedAtUtc)?.EvaluatedAtUtc,
                 true,
                 canManage,
+                canCreateTask,
                 paged);
         }, cancellationToken);
 
@@ -376,6 +381,7 @@ public sealed class ProcurementDeliveryRiskRepository(
             Version = 1,
             CreatedAtUtc = evaluatedAtUtc,
             CreatedBySubjectId = context.IdentitySubjectId.ToString(),
+            FollowUpStatus = ProcurementDeliveryRiskFollowUpStatuses.RequiresReview,
         };
 
     private static ProcurementDeliveryRiskRowReadModel MapRow(ProcurementDeliveryRiskAssessment assessment) =>
@@ -393,6 +399,8 @@ public sealed class ProcurementDeliveryRiskRepository(
             assessment.Result,
             assessment.SourceFreshness,
             assessment.EvaluatedAtUtc,
+            assessment.FollowUpStatus,
+            assessment.LinkedAiTaskId,
             assessment.Version);
 
     private static ProcurementDeliveryRiskDetailReadModel MapDetail(ProcurementDeliveryRiskAssessment assessment) =>

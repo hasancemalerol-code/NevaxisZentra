@@ -92,7 +92,7 @@ assert("workspace capabilities authoritative", workspace.json?.capabilities?.can
 assert("workspace assessments array", Array.isArray(workspace.json?.assessments));
 assert("pilot overdue assessment present", workspace.json?.assessments?.some((row) => row.result === "overdue"));
 assert("pilot insufficient assessment present", workspace.json?.assessments?.some((row) => row.result === "insufficient-data"));
-assert("automation disclaimer in workspace", typeof workspace.json?.automationDisclaimer === "string" && workspace.json.automationDisclaimer.includes("otomatik satın alma"));
+assert("automation disclaimer in workspace", typeof workspace.json?.automationDisclaimer === "string" && workspace.json.automationDisclaimer.toLowerCase().includes("otomatik satın alma"));
 
 const unauthWorkspace = await liveRequest(
   "GET",

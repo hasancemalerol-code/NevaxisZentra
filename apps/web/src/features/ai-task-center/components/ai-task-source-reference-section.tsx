@@ -38,6 +38,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     material: "Malzeme",
     mold: "Kalıp",
     production: "Üretim",
+    procurement: "Satın alma",
     "production-planning": "Üretim planlama",
   };
 
@@ -84,7 +85,13 @@ export function AiTaskSourceReferenceSection({
         label: "Üretim istisna kaydını aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? materialLink ?? moldLink ?? productionLink;
+  const procurementLink = sourceModule === "procurement" && sourceEntityId
+    ? {
+        href: `/satin-alma/tedarik-riskleri?assessment=${encodeURIComponent(sourceEntityId)}`,
+        label: "Tedarik risk değerlendirmesini aç",
+      }
+    : null;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? materialLink ?? moldLink ?? productionLink ?? procurementLink;
 
   return (
     <Card

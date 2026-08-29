@@ -19,7 +19,16 @@ export type ProcurementDeliveryRiskRow = Readonly<{
   result: ProcurementDeliveryRiskResult;
   sourceFreshness?: string;
   evaluatedAtUtc: string;
+  followUpStatus?: string;
+  linkedAiTaskId?: string;
   version: number;
+}>;
+
+export type ProcurementDeliveryRiskFollowUpAuditEvent = Readonly<{
+  eventType: string;
+  payloadJson: string;
+  actor: string;
+  occurredAtUtc: string;
 }>;
 
 export type ProcurementDeliveryRiskDriver = Readonly<{
@@ -64,6 +73,13 @@ export type ProcurementDeliveryRiskDetail = Readonly<{
   drivers: readonly ProcurementDeliveryRiskDriver[];
   evidence: readonly ProcurementDeliveryRiskEvidence[];
   evaluatedAtUtc: string;
+  followUpStatus: string;
+  linkedAiTaskId?: string;
+  canCreateTaskDraft: boolean;
+  taskDraftPurpose?: string;
+  hasInsufficientEvidence: boolean;
+  evidenceSummary?: string;
+  auditEvents: readonly ProcurementDeliveryRiskFollowUpAuditEvent[];
   version: number;
 }>;
 
@@ -83,13 +99,23 @@ export type ProcurementDeliveryRiskWorkspacePayload = Readonly<{
     onTrackCount: number;
     insufficientDataCount: number;
     sourceConflictCount: number;
+    requiresReviewCount: number;
+    taskLinkedCount: number;
+    dataReviewCount: number;
     latestEvaluatedAtUtc?: string;
   }>;
   capabilities: Readonly<{
     canRead: boolean;
     canManage: boolean;
+    canCreateTask: boolean;
   }>;
   assessments: readonly ProcurementDeliveryRiskRow[];
+}>;
+
+export type ProcurementDeliveryRiskTaskDraftResult = Readonly<{
+  taskId: string;
+  assessmentId: string;
+  idempotentReplay: boolean;
 }>;
 
 export type ProcurementDeliveryRiskEvaluateResult = Readonly<{

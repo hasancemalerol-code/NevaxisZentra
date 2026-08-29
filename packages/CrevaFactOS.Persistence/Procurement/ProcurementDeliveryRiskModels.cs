@@ -41,6 +41,8 @@ public sealed record ProcurementDeliveryRiskRowReadModel(
     string Result,
     string? SourceFreshness,
     DateTimeOffset EvaluatedAtUtc,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId,
     uint Version);
 
 public sealed record ProcurementDeliveryRiskDetailReadModel(
@@ -86,9 +88,13 @@ public sealed record ProcurementDeliveryRiskWorkspaceReadModel(
     int OnTrackCount,
     int InsufficientDataCount,
     int SourceConflictCount,
+    int RequiresReviewCount,
+    int TaskLinkedCount,
+    int DataReviewCount,
     DateTimeOffset? LatestEvaluatedAtUtc,
     bool CanRead,
     bool CanManage,
+    bool CanCreateTask,
     IReadOnlyList<ProcurementDeliveryRiskRowReadModel> Assessments);
 
 public sealed record ProcurementDeliveryRiskListFilters(
@@ -127,6 +133,7 @@ public interface IProcurementDeliveryRiskRepository
         ErpOperationContext context,
         ProcurementDeliveryRiskListFilters filters,
         bool canManage,
+        bool canCreateTask,
         CancellationToken cancellationToken = default);
 
     Task<ProcurementDeliveryRiskDetailReadModel?> GetAssessmentByIdAsync(
@@ -148,5 +155,20 @@ public interface IProcurementDeliveryRiskRepository
     Task<ProcurementDeliveryRiskWriteResult> EvaluateAllOpenLinesAsync(
         ErpOperationContext context,
         string? idempotencyKeyPrefix,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcurementDeliveryRiskFollowUpDetailReadModel?> GetFollowUpDetailAsync(
+        ErpOperationContext context,
+        Guid assessmentId,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcurementDeliveryRiskFollowUpWriteResult> LinkTaskAsync(
+        ErpOperationContext context,
+        LinkProcurementDeliveryRiskFollowUpTaskCommand command,
+        CancellationToken cancellationToken = default);
+
+    Task<ProcurementDeliveryRiskFollowUpWriteResult> TransitionFollowUpAsync(
+        ErpOperationContext context,
+        TransitionProcurementDeliveryRiskFollowUpCommand command,
         CancellationToken cancellationToken = default);
 }

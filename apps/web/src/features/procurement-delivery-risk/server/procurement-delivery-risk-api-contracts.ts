@@ -119,6 +119,8 @@ function parseRow(value: unknown): ParseResult<ProcurementDeliveryRiskRow> {
       result: result.value,
       sourceFreshness: parseOptionalString(row.sourceFreshness),
       evaluatedAtUtc: evaluatedAtUtc.value,
+      followUpStatus: parseOptionalString(row.followUpStatus),
+      linkedAiTaskId: parseOptionalString(row.linkedAiTaskId),
       version,
     },
   };
@@ -161,11 +163,15 @@ export function parseProcurementDeliveryRiskWorkspacePayload(payload: unknown): 
         onTrackCount: parseNumber(kpis.onTrackCount) ?? 0,
         insufficientDataCount: parseNumber(kpis.insufficientDataCount) ?? 0,
         sourceConflictCount: parseNumber(kpis.sourceConflictCount) ?? 0,
+        requiresReviewCount: parseNumber(kpis.requiresReviewCount) ?? 0,
+        taskLinkedCount: parseNumber(kpis.taskLinkedCount) ?? 0,
+        dataReviewCount: parseNumber(kpis.dataReviewCount) ?? 0,
         latestEvaluatedAtUtc: parseOptionalString(kpis.latestEvaluatedAtUtc),
       },
       capabilities: {
         canRead: capabilities.canRead === true,
         canManage: capabilities.canManage === true,
+        canCreateTask: capabilities.canCreateTask === true,
       },
       assessments,
     },
@@ -217,6 +223,31 @@ export function parseProcurementDeliveryRiskDetail(payload: unknown): ParseResul
       evidence.push(parsed.value);
     }
   }
+  const followUpStatus = parseString(row.followUpStatus, "followUpStatus");
+  if (followUpStatus.status === "failure") return followUpStatus;
+  const auditEvents: import("../domain/procurement-delivery-risk").ProcurementDeliveryRiskFollowUpAuditEvent[] = [];
+  if (Array.isArray(row.auditEvents)) {
+    for (const item of row.auditEvents) {
+      if (!item || typeof item !== "object") {
+        return { status: "failure", message: "audit event is invalid." };
+      }
+      const event = item as Record<string, unknown>;
+      const eventType = parseString(event.eventType, "eventType");
+      if (eventType.status === "failure") return eventType;
+      const payloadJson = parseString(event.payloadJson, "payloadJson");
+      if (payloadJson.status === "failure") return payloadJson;
+      const actor = parseString(event.actor, "actor");
+      if (actor.status === "failure") return actor;
+      const occurredAtUtc = parseString(event.occurredAtUtc, "occurredAtUtc");
+      if (occurredAtUtc.status === "failure") return occurredAtUtc;
+      auditEvents.push({
+        eventType: eventType.value,
+        payloadJson: payloadJson.value,
+        actor: actor.value,
+        occurredAtUtc: occurredAtUtc.value,
+      });
+    }
+  }
   return {
     status: "success",
     value: {
@@ -246,6 +277,13 @@ export function parseProcurementDeliveryRiskDetail(payload: unknown): ParseResul
       drivers,
       evidence,
       evaluatedAtUtc: evaluatedAtUtc.value,
+      followUpStatus: followUpStatus.value,
+      linkedAiTaskId: parseOptionalString(row.linkedAiTaskId),
+      canCreateTaskDraft: row.canCreateTaskDraft === true,
+      taskDraftPurpose: parseOptionalString(row.taskDraftPurpose),
+      hasInsufficientEvidence: row.hasInsufficientEvidence === true,
+      evidenceSummary: parseOptionalString(row.evidenceSummary),
+      auditEvents,
       version,
     },
   };

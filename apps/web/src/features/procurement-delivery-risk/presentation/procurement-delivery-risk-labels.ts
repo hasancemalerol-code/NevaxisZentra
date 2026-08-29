@@ -81,3 +81,27 @@ export function getProcurementDeliveryRiskEvidenceFieldLabel(field: string): str
   };
   return labels[field] ?? field;
 }
+
+const FOLLOW_UP_STATUS_LABELS: Record<string, string> = {
+  "requires-review": "İnceleme gerekli",
+  acknowledged: "Görüldü",
+  "task-created": "Görev oluşturuldu",
+  resolved: "Çözüldü",
+  dismissed: "Reddedildi",
+};
+
+export function getProcurementDeliveryRiskFollowUpStatusLabel(status?: string): string {
+  if (!status) return "—";
+  return FOLLOW_UP_STATUS_LABELS[status] ?? status;
+}
+
+export function getProcurementDeliveryRiskFollowUpAuditEventLabel(eventType: string): string {
+  switch (eventType) {
+    case "task-linked":
+      return "Görev bağlandı";
+    case "follow-up-transitioned":
+      return "Takip durumu güncellendi";
+    default:
+      return eventType;
+  }
+}

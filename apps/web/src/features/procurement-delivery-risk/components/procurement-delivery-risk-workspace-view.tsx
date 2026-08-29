@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   Clock,
+  ExternalLink,
   FileWarning,
   LoaderCircle,
   PackageSearch,
@@ -21,16 +23,19 @@ import type {
   ProcurementDeliveryRiskWorkspacePayload,
 } from "../domain/procurement-delivery-risk";
 import {
+  acknowledgeProcurementDeliveryRiskFollowUpAction,
+  createProcurementDeliveryRiskTaskDraftAction,
   evaluateProcurementDeliveryRiskAction,
   refreshProcurementDeliveryRiskWorkspaceAction,
 } from "../server/procurement-delivery-risk-actions";
 import {
   getProcurementDeliveryRiskDriverLabel,
   getProcurementDeliveryRiskEvidenceFieldLabel,
+  getProcurementDeliveryRiskFollowUpAuditEventLabel,
+  getProcurementDeliveryRiskFollowUpStatusLabel,
   getProcurementDeliveryRiskFreshnessLabel,
   getProcurementDeliveryRiskResultBadgeClass,
   getProcurementDeliveryRiskResultLabel,
-  PROCUREMENT_DELIVERY_RISK_DISCLAIMER,
 } from "../presentation/procurement-delivery-risk-labels";
 
 type ProcurementDeliveryRiskWorkspaceViewProps = Readonly<{
@@ -122,8 +127,50 @@ export function ProcurementDeliveryRiskWorkspaceView({
     });
   };
 
+  const handleCreateTask = () => {
+    if (!assessment?.id) return;
+    startTransition(async () => {
+      setActionError(null);
+      const result = await createProcurementDeliveryRiskTaskDraftAction(assessment.id);
+      if (result.status === "failure") {
+        setActionError(result.message);
+        return;
+      }
+      router.push(`/ai-gorevleri/${result.taskId}`);
+    });
+  };
+
+  const handleAcknowledge = () => {
+    if (!assessment?.id) return;
+    startTransition(async () => {
+      setActionError(null);
+      const result = await acknowledgeProcurementDeliveryRiskFollowUpAction(
+        assessment.id,
+        assessment.version,
+      );
+      if (result.status === "failure") {
+        setActionError(result.message);
+        return;
+      }
+      router.refresh();
+    });
+  };
+
   const canEvaluate =
     workspace.capabilities.canManage && Boolean(assessment?.purchaseOrderLineId);
+
+  const canCreateTask =
+    workspace.capabilities.canCreateTask &&
+    assessment?.canCreateTaskDraft === true &&
+    !assessment.linkedAiTaskId;
+
+  const canAcknowledge =
+    workspace.capabilities.canManage &&
+    assessment?.followUpStatus === "requires-review";
+
+  const taskButtonLabel = assessment?.hasInsufficientEvidence
+    ? "Veri inceleme görev taslağı oluştur"
+    : "Tedarik inceleme görev taslağı oluştur";
 
   if (workspace.assessments.length === 0) {
     return (
@@ -138,7 +185,10 @@ export function ProcurementDeliveryRiskWorkspaceView({
   return (
     <div data-testid="procurement-delivery-risk-workspace">
       <p className="quality-readonly-note" data-testid="procurement-delivery-risk-readonly-note">
-        {PROCUREMENT_DELIVERY_RISK_DISCLAIMER}
+        {workspace.automationDisclaimer}
+      </p>
+      <p className="quality-readonly-note" data-testid="procurement-delivery-risk-automation-disclaimer">
+        Otomatik satın alma, tedarikçi iletişimi, stok veya üretim kararı uygulanmaz.
       </p>
 
       <div className="quality-dashboard-kpi-grid" data-testid="procurement-delivery-risk-kpi-grid">
@@ -222,6 +272,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
                 <th>Taahhüt</th>
                 <th>Açık miktar</th>
                 <th>Sonuç</th>
+                <th>Takip</th>
               </tr>
             </thead>
             <tbody>
@@ -241,6 +292,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
                       {getProcurementDeliveryRiskResultLabel(row.result)}
                     </span>
                   </td>
+                  <td>{getProcurementDeliveryRiskFollowUpStatusLabel(row.followUpStatus)}</td>
                 </tr>
               ))}
             </tbody>
@@ -277,7 +329,43 @@ export function ProcurementDeliveryRiskWorkspaceView({
                 <div><dt>Açık miktar</dt><dd>{formatQuantity(assessment.openQuantity, assessment.unit)}</dd></div>
                 <div><dt>Kaynak tazeliği</dt><dd>{getProcurementDeliveryRiskFreshnessLabel(assessment.sourceFreshness)}</dd></div>
                 <div><dt>Değerlendirme</dt><dd>{formatDateTime(assessment.evaluatedAtUtc)}</dd></div>
+                <div><dt>Takip durumu</dt><dd>{getProcurementDeliveryRiskFollowUpStatusLabel(assessment.followUpStatus)}</dd></div>
               </dl>
+
+              <div className="quality-workspace-detail-actions">
+                {canCreateTask ? (
+                  <button
+                    type="button"
+                    className="quality-workspace-toolbar__button quality-workspace-toolbar__button--primary"
+                    onClick={handleCreateTask}
+                    disabled={isPending}
+                    data-testid="procurement-delivery-risk-create-task-button"
+                  >
+                    {taskButtonLabel}
+                  </button>
+                ) : null}
+                {assessment.linkedAiTaskId ? (
+                  <Link
+                    href={`/ai-gorevleri/${assessment.linkedAiTaskId}`}
+                    className="quality-workspace-toolbar__button"
+                    data-testid="procurement-delivery-risk-linked-task-link"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                    Bağlı görevi aç
+                  </Link>
+                ) : null}
+                {canAcknowledge ? (
+                  <button
+                    type="button"
+                    className="quality-workspace-toolbar__button"
+                    onClick={handleAcknowledge}
+                    disabled={isPending}
+                    data-testid="procurement-delivery-risk-acknowledge-button"
+                  >
+                    Görüldü olarak işaretle
+                  </button>
+                ) : null}
+              </div>
 
               {assessment.drivers.length > 0 ? (
                 <section>
@@ -301,6 +389,21 @@ export function ProcurementDeliveryRiskWorkspaceView({
                       <li key={`${item.field}-${item.source ?? "unknown"}`}>
                         <span>{getProcurementDeliveryRiskEvidenceFieldLabel(item.field)}</span>
                         <span>{item.isUnknown ? "—" : (item.value ?? "—")}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {assessment.auditEvents.length > 0 ? (
+                <section data-testid="procurement-delivery-risk-follow-up-audit">
+                  <h4>Takip geçmişi</h4>
+                  <ul className="quality-workspace-history-list">
+                    {assessment.auditEvents.map((event) => (
+                      <li key={`${event.eventType}-${event.occurredAtUtc}`}>
+                        <span>{formatDateTime(event.occurredAtUtc)}</span>
+                        <span>{getProcurementDeliveryRiskFollowUpAuditEventLabel(event.eventType)}</span>
+                        <span>{event.actor}</span>
                       </li>
                     ))}
                   </ul>

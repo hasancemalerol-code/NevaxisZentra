@@ -5,6 +5,7 @@ import type {
   ProcurementDeliveryRiskDetail,
   ProcurementDeliveryRiskEvaluateResult,
   ProcurementDeliveryRiskHistoryEntry,
+  ProcurementDeliveryRiskTaskDraftResult,
   ProcurementDeliveryRiskWorkspacePayload,
 } from "../domain/procurement-delivery-risk";
 import {
@@ -127,6 +128,96 @@ export async function evaluateProcurementDeliveryRisk(
       return { status: "failure", message: parsed.message };
     }
     return { status: "success", value: parsed.value };
+  } catch (error) {
+    return {
+      status: "failure",
+      message: error instanceof Error ? error.message : "Beklenmeyen ağ hatası.",
+      retryable: true,
+    };
+  }
+}
+
+function parseTaskDraftResponse(payload: unknown): ProcurementApiResult<ProcurementDeliveryRiskTaskDraftResult> {
+  if (!payload || typeof payload !== "object") {
+    return { status: "failure", message: "task draft response is invalid." };
+  }
+  const row = payload as Record<string, unknown>;
+  if (typeof row.taskId !== "string" || typeof row.assessmentId !== "string") {
+    return { status: "failure", message: "task draft response is invalid." };
+  }
+  return {
+    status: "success",
+    value: {
+      taskId: row.taskId,
+      assessmentId: row.assessmentId,
+      idempotentReplay: row.idempotentReplay === true,
+    },
+  };
+}
+
+export async function createProcurementDeliveryRiskTaskDraft(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<ProcurementApiResult<ProcurementDeliveryRiskTaskDraftResult>> {
+  try {
+    const url = new URL(`${context.apiBaseUrl}/api/procurement/delivery-risks/${assessmentId}/task-draft`);
+    url.searchParams.set("facilityId", context.facilityId);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: context.requestHeaders,
+      cache: "no-store",
+    });
+
+    if (response.status === 401) {
+      return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
+    }
+    if (response.status === 403) {
+      return { status: "failure", code: "forbidden", message: "Görev taslağı oluşturma yetkisi yok.", retryable: false };
+    }
+    if (!response.ok) {
+      return { status: "failure", message: `Görev taslağı oluşturma başarısız (${response.status}).`, retryable: response.status >= 500 };
+    }
+
+    const payload = await response.json();
+    return parseTaskDraftResponse(payload);
+  } catch (error) {
+    return {
+      status: "failure",
+      message: error instanceof Error ? error.message : "Beklenmeyen ağ hatası.",
+      retryable: true,
+    };
+  }
+}
+
+export async function transitionProcurementDeliveryRiskFollowUp(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+  body: Readonly<{ expectedVersion: number; targetFollowUpStatus: string; note?: string }>,
+): Promise<ProcurementApiResult<void>> {
+  try {
+    const url = new URL(`${context.apiBaseUrl}/api/procurement/delivery-risks/${assessmentId}/follow-up`);
+    url.searchParams.set("facilityId", context.facilityId);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { ...context.requestHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    if (response.status === 401) {
+      return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
+    }
+    if (response.status === 403) {
+      return { status: "failure", code: "forbidden", message: "Takip güncelleme yetkisi yok.", retryable: false };
+    }
+    if (response.status === 409) {
+      return { status: "failure", code: "conflict", message: "Takip durumu geçişi uyumsuz.", retryable: false };
+    }
+    if (!response.ok) {
+      return { status: "failure", message: `Takip güncelleme başarısız (${response.status}).`, retryable: response.status >= 500 };
+    }
+
+    return { status: "success", value: undefined };
   } catch (error) {
     return {
       status: "failure",

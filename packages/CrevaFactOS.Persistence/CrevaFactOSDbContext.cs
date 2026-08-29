@@ -137,6 +137,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     // Procurement delivery risk foundation (PROCUREMENT-RISK-FOUNDATION-1)
     public DbSet<ProcurementDeliveryRiskAssessment> ProcurementDeliveryRiskAssessments =>
         Set<ProcurementDeliveryRiskAssessment>();
+    public DbSet<ProcurementDeliveryRiskFollowUpAuditEvent> ProcurementDeliveryRiskFollowUpAuditEvents =>
+        Set<ProcurementDeliveryRiskFollowUpAuditEvent>();
 
     // Process OEE foundation (PROCESS-OEE-1)
     public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
@@ -1065,6 +1067,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcurementDeliveryRiskFollowUpAuditEventEntityConfiguration());
+        modelBuilder.Entity<ProcurementDeliveryRiskFollowUpAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new ProcessOeeEvaluationWindowEntityConfiguration());
         modelBuilder.Entity<ProcessOeeEvaluationWindow>().HasQueryFilter(w =>

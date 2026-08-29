@@ -1,3 +1,4 @@
+using CrevaFactOS.Api.AiTasks;
 using CrevaFactOS.Api.Erp;
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.Audit;
@@ -20,6 +21,7 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
         group.MapGet("/{assessmentId:guid}/history", GetHistoryAsync);
         group.MapPost("/evaluate", EvaluateAsync);
         group.MapPost("/evaluate-all", EvaluateAllAsync);
+        group.MapProcurementDeliveryRiskFollowUpEndpoints();
 
         return endpoints;
     }
@@ -42,6 +44,8 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
         if (context is null) return failResult!;
 
         var canManage = await HasManageAccessAsync(facilityId!.Value, facilityAccessResolver, cancellationToken);
+        var canCreateTask = await AiTaskEndpointHelpers.HasCreateAccessAsync(
+            facilityId.Value, facilityAccessResolver, cancellationToken);
         var workspace = await repository.GetWorkspaceAsync(
             context,
             new ProcurementDeliveryRiskListFilters(
@@ -52,6 +56,7 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
                 page,
                 pageSize),
             canManage,
+            canCreateTask,
             cancellationToken);
 
         return TypedResults.Ok(new
@@ -65,12 +70,16 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
                 onTrackCount = workspace.OnTrackCount,
                 insufficientDataCount = workspace.InsufficientDataCount,
                 sourceConflictCount = workspace.SourceConflictCount,
+                requiresReviewCount = workspace.RequiresReviewCount,
+                taskLinkedCount = workspace.TaskLinkedCount,
+                dataReviewCount = workspace.DataReviewCount,
                 latestEvaluatedAtUtc = workspace.LatestEvaluatedAtUtc,
             },
             capabilities = new
             {
                 canRead = workspace.CanRead,
                 canManage = workspace.CanManage,
+                canCreateTask = workspace.CanCreateTask,
             },
             assessments = workspace.Assessments.Select(ProcurementDeliveryRiskApiMapper.MapRow).ToList(),
         });
@@ -88,10 +97,10 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
         if (context is null) return failResult!;
 
-        var assessment = await repository.GetAssessmentByIdAsync(context, assessmentId, cancellationToken);
-        return assessment is null
+        var followUp = await repository.GetFollowUpDetailAsync(context, assessmentId, cancellationToken);
+        return followUp is null
             ? MapFailure(ProcurementDeliveryRiskFailureCodes.NotFound, "Delivery risk assessment not found.")
-            : TypedResults.Ok(ProcurementDeliveryRiskApiMapper.MapDetail(assessment));
+            : TypedResults.Ok(ProcurementDeliveryRiskFollowUpApiMapper.MapDetail(followUp));
     }
 
     private static async Task<IResult> GetHistoryAsync(
@@ -200,7 +209,8 @@ internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
         failureCode switch
         {
             ProcurementDeliveryRiskFailureCodes.NotFound => TypedResults.NotFound(new { code = failureCode, message = reason }),
-            ProcurementDeliveryRiskFailureCodes.AssessmentConcurrencyConflict => TypedResults.Conflict(new { code = failureCode, message = reason }),
+            ProcurementDeliveryRiskFailureCodes.AssessmentConcurrencyConflict
+                or ProcurementDeliveryRiskFailureCodes.InvalidTransition => TypedResults.Conflict(new { code = failureCode, message = reason }),
             _ => TypedResults.BadRequest(new { code = failureCode, message = reason }),
         };
 }
@@ -228,6 +238,8 @@ internal static class ProcurementDeliveryRiskApiMapper
         result = row.Result,
         sourceFreshness = row.SourceFreshness,
         evaluatedAtUtc = row.EvaluatedAtUtc,
+        followUpStatus = row.FollowUpStatus,
+        linkedAiTaskId = row.LinkedAiTaskId,
         version = row.Version,
     };
 
