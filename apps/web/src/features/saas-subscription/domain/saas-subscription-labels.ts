@@ -79,6 +79,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/satin-alma", code: "module.erp-integration" },
   { prefix: "/ticari-zeka", code: "module.commercial-intelligence" },
   { prefix: "/operasyonel-riskler", code: "module.operational-risk" },
+  { prefix: "/operasyon/yonetim-merkezi", code: "module.production" },
   { prefix: "/riskler", code: "module.operational-risk" },
   { prefix: "/ai-gorevleri", code: "module.ai-task-center" },
 ];

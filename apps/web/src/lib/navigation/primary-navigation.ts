@@ -22,6 +22,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "layout-dashboard",
       },
       {
+        label: "Operasyon Yönetim Merkezi",
+        href: "/operasyon/yonetim-merkezi",
+        iconKey: "layout-dashboard",
+        subscriptionModulePath: "/operasyon/yonetim-merkezi",
+      },
+      {
         label: "CrevaFactOS Teams",
         href: "/teams",
         iconKey: "messages-square",

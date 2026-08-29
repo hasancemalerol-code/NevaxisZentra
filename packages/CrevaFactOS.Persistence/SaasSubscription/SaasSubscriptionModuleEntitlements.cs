@@ -50,6 +50,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/satin-alma", EntitlementCodes.ErpIntegration),
         ("/ticari-zeka", EntitlementCodes.CommercialIntelligence),
         ("/operasyonel-riskler", EntitlementCodes.OperationalRisk),
+        ("/operasyon/yonetim-merkezi", EntitlementCodes.Production),
         ("/riskler", EntitlementCodes.OperationalRisk),
         ("/ai-gorevleri", EntitlementCodes.AiTaskCenter),
     ];
