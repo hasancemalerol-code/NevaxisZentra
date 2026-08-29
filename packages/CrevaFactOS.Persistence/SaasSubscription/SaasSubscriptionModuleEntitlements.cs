@@ -47,6 +47,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/iot-plc", EntitlementCodes.IotPlc),
         ("/raporlar", EntitlementCodes.Reporting),
         ("/erp-entegrasyonlari", EntitlementCodes.ErpIntegration),
+        ("/satin-alma", EntitlementCodes.ErpIntegration),
         ("/ticari-zeka", EntitlementCodes.CommercialIntelligence),
         ("/operasyonel-riskler", EntitlementCodes.OperationalRisk),
         ("/riskler", EntitlementCodes.OperationalRisk),

@@ -463,6 +463,43 @@ public static class DevelopmentPilotIds
 
     public const string MaterialPilotPpErpProductCode = "PILOT-PP-ERP";
 
+    // Procurement delivery risk pilot fixtures (PROCUREMENT-RISK-FOUNDATION-1)
+    public static readonly Guid ErpPilotPurchaseOrderOverdueId =
+        Guid.Parse("bb000001-00c0-4000-8000-0000000000c0");
+
+    public static readonly Guid ErpPilotPurchaseOrderOverdueLineId =
+        Guid.Parse("bb000001-00c1-4000-8000-0000000000c1");
+
+    public static readonly Guid ErpPilotPurchaseOrderDeliveryRiskId =
+        Guid.Parse("bb000001-00c2-4000-8000-0000000000c2");
+
+    public static readonly Guid ErpPilotPurchaseOrderDeliveryRiskLineId =
+        Guid.Parse("bb000001-00c3-4000-8000-0000000000c3");
+
+    public static readonly Guid ErpPilotPurchaseOrderInsufficientId =
+        Guid.Parse("bb000001-00c4-4000-8000-0000000000c4");
+
+    public static readonly Guid ErpPilotPurchaseOrderInsufficientLineId =
+        Guid.Parse("bb000001-00c5-4000-8000-0000000000c5");
+
+    public static readonly Guid ErpPilotPurchaseOrderOnTrackId =
+        Guid.Parse("bb000001-00c6-4000-8000-0000000000c6");
+
+    public static readonly Guid ErpPilotPurchaseOrderOnTrackLineId =
+        Guid.Parse("bb000001-00c7-4000-8000-0000000000c7");
+
+    public static readonly Guid ProcurementDeliveryRiskOverdueAssessmentId =
+        Guid.Parse("bb000001-00c8-4000-8000-0000000000c8");
+
+    public static readonly Guid ProcurementDeliveryRiskDeliveryRiskAssessmentId =
+        Guid.Parse("bb000001-00c9-4000-8000-0000000000c9");
+
+    public static readonly Guid ProcurementDeliveryRiskInsufficientAssessmentId =
+        Guid.Parse("bb000001-00ca-4000-8000-0000000000ca");
+
+    public static readonly Guid ProcurementDeliveryRiskOnTrackAssessmentId =
+        Guid.Parse("bb000001-00cb-4000-8000-0000000000cb");
+
     // Edge pilot fixtures (0094–0098)
     public static readonly Guid EdgePilotSimulatorGatewayId =
         Guid.Parse("bb000001-0094-4000-8000-000000000094");

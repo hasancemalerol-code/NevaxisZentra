@@ -76,6 +76,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/iot-plc", code: "module.iot-plc" },
   { prefix: "/raporlar", code: "module.reporting" },
   { prefix: "/erp-entegrasyonlari", code: "module.erp-integration" },
+  { prefix: "/satin-alma", code: "module.erp-integration" },
   { prefix: "/ticari-zeka", code: "module.commercial-intelligence" },
   { prefix: "/operasyonel-riskler", code: "module.operational-risk" },
   { prefix: "/riskler", code: "module.operational-risk" },

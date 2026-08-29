@@ -28,6 +28,7 @@ using CrevaFactOS.Persistence.Erp;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
+using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Configurations;
@@ -132,6 +133,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaterialRequirementAssessment> MaterialRequirementAssessments => Set<MaterialRequirementAssessment>();
     public DbSet<MaterialAvailabilityRiskFollowUpAuditEvent> MaterialAvailabilityRiskFollowUpAuditEvents =>
         Set<MaterialAvailabilityRiskFollowUpAuditEvent>();
+
+    // Procurement delivery risk foundation (PROCUREMENT-RISK-FOUNDATION-1)
+    public DbSet<ProcurementDeliveryRiskAssessment> ProcurementDeliveryRiskAssessments =>
+        Set<ProcurementDeliveryRiskAssessment>();
 
     // Process OEE foundation (PROCESS-OEE-1)
     public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
@@ -1054,6 +1059,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProcurementDeliveryRiskAssessmentEntityConfiguration());
+        modelBuilder.Entity<ProcurementDeliveryRiskAssessment>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new ProcessOeeEvaluationWindowEntityConfiguration());
         modelBuilder.Entity<ProcessOeeEvaluationWindow>().HasQueryFilter(w =>

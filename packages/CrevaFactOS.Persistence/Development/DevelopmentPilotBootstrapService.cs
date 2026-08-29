@@ -667,6 +667,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotProcurementDeliveryRiskSeed.EnsureProcurementDeliveryRiskPilotRecordsAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
             await DevelopmentPilotMaterialAvailabilityRiskSeed.EnsureMaterialAvailabilityRiskPilotRecordsAsync(
                 dbContext,

@@ -20723,6 +20723,190 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("process_oee_stability_drivers", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Procurement.ProcurementDeliveryRiskAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CommitmentDateUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("commitment_date_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at_utc");
+
+                    b.Property<string>("ExternalProductCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_product_code");
+
+                    b.Property<string>("ExternalProductId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_product_id");
+
+                    b.Property<string>("ExternalSupplierCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_supplier_code");
+
+                    b.Property<string>("ExternalSupplierId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_supplier_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("InputFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("input_fingerprint");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_current");
+
+                    b.Property<string>("LineDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("line_description");
+
+                    b.Property<int>("LineNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_number");
+
+                    b.Property<decimal?>("OpenQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("open_quantity");
+
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("order_status");
+
+                    b.Property<decimal?>("OrderedQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("ordered_quantity");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_order_id");
+
+                    b.Property<Guid>("PurchaseOrderLineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_order_line_id");
+
+                    b.Property<string>("PurchaseOrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("purchase_order_number");
+
+                    b.Property<decimal?>("ReceivedQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("received_quantity");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("result");
+
+                    b.Property<string>("RuleSetVersion")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("SourceFreshness")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_freshness");
+
+                    b.Property<DateTimeOffset?>("SourceUpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("source_updated_at_utc");
+
+                    b.Property<string>("StructuredDrivers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("structured_drivers");
+
+                    b.Property<string>("StructuredEvidence")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("structured_evidence");
+
+                    b.Property<string>("SupplierName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("supplier_name");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("unit");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "PurchaseOrderLineId")
+                        .IsUnique()
+                        .HasFilter("is_current = TRUE");
+
+                    b.HasIndex("TenantId", "PurchaseOrderLineId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "PurchaseOrderLineId", "InputFingerprint")
+                        .IsUnique()
+                        .HasDatabaseName("IX_procurement_delivery_risk_assessments_tenant_id_purchase_o~1");
+
+                    b.HasIndex("TenantId", "FacilityId", "ExternalSupplierCode", "EvaluatedAtUtc")
+                        .HasDatabaseName("IX_procurement_delivery_risk_assessments_tenant_id_facility_i~1");
+
+                    b.HasIndex("TenantId", "FacilityId", "PurchaseOrderId", "EvaluatedAtUtc")
+                        .HasDatabaseName("IX_procurement_delivery_risk_assessments_tenant_id_facility_i~2");
+
+                    b.HasIndex("TenantId", "FacilityId", "Result", "EvaluatedAtUtc")
+                        .HasDatabaseName("IX_procurement_delivery_risk_assessments_tenant_id_facility_i~3");
+
+                    b.ToTable("procurement_delivery_risk_assessments", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionCycleEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -29943,6 +30127,22 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Assessment");
 
                     b.Navigation("StabilityAssessment");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Procurement.ProcurementDeliveryRiskAssessment", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Production.ProductionCycleEntry", b =>

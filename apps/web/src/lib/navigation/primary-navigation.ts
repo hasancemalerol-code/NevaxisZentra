@@ -236,6 +236,18 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
+    label: "Satın alma",
+    items: [
+      {
+        label: "Tedarik Riskleri",
+        href: "/satin-alma/tedarik-riskleri",
+        iconKey: "shopping-basket",
+        permissionKey: "erp.read",
+        subscriptionModulePath: "/satin-alma",
+      },
+    ],
+  },
+  {
     label: "ERP entegrasyonları",
     items: [
       {
