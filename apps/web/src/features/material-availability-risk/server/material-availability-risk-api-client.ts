@@ -4,6 +4,7 @@ import type {
   MaterialAvailabilityRiskDetail,
   MaterialAvailabilityRiskEvaluateResult,
   MaterialAvailabilityRiskHistoryEntry,
+  MaterialAvailabilityRiskTaskDraftResult,
   MaterialAvailabilityRiskWorkspacePayload,
 } from "../domain/material-availability-risk";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -12,6 +13,7 @@ import {
   parseMaterialAvailabilityRiskDetail,
   parseMaterialAvailabilityRiskEvaluateResponse,
   parseMaterialAvailabilityRiskHistory,
+  parseMaterialAvailabilityRiskTaskDraftResponse,
   parseMaterialAvailabilityRiskWorkspacePayload,
 } from "./material-availability-risk-api-contracts";
 
@@ -181,5 +183,34 @@ export function evaluateMaterialAvailabilityRisk(
       idempotencyKey: input.idempotencyKey,
     },
     parseMaterialAvailabilityRiskEvaluateResponse,
+  );
+}
+
+export function createMaterialAvailabilityRiskTaskDraft(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+): Promise<MaterialApiResult<MaterialAvailabilityRiskTaskDraftResult>> {
+  return postJson(
+    context,
+    `/api/materials/availability-risks/${encodeURIComponent(assessmentId)}/task-draft`,
+    {},
+    parseMaterialAvailabilityRiskTaskDraftResponse,
+  );
+}
+
+export function transitionMaterialAvailabilityRiskFollowUp(
+  context: ProductionOrderRequestContext,
+  assessmentId: string,
+  input: Readonly<{ expectedVersion: number; targetFollowUpStatus: string; note?: string }>,
+): Promise<MaterialApiResult<MaterialAvailabilityRiskDetail | null>> {
+  return postJson(
+    context,
+    `/api/materials/availability-risks/${encodeURIComponent(assessmentId)}/follow-up`,
+    input,
+    (payload) => {
+      const data = payload as { assessment?: unknown };
+      if (!data.assessment) return { status: "success", value: null };
+      return parseMaterialAvailabilityRiskDetail(data.assessment);
+    },
   );
 }

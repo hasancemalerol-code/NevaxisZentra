@@ -125,7 +125,23 @@ public sealed class MaterialRequirementAssessment
     public DateTimeOffset CreatedAtUtc { get; set; }
     public string CreatedBySubjectId { get; set; } = string.Empty;
     public uint Version { get; set; } = 1;
+    public Guid? LinkedAiTaskId { get; set; }
+    public string FollowUpStatus { get; set; } = MaterialAvailabilityRiskFollowUpStatuses.RequiresReview;
+    public string? FollowUpUpdatedBy { get; set; }
 
     public MaterialRegistryEntry? Material { get; set; }
     public MaterialRequirementProfile? RequirementProfile { get; set; }
+}
+
+public sealed class MaterialAvailabilityRiskFollowUpAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid AssessmentId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+    public string Actor { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public MaterialRequirementAssessment? Assessment { get; set; }
 }

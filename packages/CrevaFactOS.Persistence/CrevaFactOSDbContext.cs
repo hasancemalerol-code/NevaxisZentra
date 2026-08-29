@@ -130,6 +130,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<MaterialRequirementProfile> MaterialRequirementProfiles => Set<MaterialRequirementProfile>();
     public DbSet<MaterialConsumptionObservation> MaterialConsumptionObservations => Set<MaterialConsumptionObservation>();
     public DbSet<MaterialRequirementAssessment> MaterialRequirementAssessments => Set<MaterialRequirementAssessment>();
+    public DbSet<MaterialAvailabilityRiskFollowUpAuditEvent> MaterialAvailabilityRiskFollowUpAuditEvents =>
+        Set<MaterialAvailabilityRiskFollowUpAuditEvent>();
 
     // Process OEE foundation (PROCESS-OEE-1)
     public DbSet<ProcessOeeEvaluationWindow> ProcessOeeEvaluationWindows => Set<ProcessOeeEvaluationWindow>();
@@ -1046,6 +1048,12 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MaterialAvailabilityRiskFollowUpAuditEventEntityConfiguration());
+        modelBuilder.Entity<MaterialAvailabilityRiskFollowUpAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new ProcessOeeEvaluationWindowEntityConfiguration());
         modelBuilder.Entity<ProcessOeeEvaluationWindow>().HasQueryFilter(w =>

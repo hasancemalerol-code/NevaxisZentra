@@ -1001,6 +1001,7 @@ public sealed class MaterialRequirementRepository(
             EvaluatedAtUtc = DateTimeOffset.UtcNow,
             CreatedAtUtc = DateTimeOffset.UtcNow,
             CreatedBySubjectId = actor,
+            FollowUpStatus = MaterialAvailabilityRiskFollowUpStatuses.RequiresReview,
             Version = 1,
         };
     }

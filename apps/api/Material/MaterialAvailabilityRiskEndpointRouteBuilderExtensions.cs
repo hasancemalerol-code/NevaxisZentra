@@ -1,3 +1,4 @@
+using CrevaFactOS.Api.AiTasks;
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Authorization;
@@ -17,6 +18,7 @@ internal static class MaterialAvailabilityRiskEndpointRouteBuilderExtensions
         group.MapGet("/{assessmentId:guid}", GetAssessmentAsync);
         group.MapGet("/{assessmentId:guid}/history", GetHistoryAsync);
         group.MapPost("/evaluate", EvaluateAsync);
+        group.MapMaterialAvailabilityRiskFollowUpEndpoints();
 
         return endpoints;
     }
@@ -37,10 +39,13 @@ internal static class MaterialAvailabilityRiskEndpointRouteBuilderExtensions
         if (context is null) return failResult!;
 
         var canManage = await HasManageAccessAsync(facilityId!.Value, facilityAccessResolver, cancellationToken);
+        var canCreateTask = await AiTaskEndpointHelpers.HasCreateAccessAsync(
+            facilityId.Value, facilityAccessResolver, cancellationToken);
         var workspace = await repository.GetWorkspaceAsync(
             context,
             new MaterialAvailabilityRiskListFilters(materialId, status, page, pageSize),
             canManage,
+            canCreateTask,
             cancellationToken);
 
         return TypedResults.Ok(new
@@ -53,12 +58,16 @@ internal static class MaterialAvailabilityRiskEndpointRouteBuilderExtensions
                 sufficientCount = workspace.SufficientCount,
                 insufficientDataCount = workspace.InsufficientDataCount,
                 sourceConflictCount = workspace.SourceConflictCount,
+                requiresReviewCount = workspace.RequiresReviewCount,
+                taskLinkedCount = workspace.TaskLinkedCount,
+                dataReviewCount = workspace.DataReviewCount,
                 latestEvaluatedAtUtc = workspace.LatestEvaluatedAtUtc,
             },
             capabilities = new
             {
                 canRead = workspace.CanRead,
                 canManage = workspace.CanManage,
+                canCreateTask = workspace.CanCreateTask,
             },
             assessments = workspace.Assessments.Select(MaterialAvailabilityRiskApiMapper.MapRow).ToList(),
         });
@@ -76,10 +85,10 @@ internal static class MaterialAvailabilityRiskEndpointRouteBuilderExtensions
             facilityId, facilityAccessResolver, correlationContext, cancellationToken);
         if (context is null) return failResult!;
 
-        var assessment = await repository.GetAssessmentByIdAsync(context, assessmentId, cancellationToken);
-        return assessment is null
+        var followUp = await repository.GetFollowUpDetailAsync(context, assessmentId, cancellationToken);
+        return followUp is null
             ? MaterialEndpointHelpers.MapRequirementFailure(MaterialRequirementFailureCodes.NotFound, "Availability risk assessment not found.")
-            : TypedResults.Ok(MaterialAvailabilityRiskApiMapper.MapDetail(assessment));
+            : TypedResults.Ok(MaterialAvailabilityRiskFollowUpApiMapper.MapDetail(followUp));
     }
 
     private static async Task<IResult> GetHistoryAsync(
@@ -193,6 +202,10 @@ internal static class MaterialAvailabilityRiskApiMapper
         sourceFreshness = row.SourceFreshness,
         evaluatedAtUtc = row.EvaluatedAtUtc,
         version = row.Version,
+        followUpStatus = row.FollowUpStatus,
+        linkedAiTaskId = row.LinkedAiTaskId,
+        canCreateTaskDraft = row.CanCreateTaskDraft,
+        taskDraftPurpose = row.TaskDraftPurpose,
     };
 
     internal static object MapDetail(MaterialAvailabilityRiskDetailReadModel detail) => new

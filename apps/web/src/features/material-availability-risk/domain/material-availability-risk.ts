@@ -4,6 +4,17 @@ export type MaterialAvailabilityRiskStatus =
   | "insufficient-data"
   | "source-conflict";
 
+export type MaterialAvailabilityRiskFollowUpStatus =
+  | "requires-review"
+  | "acknowledged"
+  | "task-created"
+  | "resolved"
+  | "dismissed";
+
+export type MaterialAvailabilityRiskTaskPurpose =
+  | "human-review-draft"
+  | "data-review-draft";
+
 export type MaterialAvailabilityRiskRow = Readonly<{
   id: string;
   materialId: string;
@@ -21,6 +32,10 @@ export type MaterialAvailabilityRiskRow = Readonly<{
   sourceFreshness?: string;
   evaluatedAtUtc: string;
   version: number;
+  followUpStatus: MaterialAvailabilityRiskFollowUpStatus;
+  linkedAiTaskId?: string;
+  canCreateTaskDraft: boolean;
+  taskDraftPurpose?: MaterialAvailabilityRiskTaskPurpose;
 }>;
 
 export type MaterialAvailabilityRiskDriver = Readonly<{
@@ -36,6 +51,13 @@ export type MaterialAvailabilityRiskEvidence = Readonly<{
   source?: string;
   recordedAtUtc?: string;
   isMissing: boolean;
+}>;
+
+export type MaterialAvailabilityRiskAuditEvent = Readonly<{
+  eventType: string;
+  payloadJson: string;
+  actor: string;
+  occurredAtUtc: string;
 }>;
 
 export type MaterialAvailabilityRiskDetail = Readonly<{
@@ -64,6 +86,13 @@ export type MaterialAvailabilityRiskDetail = Readonly<{
   evaluatedAtUtc: string;
   createdAtUtc: string;
   version: number;
+  followUpStatus: MaterialAvailabilityRiskFollowUpStatus;
+  linkedAiTaskId?: string;
+  canCreateTaskDraft: boolean;
+  taskDraftPurpose?: MaterialAvailabilityRiskTaskPurpose;
+  hasInsufficientEvidence: boolean;
+  evidenceSummary: string;
+  auditEvents: readonly MaterialAvailabilityRiskAuditEvent[];
 }>;
 
 export type MaterialAvailabilityRiskHistoryEntry = Readonly<{
@@ -81,11 +110,15 @@ export type MaterialAvailabilityRiskWorkspacePayload = Readonly<{
     sufficientCount: number;
     insufficientDataCount: number;
     sourceConflictCount: number;
+    requiresReviewCount: number;
+    taskLinkedCount: number;
+    dataReviewCount: number;
     latestEvaluatedAtUtc?: string;
   }>;
   capabilities: Readonly<{
     canRead: boolean;
     canManage: boolean;
+    canCreateTask: boolean;
   }>;
   assessments: readonly MaterialAvailabilityRiskRow[];
 }>;
@@ -94,4 +127,11 @@ export type MaterialAvailabilityRiskEvaluateResult = Readonly<{
   assessmentId: string;
   version: number;
   idempotentReplay: boolean;
+}>;
+
+export type MaterialAvailabilityRiskTaskDraftResult = Readonly<{
+  taskId: string;
+  assessmentId: string;
+  idempotentReplay: boolean;
+  assessment: MaterialAvailabilityRiskDetail;
 }>;

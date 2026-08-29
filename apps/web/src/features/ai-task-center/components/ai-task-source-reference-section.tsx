@@ -35,6 +35,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     export: "Dışa aktarım",
     maintenance: "Bakım",
     quality: "Kalite",
+    material: "Malzeme",
     mold: "Kalıp",
     production: "Üretim",
     "production-planning": "Üretim planlama",
@@ -65,6 +66,12 @@ export function AiTaskSourceReferenceSection({
         label: "Kalite uygunsuzluk kaydını aç",
       }
     : null;
+  const materialLink = sourceModule === "material" && sourceEntityId
+    ? {
+        href: `/stok-ve-depo/malzeme-riskleri?assessment=${encodeURIComponent(sourceEntityId)}`,
+        label: "Malzeme risk değerlendirmesini aç",
+      }
+    : null;
   const moldLink = sourceModule === "mold" && sourceEntityId
     ? {
         href: `/kaliplar/takip-ve-gorevler?mold=${encodeURIComponent(sourceEntityId)}`,
@@ -77,7 +84,7 @@ export function AiTaskSourceReferenceSection({
         label: "Üretim istisna kaydını aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? moldLink ?? productionLink;
+  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? materialLink ?? moldLink ?? productionLink;
 
   return (
     <Card

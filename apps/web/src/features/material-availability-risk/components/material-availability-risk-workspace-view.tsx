@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   Boxes,
+  ClipboardList,
+  ExternalLink,
   FileWarning,
   LoaderCircle,
   PackageSearch,
@@ -28,12 +30,16 @@ import type {
 } from "../domain/material-availability-risk";
 import {
   evaluateMaterialAvailabilityRiskAction,
+  acknowledgeMaterialAvailabilityRiskFollowUpAction,
+  createMaterialAvailabilityRiskTaskDraftAction,
   refreshMaterialAvailabilityRiskWorkspaceAction,
 } from "../server/material-availability-risk-actions";
 import {
+  getMaterialAvailabilityRiskFollowUpStatusLabel,
   getMaterialAvailabilityRiskStatusBadgeClass,
   getMaterialAvailabilityRiskStatusLabel,
   MATERIAL_AVAILABILITY_RISK_DISCLAIMER,
+  MATERIAL_AVAILABILITY_RISK_TASK_DISCLAIMER,
 } from "../presentation/material-availability-risk-labels";
 
 type MaterialAvailabilityRiskWorkspaceViewProps = Readonly<{
@@ -129,9 +135,51 @@ export function MaterialAvailabilityRiskWorkspaceView({
     });
   };
 
+  const handleCreateTask = () => {
+    if (!assessment?.id) return;
+    startTransition(async () => {
+      setActionError(null);
+      const result = await createMaterialAvailabilityRiskTaskDraftAction(assessment.id);
+      if (result.status === "failure") {
+        setActionError(result.message);
+        return;
+      }
+      router.push(`/ai-gorevleri/${result.taskId}`);
+    });
+  };
+
+  const handleAcknowledge = () => {
+    if (!assessment?.id) return;
+    startTransition(async () => {
+      setActionError(null);
+      const result = await acknowledgeMaterialAvailabilityRiskFollowUpAction(
+        assessment.id,
+        assessment.version,
+      );
+      if (result.status === "failure") {
+        setActionError(result.message);
+        return;
+      }
+      router.refresh();
+    });
+  };
+
   const canEvaluate =
     workspace.capabilities.canManage &&
     Boolean(assessment?.materialId && assessment.requirementProfileId);
+
+  const canCreateTask =
+    workspace.capabilities.canCreateTask &&
+    assessment?.canCreateTaskDraft === true &&
+    !assessment.linkedAiTaskId;
+
+  const canAcknowledge =
+    workspace.capabilities.canManage &&
+    assessment?.followUpStatus === "requires-review";
+
+  const taskButtonLabel = assessment?.hasInsufficientEvidence
+    ? "Veri inceleme görev taslağı oluştur"
+    : "Stok ve malzeme inceleme görev taslağı oluştur";
 
   if (workspace.assessments.length === 0) {
     return (
@@ -178,6 +226,27 @@ export function MaterialAvailabilityRiskWorkspaceView({
           tone="in-progress"
           icon={<PackageSearch />}
         />
+        <QualityDashboardKpi
+          label="İnceleme gerekli"
+          value={workspace.kpis.requiresReviewCount}
+          description="Takip bekleyen"
+          tone="in-progress"
+          icon={<AlertTriangle />}
+        />
+        <QualityDashboardKpi
+          label="Görev bağlantısı"
+          value={workspace.kpis.taskLinkedCount}
+          description="AI görev taslağı"
+          tone="ready"
+          icon={<ExternalLink />}
+        />
+        <QualityDashboardKpi
+          label="Veri incelemesi"
+          value={workspace.kpis.dataReviewCount}
+          description="Yetersiz kanıt"
+          tone="in-progress"
+          icon={<FileWarning />}
+        />
       </div>
 
       <div className="quality-workspace-toolbar">
@@ -211,6 +280,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                 <tr>
                   <th>Malzeme</th>
                   <th>Durum</th>
+                  <th>Takip</th>
                   <th>Üretim emri</th>
                   <th>Değerlendirme</th>
                 </tr>
@@ -237,6 +307,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                         {getMaterialAvailabilityRiskStatusLabel(row.status)}
                       </span>
                     </td>
+                    <td>{getMaterialAvailabilityRiskFollowUpStatusLabel(row.followUpStatus)}</td>
                     <td>{row.productionOrderReference ?? "—"}</td>
                     <td>{formatDateTime(row.evaluatedAtUtc)}</td>
                   </tr>
@@ -270,6 +341,10 @@ export function MaterialAvailabilityRiskWorkspaceView({
                       {getMaterialAvailabilityRiskStatusLabel(assessment.status)}
                     </span>
                   </dd>
+                </div>
+                <div>
+                  <dt>Takip durumu</dt>
+                  <dd>{getMaterialAvailabilityRiskFollowUpStatusLabel(assessment.followUpStatus)}</dd>
                 </div>
                 <div>
                   <dt>Üretim emri</dt>
@@ -349,6 +424,35 @@ export function MaterialAvailabilityRiskWorkspaceView({
                 </section>
               ) : null}
 
+              <section aria-labelledby="material-risk-evidence-summary-heading">
+                <h3 id="material-risk-evidence-summary-heading">Kanıt özeti</h3>
+                {assessment.hasInsufficientEvidence ? (
+                  <p data-testid="material-availability-risk-insufficient-evidence">
+                    Kanıt yetersiz veya çelişkili — yalnızca veri inceleme görev taslağı oluşturulabilir.
+                  </p>
+                ) : (
+                  <p>{assessment.evidenceSummary || "—"}</p>
+                )}
+              </section>
+
+              {assessment.auditEvents.length > 0 ? (
+                <section aria-labelledby="material-risk-audit-heading">
+                  <h3 id="material-risk-audit-heading">Takip denetim kaydı</h3>
+                  <ul className="quality-audit-list" data-testid="material-availability-risk-audit-events">
+                    {assessment.auditEvents.map((event) => (
+                      <li key={`${event.eventType}-${event.occurredAtUtc}`}>
+                        <strong>{event.eventType}</strong>
+                        {" — "}
+                        {event.actor}
+                        {" ("}
+                        {formatDateTime(event.occurredAtUtc)}
+                        {")"}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
               {history && history.length > 0 ? (
                 <section aria-labelledby="material-risk-history-heading">
                   <h3 id="material-risk-history-heading">Değerlendirme geçmişi</h3>
@@ -382,9 +486,48 @@ export function MaterialAvailabilityRiskWorkspaceView({
               >
                 <ShieldAlert aria-hidden="true" />
                 {workspace.automationDisclaimer || MATERIAL_AVAILABILITY_RISK_DISCLAIMER}
+                {" "}
+                {MATERIAL_AVAILABILITY_RISK_TASK_DISCLAIMER}
               </p>
 
               <div className="quality-action-row">
+                {canCreateTask ? (
+                  <button
+                    type="button"
+                    onClick={handleCreateTask}
+                    disabled={isPending}
+                    data-testid="material-availability-risk-create-task-button"
+                  >
+                    {isPending ? (
+                      <LoaderCircle aria-hidden="true" className="spin" />
+                    ) : (
+                      <ClipboardList aria-hidden="true" />
+                    )}
+                    {taskButtonLabel}
+                  </button>
+                ) : null}
+
+                {assessment.linkedAiTaskId ? (
+                  <Link
+                    href={`/ai-gorevleri/${assessment.linkedAiTaskId}`}
+                    data-testid="material-availability-risk-linked-task-link"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                    Bağlı AI görevini aç
+                  </Link>
+                ) : null}
+
+                {canAcknowledge ? (
+                  <button
+                    type="button"
+                    onClick={handleAcknowledge}
+                    disabled={isPending}
+                    data-testid="material-availability-risk-acknowledge-button"
+                  >
+                    Görüldü olarak işaretle
+                  </button>
+                ) : null}
+
                 {canEvaluate ? (
                   <button
                     type="button"

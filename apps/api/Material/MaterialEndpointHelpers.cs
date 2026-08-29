@@ -303,6 +303,10 @@ internal static class MaterialEndpointHelpers
                 title: reason ?? "Validation failed.",
                 statusCode: StatusCodes.Status400BadRequest,
                 extensions: FailureExt(MaterialRequirementApiFailureCodes.ValidationFailed)),
+            MaterialRequirementFailureCodes.InvalidTransition => TypedResults.Problem(
+                title: reason ?? "Invalid follow-up transition.",
+                statusCode: StatusCodes.Status409Conflict,
+                extensions: FailureExt(MaterialRequirementApiFailureCodes.InvalidTransition)),
             MaterialRequirementFailureCodes.SourceUnavailable => TypedResults.Problem(
                 title: reason ?? "Material requirement service is unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable,
@@ -326,6 +330,7 @@ internal static class MaterialRequirementApiFailureCodes
     public const string InsufficientData = "material.requirement.insufficient-data";
     public const string RegrindLimitExceeded = "material.regrind.limit-exceeded";
     public const string ValidationFailed = "material.requirement.validation-failed";
+    public const string InvalidTransition = "material.requirement.invalid-transition";
     public const string SourceUnavailable = "material.requirement.source-unavailable";
 }
 

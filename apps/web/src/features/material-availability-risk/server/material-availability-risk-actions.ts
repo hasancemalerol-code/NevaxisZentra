@@ -56,3 +56,78 @@ export async function refreshMaterialAvailabilityRiskWorkspaceAction() {
   revalidateMaterialAvailabilityRiskRoutes();
   return { status: "success" as const };
 }
+
+export async function createMaterialAvailabilityRiskTaskDraftAction(assessmentId: string) {
+  const authorization = await denyUnlessGranted("ai-task.create");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = await resolveContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message };
+  }
+
+  const { createMaterialAvailabilityRiskTaskDraft } = await import("./material-availability-risk-api-client");
+  const result = await createMaterialAvailabilityRiskTaskDraft(contextResult.context, assessmentId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  revalidateMaterialAvailabilityRiskRoutes();
+  return {
+    status: "success" as const,
+    taskId: result.value.taskId,
+    assessmentId: result.value.assessmentId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function transitionMaterialAvailabilityRiskFollowUpAction(
+  assessmentId: string,
+  expectedVersion: number,
+  targetFollowUpStatus: string,
+  note?: string,
+) {
+  const authorization = await denyUnlessGranted("material.manage");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = await resolveContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message };
+  }
+
+  const { transitionMaterialAvailabilityRiskFollowUp } = await import("./material-availability-risk-api-client");
+  const result = await transitionMaterialAvailabilityRiskFollowUp(contextResult.context, assessmentId, {
+    expectedVersion,
+    targetFollowUpStatus,
+    note,
+  });
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  revalidateMaterialAvailabilityRiskRoutes();
+  return { status: "success" as const };
+}
+
+export async function acknowledgeMaterialAvailabilityRiskFollowUpAction(
+  assessmentId: string,
+  expectedVersion: number,
+) {
+  return transitionMaterialAvailabilityRiskFollowUpAction(assessmentId, expectedVersion, "acknowledged");
+}
+
+export async function dismissMaterialAvailabilityRiskFollowUpAction(
+  assessmentId: string,
+  expectedVersion: number,
+  reason: string,
+) {
+  if (!reason.trim()) {
+    return { status: "failure" as const, message: "Red gerekçesi zorunludur." };
+  }
+  return transitionMaterialAvailabilityRiskFollowUpAction(
+    assessmentId,
+    expectedVersion,
+    "dismissed",
+    reason.trim(),
+  );
+}

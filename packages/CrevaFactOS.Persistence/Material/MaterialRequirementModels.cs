@@ -13,6 +13,7 @@ public static class MaterialRequirementFailureCodes
     public const string InsufficientData = "insufficient-data";
     public const string RegrindLimitExceeded = "regrind-limit-exceeded";
     public const string ValidationFailed = "validation-failed";
+    public const string InvalidTransition = "invalid-transition";
     public const string SourceUnavailable = "source-unavailable";
 }
 
@@ -302,9 +303,13 @@ public sealed record MaterialAvailabilityRiskWorkspaceReadModel(
     int SufficientCount,
     int InsufficientDataCount,
     int SourceConflictCount,
+    int RequiresReviewCount,
+    int TaskLinkedCount,
+    int DataReviewCount,
     DateTimeOffset? LatestEvaluatedAtUtc,
     bool CanRead,
     bool CanManage,
+    bool CanCreateTask,
     IReadOnlyList<MaterialAvailabilityRiskRowReadModel> Assessments);
 
 public sealed record MaterialAvailabilityRiskRowReadModel(
@@ -323,7 +328,11 @@ public sealed record MaterialAvailabilityRiskRowReadModel(
     decimal? ShortageQuantity,
     string? SourceFreshness,
     DateTimeOffset EvaluatedAtUtc,
-    uint Version);
+    uint Version,
+    string FollowUpStatus,
+    Guid? LinkedAiTaskId,
+    bool CanCreateTaskDraft,
+    string TaskDraftPurpose);
 
 public sealed record MaterialAvailabilityRiskDetailReadModel(
     Guid Id,

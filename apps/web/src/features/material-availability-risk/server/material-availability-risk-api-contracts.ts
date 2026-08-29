@@ -1,11 +1,15 @@
 import type {
+  MaterialAvailabilityRiskAuditEvent,
   MaterialAvailabilityRiskDetail,
   MaterialAvailabilityRiskDriver,
   MaterialAvailabilityRiskEvaluateResult,
   MaterialAvailabilityRiskEvidence,
+  MaterialAvailabilityRiskFollowUpStatus,
   MaterialAvailabilityRiskHistoryEntry,
   MaterialAvailabilityRiskRow,
   MaterialAvailabilityRiskStatus,
+  MaterialAvailabilityRiskTaskDraftResult,
+  MaterialAvailabilityRiskTaskPurpose,
   MaterialAvailabilityRiskWorkspacePayload,
 } from "../domain/material-availability-risk";
 
@@ -18,6 +22,19 @@ const RISK_STATUSES = new Set<MaterialAvailabilityRiskStatus>([
   "shortage",
   "insufficient-data",
   "source-conflict",
+]);
+
+const FOLLOW_UP_STATUSES = new Set<MaterialAvailabilityRiskFollowUpStatus>([
+  "requires-review",
+  "acknowledged",
+  "task-created",
+  "resolved",
+  "dismissed",
+]);
+
+const TASK_PURPOSES = new Set<MaterialAvailabilityRiskTaskPurpose>([
+  "human-review-draft",
+  "data-review-draft",
 ]);
 
 function parseString(value: unknown, field: string): ParseResult<string> {
@@ -44,6 +61,43 @@ function parseRiskStatus(value: unknown): ParseResult<MaterialAvailabilityRiskSt
     return { status: "failure", message: "status is invalid." };
   }
   return { status: "success", value: value as MaterialAvailabilityRiskStatus };
+}
+
+function parseFollowUpStatus(value: unknown): ParseResult<MaterialAvailabilityRiskFollowUpStatus> {
+  if (typeof value !== "string" || !FOLLOW_UP_STATUSES.has(value as MaterialAvailabilityRiskFollowUpStatus)) {
+    return { status: "failure", message: "followUpStatus is invalid." };
+  }
+  return { status: "success", value: value as MaterialAvailabilityRiskFollowUpStatus };
+}
+
+function parseTaskPurpose(value: unknown): MaterialAvailabilityRiskTaskPurpose | undefined {
+  if (typeof value !== "string" || !TASK_PURPOSES.has(value as MaterialAvailabilityRiskTaskPurpose)) {
+    return undefined;
+  }
+  return value as MaterialAvailabilityRiskTaskPurpose;
+}
+
+function parseAuditEvent(value: unknown): ParseResult<MaterialAvailabilityRiskAuditEvent> {
+  if (!value || typeof value !== "object") {
+    return { status: "failure", message: "audit event is invalid." };
+  }
+  const row = value as Record<string, unknown>;
+  const eventType = parseString(row.eventType, "eventType");
+  if (eventType.status === "failure") return eventType;
+  const payloadJson = typeof row.payloadJson === "string" ? row.payloadJson : "{}";
+  const actor = parseString(row.actor, "actor");
+  if (actor.status === "failure") return actor;
+  const occurredAtUtc = parseString(row.occurredAtUtc, "occurredAtUtc");
+  if (occurredAtUtc.status === "failure") return occurredAtUtc;
+  return {
+    status: "success",
+    value: {
+      eventType: eventType.value,
+      payloadJson,
+      actor: actor.value,
+      occurredAtUtc: occurredAtUtc.value,
+    },
+  };
 }
 
 function parseDriver(value: unknown): ParseResult<MaterialAvailabilityRiskDriver> {
@@ -104,6 +158,8 @@ function parseRow(value: unknown): ParseResult<MaterialAvailabilityRiskRow> {
   if (version === undefined) {
     return { status: "failure", message: "version is required." };
   }
+  const followUpStatus = parseFollowUpStatus(row.followUpStatus ?? "requires-review");
+  if (followUpStatus.status === "failure") return followUpStatus;
 
   return {
     status: "success",
@@ -124,6 +180,10 @@ function parseRow(value: unknown): ParseResult<MaterialAvailabilityRiskRow> {
       sourceFreshness: parseOptionalString(row.sourceFreshness),
       evaluatedAtUtc: evaluatedAtUtc.value,
       version,
+      followUpStatus: followUpStatus.value,
+      linkedAiTaskId: parseOptionalString(row.linkedAiTaskId),
+      canCreateTaskDraft: parseBoolean(row.canCreateTaskDraft),
+      taskDraftPurpose: parseTaskPurpose(row.taskDraftPurpose),
     },
   };
 }
@@ -169,11 +229,15 @@ export function parseMaterialAvailabilityRiskWorkspacePayload(
         sufficientCount: parseNumber(kpis.sufficientCount) ?? 0,
         insufficientDataCount: parseNumber(kpis.insufficientDataCount) ?? 0,
         sourceConflictCount: parseNumber(kpis.sourceConflictCount) ?? 0,
+        requiresReviewCount: parseNumber(kpis.requiresReviewCount) ?? 0,
+        taskLinkedCount: parseNumber(kpis.taskLinkedCount) ?? 0,
+        dataReviewCount: parseNumber(kpis.dataReviewCount) ?? 0,
         latestEvaluatedAtUtc: parseOptionalString(kpis.latestEvaluatedAtUtc),
       },
       capabilities: {
         canRead: parseBoolean(capabilities.canRead),
         canManage: parseBoolean(capabilities.canManage),
+        canCreateTask: parseBoolean(capabilities.canCreateTask),
       },
       assessments,
     },
@@ -224,6 +288,18 @@ export function parseMaterialAvailabilityRiskDetail(payload: unknown): ParseResu
     }
   }
 
+  const followUpStatus = parseFollowUpStatus(row.followUpStatus ?? "requires-review");
+  if (followUpStatus.status === "failure") return followUpStatus;
+
+  const auditEvents: MaterialAvailabilityRiskAuditEvent[] = [];
+  if (Array.isArray(row.auditEvents)) {
+    for (const item of row.auditEvents) {
+      const parsed = parseAuditEvent(item);
+      if (parsed.status === "failure") return parsed;
+      auditEvents.push(parsed.value);
+    }
+  }
+
   return {
     status: "success",
     value: {
@@ -252,6 +328,13 @@ export function parseMaterialAvailabilityRiskDetail(payload: unknown): ParseResu
       evaluatedAtUtc: evaluatedAtUtc.value,
       createdAtUtc: createdAtUtc.value,
       version,
+      followUpStatus: followUpStatus.value,
+      linkedAiTaskId: parseOptionalString(row.linkedAiTaskId),
+      canCreateTaskDraft: parseBoolean(row.canCreateTaskDraft),
+      taskDraftPurpose: parseTaskPurpose(row.taskDraftPurpose),
+      hasInsufficientEvidence: parseBoolean(row.hasInsufficientEvidence),
+      evidenceSummary: typeof row.evidenceSummary === "string" ? row.evidenceSummary : "",
+      auditEvents,
     },
   };
 }
@@ -307,6 +390,31 @@ export function parseMaterialAvailabilityRiskEvaluateResponse(
       assessmentId: id.value,
       version,
       idempotentReplay: parseBoolean(row.idempotentReplay),
+    },
+  };
+}
+
+export function parseMaterialAvailabilityRiskTaskDraftResponse(
+  payload: unknown,
+): ParseResult<MaterialAvailabilityRiskTaskDraftResult> {
+  if (!payload || typeof payload !== "object") {
+    return { status: "failure", message: "task draft response is invalid." };
+  }
+  const row = payload as Record<string, unknown>;
+  const taskId = parseString(row.taskId, "taskId");
+  if (taskId.status === "failure") return taskId;
+  const assessmentId = parseString(row.assessmentId, "assessmentId");
+  if (assessmentId.status === "failure") return assessmentId;
+  const assessmentPayload = row.assessment ?? row;
+  const assessment = parseMaterialAvailabilityRiskDetail(assessmentPayload);
+  if (assessment.status === "failure") return assessment;
+  return {
+    status: "success",
+    value: {
+      taskId: taskId.value,
+      assessmentId: assessmentId.value,
+      idempotentReplay: parseBoolean(row.idempotentReplay),
+      assessment: assessment.value,
     },
   };
 }

@@ -236,6 +236,7 @@ internal static class DevelopmentPilotMaterialAvailabilityRiskSeed
             CreatedAtUtc = seedTimestampUtc,
             CreatedBySubjectId = actorSubjectId,
             Version = 1,
+            FollowUpStatus = MaterialAvailabilityRiskFollowUpStatuses.RequiresReview,
         });
     }
 

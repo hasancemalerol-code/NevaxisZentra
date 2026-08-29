@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrevaFactOS.Persistence.Material;
 
-public interface IMaterialAvailabilityRiskRepository
+public partial interface IMaterialAvailabilityRiskRepository
 {
     Task<MaterialAvailabilityRiskWorkspaceReadModel> GetWorkspaceAsync(
         MaterialOperationContext context,
         MaterialAvailabilityRiskListFilters filters,
         bool canManage,
+        bool canCreateTask,
         CancellationToken cancellationToken = default);
 
     Task<MaterialAvailabilityRiskDetailReadModel?> GetAssessmentByIdAsync(
@@ -25,7 +26,7 @@ public interface IMaterialAvailabilityRiskRepository
         CancellationToken cancellationToken = default);
 }
 
-public sealed class MaterialAvailabilityRiskRepository(
+public sealed partial class MaterialAvailabilityRiskRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession) : IMaterialAvailabilityRiskRepository
 {
@@ -34,6 +35,7 @@ public sealed class MaterialAvailabilityRiskRepository(
         MaterialOperationContext context,
         MaterialAvailabilityRiskListFilters filters,
         bool canManage,
+        bool canCreateTask,
         CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteReadAsync(async ct =>
         {
@@ -73,14 +75,19 @@ public sealed class MaterialAvailabilityRiskRepository(
 
             return new MaterialAvailabilityRiskWorkspaceReadModel(
                 MaterialAvailabilityRiskConstants.RuleSetVersion,
-                MaterialAvailabilityRiskConstants.WorkspaceDisclaimer,
+                MaterialAvailabilityRiskFollowUpConstants.AutomationDisclaimer,
                 latestByScope.Count(a => a.Status == MaterialAvailabilityRiskStatuses.Shortage),
                 latestByScope.Count(a => a.Status == MaterialAvailabilityRiskStatuses.Sufficient),
                 latestByScope.Count(a => a.Status == MaterialAvailabilityRiskStatuses.InsufficientData),
                 latestByScope.Count(a => a.Status == MaterialAvailabilityRiskStatuses.SourceConflict),
+                latestByScope.Count(a => a.FollowUpStatus == MaterialAvailabilityRiskFollowUpStatuses.RequiresReview),
+                latestByScope.Count(a => a.FollowUpStatus == MaterialAvailabilityRiskFollowUpStatuses.TaskCreated),
+                latestByScope.Count(a =>
+                    MaterialAvailabilityRiskFollowUpPresentationBuilder.IsDataReviewEligible(a)),
                 latestByScope.MaxBy(a => a.EvaluatedAtUtc)?.EvaluatedAtUtc,
                 true,
                 canManage,
+                canCreateTask,
                 paged);
         }, cancellationToken);
 
@@ -156,7 +163,11 @@ public sealed class MaterialAvailabilityRiskRepository(
             assessment.ShortageQuantity,
             assessment.SourceFreshness,
             assessment.EvaluatedAtUtc,
-            assessment.Version);
+            assessment.Version,
+            assessment.FollowUpStatus,
+            assessment.LinkedAiTaskId,
+            MaterialAvailabilityRiskFollowUpPresentationBuilder.CanCreateTaskDraft(assessment),
+            MaterialAvailabilityRiskFollowUpPresentationBuilder.ResolveTaskPurpose(assessment));
 
     private static MaterialAvailabilityRiskDetailReadModel MapDetail(MaterialRequirementAssessment assessment)
     {
@@ -216,17 +227,18 @@ public sealed class MaterialAvailabilityRiskRepository(
     }
 }
 
-public sealed class UnavailableMaterialAvailabilityRiskRepository : IMaterialAvailabilityRiskRepository
+public sealed partial class UnavailableMaterialAvailabilityRiskRepository : IMaterialAvailabilityRiskRepository
 {
     public Task<MaterialAvailabilityRiskWorkspaceReadModel> GetWorkspaceAsync(
         MaterialOperationContext context,
         MaterialAvailabilityRiskListFilters filters,
         bool canManage,
+        bool canCreateTask,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(new MaterialAvailabilityRiskWorkspaceReadModel(
             MaterialAvailabilityRiskConstants.RuleSetVersion,
-            MaterialAvailabilityRiskConstants.WorkspaceDisclaimer,
-            0, 0, 0, 0, null, true, canManage, []));
+            MaterialAvailabilityRiskFollowUpConstants.AutomationDisclaimer,
+            0, 0, 0, 0, 0, 0, 0, null, true, canManage, canCreateTask, []));
 
     public Task<MaterialAvailabilityRiskDetailReadModel?> GetAssessmentByIdAsync(
         MaterialOperationContext context,
