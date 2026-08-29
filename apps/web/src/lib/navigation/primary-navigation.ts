@@ -208,6 +208,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/ticari-zeka",
       },
       {
+        label: "Fiyat Koruma ve Onay",
+        href: "/ticari-zeka/fiyat-koruma-ve-onay",
+        iconKey: "shield-check",
+        permissionKey: "commercial-intelligence.read",
+        subscriptionModulePath: "/ticari-zeka",
+      },
+      {
         label: "Teklif Riskleri",
         href: "/ticari-zeka/teklif-riskleri",
         iconKey: "file-warning",

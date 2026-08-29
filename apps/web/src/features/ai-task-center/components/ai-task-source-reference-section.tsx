@@ -8,7 +8,25 @@ type AiTaskSourceReferenceSectionProps = Readonly<{
   sourceModule: string | null;
   sourceEntityId: string | null;
   taskReference: string;
+  taskTitle?: string | null;
 }>;
+
+function resolveCommercialIntelligenceSourceLink(
+  sourceEntityId: string,
+  taskTitle?: string | null,
+): { href: string; label: string } | null {
+  if (taskTitle?.startsWith("Fiyat senaryosu")) {
+    return {
+      href: `/ticari-zeka/fiyat-koruma-ve-onay?scenario=${encodeURIComponent(sourceEntityId)}`,
+      label: "Fiyat senaryosunu aç",
+    };
+  }
+
+  return {
+    href: `/ticari-zeka/urun-karliligi?comparison=${encodeURIComponent(sourceEntityId)}`,
+    label: "Karlılık karşılaştırmasını aç",
+  };
+}
 
 function formatSourceModuleLabel(sourceModule: string): string {
   const labels: Record<string, string> = {
@@ -27,8 +45,12 @@ export function AiTaskSourceReferenceSection({
   sourceModule,
   sourceEntityId,
   taskReference,
+  taskTitle = null,
 }: AiTaskSourceReferenceSectionProps) {
   const hasSourceLink = Boolean(sourceModule && sourceEntityId);
+  const commercialIntelligenceLink = sourceModule === "commercial-intelligence" && sourceEntityId
+    ? resolveCommercialIntelligenceSourceLink(sourceEntityId, taskTitle)
+    : null;
 
   return (
     <Card
@@ -79,10 +101,10 @@ export function AiTaskSourceReferenceSection({
             {sourceEntityId}
           </span>
 
-          {sourceModule === "commercial-intelligence" ? (
-            <Link href={`/ticari-zeka/urun-karliligi?comparison=${encodeURIComponent(sourceEntityId!)}`}>
+          {commercialIntelligenceLink ? (
+            <Link href={commercialIntelligenceLink.href}>
               <ExternalLink aria-hidden="true" />
-              Karlılık karşılaştırmasını aç
+              {commercialIntelligenceLink.label}
             </Link>
           ) : null}
         </div>

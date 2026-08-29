@@ -25,6 +25,7 @@ const PROFITABILITY_ROUTE_PATH = "/ticari-zeka/urun-karliligi";
 const CUSTOMER_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/musteri-karliligi";
 const MATERIAL_COST_PROFITABILITY_ROUTE_PATH = "/ticari-zeka/malzeme-ve-maliyet-karliligi";
 const PROFITABILITY_ALERT_ROUTE_PATH = "/ticari-zeka/karlilik-uyarilari";
+const PRICING_SCENARIO_ROUTE_PATH = "/ticari-zeka/fiyat-koruma-ve-onay";
 
 function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(PURCHASE_PRICE_ROUTE_PATH);
@@ -35,6 +36,7 @@ function revalidateCommercialIntelligenceRoutes() {
   revalidatePath(CUSTOMER_PROFITABILITY_ROUTE_PATH);
   revalidatePath(MATERIAL_COST_PROFITABILITY_ROUTE_PATH);
   revalidatePath(PROFITABILITY_ALERT_ROUTE_PATH);
+  revalidatePath(PRICING_SCENARIO_ROUTE_PATH);
 }
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -629,6 +631,219 @@ export async function createCommercialProfitabilityAlertTaskDraftAction(alertId:
     status: "success" as const,
     taskId: result.value.taskId,
     alertId: result.value.alertId,
+    idempotentReplay: result.value.idempotentReplay,
+  };
+}
+
+export async function refreshCommercialPricingScenarioWorkspaceAction(
+  scenarioId?: string | null,
+  filters?: import("./commercial-pricing-scenario-queries").CommercialPricingScenarioApiFilters,
+) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  revalidateCommercialIntelligenceRoutes();
+  const { readCommercialPricingScenarioWorkspace } = await import("./commercial-pricing-scenario-queries");
+  const result = await readCommercialPricingScenarioWorkspace(scenarioId, filters);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return {
+    status: "success" as const,
+    workspace: result.workspace,
+  };
+}
+
+export async function loadCommercialPricingScenarioDetailAction(scenarioId: string) {
+  const authorization = await denyUnlessGranted("commercial-intelligence.read");
+  if (authorization.status === "failure") return authorization;
+
+  const { readCommercialPricingScenarioDetail } = await import("./commercial-pricing-scenario-queries");
+  const result = await readCommercialPricingScenarioDetail(scenarioId);
+  if (result.status === "failure") {
+    return { status: "failure" as const, message: result.message, code: result.code };
+  }
+
+  return { status: "success" as const, detail: result.detail };
+}
+
+export async function createCommercialPricingScenarioAction(input: Readonly<{
+  profileId: string;
+  expectedProfileVersion: number;
+  salesEvidenceObservationId: string;
+  proposedUnitPrice: number;
+  proposedDiscountRatio?: number | null;
+  quantity?: number | null;
+  validityWindowStartUtc?: string | null;
+  validityWindowEndUtc?: string | null;
+  commercialRationale: string;
+  sourceProvenance: string;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { createCommercialPricingScenario } = await import("./commercial-pricing-scenario-api-client");
+  const result = await createCommercialPricingScenario(resolved.context, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    scenario: result.value.scenario,
+  };
+}
+
+export async function updateCommercialPricingScenarioAction(input: Readonly<{
+  scenarioId: string;
+  expectedVersion: number;
+  profileId: string;
+  expectedProfileVersion: number;
+  salesEvidenceObservationId: string;
+  proposedUnitPrice: number;
+  proposedDiscountRatio?: number | null;
+  quantity?: number | null;
+  validityWindowStartUtc?: string | null;
+  validityWindowEndUtc?: string | null;
+  commercialRationale: string;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { updateCommercialPricingScenario } = await import("./commercial-pricing-scenario-api-client");
+  const result = await updateCommercialPricingScenario(resolved.context, input.scenarioId, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Senaryo başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    scenario: result.value.scenario,
+  };
+}
+
+export async function evaluateCommercialPricingScenarioAction(input: Readonly<{
+  scenarioId: string;
+  expectedVersion: number;
+}>) {
+  const resolved = await resolveManageContext();
+  if (resolved.status === "failure") return resolved;
+
+  const { evaluateCommercialPricingScenario } = await import("./commercial-pricing-scenario-api-client");
+  const result = await evaluateCommercialPricingScenario(resolved.context, input.scenarioId, input);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Senaryo başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    scenario: result.value.scenario,
+  };
+}
+
+export async function transitionCommercialPricingScenarioAction(input: Readonly<{
+  scenarioId: string;
+  expectedVersion: number;
+  targetLifecycleStatus: string;
+  note?: string | null;
+}>) {
+  const requiresReview = input.targetLifecycleStatus === "approved"
+    || input.targetLifecycleStatus === "rejected";
+
+  if (requiresReview) {
+    const authorization = await denyUnlessGranted("ai-task.review");
+    if (authorization.status === "failure") return authorization;
+  } else {
+    const resolved = await resolveManageContext();
+    if (resolved.status === "failure") return resolved;
+  }
+
+  const contextResult = resolveCommercialIntelligenceRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
+  }
+
+  const { transitionCommercialPricingScenario } = await import("./commercial-pricing-scenario-api-client");
+  const result = await transitionCommercialPricingScenario(
+    contextResult.context,
+    input.scenarioId,
+    input,
+  );
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Senaryo başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    entityId: result.value.entityId,
+    version: result.value.version,
+    idempotentReplay: result.value.idempotentReplay,
+    scenario: result.value.scenario,
+  };
+}
+
+export async function createCommercialPricingScenarioTaskDraftAction(scenarioId: string) {
+  const authorization = await denyUnlessGranted("ai-task.create");
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = resolveCommercialIntelligenceRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
+  }
+
+  const { createCommercialPricingScenarioTaskDraft } = await import("./commercial-pricing-scenario-api-client");
+  const result = await createCommercialPricingScenarioTaskDraft(contextResult.context, scenarioId);
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: result.code === "concurrency-conflict"
+        ? "Görev taslağı oluşturulurken senaryo güncellendi. Lütfen yenileyip tekrar deneyin."
+        : result.message,
+      code: result.code,
+    };
+  }
+
+  revalidateCommercialIntelligenceRoutes();
+  return {
+    status: "success" as const,
+    taskId: result.value.taskId,
+    scenarioId: result.value.scenarioId,
     idempotentReplay: result.value.idempotentReplay,
   };
 }

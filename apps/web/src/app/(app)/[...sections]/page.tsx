@@ -29,7 +29,8 @@ export function generateStaticParams() {
         && item.href !== "/ticari-zeka/urun-karliligi"
         && item.href !== "/ticari-zeka/musteri-karliligi"
         && item.href !== "/ticari-zeka/malzeme-ve-maliyet-karliligi"
-        && item.href !== "/ticari-zeka/karlilik-uyarilari",
+        && item.href !== "/ticari-zeka/karlilik-uyarilari"
+        && item.href !== "/ticari-zeka/fiyat-koruma-ve-onay",
     )
     .map((item) => ({
       sections: item.href

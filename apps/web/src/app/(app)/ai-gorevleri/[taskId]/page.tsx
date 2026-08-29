@@ -169,6 +169,7 @@ export default async function AiTaskDetailPage({
         sourceEntityId={sourceEntityId}
         sourceModule={sourceModule}
         taskReference={taskReference}
+        taskTitle={task.title}
       />
 
       <AiTaskExecutionPanel task={task} />

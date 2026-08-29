@@ -362,6 +362,12 @@ public sealed class CrevaFactOSDbContext : DbContext
         Set<CommercialProfitabilityAlert>();
     public DbSet<CommercialProfitabilityAlertAuditEvent> CommercialProfitabilityAlertAuditEvents =>
         Set<CommercialProfitabilityAlertAuditEvent>();
+    public DbSet<CommercialPricingScenario> CommercialPricingScenarios =>
+        Set<CommercialPricingScenario>();
+    public DbSet<CommercialPricingScenarioEvaluationSnapshot> CommercialPricingScenarioEvaluationSnapshots =>
+        Set<CommercialPricingScenarioEvaluationSnapshot>();
+    public DbSet<CommercialPricingScenarioAuditEvent> CommercialPricingScenarioAuditEvents =>
+        Set<CommercialPricingScenarioAuditEvent>();
 
     // ERP integration foundation
     public DbSet<ErpConnectionProfile> ErpConnectionProfiles => Set<ErpConnectionProfile>();
@@ -1766,6 +1772,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new CommercialProfitabilityAlertAuditEventEntityConfiguration());
         modelBuilder.Entity<CommercialProfitabilityAlertAuditEvent>().HasQueryFilter(auditEvent =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && auditEvent.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPricingScenarioEntityConfiguration());
+        modelBuilder.Entity<CommercialPricingScenario>().HasQueryFilter(scenario =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && scenario.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPricingScenarioEvaluationSnapshotEntityConfiguration());
+        modelBuilder.Entity<CommercialPricingScenarioEvaluationSnapshot>().HasQueryFilter(snapshot =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && snapshot.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CommercialPricingScenarioAuditEventEntityConfiguration());
+        modelBuilder.Entity<CommercialPricingScenarioAuditEvent>().HasQueryFilter(auditEvent =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && auditEvent.TenantId == tenantContextAccessor.Current!.TenantId);
