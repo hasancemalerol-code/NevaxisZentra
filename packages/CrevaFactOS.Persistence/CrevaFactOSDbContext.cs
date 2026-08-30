@@ -321,6 +321,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsChannelReadState> TeamsChannelReadStates => Set<TeamsChannelReadState>();
     public DbSet<TeamsMessageAuditEvent> TeamsMessageAuditEvents => Set<TeamsMessageAuditEvent>();
     public DbSet<TeamsMessageTaskLink> TeamsMessageTaskLinks => Set<TeamsMessageTaskLink>();
+    public DbSet<TeamsApprovalRequest> TeamsApprovalRequests => Set<TeamsApprovalRequest>();
+    public DbSet<TeamsApprovalReviewer> TeamsApprovalReviewers => Set<TeamsApprovalReviewer>();
+    public DbSet<TeamsApprovalDecision> TeamsApprovalDecisions => Set<TeamsApprovalDecision>();
+    public DbSet<TeamsApprovalAuditEvent> TeamsApprovalAuditEvents => Set<TeamsApprovalAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1697,6 +1701,30 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsApprovalRequestEntityConfiguration());
+        modelBuilder.Entity<TeamsApprovalRequest>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsApprovalReviewerEntityConfiguration());
+        modelBuilder.Entity<TeamsApprovalReviewer>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsApprovalDecisionEntityConfiguration());
+        modelBuilder.Entity<TeamsApprovalDecision>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsApprovalAuditEventEntityConfiguration());
+        modelBuilder.Entity<TeamsApprovalAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new CommercialPurchasePriceProfileEntityConfiguration());
         modelBuilder.Entity<CommercialPurchasePriceProfile>().HasQueryFilter(p =>

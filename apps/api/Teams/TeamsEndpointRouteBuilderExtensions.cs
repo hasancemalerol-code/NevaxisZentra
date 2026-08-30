@@ -381,6 +381,15 @@ public static class TeamsServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<IAiTaskRepository>());
         });
+        services.AddScoped<ITeamsApprovalRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableTeamsApprovalRepository()
+                : new TeamsApprovalRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
 
         return services;
     }

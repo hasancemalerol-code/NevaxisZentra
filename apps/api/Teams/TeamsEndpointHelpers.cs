@@ -118,6 +118,146 @@ internal static class TeamsEndpointHelpers
             CanReadMold: await HasPermissionAsync(facilityId, MoldPermissionKeys.Read, facilityAccessResolver, cancellationToken),
             CanReadOperationalRisk: await HasPermissionAsync(facilityId, OperationalRiskPermissionKeys.Read, facilityAccessResolver, cancellationToken));
 
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveApprovalCreateAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.ApprovalsCreate,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveApprovalReviewAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.ApprovalsReview,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveApprovalManageAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.ApprovalsManage,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<TeamsApprovalAccessCapabilities> ResolveApprovalCapabilitiesAsync(
+        Guid facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CancellationToken cancellationToken) =>
+        new(
+            CanCreate: await HasPermissionAsync(facilityId, TeamsPermissionKeys.ApprovalsCreate, facilityAccessResolver, cancellationToken),
+            CanReview: await HasPermissionAsync(facilityId, TeamsPermissionKeys.ApprovalsReview, facilityAccessResolver, cancellationToken),
+            CanManage: await HasPermissionAsync(facilityId, TeamsPermissionKeys.ApprovalsManage, facilityAccessResolver, cancellationToken),
+            CanReadAiTasks: await HasPermissionAsync(facilityId, AiTaskPermissionKeys.Read, facilityAccessResolver, cancellationToken));
+
+    internal static IResult MapApprovalWriteResult(TeamsApprovalWriteResult result, bool isCreate = false)
+    {
+        if (!result.Succeeded || result.Detail is null)
+        {
+            return MapFailure(result.FailureCode, result.FailureReason);
+        }
+
+        var dto = MapApprovalDetail(result.Detail);
+        if (result.IdempotentReplay)
+        {
+            return TypedResults.Ok(dto);
+        }
+
+        return isCreate ? TypedResults.Created((string?)null, dto) : TypedResults.Ok(dto);
+    }
+
+    internal static object MapApprovalDetail(TeamsApprovalDetailReadModel detail) => new
+    {
+        id = detail.Id,
+        title = detail.Title,
+        rationale = detail.Rationale,
+        status = detail.Status,
+        channelId = detail.ChannelId,
+        channelName = detail.ChannelName,
+        requestedByTenantMembershipId = detail.RequestedByTenantMembershipId,
+        requestedByLabel = detail.RequestedByLabel,
+        source = new
+        {
+            sourceKind = detail.Source.SourceKind,
+            messageId = detail.Source.MessageId,
+            aiTaskId = detail.Source.AiTaskId,
+            channelName = detail.Source.ChannelName,
+            label = detail.Source.Label,
+            deepLinkPath = detail.Source.DeepLinkPath,
+            canOpen = detail.Source.CanOpen,
+            unavailableReason = detail.Source.UnavailableReason,
+        },
+        reviewers = detail.Reviewers.Select(r => new
+        {
+            tenantMembershipId = r.TenantMembershipId,
+            displayLabel = r.DisplayLabel,
+            role = r.Role,
+        }),
+        decision = detail.Decision is null ? null : new
+        {
+            id = detail.Decision.Id,
+            reviewerTenantMembershipId = detail.Decision.ReviewerTenantMembershipId,
+            reviewerLabel = detail.Decision.ReviewerLabel,
+            decision = detail.Decision.Decision,
+            note = detail.Decision.Note,
+            createdAt = detail.Decision.CreatedAtUtc,
+        },
+        auditEvents = detail.AuditEvents.Select(e => new
+        {
+            id = e.Id,
+            eventType = e.EventType,
+            actorLabel = e.ActorLabel,
+            occurredAt = e.OccurredAtUtc,
+        }),
+        createdAt = detail.CreatedAtUtc,
+        resolvedAt = detail.ResolvedAtUtc,
+        cancelledAt = detail.CancelledAtUtc,
+        canDecide = detail.CanDecide,
+        canCancel = detail.CanCancel,
+        canManageReviewers = detail.CanManageReviewers,
+        disclaimer = detail.Disclaimer,
+    };
+
+    private static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolvePermissionAccessAsync(
+        Guid? facilityId,
+        string permissionKey,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return (null, MapAccessDenied(
+                FacilityAccessFailureCodes.FacilityMissing,
+                "Tesis tanımlayıcısı gerekli."));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, permissionKey),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return (null, MapFacilityAccessFailure(accessResult));
+        }
+
+        return (BuildContext(accessResult.Access, correlationContext), null);
+    }
+
     internal static async Task<(AiTaskOperationContext? Context, IResult? Failure)> ResolveAiTaskCreateAccessAsync(
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,

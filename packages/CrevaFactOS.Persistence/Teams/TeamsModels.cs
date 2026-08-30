@@ -178,3 +178,114 @@ public sealed record TeamsPagedMessagesReadModel(
     int TotalCount,
     int Page,
     int PageSize);
+
+public sealed record TeamsApprovalReviewerAssignment(
+    Guid TenantMembershipId,
+    string Role);
+
+public sealed record CreateTeamsApprovalRequestCommand(
+    Guid ChannelId,
+    Guid? MessageId,
+    Guid? AiTaskId,
+    string Title,
+    string Rationale,
+    string IdempotencyKey,
+    IReadOnlyList<TeamsApprovalReviewerAssignment> Reviewers);
+
+public sealed record RecordTeamsApprovalDecisionCommand(
+    Guid RequestId,
+    string Decision,
+    string? Note);
+
+public sealed record CancelTeamsApprovalRequestCommand(Guid RequestId);
+
+public sealed record AssignTeamsApprovalReviewerCommand(
+    Guid RequestId,
+    Guid TenantMembershipId,
+    string Role);
+
+public sealed record TeamsApprovalReviewerReadModel(
+    Guid TenantMembershipId,
+    string DisplayLabel,
+    string Role);
+
+public sealed record TeamsApprovalDecisionReadModel(
+    Guid Id,
+    Guid ReviewerTenantMembershipId,
+    string ReviewerLabel,
+    string Decision,
+    string? Note,
+    DateTimeOffset CreatedAtUtc);
+
+public sealed record TeamsApprovalAuditEventReadModel(
+    Guid Id,
+    string EventType,
+    string ActorLabel,
+    DateTimeOffset OccurredAtUtc,
+    string PayloadJson);
+
+public sealed record TeamsApprovalSourceReadModel(
+    string SourceKind,
+    Guid? MessageId,
+    Guid? AiTaskId,
+    string ChannelName,
+    string? Label,
+    string? DeepLinkPath,
+    bool CanOpen,
+    string? UnavailableReason);
+
+public sealed record TeamsApprovalSummaryReadModel(
+    Guid Id,
+    string Title,
+    string Status,
+    string ChannelName,
+    Guid ChannelId,
+    string RequestedByLabel,
+    DateTimeOffset CreatedAtUtc,
+    string SourceKind,
+    bool CanOpen);
+
+public sealed record TeamsApprovalDetailReadModel(
+    Guid Id,
+    string Title,
+    string Rationale,
+    string Status,
+    Guid ChannelId,
+    string ChannelName,
+    Guid RequestedByTenantMembershipId,
+    string RequestedByLabel,
+    TeamsApprovalSourceReadModel Source,
+    IReadOnlyList<TeamsApprovalReviewerReadModel> Reviewers,
+    TeamsApprovalDecisionReadModel? Decision,
+    IReadOnlyList<TeamsApprovalAuditEventReadModel> AuditEvents,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? ResolvedAtUtc,
+    DateTimeOffset? CancelledAtUtc,
+    bool CanDecide,
+    bool CanCancel,
+    bool CanManageReviewers,
+    string Disclaimer);
+
+public sealed record TeamsApprovalListReadModel(
+    IReadOnlyList<TeamsApprovalSummaryReadModel> Items,
+    bool CanCreate,
+    bool CanReview,
+    bool CanManage);
+
+public sealed record TeamsApprovalWriteResult(
+    bool Succeeded,
+    Guid? RequestId,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason,
+    TeamsApprovalDetailReadModel? Detail = null)
+{
+    public static TeamsApprovalWriteResult Success(
+        Guid requestId,
+        TeamsApprovalDetailReadModel detail,
+        bool idempotentReplay = false) =>
+        new(true, requestId, idempotentReplay, null, null, detail);
+
+    public static TeamsApprovalWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, false, failureCode, failureReason);
+}

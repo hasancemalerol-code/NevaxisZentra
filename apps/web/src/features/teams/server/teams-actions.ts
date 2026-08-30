@@ -7,7 +7,15 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
-import { markTeamsChannelRead, postTeamsMessage, createMessageTaskDraft } from "./teams-api-client";
+import {
+  assignTeamsApprovalReviewer,
+  cancelTeamsApproval,
+  createMessageTaskDraft,
+  createTeamsApproval,
+  decideTeamsApproval,
+  markTeamsChannelRead,
+  postTeamsMessage,
+} from "./teams-api-client";
 import { resolveTeamsRequestContext } from "./teams-request-context";
 
 type ActionResult =
@@ -116,4 +124,134 @@ export async function createMessageTaskDraftAction(input: Readonly<{
     taskId: result.value.taskId,
     idempotentReplay: result.value.idempotentReplay,
   };
+}
+
+type ApprovalActionResult =
+  | Readonly<{ status: "success"; requestId: string }>
+  | Readonly<{ status: "failure"; message: string }>;
+
+export async function createTeamsApprovalAction(input: Readonly<{
+  channelId: string;
+  messageId?: string | null;
+  aiTaskId?: string | null;
+  title: string;
+  rationale: string;
+  reviewerMembershipIds: readonly string[];
+}>): Promise<ApprovalActionResult> {
+  const authorization = await denyUnlessGranted("teams.approvals.create");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Onay isteği oluşturma yetkisi yok." };
+  }
+
+  const readAuthorization = await denyUnlessGranted("teams.read");
+  if (readAuthorization.status === "failure") {
+    return { status: "failure", message: "Teams okuma yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await createTeamsApproval(contextResult.context, {
+    channelId: input.channelId,
+    messageId: input.messageId,
+    aiTaskId: input.aiTaskId,
+    title: input.title,
+    rationale: input.rationale,
+    idempotencyKey: randomUUID(),
+    reviewers: input.reviewerMembershipIds.map((tenantMembershipId) => ({
+      tenantMembershipId,
+      role: "reviewer",
+    })),
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams");
+  revalidatePath("/teams/onaylar");
+  revalidatePath(`/teams/onaylar/${result.value.id}`);
+  return { status: "success", requestId: result.value.id };
+}
+
+export async function decideTeamsApprovalAction(input: Readonly<{
+  requestId: string;
+  decision: string;
+  note?: string | null;
+}>): Promise<ApprovalActionResult> {
+  const authorization = await denyUnlessGranted("teams.approvals.review");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Onay kararı yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await decideTeamsApproval(contextResult.context, input.requestId, {
+    decision: input.decision,
+    note: input.note,
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/onaylar");
+  revalidatePath(`/teams/onaylar/${input.requestId}`);
+  return { status: "success", requestId: result.value.id };
+}
+
+export async function cancelTeamsApprovalAction(input: Readonly<{
+  requestId: string;
+}>): Promise<ApprovalActionResult> {
+  const authorization = await denyUnlessGranted("teams.approvals.create");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Onay isteği iptal yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await cancelTeamsApproval(contextResult.context, input.requestId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/onaylar");
+  revalidatePath(`/teams/onaylar/${input.requestId}`);
+  return { status: "success", requestId: result.value.id };
+}
+
+export async function assignTeamsApprovalReviewerAction(input: Readonly<{
+  requestId: string;
+  tenantMembershipId: string;
+  role?: string;
+}>): Promise<ApprovalActionResult> {
+  const authorization = await denyUnlessGranted("teams.approvals.manage");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "İnceleyen atama yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await assignTeamsApprovalReviewer(contextResult.context, input.requestId, {
+    tenantMembershipId: input.tenantMembershipId,
+    role: input.role ?? "reviewer",
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath(`/teams/onaylar/${input.requestId}`);
+  return { status: "success", requestId: result.value.id };
 }

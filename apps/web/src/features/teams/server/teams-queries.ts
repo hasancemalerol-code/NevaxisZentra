@@ -1,10 +1,14 @@
 import "./teams-server-boundary";
 
 import {
+  getTeamsApproval,
   getTeamsChannelDetail,
   getTeamsMessageSourceContext,
   getTeamsTaskContextChannel,
+  listTeamsApprovals,
   listTeamsChannels,
+  type RawTeamsApprovalDetail,
+  type RawTeamsApprovalListResponse,
   type RawTeamsChannelDetail,
   type RawTeamsChannelListResponse,
   type RawTeamsMessageSourceContext,
@@ -75,6 +79,40 @@ export async function readTeamsTaskContextLink(
   }
 
   return getTeamsTaskContextChannel(contextResult.context, taskId);
+}
+
+export async function readTeamsApprovals(
+  channelId?: string | null,
+): Promise<TeamsApiResult<RawTeamsApprovalListResponse>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return listTeamsApprovals(contextResult.context, {
+    channelId: channelId ?? undefined,
+  });
+}
+
+export async function readTeamsApproval(
+  requestId: string,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsApproval(contextResult.context, requestId);
 }
 
 export async function readTeamsMessageSourceContext(

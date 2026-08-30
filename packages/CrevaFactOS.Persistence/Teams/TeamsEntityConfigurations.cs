@@ -197,3 +197,113 @@ internal sealed class TeamsMessageTaskLinkEntityConfiguration : IEntityTypeConfi
             .HasDatabaseName("ix_teams_message_task_links_tenant_facility_message");
     }
 }
+
+internal sealed class TeamsApprovalRequestEntityConfiguration : IEntityTypeConfiguration<TeamsApprovalRequest>
+{
+    public void Configure(EntityTypeBuilder<TeamsApprovalRequest> entity)
+    {
+        entity.ToTable("teams_approval_requests");
+        entity.HasKey(r => r.Id);
+        entity.Property(r => r.Id).HasColumnName("id");
+        entity.Property(r => r.TenantId).HasColumnName("tenant_id");
+        entity.Property(r => r.FacilityId).HasColumnName("facility_id");
+        entity.Property(r => r.ChannelId).HasColumnName("channel_id");
+        entity.Property(r => r.RequestedByTenantMembershipId).HasColumnName("requested_by_tenant_membership_id");
+        entity.Property(r => r.MessageId).HasColumnName("message_id");
+        entity.Property(r => r.AiTaskId).HasColumnName("ai_task_id");
+        entity.Property(r => r.SourceKind).HasColumnName("source_kind").HasMaxLength(20).IsRequired();
+        entity.Property(r => r.Title).HasColumnName("title").HasMaxLength(TeamsConstants.MaxApprovalTitleLength).IsRequired();
+        entity.Property(r => r.Rationale).HasColumnName("rationale").HasMaxLength(TeamsConstants.MaxApprovalRationaleLength).IsRequired();
+        entity.Property(r => r.Status).HasColumnName("status").HasMaxLength(30).IsRequired();
+        entity.Property(r => r.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128).IsRequired();
+        entity.Property(r => r.IdempotencyPurpose).HasColumnName("idempotency_purpose").HasMaxLength(160).IsRequired();
+        entity.Property(r => r.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(r => r.ResolvedAtUtc).HasColumnName("resolved_at_utc");
+        entity.Property(r => r.CancelledAtUtc).HasColumnName("cancelled_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(r => r.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(r => new { r.TenantId, r.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(r => new { r.TenantId, r.IdempotencyKey })
+            .HasDatabaseName("ux_teams_approval_requests_tenant_idempotency")
+            .IsUnique();
+        entity.HasIndex(r => new { r.TenantId, r.FacilityId, r.ChannelId, r.CreatedAtUtc })
+            .HasDatabaseName("ix_teams_approval_requests_tenant_facility_channel");
+        entity.HasIndex(r => new { r.TenantId, r.FacilityId, r.Status })
+            .HasDatabaseName("ix_teams_approval_requests_tenant_facility_status");
+    }
+}
+
+internal sealed class TeamsApprovalReviewerEntityConfiguration : IEntityTypeConfiguration<TeamsApprovalReviewer>
+{
+    public void Configure(EntityTypeBuilder<TeamsApprovalReviewer> entity)
+    {
+        entity.ToTable("teams_approval_reviewers");
+        entity.HasKey(r => r.Id);
+        entity.Property(r => r.Id).HasColumnName("id");
+        entity.Property(r => r.TenantId).HasColumnName("tenant_id");
+        entity.Property(r => r.FacilityId).HasColumnName("facility_id");
+        entity.Property(r => r.RequestId).HasColumnName("request_id");
+        entity.Property(r => r.TenantMembershipId).HasColumnName("tenant_membership_id");
+        entity.Property(r => r.Role).HasColumnName("role").HasMaxLength(30).IsRequired();
+        entity.Property(r => r.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(r => r.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(r => r.Request).WithMany(req => req.Reviewers)
+            .HasForeignKey(r => r.RequestId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(r => new { r.TenantId, r.RequestId, r.TenantMembershipId })
+            .HasDatabaseName("ux_teams_approval_reviewers_request_membership")
+            .IsUnique();
+    }
+}
+
+internal sealed class TeamsApprovalDecisionEntityConfiguration : IEntityTypeConfiguration<TeamsApprovalDecision>
+{
+    public void Configure(EntityTypeBuilder<TeamsApprovalDecision> entity)
+    {
+        entity.ToTable("teams_approval_decisions");
+        entity.HasKey(d => d.Id);
+        entity.Property(d => d.Id).HasColumnName("id");
+        entity.Property(d => d.TenantId).HasColumnName("tenant_id");
+        entity.Property(d => d.FacilityId).HasColumnName("facility_id");
+        entity.Property(d => d.RequestId).HasColumnName("request_id");
+        entity.Property(d => d.ReviewerTenantMembershipId).HasColumnName("reviewer_tenant_membership_id");
+        entity.Property(d => d.Decision).HasColumnName("decision").HasMaxLength(30).IsRequired();
+        entity.Property(d => d.Note).HasColumnName("note").HasMaxLength(TeamsConstants.MaxApprovalDecisionNoteLength);
+        entity.Property(d => d.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(d => d.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(d => d.Request).WithMany(req => req.Decisions)
+            .HasForeignKey(d => d.RequestId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(d => new { d.TenantId, d.RequestId })
+            .HasDatabaseName("ux_teams_approval_decisions_tenant_request")
+            .IsUnique();
+    }
+}
+
+internal sealed class TeamsApprovalAuditEventEntityConfiguration : IEntityTypeConfiguration<TeamsApprovalAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<TeamsApprovalAuditEvent> entity)
+    {
+        entity.ToTable("teams_approval_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.RequestId).HasColumnName("request_id");
+        entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(60).IsRequired();
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+        entity.Property(e => e.ActorTenantMembershipId).HasColumnName("actor_tenant_membership_id").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.ActorLabel).HasColumnName("actor_label").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").IsRequired();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.RequestId, e.OccurredAtUtc })
+            .HasDatabaseName("ix_teams_approval_audit_events_tenant_request");
+    }
+}

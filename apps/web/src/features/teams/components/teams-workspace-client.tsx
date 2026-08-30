@@ -25,6 +25,7 @@ type TeamsWorkspaceClientProps = Readonly<{
   selectedMessageId: string | null;
   canWrite: boolean;
   canCreateTask: boolean;
+  canCreateApproval: boolean;
 }>;
 
 const DATE_TIME = new Intl.DateTimeFormat("tr-TR", {
@@ -45,6 +46,7 @@ export function TeamsWorkspaceClient({
   selectedMessageId,
   canWrite,
   canCreateTask,
+  canCreateApproval,
 }: TeamsWorkspaceClientProps) {
   const router = useRouter();
   const [messageBody, setMessageBody] = useState("");
@@ -193,13 +195,29 @@ export function TeamsWorkspaceClient({
                   </Badge>
                 ))}
               </div>
-              {selectedChannel.taskContext?.canOpen && selectedChannel.taskContext.deepLinkPath ? (
-                <div style={{ marginTop: "0.75rem" }}>
+              <div style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {selectedChannel.taskContext?.canOpen && selectedChannel.taskContext.deepLinkPath ? (
                   <Link href={selectedChannel.taskContext.deepLinkPath} className="teams-context-chip">
                     Görevi aç
                   </Link>
-                </div>
-              ) : null}
+                ) : null}
+                {canCreateApproval && selectedChannel.aiTaskId ? (
+                  <Link
+                    href={`/teams/onaylar/yeni?channel=${encodeURIComponent(selectedChannel.id)}&task=${encodeURIComponent(selectedChannel.aiTaskId)}`}
+                    className="teams-context-chip"
+                    data-testid="teams-channel-request-approval"
+                  >
+                    Görevden onay iste
+                  </Link>
+                ) : null}
+                <Link
+                  href={`/teams/onaylar`}
+                  className="teams-context-chip"
+                  data-testid="teams-channel-approvals-link"
+                >
+                  Onay istekleri
+                </Link>
+              </div>
               {selectedChannel.lastReadAt ? (
                 <p style={{ margin: "0.5rem 0 0", color: "#6b7280", fontSize: "0.8125rem" }}>
                   Okundu: {formatWhen(selectedChannel.lastReadAt)}
@@ -246,22 +264,40 @@ export function TeamsWorkspaceClient({
                         <span>{message.linkedTask.taskStatus}</span>
                       </div>
                     ) : null}
-                    {message.id === selectedMessageId && !message.linkedTask ? (
+                    {message.id === selectedMessageId ? (
                       <div className="teams-message__actions">
-                        {canCreateTask ? (
-                          <Button
-                            type="button"
-                            data-testid="teams-message-convert-to-task"
-                            onClick={() => setShowTaskDraftForm(true)}
+                        {!message.linkedTask ? (
+                          canCreateTask ? (
+                            <Button
+                              type="button"
+                              data-testid="teams-message-convert-to-task"
+                              onClick={() => setShowTaskDraftForm(true)}
+                            >
+                              Göreve dönüştür
+                            </Button>
+                          ) : (
+                            <p
+                              style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }}
+                              data-testid="teams-message-task-create-denied"
+                            >
+                              Görev taslağı oluşturmak için ai-task.create yetkisi gerekir.
+                            </p>
+                          )
+                        ) : null}
+                        {canCreateApproval ? (
+                          <Link
+                            href={`/teams/onaylar/yeni?channel=${encodeURIComponent(selectedChannel.id)}&message=${encodeURIComponent(message.id)}`}
+                            className="teams-context-chip"
+                            data-testid="teams-message-request-approval"
                           >
-                            Göreve dönüştür
-                          </Button>
+                            Onay iste
+                          </Link>
                         ) : (
                           <p
                             style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }}
-                            data-testid="teams-message-task-create-denied"
+                            data-testid="teams-message-approval-create-denied"
                           >
-                            Görev taslağı oluşturmak için ai-task.create yetkisi gerekir.
+                            Onay isteği için teams.approvals.create yetkisi gerekir.
                           </p>
                         )}
                       </div>

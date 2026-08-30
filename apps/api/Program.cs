@@ -156,6 +156,7 @@ app.MapIotPlcIntelligenceEndpoints();
 app.MapOperationalRiskEndpoints();
 app.MapAiTaskEndpoints();
 app.MapTeamsEndpoints();
+app.MapTeamsApprovalEndpoints();
 app.MapCommercialIntelligenceEndpoints();
 app.MapCommercialSalesPriceEndpoints();
 app.MapCommercialQuotationRiskEndpoints();

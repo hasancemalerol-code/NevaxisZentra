@@ -9,6 +9,8 @@ import {
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import Link from "next/link";
+
 import { TeamsWorkspaceClient } from "@/features/teams/components/teams-workspace-client";
 import "@/features/teams/components/teams-workspace.css";
 import { readTeamsWorkspace } from "@/features/teams/server/teams-queries";
@@ -47,17 +49,24 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
   const canWrite =
     result.canWrite && hasGrantedPermission(effectiveAccess, "teams.write");
   const canCreateTask = hasGrantedPermission(effectiveAccess, "ai-task.create");
+  const canCreateApproval = hasGrantedPermission(effectiveAccess, "teams.approvals.create");
 
   return (
     <PageContent>
-      <PageHeader
-        description="Tesis kapsamlı operasyon kanalları, mesajlar ve görev bağlamı."
-        eyebrow="Teams"
-        title="Operasyon İletişimi"
-      />
+        <PageHeader
+          description="Tesis kapsamlı operasyon kanalları, mesajlar ve görev bağlamı."
+          eyebrow="Teams"
+          title="Operasyon İletişimi"
+          actions={
+            <Link href="/teams/onaylar" className="teams-context-chip" data-testid="teams-approvals-index-link">
+              Onay istekleri
+            </Link>
+          }
+        />
 
       <Section title="Çalışma alanı">
         <TeamsWorkspaceClient
+          canCreateApproval={canCreateApproval}
           canCreateTask={canCreateTask}
           canWrite={canWrite}
           channels={result.channels}

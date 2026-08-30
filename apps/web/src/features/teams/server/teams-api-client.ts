@@ -132,6 +132,75 @@ export type RawTeamsMessageTaskDraftResult = Readonly<{
   disclaimer: string;
 }>;
 
+export type RawTeamsApprovalSummary = Readonly<{
+  id: string;
+  title: string;
+  status: string;
+  channelName: string;
+  channelId: string;
+  requestedByLabel: string;
+  createdAt: string;
+  sourceKind: string;
+  canOpen: boolean;
+}>;
+
+export type RawTeamsApprovalListResponse = Readonly<{
+  items: readonly RawTeamsApprovalSummary[];
+  capabilities: Readonly<{
+    canCreate: boolean;
+    canReview: boolean;
+    canManage: boolean;
+  }>;
+  disclaimer: string;
+}>;
+
+export type RawTeamsApprovalDetail = Readonly<{
+  id: string;
+  title: string;
+  rationale: string;
+  status: string;
+  channelId: string;
+  channelName: string;
+  requestedByTenantMembershipId: string;
+  requestedByLabel: string;
+  source: Readonly<{
+    sourceKind: string;
+    messageId: string | null;
+    aiTaskId: string | null;
+    channelName: string;
+    label: string | null;
+    deepLinkPath: string | null;
+    canOpen: boolean;
+    unavailableReason: string | null;
+  }>;
+  reviewers: ReadonlyArray<Readonly<{
+    tenantMembershipId: string;
+    displayLabel: string;
+    role: string;
+  }>>;
+  decision: Readonly<{
+    id: string;
+    reviewerTenantMembershipId: string;
+    reviewerLabel: string;
+    decision: string;
+    note: string | null;
+    createdAt: string;
+  }> | null;
+  auditEvents: ReadonlyArray<Readonly<{
+    id: string;
+    eventType: string;
+    actorLabel: string;
+    occurredAt: string;
+  }>>;
+  createdAt: string;
+  resolvedAt: string | null;
+  cancelledAt: string | null;
+  canDecide: boolean;
+  canCancel: boolean;
+  canManageReviewers: boolean;
+  disclaimer: string;
+}>;
+
 function buildDevelopmentUrl(
   context: ProductionOrderRequestContext,
   path: string,
@@ -435,6 +504,95 @@ export async function createMessageTaskDraft(
       humanNote: body.humanNote ?? null,
     },
     (payload) => payload as RawTeamsMessageTaskDraftResult,
+  );
+}
+
+export async function listTeamsApprovals(
+  context: TeamsRequestContext,
+  query?: Readonly<{ channelId?: string; status?: string }>,
+): Promise<TeamsApiResult<RawTeamsApprovalListResponse>> {
+  return getJson(
+    context,
+    "/api/teams/approvals",
+    {
+      channelId: query?.channelId,
+      status: query?.status,
+    },
+    (payload) => payload as RawTeamsApprovalListResponse,
+  );
+}
+
+export async function getTeamsApproval(
+  context: TeamsRequestContext,
+  requestId: string,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  return getJson(
+    context,
+    `/api/teams/approvals/${requestId}`,
+    undefined,
+    (payload) => payload as RawTeamsApprovalDetail,
+  );
+}
+
+export async function createTeamsApproval(
+  context: TeamsRequestContext,
+  body: Readonly<{
+    channelId: string;
+    messageId?: string | null;
+    aiTaskId?: string | null;
+    title: string;
+    rationale: string;
+    idempotencyKey: string;
+    reviewers: ReadonlyArray<Readonly<{ tenantMembershipId: string; role: string }>>;
+  }>,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    "/api/teams/approvals",
+    body,
+    (payload) => payload as RawTeamsApprovalDetail,
+  );
+}
+
+export async function decideTeamsApproval(
+  context: TeamsRequestContext,
+  requestId: string,
+  body: Readonly<{ decision: string; note?: string | null }>,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/approvals/${requestId}/decisions`,
+    body,
+    (payload) => payload as RawTeamsApprovalDetail,
+  );
+}
+
+export async function cancelTeamsApproval(
+  context: TeamsRequestContext,
+  requestId: string,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/approvals/${requestId}/cancel`,
+    undefined,
+    (payload) => payload as RawTeamsApprovalDetail,
+  );
+}
+
+export async function assignTeamsApprovalReviewer(
+  context: TeamsRequestContext,
+  requestId: string,
+  body: Readonly<{ tenantMembershipId: string; role: string }>,
+): Promise<TeamsApiResult<RawTeamsApprovalDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/approvals/${requestId}/reviewers`,
+    body,
+    (payload) => payload as RawTeamsApprovalDetail,
   );
 }
 

@@ -98,3 +98,69 @@ public sealed class TeamsMessageTaskLink
     public Guid CreatedByTenantMembershipId { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
 }
+
+public sealed class TeamsApprovalRequest
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ChannelId { get; set; }
+    public Guid RequestedByTenantMembershipId { get; set; }
+    public Guid? MessageId { get; set; }
+    public Guid? AiTaskId { get; set; }
+    public string SourceKind { get; set; } = TeamsApprovalSourceKinds.Message;
+    public string Title { get; set; } = string.Empty;
+    public string Rationale { get; set; } = string.Empty;
+    public string Status { get; set; } = TeamsApprovalStatuses.Pending;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string IdempotencyPurpose { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset? ResolvedAtUtc { get; set; }
+    public DateTimeOffset? CancelledAtUtc { get; set; }
+
+    public ICollection<TeamsApprovalReviewer> Reviewers { get; set; } = [];
+    public ICollection<TeamsApprovalDecision> Decisions { get; set; } = [];
+}
+
+public sealed class TeamsApprovalReviewer
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid RequestId { get; set; }
+    public Guid TenantMembershipId { get; set; }
+    public string Role { get; set; } = TeamsApprovalReviewerRoles.Reviewer;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public TeamsApprovalRequest? Request { get; set; }
+}
+
+public sealed class TeamsApprovalDecision
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid RequestId { get; set; }
+    public Guid ReviewerTenantMembershipId { get; set; }
+    public string Decision { get; set; } = TeamsApprovalDecisions.Approved;
+    public string? Note { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public TeamsApprovalRequest? Request { get; set; }
+}
+
+public sealed class TeamsApprovalAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid RequestId { get; set; }
+    public Guid? ChannelId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public string ActorTenantMembershipId { get; set; } = string.Empty;
+    public string ActorLabel { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+
+    public TeamsApprovalRequest? Request { get; set; }
+}
