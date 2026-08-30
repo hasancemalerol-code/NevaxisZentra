@@ -408,6 +408,15 @@ public static class TeamsServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+        services.AddScoped<ITeamsDirectMessageRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableTeamsDirectMessageRepository()
+                : new TeamsDirectMessageRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
 
         return services;
     }

@@ -6,6 +6,12 @@ import {
   getTeamsHandover,
   getTeamsMessageSourceContext,
   getTeamsWorkInbox,
+  getTeamsDirectConversation,
+  listTeamsDirectConversations,
+  listTeamsDirectRecipients,
+  type RawTeamsDirectConversationDetail,
+  type RawTeamsDirectConversationListResponse,
+  type RawTeamsDirectRecipientListResponse,
   getTeamsTaskContextChannel,
   listTeamsApprovals,
   listTeamsChannels,
@@ -167,6 +173,50 @@ export async function readTeamsWorkInbox(): Promise<TeamsApiResult<RawTeamsWorkI
   }
 
   return getTeamsWorkInbox(contextResult.context);
+}
+
+export async function readTeamsDirectConversations(): Promise<TeamsApiResult<RawTeamsDirectConversationListResponse>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return listTeamsDirectConversations(contextResult.context);
+}
+
+export async function readTeamsDirectRecipients(): Promise<TeamsApiResult<RawTeamsDirectRecipientListResponse>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return listTeamsDirectRecipients(contextResult.context);
+}
+
+export async function readTeamsDirectConversation(
+  conversationId: string,
+): Promise<TeamsApiResult<RawTeamsDirectConversationDetail>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsDirectConversation(contextResult.context, conversationId);
 }
 
 export async function readTeamsMessageSourceContext(

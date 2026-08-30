@@ -91,6 +91,9 @@ public static class TeamsConstants
 
     public const string WorkInboxDisclaimer =
         "İş kutusu yalnızca mevcut kaynaklardaki size ait işleri bir arada gösterir; görev, onay, vardiya devri veya mesaj işlemi başlatmaz.";
+
+    public const string DirectMessageDisclaimer =
+        "Özel mesajlar yalnızca aynı tesis kapsamındaki üyeler arasında kalıcı iletişim sağlar; görev, onay, operasyon işlemi veya dış teslimat başlatmaz.";
 }
 
 public static class TeamsWorkInboxSourceKinds
@@ -167,4 +170,11 @@ public static class TeamsApprovalAuditEventTypes
     public const string ReviewerAssigned = "approval-reviewer-assigned";
     public const string DecisionRecorded = "approval-decision-recorded";
     public const string RequestCancelled = "approval-request-cancelled";
+}
+
+public static class TeamsDirectMessageAuditEventTypes
+{
+    public const string ConversationCreated = "direct-conversation-created";
+    public const string MessageCreated = "direct-message-created";
+    public const string ReadStateAdvanced = "direct-read-state-advanced";
 }

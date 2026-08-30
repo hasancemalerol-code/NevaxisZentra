@@ -798,6 +798,130 @@ export async function getTeamsWorkInbox(
   );
 }
 
+export type RawTeamsDirectRecipient = Readonly<{
+  tenantMembershipId: string;
+  displayLabel: string;
+}>;
+
+export type RawTeamsDirectConversationSummary = Readonly<{
+  id: string;
+  otherParticipantMembershipId: string;
+  otherParticipantLabel: string;
+  latestMessagePreview: string | null;
+  latestMessageAt: string | null;
+  unreadCount: number;
+  createdAt: string;
+}>;
+
+export type RawTeamsDirectMessage = Readonly<{
+  id: string;
+  authorTenantMembershipId: string;
+  authorLabel: string;
+  body: string;
+  createdAt: string;
+  isOwnMessage: boolean;
+}>;
+
+export type RawTeamsDirectConversationDetail = Readonly<{
+  id: string;
+  otherParticipantMembershipId: string;
+  otherParticipantLabel: string;
+  messages: readonly RawTeamsDirectMessage[];
+  totalMessageCount: number;
+  page: number;
+  pageSize: number;
+  lastReadMessageId: string | null;
+  lastReadAt: string | null;
+  canWrite: boolean;
+  disclaimer: string;
+}>;
+
+export type RawTeamsDirectConversationListResponse = Readonly<{
+  items: readonly RawTeamsDirectConversationSummary[];
+  capabilities: Readonly<{ canWrite: boolean }>;
+  disclaimer: string;
+}>;
+
+export type RawTeamsDirectRecipientListResponse = Readonly<{
+  items: readonly RawTeamsDirectRecipient[];
+}>;
+
+export async function listTeamsDirectRecipients(
+  context: TeamsRequestContext,
+): Promise<TeamsApiResult<RawTeamsDirectRecipientListResponse>> {
+  return getJson(
+    context,
+    "/api/teams/direct-messages/recipients",
+    undefined,
+    (payload) => payload as RawTeamsDirectRecipientListResponse,
+  );
+}
+
+export async function listTeamsDirectConversations(
+  context: TeamsRequestContext,
+): Promise<TeamsApiResult<RawTeamsDirectConversationListResponse>> {
+  return getJson(
+    context,
+    "/api/teams/direct-messages",
+    undefined,
+    (payload) => payload as RawTeamsDirectConversationListResponse,
+  );
+}
+
+export async function getTeamsDirectConversation(
+  context: TeamsRequestContext,
+  conversationId: string,
+  query?: Readonly<{ page?: string; pageSize?: string }>,
+): Promise<TeamsApiResult<RawTeamsDirectConversationDetail>> {
+  return getJson(
+    context,
+    `/api/teams/direct-messages/${conversationId}`,
+    query,
+    (payload) => payload as RawTeamsDirectConversationDetail,
+  );
+}
+
+export async function createTeamsDirectConversation(
+  context: TeamsRequestContext,
+  body: Readonly<{ recipientTenantMembershipId: string; idempotencyKey: string }>,
+): Promise<TeamsApiResult<RawTeamsDirectConversationDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    "/api/teams/direct-messages",
+    body,
+    (payload) => payload as RawTeamsDirectConversationDetail,
+  );
+}
+
+export async function postTeamsDirectMessage(
+  context: TeamsRequestContext,
+  conversationId: string,
+  body: Readonly<{ body: string; idempotencyKey: string }>,
+): Promise<TeamsApiResult<RawTeamsDirectConversationDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/direct-messages/${conversationId}/messages`,
+    body,
+    (payload) => payload as RawTeamsDirectConversationDetail,
+  );
+}
+
+export async function markTeamsDirectConversationRead(
+  context: TeamsRequestContext,
+  conversationId: string,
+  body: Readonly<{ lastReadMessageId: string | null }>,
+): Promise<TeamsApiResult<RawTeamsDirectConversationDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/direct-messages/${conversationId}/read`,
+    body,
+    (payload) => payload as RawTeamsDirectConversationDetail,
+  );
+}
+
 export async function getTeamsMessageSourceContext(
   context: TeamsRequestContext,
   messageId: string,

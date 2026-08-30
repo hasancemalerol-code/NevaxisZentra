@@ -62,3 +62,6 @@ export const TEAMS_WORK_INBOX_SOURCE_KINDS = {
   handover: "Vardiya devri",
   mention: "Etiket",
 } as const;
+
+export const TEAMS_DIRECT_MESSAGE_DISCLAIMER =
+  "Özel mesajlar yalnızca aynı tesis kapsamındaki üyeler arasında kalıcı iletişim sağlar; görev, onay, operasyon işlemi veya dış teslimat başlatmaz.";

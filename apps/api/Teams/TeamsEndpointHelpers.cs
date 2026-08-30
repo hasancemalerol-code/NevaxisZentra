@@ -590,6 +590,88 @@ internal static class TeamsEndpointHelpers
         },
         createdAt = message.CreatedAtUtc,
     };
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveDirectReadAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.DirectRead,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveDirectWriteAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.DirectWrite,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<TeamsDirectMessageAccessCapabilities> ResolveDirectMessageCapabilitiesAsync(
+        Guid facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CancellationToken cancellationToken) =>
+        new(
+            CanRead: await HasPermissionAsync(facilityId, TeamsPermissionKeys.DirectRead, facilityAccessResolver, cancellationToken),
+            CanWrite: await HasPermissionAsync(facilityId, TeamsPermissionKeys.DirectWrite, facilityAccessResolver, cancellationToken),
+            CanManage: await HasPermissionAsync(facilityId, TeamsPermissionKeys.DirectManage, facilityAccessResolver, cancellationToken));
+
+    internal static IResult MapDirectConversationWriteResult(TeamsDirectConversationWriteResult result, bool isCreate = false)
+    {
+        if (!result.Succeeded || result.Detail is null)
+        {
+            return MapFailure(result.FailureCode, result.FailureReason);
+        }
+
+        var dto = MapDirectConversationDetail(result.Detail);
+        if (result.IdempotentReplay)
+        {
+            return TypedResults.Ok(dto);
+        }
+
+        return isCreate ? TypedResults.Created((string?)null, dto) : TypedResults.Ok(dto);
+    }
+
+    internal static IResult MapDirectMessageWriteResult(TeamsDirectMessageWriteResult result)
+    {
+        if (!result.Succeeded || result.Detail is null)
+        {
+            return MapFailure(result.FailureCode, result.FailureReason);
+        }
+
+        return TypedResults.Ok(MapDirectConversationDetail(result.Detail));
+    }
+
+    internal static object MapDirectConversationDetail(TeamsDirectConversationDetailReadModel detail) => new
+    {
+        id = detail.Id,
+        otherParticipantMembershipId = detail.OtherParticipantMembershipId,
+        otherParticipantLabel = detail.OtherParticipantLabel,
+        messages = detail.Messages.Select(message => new
+        {
+            id = message.Id,
+            authorTenantMembershipId = message.AuthorTenantMembershipId,
+            authorLabel = message.AuthorLabel,
+            body = message.Body,
+            createdAt = message.CreatedAtUtc,
+            isOwnMessage = message.IsOwnMessage,
+        }),
+        totalMessageCount = detail.TotalMessageCount,
+        page = detail.Page,
+        pageSize = detail.PageSize,
+        lastReadMessageId = detail.LastReadMessageId,
+        lastReadAt = detail.LastReadAtUtc,
+        canWrite = detail.CanWrite,
+        disclaimer = detail.Disclaimer,
+    };
 }
 
 internal sealed record TeamsWriteSuccessDto(Guid Id, bool IdempotentReplay);

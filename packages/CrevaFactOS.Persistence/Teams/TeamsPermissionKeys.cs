@@ -12,4 +12,7 @@ public static class TeamsPermissionKeys
     public const string HandoverCreate = "teams.handover.create";
     public const string HandoverAcknowledge = "teams.handover.acknowledge";
     public const string HandoverManage = "teams.handover.manage";
+    public const string DirectRead = "teams.direct.read";
+    public const string DirectWrite = "teams.direct.write";
+    public const string DirectManage = "teams.direct.manage";
 }

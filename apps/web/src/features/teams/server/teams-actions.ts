@@ -9,6 +9,9 @@ import { revalidatePath } from "next/cache";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
   acknowledgeTeamsHandover,
+  createTeamsDirectConversation,
+  markTeamsDirectConversationRead,
+  postTeamsDirectMessage,
   assignTeamsApprovalReviewer,
   cancelTeamsApproval,
   createMessageTaskDraft,
@@ -382,4 +385,88 @@ export async function acknowledgeTeamsHandoverAction(input: Readonly<{
   revalidatePath("/teams/devretme");
   revalidatePath(`/teams/devretme/${input.handoverId}`);
   return { status: "success", handoverId: result.value.id };
+}
+
+type DirectMessageActionResult =
+  | Readonly<{ status: "success"; conversationId: string }>
+  | Readonly<{ status: "failure"; message: string }>;
+
+export async function createTeamsDirectConversationAction(input: Readonly<{
+  recipientTenantMembershipId: string;
+}>): Promise<DirectMessageActionResult> {
+  const authorization = await denyUnlessGranted("teams.direct.write");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Özel mesaj başlatma yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await createTeamsDirectConversation(contextResult.context, {
+    recipientTenantMembershipId: input.recipientTenantMembershipId,
+    idempotencyKey: randomUUID(),
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/ozel-mesajlar");
+  return { status: "success", conversationId: result.value.id };
+}
+
+export async function sendTeamsDirectMessageAction(input: Readonly<{
+  conversationId: string;
+  body: string;
+  idempotencyKey?: string;
+}>): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("teams.direct.write");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Özel mesaj gönderme yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await postTeamsDirectMessage(contextResult.context, input.conversationId, {
+    body: input.body,
+    idempotencyKey: input.idempotencyKey ?? randomUUID(),
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/ozel-mesajlar");
+  return { status: "success" };
+}
+
+export async function markTeamsDirectConversationReadAction(input: Readonly<{
+  conversationId: string;
+  lastReadMessageId: string | null;
+}>): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("teams.direct.write");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Okundu işaretleme yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await markTeamsDirectConversationRead(contextResult.context, input.conversationId, {
+    lastReadMessageId: input.lastReadMessageId,
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/ozel-mesajlar");
+  return { status: "success" };
 }

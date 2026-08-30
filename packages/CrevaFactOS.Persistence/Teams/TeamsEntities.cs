@@ -230,3 +230,72 @@ public sealed class TeamsShiftHandoverAuditEvent
 
     public TeamsShiftHandover? Handover { get; set; }
 }
+
+public sealed class TeamsDirectConversation
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ParticipantLowMembershipId { get; set; }
+    public Guid ParticipantHighMembershipId { get; set; }
+    public Guid InitiatedByTenantMembershipId { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string IdempotencyPurpose { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public ICollection<TeamsDirectConversationMember> Members { get; set; } = [];
+    public ICollection<TeamsDirectMessage> Messages { get; set; } = [];
+}
+
+public sealed class TeamsDirectConversationMember
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConversationId { get; set; }
+    public Guid TenantMembershipId { get; set; }
+    public DateTimeOffset JoinedAtUtc { get; set; }
+
+    public TeamsDirectConversation? Conversation { get; set; }
+}
+
+public sealed class TeamsDirectMessage
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConversationId { get; set; }
+    public Guid AuthorTenantMembershipId { get; set; }
+    public string Body { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string IdempotencyPayloadFingerprint { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public TeamsDirectConversation? Conversation { get; set; }
+}
+
+public sealed class TeamsDirectReadState
+{
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConversationId { get; set; }
+    public Guid TenantMembershipId { get; set; }
+    public Guid? LastReadMessageId { get; set; }
+    public DateTimeOffset LastReadAtUtc { get; set; }
+}
+
+public sealed class TeamsDirectMessageAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ConversationId { get; set; }
+    public Guid? MessageId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public string ActorTenantMembershipId { get; set; } = string.Empty;
+    public string ActorLabel { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+
+    public TeamsDirectConversation? Conversation { get; set; }
+}

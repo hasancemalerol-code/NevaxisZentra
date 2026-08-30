@@ -329,6 +329,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsShiftHandoverItem> TeamsShiftHandoverItems => Set<TeamsShiftHandoverItem>();
     public DbSet<TeamsShiftHandoverAcknowledgement> TeamsShiftHandoverAcknowledgements => Set<TeamsShiftHandoverAcknowledgement>();
     public DbSet<TeamsShiftHandoverAuditEvent> TeamsShiftHandoverAuditEvents => Set<TeamsShiftHandoverAuditEvent>();
+    public DbSet<TeamsDirectConversation> TeamsDirectConversations => Set<TeamsDirectConversation>();
+    public DbSet<TeamsDirectConversationMember> TeamsDirectConversationMembers => Set<TeamsDirectConversationMember>();
+    public DbSet<TeamsDirectMessage> TeamsDirectMessages => Set<TeamsDirectMessage>();
+    public DbSet<TeamsDirectReadState> TeamsDirectReadStates => Set<TeamsDirectReadState>();
+    public DbSet<TeamsDirectMessageAuditEvent> TeamsDirectMessageAuditEvents => Set<TeamsDirectMessageAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1750,6 +1755,36 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TeamsShiftHandoverAuditEventEntityConfiguration());
         modelBuilder.Entity<TeamsShiftHandoverAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsDirectConversationEntityConfiguration());
+        modelBuilder.Entity<TeamsDirectConversation>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsDirectConversationMemberEntityConfiguration());
+        modelBuilder.Entity<TeamsDirectConversationMember>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsDirectMessageEntityConfiguration());
+        modelBuilder.Entity<TeamsDirectMessage>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsDirectReadStateEntityConfiguration());
+        modelBuilder.Entity<TeamsDirectReadState>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsDirectMessageAuditEventEntityConfiguration());
+        modelBuilder.Entity<TeamsDirectMessageAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

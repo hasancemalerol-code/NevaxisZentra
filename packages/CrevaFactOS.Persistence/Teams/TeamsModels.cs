@@ -432,3 +432,96 @@ public sealed record TeamsWorkInboxReadModel(
     IReadOnlyList<TeamsWorkInboxItemReadModel> Items,
     TeamsWorkInboxSourceAvailabilityReadModel Sources,
     string Disclaimer);
+
+public sealed record TeamsDirectMessageAccessCapabilities(
+    bool CanRead,
+    bool CanWrite,
+    bool CanManage);
+
+public sealed record CreateTeamsDirectConversationCommand(
+    Guid RecipientTenantMembershipId,
+    string IdempotencyKey);
+
+public sealed record PostTeamsDirectMessageCommand(
+    Guid ConversationId,
+    string Body,
+    string IdempotencyKey);
+
+public sealed record MarkTeamsDirectConversationReadCommand(
+    Guid ConversationId,
+    Guid? LastReadMessageId);
+
+public sealed record TeamsDirectRecipientReadModel(
+    Guid TenantMembershipId,
+    string DisplayLabel);
+
+public sealed record TeamsDirectMessageReadModel(
+    Guid Id,
+    Guid AuthorTenantMembershipId,
+    string AuthorLabel,
+    string Body,
+    DateTimeOffset CreatedAtUtc,
+    bool IsOwnMessage);
+
+public sealed record TeamsDirectConversationSummaryReadModel(
+    Guid Id,
+    Guid OtherParticipantMembershipId,
+    string OtherParticipantLabel,
+    string? LatestMessagePreview,
+    DateTimeOffset? LatestMessageAtUtc,
+    int UnreadCount,
+    DateTimeOffset CreatedAtUtc);
+
+public sealed record TeamsDirectConversationDetailReadModel(
+    Guid Id,
+    Guid OtherParticipantMembershipId,
+    string OtherParticipantLabel,
+    IReadOnlyList<TeamsDirectMessageReadModel> Messages,
+    int TotalMessageCount,
+    int Page,
+    int PageSize,
+    Guid? LastReadMessageId,
+    DateTimeOffset? LastReadAtUtc,
+    bool CanWrite,
+    string Disclaimer);
+
+public sealed record TeamsDirectConversationListReadModel(
+    IReadOnlyList<TeamsDirectConversationSummaryReadModel> Items,
+    bool CanWrite,
+    string Disclaimer);
+
+public sealed record TeamsDirectConversationWriteResult(
+    bool Succeeded,
+    Guid? ConversationId,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason,
+    TeamsDirectConversationDetailReadModel? Detail = null)
+{
+    public static TeamsDirectConversationWriteResult Success(
+        Guid conversationId,
+        TeamsDirectConversationDetailReadModel detail,
+        bool idempotentReplay = false) =>
+        new(true, conversationId, idempotentReplay, null, null, detail);
+
+    public static TeamsDirectConversationWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, false, failureCode, failureReason);
+}
+
+public sealed record TeamsDirectMessageWriteResult(
+    bool Succeeded,
+    Guid? MessageId,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason,
+    TeamsDirectConversationDetailReadModel? Detail = null)
+{
+    public static TeamsDirectMessageWriteResult Success(
+        Guid messageId,
+        TeamsDirectConversationDetailReadModel detail,
+        bool idempotentReplay = false) =>
+        new(true, messageId, idempotentReplay, null, null, detail);
+
+    public static TeamsDirectMessageWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, false, failureCode, failureReason);
+}

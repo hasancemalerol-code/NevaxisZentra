@@ -159,6 +159,7 @@ app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();
 app.MapTeamsHandoverEndpoints();
 app.MapTeamsWorkInboxEndpoints();
+app.MapTeamsDirectMessageEndpoints();
 app.MapCommercialIntelligenceEndpoints();
 app.MapCommercialSalesPriceEndpoints();
 app.MapCommercialQuotationRiskEndpoints();

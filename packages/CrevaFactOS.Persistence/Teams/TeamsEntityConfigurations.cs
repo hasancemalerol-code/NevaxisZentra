@@ -416,3 +416,142 @@ internal sealed class TeamsShiftHandoverAuditEventEntityConfiguration : IEntityT
             .HasDatabaseName("ix_teams_shift_handover_audit_tenant_handover");
     }
 }
+
+internal sealed class TeamsDirectConversationEntityConfiguration : IEntityTypeConfiguration<TeamsDirectConversation>
+{
+    public void Configure(EntityTypeBuilder<TeamsDirectConversation> entity)
+    {
+        entity.ToTable("teams_direct_conversations");
+        entity.HasKey(c => c.Id);
+        entity.Property(c => c.Id).HasColumnName("id");
+        entity.Property(c => c.TenantId).HasColumnName("tenant_id");
+        entity.Property(c => c.FacilityId).HasColumnName("facility_id");
+        entity.Property(c => c.ParticipantLowMembershipId).HasColumnName("participant_low_membership_id");
+        entity.Property(c => c.ParticipantHighMembershipId).HasColumnName("participant_high_membership_id");
+        entity.Property(c => c.InitiatedByTenantMembershipId).HasColumnName("initiated_by_tenant_membership_id");
+        entity.Property(c => c.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128).IsRequired();
+        entity.Property(c => c.IdempotencyPurpose).HasColumnName("idempotency_purpose").HasMaxLength(160).IsRequired();
+        entity.Property(c => c.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(c => c.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(c => new { c.TenantId, c.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(c => new { c.TenantId, c.FacilityId, c.ParticipantLowMembershipId, c.ParticipantHighMembershipId })
+            .HasDatabaseName("ux_teams_direct_conversations_tenant_facility_pair")
+            .IsUnique();
+        entity.HasIndex(c => new { c.TenantId, c.IdempotencyKey })
+            .HasDatabaseName("ux_teams_direct_conversations_tenant_idempotency")
+            .IsUnique();
+    }
+}
+
+internal sealed class TeamsDirectConversationMemberEntityConfiguration : IEntityTypeConfiguration<TeamsDirectConversationMember>
+{
+    public void Configure(EntityTypeBuilder<TeamsDirectConversationMember> entity)
+    {
+        entity.ToTable("teams_direct_conversation_members");
+        entity.HasKey(m => m.Id);
+        entity.Property(m => m.Id).HasColumnName("id");
+        entity.Property(m => m.TenantId).HasColumnName("tenant_id");
+        entity.Property(m => m.FacilityId).HasColumnName("facility_id");
+        entity.Property(m => m.ConversationId).HasColumnName("conversation_id");
+        entity.Property(m => m.TenantMembershipId).HasColumnName("tenant_membership_id");
+        entity.Property(m => m.JoinedAtUtc).HasColumnName("joined_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(m => m.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(m => new { m.TenantId, m.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(m => m.Conversation).WithMany(c => c.Members)
+            .HasForeignKey(m => m.ConversationId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(m => new { m.TenantId, m.ConversationId, m.TenantMembershipId })
+            .HasDatabaseName("ux_teams_direct_conversation_members_conversation_membership")
+            .IsUnique();
+        entity.HasIndex(m => new { m.TenantId, m.FacilityId, m.TenantMembershipId })
+            .HasDatabaseName("ix_teams_direct_conversation_members_tenant_facility_membership");
+    }
+}
+
+internal sealed class TeamsDirectMessageEntityConfiguration : IEntityTypeConfiguration<TeamsDirectMessage>
+{
+    public void Configure(EntityTypeBuilder<TeamsDirectMessage> entity)
+    {
+        entity.ToTable("teams_direct_messages");
+        entity.HasKey(m => m.Id);
+        entity.Property(m => m.Id).HasColumnName("id");
+        entity.Property(m => m.TenantId).HasColumnName("tenant_id");
+        entity.Property(m => m.FacilityId).HasColumnName("facility_id");
+        entity.Property(m => m.ConversationId).HasColumnName("conversation_id");
+        entity.Property(m => m.AuthorTenantMembershipId).HasColumnName("author_tenant_membership_id");
+        entity.Property(m => m.Body).HasColumnName("body").HasMaxLength(TeamsConstants.MaxMessageBodyLength).IsRequired();
+        entity.Property(m => m.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128).IsRequired();
+        entity.Property(m => m.IdempotencyPayloadFingerprint).HasColumnName("idempotency_payload_fingerprint").HasMaxLength(64).IsRequired();
+        entity.Property(m => m.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(m => m.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(m => new { m.TenantId, m.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(m => m.Conversation).WithMany(c => c.Messages)
+            .HasForeignKey(m => m.ConversationId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(m => new { m.TenantId, m.IdempotencyKey })
+            .HasDatabaseName("ux_teams_direct_messages_tenant_idempotency")
+            .IsUnique();
+        entity.HasIndex(m => new { m.TenantId, m.FacilityId, m.ConversationId, m.CreatedAtUtc })
+            .HasDatabaseName("ix_teams_direct_messages_tenant_facility_conversation_created");
+    }
+}
+
+internal sealed class TeamsDirectReadStateEntityConfiguration : IEntityTypeConfiguration<TeamsDirectReadState>
+{
+    public void Configure(EntityTypeBuilder<TeamsDirectReadState> entity)
+    {
+        entity.ToTable("teams_direct_read_states");
+        entity.HasKey(r => new { r.TenantId, r.ConversationId, r.TenantMembershipId });
+        entity.Property(r => r.TenantId).HasColumnName("tenant_id");
+        entity.Property(r => r.FacilityId).HasColumnName("facility_id");
+        entity.Property(r => r.ConversationId).HasColumnName("conversation_id");
+        entity.Property(r => r.TenantMembershipId).HasColumnName("tenant_membership_id");
+        entity.Property(r => r.LastReadMessageId).HasColumnName("last_read_message_id");
+        entity.Property(r => r.LastReadAtUtc).HasColumnName("last_read_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(r => r.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(r => new { r.TenantId, r.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(r => new { r.TenantId, r.FacilityId, r.TenantMembershipId })
+            .HasDatabaseName("ix_teams_direct_read_states_tenant_facility_membership");
+    }
+}
+
+internal sealed class TeamsDirectMessageAuditEventEntityConfiguration : IEntityTypeConfiguration<TeamsDirectMessageAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<TeamsDirectMessageAuditEvent> entity)
+    {
+        entity.ToTable("teams_direct_message_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
+        entity.Property(e => e.MessageId).HasColumnName("message_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(60).IsRequired();
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+        entity.Property(e => e.ActorTenantMembershipId).HasColumnName("actor_tenant_membership_id").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.ActorLabel).HasColumnName("actor_label").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").IsRequired();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(e => e.Conversation).WithMany()
+            .HasForeignKey(e => e.ConversationId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.ConversationId, e.OccurredAtUtc })
+            .HasDatabaseName("ix_teams_direct_message_audit_tenant_conversation");
+    }
+}

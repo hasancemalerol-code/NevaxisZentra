@@ -215,6 +215,7 @@ internal static class CustomerCatalogKeys
         TeamsPermissionKeys.Read, TeamsPermissionKeys.Write, TeamsPermissionKeys.Manage,
         TeamsPermissionKeys.ApprovalsCreate, TeamsPermissionKeys.ApprovalsReview, TeamsPermissionKeys.ApprovalsManage,
         TeamsPermissionKeys.HandoverRead, TeamsPermissionKeys.HandoverCreate, TeamsPermissionKeys.HandoverAcknowledge, TeamsPermissionKeys.HandoverManage,
+        TeamsPermissionKeys.DirectRead, TeamsPermissionKeys.DirectWrite, TeamsPermissionKeys.DirectManage,
         ErpPermissionKeys.Read, ErpPermissionKeys.Manage,
         ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove, ErpPermissionKeys.WritebackExecute,
         SaasCommercialPermissionKeys.Read,
