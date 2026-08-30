@@ -213,6 +213,13 @@ export function TeamsWorkspaceClient({
                   </Link>
                 ) : null}
                 <Link
+                  href={`/teams/is-kutum`}
+                  className="teams-context-chip"
+                  data-testid="teams-channel-work-inbox-link"
+                >
+                  İş kutum
+                </Link>
+                <Link
                   href={`/teams/onaylar`}
                   className="teams-context-chip"
                   data-testid="teams-channel-approvals-link"

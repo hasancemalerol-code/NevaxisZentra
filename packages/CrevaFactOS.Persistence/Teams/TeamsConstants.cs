@@ -86,6 +86,19 @@ public static class TeamsConstants
         DateOnly shiftDate,
         string shiftType) =>
         $"teams-handover:{channelId:D}:{shiftDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}:{shiftType}";
+
+    public const int MaxInboxItems = 50;
+
+    public const string WorkInboxDisclaimer =
+        "İş kutusu yalnızca mevcut kaynaklardaki size ait işleri bir arada gösterir; görev, onay, vardiya devri veya mesaj işlemi başlatmaz.";
+}
+
+public static class TeamsWorkInboxSourceKinds
+{
+    public const string AiTask = "ai-task";
+    public const string Approval = "approval";
+    public const string Handover = "handover";
+    public const string Mention = "mention";
 }
 
 public static class TeamsHandoverStatuses

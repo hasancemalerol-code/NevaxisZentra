@@ -399,6 +399,15 @@ public static class TeamsServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+        services.AddScoped<ITeamsWorkInboxRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableTeamsWorkInboxRepository()
+                : new TeamsWorkInboxRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
 
         return services;
     }

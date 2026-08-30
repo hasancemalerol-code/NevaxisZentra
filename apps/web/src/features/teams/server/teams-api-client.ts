@@ -767,6 +767,37 @@ export async function acknowledgeTeamsHandover(
   );
 }
 
+export type RawTeamsWorkInboxItem = Readonly<{
+  sourceKind: string;
+  sourceId: string;
+  title: string;
+  reason: string;
+  occurredAt: string;
+  deepLinkPath: string;
+}>;
+
+export type RawTeamsWorkInboxResponse = Readonly<{
+  items: readonly RawTeamsWorkInboxItem[];
+  sources: Readonly<{
+    aiTasks: boolean;
+    approvals: boolean;
+    handovers: boolean;
+    mentions: boolean;
+  }>;
+  disclaimer: string;
+}>;
+
+export async function getTeamsWorkInbox(
+  context: TeamsRequestContext,
+): Promise<TeamsApiResult<RawTeamsWorkInboxResponse>> {
+  return getJson(
+    context,
+    "/api/teams/work-inbox",
+    undefined,
+    (payload) => payload as RawTeamsWorkInboxResponse,
+  );
+}
+
 export async function getTeamsMessageSourceContext(
   context: TeamsRequestContext,
   messageId: string,

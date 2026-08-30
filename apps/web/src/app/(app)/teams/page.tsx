@@ -61,6 +61,9 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
           title="Operasyon İletişimi"
           actions={
             <>
+              <Link href="/teams/is-kutum" className="teams-context-chip" data-testid="teams-work-inbox-index-link">
+                İş kutum
+              </Link>
               <Link href="/teams/onaylar" className="teams-context-chip" data-testid="teams-approvals-index-link">
                 Onay istekleri
               </Link>

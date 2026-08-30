@@ -406,3 +406,29 @@ public sealed record TeamsHandoverWriteResult(
     public static TeamsHandoverWriteResult Fail(string failureCode, string failureReason) =>
         new(false, null, false, failureCode, failureReason);
 }
+
+public sealed record TeamsWorkInboxAccessCapabilities(
+    bool CanReadAiTasks,
+    bool CanReviewAiTasks,
+    bool CanReviewApprovals,
+    bool CanAcknowledgeHandovers,
+    bool CanReadMentions);
+
+public sealed record TeamsWorkInboxItemReadModel(
+    string SourceKind,
+    Guid SourceId,
+    string Title,
+    string Reason,
+    DateTimeOffset OccurredAtUtc,
+    string DeepLinkPath);
+
+public sealed record TeamsWorkInboxSourceAvailabilityReadModel(
+    bool AiTasks,
+    bool Approvals,
+    bool Handovers,
+    bool Mentions);
+
+public sealed record TeamsWorkInboxReadModel(
+    IReadOnlyList<TeamsWorkInboxItemReadModel> Items,
+    TeamsWorkInboxSourceAvailabilityReadModel Sources,
+    string Disclaimer);

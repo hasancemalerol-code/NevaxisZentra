@@ -5,6 +5,7 @@ import {
   getTeamsChannelDetail,
   getTeamsHandover,
   getTeamsMessageSourceContext,
+  getTeamsWorkInbox,
   getTeamsTaskContextChannel,
   listTeamsApprovals,
   listTeamsChannels,
@@ -13,6 +14,7 @@ import {
   type RawTeamsApprovalListResponse,
   type RawTeamsHandoverDetail,
   type RawTeamsHandoverListResponse,
+  type RawTeamsWorkInboxResponse,
   type RawTeamsChannelDetail,
   type RawTeamsChannelListResponse,
   type RawTeamsMessageSourceContext,
@@ -151,6 +153,20 @@ export async function readTeamsHandover(
   }
 
   return getTeamsHandover(contextResult.context, handoverId);
+}
+
+export async function readTeamsWorkInbox(): Promise<TeamsApiResult<RawTeamsWorkInboxResponse>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsWorkInbox(contextResult.context);
 }
 
 export async function readTeamsMessageSourceContext(

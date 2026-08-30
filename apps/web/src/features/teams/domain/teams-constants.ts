@@ -52,3 +52,13 @@ export const TEAMS_HANDOVER_AUDIT_EVENTS = {
 export function isHandoverChannelType(channelType: string): boolean {
   return channelType === "department" || channelType === "operational";
 }
+
+export const TEAMS_WORK_INBOX_DISCLAIMER =
+  "İş kutusu yalnızca mevcut kaynaklardaki size ait işleri bir arada gösterir; görev, onay, vardiya devri veya mesaj işlemi başlatmaz.";
+
+export const TEAMS_WORK_INBOX_SOURCE_KINDS = {
+  "ai-task": "AI görevi",
+  approval: "Onay isteği",
+  handover: "Vardiya devri",
+  mention: "Etiket",
+} as const;

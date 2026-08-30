@@ -190,6 +190,38 @@ internal static class TeamsEndpointHelpers
             correlationContext,
             cancellationToken);
 
+    internal static async Task<TeamsWorkInboxAccessCapabilities> ResolveWorkInboxCapabilitiesAsync(
+        Guid facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CancellationToken cancellationToken) =>
+        new(
+            CanReadAiTasks: await HasPermissionAsync(facilityId, AiTaskPermissionKeys.Read, facilityAccessResolver, cancellationToken),
+            CanReviewAiTasks: await HasPermissionAsync(facilityId, AiTaskPermissionKeys.Review, facilityAccessResolver, cancellationToken),
+            CanReviewApprovals: await HasPermissionAsync(facilityId, TeamsPermissionKeys.ApprovalsReview, facilityAccessResolver, cancellationToken),
+            CanAcknowledgeHandovers: await HasPermissionAsync(facilityId, TeamsPermissionKeys.HandoverAcknowledge, facilityAccessResolver, cancellationToken),
+            CanReadMentions: await HasPermissionAsync(facilityId, TeamsPermissionKeys.Read, facilityAccessResolver, cancellationToken));
+
+    internal static object MapWorkInbox(TeamsWorkInboxReadModel inbox) => new
+    {
+        items = inbox.Items.Select(item => new
+        {
+            sourceKind = item.SourceKind,
+            sourceId = item.SourceId,
+            title = item.Title,
+            reason = item.Reason,
+            occurredAt = item.OccurredAtUtc,
+            deepLinkPath = item.DeepLinkPath,
+        }),
+        sources = new
+        {
+            aiTasks = inbox.Sources.AiTasks,
+            approvals = inbox.Sources.Approvals,
+            handovers = inbox.Sources.Handovers,
+            mentions = inbox.Sources.Mentions,
+        },
+        disclaimer = inbox.Disclaimer,
+    };
+
     internal static async Task<TeamsHandoverAccessCapabilities> ResolveHandoverCapabilitiesAsync(
         Guid facilityId,
         IFacilityAccessResolver facilityAccessResolver,
