@@ -1,26 +1,40 @@
 "use client";
 
+import Link from "next/link";
 import { Bell } from "lucide-react";
 
-import { IconButton } from "@/components/ui/button";
+type NotificationsControlProps = Readonly<{
+  unreadCount?: number | null;
+}>;
 
-const NOTIFICATIONS_UNAVAILABLE_REASON =
-  "Bildirim merkezi henüz kullanıma hazır değil.";
+export function NotificationsControl({ unreadCount = null }: NotificationsControlProps) {
+  const visibleCount = typeof unreadCount === "number" && unreadCount > 0 ? unreadCount : 0;
+  const badgeLabel = visibleCount > 0
+    ? `${visibleCount} okunmamış bildirim`
+    : "Bildirim merkezi";
 
-export function NotificationsControl() {
   return (
-    <IconButton
+    <Link
       aria-describedby="shell-notifications-status"
-      className="shell-notifications"
-      disabled
-      label={NOTIFICATIONS_UNAVAILABLE_REASON}
-      title={NOTIFICATIONS_UNAVAILABLE_REASON}
-      type="button"
+      className="icon-button shell-notifications"
+      data-shell-notifications-count={visibleCount}
+      href="/teams/bildirimler"
+      id="shell-notifications-link"
+      title={badgeLabel}
     >
       <Bell aria-hidden="true" />
+      {visibleCount > 0 ? (
+        <span
+          aria-hidden="true"
+          className="shell-notifications-badge"
+          data-testid="shell-notifications-unread-badge"
+        >
+          {visibleCount > 99 ? "99+" : visibleCount}
+        </span>
+      ) : null}
       <span className="visually-hidden" id="shell-notifications-status">
-        {NOTIFICATIONS_UNAVAILABLE_REASON}
+        {badgeLabel}
       </span>
-    </IconButton>
+    </Link>
   );
 }

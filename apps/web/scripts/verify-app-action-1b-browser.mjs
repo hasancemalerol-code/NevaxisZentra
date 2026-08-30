@@ -241,7 +241,7 @@ async function inspectPage(jar, viewport, path) {
         return {
           workspaceText: workspace?.textContent?.trim() || "",
           searchText: search?.textContent?.trim() || "",
-          notificationsDisabled: Boolean(notifications?.disabled),
+          notificationsHref: notifications?.getAttribute("href") || "",
           notificationsTitle: notifications?.getAttribute("title") || "",
           accountPresent: Boolean(account),
           prohibitedCursor,
@@ -301,10 +301,10 @@ for (const persona of personas) {
     assert(`${persona.name} ${viewport.width}x${viewport.height} document is 200`, result.documentStatus === 200);
     assert(`${persona.name} ${viewport.width}x${viewport.height} workspace selector visible`, page.workspaceText.length > 0);
     assert(`${persona.name} ${viewport.width}x${viewport.height} search label honest`, page.searchText.includes("Modül veya sayfa ara"));
-    assert(`${persona.name} ${viewport.width}x${viewport.height} notifications disabled`, page.notificationsDisabled);
+    assert(`${persona.name} ${viewport.width}x${viewport.height} notifications link`, page.notificationsHref.includes("/teams/bildirimler"));
     assert(
-      `${persona.name} ${viewport.width}x${viewport.height} notifications reason`,
-      page.notificationsTitle.includes("Bildirim merkezi henüz kullanıma hazır değil."),
+      `${persona.name} ${viewport.width}x${viewport.height} notifications title`,
+      page.notificationsTitle.includes("Bildirim merkezi"),
     );
     assert(`${persona.name} ${viewport.width}x${viewport.height} account menu present`, page.accountPresent);
     assert(`${persona.name} ${viewport.width}x${viewport.height} no prohibited cursor on dashboard navigation`, page.prohibitedCursor === false);

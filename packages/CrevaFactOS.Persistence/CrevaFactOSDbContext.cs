@@ -334,6 +334,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsDirectMessage> TeamsDirectMessages => Set<TeamsDirectMessage>();
     public DbSet<TeamsDirectReadState> TeamsDirectReadStates => Set<TeamsDirectReadState>();
     public DbSet<TeamsDirectMessageAuditEvent> TeamsDirectMessageAuditEvents => Set<TeamsDirectMessageAuditEvent>();
+    public DbSet<TeamsNotification> TeamsNotifications => Set<TeamsNotification>();
+    public DbSet<TeamsNotificationAuditEvent> TeamsNotificationAuditEvents => Set<TeamsNotificationAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1785,6 +1787,18 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TeamsDirectMessageAuditEventEntityConfiguration());
         modelBuilder.Entity<TeamsDirectMessageAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsNotificationEntityConfiguration());
+        modelBuilder.Entity<TeamsNotification>().HasQueryFilter(n =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && n.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsNotificationAuditEventEntityConfiguration());
+        modelBuilder.Entity<TeamsNotificationAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

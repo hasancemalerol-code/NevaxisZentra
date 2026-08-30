@@ -1,11 +1,14 @@
 import "./teams-server-boundary";
 
+import { cache } from "react";
+
 import {
   getTeamsApproval,
   getTeamsChannelDetail,
   getTeamsHandover,
   getTeamsMessageSourceContext,
   getTeamsWorkInbox,
+  getTeamsNotifications,
   getTeamsDirectConversation,
   listTeamsDirectConversations,
   listTeamsDirectRecipients,
@@ -21,6 +24,7 @@ import {
   type RawTeamsHandoverDetail,
   type RawTeamsHandoverListResponse,
   type RawTeamsWorkInboxResponse,
+  type RawTeamsNotificationListResponse,
   type RawTeamsChannelDetail,
   type RawTeamsChannelListResponse,
   type RawTeamsMessageSourceContext,
@@ -234,3 +238,29 @@ export async function readTeamsMessageSourceContext(
 
   return getTeamsMessageSourceContext(contextResult.context, messageId);
 }
+
+export async function readTeamsNotifications(options?: Readonly<{
+  unreadOnly?: boolean;
+  page?: number;
+  pageSize?: number;
+}>): Promise<TeamsApiResult<RawTeamsNotificationListResponse>> {
+  return readTeamsNotificationsCached(options);
+}
+
+const readTeamsNotificationsCached = cache(async (options?: Readonly<{
+  unreadOnly?: boolean;
+  page?: number;
+  pageSize?: number;
+}>): Promise<TeamsApiResult<RawTeamsNotificationListResponse>> => {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsNotifications(contextResult.context, options);
+});

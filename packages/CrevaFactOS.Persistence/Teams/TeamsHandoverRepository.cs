@@ -46,7 +46,8 @@ public interface ITeamsHandoverRepository
 
 public sealed class TeamsHandoverRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : ITeamsHandoverRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    ITeamsNotificationRepository notificationRepository) : ITeamsHandoverRepository
 {
     public Task<TeamsHandoverListReadModel> ListHandoversAsync(
         TeamsOperationContext context,
@@ -359,6 +360,21 @@ public sealed class TeamsHandoverRepository(
             {
                 status = TeamsHandoverStatuses.Published,
             }, now);
+
+            var memberIds = await dbContext.TeamsChannelMembers.AsNoTracking()
+                .Where(m => m.TenantId == context.TenantId && m.ChannelId == handover.ChannelId)
+                .Select(m => m.TenantMembershipId)
+                .ToListAsync(ct);
+            foreach (var memberId in memberIds.Where(id => id != context.MembershipId))
+            {
+                await notificationRepository.TryCreateHandoverAcknowledgementAsync(
+                    context,
+                    memberId,
+                    handover.Id,
+                    handover.ShiftDate,
+                    handover.ShiftType,
+                    ct);
+            }
 
             await dbContext.SaveChangesAsync(ct);
             var detail = await LoadVisibleDetailAsync(context, capabilities, handover.Id, ct);

@@ -52,7 +52,8 @@ public interface ITeamsApprovalRepository
 
 public sealed class TeamsApprovalRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : ITeamsApprovalRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    ITeamsNotificationRepository notificationRepository) : ITeamsApprovalRepository
 {
     public Task<TeamsApprovalListReadModel> ListRequestsAsync(
         TeamsOperationContext context,
@@ -292,6 +293,16 @@ public sealed class TeamsApprovalRepository(
                     actorLabel,
                     new { tenantMembershipId = reviewer.TenantMembershipId, role = reviewer.Role },
                     now);
+            }
+
+            foreach (var reviewer in command.Reviewers)
+            {
+                await notificationRepository.TryCreateApprovalReviewAsync(
+                    context,
+                    reviewer.TenantMembershipId,
+                    requestId,
+                    command.Title.Trim(),
+                    ct);
             }
 
             await dbContext.SaveChangesAsync(ct);

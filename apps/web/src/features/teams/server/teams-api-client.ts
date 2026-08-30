@@ -934,6 +934,57 @@ export async function getTeamsMessageSourceContext(
   );
 }
 
+export type RawTeamsNotificationItem = Readonly<{
+  id: string;
+  notificationType: string;
+  sourceModule: string;
+  sourceEntityId: string;
+  deepLinkPath: string;
+  title: string;
+  reason: string;
+  sourcePreview: string | null;
+  createdAt: string;
+  readAt: string | null;
+  canOpen: boolean;
+  unavailableReason: string | null;
+}>;
+
+export type RawTeamsNotificationListResponse = Readonly<{
+  items: readonly RawTeamsNotificationItem[];
+  unreadCount: number;
+  disclaimer: string;
+}>;
+
+export async function getTeamsNotifications(
+  context: TeamsRequestContext,
+  query?: Readonly<{ unreadOnly?: boolean; page?: number; pageSize?: number }>,
+): Promise<TeamsApiResult<RawTeamsNotificationListResponse>> {
+  const params = new URLSearchParams();
+  if (query?.unreadOnly) params.set("unreadOnly", "true");
+  if (query?.page) params.set("page", String(query.page));
+  if (query?.pageSize) params.set("pageSize", String(query.pageSize));
+  const suffix = params.size > 0 ? `?${params.toString()}` : "";
+  return getJson(
+    context,
+    `/api/teams/notifications${suffix}`,
+    undefined,
+    (payload) => payload as RawTeamsNotificationListResponse,
+  );
+}
+
+export async function markTeamsNotificationRead(
+  context: TeamsRequestContext,
+  notificationId: string,
+): Promise<TeamsApiResult<{ id: string; idempotentReplay: boolean }>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/notifications/${notificationId}/read`,
+    undefined,
+    (payload) => payload as { id: string; idempotentReplay: boolean },
+  );
+}
+
 // Kept for callers that need the API base URL in session mode.
 export function resolveTeamsApiBaseUrl(): string | null {
   const config = resolveSaasIdentityRuntimeConfig();

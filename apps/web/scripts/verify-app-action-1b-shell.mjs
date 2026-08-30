@@ -137,7 +137,8 @@ const accountMenu = read("src/features/saas-identity/components/account-menu.tsx
 assert("workspace panel states switching unavailable", workspacePanel.includes("değiştirme henüz kullanıma hazır değil"));
 assert("search placeholder is honest", topBar.includes("Modül veya sayfa ara"));
 assert("search palette filters by permission-fed items", searchPalette.includes("Yalnızca erişebildiğiniz"));
-assert("notifications disabled with Turkish reason", notifications.includes("Bildirim merkezi henüz kullanıma hazır değil."));
+assert("notifications link to bildirim merkezi", notifications.includes('/teams/bildirimler'));
+assert("notifications no longer disabled stub", !notifications.includes("Bildirim merkezi henüz kullanıma hazır değil."));
 assert("account menu has settings and sign-out", accountMenu.includes("Ayarlar") && accountMenu.includes("signOutSaasIdentityBrowser"));
 
 const owner = await signInOwner();
@@ -145,7 +146,7 @@ const home = await fetchWeb("/", owner);
 assert("authenticated shell home is 200", home.status === 200);
 assert("workspace selector is present", home.html.includes("workspace-selector"));
 assert("search control is present", home.html.includes("Modül veya sayfa ara"));
-assert("notifications unavailable copy is present", home.html.includes("Bildirim merkezi henüz kullanıma hazır değil."));
+assert("notifications link is present", home.html.includes("/teams/bildirimler"));
 assert("account menu trigger is present", home.html.includes("account-placeholder"));
 assert("no future-work shell aria labels remain", !/işlev ileriki pakette eklenecek/.test(home.html));
 

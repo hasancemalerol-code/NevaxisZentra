@@ -304,6 +304,25 @@ svg { display: block; width: 18px; height: 18px; stroke-width: 1.8; }
   outline: none;
 }
 .shell-search__result small { color: var(--color-text-muted); font-size: 11px; }
+.shell-notifications { position: relative; }
+.shell-notifications-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: inline-flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-information);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
 .shell-notifications:disabled { opacity: 0.72; cursor: not-allowed; }
 .shell-popover--account {
   right: 0;

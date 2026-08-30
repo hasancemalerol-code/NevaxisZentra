@@ -299,3 +299,35 @@ public sealed class TeamsDirectMessageAuditEvent
 
     public TeamsDirectConversation? Conversation { get; set; }
 }
+
+public sealed class TeamsNotification
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid RecipientTenantMembershipId { get; set; }
+    public string NotificationType { get; set; } = string.Empty;
+    public string SourceModule { get; set; } = string.Empty;
+    public string SourceEntityId { get; set; } = string.Empty;
+    public string SourceRouteKey { get; set; } = string.Empty;
+    public string SourceTitle { get; set; } = string.Empty;
+    public string SourcePreview { get; set; } = string.Empty;
+    public string SourceEventFingerprint { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset? ReadAtUtc { get; set; }
+}
+
+public sealed class TeamsNotificationAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid NotificationId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public string ActorTenantMembershipId { get; set; } = string.Empty;
+    public string ActorLabel { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+
+    public TeamsNotification? Notification { get; set; }
+}

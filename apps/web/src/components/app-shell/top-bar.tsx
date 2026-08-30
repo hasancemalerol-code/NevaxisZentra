@@ -1,7 +1,7 @@
 "use client";
 
 import { Building2, ChevronDown, Search } from "lucide-react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 
 import { AccountMenu } from "@/features/saas-identity/components/account-menu";
 
@@ -17,6 +17,7 @@ type TopBarProps = Readonly<{
   organizationLabel?: string | null;
   searchItems: readonly ShellSearchItem[];
   settingsHref?: string | null;
+  notificationsSlot?: ReactNode;
 }>;
 
 export function TopBar({
@@ -25,6 +26,7 @@ export function TopBar({
   organizationLabel = null,
   searchItems,
   settingsHref = null,
+  notificationsSlot = null,
 }: TopBarProps) {
   const workspacePanelId = useId();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -114,7 +116,7 @@ export function TopBar({
           ) : null}
         </div>
 
-        <NotificationsControl />
+        {notificationsSlot ?? <NotificationsControl />}
 
         <span className="top-bar-divider" aria-hidden="true" />
 

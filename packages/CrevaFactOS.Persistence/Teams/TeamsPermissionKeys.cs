@@ -15,4 +15,5 @@ public static class TeamsPermissionKeys
     public const string DirectRead = "teams.direct.read";
     public const string DirectWrite = "teams.direct.write";
     public const string DirectManage = "teams.direct.manage";
+    public const string NotificationsRead = "teams.notifications.read";
 }

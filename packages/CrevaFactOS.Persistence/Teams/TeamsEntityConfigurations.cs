@@ -555,3 +555,65 @@ internal sealed class TeamsDirectMessageAuditEventEntityConfiguration : IEntityT
             .HasDatabaseName("ix_teams_direct_message_audit_tenant_conversation");
     }
 }
+
+internal sealed class TeamsNotificationEntityConfiguration : IEntityTypeConfiguration<TeamsNotification>
+{
+    public void Configure(EntityTypeBuilder<TeamsNotification> entity)
+    {
+        entity.ToTable("teams_notifications");
+        entity.HasKey(n => n.Id);
+        entity.Property(n => n.Id).HasColumnName("id");
+        entity.Property(n => n.TenantId).HasColumnName("tenant_id");
+        entity.Property(n => n.FacilityId).HasColumnName("facility_id");
+        entity.Property(n => n.RecipientTenantMembershipId).HasColumnName("recipient_tenant_membership_id");
+        entity.Property(n => n.NotificationType).HasColumnName("notification_type").HasMaxLength(40).IsRequired();
+        entity.Property(n => n.SourceModule).HasColumnName("source_module").HasMaxLength(40).IsRequired();
+        entity.Property(n => n.SourceEntityId).HasColumnName("source_entity_id").HasMaxLength(80).IsRequired();
+        entity.Property(n => n.SourceRouteKey).HasColumnName("source_route_key").HasMaxLength(TeamsConstants.MaxNotificationRouteKeyLength).IsRequired();
+        entity.Property(n => n.SourceTitle).HasColumnName("source_title").HasMaxLength(TeamsConstants.MaxNotificationPreviewLength).IsRequired();
+        entity.Property(n => n.SourcePreview).HasColumnName("source_preview").HasMaxLength(TeamsConstants.MaxNotificationPreviewLength).IsRequired();
+        entity.Property(n => n.SourceEventFingerprint).HasColumnName("source_event_fingerprint").HasMaxLength(TeamsConstants.MaxNotificationFingerprintLength).IsRequired();
+        entity.Property(n => n.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(n => n.ReadAtUtc).HasColumnName("read_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(n => n.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(n => new { n.TenantId, n.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(n => new { n.TenantId, n.RecipientTenantMembershipId, n.SourceEventFingerprint })
+            .HasDatabaseName("ux_teams_notifications_tenant_recipient_fingerprint")
+            .IsUnique();
+        entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.RecipientTenantMembershipId, n.CreatedAtUtc })
+            .HasDatabaseName("ix_teams_notifications_tenant_facility_recipient_created");
+        entity.HasIndex(n => new { n.TenantId, n.FacilityId, n.RecipientTenantMembershipId, n.ReadAtUtc })
+            .HasDatabaseName("ix_teams_notifications_tenant_facility_recipient_read");
+    }
+}
+
+internal sealed class TeamsNotificationAuditEventEntityConfiguration : IEntityTypeConfiguration<TeamsNotificationAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<TeamsNotificationAuditEvent> entity)
+    {
+        entity.ToTable("teams_notification_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(60).IsRequired();
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+        entity.Property(e => e.ActorTenantMembershipId).HasColumnName("actor_tenant_membership_id").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.ActorLabel).HasColumnName("actor_label").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").IsRequired();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(e => e.Notification).WithMany()
+            .HasForeignKey(e => e.NotificationId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.NotificationId, e.OccurredAtUtc })
+            .HasDatabaseName("ix_teams_notification_audit_tenant_notification");
+    }
+}

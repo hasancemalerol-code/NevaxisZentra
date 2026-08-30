@@ -371,6 +371,15 @@ public static class TeamsServiceCollectionExtensions
 {
     public static IServiceCollection AddCrevaFactOSTeams(this IServiceCollection services)
     {
+        services.AddScoped<ITeamsNotificationRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableTeamsNotificationRepository()
+                : new TeamsNotificationRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
         services.AddScoped<ITeamsRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
@@ -379,7 +388,8 @@ public static class TeamsServiceCollectionExtensions
                 : new TeamsRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
-                    serviceProvider.GetRequiredService<IAiTaskRepository>());
+                    serviceProvider.GetRequiredService<IAiTaskRepository>(),
+                    serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
         services.AddScoped<ITeamsApprovalRepository>(serviceProvider =>
         {
@@ -388,7 +398,8 @@ public static class TeamsServiceCollectionExtensions
                 ? new UnavailableTeamsApprovalRepository()
                 : new TeamsApprovalRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
         services.AddScoped<ITeamsHandoverRepository>(serviceProvider =>
         {
@@ -397,7 +408,8 @@ public static class TeamsServiceCollectionExtensions
                 ? new UnavailableTeamsHandoverRepository()
                 : new TeamsHandoverRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
         services.AddScoped<ITeamsWorkInboxRepository>(serviceProvider =>
         {
@@ -415,7 +427,8 @@ public static class TeamsServiceCollectionExtensions
                 ? new UnavailableTeamsDirectMessageRepository()
                 : new TeamsDirectMessageRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
 
         return services;

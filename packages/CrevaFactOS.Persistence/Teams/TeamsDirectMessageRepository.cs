@@ -47,7 +47,8 @@ public interface ITeamsDirectMessageRepository
 
 public sealed class TeamsDirectMessageRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : ITeamsDirectMessageRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    ITeamsNotificationRepository notificationRepository) : ITeamsDirectMessageRepository
 {
     public Task<IReadOnlyList<TeamsDirectRecipientReadModel>> ListRecipientsAsync(
         TeamsOperationContext context,
@@ -350,6 +351,20 @@ public sealed class TeamsDirectMessageRepository(
                 actorLabel,
                 new { bodyLength = command.Body.Trim().Length },
                 now,
+                ct);
+
+            var conversation = await dbContext.TeamsDirectConversations.AsNoTracking()
+                .SingleAsync(c => c.TenantId == context.TenantId && c.Id == command.ConversationId, ct);
+            var recipientMembershipId = conversation.ParticipantLowMembershipId == context.MembershipId
+                ? conversation.ParticipantHighMembershipId
+                : conversation.ParticipantLowMembershipId;
+            await notificationRepository.TryCreateDirectMessageReceivedAsync(
+                context,
+                recipientMembershipId,
+                command.ConversationId,
+                messageId,
+                actorLabel,
+                command.Body.Trim(),
                 ct);
 
             await dbContext.SaveChangesAsync(ct);

@@ -525,3 +525,40 @@ public sealed record TeamsDirectMessageWriteResult(
     public static TeamsDirectMessageWriteResult Fail(string failureCode, string failureReason) =>
         new(false, null, false, failureCode, failureReason);
 }
+
+public sealed record TeamsNotificationAccessCapabilities(bool CanRead);
+
+public sealed record MarkTeamsNotificationReadCommand(Guid NotificationId);
+
+public sealed record TeamsNotificationReadModel(
+    Guid Id,
+    string NotificationType,
+    string SourceModule,
+    string SourceEntityId,
+    string DeepLinkPath,
+    string Title,
+    string Reason,
+    string? SourcePreview,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? ReadAtUtc,
+    bool CanOpen,
+    string? UnavailableReason);
+
+public sealed record TeamsNotificationListReadModel(
+    IReadOnlyList<TeamsNotificationReadModel> Items,
+    int UnreadCount,
+    string Disclaimer);
+
+public sealed record TeamsNotificationWriteResult(
+    bool Succeeded,
+    Guid? NotificationId,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason)
+{
+    public static TeamsNotificationWriteResult Success(Guid notificationId, bool idempotentReplay = false) =>
+        new(true, notificationId, idempotentReplay, null, null);
+
+    public static TeamsNotificationWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, false, failureCode, failureReason);
+}

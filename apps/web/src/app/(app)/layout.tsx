@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { AppShellFrame } from "@/components/app-shell/app-shell-frame";
+import { NotificationsControlServer } from "@/components/app-shell/notifications-control-server";
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { FactoryShowcaseShell } from "@/features/dashboard-showcase/components/factory-showcase-shell";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
@@ -19,7 +21,10 @@ import {
   resolveSettingsHref,
 } from "@/lib/navigation/navigation-visibility";
 
+export const dynamic = "force-dynamic";
+
 export default async function ApplicationLayout({ children }: Readonly<{ children: ReactNode }>) {
+  noStore();
   const session = await resolveSaasIdentitySession();
 
   if (session.status === "mfa_pending") {
@@ -62,11 +67,13 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
   }
 
   const navigation = await resolvePermissionAwareNavigation();
+
   return (
     <AppShellFrame
       accountDisplayName={accountDisplayName}
       emailMasked={emailMasked}
       navigation={navigation}
+      notificationsSlot={<NotificationsControlServer />}
       organizationLabel={organizationLabel}
       searchItems={buildShellSearchItems(navigation)}
       settingsHref={resolveSettingsHref(navigation)}

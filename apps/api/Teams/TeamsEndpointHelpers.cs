@@ -672,6 +672,63 @@ internal static class TeamsEndpointHelpers
         canWrite = detail.CanWrite,
         disclaimer = detail.Disclaimer,
     };
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveNotificationReadAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.NotificationsRead,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<TeamsNotificationAccessCapabilities> ResolveNotificationCapabilitiesAsync(
+        Guid facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CancellationToken cancellationToken) =>
+        new(CanRead: await HasPermissionAsync(
+            facilityId,
+            TeamsPermissionKeys.NotificationsRead,
+            facilityAccessResolver,
+            cancellationToken));
+
+    internal static object MapNotificationList(TeamsNotificationListReadModel list) => new
+    {
+        items = list.Items.Select(item => new
+        {
+            id = item.Id,
+            notificationType = item.NotificationType,
+            sourceModule = item.SourceModule,
+            sourceEntityId = item.SourceEntityId,
+            deepLinkPath = item.DeepLinkPath,
+            title = item.Title,
+            reason = item.Reason,
+            sourcePreview = item.SourcePreview,
+            createdAt = item.CreatedAtUtc,
+            readAt = item.ReadAtUtc,
+            canOpen = item.CanOpen,
+            unavailableReason = item.UnavailableReason,
+        }),
+        unreadCount = list.UnreadCount,
+        disclaimer = list.Disclaimer,
+    };
+
+    internal static IResult MapNotificationWriteResult(TeamsNotificationWriteResult result)
+    {
+        if (!result.Succeeded || result.NotificationId is null)
+        {
+            return MapFailure(result.FailureCode, result.FailureReason);
+        }
+
+        return TypedResults.Ok(new
+        {
+            id = result.NotificationId,
+            idempotentReplay = result.IdempotentReplay,
+        });
+    }
 }
 
 internal sealed record TeamsWriteSuccessDto(Guid Id, bool IdempotentReplay);

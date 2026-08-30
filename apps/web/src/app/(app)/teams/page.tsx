@@ -64,6 +64,9 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
               <Link href="/teams/is-kutum" className="teams-context-chip" data-testid="teams-work-inbox-index-link">
                 İş kutum
               </Link>
+              <Link href="/teams/bildirimler" className="teams-context-chip" data-testid="teams-notifications-index-link">
+                Bildirimler
+              </Link>
               <Link href="/teams/ozel-mesajlar" className="teams-context-chip" data-testid="teams-direct-messages-index-link">
                 Özel mesajlar
               </Link>

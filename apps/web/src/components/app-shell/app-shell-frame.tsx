@@ -17,6 +17,7 @@ type AppShellFrameProps = Readonly<{
   searchItems?: readonly ShellSearchItem[];
   settingsHref?: string | null;
   subscriptionGraceWarning?: string | null;
+  notificationsSlot?: ReactNode;
 }>;
 
 export function AppShellFrame({
@@ -28,6 +29,7 @@ export function AppShellFrame({
   searchItems = [],
   settingsHref = null,
   subscriptionGraceWarning = null,
+  notificationsSlot = null,
 }: AppShellFrameProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -47,6 +49,7 @@ export function AppShellFrame({
           organizationLabel={organizationLabel}
           searchItems={searchItems}
           settingsHref={settingsHref}
+          notificationsSlot={notificationsSlot}
         />
         <main className="content-viewport" id="main-content" tabIndex={-1}>
           {subscriptionGraceWarning ? (

@@ -94,6 +94,40 @@ public static class TeamsConstants
 
     public const string DirectMessageDisclaimer =
         "Özel mesajlar yalnızca aynı tesis kapsamındaki üyeler arasında kalıcı iletişim sağlar; görev, onay, operasyon işlemi veya dış teslimat başlatmaz.";
+
+    public const int MaxNotificationPreviewLength = 160;
+    public const int MaxNotificationRouteKeyLength = 240;
+    public const int MaxNotificationFingerprintLength = 200;
+
+    public const string NotificationDisclaimer =
+        "Bildirimler yalnızca erişebildiğiniz Teams kaynaklarına yönlendirir; görev, onay, vardiya devri veya mesaj işlemi başlatmaz.";
+}
+
+public static class TeamsNotificationTypes
+{
+    public const string DirectMessage = "direct-message";
+    public const string Mention = "mention";
+    public const string ApprovalReview = "approval-review";
+    public const string HandoverAcknowledgement = "handover-acknowledgement";
+    public const string TaskLink = "task-link";
+}
+
+public static class TeamsNotificationSourceModules
+{
+    public const string Teams = "teams";
+    public const string TeamsDirect = "teams-direct";
+    public const string AiTask = "ai-task";
+}
+
+public static class TeamsNotificationAuditEventTypes
+{
+    public const string Created = "notification-created";
+    public const string Read = "notification-read";
+}
+
+public static class TeamsNotificationUnavailableReasons
+{
+    public const string SourceInaccessible = "Kaynak artık erişilebilir değil.";
 }
 
 public static class TeamsWorkInboxSourceKinds

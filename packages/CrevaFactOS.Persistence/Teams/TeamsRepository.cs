@@ -79,7 +79,8 @@ public interface ITeamsRepository
 public sealed class TeamsRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
-    IAiTaskRepository aiTaskRepository) : ITeamsRepository
+    IAiTaskRepository aiTaskRepository,
+    ITeamsNotificationRepository notificationRepository) : ITeamsRepository
 {
     public Task<TeamsChannelListReadModel> ListAccessibleChannelsAsync(
         TeamsOperationContext context,
@@ -642,6 +643,20 @@ public sealed class TeamsRepository(
             }
 
             dbContext.TeamsMessages.Add(message);
+
+            var channel = await dbContext.TeamsChannels.AsNoTracking()
+                .SingleAsync(c => c.TenantId == context.TenantId && c.Id == command.ChannelId, ct);
+            foreach (var mentionId in mentionIds)
+            {
+                await notificationRepository.TryCreateMentionAsync(
+                    context,
+                    mentionId,
+                    command.ChannelId,
+                    channel.Name,
+                    messageId,
+                    message.Body,
+                    ct);
+            }
 
             var actor = context.MembershipId.ToString();
             await AppendAuditEventAsync(
@@ -1223,6 +1238,27 @@ public sealed class TeamsRepository(
                     sourceContextReference = link.SourceContextReference,
                 }),
             });
+
+            if (!string.IsNullOrWhiteSpace(createdTask.AssigneeJson))
+            {
+                var channelMemberIds = await dbContext.TeamsChannelMembers.AsNoTracking()
+                    .Where(m => m.TenantId == teamsContext.TenantId && m.ChannelId == message.ChannelId)
+                    .Select(m => m.TenantMembershipId)
+                    .ToListAsync(ct);
+                foreach (var memberId in channelMemberIds.Where(id => id != teamsContext.MembershipId))
+                {
+                    if (createdTask.AssigneeJson.Contains(memberId.ToString("D"), StringComparison.OrdinalIgnoreCase))
+                    {
+                        await notificationRepository.TryCreateTaskLinkAsync(
+                            teamsContext,
+                            memberId,
+                            link.Id,
+                            createdTask.Id,
+                            createdTask.TaskReference,
+                            ct);
+                    }
+                }
+            }
 
             await dbContext.SaveChangesAsync(ct);
 

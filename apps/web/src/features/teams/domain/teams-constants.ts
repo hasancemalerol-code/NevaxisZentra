@@ -65,3 +65,14 @@ export const TEAMS_WORK_INBOX_SOURCE_KINDS = {
 
 export const TEAMS_DIRECT_MESSAGE_DISCLAIMER =
   "Özel mesajlar yalnızca aynı tesis kapsamındaki üyeler arasında kalıcı iletişim sağlar; görev, onay, operasyon işlemi veya dış teslimat başlatmaz.";
+
+export const TEAMS_NOTIFICATION_DISCLAIMER =
+  "Bildirimler yalnızca erişebildiğiniz Teams kaynaklarına yönlendirir; görev, onay, vardiya devri veya mesaj işlemi başlatmaz.";
+
+export const TEAMS_NOTIFICATION_TYPES = {
+  "direct-message": "Özel mesaj",
+  mention: "Etiket",
+  "approval-review": "Onay incelemesi",
+  "handover-acknowledgement": "Vardiya devri",
+  "task-link": "Görev bağlantısı",
+} as const;

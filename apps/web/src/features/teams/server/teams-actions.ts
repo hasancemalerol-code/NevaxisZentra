@@ -11,6 +11,7 @@ import {
   acknowledgeTeamsHandover,
   createTeamsDirectConversation,
   markTeamsDirectConversationRead,
+  markTeamsNotificationRead,
   postTeamsDirectMessage,
   assignTeamsApprovalReviewer,
   cancelTeamsApproval,
@@ -24,6 +25,7 @@ import {
   updateTeamsHandoverDraft,
   type TeamsHandoverItemWriteBody,
 } from "./teams-api-client";
+import { readTeamsNotifications } from "./teams-queries";
 import { resolveTeamsRequestContext } from "./teams-request-context";
 
 type ActionResult =
@@ -469,4 +471,37 @@ export async function markTeamsDirectConversationReadAction(input: Readonly<{
 
   revalidatePath("/teams/ozel-mesajlar");
   return { status: "success" };
+}
+
+export async function markTeamsNotificationReadAction(input: Readonly<{
+  notificationId: string;
+}>): Promise<ActionResult> {
+  const authorization = await denyUnlessGranted("teams.notifications.read");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Bildirim okuma yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await markTeamsNotificationRead(contextResult.context, input.notificationId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/bildirimler");
+  revalidatePath("/", "layout");
+  return { status: "success" };
+}
+
+export async function readTeamsNotificationUnreadCountAction(): Promise<number> {
+  const authorization = await denyUnlessGranted("teams.notifications.read");
+  if (authorization.status === "failure") {
+    return 0;
+  }
+
+  const result = await readTeamsNotifications({ pageSize: 1 });
+  return result.status === "success" ? result.value.unreadCount : 0;
 }
