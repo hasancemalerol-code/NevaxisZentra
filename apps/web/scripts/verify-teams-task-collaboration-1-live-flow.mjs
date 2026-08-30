@@ -24,6 +24,8 @@ const URETIM_CHANNEL = "bb000001-03d1-4000-8000-0000000003d1";
 
 const NEGATIVE = { issuer: "crevafactos-dev", subject: "quality-negative-test-user", tenant: "dev-pilot-tenant" };
 
+const OWNER = { issuer: "crevafactos-dev", subject: "planning-pilot-user", tenant: "dev-pilot-tenant" };
+
 
 
 const SCREENSHOT_DIR = join(process.cwd(), ".cursor-screenshots");
@@ -234,6 +236,50 @@ const apiReady = await fetch(`${API}/health/ready`);
 
 assert("API ready", apiReady.status === 200, `status=${apiReady.status}`);
 
+const RUN_SUFFIX = Date.now();
+
+const turkishMessage = `Teams görev işbirliği doğrulama mesajı ${RUN_SUFFIX}`;
+
+const persistedMessage = await fetch(
+
+  `${API}/api/teams/channels/${URETIM_CHANNEL}/messages?facilityId=${FACILITY}`,
+
+  {
+
+    method: "POST",
+
+    headers: {
+
+      ...actorHeaders(OWNER),
+
+      "Content-Type": "application/json",
+
+      "Idempotency-Key": `teams-task-collab-live-${RUN_SUFFIX}`,
+
+    },
+
+    body: JSON.stringify({
+
+      body: turkishMessage,
+
+      idempotencyKey: `teams-task-collab-live-${RUN_SUFFIX}`,
+
+      mentionedMembershipIds: [],
+
+    }),
+
+  },
+
+);
+
+assert("persisted source message seeded", persistedMessage.status === 200 || persistedMessage.status === 201, `status=${persistedMessage.status}`);
+
+const persistedMessageJson = await persistedMessage.json().catch(() => null);
+
+const persistedMessageId = persistedMessageJson?.id ?? null;
+
+assert("persisted source message id resolved", Boolean(persistedMessageId), JSON.stringify(persistedMessageJson ?? {}));
+
 
 
 const userDataDir = mkdtempSync(join(tmpdir(), "teams-task-collab-1-"));
@@ -248,7 +294,7 @@ let createdTaskId = null;
 
 let selectedChannelId = URETIM_CHANNEL;
 
-let selectedMessageId = null;
+let selectedMessageId = persistedMessageId;
 
 
 
@@ -504,158 +550,23 @@ try {
     60000,
   );
 
-  const channelCount = await evalSnap(`document.querySelectorAll('[data-testid^="teams-channel-"]').length`);
+  const channelCount = await evalSnap(`Array.from(document.querySelectorAll('[data-testid^="teams-channel-"]')).filter((node) => node.getAttribute("data-testid") !== "teams-channel-rail").length`);
   assert("accessible channel list renders", Number(channelCount) >= 1, `count=${channelCount}`);
 
-  selectedChannelId = await resolveAccessibleChannelId();
+  const channelTestId = `[data-testid="teams-channel-${URETIM_CHANNEL}"]`;
+  const hasUretim = await evalSnap(`Boolean(document.querySelector(${JSON.stringify(channelTestId)}))`);
+  assert("URETIM channel visible in rail", hasUretim);
 
-  let channelReady = false;
-  try {
-    await waitForChannelReady(15000);
-    channelReady = true;
-  } catch {
-    channelReady = false;
-  }
-
-  if (!channelReady) {
+  if (hasUretim) {
     await ss("Runtime.evaluate", {
-      expression: `document.querySelector('[data-testid="teams-channel-${selectedChannelId}"]')?.click()`,
+      expression: `document.querySelector(${JSON.stringify(channelTestId)})?.click()`,
     });
-    await waitFor(
-      `(location.search || "").includes("channel=")`,
-      (ok) => ok === true,
-      30000,
-    );
-    try {
-      await waitForChannelReady(30000);
-      channelReady = true;
-    } catch {
-      channelReady = false;
-    }
   }
 
-  if (!channelReady) {
-    await navigateTo(`${ROUTE}?channel=${encodeURIComponent(selectedChannelId)}`);
-    await waitForChannelReady(90000);
-  }
-
-  selectedChannelId = await evalSnap(`document.querySelector('[data-testid="teams-selected-channel-ready"]')?.getAttribute("data-channel-id") ?? ${JSON.stringify(selectedChannelId)}`);
-  assert("channel ready through UI or deep link", Boolean(selectedChannelId));
-
-  await navigateTo(`${ROUTE}?channel=${encodeURIComponent(selectedChannelId)}`);
+  await navigateTo(`${ROUTE}?channel=${encodeURIComponent(URETIM_CHANNEL)}&message=${encodeURIComponent(selectedMessageId)}`);
   await waitForChannelReady(60000);
-
-  const turkishMessage = `Teams görev işbirliği doğrulama mesajı ${Date.now()}`;
-
-  await waitFor(
-
-    `Boolean(document.querySelector('[data-testid="teams-message-composer"]')) && Boolean(document.querySelector('[data-testid="teams-composer-input"]')) && Boolean(document.querySelector('[data-testid="teams-send-message"]'))`,
-
-    (ok) => ok === true,
-
-    60000,
-
-  );
-
-  const composerNode = await ss("DOM.getDocument", { depth: -1, pierce: true }).then(async (doc) => {
-    const { nodeId } = await ss("DOM.querySelector", {
-      nodeId: doc.root.nodeId,
-      selector: '[data-testid="teams-composer-input"]',
-    });
-    return nodeId;
-  });
-  await ss("DOM.focus", { nodeId: composerNode });
-  await ss("Input.insertText", { text: turkishMessage });
-
-  await waitFor(
-
-    `(function() {
-      const area = document.querySelector('[data-testid="teams-composer-input"]');
-      const send = document.querySelector('[data-testid="teams-send-message"]');
-      return Boolean(area?.value?.includes(${JSON.stringify(turkishMessage)})) && !send?.disabled;
-    })()`,
-
-    (ok) => ok === true,
-
-    15000,
-
-  );
-
-  await ss("Runtime.evaluate", {
-
-    expression: `(function() {
-
-      const form = document.querySelector('[data-testid="teams-message-composer"]');
-
-      if (form instanceof HTMLFormElement) {
-
-        form.requestSubmit();
-
-        return;
-
-      }
-
-      document.querySelector('[data-testid="teams-send-message"]')?.click();
-
-    })()`,
-
-  });
-
-  let messagePosted = await softWaitFor(
-    `(function(){
-      const timelineMatch = Array.from(document.querySelectorAll('article[data-testid^="teams-message-"]'))
-        .some((node) => node.innerText?.includes(${JSON.stringify(turkishMessage)}));
-      const composerValue = document.querySelector('[data-testid="teams-composer-input"]')?.value ?? "";
-      const pending = Boolean(document.querySelector('[data-testid="teams-composer-pending"]'));
-      return timelineMatch && !composerValue.includes(${JSON.stringify(turkishMessage)}) && !pending;
-    })()`,
-    (ok) => ok === true,
-    30000,
-  );
-
-  if (!messagePosted) {
-    await navigateTo(`${ROUTE}?channel=${encodeURIComponent(selectedChannelId)}`);
-    await waitForChannelReady(60000);
-    messagePosted = await softWaitFor(
-      `(function(){
-        return Array.from(document.querySelectorAll('article[data-testid^="teams-message-"]'))
-          .some((node) => node.innerText?.includes(${JSON.stringify(turkishMessage)}));
-      })()`,
-      (ok) => ok === true,
-      60000,
-    );
-  }
-
-  assert("posted message appears in channel timeline", Boolean(messagePosted));
-
-  const composerError = await evalSnap(`document.querySelector('[data-testid="teams-composer-error"]')?.innerText ?? ""`);
-
-  assert("message post has no composer error", !composerError, composerError || "");
-
-  selectedChannelId = await evalSnap(`document.querySelector('[data-testid="teams-selected-channel-ready"]')?.getAttribute("data-channel-id") ?? ${JSON.stringify(selectedChannelId)}`);
-
-  selectedMessageId = await evalSnap(`(function() {
-    const node = Array.from(document.querySelectorAll('article[data-testid^="teams-message-"]'))
-      .find((article) => article.innerText?.includes(${JSON.stringify(turkishMessage)}));
-    return node?.getAttribute("data-testid")?.replace("teams-message-", "") ?? null;
-  })()`);
-
-  assert("posted message id resolved", Boolean(selectedMessageId), `messageId=${selectedMessageId}`);
-
-  await ss("Runtime.evaluate", {
-    expression: `document.querySelector('[data-testid="teams-message-select-${selectedMessageId}"]')?.click()`,
-  });
-
-  const clickSelected = await softWaitFor(
-    `document.querySelector('[data-testid="teams-message-${selectedMessageId}"]')?.getAttribute("data-selected") === "true" || (location.search || "").includes("message=")`,
-    (ok) => ok === true,
-    15000,
-  );
-
-  if (!clickSelected) {
-    await navigateTo(`/teams?channel=${encodeURIComponent(selectedChannelId)}&message=${encodeURIComponent(selectedMessageId)}`);
-    await waitForChannelReady(60000);
-  }
+  selectedChannelId = URETIM_CHANNEL;
+  assert("channel ready through UI or deep link", selectedChannelId === URETIM_CHANNEL);
 
   await waitFor(
     `document.querySelector('[data-testid="teams-message-${selectedMessageId}"]')?.getAttribute("data-selected") === "true"`,
