@@ -325,6 +325,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsApprovalReviewer> TeamsApprovalReviewers => Set<TeamsApprovalReviewer>();
     public DbSet<TeamsApprovalDecision> TeamsApprovalDecisions => Set<TeamsApprovalDecision>();
     public DbSet<TeamsApprovalAuditEvent> TeamsApprovalAuditEvents => Set<TeamsApprovalAuditEvent>();
+    public DbSet<TeamsShiftHandover> TeamsShiftHandovers => Set<TeamsShiftHandover>();
+    public DbSet<TeamsShiftHandoverItem> TeamsShiftHandoverItems => Set<TeamsShiftHandoverItem>();
+    public DbSet<TeamsShiftHandoverAcknowledgement> TeamsShiftHandoverAcknowledgements => Set<TeamsShiftHandoverAcknowledgement>();
+    public DbSet<TeamsShiftHandoverAuditEvent> TeamsShiftHandoverAuditEvents => Set<TeamsShiftHandoverAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1722,6 +1726,30 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TeamsApprovalAuditEventEntityConfiguration());
         modelBuilder.Entity<TeamsApprovalAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsShiftHandoverEntityConfiguration());
+        modelBuilder.Entity<TeamsShiftHandover>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsShiftHandoverItemEntityConfiguration());
+        modelBuilder.Entity<TeamsShiftHandoverItem>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsShiftHandoverAcknowledgementEntityConfiguration());
+        modelBuilder.Entity<TeamsShiftHandoverAcknowledgement>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TeamsShiftHandoverAuditEventEntityConfiguration());
+        modelBuilder.Entity<TeamsShiftHandoverAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

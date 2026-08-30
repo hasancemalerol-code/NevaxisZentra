@@ -3,12 +3,16 @@ import "./teams-server-boundary";
 import {
   getTeamsApproval,
   getTeamsChannelDetail,
+  getTeamsHandover,
   getTeamsMessageSourceContext,
   getTeamsTaskContextChannel,
   listTeamsApprovals,
   listTeamsChannels,
+  listTeamsHandovers,
   type RawTeamsApprovalDetail,
   type RawTeamsApprovalListResponse,
+  type RawTeamsHandoverDetail,
+  type RawTeamsHandoverListResponse,
   type RawTeamsChannelDetail,
   type RawTeamsChannelListResponse,
   type RawTeamsMessageSourceContext,
@@ -113,6 +117,40 @@ export async function readTeamsApproval(
   }
 
   return getTeamsApproval(contextResult.context, requestId);
+}
+
+export async function readTeamsHandovers(
+  channelId?: string | null,
+): Promise<TeamsApiResult<RawTeamsHandoverListResponse>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return listTeamsHandovers(contextResult.context, {
+    channelId: channelId ?? undefined,
+  });
+}
+
+export async function readTeamsHandover(
+  handoverId: string,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return {
+      status: "failure",
+      code: "source-unavailable",
+      message: contextResult.message,
+      retryable: false,
+    };
+  }
+
+  return getTeamsHandover(contextResult.context, handoverId);
 }
 
 export async function readTeamsMessageSourceContext(

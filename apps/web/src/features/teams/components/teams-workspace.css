@@ -217,6 +217,15 @@
   gap: 0.75rem;
 }
 
+.teams-handover-item-editor {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+}
+
 .teams-approval-list a {
   display: flex;
   flex-wrap: wrap;

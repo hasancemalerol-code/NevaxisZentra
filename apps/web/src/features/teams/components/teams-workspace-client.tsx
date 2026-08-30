@@ -16,7 +16,7 @@ import {
   sendTeamsMessageAction,
 } from "@/features/teams/server/teams-actions";
 import { TeamsMessageTaskDraftForm } from "@/features/teams/components/teams-message-task-draft-form";
-import { TEAMS_MESSAGE_TASK_DRAFT_DISCLAIMER } from "@/features/teams/domain/teams-constants";
+import { isHandoverChannelType, TEAMS_MESSAGE_TASK_DRAFT_DISCLAIMER } from "@/features/teams/domain/teams-constants";
 
 type TeamsWorkspaceClientProps = Readonly<{
   channels: RawTeamsChannelListResponse;
@@ -26,6 +26,7 @@ type TeamsWorkspaceClientProps = Readonly<{
   canWrite: boolean;
   canCreateTask: boolean;
   canCreateApproval: boolean;
+  canCreateHandover: boolean;
 }>;
 
 const DATE_TIME = new Intl.DateTimeFormat("tr-TR", {
@@ -47,6 +48,7 @@ export function TeamsWorkspaceClient({
   canWrite,
   canCreateTask,
   canCreateApproval,
+  canCreateHandover,
 }: TeamsWorkspaceClientProps) {
   const router = useRouter();
   const [messageBody, setMessageBody] = useState("");
@@ -217,6 +219,26 @@ export function TeamsWorkspaceClient({
                 >
                   Onay istekleri
                 </Link>
+                {isHandoverChannelType(selectedChannel.channelType) ? (
+                  <>
+                    <Link
+                      href={`/teams/devretme`}
+                      className="teams-context-chip"
+                      data-testid="teams-channel-handovers-link"
+                    >
+                      Vardiya devri
+                    </Link>
+                    {canCreateHandover ? (
+                      <Link
+                        href={`/teams/devretme/yeni?channel=${encodeURIComponent(selectedChannel.id)}`}
+                        className="teams-context-chip"
+                        data-testid="teams-channel-create-handover"
+                      >
+                        Vardiya devri oluştur
+                      </Link>
+                    ) : null}
+                  </>
+                ) : null}
               </div>
               {selectedChannel.lastReadAt ? (
                 <p style={{ margin: "0.5rem 0 0", color: "#6b7280", fontSize: "0.8125rem" }}>
@@ -300,6 +322,15 @@ export function TeamsWorkspaceClient({
                             Onay isteği için teams.approvals.create yetkisi gerekir.
                           </p>
                         )}
+                        {canCreateHandover && isHandoverChannelType(selectedChannel.channelType) ? (
+                          <Link
+                            href={`/teams/devretme/yeni?channel=${encodeURIComponent(selectedChannel.id)}&message=${encodeURIComponent(message.id)}`}
+                            className="teams-context-chip"
+                            data-testid="teams-message-create-handover"
+                          >
+                            Devir maddesine ekle
+                          </Link>
+                        ) : null}
                       </div>
                     ) : null}
                     {message.sourceContext?.canOpen && message.sourceContext.deepLinkPath ? (

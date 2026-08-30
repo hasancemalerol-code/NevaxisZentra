@@ -390,6 +390,15 @@ public static class TeamsServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
+        services.AddScoped<ITeamsHandoverRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            return dbContext is null
+                ? new UnavailableTeamsHandoverRepository()
+                : new TeamsHandoverRepository(
+                    dbContext,
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+        });
 
         return services;
     }

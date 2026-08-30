@@ -157,6 +157,7 @@ app.MapOperationalRiskEndpoints();
 app.MapAiTaskEndpoints();
 app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();
+app.MapTeamsHandoverEndpoints();
 app.MapCommercialIntelligenceEndpoints();
 app.MapCommercialSalesPriceEndpoints();
 app.MapCommercialQuotationRiskEndpoints();

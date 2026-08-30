@@ -596,6 +596,177 @@ export async function assignTeamsApprovalReviewer(
   );
 }
 
+export type RawTeamsHandoverSummary = Readonly<{
+  id: string;
+  channelId: string;
+  channelName: string;
+  shiftDate: string;
+  shiftType: string;
+  status: string;
+  authorLabel: string;
+  createdAt: string;
+  publishedAt: string | null;
+  itemCount: number;
+  acknowledgementCount: number;
+}>;
+
+export type RawTeamsHandoverListResponse = Readonly<{
+  items: readonly RawTeamsHandoverSummary[];
+  capabilities: Readonly<{
+    canCreate: boolean;
+    canAcknowledge: boolean;
+    canManage: boolean;
+  }>;
+  disclaimer: string;
+}>;
+
+export type RawTeamsHandoverItem = Readonly<{
+  id: string;
+  itemKind: string;
+  title: string;
+  body: string;
+  messageId: string | null;
+  aiTaskId: string | null;
+  sourceKind: string | null;
+  sourceLabel: string | null;
+  deepLinkPath: string | null;
+  canOpen: boolean;
+  unavailableReason: string | null;
+}>;
+
+export type RawTeamsHandoverDetail = Readonly<{
+  id: string;
+  channelId: string;
+  channelName: string;
+  authorTenantMembershipId: string;
+  authorLabel: string;
+  shiftDate: string;
+  shiftType: string;
+  status: string;
+  summary: string;
+  safetyNote: string;
+  items: readonly RawTeamsHandoverItem[];
+  acknowledgements: ReadonlyArray<Readonly<{
+    tenantMembershipId: string;
+    displayLabel: string;
+    acknowledgedAt: string;
+  }>>;
+  auditEvents: ReadonlyArray<Readonly<{
+    id: string;
+    eventType: string;
+    actorLabel: string;
+    occurredAt: string;
+  }>>;
+  createdAt: string;
+  publishedAt: string | null;
+  canEdit: boolean;
+  canPublish: boolean;
+  canAcknowledge: boolean;
+  disclaimer: string;
+}>;
+
+export type TeamsHandoverItemWriteBody = Readonly<{
+  itemKind: string;
+  title: string;
+  body: string;
+  messageId?: string | null;
+  aiTaskId?: string | null;
+}>;
+
+export async function listTeamsHandovers(
+  context: TeamsRequestContext,
+  query?: Readonly<{ channelId?: string; status?: string }>,
+): Promise<TeamsApiResult<RawTeamsHandoverListResponse>> {
+  return getJson(
+    context,
+    "/api/teams/handovers",
+    {
+      channelId: query?.channelId,
+      status: query?.status,
+    },
+    (payload) => payload as RawTeamsHandoverListResponse,
+  );
+}
+
+export async function getTeamsHandover(
+  context: TeamsRequestContext,
+  handoverId: string,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  return getJson(
+    context,
+    `/api/teams/handovers/${handoverId}`,
+    undefined,
+    (payload) => payload as RawTeamsHandoverDetail,
+  );
+}
+
+export async function createTeamsHandover(
+  context: TeamsRequestContext,
+  body: Readonly<{
+    channelId: string;
+    shiftDate: string;
+    shiftType: string;
+    summary: string;
+    safetyNote: string;
+    idempotencyKey: string;
+    items: readonly TeamsHandoverItemWriteBody[];
+  }>,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    "/api/teams/handovers",
+    body,
+    (payload) => payload as RawTeamsHandoverDetail,
+  );
+}
+
+export async function updateTeamsHandoverDraft(
+  context: TeamsRequestContext,
+  handoverId: string,
+  body: Readonly<{
+    shiftDate: string;
+    shiftType: string;
+    summary: string;
+    safetyNote: string;
+    items: readonly TeamsHandoverItemWriteBody[];
+  }>,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/handovers/${handoverId}`,
+    body,
+    (payload) => payload as RawTeamsHandoverDetail,
+  );
+}
+
+export async function publishTeamsHandover(
+  context: TeamsRequestContext,
+  handoverId: string,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/handovers/${handoverId}/publish`,
+    undefined,
+    (payload) => payload as RawTeamsHandoverDetail,
+  );
+}
+
+export async function acknowledgeTeamsHandover(
+  context: TeamsRequestContext,
+  handoverId: string,
+): Promise<TeamsApiResult<RawTeamsHandoverDetail>> {
+  return writeJson(
+    context,
+    "POST",
+    `/api/teams/handovers/${handoverId}/acknowledgements`,
+    undefined,
+    (payload) => payload as RawTeamsHandoverDetail,
+  );
+}
+
 export async function getTeamsMessageSourceContext(
   context: TeamsRequestContext,
   messageId: string,

@@ -289,3 +289,120 @@ public sealed record TeamsApprovalWriteResult(
     public static TeamsApprovalWriteResult Fail(string failureCode, string failureReason) =>
         new(false, null, false, failureCode, failureReason);
 }
+
+public sealed record TeamsHandoverAccessCapabilities(
+    bool CanRead,
+    bool CanCreate,
+    bool CanAcknowledge,
+    bool CanManage,
+    bool CanReadAiTasks);
+
+public sealed record TeamsHandoverItemInput(
+    string ItemKind,
+    string Title,
+    string Body,
+    Guid? MessageId,
+    Guid? AiTaskId);
+
+public sealed record CreateTeamsHandoverCommand(
+    Guid ChannelId,
+    DateOnly ShiftDate,
+    string ShiftType,
+    string Summary,
+    string SafetyNote,
+    string IdempotencyKey,
+    IReadOnlyList<TeamsHandoverItemInput> Items);
+
+public sealed record UpdateTeamsHandoverCommand(
+    Guid HandoverId,
+    DateOnly ShiftDate,
+    string ShiftType,
+    string Summary,
+    string SafetyNote,
+    IReadOnlyList<TeamsHandoverItemInput> Items);
+
+public sealed record PublishTeamsHandoverCommand(Guid HandoverId);
+
+public sealed record AcknowledgeTeamsHandoverCommand(Guid HandoverId);
+
+public sealed record TeamsHandoverItemReadModel(
+    Guid Id,
+    string ItemKind,
+    string Title,
+    string Body,
+    Guid? MessageId,
+    Guid? AiTaskId,
+    string? SourceKind,
+    string? SourceLabel,
+    string? DeepLinkPath,
+    bool CanOpen,
+    string? UnavailableReason);
+
+public sealed record TeamsHandoverAcknowledgementReadModel(
+    Guid TenantMembershipId,
+    string DisplayLabel,
+    DateTimeOffset AcknowledgedAtUtc);
+
+public sealed record TeamsHandoverAuditEventReadModel(
+    Guid Id,
+    string EventType,
+    string ActorLabel,
+    DateTimeOffset OccurredAtUtc);
+
+public sealed record TeamsHandoverSummaryReadModel(
+    Guid Id,
+    Guid ChannelId,
+    string ChannelName,
+    DateOnly ShiftDate,
+    string ShiftType,
+    string Status,
+    string AuthorLabel,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? PublishedAtUtc,
+    int ItemCount,
+    int AcknowledgementCount);
+
+public sealed record TeamsHandoverDetailReadModel(
+    Guid Id,
+    Guid ChannelId,
+    string ChannelName,
+    Guid AuthorTenantMembershipId,
+    string AuthorLabel,
+    DateOnly ShiftDate,
+    string ShiftType,
+    string Status,
+    string Summary,
+    string SafetyNote,
+    IReadOnlyList<TeamsHandoverItemReadModel> Items,
+    IReadOnlyList<TeamsHandoverAcknowledgementReadModel> Acknowledgements,
+    IReadOnlyList<TeamsHandoverAuditEventReadModel> AuditEvents,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset? PublishedAtUtc,
+    bool CanEdit,
+    bool CanPublish,
+    bool CanAcknowledge,
+    string Disclaimer);
+
+public sealed record TeamsHandoverListReadModel(
+    IReadOnlyList<TeamsHandoverSummaryReadModel> Items,
+    bool CanCreate,
+    bool CanAcknowledge,
+    bool CanManage);
+
+public sealed record TeamsHandoverWriteResult(
+    bool Succeeded,
+    Guid? HandoverId,
+    bool IdempotentReplay,
+    string? FailureCode,
+    string? FailureReason,
+    TeamsHandoverDetailReadModel? Detail = null)
+{
+    public static TeamsHandoverWriteResult Success(
+        Guid handoverId,
+        TeamsHandoverDetailReadModel detail,
+        bool idempotentReplay = false) =>
+        new(true, handoverId, idempotentReplay, null, null, detail);
+
+    public static TeamsHandoverWriteResult Fail(string failureCode, string failureReason) =>
+        new(false, null, false, failureCode, failureReason);
+}

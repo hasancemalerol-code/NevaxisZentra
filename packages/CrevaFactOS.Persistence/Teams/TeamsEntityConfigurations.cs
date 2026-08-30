@@ -307,3 +307,112 @@ internal sealed class TeamsApprovalAuditEventEntityConfiguration : IEntityTypeCo
             .HasDatabaseName("ix_teams_approval_audit_events_tenant_request");
     }
 }
+
+internal sealed class TeamsShiftHandoverEntityConfiguration : IEntityTypeConfiguration<TeamsShiftHandover>
+{
+    public void Configure(EntityTypeBuilder<TeamsShiftHandover> entity)
+    {
+        entity.ToTable("teams_shift_handovers");
+        entity.HasKey(h => h.Id);
+        entity.Property(h => h.Id).HasColumnName("id");
+        entity.Property(h => h.TenantId).HasColumnName("tenant_id");
+        entity.Property(h => h.FacilityId).HasColumnName("facility_id");
+        entity.Property(h => h.ChannelId).HasColumnName("channel_id");
+        entity.Property(h => h.AuthorTenantMembershipId).HasColumnName("author_tenant_membership_id");
+        entity.Property(h => h.ShiftDate).HasColumnName("shift_date");
+        entity.Property(h => h.ShiftType).HasColumnName("shift_type").HasMaxLength(20).IsRequired();
+        entity.Property(h => h.Status).HasColumnName("status").HasMaxLength(20).IsRequired();
+        entity.Property(h => h.Summary).HasColumnName("summary").HasMaxLength(TeamsConstants.MaxHandoverSummaryLength).IsRequired();
+        entity.Property(h => h.SafetyNote).HasColumnName("safety_note").HasMaxLength(TeamsConstants.MaxHandoverSafetyNoteLength).IsRequired();
+        entity.Property(h => h.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128).IsRequired();
+        entity.Property(h => h.IdempotencyPurpose).HasColumnName("idempotency_purpose").HasMaxLength(160).IsRequired();
+        entity.Property(h => h.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(h => h.PublishedAtUtc).HasColumnName("published_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(h => h.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(h => new { h.TenantId, h.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(h => new { h.TenantId, h.IdempotencyKey })
+            .HasDatabaseName("ux_teams_shift_handovers_tenant_idempotency")
+            .IsUnique();
+        entity.HasIndex(h => new { h.TenantId, h.FacilityId, h.ChannelId, h.ShiftDate })
+            .HasDatabaseName("ix_teams_shift_handovers_tenant_facility_channel_date");
+        entity.HasIndex(h => new { h.TenantId, h.FacilityId, h.Status })
+            .HasDatabaseName("ix_teams_shift_handovers_tenant_facility_status");
+    }
+}
+
+internal sealed class TeamsShiftHandoverItemEntityConfiguration : IEntityTypeConfiguration<TeamsShiftHandoverItem>
+{
+    public void Configure(EntityTypeBuilder<TeamsShiftHandoverItem> entity)
+    {
+        entity.ToTable("teams_shift_handover_items");
+        entity.HasKey(i => i.Id);
+        entity.Property(i => i.Id).HasColumnName("id");
+        entity.Property(i => i.TenantId).HasColumnName("tenant_id");
+        entity.Property(i => i.FacilityId).HasColumnName("facility_id");
+        entity.Property(i => i.HandoverId).HasColumnName("handover_id");
+        entity.Property(i => i.SortOrder).HasColumnName("sort_order");
+        entity.Property(i => i.ItemKind).HasColumnName("item_kind").HasMaxLength(30).IsRequired();
+        entity.Property(i => i.Title).HasColumnName("title").HasMaxLength(TeamsConstants.MaxHandoverItemTitleLength).IsRequired();
+        entity.Property(i => i.Body).HasColumnName("body").HasMaxLength(TeamsConstants.MaxHandoverItemBodyLength).IsRequired();
+        entity.Property(i => i.MessageId).HasColumnName("message_id");
+        entity.Property(i => i.AiTaskId).HasColumnName("ai_task_id");
+        entity.Property(i => i.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(i => i.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(i => i.Handover).WithMany(h => h.Items)
+            .HasForeignKey(i => i.HandoverId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(i => new { i.TenantId, i.HandoverId, i.SortOrder })
+            .HasDatabaseName("ix_teams_shift_handover_items_tenant_handover");
+    }
+}
+
+internal sealed class TeamsShiftHandoverAcknowledgementEntityConfiguration : IEntityTypeConfiguration<TeamsShiftHandoverAcknowledgement>
+{
+    public void Configure(EntityTypeBuilder<TeamsShiftHandoverAcknowledgement> entity)
+    {
+        entity.ToTable("teams_shift_handover_acknowledgements");
+        entity.HasKey(a => a.Id);
+        entity.Property(a => a.Id).HasColumnName("id");
+        entity.Property(a => a.TenantId).HasColumnName("tenant_id");
+        entity.Property(a => a.FacilityId).HasColumnName("facility_id");
+        entity.Property(a => a.HandoverId).HasColumnName("handover_id");
+        entity.Property(a => a.AcknowledgedByTenantMembershipId).HasColumnName("acknowledged_by_tenant_membership_id");
+        entity.Property(a => a.AcknowledgedAtUtc).HasColumnName("acknowledged_at_utc");
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(a => a.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(a => a.Handover).WithMany(h => h.Acknowledgements)
+            .HasForeignKey(a => a.HandoverId)
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(a => new { a.TenantId, a.HandoverId, a.AcknowledgedByTenantMembershipId })
+            .HasDatabaseName("ux_teams_shift_handover_acks_tenant_handover_member")
+            .IsUnique();
+    }
+}
+
+internal sealed class TeamsShiftHandoverAuditEventEntityConfiguration : IEntityTypeConfiguration<TeamsShiftHandoverAuditEvent>
+{
+    public void Configure(EntityTypeBuilder<TeamsShiftHandoverAuditEvent> entity)
+    {
+        entity.ToTable("teams_shift_handover_audit_events");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.HandoverId).HasColumnName("handover_id");
+        entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+        entity.Property(e => e.EventType).HasColumnName("event_type").HasMaxLength(60).IsRequired();
+        entity.Property(e => e.OccurredAtUtc).HasColumnName("occurred_at_utc");
+        entity.Property(e => e.ActorTenantMembershipId).HasColumnName("actor_tenant_membership_id").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.ActorLabel).HasColumnName("actor_label").HasMaxLength(200).IsRequired();
+        entity.Property(e => e.PayloadJson).HasColumnName("payload_json").IsRequired();
+        entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Facility>().WithMany()
+            .HasForeignKey(e => new { e.TenantId, e.FacilityId })
+            .HasPrincipalKey(f => new { f.TenantId, f.Id })
+            .OnDelete(DeleteBehavior.Restrict);
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.HandoverId, e.OccurredAtUtc })
+            .HasDatabaseName("ix_teams_shift_handover_audit_tenant_handover");
+    }
+}

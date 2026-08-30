@@ -71,6 +71,53 @@ public static class TeamsConstants
 
     public static string BuildApprovalCreateIdempotencyPurpose(Guid channelId, string sourceKind, Guid sourceId) =>
         $"teams-approval:{channelId:D}:{sourceKind}:{sourceId:D}";
+
+    public const int MaxHandoverSummaryLength = 2000;
+    public const int MaxHandoverSafetyNoteLength = 2000;
+    public const int MaxHandoverItemTitleLength = 160;
+    public const int MaxHandoverItemBodyLength = 2000;
+    public const int MaxHandoverItems = 20;
+
+    public const string HandoverDisclaimer =
+        "Vardiya devri yalnızca operasyon bağlamı kaydeder; görev, onay, üretim, satın alma, stok, bakım, kalite veya finans işlemi başlatmaz.";
+
+    public static string BuildHandoverCreateIdempotencyPurpose(
+        Guid channelId,
+        DateOnly shiftDate,
+        string shiftType) =>
+        $"teams-handover:{channelId:D}:{shiftDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}:{shiftType}";
+}
+
+public static class TeamsHandoverStatuses
+{
+    public const string Draft = "draft";
+    public const string Published = "published";
+}
+
+public static class TeamsHandoverShiftTypes
+{
+    public const string Morning = "morning";
+    public const string Evening = "evening";
+    public const string Night = "night";
+    public const string Custom = "custom";
+}
+
+public static class TeamsHandoverItemKinds
+{
+    public const string Attention = "attention";
+    public const string Incident = "incident";
+    public const string PendingWork = "pending-work";
+    public const string QualityNote = "quality-note";
+    public const string MaintenanceNote = "maintenance-note";
+    public const string MaterialNote = "material-note";
+}
+
+public static class TeamsHandoverAuditEventTypes
+{
+    public const string Created = "handover-created";
+    public const string Updated = "handover-updated";
+    public const string Published = "handover-published";
+    public const string Acknowledged = "handover-acknowledged";
 }
 
 public static class TeamsApprovalStatuses

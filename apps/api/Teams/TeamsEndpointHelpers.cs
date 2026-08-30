@@ -154,6 +154,116 @@ internal static class TeamsEndpointHelpers
             correlationContext,
             cancellationToken);
 
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveHandoverReadAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.HandoverRead,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveHandoverCreateAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.HandoverCreate,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<(TeamsOperationContext? Context, IResult? Failure)> ResolveHandoverAcknowledgeAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken) =>
+        await ResolvePermissionAccessAsync(
+            facilityId,
+            TeamsPermissionKeys.HandoverAcknowledge,
+            facilityAccessResolver,
+            correlationContext,
+            cancellationToken);
+
+    internal static async Task<TeamsHandoverAccessCapabilities> ResolveHandoverCapabilitiesAsync(
+        Guid facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CancellationToken cancellationToken) =>
+        new(
+            CanRead: await HasPermissionAsync(facilityId, TeamsPermissionKeys.HandoverRead, facilityAccessResolver, cancellationToken),
+            CanCreate: await HasPermissionAsync(facilityId, TeamsPermissionKeys.HandoverCreate, facilityAccessResolver, cancellationToken),
+            CanAcknowledge: await HasPermissionAsync(facilityId, TeamsPermissionKeys.HandoverAcknowledge, facilityAccessResolver, cancellationToken),
+            CanManage: await HasPermissionAsync(facilityId, TeamsPermissionKeys.HandoverManage, facilityAccessResolver, cancellationToken),
+            CanReadAiTasks: await HasPermissionAsync(facilityId, AiTaskPermissionKeys.Read, facilityAccessResolver, cancellationToken));
+
+    internal static IResult MapHandoverWriteResult(TeamsHandoverWriteResult result, bool isCreate = false)
+    {
+        if (!result.Succeeded || result.Detail is null)
+        {
+            return MapFailure(result.FailureCode, result.FailureReason);
+        }
+
+        var dto = MapHandoverDetail(result.Detail);
+        if (result.IdempotentReplay)
+        {
+            return TypedResults.Ok(dto);
+        }
+
+        return isCreate ? TypedResults.Created((string?)null, dto) : TypedResults.Ok(dto);
+    }
+
+    internal static object MapHandoverDetail(TeamsHandoverDetailReadModel detail) => new
+    {
+        id = detail.Id,
+        channelId = detail.ChannelId,
+        channelName = detail.ChannelName,
+        authorTenantMembershipId = detail.AuthorTenantMembershipId,
+        authorLabel = detail.AuthorLabel,
+        shiftDate = detail.ShiftDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+        shiftType = detail.ShiftType,
+        status = detail.Status,
+        summary = detail.Summary,
+        safetyNote = detail.SafetyNote,
+        items = detail.Items.Select(i => new
+        {
+            id = i.Id,
+            itemKind = i.ItemKind,
+            title = i.Title,
+            body = i.Body,
+            messageId = i.MessageId,
+            aiTaskId = i.AiTaskId,
+            sourceKind = i.SourceKind,
+            sourceLabel = i.SourceLabel,
+            deepLinkPath = i.DeepLinkPath,
+            canOpen = i.CanOpen,
+            unavailableReason = i.UnavailableReason,
+        }),
+        acknowledgements = detail.Acknowledgements.Select(a => new
+        {
+            tenantMembershipId = a.TenantMembershipId,
+            displayLabel = a.DisplayLabel,
+            acknowledgedAt = a.AcknowledgedAtUtc,
+        }),
+        auditEvents = detail.AuditEvents.Select(e => new
+        {
+            id = e.Id,
+            eventType = e.EventType,
+            actorLabel = e.ActorLabel,
+            occurredAt = e.OccurredAtUtc,
+        }),
+        createdAt = detail.CreatedAtUtc,
+        publishedAt = detail.PublishedAtUtc,
+        canEdit = detail.CanEdit,
+        canPublish = detail.CanPublish,
+        canAcknowledge = detail.CanAcknowledge,
+        disclaimer = detail.Disclaimer,
+    };
+
     internal static async Task<TeamsApprovalAccessCapabilities> ResolveApprovalCapabilitiesAsync(
         Guid facilityId,
         IFacilityAccessResolver facilityAccessResolver,

@@ -164,3 +164,69 @@ public sealed class TeamsApprovalAuditEvent
 
     public TeamsApprovalRequest? Request { get; set; }
 }
+
+public sealed class TeamsShiftHandover
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid ChannelId { get; set; }
+    public Guid AuthorTenantMembershipId { get; set; }
+    public DateOnly ShiftDate { get; set; }
+    public string ShiftType { get; set; } = TeamsHandoverShiftTypes.Morning;
+    public string Status { get; set; } = TeamsHandoverStatuses.Draft;
+    public string Summary { get; set; } = string.Empty;
+    public string SafetyNote { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string IdempotencyPurpose { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset? PublishedAtUtc { get; set; }
+
+    public ICollection<TeamsShiftHandoverItem> Items { get; set; } = [];
+    public ICollection<TeamsShiftHandoverAcknowledgement> Acknowledgements { get; set; } = [];
+}
+
+public sealed class TeamsShiftHandoverItem
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid HandoverId { get; set; }
+    public int SortOrder { get; set; }
+    public string ItemKind { get; set; } = TeamsHandoverItemKinds.Attention;
+    public string Title { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public Guid? MessageId { get; set; }
+    public Guid? AiTaskId { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public TeamsShiftHandover? Handover { get; set; }
+}
+
+public sealed class TeamsShiftHandoverAcknowledgement
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid HandoverId { get; set; }
+    public Guid AcknowledgedByTenantMembershipId { get; set; }
+    public DateTimeOffset AcknowledgedAtUtc { get; set; }
+
+    public TeamsShiftHandover? Handover { get; set; }
+}
+
+public sealed class TeamsShiftHandoverAuditEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid HandoverId { get; set; }
+    public Guid? ChannelId { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public string ActorTenantMembershipId { get; set; } = string.Empty;
+    public string ActorLabel { get; set; } = string.Empty;
+    public string PayloadJson { get; set; } = "{}";
+
+    public TeamsShiftHandover? Handover { get; set; }
+}

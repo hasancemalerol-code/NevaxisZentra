@@ -17,3 +17,38 @@ export const TEAMS_APPROVAL_DECISIONS = {
   rejected: "Reddet",
   "changes-requested": "Değişiklik iste",
 } as const;
+
+export const TEAMS_HANDOVER_DISCLAIMER =
+  "Vardiya devri yalnızca operasyon bağlamı kaydeder; görev, onay, üretim, satın alma, stok, bakım, kalite veya finans işlemi başlatmaz.";
+
+export const TEAMS_HANDOVER_STATUSES = {
+  draft: "Taslak",
+  published: "Yayımlanmış",
+} as const;
+
+export const TEAMS_HANDOVER_SHIFT_TYPES = {
+  morning: "Sabah",
+  evening: "Akşam",
+  night: "Gece",
+  custom: "Özel",
+} as const;
+
+export const TEAMS_HANDOVER_ITEM_KINDS = {
+  attention: "Dikkat",
+  incident: "Olay",
+  "pending-work": "Bekleyen iş",
+  "quality-note": "Kalite notu",
+  "maintenance-note": "Bakım notu",
+  "material-note": "Malzeme notu",
+} as const;
+
+export const TEAMS_HANDOVER_AUDIT_EVENTS = {
+  "handover-created": "Oluşturuldu",
+  "handover-updated": "Güncellendi",
+  "handover-published": "Yayımlandı",
+  "handover-acknowledged": "Teslim alındı",
+} as const;
+
+export function isHandoverChannelType(channelType: string): boolean {
+  return channelType === "department" || channelType === "operational";
+}

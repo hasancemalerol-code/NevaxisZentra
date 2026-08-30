@@ -50,6 +50,8 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
     result.canWrite && hasGrantedPermission(effectiveAccess, "teams.write");
   const canCreateTask = hasGrantedPermission(effectiveAccess, "ai-task.create");
   const canCreateApproval = hasGrantedPermission(effectiveAccess, "teams.approvals.create");
+  const canCreateHandover = hasGrantedPermission(effectiveAccess, "teams.handover.create");
+  const canReadHandover = hasGrantedPermission(effectiveAccess, "teams.handover.read");
 
   return (
     <PageContent>
@@ -58,15 +60,23 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
           eyebrow="Teams"
           title="Operasyon İletişimi"
           actions={
-            <Link href="/teams/onaylar" className="teams-context-chip" data-testid="teams-approvals-index-link">
-              Onay istekleri
-            </Link>
+            <>
+              <Link href="/teams/onaylar" className="teams-context-chip" data-testid="teams-approvals-index-link">
+                Onay istekleri
+              </Link>
+              {canReadHandover ? (
+                <Link href="/teams/devretme" className="teams-context-chip" data-testid="teams-handovers-index-link">
+                  Vardiya devri
+                </Link>
+              ) : null}
+            </>
           }
         />
 
       <Section title="Çalışma alanı">
         <TeamsWorkspaceClient
           canCreateApproval={canCreateApproval}
+          canCreateHandover={canCreateHandover}
           canCreateTask={canCreateTask}
           canWrite={canWrite}
           channels={result.channels}

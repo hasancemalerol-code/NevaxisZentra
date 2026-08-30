@@ -27068,6 +27068,253 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("teams_message_task_links", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorTenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_tenant_membership_id");
+
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("channel_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("IdempotencyPurpose")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)")
+                        .HasColumnName("idempotency_purpose");
+
+                    b.Property<DateTimeOffset?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at_utc");
+
+                    b.Property<string>("SafetyNote")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("safety_note");
+
+                    b.Property<DateOnly>("ShiftDate")
+                        .HasColumnType("date")
+                        .HasColumnName("shift_date");
+
+                    b.Property<string>("ShiftType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("shift_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_teams_shift_handovers_tenant_idempotency");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status")
+                        .HasDatabaseName("ix_teams_shift_handovers_tenant_facility_status");
+
+                    b.HasIndex("TenantId", "FacilityId", "ChannelId", "ShiftDate")
+                        .HasDatabaseName("ix_teams_shift_handovers_tenant_facility_channel_date");
+
+                    b.ToTable("teams_shift_handovers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverAcknowledgement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AcknowledgedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("acknowledged_at_utc");
+
+                    b.Property<Guid>("AcknowledgedByTenantMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("acknowledged_by_tenant_membership_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("TenantId", "HandoverId", "AcknowledgedByTenantMembershipId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_teams_shift_handover_acks_tenant_handover_member");
+
+                    b.ToTable("teams_shift_handover_acknowledgements", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_label");
+
+                    b.Property<string>("ActorTenantMembershipId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_tenant_membership_id");
+
+                    b.Property<Guid?>("ChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("channel_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("TenantId", "FacilityId", "HandoverId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_teams_shift_handover_audit_tenant_handover");
+
+                    b.ToTable("teams_shift_handover_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_task_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("body");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<string>("ItemKind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("item_kind");
+
+                    b.Property<Guid?>("MessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("TenantId", "HandoverId", "SortOrder")
+                        .HasDatabaseName("ix_teams_shift_handover_items_tenant_handover");
+
+                    b.ToTable("teams_shift_handover_items", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -31991,6 +32238,80 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverAcknowledgement", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", "Handover")
+                        .WithMany("Acknowledgements")
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Handover");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", "Handover")
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Handover");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandoverItem", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", "Handover")
+                        .WithMany("Items")
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Handover");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Tenancy.TenantIsolationProbe", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -32274,6 +32595,13 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsMessage", b =>
                 {
                     b.Navigation("Mentions");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Teams.TeamsShiftHandover", b =>
+                {
+                    b.Navigation("Acknowledgements");
+
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

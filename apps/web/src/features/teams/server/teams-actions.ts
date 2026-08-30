@@ -8,13 +8,18 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
+  acknowledgeTeamsHandover,
   assignTeamsApprovalReviewer,
   cancelTeamsApproval,
   createMessageTaskDraft,
   createTeamsApproval,
+  createTeamsHandover,
   decideTeamsApproval,
   markTeamsChannelRead,
   postTeamsMessage,
+  publishTeamsHandover,
+  updateTeamsHandoverDraft,
+  type TeamsHandoverItemWriteBody,
 } from "./teams-api-client";
 import { resolveTeamsRequestContext } from "./teams-request-context";
 
@@ -254,4 +259,127 @@ export async function assignTeamsApprovalReviewerAction(input: Readonly<{
 
   revalidatePath(`/teams/onaylar/${input.requestId}`);
   return { status: "success", requestId: result.value.id };
+}
+
+type HandoverActionResult =
+  | Readonly<{ status: "success"; handoverId: string }>
+  | Readonly<{ status: "failure"; message: string }>;
+
+export async function createTeamsHandoverAction(input: Readonly<{
+  channelId: string;
+  shiftDate: string;
+  shiftType: string;
+  summary: string;
+  safetyNote: string;
+  items: readonly TeamsHandoverItemWriteBody[];
+}>): Promise<HandoverActionResult> {
+  const authorization = await denyUnlessGranted("teams.handover.create");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Vardiya devri oluşturma yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await createTeamsHandover(contextResult.context, {
+    channelId: input.channelId,
+    shiftDate: input.shiftDate,
+    shiftType: input.shiftType,
+    summary: input.summary,
+    safetyNote: input.safetyNote,
+    idempotencyKey: randomUUID(),
+    items: input.items,
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams");
+  revalidatePath("/teams/devretme");
+  revalidatePath(`/teams/devretme/${result.value.id}`);
+  return { status: "success", handoverId: result.value.id };
+}
+
+export async function updateTeamsHandoverDraftAction(input: Readonly<{
+  handoverId: string;
+  shiftDate: string;
+  shiftType: string;
+  summary: string;
+  safetyNote: string;
+  items: readonly TeamsHandoverItemWriteBody[];
+}>): Promise<HandoverActionResult> {
+  const authorization = await denyUnlessGranted("teams.handover.create");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Vardiya devri güncelleme yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await updateTeamsHandoverDraft(contextResult.context, input.handoverId, {
+    shiftDate: input.shiftDate,
+    shiftType: input.shiftType,
+    summary: input.summary,
+    safetyNote: input.safetyNote,
+    items: input.items,
+  });
+
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/devretme");
+  revalidatePath(`/teams/devretme/${input.handoverId}`);
+  return { status: "success", handoverId: result.value.id };
+}
+
+export async function publishTeamsHandoverAction(input: Readonly<{
+  handoverId: string;
+}>): Promise<HandoverActionResult> {
+  const authorization = await denyUnlessGranted("teams.handover.create");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Vardiya devri yayımlama yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await publishTeamsHandover(contextResult.context, input.handoverId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/devretme");
+  revalidatePath(`/teams/devretme/${input.handoverId}`);
+  return { status: "success", handoverId: result.value.id };
+}
+
+export async function acknowledgeTeamsHandoverAction(input: Readonly<{
+  handoverId: string;
+}>): Promise<HandoverActionResult> {
+  const authorization = await denyUnlessGranted("teams.handover.acknowledge");
+  if (authorization.status === "failure") {
+    return { status: "failure", message: "Vardiya devri teslim alma yetkisi yok." };
+  }
+
+  const contextResult = await resolveTeamsRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  const result = await acknowledgeTeamsHandover(contextResult.context, input.handoverId);
+  if (result.status === "failure") {
+    return { status: "failure", message: result.message };
+  }
+
+  revalidatePath("/teams/devretme");
+  revalidatePath(`/teams/devretme/${input.handoverId}`);
+  return { status: "success", handoverId: result.value.id };
 }
