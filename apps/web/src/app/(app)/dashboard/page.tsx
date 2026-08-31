@@ -9,6 +9,7 @@ import { MaintenanceStatusPanel } from "@/components/dashboard/maintenance-statu
 import { MaterialRisksPanel } from "@/components/dashboard/material-risks-panel";
 import { MoldStatusPanel } from "@/components/dashboard/mold-status-panel";
 import { PlanConfidencePanel } from "@/components/dashboard/plan-confidence-panel";
+import { PiyasaOzetiPanel } from "@/components/dashboard/piyasa-ozeti-panel";
 import { ProductionOrdersTable } from "@/components/dashboard/production-orders-table";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
 import { DashboardShowcaseTvAction } from "@/components/dashboard/dashboard-showcase-tv-action";
@@ -50,92 +51,96 @@ export default async function DashboardPage() {
 
         <div className="command-center__titlebar-actions">
           <button
-            aria-label="AI'ya Görev Ver. AI görev oluşturma akışı henüz kullanıma hazır değil."
-            className="command-center__ai-task-button"
-            disabled
-            title="AI görev oluşturma akışı henüz kullanıma hazır değil."
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              className="command-center__ai-task-button-icon"
+              aria-label="AI'ya Görev Ver. AI görev oluşturma akışı henüz kullanıma hazır değil."
+              className="command-center__ai-task-button"
+              disabled
+              title="AI görev oluşturma akışı henüz kullanıma hazır değil."
+              type="button"
             >
-              <svg
-                fill="none"
-                height="20"
-                viewBox="0 0 24 24"
-                width="20"
+              <span
+                aria-hidden="true"
+                className="command-center__ai-task-button-icon"
               >
-                <path
-                  d="M12 5v14M5 12h14"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                />
-              </svg>
-            </span>
+                <svg
+                  fill="none"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  width="20"
+                >
+                  <path
+                    d="M12 5v14M5 12h14"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </span>
 
-            <span className="command-center__ai-task-button-copy">
-              <strong>AI&apos;ya Görev Ver</strong>
-              <span>AI görev oluşturma akışı henüz kullanıma hazır değil.</span>
-            </span>
-          </button>
-          <DashboardShowcaseTvAction />
-          <Link
-            aria-label="CrevaFact Teams çalışma alanını aç"
-            className="command-center__teams-button"
-            href="/teams"
-          >
-            <span
-              aria-hidden="true"
-              className="command-center__teams-button-icon"
+              <span className="command-center__ai-task-button-copy">
+                <strong>AI&apos;ya Görev Ver</strong>
+                <span>AI görev oluşturma akışı henüz kullanıma hazır değil.</span>
+              </span>
+            </button>
+            <DashboardShowcaseTvAction />
+            <Link
+              aria-label="CrevaFact Teams çalışma alanını aç"
+              className="command-center__teams-button"
+              href="/teams"
             >
-              <svg
-                fill="none"
-                height="20"
-                viewBox="0 0 24 24"
-                width="20"
+              <span
+                aria-hidden="true"
+                className="command-center__teams-button-icon"
               >
-                <path
-                  d="M7.5 18.5 4 20l1.1-3.4A7.5 7.5 0 1 1 19.5 13"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
+                <svg
+                  fill="none"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  width="20"
+                >
+                  <path
+                    d="M7.5 18.5 4 20l1.1-3.4A7.5 7.5 0 1 1 19.5 13"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.8"
+                  />
+                  <path
+                    d="M8 10h8M8 13.5h5"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeWidth="1.8"
+                  />
+                </svg>
+              </span>
+
+              <span className="command-center__teams-button-copy">
+                <strong>CrevaFact Teams</strong>
+                <span>Yeni ekip mesajları</span>
+              </span>
+
+              <span
+                aria-label="3 okunmamış mesaj"
+                className="command-center__teams-button-badge"
+              >
+                3
+              </span>
+            </Link>
+
+            <div className="command-center__titlebar-context-strip">
+              <div className="command-center__titlebar-status">
+                <span
+                  aria-hidden="true"
+                  className="command-center__live-dot"
                 />
-                <path
-                  d="M8 10h8M8 13.5h5"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeWidth="1.8"
-                />
-              </svg>
-            </span>
 
-            <span className="command-center__teams-button-copy">
-              <strong>CrevaFact Teams</strong>
-              <span>Yeni ekip mesajları</span>
-            </span>
+                <div>
+                  <strong>Canlı operasyon görünümü</strong>
+                  <span>Son güncelleme: şimdi</span>
+                </div>
+              </div>
 
-            <span
-              aria-label="3 okunmamış mesaj"
-              className="command-center__teams-button-badge"
-            >
-              3
-            </span>
-          </Link>
-
-          <div className="command-center__titlebar-status">
-            <span
-              aria-hidden="true"
-              className="command-center__live-dot"
-            />
-
-            <div>
-              <strong>Canlı operasyon görünümü</strong>
-              <span>Son güncelleme: şimdi</span>
+              <PiyasaOzetiPanel />
             </div>
-          </div>
         </div>
       </header>
 

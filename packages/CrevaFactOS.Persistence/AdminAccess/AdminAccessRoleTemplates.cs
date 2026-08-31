@@ -9,6 +9,7 @@ using CrevaFactOS.Persistence.SaasCommercial;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.ShiftWorkforce;
+using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Teams;
 
 namespace CrevaFactOS.Persistence.AdminAccess;
@@ -184,6 +185,7 @@ internal static class CustomerCatalogKeys
         CommercialIntelligencePermissionKeys.Read,
         AiTaskPermissionKeys.Read,
         TeamsPermissionKeys.Read,
+        MarketRatesPermissionKeys.Read,
         SaasCommercialPermissionKeys.Read,
     ];
 
@@ -213,6 +215,7 @@ internal static class CustomerCatalogKeys
         CommercialIntelligencePermissionKeys.Read, CommercialIntelligencePermissionKeys.Manage,
         AiTaskPermissionKeys.Read, AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
         TeamsPermissionKeys.Read, TeamsPermissionKeys.Write, TeamsPermissionKeys.Manage,
+        MarketRatesPermissionKeys.Read,
         TeamsPermissionKeys.ApprovalsCreate, TeamsPermissionKeys.ApprovalsReview, TeamsPermissionKeys.ApprovalsManage,
         TeamsPermissionKeys.HandoverRead, TeamsPermissionKeys.HandoverCreate, TeamsPermissionKeys.HandoverAcknowledge, TeamsPermissionKeys.HandoverManage,
         TeamsPermissionKeys.DirectRead, TeamsPermissionKeys.DirectWrite, TeamsPermissionKeys.DirectManage,

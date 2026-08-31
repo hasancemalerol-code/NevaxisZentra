@@ -16025,6 +16025,172 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("preventive_maintenance_plans", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_label");
+
+                    b.Property<string>("ActorTenantMembershipId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_tenant_membership_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_market_rate_audit_tenant_occurred");
+
+                    b.ToTable("market_rate_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateQuoteLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BaseCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("base_currency");
+
+                    b.Property<decimal?>("ChangePercent")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)")
+                        .HasColumnName("change_percent");
+
+                    b.Property<string>("PairLabel")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("pair_label");
+
+                    b.Property<string>("QuoteCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("quote_currency");
+
+                    b.Property<decimal>("Rate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rate");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PairLabel")
+                        .IsUnique()
+                        .HasDatabaseName("ux_market_rate_quote_lines_tenant_pair");
+
+                    b.ToTable("market_rate_quote_lines", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateSnapshot", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("AvailabilityState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("availability_state");
+
+                    b.Property<string>("ConfigurationMessage")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)")
+                        .HasColumnName("configuration_message");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("FreshnessState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<string>("LastFetchFailureCode")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("last_fetch_failure_code");
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("provider_key");
+
+                    b.Property<DateTimeOffset?>("ProviderObservedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("provider_observed_at_utc");
+
+                    b.Property<string>("SourceAttributionUrl")
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)")
+                        .HasColumnName("source_attribution_url");
+
+                    b.Property<string>("SourceFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_fingerprint");
+
+                    b.Property<string>("SourceLabel")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("source_label");
+
+                    b.Property<DateTimeOffset?>("SynchronizedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("synchronized_at_utc");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("TenantId");
+
+                    b.ToTable("market_rate_snapshots", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Material.MaterialAvailabilityRiskFollowUpAuditEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -30611,6 +30777,35 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateAuditEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateQuoteLine", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.MarketRates.MarketRateSnapshot", "Snapshot")
+                        .WithMany("QuoteLines")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Snapshot");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateSnapshot", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Material.MaterialAvailabilityRiskFollowUpAuditEvent", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Material.MaterialRequirementAssessment", "Assessment")
@@ -32992,6 +33187,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Drivers");
 
                     b.Navigation("EvidenceItems");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.MarketRates.MarketRateSnapshot", b =>
+                {
+                    b.Navigation("QuoteLines");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Material.MaterialRegistryEntry", b =>

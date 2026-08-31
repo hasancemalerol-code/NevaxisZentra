@@ -32,6 +32,7 @@ using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Teams;
+using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
 
 namespace CrevaFactOS.Persistence;
@@ -336,6 +337,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsDirectMessageAuditEvent> TeamsDirectMessageAuditEvents => Set<TeamsDirectMessageAuditEvent>();
     public DbSet<TeamsNotification> TeamsNotifications => Set<TeamsNotification>();
     public DbSet<TeamsNotificationAuditEvent> TeamsNotificationAuditEvents => Set<TeamsNotificationAuditEvent>();
+
+    public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
+    public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
+    public DbSet<MarketRateAuditEvent> MarketRateAuditEvents => Set<MarketRateAuditEvent>();
 
     // Commercial intelligence foundation (COMMERCIAL-INTELLIGENCE-1)
     public DbSet<CommercialPurchasePriceProfile> CommercialPurchasePriceProfiles => Set<CommercialPurchasePriceProfile>();
@@ -1799,6 +1804,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TeamsNotificationAuditEventEntityConfiguration());
         modelBuilder.Entity<TeamsNotificationAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
+        modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MarketRateQuoteLineEntityConfiguration());
+        modelBuilder.Entity<MarketRateQuoteLine>().HasQueryFilter(q =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && q.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new MarketRateAuditEventEntityConfiguration());
+        modelBuilder.Entity<MarketRateAuditEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

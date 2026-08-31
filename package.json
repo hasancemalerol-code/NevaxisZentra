@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev:web": "pnpm --filter @crevafactos/web dev",
-    "dev:api": "dotnet run --project apps/api/CrevaFactOS.Api.csproj",
+    "dev:api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/start-dev-api.ps1",
     "dev:worker": "dotnet run --project apps/worker/CrevaFactOS.Worker.csproj",
     "dev:edge-agent": "dotnet run --project apps/edge-agent/CrevaFactOS.EdgeAgent.csproj",
     "infra:config": "docker compose -f infrastructure/compose.yaml config",
