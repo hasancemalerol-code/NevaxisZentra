@@ -85,6 +85,7 @@ public sealed record AiTaskSummaryReadModel(
     string ApprovalState,
     string? SourceModule,
     string? SourceEntityId,
+    string ListOriginKind,
     DateTimeOffset? DueAtUtc,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,

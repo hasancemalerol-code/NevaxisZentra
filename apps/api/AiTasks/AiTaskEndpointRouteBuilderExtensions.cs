@@ -237,6 +237,7 @@ public static class AiTaskEndpointRouteBuilderExtensions
         approval = new { state = item.ApprovalState },
         sourceModule = item.SourceModule,
         sourceEntityId = item.SourceEntityId,
+        listOriginKind = item.ListOriginKind,
         dueAt = item.DueAtUtc,
         createdAt = item.CreatedAtUtc,
         updatedAt = item.UpdatedAtUtc,

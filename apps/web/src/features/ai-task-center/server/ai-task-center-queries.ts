@@ -1,0 +1,139 @@
+import "./ai-task-server-boundary";
+
+import {
+  collectAssignedTaskIds,
+  composeAiTaskCenterItems,
+} from "../application/ai-task-center-composition";
+import { calculateAiTaskKpis } from "../application/ai-task-query";
+import type { AiTaskCenterItem } from "../domain/ai-task-center-item";
+import { denyUnlessAnyGranted, denyUnlessGranted } from "../../admin-access/server/require-current-permission";
+import { readTeamsWorkInbox } from "../../teams/server/teams-queries";
+import type { AiTaskListRecord } from "./ai-task-mapper";
+import { listAiTasks } from "./ai-task-api-client";
+import { mapRawAiTaskSummary } from "./ai-task-mapper";
+import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
+
+export type AiTaskCenterUnifiedPayload = Readonly<{
+  items: readonly AiTaskCenterItem[];
+  assignedTaskIds: readonly string[];
+  tasks: readonly AiTaskListRecord[];
+  totalTaskCount: number;
+  ruleSetVersion: string;
+  provenanceDisclaimer: string;
+  workInboxDisclaimer: string | null;
+  canCreate: boolean;
+  canReview: boolean;
+  canReadTasks: boolean;
+  canReadTeamsInbox: boolean;
+  sourceAvailability: Readonly<{
+    aiTasks: boolean;
+    approvals: boolean;
+    handovers: boolean;
+    mentions: boolean;
+  }>;
+  kpis: ReturnType<typeof calculateAiTaskKpis>;
+}>;
+
+export type AiTaskCenterUnifiedResult =
+  | Readonly<{ status: "success"; center: AiTaskCenterUnifiedPayload }>
+  | ReadFailure;
+
+function mapFailureMessage(code: string | undefined, message: string): ReadFailure {
+  if (code === "unauthenticated") {
+    return { status: "failure", message: "Oturum doğrulanamadı.", code };
+  }
+
+  if (code === "permission-denied") {
+    return {
+      status: "failure",
+      message: "AI Görev Merkezi görüntüleme yetkiniz bulunmuyor.",
+      code,
+    };
+  }
+
+  return { status: "failure", message, code };
+}
+
+export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResult> {
+  const authorization = await denyUnlessAnyGranted(["ai-task.read", "teams.read"]);
+  if (authorization.status === "failure") {
+    return { status: "failure", message: authorization.message, code: "permission-denied" };
+  }
+
+  const canReadTasks = (await denyUnlessGranted("ai-task.read")).status === "granted";
+  const canReadTeamsInbox = (await denyUnlessGranted("teams.read")).status === "granted";
+
+  let tasks: readonly AiTaskListRecord[] = [];
+  let totalTaskCount = 0;
+  let ruleSetVersion = "";
+  let provenanceDisclaimer = "";
+  let canCreate = false;
+  let canReview = false;
+
+  if (canReadTasks) {
+    const contextResult = resolveAiTaskRequestContext();
+    if (contextResult.status === "failure") {
+      return { status: "failure", message: contextResult.message, code: contextResult.code };
+    }
+
+    const result = await listAiTasks(contextResult.context, { page: 1, pageSize: 100 });
+    if (result.status === "failure") {
+      return mapFailureMessage(result.code, result.message);
+    }
+
+    tasks = result.value.items.map(mapRawAiTaskSummary);
+    totalTaskCount = result.value.totalCount;
+    ruleSetVersion = result.value.ruleSetVersion;
+    provenanceDisclaimer = result.value.provenanceDisclaimer;
+    canCreate = result.value.capabilities.canCreate;
+    canReview = result.value.capabilities.canReview;
+  }
+
+  let workInboxItems: readonly import("../../teams/server/teams-api-client").RawTeamsWorkInboxItem[] = [];
+  let workInboxDisclaimer: string | null = null;
+  let sourceAvailability = {
+    aiTasks: false,
+    approvals: false,
+    handovers: false,
+    mentions: false,
+  };
+
+  if (canReadTeamsInbox) {
+    const inboxResult = await readTeamsWorkInbox();
+    if (inboxResult.status === "failure") {
+      return mapFailureMessage(inboxResult.code, inboxResult.message);
+    }
+
+    workInboxItems = inboxResult.value.items;
+    workInboxDisclaimer = inboxResult.value.disclaimer;
+    sourceAvailability = inboxResult.value.sources;
+  }
+
+  const assignedTaskIds = collectAssignedTaskIds(workInboxItems);
+  const items = composeAiTaskCenterItems({
+    tasks,
+    workInboxItems,
+    facilityLabel: null,
+  });
+
+  return {
+    status: "success",
+    center: {
+      items,
+      assignedTaskIds: [...assignedTaskIds],
+      tasks,
+      totalTaskCount,
+      ruleSetVersion,
+      provenanceDisclaimer,
+      workInboxDisclaimer,
+      canCreate,
+      canReview,
+      canReadTasks,
+      canReadTeamsInbox,
+      sourceAvailability,
+      kpis: calculateAiTaskKpis(tasks),
+    },
+  };
+}

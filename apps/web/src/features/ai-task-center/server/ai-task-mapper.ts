@@ -12,6 +12,14 @@ import type {
 } from "../domain/ai-task";
 import type { RawAiTaskDetail, RawAiTaskSummary } from "./ai-task-api-client";
 
+export type AiTaskListRecord = AiTask &
+  Readonly<{
+    sourceModule: string | null;
+    sourceEntityId: string | null;
+    listOriginKind: string;
+    version: number;
+  }>;
+
 function asCategory(value: string): AiTaskCategory {
   return value as AiTaskCategory;
 }
@@ -152,7 +160,7 @@ export function mapRawAiTaskDetail(raw: RawAiTaskDetail): AiTask {
   };
 }
 
-export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTask {
+export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTaskListRecord {
   return {
     id: raw.id,
     title: raw.title,
@@ -185,6 +193,10 @@ export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTask {
     updatedAt: raw.updatedAt,
     dueAt: raw.dueAt ?? undefined,
     auditTrail: [],
+    sourceModule: raw.sourceModule,
+    sourceEntityId: raw.sourceEntityId,
+    listOriginKind: raw.listOriginKind,
+    version: raw.version,
   };
 }
 

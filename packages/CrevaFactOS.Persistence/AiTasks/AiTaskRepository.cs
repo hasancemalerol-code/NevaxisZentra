@@ -706,6 +706,7 @@ public sealed class AiTaskRepository(
             task.ApprovalState,
             task.SourceModule,
             task.SourceEntityId,
+            AiTaskListOriginResolver.Resolve(task),
             task.DueAtUtc,
             task.CreatedAtUtc,
             task.UpdatedAtUtc,

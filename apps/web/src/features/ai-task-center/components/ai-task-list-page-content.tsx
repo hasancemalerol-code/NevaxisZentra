@@ -14,16 +14,21 @@ import {
   Section,
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
+import { AiTaskCenterUnifiedWorkspace } from "@/features/ai-task-center/components/ai-task-center-unified-workspace";
 import { AiTaskKpiLinks } from "@/features/ai-task-center/components/ai-task-kpi-links";
 import { AiTaskKpiLoading } from "@/features/ai-task-center/components/ai-task-kpi-loading";
-import { AiTaskWorkspace } from "@/features/ai-task-center/components/ai-task-workspace";
-import { AiTaskWorkspaceLoading } from "@/features/ai-task-center/components/ai-task-workspace-loading";
+import {
+  parseAiTaskCenterTaskOriginFilter,
+  parseAiTaskCenterView,
+} from "@/features/ai-task-center/domain/ai-task-center-item";
 import { refreshAiTaskWorkspaceAction } from "@/features/ai-task-center/server/ai-task-actions";
-import { readAiTaskWorkspace } from "@/features/ai-task-center/server/ai-task-queries";
+import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-task-center-queries";
 
 type AiTaskListPageContentProps = Readonly<{
   listPath?: string;
   showCreateAction?: boolean;
+  initialView?: string;
+  initialOriginFilter?: string;
 }>;
 
 async function RefreshButton() {
@@ -44,35 +49,37 @@ async function RefreshButton() {
 export async function AiTaskListPageContent({
   listPath = "/ai-gorevleri",
   showCreateAction = true,
+  initialView,
+  initialOriginFilter,
 }: AiTaskListPageContentProps) {
-  const result = await readAiTaskWorkspace({ page: 1, pageSize: 100 });
+  const result = await readAiTaskCenterUnified();
 
   if (result.status === "failure") {
     return (
       <PageContent>
         <PageHeader
-          description="Üretim, kalite, bakım, malzeme, ticari zekâ ve ERP entegrasyonlarından oluşan AI önerilerini tek merkezden inceleyin."
+          description="AI destekli birleşik görev ve aksiyon yönetimi"
           eyebrow="AI Görev Merkezi"
-          title="Operasyon karar merkezi"
+          title="AI Görev Merkezi"
         />
 
         <EmptyState
           data-testid="ai-task-center-list-error"
           description={result.message}
-          title="AI görevleri yüklenemedi"
+          title="AI Görev Merkezi yüklenemedi"
         />
       </PageContent>
     );
   }
 
-  const { workspace } = result;
+  const { center } = result;
 
   return (
     <PageContent data-testid="ai-task-center-list">
       <PageHeader
         actions={
           <>
-            {showCreateAction && workspace.canCreate ? (
+            {showCreateAction && center.canCreate ? (
               <Link
                 className="ai-task-create-button"
                 href="/ai-gorevleri/yeni"
@@ -88,14 +95,16 @@ export async function AiTaskListPageContent({
             <RefreshButton />
           </>
         }
-        description="Üretim, kalite, bakım, malzeme, ticari zekâ ve ERP entegrasyonlarından oluşan AI önerilerini tek merkezden inceleyin."
+        description="AI destekli birleşik görev ve aksiyon yönetimi"
         eyebrow="AI Görev Merkezi"
-        title="Operasyon karar merkezi"
+        title="AI Görev Merkezi"
       />
 
-      <Suspense fallback={<AiTaskKpiLoading />}>
-        <AiTaskKpiLinks kpis={workspace.kpis} />
-      </Suspense>
+      {center.canReadTasks ? (
+        <Suspense fallback={<AiTaskKpiLoading />}>
+          <AiTaskKpiLinks kpis={center.kpis} />
+        </Suspense>
+      ) : null}
 
       <Section
         action={
@@ -104,30 +113,24 @@ export async function AiTaskListPageContent({
             Human-in-the-Loop
           </Badge>
         }
-        description="Görevleri arayın, filtreleyin ve risk, öncelik ve gecikme durumlarına göre inceleyin."
-        title="AI görev çalışma alanı"
+        description="Görevleri, onayları, vardiya teslimlerini ve etiketlemeleri tek merkezden inceleyin."
+        title="Birleşik çalışma alanı"
       >
-        {workspace.tasks.length === 0 ? (
-          <EmptyState
-            action={
-              workspace.canCreate ? (
-                <Link href="/ai-gorevleri/yeni">
-                  İlk taslak görevi oluştur
-                </Link>
-              ) : (
-                <Link href={listPath}>
-                  Listeye dön
-                </Link>
-              )
-            }
-            description="Henüz kayıtlı AI görevi bulunmuyor. Yetkili kullanıcılar yeni taslak görev oluşturabilir."
-            title="Görev listesi boş"
+        <Suspense>
+          <AiTaskCenterUnifiedWorkspace
+            assignedTaskIds={center.assignedTaskIds}
+            initialOriginFilter={parseAiTaskCenterTaskOriginFilter(initialOriginFilter)}
+            initialView={parseAiTaskCenterView(initialView)}
+            items={center.items}
+            listPath={listPath}
           />
-        ) : (
-          <Suspense fallback={<AiTaskWorkspaceLoading />}>
-            <AiTaskWorkspace tasks={workspace.tasks} />
-          </Suspense>
-        )}
+        </Suspense>
+
+        {center.workInboxDisclaimer ? (
+          <p className="ai-task-center-unified__disclaimer" data-testid="ai-task-center-disclaimer">
+            {center.workInboxDisclaimer}
+          </p>
+        ) : null}
       </Section>
     </PageContent>
   );

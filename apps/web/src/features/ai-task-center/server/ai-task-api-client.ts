@@ -34,6 +34,7 @@ export type RawAiTaskSummary = Readonly<{
   approval: Readonly<{ state: string }>;
   sourceModule: string | null;
   sourceEntityId: string | null;
+  listOriginKind: string;
   dueAt: string | null;
   createdAt: string;
   updatedAt: string;
