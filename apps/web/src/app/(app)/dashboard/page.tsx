@@ -9,6 +9,7 @@ import { MaintenanceStatusPanel } from "@/components/dashboard/maintenance-statu
 import { MaterialRisksPanel } from "@/components/dashboard/material-risks-panel";
 import { MoldStatusPanel } from "@/components/dashboard/mold-status-panel";
 import { PlanConfidencePanel } from "@/components/dashboard/plan-confidence-panel";
+import { OperasyonOncelikleriPanel } from "@/components/dashboard/operasyon-oncelikleri-panel";
 import { PiyasaOzetiPanel } from "@/components/dashboard/piyasa-ozeti-panel";
 import { ProductionOrdersTable } from "@/components/dashboard/production-orders-table";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
@@ -158,6 +159,13 @@ export default async function DashboardPage() {
         <QuickActionsPanel
           grantedPermissionKeys={grantedPermissionKeys}
         />
+      </section>
+
+      <section
+        aria-label="Operasyon öncelikleri"
+        className="command-center__action-context-strip"
+      >
+        <OperasyonOncelikleriPanel />
       </section>
 
       <section

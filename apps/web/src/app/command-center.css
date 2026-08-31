@@ -9296,3 +9296,177 @@ body:has(.command-center) .command-center {
 }
 
 /* DASHBOARD MARKET RATES COMPACT END */
+
+/* DASHBOARD OPERASYON ONCELIKLERI START */
+
+.dashboard-panel--operasyon-oncelikleri {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  min-width: 0;
+}
+
+.command-center__operasyon-oncelikleri-list {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0 14px;
+  list-style: none;
+}
+
+.command-center__operasyon-oncelikleri-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.78fr) minmax(0, 2.4fr) minmax(88px, 0.72fr) 18px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--cc-border, #dce5f0);
+  color: inherit;
+  text-decoration: none;
+}
+
+.command-center__operasyon-oncelikleri-list li:last-child .command-center__operasyon-oncelikleri-row {
+  border-bottom: 0;
+}
+
+.command-center__operasyon-oncelikleri-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #1769e0;
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.command-center__operasyon-oncelikleri-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.command-center__operasyon-oncelikleri-copy strong {
+  overflow: hidden;
+  color: var(--cc-text, #10213d);
+  font-size: 13px;
+  font-weight: 790;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-center__operasyon-oncelikleri-copy span {
+  overflow: hidden;
+  color: var(--cc-text-muted, #5f6f86);
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-center__operasyon-oncelikleri-time {
+  color: var(--cc-text-muted, #75839a);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.command-center__operasyon-oncelikleri-time--empty {
+  display: block;
+}
+
+.command-center__operasyon-oncelikleri-arrow {
+  color: #1769e0;
+}
+
+.command-center__operasyon-oncelikleri-empty {
+  margin: 0;
+  padding: 0 14px;
+  color: var(--cc-text-muted, #5f6f86);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.command-center__operasyon-oncelikleri-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 14px 2px;
+  border-top: 1px solid var(--cc-border, #dce5f0);
+}
+
+.command-center__operasyon-oncelikleri-footer a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  color: #1769e0;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.command-center__operasyon-oncelikleri-disclaimer {
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  color: var(--cc-text-muted, #75839a);
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .command-center__operasyon-oncelikleri-row {
+    grid-template-columns: minmax(72px, 0.9fr) minmax(0, 1fr) 16px;
+    grid-template-areas:
+      "source copy arrow"
+      "source time arrow";
+  }
+
+  .command-center__operasyon-oncelikleri-source {
+    grid-area: source;
+    align-self: start;
+  }
+
+  .command-center__operasyon-oncelikleri-copy {
+    grid-area: copy;
+  }
+
+  .command-center__operasyon-oncelikleri-time {
+    grid-area: time;
+    text-align: left;
+  }
+
+  .command-center__operasyon-oncelikleri-arrow {
+    grid-area: arrow;
+    align-self: center;
+  }
+
+  .command-center__operasyon-oncelikleri-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .command-center__operasyon-oncelikleri-disclaimer {
+    text-align: left;
+    white-space: normal;
+  }
+}
+
+/* DASHBOARD OPERASYON ONCELIKLERI END */
