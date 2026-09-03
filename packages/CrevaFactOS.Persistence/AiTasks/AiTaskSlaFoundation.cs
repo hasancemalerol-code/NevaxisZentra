@@ -44,10 +44,11 @@ public static class AiTaskAssignmentSources
     public const string Routing = "routing";
     public const string Reassignment = "reassignment";
     public const string Escalation = "escalation";
+    public const string Automation = "automation";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
-        Manual, Routing, Reassignment, Escalation,
+        Manual, Routing, Reassignment, Escalation, Automation,
     };
 }
 

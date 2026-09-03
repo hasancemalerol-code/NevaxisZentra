@@ -319,6 +319,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskEscalationEvent> AiTaskEscalationEvents => Set<AiTaskEscalationEvent>();
     public DbSet<AiTaskEvidence> AiTaskEvidence => Set<AiTaskEvidence>();
     public DbSet<AiTaskClosurePolicy> AiTaskClosurePolicies => Set<AiTaskClosurePolicy>();
+    public DbSet<AiTaskAutomationRule> AiTaskAutomationRules => Set<AiTaskAutomationRule>();
+    public DbSet<AiTaskAutomationRuleRevision> AiTaskAutomationRuleRevisions => Set<AiTaskAutomationRuleRevision>();
+    public DbSet<AiTaskAutomationExecution> AiTaskAutomationExecutions => Set<AiTaskAutomationExecution>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1714,6 +1717,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAutomationRuleEntityConfiguration());
+        modelBuilder.Entity<AiTaskAutomationRule>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAutomationRuleRevisionEntityConfiguration());
+        modelBuilder.Entity<AiTaskAutomationRuleRevision>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAutomationExecutionEntityConfiguration());
+        modelBuilder.Entity<AiTaskAutomationExecution>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Teams foundation (TEAMS-FOUNDATION-1)
         modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());

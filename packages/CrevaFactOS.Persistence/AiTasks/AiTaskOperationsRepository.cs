@@ -12,6 +12,7 @@ public sealed class AiTaskOperationsRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskRoutingService routingService,
+    IAiTaskAutomationRepository automationRepository,
     ITeamsNotificationRepository teamsNotificationRepository) : IAiTaskOperationsRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -98,6 +99,16 @@ public sealed class AiTaskOperationsRepository(
                         && command.TargetMembershipId.Value != context.MembershipId)
                     {
                         await TryNotifyAssignmentAsync(context, task, command.TargetMembershipId.Value, ct);
+                    }
+
+                    if (source is AiTaskAssignmentSources.Manual or AiTaskAssignmentSources.Reassignment)
+                    {
+                        task.AutomationOverrideJson = Serialize(new AiTaskAutomationOverrideState(
+                            [AiTaskAutomationOverrideScopes.Assignment],
+                            actor,
+                            command.Reason ?? "Manual assignment override.",
+                            now,
+                            AllowAutomationResume: false));
                     }
 
                     return AiTaskWriteResult.Success(task.Id, task.Version);
@@ -333,61 +344,92 @@ public sealed class AiTaskOperationsRepository(
         string actor,
         CancellationToken cancellationToken = default)
     {
-        var decision = await routingService.EvaluateRoutingAsync(context, task, cancellationToken);
-        if (decision is not null)
-        {
-            task.RoutingRuleId = decision.RuleId;
-            task.RoutingMetadataJson = Serialize(decision);
+        var trigger = string.IsNullOrWhiteSpace(task.SourceModule)
+            ? AiTaskAutomationTriggers.TaskCreated
+            : AiTaskAutomationTriggers.TaskSourceLinked;
 
+        var automationResult = await automationRepository.EvaluateAndApplyToTaskAsync(
+            context,
+            task,
+            trigger,
+            now,
+            actor,
+            context.CorrelationId,
+            cancellationToken);
+
+        if (!task.AssignedMembershipId.HasValue && !task.AssignedTeamChannelId.HasValue)
+        {
+            var decision = await routingService.EvaluateRoutingAsync(context, task, cancellationToken);
+            if (decision is not null)
+            {
+                task.RoutingRuleId = decision.RuleId;
+                task.RoutingMetadataJson = Serialize(decision);
+
+                AppendAuditEvent(
+                    context,
+                    task,
+                    AiTaskAuditEventTypes.Routed,
+                    actor,
+                    "AI Task Routing",
+                    now,
+                    metadata: decision,
+                    note: decision.Reason);
+
+                if (string.Equals(decision.TargetType, AiTaskRoutingTargetTypes.Membership, StringComparison.Ordinal)
+                    && decision.TargetMembershipId.HasValue)
+                {
+                    task.AssignedMembershipId = decision.TargetMembershipId;
+                    task.AssignmentSource = AiTaskAssignmentSources.Routing;
+                    task.AssignmentReason = decision.Reason;
+                    task.AssigneeJson = Serialize(
+                        await ResolveAssigneeModelAsync(context, decision.TargetMembershipId.Value, cancellationToken));
+
+                    AppendAuditEvent(
+                        context,
+                        task,
+                        AiTaskAuditEventTypes.Assigned,
+                        actor,
+                        "AI Task Routing",
+                        now,
+                        metadata: decision,
+                        note: decision.Reason);
+                }
+                else if (string.Equals(decision.TargetType, AiTaskRoutingTargetTypes.TeamChannel, StringComparison.Ordinal)
+                         && decision.TargetTeamChannelId.HasValue)
+                {
+                    task.AssignedTeamChannelId = decision.TargetTeamChannelId;
+                    task.AssignmentSource = AiTaskAssignmentSources.Routing;
+                    task.AssignmentReason = decision.Reason;
+
+                    AppendAuditEvent(
+                        context,
+                        task,
+                        AiTaskAuditEventTypes.Assigned,
+                        actor,
+                        "AI Task Routing",
+                        now,
+                        metadata: decision,
+                        note: decision.Reason);
+                }
+            }
+        }
+        else if (automationResult.MatchedRules.Count > 0)
+        {
             AppendAuditEvent(
                 context,
                 task,
                 AiTaskAuditEventTypes.Routed,
                 actor,
-                "AI Task Routing",
+                "Automation Engine",
                 now,
-                metadata: decision,
-                note: decision.Reason);
-
-            if (string.Equals(decision.TargetType, AiTaskRoutingTargetTypes.Membership, StringComparison.Ordinal)
-                && decision.TargetMembershipId.HasValue)
-            {
-                task.AssignedMembershipId = decision.TargetMembershipId;
-                task.AssignmentSource = AiTaskAssignmentSources.Routing;
-                task.AssignmentReason = decision.Reason;
-                task.AssigneeJson = Serialize(
-                    await ResolveAssigneeModelAsync(context, decision.TargetMembershipId.Value, cancellationToken));
-
-                AppendAuditEvent(
-                    context,
-                    task,
-                    AiTaskAuditEventTypes.Assigned,
-                    actor,
-                    "AI Task Routing",
-                    now,
-                    metadata: decision,
-                    note: decision.Reason);
-            }
-            else if (string.Equals(decision.TargetType, AiTaskRoutingTargetTypes.TeamChannel, StringComparison.Ordinal)
-                     && decision.TargetTeamChannelId.HasValue)
-            {
-                task.AssignedTeamChannelId = decision.TargetTeamChannelId;
-                task.AssignmentSource = AiTaskAssignmentSources.Routing;
-                task.AssignmentReason = decision.Reason;
-
-                AppendAuditEvent(
-                    context,
-                    task,
-                    AiTaskAuditEventTypes.Assigned,
-                    actor,
-                    "AI Task Routing",
-                    now,
-                    metadata: decision,
-                    note: decision.Reason);
-            }
+                metadata: automationResult,
+                note: automationResult.OutcomeSummary);
         }
 
-        await ApplySlaPolicyAsync(task, cancellationToken);
+        if (!task.SlaPolicyId.HasValue)
+        {
+            await ApplySlaPolicyAsync(task, cancellationToken);
+        }
     }
 
     private async Task<AiTaskWriteResult> CreateEscalationAsync(

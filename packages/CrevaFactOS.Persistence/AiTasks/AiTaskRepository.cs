@@ -914,7 +914,13 @@ public sealed class AiTaskRepository(
                     e.PreviousStatus,
                     e.NextStatus,
                     e.MetadataJson))
-                .ToList());
+                .ToList(),
+            task.AutomationRuleId,
+            task.AutomationRuleVersion,
+            task.MinimumEvidenceRequired,
+            task.FourEyesRequired,
+            task.AutomationMetadataJson,
+            task.AutomationOverrideJson);
     }
 
     private static string Serialize<T>(T value) =>

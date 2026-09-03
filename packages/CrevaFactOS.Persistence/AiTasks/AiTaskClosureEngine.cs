@@ -25,6 +25,15 @@ public sealed class AiTaskClosureEngine : IAiTaskClosureEngine
         AiTask task,
         IReadOnlyList<AiTaskClosurePolicy> policies)
     {
+        if (task.ClosurePolicyId.HasValue)
+        {
+            var pinned = policies.FirstOrDefault(p => p.Id == task.ClosurePolicyId.Value && p.Enabled);
+            if (pinned is not null)
+            {
+                return MapPolicyWithTaskOverrides(pinned, task);
+            }
+        }
+
         var enabled = policies
             .Where(p => p.Enabled)
             .OrderByDescending(p => ScorePolicy(p, task))
@@ -32,7 +41,7 @@ public sealed class AiTaskClosureEngine : IAiTaskClosureEngine
 
         if (enabled is not null)
         {
-            return MapPolicy(enabled);
+            return MapPolicyWithTaskOverrides(enabled, task);
         }
 
         return ResolveFallbackPolicy(task);
@@ -75,11 +84,11 @@ public sealed class AiTaskClosureEngine : IAiTaskClosureEngine
             issues.Add(new("resolution-code-invalid", "Geçersiz çözüm kodu."));
         }
 
-        if (evidenceItems.Count < policy.MinimumEvidenceCount)
+        if (evidenceItems.Count < Math.Max(policy.MinimumEvidenceCount, task.MinimumEvidenceRequired))
         {
             issues.Add(new(
                 "evidence-count",
-                $"En az {policy.MinimumEvidenceCount} kanıt kaydı gereklidir."));
+                $"En az {Math.Max(policy.MinimumEvidenceCount, task.MinimumEvidenceRequired)} kanıt kaydı gereklidir."));
         }
 
         foreach (var requiredType in policy.RequiredEvidenceTypes)
@@ -146,6 +155,20 @@ public sealed class AiTaskClosureEngine : IAiTaskClosureEngine
         }
 
         return score;
+    }
+
+    private static AiTaskClosurePolicyReadModel MapPolicyWithTaskOverrides(AiTaskClosurePolicy policy, AiTask task)
+    {
+        var mapped = MapPolicy(policy);
+        var minimumEvidence = Math.Max(mapped.MinimumEvidenceCount, task.MinimumEvidenceRequired);
+        var approvalRequired = mapped.ApprovalRequired || task.ClosureApprovalRequired;
+        var fourEyes = mapped.FourEyesRequired || task.FourEyesRequired;
+        return mapped with
+        {
+            MinimumEvidenceCount = minimumEvidence,
+            ApprovalRequired = approvalRequired,
+            FourEyesRequired = fourEyes,
+        };
     }
 
     private static AiTaskClosurePolicyReadModel MapPolicy(AiTaskClosurePolicy policy)

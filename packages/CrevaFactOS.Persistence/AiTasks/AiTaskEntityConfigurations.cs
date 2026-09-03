@@ -65,6 +65,14 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
         entity.Property(t => t.DueAtUtc).HasColumnName("due_at_utc");
         entity.Property(t => t.CompletedAtUtc).HasColumnName("completed_at_utc");
         entity.Property(t => t.ClosureState).HasColumnName("closure_state").HasMaxLength(40).IsRequired();
+        entity.Property(t => t.ClosurePolicyId).HasColumnName("closure_policy_id");
+        entity.Property(t => t.MinimumEvidenceRequired).HasColumnName("minimum_evidence_required");
+        entity.Property(t => t.FourEyesRequired).HasColumnName("four_eyes_required");
+        entity.Property(t => t.AutomationRuleId).HasColumnName("automation_rule_id");
+        entity.Property(t => t.AutomationRuleVersion).HasColumnName("automation_rule_version");
+        entity.Property(t => t.AutomationOverrideJson).HasColumnName("automation_override_json");
+        entity.Property(t => t.AutomationMetadataJson).HasColumnName("automation_metadata_json");
+        entity.Property(t => t.AutomationTagsJson).HasColumnName("automation_tags_json");
         entity.Property(t => t.ResolutionSummary).HasColumnName("resolution_summary").HasMaxLength(4000);
         entity.Property(t => t.ResolutionCode).HasColumnName("resolution_code").HasMaxLength(50);
         entity.Property(t => t.ClosureReason).HasColumnName("closure_reason").HasMaxLength(2000);

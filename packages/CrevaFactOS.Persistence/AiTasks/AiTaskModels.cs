@@ -153,7 +153,13 @@ public sealed record AiTaskDetailReadModel(
     AiTaskClosurePolicyReadModel ClosurePolicy,
     AiTaskClosureValidationResult ClosureValidation,
     IReadOnlyList<AiTaskEvidenceReadModel> Evidence,
-    IReadOnlyList<AiTaskAuditEventReadModel> AuditTrail);
+    IReadOnlyList<AiTaskAuditEventReadModel> AuditTrail,
+    Guid? AutomationRuleId = null,
+    int? AutomationRuleVersion = null,
+    int MinimumEvidenceRequired = 0,
+    bool FourEyesRequired = false,
+    string? AutomationMetadataJson = null,
+    string? AutomationOverrideJson = null);
 
 public sealed record AiTaskListReadModel(
     IReadOnlyList<AiTaskSummaryReadModel> Items,

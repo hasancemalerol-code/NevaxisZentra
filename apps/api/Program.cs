@@ -161,6 +161,7 @@ app.MapOperationalRiskEndpoints();
 app.MapAiTaskEndpoints();
 app.MapAiTaskOperationsEndpoints();
 app.MapAiTaskClosureEndpoints();
+app.MapAiTaskAutomationEndpoints();
 app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();
 app.MapTeamsHandoverEndpoints();

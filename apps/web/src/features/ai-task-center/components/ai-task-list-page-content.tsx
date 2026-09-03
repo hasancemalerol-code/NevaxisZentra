@@ -4,6 +4,7 @@ import {
   Plus,
   RefreshCw,
   Sparkles,
+  Workflow,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -91,6 +92,14 @@ export async function AiTaskListPageContent({
                 </span>
               </Link>
             ) : null}
+
+            <Link
+              className="ai-task-automation-nav-link"
+              href="/ai-gorevleri/otomasyon"
+            >
+              <Workflow aria-hidden="true" />
+              <span>Otomasyon</span>
+            </Link>
 
             <RefreshButton />
           </>

@@ -56,6 +56,14 @@ public sealed class AiTask
     public DateTimeOffset? DueAtUtc { get; set; }
     public DateTimeOffset? CompletedAtUtc { get; set; }
     public string ClosureState { get; set; } = AiTaskClosureStates.None;
+    public Guid? ClosurePolicyId { get; set; }
+    public int MinimumEvidenceRequired { get; set; }
+    public bool FourEyesRequired { get; set; }
+    public Guid? AutomationRuleId { get; set; }
+    public int? AutomationRuleVersion { get; set; }
+    public string? AutomationOverrideJson { get; set; }
+    public string? AutomationMetadataJson { get; set; }
+    public string? AutomationTagsJson { get; set; }
     public string? ResolutionSummary { get; set; }
     public string? ResolutionCode { get; set; }
     public string? ClosureReason { get; set; }

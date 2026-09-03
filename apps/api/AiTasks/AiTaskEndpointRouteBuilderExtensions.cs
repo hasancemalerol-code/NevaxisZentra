@@ -434,6 +434,22 @@ public static class AiTaskEndpointRouteBuilderExtensions
             nextStatus = e.NextStatus,
             metadataJson = e.MetadataJson,
         }),
+        timeline = item.AuditTrail.Select(e => new
+        {
+            id = e.Id,
+            eventType = e.EventType,
+            type = e.EventType,
+            occurredAt = e.OccurredAt,
+            actorLabel = e.ActorLabel,
+            note = e.Note,
+        }),
+        automationRuleId = item.AutomationRuleId,
+        automationRuleVersion = item.AutomationRuleVersion,
+        minimumEvidenceRequired = item.MinimumEvidenceRequired,
+        fourEyesRequired = item.FourEyesRequired,
+        automationMetadataJson = item.AutomationMetadataJson,
+        automationOverrideJson = item.AutomationOverrideJson,
+        closureApprovalRequired = item.Closure.ClosureApprovalRequired,
     };
 
     private static AiTaskRecommendationModel MapRecommendation(AiTaskRecommendationRequest recommendation) =>
@@ -572,6 +588,22 @@ public static class AiTaskServiceCollectionExtensions
                 serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
 
+        services.AddScoped<IAiTaskAutomationEngine, AiTaskAutomationEngine>();
+        services.AddScoped<IAiTaskAutomationRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskAutomationRepository();
+            }
+
+            return new AiTaskAutomationRepository(
+                dbContext,
+                serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                serviceProvider.GetRequiredService<IAiTaskAutomationEngine>(),
+                serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
+        });
+
         services.AddScoped<IAiTaskRoutingService, AiTaskRoutingService>();
         services.AddScoped<IAiTaskOperationsRepository>(serviceProvider =>
         {
@@ -585,6 +617,7 @@ public static class AiTaskServiceCollectionExtensions
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                 serviceProvider.GetRequiredService<IAiTaskRoutingService>(),
+                serviceProvider.GetRequiredService<IAiTaskAutomationRepository>(),
                 serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
 

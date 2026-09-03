@@ -14,4 +14,7 @@ public static class AiTaskPermissionKeys
     public const string ClosureRequest = "ai-task.closure.request";
     public const string ClosureApprove = "ai-task.closure.approve";
     public const string Reopen = "ai-task.reopen";
+    public const string AutomationRead = "ai-task.automation.read";
+    public const string AutomationManage = "ai-task.automation.manage";
+    public const string AutomationSimulate = "ai-task.automation.simulate";
 }

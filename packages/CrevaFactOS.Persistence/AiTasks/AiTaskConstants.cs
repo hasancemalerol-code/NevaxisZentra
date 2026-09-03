@@ -167,6 +167,8 @@ public static class AiTaskAuditEventTypes
     public const string ClosureApproved = "closure-approved";
     public const string ClosureRejected = "closure-rejected";
     public const string TaskReopened = "task-reopened";
+    public const string AutomationApplied = "automation-applied";
+    public const string AutomationOverrideRecorded = "automation-override-recorded";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -174,7 +176,7 @@ public static class AiTaskAuditEventTypes
         DueDateChanged, SlaWarning, Escalated, ApprovalRequested, Approved, Rejected, Deferred,
         ExecutionStarted, ExecutionCompleted, ExecutionFailed, Cancelled, StatusChanged,
         TeamsNotificationEmitted, EvidenceSubmitted, ResolutionUpdated, ClosureRequested,
-        ClosureApproved, ClosureRejected, TaskReopened,
+        ClosureApproved, ClosureRejected, TaskReopened, AutomationApplied, AutomationOverrideRecorded,
     };
 }
 
