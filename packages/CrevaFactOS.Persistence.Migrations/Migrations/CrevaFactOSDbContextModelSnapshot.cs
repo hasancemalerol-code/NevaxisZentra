@@ -26050,6 +26050,258 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("shift_operator_eligibility_results", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.FactoryShiftHandover", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("AcknowledgedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("acknowledged_at_utc");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("department");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset?>("HandedOverAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("handed_over_at_utc");
+
+                    b.Property<string>("HandoverReference")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("handover_reference");
+
+                    b.Property<Guid?>("IncomingMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("incoming_membership_id");
+
+                    b.Property<Guid>("OutgoingMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("outgoing_membership_id");
+
+                    b.Property<DateOnly>("ShiftDate")
+                        .HasColumnType("date")
+                        .HasColumnName("shift_date");
+
+                    b.Property<string>("ShiftPeriod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("shift_period");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "HandoverReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_shift_handovers_tenant_reference");
+
+                    b.HasIndex("TenantId", "FacilityId", "ShiftDate")
+                        .HasDatabaseName("ix_shift_handovers_tenant_facility_shift_date");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status")
+                        .HasDatabaseName("ix_shift_handovers_tenant_facility_status");
+
+                    b.ToTable("factory_shift_handovers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.ShiftHandoverEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActorLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_label");
+
+                    b.Property<string>("ActorMembershipId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actor_membership_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("TenantId", "FacilityId", "HandoverId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_shift_handover_events_tenant_handover_occurred");
+
+                    b.ToTable("factory_shift_handover_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.ShiftHandoverItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EvidenceMetadataJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("evidence_metadata_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
+
+                    b.Property<bool>("RequiresFollowUp")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_follow_up");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceEntityId")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("source_entity_id");
+
+                    b.Property<string>("SourceModule")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("source_module");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("TenantId", "HandoverId", "SortOrder")
+                        .HasDatabaseName("ix_shift_handover_items_tenant_handover_sort");
+
+                    b.ToTable("factory_shift_handover_items", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftRisk.ShiftCoverageRequirement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -32817,6 +33069,45 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Assessment");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.FactoryShiftHandover", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.ShiftHandoverEvent", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ShiftHandover.FactoryShiftHandover", "Handover")
+                        .WithMany("Events")
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Handover");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.ShiftHandoverItem", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ShiftHandover.FactoryShiftHandover", "Handover")
+                        .WithMany("Items")
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Handover");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftRisk.ShiftCoverageRequirement", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Production.ProductionShift", null)
@@ -33647,6 +33938,13 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftAssignment.ShiftOperatorEligibilityResult", b =>
                 {
                     b.Navigation("Reasons");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ShiftHandover.FactoryShiftHandover", b =>
+                {
+                    b.Navigation("Events");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.ShiftRisk.ShiftRiskAssessment", b =>

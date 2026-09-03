@@ -36,6 +36,7 @@ public static class SaasSubscriptionModuleEntitlements
         ("/uretim", EntitlementCodes.Production),
         ("/ihracat", EntitlementCodes.Export),
         ("/vardiyalar", EntitlementCodes.ShiftWorkforce),
+        ("/vardiya-devir", EntitlementCodes.ShiftWorkforce),
         ("/proses-oee", EntitlementCodes.ProcessOee),
         ("/makineler", EntitlementCodes.ConnectedMachines),
         ("/kaliplar", EntitlementCodes.Mold),

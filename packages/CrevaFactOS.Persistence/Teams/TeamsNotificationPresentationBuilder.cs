@@ -12,6 +12,8 @@ public static class TeamsNotificationPresentationBuilder
     public static string TaskAssignedReason => "Size atanan AI görevi";
     public static string TaskEscalatedReason => "Eskale edilen AI görevi";
     public static string TaskSlaWarningReason => "SLA riski taşıyan AI görevi";
+    public static string FactoryShiftHandoverReason => "Yeni vardiya devir teslimi";
+    public static string FactoryShiftHandoverAcknowledgedReason => "Vardiya devri teslim alındı";
 
     public static string BuildDirectMessageFingerprint(Guid messageId, Guid recipientMembershipId) =>
         $"direct-message:{messageId:D}:{recipientMembershipId:D}";
@@ -24,6 +26,15 @@ public static class TeamsNotificationPresentationBuilder
 
     public static string BuildHandoverAcknowledgementFingerprint(Guid handoverId, Guid recipientMembershipId) =>
         $"handover-acknowledgement:{handoverId:D}:{recipientMembershipId:D}";
+
+    public static string BuildFactoryShiftHandoverFingerprint(Guid handoverId, Guid recipientMembershipId) =>
+        $"factory-shift-handover:{handoverId:D}:{recipientMembershipId:D}";
+
+    public static string BuildFactoryShiftHandoverAcknowledgedFingerprint(Guid handoverId, Guid recipientMembershipId) =>
+        $"factory-shift-handover-acknowledged:{handoverId:D}:{recipientMembershipId:D}";
+
+    public static string BuildFactoryShiftHandoverRoute(Guid handoverId) =>
+        $"/vardiya-devir/{handoverId:D}";
 
     public static string BuildTaskLinkFingerprint(Guid linkId, Guid recipientMembershipId) =>
         $"task-link:{linkId:D}:{recipientMembershipId:D}";
@@ -63,6 +74,9 @@ public static class TeamsNotificationPresentationBuilder
 
     public static string BuildHandoverTitle(DateOnly shiftDate, string shiftType) =>
         $"{shiftDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)} {ResolveShiftLabel(shiftType)} vardiya devri";
+
+    public static string BuildFactoryShiftHandoverTitle(DateOnly shiftDate, string shiftPeriod, int unresolvedCount) =>
+        $"{shiftDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)} {ResolveShiftLabel(shiftPeriod)} devir — {unresolvedCount} açık madde";
 
     public static string BuildTaskLinkTitle(string taskReference) =>
         $"Teams mesajına bağlı görev: {taskReference}";

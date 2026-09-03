@@ -69,6 +69,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/vardiyalar",
       },
       {
+        label: "Vardiya Devir Teslimi",
+        href: "/vardiya-devir",
+        iconKey: "calendar-clock",
+        permissionKey: "shift-handover.read",
+        subscriptionModulePath: "/vardiya-devir",
+      },
+      {
         label: "Proses & OEE",
         href: "/proses-oee",
         iconKey: "circle-gauge",

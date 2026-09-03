@@ -65,6 +65,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/uretim", code: "module.production" },
   { prefix: "/ihracat", code: "module.export" },
   { prefix: "/vardiyalar", code: "module.shift-workforce" },
+  { prefix: "/vardiya-devir", code: "module.shift-workforce" },
   { prefix: "/proses-oee", code: "module.process-oee" },
   { prefix: "/makineler", code: "module.connected-machines" },
   { prefix: "/kaliplar", code: "module.mold" },

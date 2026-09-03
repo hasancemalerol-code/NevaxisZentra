@@ -113,6 +113,8 @@ public static class TeamsNotificationTypes
     public const string TaskAssigned = "task-assigned";
     public const string TaskEscalated = "task-escalated";
     public const string TaskSlaWarning = "task-sla-warning";
+    public const string FactoryShiftHandover = "factory-shift-handover";
+    public const string FactoryShiftHandoverAcknowledged = "factory-shift-handover-acknowledged";
 }
 
 public static class TeamsNotificationSourceModules
@@ -120,6 +122,7 @@ public static class TeamsNotificationSourceModules
     public const string Teams = "teams";
     public const string TeamsDirect = "teams-direct";
     public const string AiTask = "ai-task";
+    public const string ShiftHandover = "shift-handover";
 }
 
 public static class TeamsNotificationAuditEventTypes

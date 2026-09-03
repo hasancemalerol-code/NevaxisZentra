@@ -53,6 +53,25 @@ public interface ITeamsNotificationRepository
         string shiftType,
         CancellationToken cancellationToken = default);
 
+    Task TryCreateFactoryShiftHandoverAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string summary,
+        int unresolvedCount,
+        CancellationToken cancellationToken = default);
+
+    Task TryCreateFactoryShiftHandoverAcknowledgedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string acknowledgedByLabel,
+        CancellationToken cancellationToken = default);
+
     Task TryCreateTaskLinkAsync(
         TeamsOperationContext context,
         Guid recipientMembershipId,
@@ -260,6 +279,49 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationPresentationBuilder.TruncatePreview(
                 TeamsNotificationPresentationBuilder.BuildHandoverTitle(shiftDate, shiftType)),
             TeamsNotificationPresentationBuilder.BuildHandoverAcknowledgementFingerprint(handoverId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateFactoryShiftHandoverAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string summary,
+        int unresolvedCount,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.FactoryShiftHandover,
+            TeamsNotificationSourceModules.ShiftHandover,
+            handoverId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildFactoryShiftHandoverRoute(handoverId),
+            TeamsNotificationPresentationBuilder.BuildFactoryShiftHandoverTitle(shiftDate, shiftPeriod, unresolvedCount),
+            TeamsNotificationPresentationBuilder.FactoryShiftHandoverReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(summary),
+            TeamsNotificationPresentationBuilder.BuildFactoryShiftHandoverFingerprint(handoverId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateFactoryShiftHandoverAcknowledgedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string acknowledgedByLabel,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.FactoryShiftHandoverAcknowledged,
+            TeamsNotificationSourceModules.ShiftHandover,
+            handoverId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildFactoryShiftHandoverRoute(handoverId),
+            TeamsNotificationPresentationBuilder.BuildHandoverTitle(shiftDate, shiftPeriod),
+            TeamsNotificationPresentationBuilder.FactoryShiftHandoverAcknowledgedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview($"{acknowledgedByLabel} tarafından teslim alındı."),
+            TeamsNotificationPresentationBuilder.BuildFactoryShiftHandoverAcknowledgedFingerprint(handoverId, recipientMembershipId),
             cancellationToken);
 
     public Task TryCreateTaskLinkAsync(
@@ -765,6 +827,25 @@ public sealed class UnavailableTeamsNotificationRepository : ITeamsNotificationR
         Guid handoverId,
         DateOnly shiftDate,
         string shiftType,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateFactoryShiftHandoverAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string summary,
+        int unresolvedCount,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateFactoryShiftHandoverAcknowledgedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid handoverId,
+        DateOnly shiftDate,
+        string shiftPeriod,
+        string acknowledgedByLabel,
         CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     public Task TryCreateTaskLinkAsync(

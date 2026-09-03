@@ -32,6 +32,7 @@ using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Teams;
+using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
 
@@ -340,6 +341,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsDirectMessageAuditEvent> TeamsDirectMessageAuditEvents => Set<TeamsDirectMessageAuditEvent>();
     public DbSet<TeamsNotification> TeamsNotifications => Set<TeamsNotification>();
     public DbSet<TeamsNotificationAuditEvent> TeamsNotificationAuditEvents => Set<TeamsNotificationAuditEvent>();
+
+    public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
+    public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
+    public DbSet<ShiftHandoverEvent> ShiftHandoverEvents => Set<ShiftHandoverEvent>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -1825,6 +1830,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TeamsNotificationAuditEventEntityConfiguration());
         modelBuilder.Entity<TeamsNotificationAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftHandoverEntityConfiguration());
+        modelBuilder.Entity<FactoryShiftHandover>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftHandoverItemEntityConfiguration());
+        modelBuilder.Entity<ShiftHandoverItem>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftHandoverEventEntityConfiguration());
+        modelBuilder.Entity<ShiftHandoverEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

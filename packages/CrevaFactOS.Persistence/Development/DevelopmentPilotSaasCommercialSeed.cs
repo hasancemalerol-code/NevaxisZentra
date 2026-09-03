@@ -329,8 +329,8 @@ internal static class DevelopmentPilotSaasCommercialSeed
                 Id = moduleGrantId,
                 PlanVersionId = versionId,
                 EntitlementDefinitionId = DevelopmentPilotIds.SaasCommercialShiftWorkforceModuleEntitlementId,
-                Semantics = SaasCommercialEntitlementSemantics.Unavailable,
-                BooleanValue = false,
+                Semantics = SaasCommercialEntitlementSemantics.Unlimited,
+                BooleanValue = true,
             });
     }
 
