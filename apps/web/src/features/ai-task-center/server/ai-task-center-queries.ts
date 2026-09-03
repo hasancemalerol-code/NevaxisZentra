@@ -12,6 +12,8 @@ import type { AiTaskListRecord } from "./ai-task-mapper";
 import { listAiTasks } from "./ai-task-api-client";
 import { mapRawAiTaskSummary } from "./ai-task-mapper";
 import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { listTeamsChannels } from "../../teams/server/teams-api-client";
+import { resolveTeamsRequestContext } from "../../teams/server/teams-request-context";
 
 type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
@@ -112,10 +114,25 @@ export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResu
   }
 
   const assignedTaskIds = collectAssignedTaskIds(workInboxItems);
+
+  const teamChannelLabels: Record<string, string> = {};
+  if (canReadTeamsInbox) {
+    const teamsContext = await resolveTeamsRequestContext();
+    if (teamsContext.status === "success") {
+      const channelsResult = await listTeamsChannels(teamsContext.context);
+      if (channelsResult.status === "success") {
+        for (const channel of channelsResult.value.items) {
+          teamChannelLabels[channel.id] = channel.name;
+        }
+      }
+    }
+  }
+
   const items = composeAiTaskCenterItems({
     tasks,
     workInboxItems,
     facilityLabel: null,
+    teamChannelLabels,
   });
 
   return {

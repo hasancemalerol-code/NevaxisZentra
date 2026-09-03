@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
 import { AiTaskActionPanelClient } from "@/features/ai-task-center/components/ai-task-action-panel-client";
+import { AiTaskOperationsPanelClient } from "@/features/ai-task-center/components/ai-task-operations-panel-client";
 import { AiTaskExecutionPanel } from "@/features/ai-task-center/components/ai-task-execution-panel";
 import { AiTaskImpactPanel } from "@/features/ai-task-center/components/ai-task-impact-panel";
 import { AiTaskSourceReferenceSection } from "@/features/ai-task-center/components/ai-task-source-reference-section";
 import { AiTaskTeamsContextSection } from "@/features/teams/components/ai-task-teams-context-section";
 import { AiTaskTeamsMessageSourceLink } from "@/features/teams/components/ai-task-teams-message-source-link";
 import {
+  getAiTaskAuditMetadataSummary,
   getAiTaskAuditTransitionLabel,
   getAiTaskAuditEventLabel,
 } from "@/features/ai-task-center/presentation/ai-task-audit-labels";
@@ -51,6 +53,13 @@ import {
   getAiTaskStatusLabel,
 } from "@/features/ai-task-center/presentation/ai-task-labels";
 import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
+import {
+  AI_TASK_SLA_STATE_TONES,
+  formatAiTaskSlaCountdown,
+  getAiTaskEscalationLevelLabel,
+  getAiTaskEscalationStateLabel,
+  getAiTaskSlaStateLabel,
+} from "@/features/ai-task-center/presentation/ai-task-sla-labels";
 
 type PageParams = Readonly<{
   taskId: string;
@@ -137,6 +146,16 @@ export default async function AiTaskDetailPage({
   }
 
   const { task, version, taskReference, sourceModule, sourceEntityId } = result.detail;
+  const { operations } = result;
+  const teamLabel = task.assignedTeamChannelId
+    ? operations.teamChannelLabels[task.assignedTeamChannelId] ?? "Ekip kanalı"
+    : null;
+  const slaCountdown = formatAiTaskSlaCountdown(
+    task.sla?.resolutionDueAt
+      ?? task.sla?.responseDueAt
+      ?? task.sla?.acknowledgmentDueAt
+      ?? task.dueAt,
+  );
 
   return (
     <PageContent data-testid="ai-task-detail-page">
@@ -159,6 +178,13 @@ export default async function AiTaskDetailPage({
             </Badge>
           </div>
         }
+      />
+
+      <AiTaskOperationsPanelClient
+        operations={operations}
+        task={task}
+        teamChannelLabels={operations.teamChannelLabels}
+        version={version}
       />
 
       <AiTaskActionPanelClient
@@ -208,7 +234,7 @@ export default async function AiTaskDetailPage({
           </span>
 
           <strong>
-            {task.assignee?.displayName ?? "Atanmadı"}
+            {task.assignee?.displayName ?? teamLabel ?? "Atanmadı"}
           </strong>
 
           <small
@@ -216,9 +242,29 @@ export default async function AiTaskDetailPage({
               task.assignee?.role,
             )}
           >
-            {getAiTaskActorRoleLabel(
-              task.assignee?.role,
-            )}
+            {teamLabel && !task.assignee
+              ? `Ekip: ${teamLabel}`
+              : getAiTaskActorRoleLabel(task.assignee?.role)}
+          </small>
+        </Card>
+
+        <Card className="ai-task-detail__summary-card">
+          <span>
+            <CalendarClock aria-hidden="true" />
+            SLA durumu
+          </span>
+
+          <strong>
+            <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
+              {getAiTaskSlaStateLabel(task.slaState)}
+            </Badge>
+          </strong>
+
+          <small>
+            {slaCountdown ?? "Aktif SLA hedefi tanımlanmadı"}
+            {task.acknowledgedAtUtc
+              ? ` · Teslim: ${formatDateTime(task.acknowledgedAtUtc)}`
+              : ""}
           </small>
         </Card>
 
@@ -233,7 +279,9 @@ export default async function AiTaskDetailPage({
           </strong>
 
           <small>
-            Oluşturulma: {formatDateTime(task.createdAt)}
+            Eskalasyon: {getAiTaskEscalationLevelLabel(task.escalationLevel)}
+            {" · "}
+            {getAiTaskEscalationStateLabel(task.escalationState)}
           </small>
         </Card>
 
@@ -417,6 +465,10 @@ export default async function AiTaskDetailPage({
               {event.note ? (
                 <small>
                   {event.note}
+                </small>
+              ) : getAiTaskAuditMetadataSummary(event.metadataJson) ? (
+                <small>
+                  {getAiTaskAuditMetadataSummary(event.metadataJson)}
                 </small>
               ) : null}
 

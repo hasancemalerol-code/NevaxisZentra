@@ -12,10 +12,39 @@ import {
   mapRawAiTaskSummary,
   type AiTaskDetailViewModel,
 } from "./ai-task-mapper";
+import { parseMembershipIdFromMemberReference } from "./ai-task-membership";
 import { resolveAiTaskRequestContext } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
+import {
+  fetchCurrentEffectiveAccess,
+  hasGrantedPermission,
+} from "../../admin-access/server/admin-access-effective-access";
+import { getTeamsChannelDetail, listTeamsChannels } from "../../teams/server/teams-api-client";
+import { resolveTeamsRequestContext } from "../../teams/server/teams-request-context";
 
 type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
+
+export type AiTaskAssignmentCandidate = Readonly<{
+  tenantMembershipId: string;
+  displayLabel: string;
+}>;
+
+export type AiTaskTeamChannelOption = Readonly<{
+  id: string;
+  name: string;
+}>;
+
+export type AiTaskOperationCapabilities = Readonly<{
+  canAssign: boolean;
+  canAcknowledge: boolean;
+  canEscalate: boolean;
+  canManage: boolean;
+  canReview: boolean;
+  currentMembershipId: string | null;
+  membershipCandidates: readonly AiTaskAssignmentCandidate[];
+  teamChannels: readonly AiTaskTeamChannelOption[];
+  teamChannelLabels: Readonly<Record<string, string>>;
+}>;
 
 export type AiTaskWorkspacePayload = Readonly<{
   tasks: readonly AiTask[];
@@ -34,7 +63,12 @@ export type AiTaskWorkspaceResult =
   | ReadFailure;
 
 export type AiTaskDetailResult =
-  | Readonly<{ status: "success"; detail: AiTaskDetailViewModel; canReview: boolean }>
+  | Readonly<{
+      status: "success";
+      detail: AiTaskDetailViewModel;
+      canReview: boolean;
+      operations: AiTaskOperationCapabilities;
+    }>
   | ReadFailure;
 
 function mapFailureMessage(code: string | undefined, message: string): ReadFailure {
@@ -93,6 +127,63 @@ export async function readAiTaskWorkspace(
   return { status: "success", workspace: buildWorkspace(result.value) };
 }
 
+async function resolveOperationCapabilities(): Promise<AiTaskOperationCapabilities> {
+  const access = await fetchCurrentEffectiveAccess();
+  const canAssign = hasGrantedPermission(access, "ai-task.assign");
+  const canAcknowledge = hasGrantedPermission(access, "ai-task.acknowledge");
+  const canEscalate = hasGrantedPermission(access, "ai-task.escalate");
+  const canManage = hasGrantedPermission(access, "ai-task.manage");
+  const canReview = hasGrantedPermission(access, "ai-task.review");
+  const currentMembershipId = parseMembershipIdFromMemberReference(
+    access?.memberReference ?? undefined,
+  );
+
+  const membershipCandidates = new Map<string, AiTaskAssignmentCandidate>();
+  const teamChannels: AiTaskTeamChannelOption[] = [];
+  const teamChannelLabels: Record<string, string> = {};
+
+  if (hasGrantedPermission(access, "teams.read")) {
+    const teamsContext = await resolveTeamsRequestContext();
+    if (teamsContext.status === "success") {
+      const channelsResult = await listTeamsChannels(teamsContext.context);
+      if (channelsResult.status === "success") {
+        for (const channel of channelsResult.value.items) {
+          teamChannels.push({ id: channel.id, name: channel.name });
+          teamChannelLabels[channel.id] = channel.name;
+        }
+
+        const primaryChannelId = channelsResult.value.items[0]?.id;
+        if (primaryChannelId) {
+          const detailResult = await getTeamsChannelDetail(
+            teamsContext.context,
+            primaryChannelId,
+          );
+          if (detailResult.status === "success") {
+            for (const member of detailResult.value.members) {
+              membershipCandidates.set(member.tenantMembershipId, {
+                tenantMembershipId: member.tenantMembershipId,
+                displayLabel: member.displayLabel,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    canAssign,
+    canAcknowledge,
+    canEscalate,
+    canManage,
+    canReview,
+    currentMembershipId,
+    membershipCandidates: [...membershipCandidates.values()],
+    teamChannels,
+    teamChannelLabels,
+  };
+}
+
 export async function readAiTaskDetail(taskId: string): Promise<AiTaskDetailResult> {
   const authorization = await denyUnlessGranted("ai-task.read");
   if (authorization.status === "failure") {
@@ -109,6 +200,8 @@ export async function readAiTaskDetail(taskId: string): Promise<AiTaskDetailResu
     ? listResult.value.capabilities.canReview
     : false;
 
+  const operations = await resolveOperationCapabilities();
+
   const result = await getAiTask(contextResult.context, taskId);
   if (result.status === "failure") {
     if (result.code === "not-found") {
@@ -122,5 +215,6 @@ export async function readAiTaskDetail(taskId: string): Promise<AiTaskDetailResu
     status: "success",
     detail: mapRawAiTaskDetailViewModel(result.value),
     canReview,
+    operations,
   };
 }

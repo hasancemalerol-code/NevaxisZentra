@@ -9,6 +9,9 @@ public static class TeamsNotificationPresentationBuilder
     public static string ApprovalReviewReason => "İncelemenizi bekleyen onay isteği";
     public static string HandoverAcknowledgementReason => "Teslim almanız gereken vardiya devri";
     public static string TaskLinkReason => "Teams mesajına bağlı AI görevi";
+    public static string TaskAssignedReason => "Size atanan AI görevi";
+    public static string TaskEscalatedReason => "Eskale edilen AI görevi";
+    public static string TaskSlaWarningReason => "SLA riski taşıyan AI görevi";
 
     public static string BuildDirectMessageFingerprint(Guid messageId, Guid recipientMembershipId) =>
         $"direct-message:{messageId:D}:{recipientMembershipId:D}";
@@ -24,6 +27,15 @@ public static class TeamsNotificationPresentationBuilder
 
     public static string BuildTaskLinkFingerprint(Guid linkId, Guid recipientMembershipId) =>
         $"task-link:{linkId:D}:{recipientMembershipId:D}";
+
+    public static string BuildTaskAssignedFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-assigned:{taskId:D}:{recipientMembershipId:D}";
+
+    public static string BuildTaskEscalatedFingerprint(Guid taskId, int escalationLevel, Guid recipientMembershipId) =>
+        $"task-escalated:{taskId:D}:{escalationLevel}:{recipientMembershipId:D}";
+
+    public static string BuildTaskSlaWarningFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-sla-warning:{taskId:D}:{recipientMembershipId:D}";
 
     public static string BuildDirectMessageRoute(Guid conversationId) =>
         $"/teams/ozel-mesajlar?conversation={conversationId:D}";
@@ -54,6 +66,12 @@ public static class TeamsNotificationPresentationBuilder
 
     public static string BuildTaskLinkTitle(string taskReference) =>
         $"Teams mesajına bağlı görev: {taskReference}";
+
+    public static string BuildTaskAssignedTitle(string taskReference) =>
+        $"Size atanan görev: {taskReference}";
+
+    public static string BuildTaskEscalatedTitle(string taskReference, int escalationLevel) =>
+        $"Eskale görev (seviye {escalationLevel}): {taskReference}";
 
     public static string TruncatePreview(string value) =>
         string.IsNullOrWhiteSpace(value)

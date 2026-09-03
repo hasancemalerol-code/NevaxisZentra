@@ -28,6 +28,19 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
         entity.Property(t => t.ImpactJson).HasColumnName("impact_json").IsRequired();
         entity.Property(t => t.SourcesJson).HasColumnName("sources_json").IsRequired();
         entity.Property(t => t.AssigneeJson).HasColumnName("assignee_json");
+        entity.Property(t => t.AssignedMembershipId).HasColumnName("assigned_membership_id");
+        entity.Property(t => t.AssignedTeamChannelId).HasColumnName("assigned_team_channel_id");
+        entity.Property(t => t.AcknowledgedAtUtc).HasColumnName("acknowledged_at_utc");
+        entity.Property(t => t.StartedAtUtc).HasColumnName("started_at_utc");
+        entity.Property(t => t.ResolvedAtUtc).HasColumnName("resolved_at_utc");
+        entity.Property(t => t.EscalationLevel).HasColumnName("escalation_level");
+        entity.Property(t => t.EscalationState).HasColumnName("escalation_state").HasMaxLength(20).IsRequired();
+        entity.Property(t => t.SlaPolicyId).HasColumnName("sla_policy_id");
+        entity.Property(t => t.LastEscalatedAtUtc).HasColumnName("last_escalated_at_utc");
+        entity.Property(t => t.AssignmentReason).HasColumnName("assignment_reason").HasMaxLength(500);
+        entity.Property(t => t.AssignmentSource).HasColumnName("assignment_source").HasMaxLength(40);
+        entity.Property(t => t.RoutingRuleId).HasColumnName("routing_rule_id");
+        entity.Property(t => t.RoutingMetadataJson).HasColumnName("routing_metadata_json");
         entity.Property(t => t.ApprovalState).HasColumnName("approval_state").HasMaxLength(20).IsRequired();
         entity.Property(t => t.ApprovalRequestedAtUtc).HasColumnName("approval_requested_at_utc");
         entity.Property(t => t.ApprovalRequestedBy).HasColumnName("approval_requested_by").HasMaxLength(200);
@@ -80,6 +93,14 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
             .HasDatabaseName("ix_ai_tasks_tenant_facility_source");
         entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.CreatedAtUtc })
             .HasDatabaseName("ix_ai_tasks_tenant_facility_created");
+        entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.AssignedMembershipId })
+            .HasDatabaseName("ix_ai_tasks_tenant_facility_assignee");
+        entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.AssignedTeamChannelId })
+            .HasDatabaseName("ix_ai_tasks_tenant_facility_team");
+        entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.DueAtUtc })
+            .HasDatabaseName("ix_ai_tasks_tenant_facility_due");
+        entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.EscalationLevel })
+            .HasDatabaseName("ix_ai_tasks_tenant_facility_escalation");
     }
 }
 
@@ -102,6 +123,7 @@ internal sealed class AiTaskAuditEventEntityConfiguration : IEntityTypeConfigura
         entity.Property(e => e.PreviousStatus).HasColumnName("previous_status").HasMaxLength(30);
         entity.Property(e => e.NextStatus).HasColumnName("next_status").HasMaxLength(30);
         entity.Property(e => e.CorrelationId).HasColumnName("correlation_id");
+        entity.Property(e => e.MetadataJson).HasColumnName("metadata_json");
         entity.HasOne<Tenant>().WithMany().HasForeignKey(e => e.TenantId).OnDelete(DeleteBehavior.Restrict);
         entity.HasOne<Facility>().WithMany()
             .HasForeignKey(e => new { e.TenantId, e.FacilityId })

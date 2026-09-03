@@ -35,10 +35,30 @@ export type RawAiTaskSummary = Readonly<{
   sourceModule: string | null;
   sourceEntityId: string | null;
   listOriginKind: string;
+  assignee: Readonly<{
+    userId: string;
+    displayName: string;
+    role: string | null;
+  }> | null;
+  assignedMembershipId: string | null;
+  assignedTeamChannelId: string | null;
+  acknowledgedAtUtc: string | null;
+  escalationLevel: number;
+  escalationState: string;
+  slaState: string;
   dueAt: string | null;
   createdAt: string;
   updatedAt: string;
   version: number;
+}>;
+
+export type RawAiTaskSla = Readonly<{
+  state: string;
+  acknowledgmentDueAtUtc: string | null;
+  responseDueAtUtc: string | null;
+  resolutionDueAtUtc: string | null;
+  isOverdue: boolean;
+  breachType: string | null;
 }>;
 
 export type RawAiTaskDetail = Readonly<{
@@ -87,6 +107,15 @@ export type RawAiTaskDetail = Readonly<{
     displayName: string;
     role: string | null;
   }> | null;
+  assignedMembershipId: string | null;
+  assignedTeamChannelId: string | null;
+  acknowledgedAtUtc: string | null;
+  escalationLevel: number;
+  escalationState: string;
+  slaState: string;
+  sla: RawAiTaskSla;
+  assignmentReason: string | null;
+  assignmentSource: string | null;
   approval: Readonly<{
     state: string;
     requestedAt: string | null;
@@ -133,6 +162,7 @@ export type RawAiTaskDetail = Readonly<{
     note: string | null;
     previousStatus: string | null;
     nextStatus: string | null;
+    metadataJson: string | null;
   }>>;
 }>;
 
@@ -147,6 +177,10 @@ export type RawAiTaskListResponse = Readonly<{
     canRead: boolean;
     canCreate: boolean;
     canReview: boolean;
+    canAssign?: boolean;
+    canAcknowledge?: boolean;
+    canEscalate?: boolean;
+    canManage?: boolean;
   }>;
 }>;
 
@@ -292,9 +326,10 @@ async function writeJson<T>(
   path: string,
   body: unknown,
   parser: (payload: unknown) => T,
+  query?: Record<string, string | undefined>,
 ): Promise<AiTaskApiResult<T>> {
   try {
-    const response = await fetch(buildUrl(context, path), {
+    const response = await fetch(buildUrl(context, path, query), {
       method,
       headers: {
         ...context.requestHeaders,
@@ -424,4 +459,79 @@ export async function transitionAiTask(
   body: Readonly<{ expectedVersion: number; targetStatus: string; note?: string | null }>,
 ): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
   return writeJson(context, "POST", `/api/ai-tasks/${taskId}/transitions`, body, parseWrite);
+}
+
+export async function assignAiTask(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{
+    expectedVersion: number;
+    targetMembershipId?: string | null;
+    targetTeamChannelId?: string | null;
+    reason: string;
+    source?: string | null;
+  }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/assign`, body, parseWrite);
+}
+
+export async function acknowledgeAiTask(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; note?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/acknowledge`, body, parseWrite);
+}
+
+export async function changeAiTaskPriority(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; priority: string; reason?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/priority`, body, parseWrite);
+}
+
+export async function changeAiTaskDueDate(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; dueAtUtc?: string | null; reason?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/due-date`, body, parseWrite);
+}
+
+export async function escalateAiTask(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; breachType: string; note?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/escalate`, body, parseWrite);
+}
+
+export async function evaluateAiTaskEscalations(
+  context: ProductionOrderRequestContext,
+  maxTasks?: number,
+): Promise<AiTaskApiResult<Readonly<{
+  tasksEvaluated: number;
+  escalationsCreated: number;
+  escalatedTaskIds: readonly string[];
+}>>> {
+  return writeJson(
+    context,
+    "POST",
+    "/api/ai-tasks/escalations/evaluate",
+    {},
+    (payload) => {
+      const value = payload as {
+        tasksEvaluated?: number;
+        escalationsCreated?: number;
+        escalatedTaskIds?: readonly string[];
+      };
+      return {
+        tasksEvaluated: value.tasksEvaluated ?? 0,
+        escalationsCreated: value.escalationsCreated ?? 0,
+        escalatedTaskIds: value.escalatedTaskIds ?? [],
+      };
+    },
+    maxTasks !== undefined ? { maxTasks: String(maxTasks) } : undefined,
+  );
 }

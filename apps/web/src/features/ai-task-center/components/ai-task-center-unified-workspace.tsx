@@ -56,7 +56,7 @@ function buildCenterHref(
   const params = new URLSearchParams();
   params.set("gorunum", view);
 
-  if (view === "all-tasks" || view === "assigned" || view === "completed") {
+  if (view === "all-tasks" || view === "assigned" || view === "completed" || view === "unassigned") {
     params.set("kaynak", originFilter);
   }
 
@@ -68,12 +68,20 @@ type AiTaskCenterUnifiedRowProps = Readonly<{
   item: AiTaskCenterItem;
   showFacilityColumn: boolean;
   showAssigneeColumn: boolean;
+  showTeamColumn: boolean;
+  showSlaColumn: boolean;
+  showDueDateColumn: boolean;
+  showEscalationColumn: boolean;
 }>;
 
 function AiTaskCenterUnifiedRow({
   item,
   showFacilityColumn,
   showAssigneeColumn,
+  showTeamColumn,
+  showSlaColumn,
+  showDueDateColumn,
+  showEscalationColumn,
 }: AiTaskCenterUnifiedRowProps) {
   const occurredLabel = formatDateTime(item.occurredAt);
 
@@ -86,10 +94,13 @@ function AiTaskCenterUnifiedRow({
         <Link href={item.deepLinkPath}>{item.title}</Link>
       </td>
       {showFacilityColumn ? <td>{item.facilityLabel}</td> : null}
-      {showAssigneeColumn ? <td>{item.assigneeLabel}</td> : null}
+      {showAssigneeColumn ? <td>{item.assigneeLabel ?? "—"}</td> : null}
+      {showTeamColumn ? <td>{item.teamLabel ?? "—"}</td> : null}
+      {showSlaColumn ? <td>{item.slaLabel ?? "—"}</td> : null}
+      {showDueDateColumn ? <td>{item.dueAtLabel ?? occurredLabel ?? "—"}</td> : null}
+      {showEscalationColumn ? <td>{item.escalationLabel ?? "—"}</td> : null}
       <td>{item.priorityLabel ?? "—"}</td>
       <td>{item.statusLabel ?? "—"}</td>
-      <td>{occurredLabel ?? "—"}</td>
       <td>{item.relatedContext ?? "—"}</td>
       <td>
         <Link href={item.deepLinkPath}>Aç</Link>
@@ -123,7 +134,10 @@ export function AiTaskCenterUnifiedWorkspace({
   );
 
   const showOriginFilters =
-    view === "all-tasks" || view === "assigned" || view === "completed";
+    view === "all-tasks"
+    || view === "assigned"
+    || view === "completed"
+    || view === "unassigned";
 
   const showFacilityColumn = useMemo(
     () => hasAnyTaskCenterColumnValue(visibleItems, (item) => item.facilityLabel),
@@ -132,6 +146,29 @@ export function AiTaskCenterUnifiedWorkspace({
 
   const showAssigneeColumn = useMemo(
     () => hasAnyTaskCenterColumnValue(visibleItems, (item) => item.assigneeLabel),
+    [visibleItems],
+  );
+
+  const showTeamColumn = useMemo(
+    () => hasAnyTaskCenterColumnValue(visibleItems, (item) => item.teamLabel),
+    [visibleItems],
+  );
+
+  const showSlaColumn = useMemo(
+    () => hasAnyTaskCenterColumnValue(visibleItems, (item) => item.slaLabel),
+    [visibleItems],
+  );
+
+  const showDueDateColumn = useMemo(
+    () => hasAnyTaskCenterColumnValue(
+      visibleItems,
+      (item) => item.dueAtLabel ?? item.occurredAt,
+    ),
+    [visibleItems],
+  );
+
+  const showEscalationColumn = useMemo(
+    () => hasAnyTaskCenterColumnValue(visibleItems, (item) => item.escalationLabel),
     [visibleItems],
   );
 
@@ -202,9 +239,12 @@ export function AiTaskCenterUnifiedWorkspace({
                 <th>Başlık</th>
                 {showFacilityColumn ? <th>Tesis</th> : null}
                 {showAssigneeColumn ? <th>Atanan</th> : null}
+                {showTeamColumn ? <th>Ekip</th> : null}
+                {showSlaColumn ? <th>SLA</th> : null}
+                {showDueDateColumn ? <th>Son Tarih</th> : null}
+                {showEscalationColumn ? <th>Eskalasyon</th> : null}
                 <th>Öncelik</th>
                 <th>Durum</th>
-                <th>Son tarih / oluşum</th>
                 <th>İlişkili bağlam</th>
                 <th>Bağlantı</th>
               </tr>
@@ -215,7 +255,11 @@ export function AiTaskCenterUnifiedWorkspace({
                   item={item}
                   key={item.dedupeKey}
                   showAssigneeColumn={showAssigneeColumn}
+                  showDueDateColumn={showDueDateColumn}
+                  showEscalationColumn={showEscalationColumn}
                   showFacilityColumn={showFacilityColumn}
+                  showSlaColumn={showSlaColumn}
+                  showTeamColumn={showTeamColumn}
                 />
               ))}
             </tbody>

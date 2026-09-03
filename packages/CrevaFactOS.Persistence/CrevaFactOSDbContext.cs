@@ -313,6 +313,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     // AI task center foundation (AI-TASK-CENTER-1)
     public DbSet<AiTask> AiTasks => Set<AiTask>();
     public DbSet<AiTaskAuditEvent> AiTaskAuditEvents => Set<AiTaskAuditEvent>();
+    public DbSet<AiTaskSlaPolicy> AiTaskSlaPolicies => Set<AiTaskSlaPolicy>();
+    public DbSet<AiTaskRoutingRule> AiTaskRoutingRules => Set<AiTaskRoutingRule>();
+    public DbSet<AiTaskEscalationEvent> AiTaskEscalationEvents => Set<AiTaskEscalationEvent>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1671,6 +1674,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new AiTaskAuditEventEntityConfiguration());
         modelBuilder.Entity<AiTaskAuditEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskSlaPolicyEntityConfiguration());
+        modelBuilder.Entity<AiTaskSlaPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskRoutingRuleEntityConfiguration());
+        modelBuilder.Entity<AiTaskRoutingRule>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskEscalationEventEntityConfiguration());
+        modelBuilder.Entity<AiTaskEscalationEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

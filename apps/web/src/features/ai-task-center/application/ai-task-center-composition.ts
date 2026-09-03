@@ -15,6 +15,18 @@ import {
   getAiTaskPriorityLabel,
   getAiTaskStatusLabel,
 } from "../presentation/ai-task-labels";
+import {
+  formatAiTaskShortDateTime,
+} from "../presentation/ai-task-formatters";
+import {
+  getAiTaskEscalationLevelLabel,
+  getAiTaskEscalationStateLabel,
+  getAiTaskSlaStateLabel,
+} from "../presentation/ai-task-sla-labels";
+
+export type AiTaskCenterTeamChannelLabels = Readonly<
+  Record<string, string>
+>;
 
 function isAiTaskListOriginKind(value: string): value is AiTaskListOriginKind {
   return value in AI_TASK_CENTER_SOURCE_LABELS
@@ -82,10 +94,19 @@ function buildTaskRelatedContext(task: AiTaskListRecord): string | null {
 export function mapTaskToCenterItem(
   task: AiTaskListRecord,
   facilityLabel: string | null,
+  teamChannelLabels: AiTaskCenterTeamChannelLabels = {},
 ): AiTaskCenterItem {
   const listOriginKind = isAiTaskListOriginKind(task.listOriginKind)
     ? task.listOriginKind
     : "unspecified";
+
+  const teamLabel = task.assignedTeamChannelId
+    ? teamChannelLabels[task.assignedTeamChannelId] ?? "Ekip kanalı"
+    : null;
+
+  const escalationLabel = task.escalationLevel > 0 || task.escalationState !== "none"
+    ? `${getAiTaskEscalationLevelLabel(task.escalationLevel)} · ${getAiTaskEscalationStateLabel(task.escalationState)}`
+    : null;
 
   return {
     dedupeKey: `task:${task.id}`,
@@ -95,6 +116,16 @@ export function mapTaskToCenterItem(
     title: task.title,
     facilityLabel,
     assigneeLabel: task.assignee?.displayName ?? null,
+    teamLabel,
+    slaLabel: getAiTaskSlaStateLabel(task.slaState),
+    slaState: task.slaState,
+    dueAt: task.dueAt ?? null,
+    dueAtLabel: task.dueAt ? formatAiTaskShortDateTime(task.dueAt) : null,
+    escalationLabel,
+    escalationLevel: task.escalationLevel,
+    escalationState: task.escalationState,
+    assignedMembershipId: task.assignedMembershipId ?? null,
+    assignedTeamChannelId: task.assignedTeamChannelId ?? null,
     priorityLabel: getAiTaskPriorityLabel(task.priority),
     statusLabel: getAiTaskStatusLabel(task.status),
     statusCode: task.status,
@@ -123,6 +154,16 @@ export function mapWorkInboxItemToCenterItem(
     title: item.title,
     facilityLabel,
     assigneeLabel: null,
+    teamLabel: null,
+    slaLabel: null,
+    slaState: null,
+    dueAt: null,
+    dueAtLabel: null,
+    escalationLabel: null,
+    escalationLevel: null,
+    escalationState: null,
+    assignedMembershipId: null,
+    assignedTeamChannelId: null,
     priorityLabel: null,
     statusLabel: item.reason,
     statusCode: null,
@@ -138,6 +179,7 @@ export type ComposeAiTaskCenterItemsInput = Readonly<{
   tasks: readonly AiTaskListRecord[];
   workInboxItems: readonly RawTeamsWorkInboxItem[];
   facilityLabel: string | null;
+  teamChannelLabels?: AiTaskCenterTeamChannelLabels;
 }>;
 
 export function composeAiTaskCenterItems(
@@ -145,9 +187,13 @@ export function composeAiTaskCenterItems(
 ): readonly AiTaskCenterItem[] {
   const taskIds = new Set(input.tasks.map((task) => task.id));
   const items = new Map<string, AiTaskCenterItem>();
+  const teamChannelLabels = input.teamChannelLabels ?? {};
 
   for (const task of input.tasks) {
-    items.set(`task:${task.id}`, mapTaskToCenterItem(task, input.facilityLabel));
+    items.set(
+      `task:${task.id}`,
+      mapTaskToCenterItem(task, input.facilityLabel, teamChannelLabels),
+    );
   }
 
   for (const inboxItem of input.workInboxItems) {
@@ -189,6 +235,32 @@ function matchesTaskOriginFilter(
   return item.kind === "task" && item.listOriginKind === "teams-message";
 }
 
+function isSlaRiskState(item: AiTaskCenterItem): boolean {
+  return item.slaState === "due-soon"
+    || item.slaState === "overdue"
+    || item.slaState === "breached";
+}
+
+function isOverdueState(item: AiTaskCenterItem): boolean {
+  return item.slaState === "overdue" || item.slaState === "breached";
+}
+
+function isUnassignedTask(item: AiTaskCenterItem): boolean {
+  return item.kind === "task"
+    && !item.assignedMembershipId
+    && !item.assignedTeamChannelId;
+}
+
+function isTeamAssignedTask(item: AiTaskCenterItem): boolean {
+  return item.kind === "task" && Boolean(item.assignedTeamChannelId);
+}
+
+function isEscalatedTask(item: AiTaskCenterItem): boolean {
+  return item.kind === "task" && (
+    (item.escalationLevel ?? 0) > 0 || item.escalationState === "active"
+  );
+}
+
 export function filterAiTaskCenterItems(
   items: readonly AiTaskCenterItem[],
   view: AiTaskCenterView,
@@ -199,6 +271,16 @@ export function filterAiTaskCenterItems(
     switch (view) {
       case "assigned":
         return item.kind !== "task" || assignedTaskIds.has(item.nativeSourceId);
+      case "team-assigned":
+        return isTeamAssignedTask(item);
+      case "unassigned":
+        return isUnassignedTask(item) && !isTaskItemFinal(item);
+      case "overdue":
+        return item.kind === "task" && isOverdueState(item) && !isTaskItemFinal(item);
+      case "sla-risk":
+        return item.kind === "task" && isSlaRiskState(item) && !isTaskItemFinal(item);
+      case "escalated":
+        return isEscalatedTask(item) && !isTaskItemFinal(item);
       case "all-tasks":
         return item.kind === "task" && !isTaskItemFinal(item);
       case "approvals-handovers":
@@ -212,7 +294,12 @@ export function filterAiTaskCenterItems(
     }
   });
 
-  if (view === "all-tasks" || view === "assigned" || view === "completed") {
+  if (
+    view === "all-tasks"
+    || view === "assigned"
+    || view === "completed"
+    || view === "unassigned"
+  ) {
     if (originFilter === "all") {
       return viewFiltered;
     }

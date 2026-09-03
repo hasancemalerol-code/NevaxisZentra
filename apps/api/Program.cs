@@ -157,6 +157,7 @@ app.MapIotPlcEndpoints();
 app.MapIotPlcIntelligenceEndpoints();
 app.MapOperationalRiskEndpoints();
 app.MapAiTaskEndpoints();
+app.MapAiTaskOperationsEndpoints();
 app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();
 app.MapTeamsHandoverEndpoints();

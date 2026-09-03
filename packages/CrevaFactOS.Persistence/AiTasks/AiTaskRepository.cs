@@ -45,7 +45,8 @@ public interface IAiTaskRepository
 
 public sealed class AiTaskRepository(
     CrevaFactOSDbContext dbContext,
-    TenantDatabaseSession tenantDatabaseSession) : IAiTaskRepository
+    TenantDatabaseSession tenantDatabaseSession,
+    IAiTaskOperationsRepository operationsRepository) : IAiTaskRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -83,6 +84,9 @@ public sealed class AiTaskRepository(
                 }
 
                 var totalCount = await query.CountAsync(ct);
+                var policies = await dbContext.AiTaskSlaPolicies.AsNoTracking()
+                    .Where(p => p.TenantId == context.TenantId && p.Enabled)
+                    .ToListAsync(ct);
                 var items = await query
                     .OrderByDescending(t => t.UpdatedAtUtc)
                     .ThenByDescending(t => t.CreatedAtUtc)
@@ -91,7 +95,7 @@ public sealed class AiTaskRepository(
                     .ToListAsync(ct);
 
                 return new AiTaskListReadModel(
-                    items.Select(MapSummary).ToList(),
+                    items.Select(task => MapSummary(task, policies)).ToList(),
                     totalCount,
                     page,
                     pageSize);
@@ -189,6 +193,8 @@ public sealed class AiTaskRepository(
                     task.Status,
                     null);
 
+                await operationsRepository.ApplyRoutingOnCreateAsync(context, task, now, actor, ct);
+
                 await dbContext.SaveChangesAsync(ct);
                 return AiTaskWriteResult.Success(task.Id, task.Version);
             },
@@ -250,6 +256,8 @@ public sealed class AiTaskRepository(
                     null,
                     task.Status,
                     null);
+
+                await operationsRepository.ApplyRoutingOnCreateAsync(context, task, now, actor, ct);
 
                 await dbContext.SaveChangesAsync(ct);
                 return AiTaskWriteResult.Success(task.Id, task.Version);
@@ -346,7 +354,7 @@ public sealed class AiTaskRepository(
             .Where(predicate)
             .SingleOrDefaultAsync(ct);
 
-        return task is null ? null : MapDetail(task);
+        return task is null ? null : await MapDetailAsync(task, ct);
     }
 
     private static AiTaskWriteResult ResolveIdempotentReplay(AiTask existing, string fingerprint)
@@ -693,8 +701,11 @@ public sealed class AiTaskRepository(
         return null;
     }
 
-    private static AiTaskSummaryReadModel MapSummary(AiTask task) =>
-        new(
+    private static AiTaskSummaryReadModel MapSummary(AiTask task, IReadOnlyList<AiTaskSlaPolicy> policies)
+    {
+        var policy = AiTaskSlaEngine.ResolvePolicy(task, policies);
+        var sla = AiTaskSlaEngine.DeriveSlaState(task, policy, DateTimeOffset.UtcNow);
+        return new(
             task.Id,
             task.TaskReference,
             task.Title,
@@ -710,10 +721,25 @@ public sealed class AiTaskRepository(
             task.DueAtUtc,
             task.CreatedAtUtc,
             task.UpdatedAtUtc,
-            task.Version);
+            task.Version,
+            DeserializeOptional<AiTaskAssigneeModel>(task.AssigneeJson),
+            task.AssignedMembershipId,
+            task.AssignedTeamChannelId,
+            task.AcknowledgedAtUtc,
+            task.EscalationLevel,
+            task.EscalationState,
+            sla.State);
+    }
 
-    private static AiTaskDetailReadModel MapDetail(AiTask task) =>
-        new(
+    private async Task<AiTaskDetailReadModel> MapDetailAsync(AiTask task, CancellationToken ct)
+    {
+        var policies = await dbContext.AiTaskSlaPolicies.AsNoTracking()
+            .Where(p => p.TenantId == task.TenantId && p.Enabled)
+            .ToListAsync(ct);
+        var policy = AiTaskSlaEngine.ResolvePolicy(task, policies);
+        var sla = AiTaskSlaEngine.DeriveSlaState(task, policy, DateTimeOffset.UtcNow);
+
+        return new AiTaskDetailReadModel(
             task.Id,
             task.TaskReference,
             task.Title,
@@ -751,6 +777,18 @@ public sealed class AiTaskRepository(
             task.RuleSetVersion,
             task.DueAtUtc,
             task.CompletedAtUtc,
+            task.AcknowledgedAtUtc,
+            task.StartedAtUtc,
+            task.ResolvedAtUtc,
+            task.EscalationLevel,
+            task.EscalationState,
+            task.LastEscalatedAtUtc,
+            task.AssignmentReason,
+            task.AssignmentSource,
+            task.AssignedMembershipId,
+            task.AssignedTeamChannelId,
+            task.SlaPolicyId,
+            sla,
             task.CreatedAtUtc,
             task.UpdatedAtUtc,
             task.Version,
@@ -766,8 +804,10 @@ public sealed class AiTaskRepository(
                     e.ActorLabel,
                     e.Note,
                     e.PreviousStatus,
-                    e.NextStatus))
+                    e.NextStatus,
+                    e.MetadataJson))
                 .ToList());
+    }
 
     private static string Serialize<T>(T value) =>
         JsonSerializer.Serialize(value, JsonOptions);

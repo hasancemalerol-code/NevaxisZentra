@@ -1,3 +1,5 @@
+import type { AiTaskEscalationState, AiTaskSlaState } from "./ai-task";
+
 export const AI_TASK_CENTER_SOURCE_LABELS = {
   "ai-analysis": "AI Analizi",
   "manual-task": "Manuel Görev",
@@ -23,6 +25,11 @@ export type AiTaskListOriginKind = keyof typeof AI_TASK_LIST_ORIGIN_KINDS;
 
 export const AI_TASK_CENTER_VIEWS = {
   assigned: "Bana Atananlar",
+  "team-assigned": "Ekibe Atananlar",
+  unassigned: "Atanmamış",
+  overdue: "Gecikenler",
+  "sla-risk": "SLA Riski",
+  escalated: "Eskale Edilenler",
   "all-tasks": "Tüm Görevler",
   "approvals-handovers": "Onay ve Teslimler",
   mentions: "Etiketlemeler",
@@ -48,6 +55,16 @@ export type AiTaskCenterItem = Readonly<{
   title: string;
   facilityLabel: string | null;
   assigneeLabel: string | null;
+  teamLabel: string | null;
+  slaLabel: string | null;
+  slaState: AiTaskSlaState | null;
+  dueAt: string | null;
+  dueAtLabel: string | null;
+  escalationLabel: string | null;
+  escalationLevel: number | null;
+  escalationState: AiTaskEscalationState | null;
+  assignedMembershipId: string | null;
+  assignedTeamChannelId: string | null;
   priorityLabel: string | null;
   statusLabel: string | null;
   statusCode: string | null;

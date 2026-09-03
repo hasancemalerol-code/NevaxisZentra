@@ -19,6 +19,19 @@ public sealed class AiTask
     public string ImpactJson { get; set; } = "{}";
     public string SourcesJson { get; set; } = "[]";
     public string? AssigneeJson { get; set; }
+    public Guid? AssignedMembershipId { get; set; }
+    public Guid? AssignedTeamChannelId { get; set; }
+    public DateTimeOffset? AcknowledgedAtUtc { get; set; }
+    public DateTimeOffset? StartedAtUtc { get; set; }
+    public DateTimeOffset? ResolvedAtUtc { get; set; }
+    public int EscalationLevel { get; set; }
+    public string EscalationState { get; set; } = AiTaskEscalationStates.None;
+    public Guid? SlaPolicyId { get; set; }
+    public DateTimeOffset? LastEscalatedAtUtc { get; set; }
+    public string? AssignmentReason { get; set; }
+    public string? AssignmentSource { get; set; }
+    public Guid? RoutingRuleId { get; set; }
+    public string? RoutingMetadataJson { get; set; }
     public string ApprovalState { get; set; } = AiTaskApprovalStates.NotRequired;
     public DateTimeOffset? ApprovalRequestedAtUtc { get; set; }
     public string? ApprovalRequestedBy { get; set; }
@@ -66,6 +79,61 @@ public sealed class AiTaskAuditEvent
     public string? PreviousStatus { get; set; }
     public string? NextStatus { get; set; }
     public Guid? CorrelationId { get; set; }
+    public string? MetadataJson { get; set; }
+
+    public AiTask? Task { get; set; }
+}
+
+public sealed class AiTaskSlaPolicy
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid? FacilityId { get; set; }
+    public string PolicyKey { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Priority { get; set; } = AiTaskPriorities.Medium;
+    public string? Category { get; set; }
+    public string? SourceModule { get; set; }
+    public int AcknowledgmentTargetMinutes { get; set; }
+    public int ResponseTargetMinutes { get; set; }
+    public int ResolutionTargetMinutes { get; set; }
+    public bool Enabled { get; set; } = true;
+    public uint Version { get; set; } = 1;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class AiTaskRoutingRule
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public string RuleKey { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
+    public string? SourceModule { get; set; }
+    public string? Category { get; set; }
+    public string? Priority { get; set; }
+    public string TargetType { get; set; } = AiTaskRoutingTargetTypes.UnassignedQueue;
+    public Guid? TargetMembershipId { get; set; }
+    public Guid? TargetTeamChannelId { get; set; }
+    public bool Enabled { get; set; } = true;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class AiTaskEscalationEvent
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid TaskId { get; set; }
+    public int EscalationLevel { get; set; }
+    public string BreachType { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public DateTimeOffset OccurredAtUtc { get; set; }
+    public string ActorId { get; set; } = string.Empty;
+    public string? Note { get; set; }
 
     public AiTask? Task { get; set; }
 }

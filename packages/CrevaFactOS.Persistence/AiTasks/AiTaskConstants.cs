@@ -140,7 +140,14 @@ public static class AiTaskAuditEventTypes
 {
     public const string Created = "created";
     public const string AnalysisUpdated = "analysis-updated";
+    public const string Routed = "routed";
     public const string Assigned = "assigned";
+    public const string Reassigned = "reassigned";
+    public const string Acknowledged = "acknowledged";
+    public const string PriorityChanged = "priority-changed";
+    public const string DueDateChanged = "due-date-changed";
+    public const string SlaWarning = "sla-warning";
+    public const string Escalated = "escalated";
     public const string ApprovalRequested = "approval-requested";
     public const string Approved = "approved";
     public const string Rejected = "rejected";
@@ -150,11 +157,14 @@ public static class AiTaskAuditEventTypes
     public const string ExecutionFailed = "execution-failed";
     public const string Cancelled = "cancelled";
     public const string StatusChanged = "status-changed";
+    public const string TeamsNotificationEmitted = "teams-notification-emitted";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
-        Created, AnalysisUpdated, Assigned, ApprovalRequested, Approved, Rejected, Deferred,
+        Created, AnalysisUpdated, Routed, Assigned, Reassigned, Acknowledged, PriorityChanged,
+        DueDateChanged, SlaWarning, Escalated, ApprovalRequested, Approved, Rejected, Deferred,
         ExecutionStarted, ExecutionCompleted, ExecutionFailed, Cancelled, StatusChanged,
+        TeamsNotificationEmitted,
     };
 }
 

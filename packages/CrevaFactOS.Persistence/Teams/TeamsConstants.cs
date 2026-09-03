@@ -110,6 +110,9 @@ public static class TeamsNotificationTypes
     public const string ApprovalReview = "approval-review";
     public const string HandoverAcknowledgement = "handover-acknowledgement";
     public const string TaskLink = "task-link";
+    public const string TaskAssigned = "task-assigned";
+    public const string TaskEscalated = "task-escalated";
+    public const string TaskSlaWarning = "task-sla-warning";
 }
 
 public static class TeamsNotificationSourceModules

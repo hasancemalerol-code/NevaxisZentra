@@ -8,7 +8,14 @@ export const AI_TASK_AUDIT_EVENT_LABELS: Readonly<
 > = {
   created: "Görev oluşturuldu",
   "analysis-updated": "AI analizi güncellendi",
+  routed: "Görev yönlendirildi",
   assigned: "Sorumlu atandı",
+  reassigned: "Sorumlu yeniden atandı",
+  acknowledged: "Teslim alındı",
+  "priority-changed": "Öncelik değiştirildi",
+  "due-date-changed": "Son tarih değiştirildi",
+  "sla-warning": "SLA uyarısı",
+  escalated: "Görev eskale edildi",
   "approval-requested": "Onay istendi",
   approved: "Görev onaylandı",
   rejected: "Görev reddedildi",
@@ -17,6 +24,8 @@ export const AI_TASK_AUDIT_EVENT_LABELS: Readonly<
   "execution-completed": "Uygulama tamamlandı",
   "execution-failed": "Uygulama başarısız oldu",
   cancelled: "Görev iptal edildi",
+  "status-changed": "Durum değiştirildi",
+  "teams-notification-emitted": "Teams bildirimi gönderildi",
 };
 
 export const AI_TASK_AUDIT_ACTOR_TYPE_LABELS: Readonly<
@@ -30,7 +39,7 @@ export const AI_TASK_AUDIT_ACTOR_TYPE_LABELS: Readonly<
 export function getAiTaskAuditEventLabel(
   eventType: AiTaskAuditEventType,
 ): string {
-  return AI_TASK_AUDIT_EVENT_LABELS[eventType];
+  return AI_TASK_AUDIT_EVENT_LABELS[eventType] ?? eventType;
 }
 
 export function getAiTaskAuditActorTypeLabel(
@@ -64,4 +73,45 @@ export function getAiTaskAuditTransitionLabel(
     : "Değişmedi";
 
   return `${previousLabel} → ${nextLabel}`;
+}
+
+export function getAiTaskAuditMetadataSummary(
+  metadataJson: string | undefined,
+): string | undefined {
+  if (!metadataJson?.trim()) {
+    return undefined;
+  }
+
+  try {
+    const metadata = JSON.parse(metadataJson) as Record<string, unknown>;
+    const parts: string[] = [];
+
+    if (typeof metadata.reason === "string" && metadata.reason.trim()) {
+      parts.push(metadata.reason.trim());
+    }
+
+    if (typeof metadata.priority === "string") {
+      parts.push(`Öncelik: ${metadata.priority}`);
+    }
+
+    if (typeof metadata.dueAtUtc === "string") {
+      parts.push(`Son tarih: ${metadata.dueAtUtc}`);
+    }
+
+    if (typeof metadata.escalationLevel === "number") {
+      parts.push(`Eskalasyon seviyesi: ${metadata.escalationLevel}`);
+    }
+
+    if (typeof metadata.breachType === "string") {
+      parts.push(`İhlal türü: ${metadata.breachType}`);
+    }
+
+    if (typeof metadata.source === "string") {
+      parts.push(`Kaynak: ${metadata.source}`);
+    }
+
+    return parts.length > 0 ? parts.join(" · ") : metadataJson;
+  } catch {
+    return metadataJson;
+  }
 }

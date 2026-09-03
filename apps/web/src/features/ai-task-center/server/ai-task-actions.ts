@@ -6,8 +6,13 @@ import { revalidatePath } from "next/cache";
 
 import type { CreateAiTaskInput } from "../domain/ai-task";
 import {
+  acknowledgeAiTask,
+  assignAiTask,
+  changeAiTaskDueDate,
+  changeAiTaskPriority,
   createAiTask,
   createSourceLinkedAiTask,
+  escalateAiTask,
   transitionAiTask,
   type CreateAiTaskPayload,
   type CreateSourceLinkedAiTaskPayload,
@@ -100,6 +105,53 @@ async function resolveReviewContext(): Promise<
   return { status: "success", context: contextResult.context };
 }
 
+async function resolvePermissionContext(
+  permissionKey: string,
+): Promise<
+  | Readonly<{ status: "success"; context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
+  | ActionFailure
+> {
+  const authorization = await denyUnlessGranted(permissionKey);
+  if (authorization.status === "failure") return authorization;
+
+  const contextResult = resolveAiTaskRequestContext();
+  if (contextResult.status === "failure") {
+    return { status: "failure", message: contextResult.message };
+  }
+
+  return { status: "success", context: contextResult.context };
+}
+
+async function revalidateTaskPaths(taskId: string) {
+  revalidatePath("/");
+  revalidatePath("/ai-gorevleri");
+  revalidatePath(`/ai-gorevleri/${taskId}`);
+}
+
+async function finalizeTaskMutation(taskId: string, version: number) {
+  await revalidateTaskPaths(taskId);
+  const detail = await readAiTaskDetail(taskId);
+  if (detail.status === "failure") {
+    return { status: "success" as const, version };
+  }
+
+  return {
+    status: "success" as const,
+    version,
+    detail: detail.detail,
+    canReview: detail.canReview,
+    operations: detail.operations,
+  };
+}
+
+function mapMutationFailure(code: string | undefined, message: string) {
+  if (code === "concurrency-conflict") {
+    return "Görev başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin.";
+  }
+
+  return message;
+}
+
 export async function refreshAiTaskWorkspaceAction() {
   const authorization = await denyUnlessGranted("ai-task.read");
   if (authorization.status === "failure") return authorization;
@@ -175,15 +227,11 @@ export async function transitionAiTaskAction(input: Readonly<{
   if (result.status === "failure") {
     return {
       status: "failure" as const,
-      message: result.code === "concurrency-conflict"
-        ? "Görev başka bir işlem tarafından güncellendi. Lütfen yenileyip tekrar deneyin."
-        : result.message,
+      message: mapMutationFailure(result.code, result.message),
     };
   }
 
-  revalidatePath("/");
-  revalidatePath("/ai-gorevleri");
-  revalidatePath(`/ai-gorevleri/${input.taskId}`);
+  await revalidateTaskPaths(input.taskId);
 
   const detail = await readAiTaskDetail(input.taskId);
   if (detail.status === "failure") {
@@ -195,7 +243,135 @@ export async function transitionAiTaskAction(input: Readonly<{
     version: result.value.version,
     detail: detail.detail,
     canReview: detail.canReview,
+    operations: detail.operations,
   };
+}
+
+export async function assignAiTaskAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  targetMembershipId?: string | null;
+  targetTeamChannelId?: string | null;
+  reason: string;
+  source?: string | null;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.assign");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await assignAiTask(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    targetMembershipId: input.targetMembershipId ?? null,
+    targetTeamChannelId: input.targetTeamChannelId ?? null,
+    reason: input.reason,
+    source: input.source ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function acknowledgeAiTaskAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  note?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.acknowledge");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await acknowledgeAiTask(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    note: input.note ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function changeAiTaskPriorityAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  priority: string;
+  reason?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.manage");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await changeAiTaskPriority(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    priority: input.priority,
+    reason: input.reason ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function changeAiTaskDueDateAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  dueAtUtc?: string | null;
+  reason?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.manage");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await changeAiTaskDueDate(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    dueAtUtc: input.dueAtUtc ?? null,
+    reason: input.reason ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function escalateAiTaskAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  breachType: string;
+  note?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.escalate");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await escalateAiTask(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    breachType: input.breachType,
+    note: input.note ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
 }
 
 export async function loadAiTaskDetailAction(taskId: string) {
@@ -211,5 +387,6 @@ export async function loadAiTaskDetailAction(taskId: string) {
     status: "success" as const,
     detail: result.detail,
     canReview: result.canReview,
+    operations: result.operations,
   };
 }

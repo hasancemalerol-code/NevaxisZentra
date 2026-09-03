@@ -106,6 +106,32 @@ internal static class AiTaskEndpointHelpers
         return accessResult.Succeeded && accessResult.Access is not null;
     }
 
+    internal static async Task<(AiTaskOperationContext? Context, IResult? Failure)> ResolvePermissionAccessAsync(
+        Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        CorrelationContext correlationContext,
+        string permissionKey,
+        CancellationToken cancellationToken)
+    {
+        if (facilityId is null || facilityId == Guid.Empty)
+        {
+            return (null, MapAccessDenied(
+                FacilityAccessFailureCodes.FacilityMissing,
+                "A facility identifier is required."));
+        }
+
+        var accessResult = await facilityAccessResolver.ResolveAsync(
+            new FacilityAccessRequest(facilityId.Value, permissionKey),
+            cancellationToken);
+
+        if (!accessResult.Succeeded || accessResult.Access is null)
+        {
+            return (null, MapFacilityAccessFailure(accessResult));
+        }
+
+        return (BuildContext(accessResult.Access, correlationContext), null);
+    }
+
     internal static AiTaskOperationContext BuildContext(
         FacilityAccessContext access,
         CorrelationContext correlationContext) =>

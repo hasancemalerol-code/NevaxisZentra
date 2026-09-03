@@ -146,10 +146,58 @@ export type AiTaskAssignee = Readonly<{
   role?: string;
 }>;
 
+export const AI_TASK_SLA_STATES = [
+  "on-track",
+  "due-soon",
+  "overdue",
+  "breached",
+  "completed-within-sla",
+  "completed-after-sla",
+  "not-applicable",
+] as const;
+
+export type AiTaskSlaState = (typeof AI_TASK_SLA_STATES)[number];
+
+export const AI_TASK_ESCALATION_STATES = [
+  "none",
+  "active",
+  "resolved",
+] as const;
+
+export type AiTaskEscalationState =
+  (typeof AI_TASK_ESCALATION_STATES)[number];
+
+export const AI_TASK_ESCALATION_BREACH_TYPES = [
+  "acknowledgment",
+  "response",
+  "resolution",
+  "critical-approaching-due",
+  "manual",
+] as const;
+
+export type AiTaskEscalationBreachType =
+  (typeof AI_TASK_ESCALATION_BREACH_TYPES)[number];
+
+export type AiTaskSla = Readonly<{
+  state: AiTaskSlaState;
+  acknowledgmentDueAt?: string;
+  responseDueAt?: string;
+  resolutionDueAt?: string;
+  isOverdue: boolean;
+  breachType?: AiTaskEscalationBreachType;
+}>;
+
 export type AiTaskAuditEventType =
   | "created"
   | "analysis-updated"
+  | "routed"
   | "assigned"
+  | "reassigned"
+  | "acknowledged"
+  | "priority-changed"
+  | "due-date-changed"
+  | "sla-warning"
+  | "escalated"
   | "approval-requested"
   | "approved"
   | "rejected"
@@ -157,7 +205,9 @@ export type AiTaskAuditEventType =
   | "execution-started"
   | "execution-completed"
   | "execution-failed"
-  | "cancelled";
+  | "cancelled"
+  | "status-changed"
+  | "teams-notification-emitted";
 
 export type AiTaskAuditEvent = Readonly<{
   id: string;
@@ -170,6 +220,7 @@ export type AiTaskAuditEvent = Readonly<{
   note?: string;
   previousStatus?: AiTaskStatus;
   nextStatus?: AiTaskStatus;
+  metadataJson?: string;
 }>;
 
 export type AiTaskExecution = Readonly<{
@@ -210,6 +261,15 @@ export type AiTask = Readonly<{
   sources: readonly AiTaskSourceReference[];
 
   assignee?: AiTaskAssignee;
+  assignedMembershipId?: string;
+  assignedTeamChannelId?: string;
+  acknowledgedAtUtc?: string;
+  escalationLevel: number;
+  escalationState: AiTaskEscalationState;
+  slaState: AiTaskSlaState;
+  sla?: AiTaskSla;
+  assignmentReason?: string;
+  assignmentSource?: string;
   approval: AiTaskApproval;
   execution?: AiTaskExecution;
 

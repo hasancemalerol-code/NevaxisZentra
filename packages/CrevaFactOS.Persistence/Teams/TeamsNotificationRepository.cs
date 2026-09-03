@@ -60,6 +60,21 @@ public interface ITeamsNotificationRepository
         Guid taskId,
         string taskReference,
         CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskAssignedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskEscalatedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        int escalationLevel,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class TeamsNotificationRepository(
@@ -267,6 +282,45 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationPresentationBuilder.BuildTaskLinkFingerprint(linkId, recipientMembershipId),
             cancellationToken);
 
+    public Task TryCreateTaskAssignedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskAssigned,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskAssignedTitle(taskReference),
+            TeamsNotificationPresentationBuilder.TaskAssignedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskAssignedFingerprint(taskId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateTaskEscalatedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        int escalationLevel,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskEscalated,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskEscalatedTitle(taskReference, escalationLevel),
+            TeamsNotificationPresentationBuilder.TaskEscalatedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskEscalatedFingerprint(taskId, escalationLevel, recipientMembershipId),
+            cancellationToken);
+
     private async Task TryCreateAsync(
         TeamsOperationContext context,
         Guid recipientMembershipId,
@@ -384,8 +438,38 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.ApprovalReview => await CanOpenApprovalAsync(context, row, cancellationToken),
             TeamsNotificationTypes.HandoverAcknowledgement => await CanOpenHandoverAsync(context, row, cancellationToken),
             TeamsNotificationTypes.TaskLink => await CanOpenTaskLinkAsync(context, row, cancellationToken),
+            TeamsNotificationTypes.TaskAssigned
+                or TeamsNotificationTypes.TaskEscalated
+                or TeamsNotificationTypes.TaskSlaWarning => await CanOpenAssignedTaskAsync(context, row, cancellationToken),
             _ => (false, TeamsNotificationUnavailableReasons.SourceInaccessible),
         };
+
+    private async Task<(bool CanOpen, string? UnavailableReason)> CanOpenAssignedTaskAsync(
+        TeamsOperationContext context,
+        TeamsNotification row,
+        CancellationToken cancellationToken)
+    {
+        if (row.RecipientTenantMembershipId != context.MembershipId)
+        {
+            return (false, TeamsNotificationUnavailableReasons.SourceInaccessible);
+        }
+
+        if (!Guid.TryParse(row.SourceEntityId, out var taskId))
+        {
+            return (false, TeamsNotificationUnavailableReasons.SourceInaccessible);
+        }
+
+        var taskExists = await dbContext.AiTasks.AsNoTracking()
+            .AnyAsync(
+                t => t.TenantId == context.TenantId
+                     && t.FacilityId == context.FacilityId
+                     && t.Id == taskId,
+                cancellationToken);
+
+        return taskExists
+            ? (true, null)
+            : (false, TeamsNotificationUnavailableReasons.SourceInaccessible);
+    }
 
     private async Task<(bool CanOpen, string? UnavailableReason)> CanOpenDirectMessageAsync(
         TeamsOperationContext context,
@@ -611,6 +695,9 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.ApprovalReview => "Onay bildirimi",
             TeamsNotificationTypes.HandoverAcknowledgement => "Vardiya devri bildirimi",
             TeamsNotificationTypes.TaskLink => "Görev bağlantı bildirimi",
+            TeamsNotificationTypes.TaskAssigned => "Görev atama bildirimi",
+            TeamsNotificationTypes.TaskEscalated => "Görev eskalasyon bildirimi",
+            TeamsNotificationTypes.TaskSlaWarning => "Görev SLA uyarı bildirimi",
             _ => "Teams bildirimi",
         };
 
@@ -622,6 +709,9 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.ApprovalReview => TeamsNotificationPresentationBuilder.ApprovalReviewReason,
             TeamsNotificationTypes.HandoverAcknowledgement => TeamsNotificationPresentationBuilder.HandoverAcknowledgementReason,
             TeamsNotificationTypes.TaskLink => TeamsNotificationPresentationBuilder.TaskLinkReason,
+            TeamsNotificationTypes.TaskAssigned => TeamsNotificationPresentationBuilder.TaskAssignedReason,
+            TeamsNotificationTypes.TaskEscalated => TeamsNotificationPresentationBuilder.TaskEscalatedReason,
+            TeamsNotificationTypes.TaskSlaWarning => TeamsNotificationPresentationBuilder.TaskSlaWarningReason,
             _ => "Teams bildirimi",
         };
 }
@@ -683,5 +773,20 @@ public sealed class UnavailableTeamsNotificationRepository : ITeamsNotificationR
         Guid linkId,
         Guid taskId,
         string taskReference,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskAssignedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskEscalatedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        int escalationLevel,
         CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

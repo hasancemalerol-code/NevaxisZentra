@@ -2,6 +2,7 @@ using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -239,6 +240,15 @@ public static class AiTaskEndpointRouteBuilderExtensions
         sourceEntityId = item.SourceEntityId,
         listOriginKind = item.ListOriginKind,
         dueAt = item.DueAtUtc,
+        assignee = item.Assignee is null
+            ? null
+            : new { userId = item.Assignee.UserId, displayName = item.Assignee.DisplayName, role = item.Assignee.Role },
+        assignedMembershipId = item.AssignedMembershipId,
+        assignedTeamChannelId = item.AssignedTeamChannelId,
+        acknowledgedAtUtc = item.AcknowledgedAtUtc,
+        escalationLevel = item.EscalationLevel,
+        escalationState = item.EscalationState,
+        slaState = item.SlaState,
         createdAt = item.CreatedAtUtc,
         updatedAt = item.UpdatedAtUtc,
         version = item.Version,
@@ -334,6 +344,26 @@ public static class AiTaskEndpointRouteBuilderExtensions
         ruleSetVersion = item.RuleSetVersion,
         dueAt = item.DueAtUtc,
         completedAt = item.CompletedAtUtc,
+        acknowledgedAtUtc = item.AcknowledgedAtUtc,
+        startedAtUtc = item.StartedAtUtc,
+        resolvedAtUtc = item.ResolvedAtUtc,
+        escalationLevel = item.EscalationLevel,
+        escalationState = item.EscalationState,
+        lastEscalatedAtUtc = item.LastEscalatedAtUtc,
+        assignmentReason = item.AssignmentReason,
+        assignmentSource = item.AssignmentSource,
+        assignedMembershipId = item.AssignedMembershipId,
+        assignedTeamChannelId = item.AssignedTeamChannelId,
+        slaPolicyId = item.SlaPolicyId,
+        sla = new
+        {
+            state = item.Sla.State,
+            acknowledgmentDueAtUtc = item.Sla.AcknowledgmentDueAtUtc,
+            responseDueAtUtc = item.Sla.ResponseDueAtUtc,
+            resolutionDueAtUtc = item.Sla.ResolutionDueAtUtc,
+            isOverdue = item.Sla.IsOverdue,
+            breachType = item.Sla.BreachType,
+        },
         createdAt = item.CreatedAtUtc,
         updatedAt = item.UpdatedAtUtc,
         version = item.Version,
@@ -349,6 +379,7 @@ public static class AiTaskEndpointRouteBuilderExtensions
             note = e.Note,
             previousStatus = e.PreviousStatus,
             nextStatus = e.NextStatus,
+            metadataJson = e.MetadataJson,
         }),
     };
 
@@ -472,6 +503,22 @@ public static class AiTaskServiceCollectionExtensions
 {
     public static IServiceCollection AddCrevaFactOSAiTasks(this IServiceCollection services)
     {
+        services.AddScoped<IAiTaskRoutingService, AiTaskRoutingService>();
+        services.AddScoped<IAiTaskOperationsRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskOperationsRepository();
+            }
+
+            return new AiTaskOperationsRepository(
+                dbContext,
+                serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                serviceProvider.GetRequiredService<IAiTaskRoutingService>(),
+                serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
+        });
+
         services.AddScoped<IAiTaskRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
@@ -479,7 +526,8 @@ public static class AiTaskServiceCollectionExtensions
                 ? new UnavailableAiTaskRepository()
                 : new AiTaskRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<TenantDatabaseSession>());
+                    serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<IAiTaskOperationsRepository>());
         });
 
         return services;

@@ -71,7 +71,8 @@ public sealed record AiTaskAuditEventReadModel(
     string ActorLabel,
     string? Note,
     string? PreviousStatus,
-    string? NextStatus);
+    string? NextStatus,
+    string? MetadataJson);
 
 public sealed record AiTaskSummaryReadModel(
     Guid Id,
@@ -89,7 +90,14 @@ public sealed record AiTaskSummaryReadModel(
     DateTimeOffset? DueAtUtc,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
-    uint Version);
+    uint Version,
+    AiTaskAssigneeModel? Assignee,
+    Guid? AssignedMembershipId,
+    Guid? AssignedTeamChannelId,
+    DateTimeOffset? AcknowledgedAtUtc,
+    int EscalationLevel,
+    string EscalationState,
+    string SlaState);
 
 public sealed record AiTaskDetailReadModel(
     Guid Id,
@@ -123,6 +131,18 @@ public sealed record AiTaskDetailReadModel(
     string RuleSetVersion,
     DateTimeOffset? DueAtUtc,
     DateTimeOffset? CompletedAtUtc,
+    DateTimeOffset? AcknowledgedAtUtc,
+    DateTimeOffset? StartedAtUtc,
+    DateTimeOffset? ResolvedAtUtc,
+    int EscalationLevel,
+    string EscalationState,
+    DateTimeOffset? LastEscalatedAtUtc,
+    string? AssignmentReason,
+    string? AssignmentSource,
+    Guid? AssignedMembershipId,
+    Guid? AssignedTeamChannelId,
+    Guid? SlaPolicyId,
+    AiTaskSlaStateReadModel Sla,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     uint Version,

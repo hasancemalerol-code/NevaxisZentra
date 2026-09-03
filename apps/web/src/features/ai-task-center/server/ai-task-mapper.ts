@@ -5,12 +5,16 @@ import type {
   AiTaskAuditEvent,
   AiTaskAuditEventType,
   AiTaskCategory,
+  AiTaskEscalationBreachType,
+  AiTaskEscalationState,
   AiTaskPriority,
   AiTaskRiskLevel,
+  AiTaskSla,
+  AiTaskSlaState,
   AiTaskSourceReference,
   AiTaskStatus,
 } from "../domain/ai-task";
-import type { RawAiTaskDetail, RawAiTaskSummary } from "./ai-task-api-client";
+import type { RawAiTaskDetail, RawAiTaskSummary, RawAiTaskSla } from "./ai-task-api-client";
 
 export type AiTaskListRecord = AiTask &
   Readonly<{
@@ -48,6 +52,56 @@ function asAuditEventType(value: string): AiTaskAuditEventType {
   return value as AiTaskAuditEventType;
 }
 
+function asSlaState(value: string): AiTaskSlaState {
+  return value as AiTaskSlaState;
+}
+
+function asEscalationState(value: string): AiTaskEscalationState {
+  return value as AiTaskEscalationState;
+}
+
+function asBreachType(value: string): AiTaskEscalationBreachType {
+  return value as AiTaskEscalationBreachType;
+}
+
+function mapSla(raw: RawAiTaskSla | undefined, fallbackState: string): AiTaskSla {
+  const state = asSlaState(raw?.state ?? fallbackState);
+  return {
+    state,
+    acknowledgmentDueAt: raw?.acknowledgmentDueAtUtc ?? undefined,
+    responseDueAt: raw?.responseDueAtUtc ?? undefined,
+    resolutionDueAt: raw?.resolutionDueAtUtc ?? undefined,
+    isOverdue: raw?.isOverdue ?? false,
+    breachType: raw?.breachType ? asBreachType(raw.breachType) : undefined,
+  };
+}
+
+function mapOwnershipFields(raw: Readonly<{
+  assignee: RawAiTaskDetail["assignee"];
+  assignedMembershipId: string | null;
+  assignedTeamChannelId: string | null;
+  acknowledgedAtUtc: string | null;
+  escalationLevel: number;
+  escalationState: string;
+  slaState: string;
+}>) {
+  return {
+    assignee: raw.assignee
+      ? {
+          userId: raw.assignee.userId,
+          displayName: raw.assignee.displayName,
+          role: raw.assignee.role ?? undefined,
+        }
+      : undefined,
+    assignedMembershipId: raw.assignedMembershipId ?? undefined,
+    assignedTeamChannelId: raw.assignedTeamChannelId ?? undefined,
+    acknowledgedAtUtc: raw.acknowledgedAtUtc ?? undefined,
+    escalationLevel: raw.escalationLevel ?? 0,
+    escalationState: asEscalationState(raw.escalationState ?? "none"),
+    slaState: asSlaState(raw.slaState ?? "not-applicable"),
+  };
+}
+
 function asSourceType(value: string): AiTaskSourceReference["sourceType"] {
   return value as AiTaskSourceReference["sourceType"];
 }
@@ -78,6 +132,7 @@ function mapAuditTrail(
     note: event.note ?? undefined,
     previousStatus: event.previousStatus ? asStatus(event.previousStatus) : undefined,
     nextStatus: event.nextStatus ? asStatus(event.nextStatus) : undefined,
+    metadataJson: event.metadataJson ?? undefined,
   }));
 }
 
@@ -125,13 +180,10 @@ export function mapRawAiTaskDetail(raw: RawAiTaskDetail): AiTask {
       summary: raw.impact.summary,
     },
     sources: mapSources(raw.sources),
-    assignee: raw.assignee
-      ? {
-          userId: raw.assignee.userId,
-          displayName: raw.assignee.displayName,
-          role: raw.assignee.role ?? undefined,
-        }
-      : undefined,
+    ...mapOwnershipFields(raw),
+    sla: mapSla(raw.sla, raw.slaState ?? raw.sla?.state ?? "not-applicable"),
+    assignmentReason: raw.assignmentReason ?? undefined,
+    assignmentSource: raw.assignmentSource ?? undefined,
     approval: {
       state: asApprovalState(raw.approval.state),
       requestedAt: raw.approval.requestedAt ?? undefined,
@@ -161,6 +213,16 @@ export function mapRawAiTaskDetail(raw: RawAiTaskDetail): AiTask {
 }
 
 export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTaskListRecord {
+  const ownership = mapOwnershipFields({
+    assignee: raw.assignee ?? null,
+    assignedMembershipId: raw.assignedMembershipId ?? null,
+    assignedTeamChannelId: raw.assignedTeamChannelId ?? null,
+    acknowledgedAtUtc: raw.acknowledgedAtUtc ?? null,
+    escalationLevel: raw.escalationLevel ?? 0,
+    escalationState: raw.escalationState ?? "none",
+    slaState: raw.slaState ?? "not-applicable",
+  });
+
   return {
     id: raw.id,
     title: raw.title,
@@ -186,6 +248,7 @@ export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTaskListRecord {
       summary: raw.summary,
     },
     sources: [],
+    ...ownership,
     approval: {
       state: asApprovalState(raw.approval.state),
     },
