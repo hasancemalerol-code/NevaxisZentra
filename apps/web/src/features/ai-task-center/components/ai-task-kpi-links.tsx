@@ -14,15 +14,20 @@ import { KpiCard } from "@/components/ui/card";
 
 import type { AiTaskKpiSummary } from "../application/ai-task-query";
 import {
-  createAiTaskKpiHref,
-  isAiTaskKpiFilterActive,
-  type AiTaskKpiFilterId,
-} from "../presentation/ai-task-filter-link";
-import { parseAiTaskFilterSearchParams } from "../presentation/ai-task-filter-url";
+  parseAiTaskCenterView,
+  type AiTaskCenterView,
+} from "../domain/ai-task-center-item";
 
 type AiTaskKpiLinksProps = Readonly<{
   kpis: AiTaskKpiSummary;
+  listPath?: string;
 }>;
+
+type AiTaskKpiFilterId =
+  | "open"
+  | "awaiting-approval"
+  | "critical"
+  | "overdue";
 
 type AiTaskKpiLinkProps = Readonly<{
   active: boolean;
@@ -39,7 +44,15 @@ type AiTaskKpiItem = Readonly<{
   value: string;
   tone: "information" | "warning" | "neutral";
   icon: ReactNode;
+  view: AiTaskCenterView;
 }>;
+
+const KPI_VIEW_MAP: Readonly<Record<AiTaskKpiFilterId, AiTaskCenterView>> = {
+  open: "all-tasks",
+  "awaiting-approval": "approvals-handovers",
+  critical: "sla-risk",
+  overdue: "overdue",
+};
 
 function AiTaskKpiLink({
   active,
@@ -60,55 +73,64 @@ function AiTaskKpiLink({
   );
 }
 
+function createKpiHref(listPath: string, view: AiTaskCenterView): string {
+  return `${listPath}?gorunum=${view}`;
+}
+
+function isKpiActive(
+  currentView: AiTaskCenterView,
+  filterId: AiTaskKpiFilterId,
+): boolean {
+  return currentView === KPI_VIEW_MAP[filterId];
+}
+
 export function AiTaskKpiLinks({
   kpis,
+  listPath = "/",
 }: AiTaskKpiLinksProps) {
   const searchParams = useSearchParams();
-
-  const filterValue =
-    parseAiTaskFilterSearchParams(
-      new URLSearchParams(
-        searchParams.toString(),
-      ),
-    );
+  const currentView = parseAiTaskCenterView(searchParams.get("gorunum"));
 
   const items: readonly AiTaskKpiItem[] = [
     {
       id: "open",
       ariaLabel: "Açık görevleri görüntüle",
       label: "Açık görev",
-      detail: `${kpis.total} görev içinden`,
+      detail: `${kpis.total} toplam görev`,
       value: String(kpis.open),
       tone: "information",
       icon: <ListChecks />,
+      view: KPI_VIEW_MAP.open,
     },
     {
       id: "awaiting-approval",
-      ariaLabel:
-        "Onay bekleyen görevleri görüntüle",
+      ariaLabel: "Onay bekleyen görevleri görüntüle",
       label: "Onay bekleyen",
-      detail: "İnsan kararı gerekiyor",
+      detail: "İnsan kararı gereken görev",
       value: String(kpis.awaitingApproval),
       tone: "warning",
       icon: <Clock3 />,
+      view: KPI_VIEW_MAP["awaiting-approval"],
     },
     {
       id: "critical",
-      ariaLabel: "Kritik görevleri görüntüle",
+      ariaLabel: "Kritik risk görevlerini görüntüle",
       label: "Kritik risk",
       detail: "Öncelikli müdahale",
       value: String(kpis.criticalRisk),
       tone: "neutral",
       icon: <ShieldAlert />,
+      view: KPI_VIEW_MAP.critical,
     },
     {
       id: "overdue",
       ariaLabel: "Geciken görevleri görüntüle",
       label: "Geciken görev",
-      detail: `${kpis.failed} başarısız görev`,
+      detail: "SLA / son tarih aşımı",
       value: String(kpis.overdue),
       tone: "warning",
       icon: <TriangleAlert />,
+      view: KPI_VIEW_MAP.overdue,
     },
   ];
 
@@ -119,19 +141,15 @@ export function AiTaskKpiLinks({
     >
       {items.map((item) => (
         <AiTaskKpiLink
-          active={isAiTaskKpiFilterActive(
-            filterValue,
-            item.id,
-          )}
+          active={isKpiActive(currentView, item.id)}
           ariaLabel={item.ariaLabel}
-          href={createAiTaskKpiHref(item.id)}
+          href={createKpiHref(listPath, item.view)}
           key={item.id}
         >
           <KpiCard
             detail={item.detail}
             icon={item.icon}
             label={item.label}
-            preview
             tone={item.tone}
             value={item.value}
           />

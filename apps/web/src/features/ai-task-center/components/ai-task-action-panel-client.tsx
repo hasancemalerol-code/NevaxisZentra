@@ -26,6 +26,10 @@ import {
   getAiTaskApprovalStateLabel,
   getAiTaskStatusLabel,
 } from "../presentation/ai-task-labels";
+import {
+  AiTaskDetailField,
+  AiTaskDetailTextarea,
+} from "./ai-task-detail-form-controls";
 
 type AiTaskActionPanelClientProps = Readonly<{
   task: AiTask;
@@ -303,18 +307,16 @@ export function AiTaskActionPanelClient({
             runTransition("rejected", rejectNote.trim());
           }}
         >
-          <label htmlFor="ai-task-reject-note">
-            Ret gerekçesi
-          </label>
-
-          <textarea
-            id="ai-task-reject-note"
-            onChange={(event) => setRejectNote(event.target.value)}
-            placeholder="Görevin neden reddedildiğini Türkçe olarak açıklayın."
-            required
-            rows={3}
-            value={rejectNote}
-          />
+          <AiTaskDetailField label="Ret gerekçesi">
+            <AiTaskDetailTextarea
+              id="ai-task-reject-note"
+              onChange={(event) => setRejectNote(event.target.value)}
+              placeholder="Görevin neden reddedildiğini Türkçe olarak açıklayın."
+              required
+              rows={3}
+              value={rejectNote}
+            />
+          </AiTaskDetailField>
 
           <div className="ai-task-action-panel__reject-actions">
             <Button disabled={isPending} type="submit" variant="secondary">

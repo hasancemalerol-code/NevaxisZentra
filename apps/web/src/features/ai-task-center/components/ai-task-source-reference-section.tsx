@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { ExternalLink, Link2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 
 type AiTaskSourceReferenceSectionProps = Readonly<{
   sourceModule: string | null;
@@ -43,6 +42,7 @@ function formatSourceModuleLabel(sourceModule: string): string {
     procurement: "Satın alma",
     "production-planning": "Üretim planlama",
     teams: "Teams mesajı",
+    "shift-handover": "Vardiya teslimi",
   };
 
   return labels[sourceModule] ?? sourceModule;
@@ -95,72 +95,73 @@ export function AiTaskSourceReferenceSection({
         label: "Tedarik risk değerlendirmesini aç",
       }
     : null;
-  const sourceLink = commercialIntelligenceLink ?? maintenanceLink ?? qualityLink ?? materialLink ?? moldLink ?? productionLink ?? procurementLink;
+  const sourceLink = commercialIntelligenceLink
+    ?? maintenanceLink
+    ?? qualityLink
+    ?? materialLink
+    ?? moldLink
+    ?? productionLink
+    ?? procurementLink;
 
   return (
-    <Card
-      className="ai-task-source-reference"
+    <section
+      className="ai-task-detail-context"
       data-testid="ai-task-source-reference-section"
     >
-      <div className="ai-task-source-reference__heading">
+      <header className="ai-task-detail-context__header">
         <Link2 aria-hidden="true" />
         <div>
-          <h3>Kaynak referansı</h3>
-          <p>
-            Bu görev, gelecekteki modül entegrasyonları için genel kaynak
-            bağlantısı taşır.
-          </p>
+          <p className="ai-task-detail-context__eyebrow">Related Context</p>
+          <h2 className="ai-task-detail-context__title">İlişkili Bağlam</h2>
         </div>
-      </div>
+      </header>
 
-      <dl className="ai-task-source-reference__grid">
+      <dl className="ai-task-detail-context__grid">
         <div>
           <dt>Görev referansı</dt>
           <dd>{taskReference}</dd>
         </div>
-
         <div>
-          <dt>Kaynak modül</dt>
+          <dt>Modül</dt>
           <dd>
             {sourceModule
               ? formatSourceModuleLabel(sourceModule)
               : "Bağlı değil"}
           </dd>
         </div>
-
         <div>
-          <dt>Kaynak varlık</dt>
+          <dt>Kaynak kayıt</dt>
+          <dd>{sourceEntityId ?? "Tanımlanmadı"}</dd>
+        </div>
+        <div>
+          <dt>Kaynak türü</dt>
           <dd>
-            {sourceEntityId ?? "Tanımlanmadı"}
+            {sourceModule
+              ? formatSourceModuleLabel(sourceModule)
+              : "Belirtilmemiş"}
           </dd>
         </div>
       </dl>
 
       {hasSourceLink ? (
-        <div className="ai-task-source-reference__link-row">
+        <div className="ai-task-detail-context__footer">
           <Badge tone="neutral">
             {formatSourceModuleLabel(sourceModule!)}
           </Badge>
-
-          <span>
-            {sourceEntityId}
-          </span>
-
+          <span className="ai-task-detail-context__entity">{sourceEntityId}</span>
           {sourceLink ? (
-            <Link href={sourceLink.href}>
+            <Link className="ai-task-detail-context__link" href={sourceLink.href}>
               <ExternalLink aria-hidden="true" />
               {sourceLink.label}
             </Link>
           ) : null}
-
           {sourceModule === "teams" ? teamsMessageSourceLink : null}
         </div>
       ) : (
-        <p className="ai-task-source-reference__empty">
-          Bu görev henüz bir kaynak modülüne bağlanmadı. Taslak görevler
-          manuel oluşturulduğunda kaynak referansı boş kalabilir.
+        <p className="ai-task-detail-context__empty">
+          Bu görev henüz bir kaynak modülüne bağlanmadı.
         </p>
       )}
-    </Card>
+    </section>
   );
 }

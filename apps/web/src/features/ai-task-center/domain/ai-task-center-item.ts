@@ -1,4 +1,8 @@
-import type { AiTaskEscalationState, AiTaskSlaState } from "./ai-task";
+import type {
+  AiTaskEscalationState,
+  AiTaskPriority,
+  AiTaskSlaState,
+} from "./ai-task";
 
 export const AI_TASK_CENTER_SOURCE_LABELS = {
   "ai-analysis": "AI Analizi",
@@ -53,6 +57,7 @@ export type AiTaskCenterItem = Readonly<{
   sourceLabel: (typeof AI_TASK_CENTER_SOURCE_LABELS)[AiTaskCenterSourceLabelKey];
   listOriginKind: AiTaskListOriginKind | null;
   title: string;
+  summary: string | null;
   facilityLabel: string | null;
   assigneeLabel: string | null;
   teamLabel: string | null;
@@ -65,6 +70,9 @@ export type AiTaskCenterItem = Readonly<{
   escalationState: AiTaskEscalationState | null;
   assignedMembershipId: string | null;
   assignedTeamChannelId: string | null;
+  acknowledgedAtUtc: string | null;
+  slaDueAt: string | null;
+  priority: AiTaskPriority | null;
   priorityLabel: string | null;
   statusLabel: string | null;
   statusCode: string | null;

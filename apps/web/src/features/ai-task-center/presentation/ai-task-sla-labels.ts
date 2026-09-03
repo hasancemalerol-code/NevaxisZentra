@@ -62,6 +62,55 @@ export function getAiTaskEscalationLevelLabel(level: number): string {
   return `Seviye ${level}`;
 }
 
+export function getAiTaskEscalationBadgeLabel(level: number): string | null {
+  if (level <= 0) {
+    return null;
+  }
+
+  if (level === 1) {
+    return "Eskalasyon 1";
+  }
+
+  if (level === 2) {
+    return "Eskalasyon 2";
+  }
+
+  if (level === 3) {
+    return "Yönetim Eskalasyonu";
+  }
+
+  return "Kritik Eskalasyon";
+}
+
+export function getAiTaskSlaDisplayText(
+  slaState: AiTaskSlaState | null,
+  slaDueAt: string | null | undefined,
+  now: Date = new Date(),
+): string | null {
+  if (!slaState || slaState === "not-applicable") {
+    return null;
+  }
+
+  const countdown = slaDueAt ? formatAiTaskSlaCountdown(slaDueAt, now) : null;
+
+  switch (slaState) {
+    case "on-track":
+      return countdown ?? "SLA içinde";
+    case "due-soon":
+      return countdown ?? "SLA riski";
+    case "overdue":
+      return countdown ?? getAiTaskSlaStateLabel(slaState);
+    case "breached":
+      return countdown ?? "SLA ihlali";
+    case "completed-within-sla":
+      return getAiTaskSlaStateLabel(slaState);
+    case "completed-after-sla":
+      return getAiTaskSlaStateLabel(slaState);
+    default:
+      return getAiTaskSlaStateLabel(slaState);
+  }
+}
+
 export function formatAiTaskSlaCountdown(
   dueAt: string | undefined,
   now: Date = new Date(),

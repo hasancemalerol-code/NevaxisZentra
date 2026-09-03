@@ -7,14 +7,15 @@ import {
   ArrowRightLeft,
   CirclePlay,
   Hand,
+  Pencil,
   RefreshCw,
+  ShieldAlert,
   UserPlus,
   Users,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 import {
   AI_TASK_PRIORITIES,
@@ -27,8 +28,18 @@ import {
   getAllowedAiTaskTransitions,
 } from "../domain/ai-task-policy";
 import {
+  AI_TASK_PRIORITY_TONES,
   getAiTaskPriorityLabel,
 } from "../presentation/ai-task-labels";
+import {
+  AI_TASK_ESCALATION_STATE_TONES,
+  AI_TASK_SLA_STATE_TONES,
+  getAiTaskEscalationBadgeLabel,
+  getAiTaskEscalationStateLabel,
+  getAiTaskSlaDisplayText,
+  getAiTaskSlaStateLabel,
+} from "../presentation/ai-task-sla-labels";
+import { formatAiTaskShortDateTime } from "../presentation/ai-task-formatters";
 import type {
   AiTaskAssignmentCandidate,
   AiTaskOperationCapabilities,
@@ -42,6 +53,14 @@ import {
   escalateAiTaskAction,
   transitionAiTaskAction,
 } from "../server/ai-task-actions";
+import {
+  AiTaskDetailField,
+  AiTaskDetailInput,
+  AiTaskDetailSectionCard,
+  AiTaskDetailSelect,
+  AiTaskDetailTextarea,
+  AiTaskDetailValueRow,
+} from "./ai-task-detail-form-controls";
 
 type AiTaskOperationsPanelClientProps = Readonly<{
   task: AiTask;
@@ -65,6 +84,23 @@ function toDateTimeLocalValue(value: string | undefined): string {
   return local.toISOString().slice(0, 16);
 }
 
+function resolveAssigneeInitials(label: string | null | undefined): string {
+  if (!label) {
+    return "?";
+  }
+
+  const parts = label.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "?";
+  }
+
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+}
+
 export function AiTaskOperationsPanelClient({
   task,
   version,
@@ -80,6 +116,12 @@ export function AiTaskOperationsPanelClient({
   const [selectedPriority, setSelectedPriority] = useState<AiTaskPriority>(task.priority);
   const [dueAtLocal, setDueAtLocal] = useState(toDateTimeLocalValue(task.dueAt));
   const [escalationNote, setEscalationNote] = useState("");
+
+  const [showUserAssign, setShowUserAssign] = useState(false);
+  const [showTeamAssign, setShowTeamAssign] = useState(false);
+  const [showPriorityEdit, setShowPriorityEdit] = useState(false);
+  const [showDueDateEdit, setShowDueDateEdit] = useState(false);
+  const [showEscalationForm, setShowEscalationForm] = useState(false);
 
   const allowedTransitions = getAllowedAiTaskTransitions(task.status);
   const executionDecision = canExecuteAiTask(task);
@@ -119,6 +161,18 @@ export function AiTaskOperationsPanelClient({
   const canChangeDueDate = operations.canManage;
   const canEscalate = operations.canEscalate && !isFinal;
 
+  const slaDueAt = task.sla?.resolutionDueAt
+    ?? task.sla?.responseDueAt
+    ?? task.sla?.acknowledgmentDueAt
+    ?? task.dueAt;
+  const slaDisplay = getAiTaskSlaDisplayText(task.slaState, slaDueAt);
+  const escalationBadge = task.escalationLevel > 0
+    ? getAiTaskEscalationBadgeLabel(task.escalationLevel)
+    : null;
+
+  const latestEscalationNote = task.auditTrail
+    .find((event) => event.eventType === "escalated")?.note ?? null;
+
   function runMutation(action: () => Promise<{ status: string; message?: string }>) {
     setErrorMessage(null);
 
@@ -129,6 +183,11 @@ export function AiTaskOperationsPanelClient({
         return;
       }
 
+      setShowUserAssign(false);
+      setShowTeamAssign(false);
+      setShowPriorityEdit(false);
+      setShowDueDateEdit(false);
+      setShowEscalationForm(false);
       router.refresh();
     });
   }
@@ -136,7 +195,7 @@ export function AiTaskOperationsPanelClient({
   function requireAssignReason(): string | null {
     const reason = assignReason.trim();
     if (!reason) {
-      setErrorMessage("Atama gerekçesi zorunludur.");
+      setErrorMessage("Atama notu zorunludur.");
       return null;
     }
 
@@ -177,283 +236,486 @@ export function AiTaskOperationsPanelClient({
     }));
   }
 
+  const hasAnyOperations = operations.canAssign
+    || operations.canAcknowledge
+    || operations.canManage
+    || operations.canEscalate
+    || operations.canReview;
+
   return (
-    <Card
-      className="ai-task-operations-panel"
+    <aside
+      className="ai-task-detail-sidebar"
       data-testid="ai-task-operations-panel"
     >
-      <div className="ai-task-operations-panel__heading">
-        <div>
-          <p>Operasyon</p>
-          <h2>Sahiplik ve SLA</h2>
-        </div>
-
-        <div className="ai-task-operations-panel__states">
-          {task.assignee ? (
-            <Badge tone="information">{task.assignee.displayName}</Badge>
-          ) : (
-            <Badge tone="neutral">Atanmadı</Badge>
-          )}
-
-          {teamLabel ? (
-            <Badge tone="neutral">
-              <Users aria-hidden="true" />
-              {teamLabel}
-            </Badge>
-          ) : null}
-
-          {task.acknowledgedAtUtc ? (
-            <Badge tone="success">
-              <Hand aria-hidden="true" />
-              Teslim alındı
-            </Badge>
-          ) : null}
-        </div>
-      </div>
-
-      {task.assignmentReason ? (
-        <p className="ai-task-operations-panel__description">
-          Atama gerekçesi: {task.assignmentReason}
-        </p>
-      ) : null}
-
       {errorMessage ? (
-        <div className="ai-task-operations-panel__warning" role="alert">
+        <div className="ai-task-detail-sidebar__alert" role="alert">
           <AlarmClock aria-hidden="true" />
           <span>{errorMessage}</span>
         </div>
       ) : null}
 
-      {(canAssignToSelf || canAssignToUser || canAssignToTeam || canReassign) ? (
-        <label className="ai-task-operations-panel__field">
-          Atama gerekçesi
-          <input
-            disabled={isPending}
-            onChange={(event) => setAssignReason(event.target.value)}
-            placeholder="Atama veya yeniden atama gerekçesini yazın"
-            type="text"
-            value={assignReason}
-          />
-        </label>
-      ) : null}
+      <AiTaskDetailSectionCard title="Sahiplik" eyebrow="Ownership">
+        <div className="ai-task-detail-sidebar__owner">
+          <span aria-hidden="true" className="ai-task-detail-sidebar__avatar">
+            {resolveAssigneeInitials(task.assignee?.displayName ?? teamLabel)}
+          </span>
+          <div>
+            <strong>
+              {task.assignee?.displayName ?? teamLabel ?? "Atanmamış"}
+            </strong>
+            {teamLabel && task.assignee ? (
+              <p className="ai-task-detail-sidebar__meta">
+                <Users aria-hidden="true" />
+                {teamLabel}
+              </p>
+            ) : null}
+          </div>
+        </div>
 
-      <div
-        aria-label="Görev operasyon aksiyonları"
-        className="ai-task-operations-panel__actions"
-      >
-        {canAssignToSelf ? (
-          <Button
-            disabled={isPending}
-            leadingIcon={<UserPlus />}
-            onClick={() => {
-              if (!operations.currentMembershipId) {
-                return;
-              }
-
-              assignToMembership(operations.currentMembershipId, "manual");
-            }}
-            variant="secondary"
-          >
-            Bana Ata
-          </Button>
+        {task.assignmentReason ? (
+          <p className="ai-task-detail-sidebar__note">
+            Son atama notu: {task.assignmentReason}
+          </p>
         ) : null}
 
-        {canAssignToUser ? (
-          <div className="ai-task-operations-panel__inline-form">
-            <select
+        {(canAssignToSelf || canAssignToUser || canAssignToTeam || canReassign) ? (
+          <AiTaskDetailField
+            helper="Atama veya yeniden atama nedeni"
+            label="Atama notu"
+          >
+            <AiTaskDetailInput
               disabled={isPending}
-              onChange={(event) => setSelectedMembershipId(event.target.value)}
-              value={selectedMembershipId}
-            >
-              <option value="">Kullanıcı seçin</option>
-              {membershipCandidates.map((candidate: AiTaskAssignmentCandidate) => (
-                <option
-                  key={candidate.tenantMembershipId}
-                  value={candidate.tenantMembershipId}
-                >
-                  {candidate.displayLabel}
-                </option>
-              ))}
-            </select>
+              onChange={(event) => setAssignReason(event.target.value)}
+              placeholder="Atama veya yeniden atama nedeni"
+              type="text"
+              value={assignReason}
+            />
+          </AiTaskDetailField>
+        ) : null}
 
+        <div className="ai-task-detail-sidebar__controls">
+          {canAssignToSelf ? (
             <Button
-              disabled={isPending || !selectedMembershipId}
+              disabled={isPending}
               leadingIcon={<UserPlus />}
-              onClick={() => assignToMembership(selectedMembershipId)}
+              onClick={() => {
+                if (!operations.currentMembershipId) {
+                  return;
+                }
+
+                assignToMembership(operations.currentMembershipId, "manual");
+              }}
+              size="small"
+              variant="secondary"
+            >
+              Bana Ata
+            </Button>
+          ) : null}
+
+          {canAssignToUser ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<UserPlus />}
+              onClick={() => setShowUserAssign((current) => !current)}
+              size="small"
               variant="secondary"
             >
               Kullanıcıya Ata
             </Button>
+          ) : null}
+
+          {canAssignToTeam ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<Users />}
+              onClick={() => setShowTeamAssign((current) => !current)}
+              size="small"
+              variant="secondary"
+            >
+              Ekibe Ata
+            </Button>
+          ) : null}
+
+          {canReassign ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<ArrowRightLeft />}
+              onClick={() => {
+                if (operations.currentMembershipId) {
+                  assignToMembership(operations.currentMembershipId, "reassignment");
+                  return;
+                }
+
+                if (selectedMembershipId) {
+                  assignToMembership(selectedMembershipId, "reassignment");
+                  return;
+                }
+
+                if (selectedTeamChannelId) {
+                  assignToTeam(selectedTeamChannelId);
+                }
+              }}
+              size="small"
+              variant="secondary"
+            >
+              Yeniden Ata
+            </Button>
+          ) : null}
+        </div>
+
+        {showUserAssign && canAssignToUser ? (
+          <div className="ai-task-detail-sidebar__expand">
+            <AiTaskDetailField label="Kullanıcı">
+              <AiTaskDetailSelect
+                disabled={isPending}
+                onChange={(event) => setSelectedMembershipId(event.target.value)}
+                value={selectedMembershipId}
+              >
+                <option value="">Kullanıcı seçin</option>
+                {membershipCandidates.map((candidate: AiTaskAssignmentCandidate) => (
+                  <option
+                    key={candidate.tenantMembershipId}
+                    value={candidate.tenantMembershipId}
+                  >
+                    {candidate.displayLabel}
+                  </option>
+                ))}
+              </AiTaskDetailSelect>
+            </AiTaskDetailField>
+            <Button
+              disabled={isPending || !selectedMembershipId}
+              leadingIcon={<UserPlus />}
+              onClick={() => assignToMembership(selectedMembershipId)}
+              size="small"
+            >
+              Ata
+            </Button>
           </div>
         ) : null}
 
-        {canAssignToTeam ? (
-          <div className="ai-task-operations-panel__inline-form">
-            <select
-              disabled={isPending}
-              onChange={(event) => setSelectedTeamChannelId(event.target.value)}
-              value={selectedTeamChannelId}
-            >
-              <option value="">Ekip kanalı seçin</option>
-              {operations.teamChannels.map((channel: AiTaskTeamChannelOption) => (
-                <option key={channel.id} value={channel.id}>
-                  {channel.name}
-                </option>
-              ))}
-            </select>
-
+        {showTeamAssign && canAssignToTeam ? (
+          <div className="ai-task-detail-sidebar__expand">
+            <AiTaskDetailField label="Ekip kanalı">
+              <AiTaskDetailSelect
+                disabled={isPending}
+                onChange={(event) => setSelectedTeamChannelId(event.target.value)}
+                value={selectedTeamChannelId}
+              >
+                <option value="">Ekip kanalı seçin</option>
+                {operations.teamChannels.map((channel: AiTaskTeamChannelOption) => (
+                  <option key={channel.id} value={channel.id}>
+                    {channel.name}
+                  </option>
+                ))}
+              </AiTaskDetailSelect>
+            </AiTaskDetailField>
             <Button
               disabled={isPending || !selectedTeamChannelId}
               leadingIcon={<Users />}
               onClick={() => assignToTeam(selectedTeamChannelId)}
-              variant="secondary"
+              size="small"
             >
               Ekibe Ata
             </Button>
           </div>
         ) : null}
+      </AiTaskDetailSectionCard>
 
-        {canReassign ? (
-          <Button
-            disabled={isPending}
-            leadingIcon={<ArrowRightLeft />}
-            onClick={() => {
-              if (operations.currentMembershipId) {
-                assignToMembership(operations.currentMembershipId, "reassignment");
-                return;
-              }
-
-              if (selectedMembershipId) {
-                assignToMembership(selectedMembershipId, "reassignment");
-                return;
-              }
-
-              if (selectedTeamChannelId) {
-                assignToTeam(selectedTeamChannelId);
-              }
-            }}
-            variant="secondary"
-          >
-            Yeniden Ata
-          </Button>
+      <AiTaskDetailSectionCard
+        actions={
+          slaDisplay ? (
+            <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
+              {slaDisplay}
+            </Badge>
+          ) : null
+        }
+        eyebrow="SLA"
+        title="SLA ve son tarih"
+      >
+        <AiTaskDetailValueRow
+          label="SLA durumu"
+          value={
+            <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
+              {getAiTaskSlaStateLabel(task.slaState)}
+            </Badge>
+          }
+        />
+        <AiTaskDetailValueRow
+          label="Kalan / gecikme"
+          value={slaDisplay ?? "Aktif SLA hedefi tanımlanmadı"}
+        />
+        <AiTaskDetailValueRow
+          label="Teslim durumu"
+          value={
+            task.acknowledgedAtUtc
+              ? `Teslim alındı · ${formatAiTaskShortDateTime(task.acknowledgedAtUtc)}`
+              : hasAssignment
+                ? "Teslim bekleniyor"
+                : "Atama gerekli"
+          }
+        />
+        {task.sla?.resolutionDueAt ? (
+          <AiTaskDetailValueRow
+            label="Çözüm hedefi"
+            value={formatAiTaskShortDateTime(task.sla.resolutionDueAt)}
+          />
         ) : null}
-
-        {canAcknowledge ? (
-          <Button
-            disabled={isPending}
-            leadingIcon={<Hand />}
-            onClick={() => runMutation(() => acknowledgeAiTaskAction({
-              taskId: task.id,
-              expectedVersion: version,
-            }))}
-          >
-            Teslim Aldım
-          </Button>
-        ) : null}
-
-        {canStart ? (
-          <Button
-            disabled={isPending}
-            leadingIcon={<CirclePlay />}
-            onClick={() => runMutation(() => transitionAiTaskAction({
-              taskId: task.id,
-              expectedVersion: version,
-              targetStatus: "in-progress",
-            }))}
-          >
-            Başlat
-          </Button>
-        ) : null}
-
-        {canChangePriority ? (
-          <div className="ai-task-operations-panel__inline-form">
-            <select
-              disabled={isPending}
-              onChange={(event) => setSelectedPriority(event.target.value as AiTaskPriority)}
-              value={selectedPriority}
-            >
-              {AI_TASK_PRIORITIES.map((priority) => (
-                <option key={priority} value={priority}>
-                  {getAiTaskPriorityLabel(priority)}
-                </option>
-              ))}
-            </select>
-
-            <Button
-              disabled={isPending || selectedPriority === task.priority}
-              leadingIcon={<RefreshCw />}
-              onClick={() => runMutation(() => changeAiTaskPriorityAction({
-                taskId: task.id,
-                expectedVersion: version,
-                priority: selectedPriority,
-              }))}
-              variant="secondary"
-            >
-              Öncelik Değiştir
-            </Button>
-          </div>
-        ) : null}
+        <AiTaskDetailValueRow
+          label="Son tarih"
+          value={task.dueAt ? formatAiTaskShortDateTime(task.dueAt) : "Tanımlanmadı"}
+        />
 
         {canChangeDueDate ? (
-          <div className="ai-task-operations-panel__inline-form">
-            <input
-              disabled={isPending}
-              onChange={(event) => setDueAtLocal(event.target.value)}
-              type="datetime-local"
-              value={dueAtLocal}
-            />
+          <>
+            {!showDueDateEdit ? (
+              <Button
+                disabled={isPending}
+                leadingIcon={<Pencil />}
+                onClick={() => setShowDueDateEdit(true)}
+                size="small"
+                variant="secondary"
+              >
+                Değiştir
+              </Button>
+            ) : (
+              <div className="ai-task-detail-sidebar__expand">
+                <AiTaskDetailField label="Yeni son tarih">
+                  <AiTaskDetailInput
+                    disabled={isPending}
+                    onChange={(event) => setDueAtLocal(event.target.value)}
+                    type="datetime-local"
+                    value={dueAtLocal}
+                  />
+                </AiTaskDetailField>
+                <div className="ai-task-detail-sidebar__controls">
+                  <Button
+                    disabled={isPending}
+                    leadingIcon={<AlarmClock />}
+                    onClick={() => runMutation(() => changeAiTaskDueDateAction({
+                      taskId: task.id,
+                      expectedVersion: version,
+                      dueAtUtc: dueAtLocal ? new Date(dueAtLocal).toISOString() : null,
+                    }))}
+                    size="small"
+                  >
+                    Kaydet
+                  </Button>
+                  <Button
+                    disabled={isPending}
+                    onClick={() => {
+                      setShowDueDateEdit(false);
+                      setDueAtLocal(toDateTimeLocalValue(task.dueAt));
+                    }}
+                    size="small"
+                    variant="secondary"
+                  >
+                    Vazgeç
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : null}
+      </AiTaskDetailSectionCard>
 
-            <Button
-              disabled={isPending}
-              leadingIcon={<AlarmClock />}
-              onClick={() => runMutation(() => changeAiTaskDueDateAction({
-                taskId: task.id,
-                expectedVersion: version,
-                dueAtUtc: dueAtLocal ? new Date(dueAtLocal).toISOString() : null,
-              }))}
-              variant="secondary"
-            >
-              Son Tarih Değiştir
-            </Button>
+      <AiTaskDetailSectionCard
+        actions={
+          <Badge tone={AI_TASK_PRIORITY_TONES[task.priority]}>
+            {getAiTaskPriorityLabel(task.priority)}
+          </Badge>
+        }
+        eyebrow="Priority"
+        title="Öncelik"
+      >
+        {!showPriorityEdit ? (
+          <Button
+            disabled={isPending || !canChangePriority}
+            leadingIcon={<Pencil />}
+            onClick={() => setShowPriorityEdit(true)}
+            size="small"
+            variant="secondary"
+          >
+            Önceliği Değiştir
+          </Button>
+        ) : (
+          <div className="ai-task-detail-sidebar__expand">
+            <AiTaskDetailField label="Yeni öncelik">
+              <AiTaskDetailSelect
+                disabled={isPending}
+                onChange={(event) => setSelectedPriority(event.target.value as AiTaskPriority)}
+                value={selectedPriority}
+              >
+                {AI_TASK_PRIORITIES.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {getAiTaskPriorityLabel(priority)}
+                  </option>
+                ))}
+              </AiTaskDetailSelect>
+            </AiTaskDetailField>
+            <div className="ai-task-detail-sidebar__controls">
+              <Button
+                disabled={isPending || selectedPriority === task.priority}
+                leadingIcon={<RefreshCw />}
+                onClick={() => runMutation(() => changeAiTaskPriorityAction({
+                  taskId: task.id,
+                  expectedVersion: version,
+                  priority: selectedPriority,
+                }))}
+                size="small"
+              >
+                Kaydet
+              </Button>
+              <Button
+                disabled={isPending}
+                onClick={() => {
+                  setShowPriorityEdit(false);
+                  setSelectedPriority(task.priority);
+                }}
+                size="small"
+                variant="secondary"
+              >
+                Vazgeç
+              </Button>
+            </div>
           </div>
+        )}
+      </AiTaskDetailSectionCard>
+
+      <AiTaskDetailSectionCard
+        actions={
+          escalationBadge ? (
+            <Badge tone={AI_TASK_ESCALATION_STATE_TONES[task.escalationState]}>
+              {escalationBadge}
+            </Badge>
+          ) : null
+        }
+        eyebrow="Escalation"
+        title="Eskalasyon"
+      >
+        <AiTaskDetailValueRow
+          label="Durum"
+          value={getAiTaskEscalationStateLabel(task.escalationState)}
+        />
+        {latestEscalationNote ? (
+          <AiTaskDetailValueRow label="Son not" value={latestEscalationNote} />
         ) : null}
 
         {canEscalate ? (
-          <div className="ai-task-operations-panel__inline-form">
-            <input
-              disabled={isPending}
-              onChange={(event) => setEscalationNote(event.target.value)}
-              placeholder="Eskalasyon notu (isteğe bağlı)"
-              type="text"
-              value={escalationNote}
-            />
-
+          !showEscalationForm ? (
             <Button
               disabled={isPending}
-              leadingIcon={<AlarmClock />}
-              onClick={() => runMutation(() => escalateAiTaskAction({
-                taskId: task.id,
-                expectedVersion: version,
-                breachType: "manual" satisfies AiTaskEscalationBreachType,
-                note: escalationNote.trim() || undefined,
-              }))}
+              leadingIcon={<ShieldAlert />}
+              onClick={() => setShowEscalationForm(true)}
+              size="small"
               variant="secondary"
             >
               Eskale Et
             </Button>
-          </div>
+          ) : (
+            <div className="ai-task-detail-sidebar__expand">
+              <AiTaskDetailField
+                helper="Eskalasyon gerekçesini kısa olarak belirtin"
+                label="Eskalasyon notu"
+              >
+                <AiTaskDetailTextarea
+                  disabled={isPending}
+                  onChange={(event) => setEscalationNote(event.target.value)}
+                  placeholder="Eskalasyon nedeni"
+                  rows={2}
+                  value={escalationNote}
+                />
+              </AiTaskDetailField>
+              <div className="ai-task-detail-sidebar__controls">
+                <Button
+                  disabled={isPending}
+                  leadingIcon={<ShieldAlert />}
+                  onClick={() => runMutation(() => escalateAiTaskAction({
+                    taskId: task.id,
+                    expectedVersion: version,
+                    breachType: "manual" satisfies AiTaskEscalationBreachType,
+                    note: escalationNote.trim() || undefined,
+                  }))}
+                  size="small"
+                  variant="danger"
+                >
+                  Eskale Et
+                </Button>
+                <Button
+                  disabled={isPending}
+                  onClick={() => {
+                    setShowEscalationForm(false);
+                    setEscalationNote("");
+                  }}
+                  size="small"
+                  variant="secondary"
+                >
+                  Vazgeç
+                </Button>
+              </div>
+            </div>
+          )
         ) : null}
-      </div>
+      </AiTaskDetailSectionCard>
 
-      {!operations.canAssign
-        && !operations.canAcknowledge
-        && !operations.canManage
-        && !operations.canEscalate
-        && !operations.canReview ? (
-        <p className="ai-task-operations-panel__footnote">
+      <AiTaskDetailSectionCard eyebrow="Actions" title="Hızlı aksiyonlar">
+        <div
+          aria-label="Görev operasyon aksiyonları"
+          className="ai-task-detail-sidebar__quick-actions"
+        >
+          {canAssignToSelf ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<UserPlus />}
+              onClick={() => {
+                if (!operations.currentMembershipId) {
+                  return;
+                }
+
+                assignToMembership(operations.currentMembershipId, "manual");
+              }}
+              size="small"
+              variant="secondary"
+            >
+              Bana Ata
+            </Button>
+          ) : null}
+
+          {canAcknowledge ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<Hand />}
+              onClick={() => runMutation(() => acknowledgeAiTaskAction({
+                taskId: task.id,
+                expectedVersion: version,
+              }))}
+              size="small"
+            >
+              Teslim Aldım
+            </Button>
+          ) : null}
+
+          {canStart ? (
+            <Button
+              disabled={isPending}
+              leadingIcon={<CirclePlay />}
+              onClick={() => runMutation(() => transitionAiTaskAction({
+                taskId: task.id,
+                expectedVersion: version,
+                targetStatus: "in-progress",
+              }))}
+              size="small"
+            >
+              Başlat
+            </Button>
+          ) : null}
+        </div>
+      </AiTaskDetailSectionCard>
+
+      {!hasAnyOperations ? (
+        <p className="ai-task-detail-sidebar__footnote">
           Bu görev için operasyon yetkiniz bulunmuyor.
         </p>
       ) : null}
-    </Card>
+    </aside>
   );
 }

@@ -102,7 +102,7 @@ export async function AiTaskListPageContent({
 
       {center.canReadTasks ? (
         <Suspense fallback={<AiTaskKpiLoading />}>
-          <AiTaskKpiLinks kpis={center.kpis} />
+          <AiTaskKpiLinks kpis={center.kpis} listPath={listPath} />
         </Suspense>
       ) : null}
 

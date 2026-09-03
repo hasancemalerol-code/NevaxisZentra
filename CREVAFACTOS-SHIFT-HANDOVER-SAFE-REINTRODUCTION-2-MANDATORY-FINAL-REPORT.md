@@ -195,3 +195,51 @@ commit = NO
 - Live flow passes
 - AI Task SLA system passes (10/10 verifiers)
 - Dashboard remains byte-identical on protected paths
+
+## Navigation Closure
+
+Package: `CREVAFACTOS-SHIFT-HANDOVER-NAVIGATION-CLOSURE-1`
+
+| Check | Result |
+|-------|--------|
+| sidebar entry present | **PASS** |
+| href | `/vardiya-devir` |
+| permission | `shift-handover.read` |
+| icon | `calendar-clock` |
+| subscription mapping | **PASS** (`/vardiya-devir` → `module.shift-workforce`) |
+| duplicate entries | **0** |
+| dashboard changes | **0** |
+
+**Feature prerequisites verified:**
+
+- `/vardiya-devir` route exists (`apps/web/src/app/(app)/vardiya-devir/`)
+- `/api/shift-handovers` API responds (HTTP 200)
+- `shift-handover.read` permission defined (`ShiftHandoverPermissionKeys.Read`)
+- Subscription entitlement mapped in `saas-subscription-labels.ts` and `SaasSubscriptionModuleEntitlements.cs`
+
+**Live authenticated browser validation:**
+
+1. Sidebar order: Vardiyalar → Vardiya Devir Teslimi → Proses & OEE — **PASS**
+2. Click Vardiya Devir Teslimi — **PASS**
+3. `/vardiya-devir` opens without subscription redirect — **PASS**
+4. `/dashboard` unchanged — **PASS**
+
+**Screenshot:** `.cursor-screenshots/shift-handover-navigation-closure-1-authenticated.png`
+
+**Git (navigation closure):**
+
+```
+git diff --check
+```
+No conflict markers.
+
+```
+git status --short
+```
+Only new navigation-closure screenshot + capture script (untracked).
+
+```
+staged = 0
+commit = NO
+```
+

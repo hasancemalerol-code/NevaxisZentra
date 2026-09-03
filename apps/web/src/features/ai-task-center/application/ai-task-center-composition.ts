@@ -91,6 +91,19 @@ function buildTaskRelatedContext(task: AiTaskListRecord): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
+function resolveSlaDueAt(task: AiTaskListRecord): string | null {
+  const sla = task.sla;
+  if (!sla) {
+    return task.dueAt ?? null;
+  }
+
+  return sla.resolutionDueAt
+    ?? sla.responseDueAt
+    ?? sla.acknowledgmentDueAt
+    ?? task.dueAt
+    ?? null;
+}
+
 export function mapTaskToCenterItem(
   task: AiTaskListRecord,
   facilityLabel: string | null,
@@ -114,6 +127,7 @@ export function mapTaskToCenterItem(
     sourceLabel: resolveTaskSourceLabel(listOriginKind),
     listOriginKind,
     title: task.title,
+    summary: task.summary,
     facilityLabel,
     assigneeLabel: task.assignee?.displayName ?? null,
     teamLabel,
@@ -126,6 +140,9 @@ export function mapTaskToCenterItem(
     escalationState: task.escalationState,
     assignedMembershipId: task.assignedMembershipId ?? null,
     assignedTeamChannelId: task.assignedTeamChannelId ?? null,
+    acknowledgedAtUtc: task.acknowledgedAtUtc ?? null,
+    slaDueAt: resolveSlaDueAt(task),
+    priority: task.priority,
     priorityLabel: getAiTaskPriorityLabel(task.priority),
     statusLabel: getAiTaskStatusLabel(task.status),
     statusCode: task.status,
@@ -152,6 +169,7 @@ export function mapWorkInboxItemToCenterItem(
     sourceLabel: resolveWorkInboxSourceLabel(item.sourceKind),
     listOriginKind: null,
     title: item.title,
+    summary: null,
     facilityLabel,
     assigneeLabel: null,
     teamLabel: null,
@@ -164,6 +182,9 @@ export function mapWorkInboxItemToCenterItem(
     escalationState: null,
     assignedMembershipId: null,
     assignedTeamChannelId: null,
+    acknowledgedAtUtc: null,
+    slaDueAt: null,
+    priority: null,
     priorityLabel: null,
     statusLabel: item.reason,
     statusCode: null,
