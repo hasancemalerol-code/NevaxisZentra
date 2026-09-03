@@ -12,6 +12,10 @@ public static class TeamsNotificationPresentationBuilder
     public static string TaskAssignedReason => "Size atanan AI görevi";
     public static string TaskEscalatedReason => "Eskale edilen AI görevi";
     public static string TaskSlaWarningReason => "SLA riski taşıyan AI görevi";
+    public static string TaskClosureApprovalRequestedReason => "Kapanış onayı bekleyen AI görevi";
+    public static string TaskClosureApprovedReason => "Kapanışı onaylanan AI görevi";
+    public static string TaskClosureRejectedReason => "Kapanışı reddedilen AI görevi";
+    public static string TaskReopenedReason => "Yeniden açılan AI görevi";
     public static string FactoryShiftHandoverReason => "Yeni vardiya devir teslimi";
     public static string FactoryShiftHandoverAcknowledgedReason => "Vardiya devri teslim alındı";
 
@@ -86,6 +90,30 @@ public static class TeamsNotificationPresentationBuilder
 
     public static string BuildTaskEscalatedTitle(string taskReference, int escalationLevel) =>
         $"Eskale görev (seviye {escalationLevel}): {taskReference}";
+
+    public static string BuildTaskClosureApprovalRequestedTitle(string taskReference) =>
+        $"Kapanış onayı bekliyor: {taskReference}";
+
+    public static string BuildTaskClosureApprovedTitle(string taskReference) =>
+        $"Kapanış onaylandı: {taskReference}";
+
+    public static string BuildTaskClosureRejectedTitle(string taskReference) =>
+        $"Kapanış reddedildi: {taskReference}";
+
+    public static string BuildTaskReopenedTitle(string taskReference) =>
+        $"Görev yeniden açıldı: {taskReference}";
+
+    public static string BuildTaskClosureApprovalRequestedFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-closure-approval-requested:{taskId:D}:{recipientMembershipId:D}";
+
+    public static string BuildTaskClosureApprovedFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-closure-approved:{taskId:D}:{recipientMembershipId:D}";
+
+    public static string BuildTaskClosureRejectedFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-closure-rejected:{taskId:D}:{recipientMembershipId:D}";
+
+    public static string BuildTaskReopenedFingerprint(Guid taskId, Guid recipientMembershipId) =>
+        $"task-reopened:{taskId:D}:{recipientMembershipId:D}";
 
     public static string TruncatePreview(string value) =>
         string.IsNullOrWhiteSpace(value)

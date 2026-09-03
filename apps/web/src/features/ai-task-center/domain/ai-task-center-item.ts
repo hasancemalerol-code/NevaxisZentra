@@ -1,8 +1,15 @@
 import type {
   AiTaskEscalationState,
+  AiTaskClosureState,
   AiTaskPriority,
   AiTaskSlaState,
 } from "./ai-task";
+
+export type AiTaskCenterClosureBadgeKey =
+  | "missingEvidence"
+  | "awaitingApproval"
+  | "revisionPending"
+  | "closureReady";
 
 export const AI_TASK_CENTER_SOURCE_LABELS = {
   "ai-analysis": "AI Analizi",
@@ -38,6 +45,10 @@ export const AI_TASK_CENTER_VIEWS = {
   "approvals-handovers": "Onay ve Teslimler",
   mentions: "Etiketlemeler",
   completed: "Tamamlananlar",
+  "closure-awaiting-approval": "Kapanış Onayı",
+  "closure-missing-evidence": "Kanıt Gerekli",
+  "closure-revision-pending": "Revizyon İstendi",
+  "closure-reopened": "Yeniden Açılan",
 } as const;
 
 export type AiTaskCenterView = keyof typeof AI_TASK_CENTER_VIEWS;
@@ -81,6 +92,10 @@ export type AiTaskCenterItem = Readonly<{
   deepLinkPath: string;
   nativeSourceKind: string;
   nativeSourceId: string;
+  closureState: AiTaskClosureState | null;
+  evidenceCount: number | null;
+  closureApprovalRequired: boolean | null;
+  closureBadgeKey: AiTaskCenterClosureBadgeKey | null;
 }>;
 
 export function parseAiTaskCenterView(value: string | null | undefined): AiTaskCenterView {

@@ -55,6 +55,22 @@ public sealed class AiTask
     public string? IdempotencyPayloadFingerprint { get; set; }
     public DateTimeOffset? DueAtUtc { get; set; }
     public DateTimeOffset? CompletedAtUtc { get; set; }
+    public string ClosureState { get; set; } = AiTaskClosureStates.None;
+    public string? ResolutionSummary { get; set; }
+    public string? ResolutionCode { get; set; }
+    public string? ClosureReason { get; set; }
+    public bool ClosureApprovalRequired { get; set; }
+    public DateTimeOffset? ClosureRequestedAtUtc { get; set; }
+    public Guid? ClosureRequestedByMembershipId { get; set; }
+    public DateTimeOffset? ClosureApprovedAtUtc { get; set; }
+    public Guid? ClosureApprovedByMembershipId { get; set; }
+    public DateTimeOffset? ClosureRejectedAtUtc { get; set; }
+    public Guid? ClosureRejectedByMembershipId { get; set; }
+    public string? ClosureRejectionReason { get; set; }
+    public DateTimeOffset? ReopenedAtUtc { get; set; }
+    public Guid? ReopenedByMembershipId { get; set; }
+    public string? ReopenReason { get; set; }
+    public DateTimeOffset? FinalClosedAtUtc { get; set; }
     public uint Version { get; set; } = 1;
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
@@ -62,6 +78,46 @@ public sealed class AiTask
     public string UpdatedBy { get; set; } = string.Empty;
 
     public ICollection<AiTaskAuditEvent> AuditEvents { get; set; } = [];
+    public ICollection<AiTaskEvidence> EvidenceItems { get; set; } = [];
+}
+
+public sealed class AiTaskEvidence
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid FacilityId { get; set; }
+    public Guid TaskId { get; set; }
+    public string EvidenceType { get; set; } = AiTaskEvidenceTypes.Note;
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public string? ReferenceMetadataJson { get; set; }
+    public string? SourceModule { get; set; }
+    public string? SourceEntityId { get; set; }
+    public Guid SubmittedByMembershipId { get; set; }
+    public DateTimeOffset SubmittedAtUtc { get; set; }
+    public string SubmittedByLabel { get; set; } = string.Empty;
+
+    public AiTask? Task { get; set; }
+}
+
+public sealed class AiTaskClosurePolicy
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid? FacilityId { get; set; }
+    public string PolicyKey { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string? Category { get; set; }
+    public string? Priority { get; set; }
+    public string? SourceModule { get; set; }
+    public int MinimumEvidenceCount { get; set; }
+    public string? RequiredEvidenceTypesJson { get; set; }
+    public bool ApprovalRequired { get; set; }
+    public bool FourEyesRequired { get; set; }
+    public bool ResolutionSummaryRequired { get; set; } = true;
+    public bool Enabled { get; set; } = true;
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
 public sealed class AiTaskAuditEvent

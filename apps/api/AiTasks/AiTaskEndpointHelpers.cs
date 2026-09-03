@@ -170,7 +170,10 @@ internal static class AiTaskEndpointHelpers
                 or AiTaskFailureCodes.IdempotencyConflict
                 or AiTaskFailureCodes.IdempotencyLegacyUnverifiable
                 or AiTaskFailureCodes.InvalidTransition
-                or AiTaskFailureCodes.FinalStatus => TypedResults.Problem(
+                or AiTaskFailureCodes.FinalStatus
+                or AiTaskFailureCodes.ClosureValidationFailed
+                or AiTaskFailureCodes.FourEyesViolation
+                or AiTaskFailureCodes.ClosureStateConflict => TypedResults.Problem(
                 title: reason ?? "Request conflict.",
                 statusCode: StatusCodes.Status409Conflict,
                 extensions: FailureExt(failureCode)),

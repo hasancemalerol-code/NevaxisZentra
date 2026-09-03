@@ -97,7 +97,10 @@ public sealed record AiTaskSummaryReadModel(
     DateTimeOffset? AcknowledgedAtUtc,
     int EscalationLevel,
     string EscalationState,
-    string SlaState);
+    string SlaState,
+    string ClosureState,
+    int EvidenceCount,
+    bool ClosureApprovalRequired);
 
 public sealed record AiTaskDetailReadModel(
     Guid Id,
@@ -146,6 +149,10 @@ public sealed record AiTaskDetailReadModel(
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     uint Version,
+    AiTaskClosureReadModel Closure,
+    AiTaskClosurePolicyReadModel ClosurePolicy,
+    AiTaskClosureValidationResult ClosureValidation,
+    IReadOnlyList<AiTaskEvidenceReadModel> Evidence,
     IReadOnlyList<AiTaskAuditEventReadModel> AuditTrail);
 
 public sealed record AiTaskListReadModel(
@@ -159,6 +166,8 @@ public sealed record AiTaskListFilters(
     string? Category,
     string? Priority,
     string? SourceModule,
+    string? ClosureState,
+    string? ClosureQueue,
     int Page,
     int PageSize);
 

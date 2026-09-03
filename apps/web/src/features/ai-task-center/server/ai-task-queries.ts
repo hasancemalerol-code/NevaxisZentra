@@ -40,6 +40,10 @@ export type AiTaskOperationCapabilities = Readonly<{
   canEscalate: boolean;
   canManage: boolean;
   canReview: boolean;
+  canManageEvidence: boolean;
+  canRequestClosure: boolean;
+  canApproveClosure: boolean;
+  canReopen: boolean;
   currentMembershipId: string | null;
   membershipCandidates: readonly AiTaskAssignmentCandidate[];
   teamChannels: readonly AiTaskTeamChannelOption[];
@@ -134,6 +138,10 @@ async function resolveOperationCapabilities(): Promise<AiTaskOperationCapabiliti
   const canEscalate = hasGrantedPermission(access, "ai-task.escalate");
   const canManage = hasGrantedPermission(access, "ai-task.manage");
   const canReview = hasGrantedPermission(access, "ai-task.review");
+  const canManageEvidence = hasGrantedPermission(access, "ai-task.evidence.manage");
+  const canRequestClosure = hasGrantedPermission(access, "ai-task.closure.request");
+  const canApproveClosure = hasGrantedPermission(access, "ai-task.closure.approve");
+  const canReopen = hasGrantedPermission(access, "ai-task.reopen");
   const currentMembershipId = parseMembershipIdFromMemberReference(
     access?.memberReference ?? undefined,
   );
@@ -177,6 +185,10 @@ async function resolveOperationCapabilities(): Promise<AiTaskOperationCapabiliti
     canEscalate,
     canManage,
     canReview,
+    canManageEvidence,
+    canRequestClosure,
+    canApproveClosure,
+    canReopen,
     currentMembershipId,
     membershipCandidates: [...membershipCandidates.values()],
     teamChannels,

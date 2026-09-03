@@ -13,7 +13,13 @@ import {
   createAiTask,
   createSourceLinkedAiTask,
   escalateAiTask,
+  reopenAiTask,
+  rejectAiTaskClosure,
+  requestAiTaskClosure,
+  approveAiTaskClosure,
+  submitAiTaskEvidence,
   transitionAiTask,
+  updateAiTaskResolution,
   type CreateAiTaskPayload,
   type CreateSourceLinkedAiTaskPayload,
 } from "./ai-task-api-client";
@@ -362,6 +368,158 @@ export async function escalateAiTaskAction(input: Readonly<{
     expectedVersion: input.expectedVersion,
     breachType: input.breachType,
     note: input.note ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function submitAiTaskEvidenceAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  evidenceType: string;
+  title: string;
+  description?: string;
+  referenceMetadataJson?: string;
+  sourceModule?: string;
+  sourceEntityId?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.evidence.manage");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await submitAiTaskEvidence(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    evidenceType: input.evidenceType,
+    title: input.title,
+    description: input.description ?? null,
+    referenceMetadataJson: input.referenceMetadataJson ?? null,
+    sourceModule: input.sourceModule ?? null,
+    sourceEntityId: input.sourceEntityId ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function updateAiTaskResolutionAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  resolutionSummary: string;
+  resolutionCode: string;
+  closureReason?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.closure.request");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await updateAiTaskResolution(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    resolutionSummary: input.resolutionSummary,
+    resolutionCode: input.resolutionCode,
+    closureReason: input.closureReason ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function requestAiTaskClosureAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  note?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.closure.request");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await requestAiTaskClosure(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    note: input.note ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function approveAiTaskClosureAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  note?: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.closure.approve");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await approveAiTaskClosure(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    note: input.note ?? null,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function rejectAiTaskClosureAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  rejectionReason: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.closure.approve");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await rejectAiTaskClosure(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    rejectionReason: input.rejectionReason,
+  });
+
+  if (result.status === "failure") {
+    return {
+      status: "failure" as const,
+      message: mapMutationFailure(result.code, result.message),
+    };
+  }
+
+  return finalizeTaskMutation(input.taskId, result.value.version);
+}
+
+export async function reopenAiTaskAction(input: Readonly<{
+  taskId: string;
+  expectedVersion: number;
+  reopenReason: string;
+}>) {
+  const resolved = await resolvePermissionContext("ai-task.reopen");
+  if (resolved.status === "failure") return resolved;
+
+  const result = await reopenAiTask(resolved.context, input.taskId, {
+    expectedVersion: input.expectedVersion,
+    reopenReason: input.reopenReason,
   });
 
   if (result.status === "failure") {

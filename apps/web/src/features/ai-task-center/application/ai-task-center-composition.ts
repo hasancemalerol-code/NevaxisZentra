@@ -19,10 +19,26 @@ import {
   formatAiTaskShortDateTime,
 } from "../presentation/ai-task-formatters";
 import {
+  resolveAiTaskClosureBadge,
+} from "../presentation/ai-task-closure-labels";
+import {
   getAiTaskEscalationLevelLabel,
   getAiTaskEscalationStateLabel,
   getAiTaskSlaStateLabel,
 } from "../presentation/ai-task-sla-labels";
+import type { AiTaskClosureQueueKey } from "../domain/ai-task";
+
+export const AI_TASK_CLOSURE_QUEUE_VIEW_MAP: Readonly<
+  Record<
+    "closure-awaiting-approval" | "closure-missing-evidence" | "closure-revision-pending" | "closure-reopened",
+    AiTaskClosureQueueKey
+  >
+> = {
+  "closure-awaiting-approval": "awaiting-approval",
+  "closure-missing-evidence": "missing-evidence",
+  "closure-revision-pending": "revision-pending",
+  "closure-reopened": "reopened",
+};
 
 export type AiTaskCenterTeamChannelLabels = Readonly<
   Record<string, string>
@@ -121,6 +137,14 @@ export function mapTaskToCenterItem(
     ? `${getAiTaskEscalationLevelLabel(task.escalationLevel)} · ${getAiTaskEscalationStateLabel(task.escalationState)}`
     : null;
 
+  const closureBadgeKey = resolveAiTaskClosureBadge({
+    closureState: task.closureState,
+    evidenceCount: task.evidenceCount,
+    status: task.status,
+    category: task.category,
+    priority: task.priority,
+  });
+
   return {
     dedupeKey: `task:${task.id}`,
     kind: "task",
@@ -151,6 +175,10 @@ export function mapTaskToCenterItem(
     deepLinkPath: `/ai-gorevleri/${task.id}`,
     nativeSourceKind: "ai-task",
     nativeSourceId: task.id,
+    closureState: task.closureState ?? null,
+    evidenceCount: task.evidenceCount ?? null,
+    closureApprovalRequired: task.closureApprovalRequired ?? null,
+    closureBadgeKey,
   };
 }
 
@@ -193,6 +221,10 @@ export function mapWorkInboxItemToCenterItem(
     deepLinkPath: item.deepLinkPath,
     nativeSourceKind: item.sourceKind,
     nativeSourceId: item.sourceId,
+    closureState: null,
+    evidenceCount: null,
+    closureApprovalRequired: null,
+    closureBadgeKey: null,
   };
 }
 
@@ -276,6 +308,38 @@ function isTeamAssignedTask(item: AiTaskCenterItem): boolean {
   return item.kind === "task" && Boolean(item.assignedTeamChannelId);
 }
 
+function isMissingEvidenceTask(task: AiTaskListRecord): boolean {
+  const closureState = task.closureState ?? "none";
+  const requiresEvidence = task.category === "quality"
+    || task.category === "maintenance"
+    || task.priority === "critical";
+
+  return requiresEvidence
+    && task.status === "in-progress"
+    && (closureState === "none" || closureState === "closure-rejected" || closureState === "reopened")
+    && (task.evidenceCount ?? 0) === 0;
+}
+
+function isClosureQueueTask(
+  task: AiTaskListRecord,
+  queue: AiTaskClosureQueueKey,
+): boolean {
+  const closureState = task.closureState ?? "none";
+
+  switch (queue) {
+    case "awaiting-approval":
+      return closureState === "awaiting-closure-approval";
+    case "revision-pending":
+      return closureState === "closure-rejected";
+    case "reopened":
+      return closureState === "reopened";
+    case "missing-evidence":
+      return isMissingEvidenceTask(task);
+    default:
+      return false;
+  }
+}
+
 function isEscalatedTask(item: AiTaskCenterItem): boolean {
   return item.kind === "task" && (
     (item.escalationLevel ?? 0) > 0 || item.escalationState === "active"
@@ -310,6 +374,16 @@ export function filterAiTaskCenterItems(
         return item.kind === "mention";
       case "completed":
         return item.kind === "task" && isTaskItemFinal(item);
+      case "closure-awaiting-approval":
+        return item.kind === "task"
+          && item.closureState === "awaiting-closure-approval";
+      case "closure-missing-evidence":
+        return item.kind === "task" && item.closureBadgeKey === "missingEvidence";
+      case "closure-revision-pending":
+        return item.kind === "task"
+          && item.closureState === "closure-rejected";
+      case "closure-reopened":
+        return item.kind === "task" && item.closureState === "reopened";
       default:
         return true;
     }
@@ -337,6 +411,13 @@ function isTaskItemFinal(item: AiTaskCenterItem): boolean {
   }
 
   return isAiTaskFinalStatus(item.statusCode as never);
+}
+
+export function filterTasksForClosureQueue(
+  tasks: readonly AiTaskListRecord[],
+  queue: AiTaskClosureQueueKey,
+): readonly AiTaskListRecord[] {
+  return tasks.filter((task) => isClosureQueueTask(task, queue));
 }
 
 export function hasAnyTaskCenterColumnValue(

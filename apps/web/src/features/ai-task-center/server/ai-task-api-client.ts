@@ -50,6 +50,9 @@ export type RawAiTaskSummary = Readonly<{
   createdAt: string;
   updatedAt: string;
   version: number;
+  closureState: string | null;
+  evidenceCount: number;
+  closureApprovalRequired: boolean;
 }>;
 
 export type RawAiTaskSla = Readonly<{
@@ -151,6 +154,10 @@ export type RawAiTaskDetail = Readonly<{
   createdAt: string;
   updatedAt: string;
   version: number;
+  closure?: RawAiTaskClosure;
+  closurePolicy?: RawAiTaskClosurePolicy;
+  closureValidation?: RawAiTaskClosureValidation;
+  evidence?: readonly RawAiTaskEvidence[];
   auditTrail: ReadonlyArray<Readonly<{
     id: string;
     taskId: string;
@@ -164,6 +171,61 @@ export type RawAiTaskDetail = Readonly<{
     nextStatus: string | null;
     metadataJson: string | null;
   }>>;
+}>;
+
+export type RawAiTaskEvidence = Readonly<{
+  id: string;
+  taskId: string;
+  evidenceType: string;
+  title: string;
+  description: string | null;
+  referenceMetadataJson: string | null;
+  sourceModule: string | null;
+  sourceEntityId: string | null;
+  submittedByMembershipId: string;
+  submittedByLabel: string;
+  submittedAtUtc: string;
+}>;
+
+export type RawAiTaskClosure = Readonly<{
+  state: string;
+  resolutionSummary: string | null;
+  resolutionCode: string | null;
+  closureReason: string | null;
+  approvalRequired: boolean;
+  requestedAtUtc: string | null;
+  requestedByMembershipId: string | null;
+  approvedAtUtc: string | null;
+  approvedByMembershipId: string | null;
+  rejectedAtUtc: string | null;
+  rejectedByMembershipId: string | null;
+  rejectionReason: string | null;
+  reopenedAtUtc: string | null;
+  reopenedByMembershipId: string | null;
+  reopenReason: string | null;
+  finalClosedAtUtc: string | null;
+}>;
+
+export type RawAiTaskClosurePolicy = Readonly<{
+  policyKey: string;
+  name: string;
+  minimumEvidenceCount: number;
+  requiredEvidenceTypes: readonly string[];
+  approvalRequired: boolean;
+  fourEyesRequired: boolean;
+  resolutionSummaryRequired: boolean;
+}>;
+
+export type RawAiTaskClosureValidation = Readonly<{
+  isValid: boolean;
+  issues: ReadonlyArray<Readonly<{
+    code: string;
+    message: string;
+  }>>;
+}>;
+
+export type RawAiTaskEvidenceListResponse = Readonly<{
+  items: readonly RawAiTaskEvidence[];
 }>;
 
 export type RawAiTaskListResponse = Readonly<{
@@ -395,6 +457,8 @@ export async function listAiTasks(
     category?: string;
     priority?: string;
     sourceModule?: string;
+    closureState?: string;
+    closureQueue?: string;
     page?: number;
     pageSize?: number;
   }>,
@@ -404,6 +468,8 @@ export async function listAiTasks(
     category: filters?.category,
     priority: filters?.priority,
     sourceModule: filters?.sourceModule,
+    closureState: filters?.closureState,
+    closureQueue: filters?.closureQueue,
     page: filters?.page !== undefined ? String(filters.page) : undefined,
     pageSize: filters?.pageSize !== undefined ? String(filters.pageSize) : undefined,
   }, parseList);
@@ -534,4 +600,102 @@ export async function evaluateAiTaskEscalations(
     },
     maxTasks !== undefined ? { maxTasks: String(maxTasks) } : undefined,
   );
+}
+
+function parseEvidenceList(payload: unknown): RawAiTaskEvidenceListResponse {
+  const value = payload as RawAiTaskEvidenceListResponse;
+  return { items: value.items ?? [] };
+}
+
+function parseClosureValidation(payload: unknown): RawAiTaskClosureValidation {
+  const value = payload as RawAiTaskClosureValidation;
+  return {
+    isValid: Boolean(value.isValid),
+    issues: value.issues ?? [],
+  };
+}
+
+export async function listAiTaskEvidence(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+): Promise<AiTaskApiResult<RawAiTaskEvidenceListResponse>> {
+  return getJson(
+    context,
+    `/api/ai-tasks/${taskId}/evidence`,
+    undefined,
+    parseEvidenceList,
+  );
+}
+
+export async function getAiTaskClosureValidation(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+): Promise<AiTaskApiResult<RawAiTaskClosureValidation>> {
+  return getJson(
+    context,
+    `/api/ai-tasks/${taskId}/closure-validation`,
+    undefined,
+    parseClosureValidation,
+  );
+}
+
+export async function submitAiTaskEvidence(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{
+    expectedVersion: number;
+    evidenceType: string;
+    title: string;
+    description?: string | null;
+    referenceMetadataJson?: string | null;
+    sourceModule?: string | null;
+    sourceEntityId?: string | null;
+  }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/evidence`, body, parseWrite);
+}
+
+export async function updateAiTaskResolution(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{
+    expectedVersion: number;
+    resolutionSummary: string;
+    resolutionCode: string;
+    closureReason?: string | null;
+  }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/resolution`, body, parseWrite);
+}
+
+export async function requestAiTaskClosure(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; note?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/closure-request`, body, parseWrite);
+}
+
+export async function approveAiTaskClosure(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; note?: string | null }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/approve-closure`, body, parseWrite);
+}
+
+export async function rejectAiTaskClosure(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; rejectionReason: string }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/reject-closure`, body, parseWrite);
+}
+
+export async function reopenAiTask(
+  context: ProductionOrderRequestContext,
+  taskId: string,
+  body: Readonly<{ expectedVersion: number; reopenReason: string }>,
+): Promise<AiTaskApiResult<ReturnType<typeof parseWrite>>> {
+  return writeJson(context, "POST", `/api/ai-tasks/${taskId}/reopen`, body, parseWrite);
 }

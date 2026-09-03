@@ -456,6 +456,50 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("category");
 
+                    b.Property<bool>("ClosureApprovalRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("closure_approval_required");
+
+                    b.Property<DateTimeOffset?>("ClosureApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closure_approved_at_utc");
+
+                    b.Property<Guid?>("ClosureApprovedByMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("closure_approved_by_membership_id");
+
+                    b.Property<string>("ClosureReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("closure_reason");
+
+                    b.Property<DateTimeOffset?>("ClosureRejectedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closure_rejected_at_utc");
+
+                    b.Property<Guid?>("ClosureRejectedByMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("closure_rejected_by_membership_id");
+
+                    b.Property<string>("ClosureRejectionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("closure_rejection_reason");
+
+                    b.Property<DateTimeOffset?>("ClosureRequestedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closure_requested_at_utc");
+
+                    b.Property<Guid?>("ClosureRequestedByMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("closure_requested_by_membership_id");
+
+                    b.Property<string>("ClosureState")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("closure_state");
+
                     b.Property<DateTimeOffset?>("CompletedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at_utc");
@@ -507,6 +551,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Property<Guid>("FacilityId")
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset?>("FinalClosedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("final_closed_at_utc");
 
                     b.Property<string>("IdempotencyKey")
                         .HasMaxLength(128)
@@ -568,6 +616,29 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("recommendation_json");
+
+                    b.Property<string>("ReopenReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("reopen_reason");
+
+                    b.Property<DateTimeOffset?>("ReopenedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reopened_at_utc");
+
+                    b.Property<Guid?>("ReopenedByMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reopened_by_membership_id");
+
+                    b.Property<string>("ResolutionCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("resolution_code");
+
+                    b.Property<string>("ResolutionSummary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("resolution_summary");
 
                     b.Property<DateTimeOffset?>("ResolvedAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -697,6 +768,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasIndex("TenantId", "FacilityId", "Category")
                         .HasDatabaseName("ix_ai_tasks_tenant_facility_category");
 
+                    b.HasIndex("TenantId", "FacilityId", "ClosureState")
+                        .HasDatabaseName("ix_ai_tasks_tenant_facility_closure_state");
+
                     b.HasIndex("TenantId", "FacilityId", "CreatedAtUtc")
                         .HasDatabaseName("ix_ai_tasks_tenant_facility_created");
 
@@ -797,6 +871,92 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("ai_task_audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskClosurePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("ApprovalRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("approval_required");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<Guid?>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("FourEyesRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("four_eyes_required");
+
+                    b.Property<int>("MinimumEvidenceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum_evidence_count");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PolicyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("policy_key");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("priority");
+
+                    b.Property<string>("RequiredEvidenceTypesJson")
+                        .HasColumnType("text")
+                        .HasColumnName("required_evidence_types_json");
+
+                    b.Property<bool>("ResolutionSummaryRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("resolution_summary_required");
+
+                    b.Property<string>("SourceModule")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_module");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PolicyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_ai_task_closure_policies_tenant_key");
+
+                    b.HasIndex("TenantId", "FacilityId", "Category", "Priority")
+                        .HasDatabaseName("ix_ai_task_closure_policies_tenant_facility_match");
+
+                    b.ToTable("ai_task_closure_policies", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskEscalationEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -858,6 +1018,80 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasDatabaseName("ux_ai_task_escalation_events_idempotency");
 
                     b.ToTable("ai_task_escalation_events", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EvidenceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("evidence_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("ReferenceMetadataJson")
+                        .HasColumnType("text")
+                        .HasColumnName("reference_metadata_json");
+
+                    b.Property<string>("SourceEntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_entity_id");
+
+                    b.Property<string>("SourceModule")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_module");
+
+                    b.Property<DateTimeOffset>("SubmittedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at_utc");
+
+                    b.Property<string>("SubmittedByLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("submitted_by_label");
+
+                    b.Property<Guid>("SubmittedByMembershipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("submitted_by_membership_id");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("task_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("TenantId", "FacilityId", "TaskId", "SubmittedAtUtc")
+                        .HasDatabaseName("ix_ai_task_evidence_tenant_facility_task");
+
+                    b.ToTable("ai_task_evidence", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskRoutingRule", b =>
@@ -28600,10 +28834,43 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Task");
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskClosurePolicy", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskEscalationEvent", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.AiTasks.AiTask", "Task")
                         .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTaskEvidence", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.AiTasks.AiTask", "Task")
+                        .WithMany("EvidenceItems")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -33696,6 +33963,8 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.AiTasks.AiTask", b =>
                 {
                     b.Navigation("AuditEvents");
+
+                    b.Navigation("EvidenceItems");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.CommercialIntelligence.CommercialPricingScenario", b =>

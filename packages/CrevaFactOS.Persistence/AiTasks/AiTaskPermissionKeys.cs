@@ -10,4 +10,8 @@ public static class AiTaskPermissionKeys
     public const string Escalate = "ai-task.escalate";
     public const string Manage = "ai-task.manage";
     public const string SlaManage = "ai-task.sla.manage";
+    public const string EvidenceManage = "ai-task.evidence.manage";
+    public const string ClosureRequest = "ai-task.closure.request";
+    public const string ClosureApprove = "ai-task.closure.approve";
+    public const string Reopen = "ai-task.reopen";
 }

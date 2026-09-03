@@ -94,6 +94,35 @@ public interface ITeamsNotificationRepository
         string taskReference,
         int escalationLevel,
         CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskClosureApprovalRequestedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskClosureApprovedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskClosureRejectedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        string? rejectionReason,
+        CancellationToken cancellationToken = default);
+
+    Task TryCreateTaskReopenedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class TeamsNotificationRepository(
@@ -383,6 +412,83 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationPresentationBuilder.BuildTaskEscalatedFingerprint(taskId, escalationLevel, recipientMembershipId),
             cancellationToken);
 
+    public Task TryCreateTaskClosureApprovalRequestedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskClosureApprovalRequested,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureApprovalRequestedTitle(taskReference),
+            TeamsNotificationPresentationBuilder.TaskClosureApprovalRequestedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureApprovalRequestedFingerprint(taskId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateTaskClosureApprovedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskClosureApproved,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureApprovedTitle(taskReference),
+            TeamsNotificationPresentationBuilder.TaskClosureApprovedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureApprovedFingerprint(taskId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateTaskClosureRejectedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        string? rejectionReason,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskClosureRejected,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureRejectedTitle(taskReference),
+            TeamsNotificationPresentationBuilder.TaskClosureRejectedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(rejectionReason ?? taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskClosureRejectedFingerprint(taskId, recipientMembershipId),
+            cancellationToken);
+
+    public Task TryCreateTaskReopenedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) =>
+        TryCreateAsync(
+            context,
+            recipientMembershipId,
+            TeamsNotificationTypes.TaskReopened,
+            TeamsNotificationSourceModules.AiTask,
+            taskId.ToString("D"),
+            TeamsNotificationPresentationBuilder.BuildTaskLinkRoute(taskId),
+            TeamsNotificationPresentationBuilder.BuildTaskReopenedTitle(taskReference),
+            TeamsNotificationPresentationBuilder.TaskReopenedReason,
+            TeamsNotificationPresentationBuilder.TruncatePreview(taskReference),
+            TeamsNotificationPresentationBuilder.BuildTaskReopenedFingerprint(taskId, recipientMembershipId),
+            cancellationToken);
+
     private async Task TryCreateAsync(
         TeamsOperationContext context,
         Guid recipientMembershipId,
@@ -502,7 +608,11 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.TaskLink => await CanOpenTaskLinkAsync(context, row, cancellationToken),
             TeamsNotificationTypes.TaskAssigned
                 or TeamsNotificationTypes.TaskEscalated
-                or TeamsNotificationTypes.TaskSlaWarning => await CanOpenAssignedTaskAsync(context, row, cancellationToken),
+                or TeamsNotificationTypes.TaskSlaWarning
+                or TeamsNotificationTypes.TaskClosureApprovalRequested
+                or TeamsNotificationTypes.TaskClosureApproved
+                or TeamsNotificationTypes.TaskClosureRejected
+                or TeamsNotificationTypes.TaskReopened => await CanOpenAssignedTaskAsync(context, row, cancellationToken),
             _ => (false, TeamsNotificationUnavailableReasons.SourceInaccessible),
         };
 
@@ -760,6 +870,10 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.TaskAssigned => "Görev atama bildirimi",
             TeamsNotificationTypes.TaskEscalated => "Görev eskalasyon bildirimi",
             TeamsNotificationTypes.TaskSlaWarning => "Görev SLA uyarı bildirimi",
+            TeamsNotificationTypes.TaskClosureApprovalRequested => "Görev kapanış onay bildirimi",
+            TeamsNotificationTypes.TaskClosureApproved => "Görev kapanış onaylandı bildirimi",
+            TeamsNotificationTypes.TaskClosureRejected => "Görev kapanış ret bildirimi",
+            TeamsNotificationTypes.TaskReopened => "Görev yeniden açıldı bildirimi",
             _ => "Teams bildirimi",
         };
 
@@ -774,6 +888,10 @@ public sealed class TeamsNotificationRepository(
             TeamsNotificationTypes.TaskAssigned => TeamsNotificationPresentationBuilder.TaskAssignedReason,
             TeamsNotificationTypes.TaskEscalated => TeamsNotificationPresentationBuilder.TaskEscalatedReason,
             TeamsNotificationTypes.TaskSlaWarning => TeamsNotificationPresentationBuilder.TaskSlaWarningReason,
+            TeamsNotificationTypes.TaskClosureApprovalRequested => TeamsNotificationPresentationBuilder.TaskClosureApprovalRequestedReason,
+            TeamsNotificationTypes.TaskClosureApproved => TeamsNotificationPresentationBuilder.TaskClosureApprovedReason,
+            TeamsNotificationTypes.TaskClosureRejected => TeamsNotificationPresentationBuilder.TaskClosureRejectedReason,
+            TeamsNotificationTypes.TaskReopened => TeamsNotificationPresentationBuilder.TaskReopenedReason,
             _ => "Teams bildirimi",
         };
 }
@@ -869,5 +987,34 @@ public sealed class UnavailableTeamsNotificationRepository : ITeamsNotificationR
         Guid taskId,
         string taskReference,
         int escalationLevel,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskClosureApprovalRequestedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskClosureApprovedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskClosureRejectedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
+        string? rejectionReason,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TryCreateTaskReopenedAsync(
+        TeamsOperationContext context,
+        Guid recipientMembershipId,
+        Guid taskId,
+        string taskReference,
         CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

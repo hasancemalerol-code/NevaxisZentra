@@ -26,6 +26,12 @@ export const AI_TASK_AUDIT_EVENT_LABELS: Readonly<
   cancelled: "Görev iptal edildi",
   "status-changed": "Durum değiştirildi",
   "teams-notification-emitted": "Teams bildirimi gönderildi",
+  "evidence-submitted": "Kanıt eklendi",
+  "resolution-updated": "Çözüm güncellendi",
+  "closure-requested": "Kapanış talep edildi",
+  "closure-approved": "Kapanış onaylandı",
+  "closure-rejected": "Kapanış reddedildi",
+  "task-reopened": "Görev yeniden açıldı",
 };
 
 export const AI_TASK_AUDIT_ACTOR_TYPE_LABELS: Readonly<

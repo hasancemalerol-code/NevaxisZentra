@@ -31,6 +31,8 @@ public static class AiTaskEndpointRouteBuilderExtensions
         [FromQuery] string? category,
         [FromQuery] string? priority,
         [FromQuery] string? sourceModule,
+        [FromQuery] string? closureState,
+        [FromQuery] string? closureQueue,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 25,
         IFacilityAccessResolver facilityAccessResolver = null!,
@@ -44,7 +46,7 @@ public static class AiTaskEndpointRouteBuilderExtensions
 
         var result = await repository.ListTasksAsync(
             context,
-            new AiTaskListFilters(status, category, priority, sourceModule, page, pageSize),
+            new AiTaskListFilters(status, category, priority, sourceModule, closureState, closureQueue, page, pageSize),
             cancellationToken);
 
         var canCreate = await AiTaskEndpointHelpers.HasCreateAccessAsync(
@@ -249,6 +251,9 @@ public static class AiTaskEndpointRouteBuilderExtensions
         escalationLevel = item.EscalationLevel,
         escalationState = item.EscalationState,
         slaState = item.SlaState,
+        closureState = item.ClosureState,
+        evidenceCount = item.EvidenceCount,
+        closureApprovalRequired = item.ClosureApprovalRequired,
         createdAt = item.CreatedAtUtc,
         updatedAt = item.UpdatedAtUtc,
         version = item.Version,
@@ -367,6 +372,54 @@ public static class AiTaskEndpointRouteBuilderExtensions
         createdAt = item.CreatedAtUtc,
         updatedAt = item.UpdatedAtUtc,
         version = item.Version,
+        closure = new
+        {
+            state = item.Closure.ClosureState,
+            resolutionSummary = item.Closure.ResolutionSummary,
+            resolutionCode = item.Closure.ResolutionCode,
+            closureReason = item.Closure.ClosureReason,
+            approvalRequired = item.Closure.ClosureApprovalRequired,
+            requestedAtUtc = item.Closure.ClosureRequestedAtUtc,
+            requestedByMembershipId = item.Closure.ClosureRequestedByMembershipId,
+            approvedAtUtc = item.Closure.ClosureApprovedAtUtc,
+            approvedByMembershipId = item.Closure.ClosureApprovedByMembershipId,
+            rejectedAtUtc = item.Closure.ClosureRejectedAtUtc,
+            rejectedByMembershipId = item.Closure.ClosureRejectedByMembershipId,
+            rejectionReason = item.Closure.ClosureRejectionReason,
+            reopenedAtUtc = item.Closure.ReopenedAtUtc,
+            reopenedByMembershipId = item.Closure.ReopenedByMembershipId,
+            reopenReason = item.Closure.ReopenReason,
+            finalClosedAtUtc = item.Closure.FinalClosedAtUtc,
+        },
+        closurePolicy = new
+        {
+            policyKey = item.ClosurePolicy.PolicyKey,
+            name = item.ClosurePolicy.Name,
+            minimumEvidenceCount = item.ClosurePolicy.MinimumEvidenceCount,
+            requiredEvidenceTypes = item.ClosurePolicy.RequiredEvidenceTypes,
+            approvalRequired = item.ClosurePolicy.ApprovalRequired,
+            fourEyesRequired = item.ClosurePolicy.FourEyesRequired,
+            resolutionSummaryRequired = item.ClosurePolicy.ResolutionSummaryRequired,
+        },
+        closureValidation = new
+        {
+            isValid = item.ClosureValidation.IsValid,
+            issues = item.ClosureValidation.Issues.Select(issue => new { code = issue.Code, message = issue.Message }),
+        },
+        evidence = item.Evidence.Select(e => new
+        {
+            id = e.Id,
+            taskId = e.TaskId,
+            evidenceType = e.EvidenceType,
+            title = e.Title,
+            description = e.Description,
+            referenceMetadataJson = e.ReferenceMetadataJson,
+            sourceModule = e.SourceModule,
+            sourceEntityId = e.SourceEntityId,
+            submittedByMembershipId = e.SubmittedByMembershipId,
+            submittedByLabel = e.SubmittedByLabel,
+            submittedAtUtc = e.SubmittedAtUtc,
+        }),
         auditTrail = item.AuditTrail.Select(e => new
         {
             id = e.Id,
@@ -503,6 +556,22 @@ public static class AiTaskServiceCollectionExtensions
 {
     public static IServiceCollection AddCrevaFactOSAiTasks(this IServiceCollection services)
     {
+        services.AddScoped<IAiTaskClosureEngine, AiTaskClosureEngine>();
+        services.AddScoped<IAiTaskClosureRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskClosureRepository();
+            }
+
+            return new AiTaskClosureRepository(
+                dbContext,
+                serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                serviceProvider.GetRequiredService<IAiTaskClosureEngine>(),
+                serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
+        });
+
         services.AddScoped<IAiTaskRoutingService, AiTaskRoutingService>();
         services.AddScoped<IAiTaskOperationsRepository>(serviceProvider =>
         {
@@ -527,7 +596,8 @@ public static class AiTaskServiceCollectionExtensions
                 : new AiTaskRepository(
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
-                    serviceProvider.GetRequiredService<IAiTaskOperationsRepository>());
+                    serviceProvider.GetRequiredService<IAiTaskOperationsRepository>(),
+                    serviceProvider.GetRequiredService<IAiTaskClosureEngine>());
         });
 
         return services;

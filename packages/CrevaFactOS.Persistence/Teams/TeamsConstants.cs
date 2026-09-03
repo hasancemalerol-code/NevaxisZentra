@@ -113,6 +113,10 @@ public static class TeamsNotificationTypes
     public const string TaskAssigned = "task-assigned";
     public const string TaskEscalated = "task-escalated";
     public const string TaskSlaWarning = "task-sla-warning";
+    public const string TaskClosureApprovalRequested = "task-closure-approval-requested";
+    public const string TaskClosureApproved = "task-closure-approved";
+    public const string TaskClosureRejected = "task-closure-rejected";
+    public const string TaskReopened = "task-reopened";
     public const string FactoryShiftHandover = "factory-shift-handover";
     public const string FactoryShiftHandoverAcknowledged = "factory-shift-handover-acknowledged";
 }

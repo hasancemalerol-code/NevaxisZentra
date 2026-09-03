@@ -46,7 +46,8 @@ public interface IAiTaskRepository
 public sealed class AiTaskRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
-    IAiTaskOperationsRepository operationsRepository) : IAiTaskRepository
+    IAiTaskOperationsRepository operationsRepository,
+    IAiTaskClosureEngine closureEngine) : IAiTaskRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -83,8 +84,21 @@ public sealed class AiTaskRepository(
                     query = query.Where(t => t.SourceModule == filters.SourceModule.Trim());
                 }
 
+                if (!string.IsNullOrWhiteSpace(filters.ClosureState))
+                {
+                    query = query.Where(t => t.ClosureState == filters.ClosureState.Trim());
+                }
+
+                if (!string.IsNullOrWhiteSpace(filters.ClosureQueue))
+                {
+                    query = ApplyClosureQueueFilter(query, filters.ClosureQueue.Trim(), context);
+                }
+
                 var totalCount = await query.CountAsync(ct);
                 var policies = await dbContext.AiTaskSlaPolicies.AsNoTracking()
+                    .Where(p => p.TenantId == context.TenantId && p.Enabled)
+                    .ToListAsync(ct);
+                var closurePolicies = await dbContext.AiTaskClosurePolicies.AsNoTracking()
                     .Where(p => p.TenantId == context.TenantId && p.Enabled)
                     .ToListAsync(ct);
                 var items = await query
@@ -93,9 +107,23 @@ public sealed class AiTaskRepository(
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync(ct);
+                var taskIds = items.Select(t => t.Id).ToList();
+                var evidenceCounts = taskIds.Count == 0
+                    ? new Dictionary<Guid, int>()
+                    : await dbContext.AiTaskEvidence.AsNoTracking()
+                        .Where(e => e.TenantId == context.TenantId
+                            && e.FacilityId == context.FacilityId
+                            && taskIds.Contains(e.TaskId))
+                        .GroupBy(e => e.TaskId)
+                        .Select(g => new { g.Key, Count = g.Count() })
+                        .ToDictionaryAsync(x => x.Key, x => x.Count, ct);
 
                 return new AiTaskListReadModel(
-                    items.Select(task => MapSummary(task, policies)).ToList(),
+                    items.Select(task => MapSummary(
+                        task,
+                        policies,
+                        closurePolicies,
+                        evidenceCounts.GetValueOrDefault(task.Id))).ToList(),
                     totalCount,
                     page,
                     pageSize);
@@ -701,10 +729,58 @@ public sealed class AiTaskRepository(
         return null;
     }
 
-    private static AiTaskSummaryReadModel MapSummary(AiTask task, IReadOnlyList<AiTaskSlaPolicy> policies)
+    private IQueryable<AiTask> ApplyClosureQueueFilter(
+        IQueryable<AiTask> query,
+        string closureQueue,
+        AiTaskOperationContext context) =>
+        closureQueue switch
+        {
+            "awaiting-approval" => query.Where(t => t.ClosureState == AiTaskClosureStates.AwaitingClosureApproval),
+            "revision-pending" => query.Where(t => t.ClosureState == AiTaskClosureStates.ClosureRejected),
+            "reopened" => query.Where(t => t.ClosureState == AiTaskClosureStates.Reopened),
+            "missing-evidence" => query.Where(t =>
+                t.Status == AiTaskStatuses.InProgress
+                && (t.ClosureState == AiTaskClosureStates.None
+                    || t.ClosureState == AiTaskClosureStates.ClosureRejected
+                    || t.ClosureState == AiTaskClosureStates.Reopened)
+                && !dbContext.AiTaskEvidence.Any(e =>
+                    e.TenantId == context.TenantId
+                    && e.FacilityId == context.FacilityId
+                    && e.TaskId == t.Id)
+                && (t.Priority == AiTaskPriorities.Critical
+                    || t.Category == AiTaskCategories.Quality
+                    || t.Category == AiTaskCategories.Maintenance)),
+            _ => query,
+        };
+
+    private static AiTaskClosureReadModel MapClosure(AiTask task) =>
+        new(
+            task.ClosureState,
+            task.ResolutionSummary,
+            task.ResolutionCode,
+            task.ClosureReason,
+            task.ClosureApprovalRequired,
+            task.ClosureRequestedAtUtc,
+            task.ClosureRequestedByMembershipId,
+            task.ClosureApprovedAtUtc,
+            task.ClosureApprovedByMembershipId,
+            task.ClosureRejectedAtUtc,
+            task.ClosureRejectedByMembershipId,
+            task.ClosureRejectionReason,
+            task.ReopenedAtUtc,
+            task.ReopenedByMembershipId,
+            task.ReopenReason,
+            task.FinalClosedAtUtc);
+
+    private AiTaskSummaryReadModel MapSummary(
+        AiTask task,
+        IReadOnlyList<AiTaskSlaPolicy> policies,
+        IReadOnlyList<AiTaskClosurePolicy> closurePolicies,
+        int evidenceCount)
     {
         var policy = AiTaskSlaEngine.ResolvePolicy(task, policies);
         var sla = AiTaskSlaEngine.DeriveSlaState(task, policy, DateTimeOffset.UtcNow);
+        var closurePolicy = closureEngine.ResolvePolicy(task, closurePolicies);
         return new(
             task.Id,
             task.TaskReference,
@@ -728,7 +804,10 @@ public sealed class AiTaskRepository(
             task.AcknowledgedAtUtc,
             task.EscalationLevel,
             task.EscalationState,
-            sla.State);
+            sla.State,
+            task.ClosureState,
+            evidenceCount,
+            closurePolicy.ApprovalRequired);
     }
 
     private async Task<AiTaskDetailReadModel> MapDetailAsync(AiTask task, CancellationToken ct)
@@ -738,6 +817,31 @@ public sealed class AiTaskRepository(
             .ToListAsync(ct);
         var policy = AiTaskSlaEngine.ResolvePolicy(task, policies);
         var sla = AiTaskSlaEngine.DeriveSlaState(task, policy, DateTimeOffset.UtcNow);
+        var closurePolicies = await dbContext.AiTaskClosurePolicies.AsNoTracking()
+            .Where(p => p.TenantId == task.TenantId && p.Enabled)
+            .ToListAsync(ct);
+        var closurePolicy = closureEngine.ResolvePolicy(task, closurePolicies);
+        var evidenceEntities = await dbContext.AiTaskEvidence.AsNoTracking()
+            .Where(e => e.TenantId == task.TenantId
+                && e.FacilityId == task.FacilityId
+                && e.TaskId == task.Id)
+            .OrderByDescending(e => e.SubmittedAtUtc)
+            .ToListAsync(ct);
+        var evidence = evidenceEntities
+            .Select(e => new AiTaskEvidenceReadModel(
+                e.Id,
+                e.TaskId,
+                e.EvidenceType,
+                e.Title,
+                e.Description,
+                e.ReferenceMetadataJson,
+                e.SourceModule,
+                e.SourceEntityId,
+                e.SubmittedByMembershipId,
+                e.SubmittedByLabel,
+                e.SubmittedAtUtc))
+            .ToList();
+        var closureValidation = closureEngine.ValidateClosureRequest(task, evidenceEntities, closurePolicy);
 
         return new AiTaskDetailReadModel(
             task.Id,
@@ -792,6 +896,10 @@ public sealed class AiTaskRepository(
             task.CreatedAtUtc,
             task.UpdatedAtUtc,
             task.Version,
+            MapClosure(task),
+            closurePolicy,
+            closureValidation,
+            evidence,
             task.AuditEvents
                 .OrderBy(e => e.OccurredAtUtc)
                 .Select(e => new AiTaskAuditEventReadModel(

@@ -64,6 +64,22 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
         entity.Property(t => t.IdempotencyPayloadFingerprint).HasColumnName("idempotency_payload_fingerprint").HasMaxLength(64);
         entity.Property(t => t.DueAtUtc).HasColumnName("due_at_utc");
         entity.Property(t => t.CompletedAtUtc).HasColumnName("completed_at_utc");
+        entity.Property(t => t.ClosureState).HasColumnName("closure_state").HasMaxLength(40).IsRequired();
+        entity.Property(t => t.ResolutionSummary).HasColumnName("resolution_summary").HasMaxLength(4000);
+        entity.Property(t => t.ResolutionCode).HasColumnName("resolution_code").HasMaxLength(50);
+        entity.Property(t => t.ClosureReason).HasColumnName("closure_reason").HasMaxLength(2000);
+        entity.Property(t => t.ClosureApprovalRequired).HasColumnName("closure_approval_required");
+        entity.Property(t => t.ClosureRequestedAtUtc).HasColumnName("closure_requested_at_utc");
+        entity.Property(t => t.ClosureRequestedByMembershipId).HasColumnName("closure_requested_by_membership_id");
+        entity.Property(t => t.ClosureApprovedAtUtc).HasColumnName("closure_approved_at_utc");
+        entity.Property(t => t.ClosureApprovedByMembershipId).HasColumnName("closure_approved_by_membership_id");
+        entity.Property(t => t.ClosureRejectedAtUtc).HasColumnName("closure_rejected_at_utc");
+        entity.Property(t => t.ClosureRejectedByMembershipId).HasColumnName("closure_rejected_by_membership_id");
+        entity.Property(t => t.ClosureRejectionReason).HasColumnName("closure_rejection_reason").HasMaxLength(2000);
+        entity.Property(t => t.ReopenedAtUtc).HasColumnName("reopened_at_utc");
+        entity.Property(t => t.ReopenedByMembershipId).HasColumnName("reopened_by_membership_id");
+        entity.Property(t => t.ReopenReason).HasColumnName("reopen_reason").HasMaxLength(2000);
+        entity.Property(t => t.FinalClosedAtUtc).HasColumnName("final_closed_at_utc");
         entity.Property(t => t.Version).HasColumnName("version").IsConcurrencyToken();
         entity.Property(t => t.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(t => t.UpdatedAtUtc).HasColumnName("updated_at_utc");
@@ -101,6 +117,8 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
             .HasDatabaseName("ix_ai_tasks_tenant_facility_due");
         entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.EscalationLevel })
             .HasDatabaseName("ix_ai_tasks_tenant_facility_escalation");
+        entity.HasIndex(t => new { t.TenantId, t.FacilityId, t.ClosureState })
+            .HasDatabaseName("ix_ai_tasks_tenant_facility_closure_state");
     }
 }
 

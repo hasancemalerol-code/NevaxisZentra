@@ -5,16 +5,31 @@ import type {
   AiTaskAuditEvent,
   AiTaskAuditEventType,
   AiTaskCategory,
+  AiTaskClosure,
+  AiTaskClosurePolicy,
+  AiTaskClosureState,
+  AiTaskClosureValidation,
+  AiTaskEvidence,
+  AiTaskEvidenceType,
   AiTaskEscalationBreachType,
   AiTaskEscalationState,
   AiTaskPriority,
+  AiTaskResolutionCode,
   AiTaskRiskLevel,
   AiTaskSla,
   AiTaskSlaState,
   AiTaskSourceReference,
   AiTaskStatus,
 } from "../domain/ai-task";
-import type { RawAiTaskDetail, RawAiTaskSummary, RawAiTaskSla } from "./ai-task-api-client";
+import type {
+  RawAiTaskClosure,
+  RawAiTaskClosurePolicy,
+  RawAiTaskClosureValidation,
+  RawAiTaskDetail,
+  RawAiTaskEvidence,
+  RawAiTaskSummary,
+  RawAiTaskSla,
+} from "./ai-task-api-client";
 
 export type AiTaskListRecord = AiTask &
   Readonly<{
@@ -62,6 +77,95 @@ function asEscalationState(value: string): AiTaskEscalationState {
 
 function asBreachType(value: string): AiTaskEscalationBreachType {
   return value as AiTaskEscalationBreachType;
+}
+
+function asClosureState(value: string): AiTaskClosureState {
+  return value as AiTaskClosureState;
+}
+
+function asEvidenceType(value: string): AiTaskEvidenceType {
+  return value as AiTaskEvidenceType;
+}
+
+function asResolutionCode(value: string): AiTaskResolutionCode {
+  return value as AiTaskResolutionCode;
+}
+
+function mapClosure(raw: RawAiTaskClosure | undefined): AiTaskClosure | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  return {
+    state: asClosureState(raw.state),
+    resolutionSummary: raw.resolutionSummary ?? undefined,
+    resolutionCode: raw.resolutionCode ? asResolutionCode(raw.resolutionCode) : undefined,
+    closureReason: raw.closureReason ?? undefined,
+    approvalRequired: raw.approvalRequired,
+    requestedAt: raw.requestedAtUtc ?? undefined,
+    requestedByMembershipId: raw.requestedByMembershipId ?? undefined,
+    approvedAt: raw.approvedAtUtc ?? undefined,
+    approvedByMembershipId: raw.approvedByMembershipId ?? undefined,
+    rejectedAt: raw.rejectedAtUtc ?? undefined,
+    rejectedByMembershipId: raw.rejectedByMembershipId ?? undefined,
+    rejectionReason: raw.rejectionReason ?? undefined,
+    reopenedAt: raw.reopenedAtUtc ?? undefined,
+    reopenedByMembershipId: raw.reopenedByMembershipId ?? undefined,
+    reopenReason: raw.reopenReason ?? undefined,
+    finalClosedAt: raw.finalClosedAtUtc ?? undefined,
+  };
+}
+
+function mapClosurePolicy(
+  raw: RawAiTaskClosurePolicy | undefined,
+): AiTaskClosurePolicy | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  return {
+    policyKey: raw.policyKey,
+    name: raw.name,
+    minimumEvidenceCount: raw.minimumEvidenceCount,
+    requiredEvidenceTypes: raw.requiredEvidenceTypes ?? [],
+    approvalRequired: raw.approvalRequired,
+    fourEyesRequired: raw.fourEyesRequired,
+    resolutionSummaryRequired: raw.resolutionSummaryRequired,
+  };
+}
+
+function mapClosureValidation(
+  raw: RawAiTaskClosureValidation | undefined,
+): AiTaskClosureValidation | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  return {
+    isValid: raw.isValid,
+    issues: (raw.issues ?? []).map((issue) => ({
+      code: issue.code,
+      message: issue.message,
+    })),
+  };
+}
+
+function mapEvidenceItems(
+  items: readonly RawAiTaskEvidence[] | undefined,
+): readonly AiTaskEvidence[] {
+  return (items ?? []).map((item) => ({
+    id: item.id,
+    taskId: item.taskId,
+    evidenceType: asEvidenceType(item.evidenceType),
+    title: item.title,
+    description: item.description ?? undefined,
+    referenceMetadataJson: item.referenceMetadataJson ?? undefined,
+    sourceModule: item.sourceModule ?? undefined,
+    sourceEntityId: item.sourceEntityId ?? undefined,
+    submittedByMembershipId: item.submittedByMembershipId,
+    submittedByLabel: item.submittedByLabel,
+    submittedAt: item.submittedAtUtc,
+  }));
 }
 
 function mapSla(raw: RawAiTaskSla | undefined, fallbackState: string): AiTaskSla {
@@ -209,6 +313,10 @@ export function mapRawAiTaskDetail(raw: RawAiTaskDetail): AiTask {
     updatedAt: raw.updatedAt,
     completedAt: raw.completedAt ?? undefined,
     auditTrail: mapAuditTrail(raw.auditTrail),
+    closure: mapClosure(raw.closure),
+    closurePolicy: mapClosurePolicy(raw.closurePolicy),
+    closureValidation: mapClosureValidation(raw.closureValidation),
+    evidence: mapEvidenceItems(raw.evidence),
   };
 }
 
@@ -260,6 +368,9 @@ export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTaskListRecord {
     sourceEntityId: raw.sourceEntityId,
     listOriginKind: raw.listOriginKind,
     version: raw.version,
+    closureState: raw.closureState ? asClosureState(raw.closureState) : undefined,
+    evidenceCount: raw.evidenceCount ?? 0,
+    closureApprovalRequired: raw.closureApprovalRequired ?? false,
   };
 }
 

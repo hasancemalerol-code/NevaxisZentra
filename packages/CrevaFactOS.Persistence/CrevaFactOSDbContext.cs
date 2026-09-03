@@ -317,6 +317,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskSlaPolicy> AiTaskSlaPolicies => Set<AiTaskSlaPolicy>();
     public DbSet<AiTaskRoutingRule> AiTaskRoutingRules => Set<AiTaskRoutingRule>();
     public DbSet<AiTaskEscalationEvent> AiTaskEscalationEvents => Set<AiTaskEscalationEvent>();
+    public DbSet<AiTaskEvidence> AiTaskEvidence => Set<AiTaskEvidence>();
+    public DbSet<AiTaskClosurePolicy> AiTaskClosurePolicies => Set<AiTaskClosurePolicy>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1700,6 +1702,18 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskEvidenceEntityConfiguration());
+        modelBuilder.Entity<AiTaskEvidence>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskClosurePolicyEntityConfiguration());
+        modelBuilder.Entity<AiTaskClosurePolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Teams foundation (TEAMS-FOUNDATION-1)
         modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());

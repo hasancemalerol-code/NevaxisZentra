@@ -5,6 +5,8 @@ import {
   composeAiTaskCenterItems,
 } from "../application/ai-task-center-composition";
 import { calculateAiTaskKpis } from "../application/ai-task-query";
+import type { AiTaskClosureQueueKey } from "../domain/ai-task";
+import { AI_TASK_CLOSURE_QUEUE_KEYS } from "../domain/ai-task";
 import type { AiTaskCenterItem } from "../domain/ai-task-center-item";
 import { denyUnlessAnyGranted, denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { readTeamsWorkInbox } from "../../teams/server/teams-queries";
@@ -36,6 +38,7 @@ export type AiTaskCenterUnifiedPayload = Readonly<{
     mentions: boolean;
   }>;
   kpis: ReturnType<typeof calculateAiTaskKpis>;
+  closureQueueCounts: Readonly<Record<AiTaskClosureQueueKey, number>>;
 }>;
 
 export type AiTaskCenterUnifiedResult =
@@ -58,6 +61,25 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
   return { status: "failure", message, code };
 }
 
+async function readClosureQueueCounts(
+  context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext,
+): Promise<Readonly<Record<AiTaskClosureQueueKey, number>>> {
+  const counts = {} as Record<AiTaskClosureQueueKey, number>;
+
+  await Promise.all(
+    AI_TASK_CLOSURE_QUEUE_KEYS.map(async (queue) => {
+      const result = await listAiTasks(context, {
+        closureQueue: queue,
+        page: 1,
+        pageSize: 1,
+      });
+      counts[queue] = result.status === "success" ? result.value.totalCount : 0;
+    }),
+  );
+
+  return counts;
+}
+
 export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResult> {
   const authorization = await denyUnlessAnyGranted(["ai-task.read", "teams.read"]);
   if (authorization.status === "failure") {
@@ -73,6 +95,12 @@ export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResu
   let provenanceDisclaimer = "";
   let canCreate = false;
   let canReview = false;
+  let closureQueueCounts = {
+    "awaiting-approval": 0,
+    "missing-evidence": 0,
+    "revision-pending": 0,
+    reopened: 0,
+  } as Record<AiTaskClosureQueueKey, number>;
 
   if (canReadTasks) {
     const contextResult = resolveAiTaskRequestContext();
@@ -91,6 +119,7 @@ export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResu
     provenanceDisclaimer = result.value.provenanceDisclaimer;
     canCreate = result.value.capabilities.canCreate;
     canReview = result.value.capabilities.canReview;
+    closureQueueCounts = await readClosureQueueCounts(contextResult.context);
   }
 
   let workInboxItems: readonly import("../../teams/server/teams-api-client").RawTeamsWorkInboxItem[] = [];
@@ -151,6 +180,7 @@ export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResu
       canReadTeamsInbox,
       sourceAvailability,
       kpis: calculateAiTaskKpis(tasks),
+      closureQueueCounts,
     },
   };
 }

@@ -11,8 +11,10 @@ import { EmptyState } from "@/components/ui/states";
 import {
   filterAiTaskCenterItems,
   hasAnyTaskCenterColumnValue,
+  AI_TASK_CLOSURE_QUEUE_VIEW_MAP,
 } from "../application/ai-task-center-composition";
 import type { AiTaskCenterItem } from "../domain/ai-task-center-item";
+import type { AiTaskClosureQueueKey } from "../domain/ai-task";
 import {
   AI_TASK_CENTER_TASK_ORIGIN_FILTERS,
   AI_TASK_CENTER_VIEWS,
@@ -27,6 +29,7 @@ type AiTaskCenterUnifiedWorkspaceProps = Readonly<{
   items: readonly AiTaskCenterItem[];
   assignedTaskIds: readonly string[];
   listPath: string;
+  closureQueueCounts?: Readonly<Record<AiTaskClosureQueueKey, number>>;
   initialView?: AiTaskCenterView;
   initialOriginFilter?: AiTaskCenterTaskOriginFilter;
 }>;
@@ -82,7 +85,13 @@ function countItemsForView(
   viewKey: AiTaskCenterView,
   assignedIds: ReadonlySet<string>,
   originFilter: AiTaskCenterTaskOriginFilter,
+  closureQueueCounts?: Readonly<Record<AiTaskClosureQueueKey, number>>,
 ): number {
+  if (viewKey in AI_TASK_CLOSURE_QUEUE_VIEW_MAP && closureQueueCounts) {
+    const queue = AI_TASK_CLOSURE_QUEUE_VIEW_MAP[viewKey as keyof typeof AI_TASK_CLOSURE_QUEUE_VIEW_MAP];
+    return closureQueueCounts[queue] ?? 0;
+  }
+
   return filterAiTaskCenterItems(items, viewKey, assignedIds, originFilter).length;
 }
 
@@ -135,6 +144,7 @@ export function AiTaskCenterUnifiedWorkspace({
   items,
   assignedTaskIds,
   listPath,
+  closureQueueCounts,
   initialView,
   initialOriginFilter,
 }: AiTaskCenterUnifiedWorkspaceProps) {
@@ -160,11 +170,17 @@ export function AiTaskCenterUnifiedWorkspace({
     const counts = {} as Record<AiTaskCenterView, number>;
 
     for (const viewKey of Object.keys(AI_TASK_CENTER_VIEWS) as AiTaskCenterView[]) {
-      counts[viewKey] = countItemsForView(items, viewKey, assignedIds, originFilter);
+      counts[viewKey] = countItemsForView(
+        items,
+        viewKey,
+        assignedIds,
+        originFilter,
+        closureQueueCounts,
+      );
     }
 
     return counts;
-  }, [assignedIds, items, originFilter]);
+  }, [assignedIds, closureQueueCounts, items, originFilter]);
 
   const showOriginFilters =
     view === "all-tasks"

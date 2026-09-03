@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageContent, Section } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
+import { AiTaskClosurePanelClient } from "@/features/ai-task-center/components/ai-task-closure-panel-client";
 import { AiTaskActionPanelClient } from "@/features/ai-task-center/components/ai-task-action-panel-client";
 import { AiTaskDetailTimeline } from "@/features/ai-task-center/components/ai-task-detail-timeline";
 import { AiTaskOperationsPanelClient } from "@/features/ai-task-center/components/ai-task-operations-panel-client";
@@ -231,6 +232,12 @@ export default async function AiTaskDetailPage({
 
           <AiTaskActionPanelClient
             canReview={result.canReview}
+            task={task}
+            version={version}
+          />
+
+          <AiTaskClosurePanelClient
+            operations={operations}
             task={task}
             version={version}
           />

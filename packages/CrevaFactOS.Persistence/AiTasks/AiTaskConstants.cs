@@ -18,6 +18,9 @@ public static class AiTaskFailureCodes
     public const string FinalStatus = "ai-task.final-status";
     public const string FacilityScopeDenied = "ai-task.facility-scope-denied";
     public const string Unavailable = "ai-task.unavailable";
+    public const string ClosureValidationFailed = "ai-task.closure-validation-failed";
+    public const string FourEyesViolation = "ai-task.four-eyes-violation";
+    public const string ClosureStateConflict = "ai-task.closure-state-conflict";
 }
 
 public static class AiTaskStatuses
@@ -158,13 +161,20 @@ public static class AiTaskAuditEventTypes
     public const string Cancelled = "cancelled";
     public const string StatusChanged = "status-changed";
     public const string TeamsNotificationEmitted = "teams-notification-emitted";
+    public const string EvidenceSubmitted = "evidence-submitted";
+    public const string ResolutionUpdated = "resolution-updated";
+    public const string ClosureRequested = "closure-requested";
+    public const string ClosureApproved = "closure-approved";
+    public const string ClosureRejected = "closure-rejected";
+    public const string TaskReopened = "task-reopened";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         Created, AnalysisUpdated, Routed, Assigned, Reassigned, Acknowledged, PriorityChanged,
         DueDateChanged, SlaWarning, Escalated, ApprovalRequested, Approved, Rejected, Deferred,
         ExecutionStarted, ExecutionCompleted, ExecutionFailed, Cancelled, StatusChanged,
-        TeamsNotificationEmitted,
+        TeamsNotificationEmitted, EvidenceSubmitted, ResolutionUpdated, ClosureRequested,
+        ClosureApproved, ClosureRejected, TaskReopened,
     };
 }
 

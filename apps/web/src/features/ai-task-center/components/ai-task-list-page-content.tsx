@@ -121,6 +121,7 @@ export async function AiTaskListPageContent({
             assignedTaskIds={center.assignedTaskIds}
             initialOriginFilter={parseAiTaskCenterTaskOriginFilter(initialOriginFilter)}
             initialView={parseAiTaskCenterView(initialView)}
+            closureQueueCounts={center.closureQueueCounts}
             items={center.items}
             listPath={listPath}
           />

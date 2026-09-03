@@ -178,6 +178,107 @@ export const AI_TASK_ESCALATION_BREACH_TYPES = [
 export type AiTaskEscalationBreachType =
   (typeof AI_TASK_ESCALATION_BREACH_TYPES)[number];
 
+export const AI_TASK_CLOSURE_STATES = [
+  "none",
+  "resolution-requested",
+  "awaiting-closure-approval",
+  "closure-rejected",
+  "closed",
+  "reopened",
+] as const;
+
+export type AiTaskClosureState =
+  (typeof AI_TASK_CLOSURE_STATES)[number];
+
+export const AI_TASK_EVIDENCE_TYPES = [
+  "photo",
+  "document",
+  "measurement",
+  "machine-reading",
+  "quality-record",
+  "maintenance-record",
+  "production-record",
+  "external-reference",
+  "note",
+] as const;
+
+export type AiTaskEvidenceType =
+  (typeof AI_TASK_EVIDENCE_TYPES)[number];
+
+export const AI_TASK_RESOLUTION_CODES = [
+  "resolved",
+  "mitigated",
+  "accepted-risk",
+  "false-positive",
+  "deferred-follow-up",
+] as const;
+
+export type AiTaskResolutionCode =
+  (typeof AI_TASK_RESOLUTION_CODES)[number];
+
+export const AI_TASK_CLOSURE_QUEUE_KEYS = [
+  "awaiting-approval",
+  "missing-evidence",
+  "revision-pending",
+  "reopened",
+] as const;
+
+export type AiTaskClosureQueueKey =
+  (typeof AI_TASK_CLOSURE_QUEUE_KEYS)[number];
+
+export type AiTaskEvidence = Readonly<{
+  id: string;
+  taskId: AiTaskId;
+  evidenceType: AiTaskEvidenceType;
+  title: string;
+  description?: string;
+  referenceMetadataJson?: string;
+  sourceModule?: string;
+  sourceEntityId?: string;
+  submittedByMembershipId: string;
+  submittedByLabel: string;
+  submittedAt: string;
+}>;
+
+export type AiTaskClosure = Readonly<{
+  state: AiTaskClosureState;
+  resolutionSummary?: string;
+  resolutionCode?: AiTaskResolutionCode;
+  closureReason?: string;
+  approvalRequired: boolean;
+  requestedAt?: string;
+  requestedByMembershipId?: string;
+  approvedAt?: string;
+  approvedByMembershipId?: string;
+  rejectedAt?: string;
+  rejectedByMembershipId?: string;
+  rejectionReason?: string;
+  reopenedAt?: string;
+  reopenedByMembershipId?: string;
+  reopenReason?: string;
+  finalClosedAt?: string;
+}>;
+
+export type AiTaskClosurePolicy = Readonly<{
+  policyKey: string;
+  name: string;
+  minimumEvidenceCount: number;
+  requiredEvidenceTypes: readonly string[];
+  approvalRequired: boolean;
+  fourEyesRequired: boolean;
+  resolutionSummaryRequired: boolean;
+}>;
+
+export type AiTaskClosureValidationIssue = Readonly<{
+  code: string;
+  message: string;
+}>;
+
+export type AiTaskClosureValidation = Readonly<{
+  isValid: boolean;
+  issues: readonly AiTaskClosureValidationIssue[];
+}>;
+
 export type AiTaskSla = Readonly<{
   state: AiTaskSlaState;
   acknowledgmentDueAt?: string;
@@ -207,7 +308,13 @@ export type AiTaskAuditEventType =
   | "execution-failed"
   | "cancelled"
   | "status-changed"
-  | "teams-notification-emitted";
+  | "teams-notification-emitted"
+  | "evidence-submitted"
+  | "resolution-updated"
+  | "closure-requested"
+  | "closure-approved"
+  | "closure-rejected"
+  | "task-reopened";
 
 export type AiTaskAuditEvent = Readonly<{
   id: string;
@@ -272,6 +379,13 @@ export type AiTask = Readonly<{
   assignmentSource?: string;
   approval: AiTaskApproval;
   execution?: AiTaskExecution;
+  closure?: AiTaskClosure;
+  closurePolicy?: AiTaskClosurePolicy;
+  closureValidation?: AiTaskClosureValidation;
+  evidence?: readonly AiTaskEvidence[];
+  closureState?: AiTaskClosureState;
+  evidenceCount?: number;
+  closureApprovalRequired?: boolean;
 
   dueAt?: string;
   createdAt: string;

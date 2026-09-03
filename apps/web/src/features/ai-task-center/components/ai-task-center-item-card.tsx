@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 
 import type { AiTaskCenterItem } from "../domain/ai-task-center-item";
 import {
+  AI_TASK_CLOSURE_BADGE_LABELS,
+  AI_TASK_CLOSURE_BADGE_TONES,
+} from "../presentation/ai-task-closure-labels";
+import {
   AI_TASK_PRIORITY_TONES,
   AI_TASK_STATUS_TONES,
 } from "../presentation/ai-task-labels";
@@ -100,6 +104,12 @@ export function AiTaskCenterItemCard({
 
         {escalationBadge && item.escalationState === "active" ? (
           <Badge tone={escalationTone}>{escalationBadge}</Badge>
+        ) : null}
+
+        {item.closureBadgeKey ? (
+          <Badge tone={AI_TASK_CLOSURE_BADGE_TONES[item.closureBadgeKey]}>
+            {AI_TASK_CLOSURE_BADGE_LABELS[item.closureBadgeKey]}
+          </Badge>
         ) : null}
       </header>
 

@@ -1360,6 +1360,180 @@ table {
   }
 }
 
+.ai-task-closure-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #dbe2ea) 88%, #94a3b8);
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-elevated, #fff) 98%, #f0f9ff),
+      color-mix(in srgb, var(--surface-muted, #f8fafc) 94%, white)
+    );
+}
+
+.ai-task-closure-panel[data-closure-state="awaiting-closure-approval"] {
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.ai-task-closure-panel[data-closure-state="closure-rejected"] {
+  border-color: rgba(239, 68, 68, 0.24);
+}
+
+.ai-task-closure-panel[data-closure-state="closed"] {
+  border-color: rgba(16, 185, 129, 0.24);
+}
+
+.ai-task-closure-panel__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ai-task-closure-panel__heading p {
+  margin: 0;
+  color: var(--text-muted, #64748b);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-task-closure-panel__heading h2 {
+  margin: 0.15rem 0 0;
+  color: var(--text-strong, #0f172a);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ai-task-closure-panel__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ai-task-closure-panel__policy {
+  margin: 0;
+  color: var(--text-secondary, #475569);
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__sections {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ai-task-closure-panel__form {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.ai-task-closure-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ai-task-closure-panel__evidence-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-task-closure-panel__evidence-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #e2e8f0) 80%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, white 70%, #f8fafc);
+}
+
+.ai-task-closure-panel__evidence-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ai-task-closure-panel__evidence-item p {
+  margin: 0;
+  color: var(--text-secondary, #475569);
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__evidence-item small {
+  color: var(--text-muted, #64748b);
+  font-size: 0.72rem;
+}
+
+.ai-task-closure-panel__empty {
+  margin: 0;
+  color: var(--text-muted, #64748b);
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__issues {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-task-closure-panel__issues li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  color: #b45309;
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__ready {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: #047857;
+  font-size: 0.78rem;
+}
+
+.ai-task-closure-panel__decision-note {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, #f8fafc 80%, white);
+}
+
+.ai-task-closure-panel__decision-note strong {
+  color: var(--text-strong, #0f172a);
+  font-size: 0.75rem;
+}
+
+.ai-task-closure-panel__decision-note p {
+  margin: 0;
+  color: var(--text-secondary, #475569);
+  font-size: 0.78rem;
+}
+
 /* AI TASK DETAIL WORKSPACE END */
 /* AI TASK ACTION PANEL START */
 
