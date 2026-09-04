@@ -3,6 +3,7 @@
 using System.Text.Json;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CrevaFactOS.Persistence.AiTasks;
 
@@ -10,7 +11,8 @@ public sealed class AiTaskDecisionIntelligenceRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskDecisionProvider decisionProvider,
-    IAiTaskOperationsRepository operationsRepository) : IAiTaskDecisionIntelligenceRepository
+    IAiTaskOperationsRepository operationsRepository,
+    IServiceProvider serviceProvider) : IAiTaskDecisionIntelligenceRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -319,6 +321,7 @@ public sealed class AiTaskDecisionIntelligenceRepository(
 
         var now = DateTimeOffset.UtcNow;
         AiTaskWriteResult? applyResult = null;
+        string? customAppliedResultJson = null;
         var payloadJson = command.EditedPayloadJson ?? recommendation.PayloadJson;
 
         switch (recommendation.ActionType)
@@ -375,6 +378,58 @@ public sealed class AiTaskDecisionIntelligenceRepository(
                         command.Reason ?? recommendation.Rationale),
                     ct);
                 break;
+
+            case AiTaskDecisionRecommendationActionTypes.StartPlaybook:
+            {
+                var payload = DeserializePayload(payloadJson);
+                Guid? playbookId = null;
+                if (payload.TryGetValue("playbookId", out var playbookIdRaw)
+                    && Guid.TryParse(playbookIdRaw?.ToString(), out var parsedPlaybookId))
+                {
+                    playbookId = parsedPlaybookId;
+                }
+                else
+                {
+                    var playbookKey = recommendation.RelatedEntityId
+                        ?? (payload.TryGetValue("playbookKey", out var keyRaw) ? keyRaw?.ToString() : null);
+                    if (!string.IsNullOrWhiteSpace(playbookKey))
+                    {
+                        var playbook = await dbContext.AiTaskPlaybooks.AsNoTracking()
+                            .Where(p => p.TenantId == context.TenantId
+                                        && (p.FacilityId == null || p.FacilityId == context.FacilityId)
+                                        && p.PlaybookKey == playbookKey.Trim()
+                                        && p.Enabled)
+                            .OrderByDescending(p => p.Version)
+                            .FirstOrDefaultAsync(ct);
+                        playbookId = playbook?.Id;
+                    }
+                }
+
+                if (playbookId.HasValue)
+                {
+                    var playbookRepository = serviceProvider.GetRequiredService<IAiTaskPlaybookRepository>();
+                    var runResult = await playbookRepository.StartRunAsync(
+                        context,
+                        new StartAiTaskPlaybookRunCommand(
+                            playbookId.Value,
+                            $"ai-rec:{command.TaskId:N}:{command.RecommendationId:N}",
+                            AiTaskPlaybookTriggerSources.AiRecommendation,
+                            command.TaskId,
+                            null,
+                            context.CorrelationId,
+                            null),
+                        ct);
+                    customAppliedResultJson = Serialize(new
+                    {
+                        runResult.Success,
+                        runResult.RunId,
+                        runResult.FailureCode,
+                        runResult.Message,
+                    });
+                }
+
+                break;
+            }
         }
 
         recommendation.Status = AiTaskDecisionRecommendationStatuses.Accepted;
@@ -382,9 +437,10 @@ public sealed class AiTaskDecisionIntelligenceRepository(
         recommendation.FeedbackReason = command.Reason;
         recommendation.FeedbackByMembershipId = context.MembershipId;
         recommendation.FeedbackAtUtc = now;
-        recommendation.AppliedResultJson = applyResult is null
-            ? Serialize(new { advisoryOnly = true })
-            : Serialize(new { applyResult.Succeeded, applyResult.Version, applyResult.FailureCode });
+        recommendation.AppliedResultJson = customAppliedResultJson
+            ?? (applyResult is null
+                ? Serialize(new { advisoryOnly = true })
+                : Serialize(new { applyResult.Succeeded, applyResult.Version, applyResult.FailureCode }));
 
         AppendAuditEvent(
             context,

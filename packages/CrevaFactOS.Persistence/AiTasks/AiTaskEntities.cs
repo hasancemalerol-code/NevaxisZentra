@@ -50,6 +50,11 @@ public sealed class AiTask
     public string? CustomerId { get; set; }
     public string? SourceModule { get; set; }
     public string? SourceEntityId { get; set; }
+    public Guid? ParentTaskId { get; set; }
+    public Guid? PlaybookRunId { get; set; }
+    public Guid? PlaybookRunStepId { get; set; }
+    public string DependencyState { get; set; } = string.Empty;
+    public string? DependencyBlockReason { get; set; }
     public string RuleSetVersion { get; set; } = AiTaskConstants.RuleSetVersion;
     public string? IdempotencyKey { get; set; }
     public string? IdempotencyPayloadFingerprint { get; set; }

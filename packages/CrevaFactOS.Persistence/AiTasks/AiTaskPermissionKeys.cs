@@ -20,4 +20,8 @@ public static class AiTaskPermissionKeys
     public const string AiRead = "ai-task.ai.read";
     public const string AiAnalyze = "ai-task.ai.analyze";
     public const string AiFeedback = "ai-task.ai.feedback";
+    public const string PlaybookRead = "ai-task.playbook.read";
+    public const string PlaybookManage = "ai-task.playbook.manage";
+    public const string PlaybookRun = "ai-task.playbook.run";
+    public const string PlaybookOverride = "ai-task.playbook.override";
 }

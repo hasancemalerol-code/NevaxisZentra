@@ -7,6 +7,7 @@ using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CrevaFactOS.Persistence.AiTasks;
 
@@ -14,7 +15,8 @@ public sealed class AiTaskAutomationRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskAutomationEngine automationEngine,
-    ITeamsNotificationRepository teamsNotificationRepository) : IAiTaskAutomationRepository
+    ITeamsNotificationRepository teamsNotificationRepository,
+    IServiceProvider serviceProvider) : IAiTaskAutomationRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -334,6 +336,22 @@ public sealed class AiTaskAutomationRepository(
             if (action.Type == AiTaskAutomationActionTypes.NotifyTeamsChannel && action.GuidValue.HasValue)
             {
                 await TryNotifyTeamsAsync(context, task, action.GuidValue.Value, cancellationToken);
+            }
+
+            if (action.Type == AiTaskAutomationActionTypes.StartPlaybook && action.GuidValue.HasValue)
+            {
+                var playbookRepository = serviceProvider.GetRequiredService<IAiTaskPlaybookRepository>();
+                await playbookRepository.StartRunAsync(
+                    context,
+                    new StartAiTaskPlaybookRunCommand(
+                        action.GuidValue.Value,
+                        $"{idempotencyKey}:start-playbook",
+                        AiTaskPlaybookTriggerSources.Automation,
+                        task.Id,
+                        null,
+                        correlationId,
+                        null),
+                    cancellationToken);
             }
         }
 

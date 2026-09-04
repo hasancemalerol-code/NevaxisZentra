@@ -3621,6 +3621,790 @@ table {
 
 /* AI TASK DECISION INTELLIGENCE END */
 
+/* AI TASK PLAYBOOK START */
+
+.ai-task-playbook-back-link,
+.ai-task-playbook-inline-link,
+.ai-task-playbook-inline-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.ai-task-playbook-inline-button {
+  color: var(--text-primary);
+}
+
+.ai-task-playbook-inline-button--primary {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--accent-on-primary, #fff);
+  font-weight: 600;
+}
+
+.ai-task-playbook-inline-button--primary:hover {
+  color: var(--accent-on-primary, #fff);
+  border-color: color-mix(in srgb, var(--accent-primary) 85%, #000 15%);
+  background: color-mix(in srgb, var(--accent-primary) 85%, #000 15%);
+}
+
+.ai-task-playbook-back-link:hover,
+.ai-task-playbook-inline-link:hover,
+.ai-task-playbook-inline-button:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-elevated);
+}
+
+.ai-task-playbook-back-link svg,
+.ai-task-playbook-inline-link svg,
+.ai-task-playbook-inline-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ai-task-playbook-page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-page-actions__primary {
+  text-decoration: none;
+}
+
+.ai-task-playbook-page-actions__primary:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ai-task-playbook-library,
+.ai-task-playbook-builder,
+.ai-task-playbook-run-detail {
+  display: grid;
+  gap: 1rem;
+}
+
+.ai-task-playbook-library__error,
+.ai-task-playbook-builder__error,
+.ai-task-playbook-run-detail__error {
+  color: var(--danger-text);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.ai-task-playbook-muted {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.ai-task-playbook-library__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-base);
+}
+
+.ai-task-playbook-library__hero-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.ai-task-playbook-library__hero-description {
+  margin: 0.2rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.ai-task-playbook-library__hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-library__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-library__tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-base);
+}
+
+.ai-task-playbook-library__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 0;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ai-task-playbook-library__tab--active {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+.ai-task-playbook-library__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border-subtle) 70%, var(--accent-primary) 30%);
+  font-size: 0.6875rem;
+}
+
+.ai-task-playbook-library__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-task-playbook-library__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.ai-task-playbook-library__hint svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.ai-task-playbook-module {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-base);
+}
+
+.ai-task-playbook-module__eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-task-playbook-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.ai-task-playbook-section__header h2,
+.ai-task-playbook-section__header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ai-task-playbook-section__header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.ai-task-playbook-card-list,
+.ai-task-playbook-library-row-list,
+.ai-task-playbook-run-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ai-task-playbook-library-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+}
+
+.ai-task-playbook-library-row--enabled {
+  border-color: color-mix(in srgb, var(--border-subtle) 65%, var(--success-text) 35%);
+}
+
+.ai-task-playbook-library-row__main {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.ai-task-playbook-library-row__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-library-row__name {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ai-task-playbook-library-row__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-library-row__meta {
+  display: grid;
+  gap: 0.35rem 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+}
+
+.ai-task-playbook-library-row__meta-item {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+}
+
+.ai-task-playbook-library-row__meta-label {
+  color: var(--text-secondary);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ai-task-playbook-library-row__muted {
+  color: var(--text-secondary);
+  font-style: normal;
+}
+
+.ai-task-playbook-library-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+
+.ai-task-playbook-run-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ai-task-playbook-run-card__detail-link {
+  text-decoration: none;
+}
+
+.ai-task-playbook-run-card__detail-link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ai-task-playbook-card,
+.ai-task-playbook-run-card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+}
+
+.ai-task-playbook-card--enabled {
+  border-color: color-mix(in srgb, var(--border-subtle) 65%, var(--success-text) 35%);
+}
+
+.ai-task-playbook-card__title-row,
+.ai-task-playbook-run-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ai-task-playbook-card__name,
+.ai-task-playbook-run-card__name {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ai-task-playbook-card__key,
+.ai-task-playbook-run-card__meta {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.ai-task-playbook-card__meta-grid,
+.ai-task-playbook-run-card__metrics,
+.ai-task-playbook-run-detail__metrics {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+.ai-task-playbook-card__meta-item,
+.ai-task-playbook-run-card__metric,
+.ai-task-playbook-run-detail__metric {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.ai-task-playbook-card__meta-label,
+.ai-task-playbook-run-card__metric span,
+.ai-task-playbook-run-detail__metric span {
+  color: var(--text-secondary);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ai-task-playbook-card__meta-item span:last-child,
+.ai-task-playbook-run-card__metric strong,
+.ai-task-playbook-run-detail__metric strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ai-task-playbook-card__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ai-task-playbook-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ai-task-playbook-card__action svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.ai-task-playbook-run-card__risk,
+.ai-task-playbook-run-detail__risk {
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-base) 70%, var(--warning-text) 30%);
+  color: var(--warning-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ai-task-playbook-builder__grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ai-task-playbook-builder__full {
+  grid-column: 1 / -1;
+}
+
+.ai-task-playbook-builder__section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.65rem;
+}
+
+.ai-task-playbook-builder__steps {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ai-task-playbook-builder__step-card {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.ai-task-playbook-builder__step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.ai-task-playbook-builder__step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-builder__step-toolbar {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.ai-task-playbook-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ai-task-playbook-icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ai-task-playbook-icon-button--danger {
+  color: var(--danger-text);
+}
+
+.ai-task-playbook-icon-button svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.ai-task-playbook-builder__condition {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ai-task-playbook-builder__condition summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ai-task-playbook-builder__dependencies {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ai-task-playbook-builder__dependency-row {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: 1fr auto 1fr 1fr auto;
+  align-items: center;
+}
+
+.ai-task-playbook-builder__dependency-arrow {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.ai-task-playbook-builder__validation {
+  padding: 0.75rem 0.85rem;
+  border-color: color-mix(in srgb, var(--border-subtle) 65%, var(--danger-text) 35%);
+}
+
+.ai-task-playbook-builder__validation h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+}
+
+.ai-task-playbook-builder__validation ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--danger-text);
+  font-size: 0.75rem;
+}
+
+.ai-task-playbook-builder__success {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  color: var(--success-text);
+  font-size: 0.8125rem;
+}
+
+.ai-task-playbook-builder__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ai-task-playbook-builder__footer-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.ai-task-playbook-run-detail__overview,
+.ai-task-playbook-run-detail__flow,
+.ai-task-playbook-run-detail__cancel {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-base);
+}
+
+.ai-task-playbook-run-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ai-task-playbook-run-detail__header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ai-task-playbook-run-detail__meta {
+  margin: 0.2rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.ai-task-playbook-run-detail__metrics {
+  margin-top: 0.75rem;
+}
+
+.ai-task-playbook-run-detail__block-reason {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.ai-task-playbook-run-detail__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ai-task-playbook-run-detail__steps {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.ai-task-playbook-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+}
+
+.ai-task-playbook-step__connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1.5rem;
+}
+
+.ai-task-playbook-step__line {
+  width: 2px;
+  flex: 1;
+  min-height: 0.65rem;
+  background: var(--border-subtle);
+}
+
+.ai-task-playbook-step__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-elevated);
+}
+
+.ai-task-playbook-step__marker svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.ai-task-playbook-step__body {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+}
+
+.ai-task-playbook-step__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.ai-task-playbook-step__meta {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.ai-task-playbook-step__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ai-task-playbook-step__timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+}
+
+.ai-task-playbook-step__block-reason {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--danger-text);
+}
+
+.ai-task-playbook-step__actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.ai-task-playbook-step__action {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ai-task-playbook-step__override {
+  display: grid;
+  gap: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ai-task-playbook-step__override-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ai-task-playbook-step--completed .ai-task-playbook-step__marker {
+  border-color: color-mix(in srgb, var(--border-subtle) 55%, var(--success-text) 45%);
+  color: var(--success-text);
+}
+
+.ai-task-playbook-step--in-progress .ai-task-playbook-step__marker {
+  border-color: color-mix(in srgb, var(--border-subtle) 55%, var(--accent-primary) 45%);
+  color: var(--accent-primary);
+}
+
+.ai-task-playbook-step--ready .ai-task-playbook-step__marker {
+  border-color: color-mix(in srgb, var(--border-subtle) 55%, var(--accent-ai) 45%);
+  color: var(--accent-ai);
+}
+
+.ai-task-playbook-step--pending .ai-task-playbook-step__marker {
+  color: var(--text-secondary);
+}
+
+.ai-task-playbook-step--blocked .ai-task-playbook-step__marker,
+.ai-task-playbook-step--failed .ai-task-playbook-step__marker {
+  border-color: color-mix(in srgb, var(--border-subtle) 55%, var(--danger-text) 45%);
+  color: var(--danger-text);
+}
+
+.ai-task-playbook-step--awaiting-approval .ai-task-playbook-step__marker {
+  border-color: color-mix(in srgb, var(--border-subtle) 55%, var(--warning-text) 45%);
+  color: var(--warning-text);
+}
+
+.ai-task-playbook-step--cancelled .ai-task-playbook-step__marker {
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .ai-task-playbook-builder__dependency-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-task-playbook-builder__dependency-arrow {
+    display: none;
+  }
+
+  .ai-task-playbook-step {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-task-playbook-step__connector {
+    display: none;
+  }
+}
+
+/* AI TASK PLAYBOOK END */
+
 /* AI TASK KPI LOADING START */
 
 .ai-task-kpi-loading {

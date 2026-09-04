@@ -585,7 +585,31 @@ public static class AiTaskServiceCollectionExtensions
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                 serviceProvider.GetRequiredService<IAiTaskClosureEngine>(),
-                serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
+                serviceProvider.GetRequiredService<ITeamsNotificationRepository>(),
+                serviceProvider.GetRequiredService<IAiTaskPlaybookOrchestrator>());
+        });
+
+        services.AddScoped<IAiTaskPlaybookEngine, AiTaskPlaybookEngine>();
+        services.AddScoped<AiTaskPlaybookRepository>();
+        services.AddScoped<IAiTaskPlaybookRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskPlaybookRepository();
+            }
+
+            return serviceProvider.GetRequiredService<AiTaskPlaybookRepository>();
+        });
+        services.AddScoped<IAiTaskPlaybookOrchestrator>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskPlaybookRepository();
+            }
+
+            return serviceProvider.GetRequiredService<AiTaskPlaybookRepository>();
         });
 
         services.AddScoped<IAiTaskAutomationEngine, AiTaskAutomationEngine>();
@@ -601,7 +625,8 @@ public static class AiTaskServiceCollectionExtensions
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                 serviceProvider.GetRequiredService<IAiTaskAutomationEngine>(),
-                serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
+                serviceProvider.GetRequiredService<ITeamsNotificationRepository>(),
+                serviceProvider);
         });
 
         services.AddScoped<IAiTaskRoutingService, AiTaskRoutingService>();
@@ -634,7 +659,8 @@ public static class AiTaskServiceCollectionExtensions
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                 serviceProvider.GetRequiredService<IAiTaskDecisionProvider>(),
-                serviceProvider.GetRequiredService<IAiTaskOperationsRepository>());
+                serviceProvider.GetRequiredService<IAiTaskOperationsRepository>(),
+                serviceProvider);
         });
 
         services.AddScoped<IAiTaskRepository>(serviceProvider =>
@@ -646,7 +672,8 @@ public static class AiTaskServiceCollectionExtensions
                     dbContext,
                     serviceProvider.GetRequiredService<TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<IAiTaskOperationsRepository>(),
-                    serviceProvider.GetRequiredService<IAiTaskClosureEngine>());
+                    serviceProvider.GetRequiredService<IAiTaskClosureEngine>(),
+                    serviceProvider.GetRequiredService<IAiTaskPlaybookOrchestrator>());
         });
 
         return services;

@@ -52,7 +52,8 @@ public sealed class AiTaskClosureRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskClosureEngine closureEngine,
-    ITeamsNotificationRepository teamsNotificationRepository) : IAiTaskClosureRepository
+    ITeamsNotificationRepository teamsNotificationRepository,
+    IAiTaskPlaybookOrchestrator playbookOrchestrator) : IAiTaskClosureRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -494,6 +495,9 @@ public sealed class AiTaskClosureRepository(
                     });
 
                 await dbContext.SaveChangesAsync(ct);
+
+                await playbookOrchestrator.NotifyTaskReopenedAsync(context, task, ct);
+
                 return AiTaskWriteResult.Success(task.Id, task.Version);
             },
             cancellationToken);

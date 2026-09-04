@@ -85,6 +85,7 @@ public static class AiTaskDecisionRecommendationActionTypes
     public const string ReviewProductionOrder = "review-production-order";
     public const string StartQualityReview = "start-quality-review";
     public const string NotifyTeam = "notify-team";
+    public const string StartPlaybook = "start-playbook";
 }
 
 public static class AiTaskDecisionRelationshipTypes

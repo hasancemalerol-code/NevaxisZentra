@@ -325,6 +325,12 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskAiAnalysis> AiTaskAiAnalyses => Set<AiTaskAiAnalysis>();
     public DbSet<AiTaskAiRecommendation> AiTaskAiRecommendations => Set<AiTaskAiRecommendation>();
     public DbSet<AiTaskRelationship> AiTaskRelationships => Set<AiTaskRelationship>();
+    public DbSet<AiTaskPlaybook> AiTaskPlaybooks => Set<AiTaskPlaybook>();
+    public DbSet<AiTaskPlaybookRevision> AiTaskPlaybookRevisions => Set<AiTaskPlaybookRevision>();
+    public DbSet<AiTaskPlaybookStep> AiTaskPlaybookSteps => Set<AiTaskPlaybookStep>();
+    public DbSet<AiTaskPlaybookStepDependency> AiTaskPlaybookStepDependencies => Set<AiTaskPlaybookStepDependency>();
+    public DbSet<AiTaskPlaybookRun> AiTaskPlaybookRuns => Set<AiTaskPlaybookRun>();
+    public DbSet<AiTaskPlaybookRunStep> AiTaskPlaybookRunSteps => Set<AiTaskPlaybookRunStep>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1756,6 +1762,42 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybook>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookRevisionEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybookRevision>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookStepEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybookStep>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookStepDependencyEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybookStepDependency>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookRunEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybookRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskPlaybookRunStepEntityConfiguration());
+        modelBuilder.Entity<AiTaskPlaybookRunStep>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Teams foundation (TEAMS-FOUNDATION-1)
         modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());

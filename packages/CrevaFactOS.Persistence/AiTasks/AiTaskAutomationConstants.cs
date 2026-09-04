@@ -68,12 +68,13 @@ public static class AiTaskAutomationActionTypes
     public const string AddTaskTag = "addTaskTag";
     public const string SetDueDatePolicy = "setDueDatePolicy";
     public const string ApplyClosurePolicy = "applyClosurePolicy";
+    public const string StartPlaybook = "startPlaybook";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.Ordinal)
     {
         AssignToMembership, AssignToTeam, RouteToQueue, SetPriority, ApplySlaPolicy, ApplyEscalationPolicy,
         RequireEvidence, RequireClosureApproval, EnableFourEyes, NotifyTeamsChannel, AddTaskTag, SetDueDatePolicy,
-        ApplyClosurePolicy,
+        ApplyClosurePolicy, StartPlaybook,
     };
 }
 

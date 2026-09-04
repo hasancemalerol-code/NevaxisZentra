@@ -162,6 +162,7 @@ app.MapAiTaskEndpoints();
 app.MapAiTaskOperationsEndpoints();
 app.MapAiTaskClosureEndpoints();
 app.MapAiTaskAutomationEndpoints();
+app.MapAiTaskPlaybookEndpoints();
 app.MapAiTaskDecisionIntelligenceEndpoints();
 app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();

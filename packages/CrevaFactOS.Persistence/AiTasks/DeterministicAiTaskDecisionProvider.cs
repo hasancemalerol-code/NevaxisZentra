@@ -448,6 +448,25 @@ public sealed partial class DeterministicAiTaskDecisionProvider : IAiTaskDecisio
                 JsonSerializer.Serialize(new { evidenceType = AiTaskEvidenceTypes.Photo }, JsonOptions)));
         }
 
+        if (string.Equals(task.Category, AiTaskCategories.Maintenance, StringComparison.Ordinal)
+            && string.Equals(task.Priority, AiTaskPriorities.Critical, StringComparison.Ordinal)
+            && (!string.IsNullOrWhiteSpace(task.MachineId)
+                || string.Equals(task.SourceModule, "shift-handover", StringComparison.Ordinal)))
+        {
+            var playbookKey = string.Equals(task.SourceModule, "shift-handover", StringComparison.Ordinal)
+                ? AiTaskPlaybookCategories.ShiftHandoverCritical
+                : AiTaskPlaybookCategories.MachineIncident;
+            actions.Add(new AiTaskDecisionNextActionResult(
+                AiTaskDecisionRecommendationActionTypes.StartPlaybook,
+                "Kritik olay playbook'unu başlat",
+                "Kritik bakım veya vardiya devir görevleri için yapılandırılmış playbook önerilir.",
+                AiTaskDecisionConfidenceBands.High,
+                AiTaskDecisionUrgencyBands.Critical,
+                "playbook-key",
+                playbookKey,
+                JsonSerializer.Serialize(new { playbookKey }, JsonOptions)));
+        }
+
         if (slaRisk is AiTaskDecisionSlaRiskBands.High or AiTaskDecisionSlaRiskBands.Critical)
         {
             actions.Add(new AiTaskDecisionNextActionResult(

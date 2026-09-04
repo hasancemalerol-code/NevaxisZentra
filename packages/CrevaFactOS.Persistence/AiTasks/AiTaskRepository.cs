@@ -47,7 +47,8 @@ public sealed class AiTaskRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskOperationsRepository operationsRepository,
-    IAiTaskClosureEngine closureEngine) : IAiTaskRepository
+    IAiTaskClosureEngine closureEngine,
+    IAiTaskPlaybookOrchestrator? playbookOrchestrator = null) : IAiTaskRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -367,6 +368,13 @@ public sealed class AiTaskRepository(
                     command.Note);
 
                 await dbContext.SaveChangesAsync(ct);
+
+                if (playbookOrchestrator is not null)
+                {
+                    await playbookOrchestrator.NotifyTaskTransitionAsync(
+                        context, task, previousStatus, targetStatus, ct);
+                }
+
                 return AiTaskWriteResult.Success(task.Id, task.Version);
             },
             cancellationToken);

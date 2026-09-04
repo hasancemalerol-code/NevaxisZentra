@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import {
+  BookOpen,
   Plus,
   RefreshCw,
   Sparkles,
@@ -99,6 +100,14 @@ export async function AiTaskListPageContent({
             >
               <Workflow aria-hidden="true" />
               <span>Otomasyon</span>
+            </Link>
+
+            <Link
+              className="ai-task-automation-nav-link"
+              href="/ai-gorevleri/playbooklar"
+            >
+              <BookOpen aria-hidden="true" />
+              <span>Playbooklar</span>
             </Link>
 
             <RefreshButton />

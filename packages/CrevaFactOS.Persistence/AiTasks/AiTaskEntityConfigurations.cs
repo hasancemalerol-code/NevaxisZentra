@@ -59,6 +59,11 @@ internal sealed class AiTaskEntityConfiguration : IEntityTypeConfiguration<AiTas
         entity.Property(t => t.CustomerId).HasColumnName("customer_id").HasMaxLength(100);
         entity.Property(t => t.SourceModule).HasColumnName("source_module").HasMaxLength(100);
         entity.Property(t => t.SourceEntityId).HasColumnName("source_entity_id").HasMaxLength(200);
+        entity.Property(t => t.ParentTaskId).HasColumnName("parent_task_id");
+        entity.Property(t => t.PlaybookRunId).HasColumnName("playbook_run_id");
+        entity.Property(t => t.PlaybookRunStepId).HasColumnName("playbook_run_step_id");
+        entity.Property(t => t.DependencyState).HasColumnName("dependency_state").HasMaxLength(20).IsRequired();
+        entity.Property(t => t.DependencyBlockReason).HasColumnName("dependency_block_reason").HasMaxLength(500);
         entity.Property(t => t.RuleSetVersion).HasColumnName("rule_set_version").HasMaxLength(100).IsRequired();
         entity.Property(t => t.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(128);
         entity.Property(t => t.IdempotencyPayloadFingerprint).HasColumnName("idempotency_payload_fingerprint").HasMaxLength(64);
