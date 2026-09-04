@@ -17,4 +17,7 @@ public static class AiTaskPermissionKeys
     public const string AutomationRead = "ai-task.automation.read";
     public const string AutomationManage = "ai-task.automation.manage";
     public const string AutomationSimulate = "ai-task.automation.simulate";
+    public const string AiRead = "ai-task.ai.read";
+    public const string AiAnalyze = "ai-task.ai.analyze";
+    public const string AiFeedback = "ai-task.ai.feedback";
 }

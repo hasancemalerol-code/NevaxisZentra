@@ -3,7 +3,6 @@ import {
   Bot,
   Database,
   Gauge,
-  Sparkles,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,21 +23,18 @@ import {
   getAiTaskSourceTypeLabel,
 } from "@/features/ai-task-center/presentation/ai-task-source-labels";
 import {
-  getAiTaskTargetSystemDescription,
-  getAiTaskTargetSystemLabel,
-} from "@/features/ai-task-center/presentation/ai-task-target-system-labels";
-import {
   AI_TASK_PRIORITY_TONES,
   AI_TASK_RISK_LEVEL_TONES,
   AI_TASK_STATUS_TONES,
-  getAiTaskActionTypeLabel,
-  getAiTaskApprovalStateLabel,
   getAiTaskCategoryLabel,
   getAiTaskPriorityLabel,
   getAiTaskRiskLevelLabel,
   getAiTaskStatusLabel,
 } from "@/features/ai-task-center/presentation/ai-task-labels";
 import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
+import { AiTaskDetailOverviewAiCardClient } from "@/features/ai-task-center/components/ai-task-detail-overview-ai-card-client";
+import { AiTaskDecisionIntelligencePanelClient } from "@/features/ai-task-center/components/ai-task-decision-intelligence-panel-client";
+import { readAiTaskDecisionWorkspace } from "@/features/ai-task-center/server/ai-task-decision-intelligence-queries";
 import {
   AI_TASK_ESCALATION_STATE_TONES,
   AI_TASK_SLA_STATE_TONES,
@@ -92,7 +88,10 @@ export default async function AiTaskDetailPage({
   params: Promise<PageParams>;
 }>) {
   const { taskId } = await params;
-  const result = await readAiTaskDetail(taskId);
+  const [result, decisionResult] = await Promise.all([
+    readAiTaskDetail(taskId),
+    readAiTaskDecisionWorkspace(taskId),
+  ]);
 
   if (result.status === "failure") {
     if (result.code === "not-found") {
@@ -180,41 +179,31 @@ export default async function AiTaskDetailPage({
                 <p>{task.confidence.explanation}</p>
               </Card>
 
-              <Card className="ai-task-detail-overview__card ai-task-detail-overview__card--ai">
-                <div className="ai-task-detail-overview__heading">
-                  <span>
-                    <Sparkles aria-hidden="true" />
-                    AI değerlendirmesi
-                  </span>
-                  <Badge tone="ai">
-                    {getAiTaskActionTypeLabel(task.recommendation.actionType)}
-                  </Badge>
-                </div>
-                <h3>{task.recommendation.title}</h3>
-                <p>{task.recommendation.description}</p>
-                <dl className="ai-task-detail-overview__facts">
-                  <div>
-                    <dt>Tespit</dt>
-                    <dd>{task.detectedIssue}</dd>
-                  </div>
-                  <div>
-                    <dt>Gerekçe</dt>
-                    <dd>{task.reasoning}</dd>
-                  </div>
-                  <div>
-                    <dt>Onay durumu</dt>
-                    <dd>{getAiTaskApprovalStateLabel(task.approval.state)}</dd>
-                  </div>
-                  <div>
-                    <dt>Hedef sistem</dt>
-                    <dd title={getAiTaskTargetSystemDescription(task.recommendation.targetSystem)}>
-                      {getAiTaskTargetSystemLabel(task.recommendation.targetSystem)}
-                    </dd>
-                  </div>
-                </dl>
-              </Card>
+              <AiTaskDetailOverviewAiCardClient
+                latestAnalysis={
+                  decisionResult.status === "success"
+                    ? decisionResult.workspace.latestAnalysis
+                    : null
+                }
+                task={task}
+              />
             </div>
           </Section>
+
+          {decisionResult.status === "success" ? (
+            <Section
+              description="AI triage, SLA riski, ilişkili görevler ve sonraki aksiyon önerileri."
+              title="Karar desteği"
+            >
+              <AiTaskDecisionIntelligencePanelClient
+                capabilities={decisionResult.capabilities}
+                task={task}
+                taskId={taskId}
+                taskVersion={version}
+                workspace={decisionResult.workspace}
+              />
+            </Section>
+          ) : null}
 
           <AiTaskSourceReferenceSection
             sourceEntityId={sourceEntityId}

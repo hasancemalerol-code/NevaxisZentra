@@ -621,6 +621,22 @@ public static class AiTaskServiceCollectionExtensions
                 serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
 
+        services.AddScoped<IAiTaskDecisionProvider, DeterministicAiTaskDecisionProvider>();
+        services.AddScoped<IAiTaskDecisionIntelligenceRepository>(serviceProvider =>
+        {
+            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            if (dbContext is null)
+            {
+                return new UnavailableAiTaskDecisionIntelligenceRepository();
+            }
+
+            return new AiTaskDecisionIntelligenceRepository(
+                dbContext,
+                serviceProvider.GetRequiredService<TenantDatabaseSession>(),
+                serviceProvider.GetRequiredService<IAiTaskDecisionProvider>(),
+                serviceProvider.GetRequiredService<IAiTaskOperationsRepository>());
+        });
+
         services.AddScoped<IAiTaskRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();

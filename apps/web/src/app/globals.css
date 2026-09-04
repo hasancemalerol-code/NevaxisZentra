@@ -1107,9 +1107,59 @@ table {
 
 .ai-task-detail-overview__heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.ai-task-detail-overview__heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.ai-task-detail-overview__inspect-button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ai-task-detail-overview__inspect-icon--open {
+  transform: rotate(180deg);
+}
+
+.ai-task-detail-overview__inspection {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ai-task-detail-overview__inspection--open {
+  animation: ai-task-inspection-open 160ms ease-out;
+}
+
+.ai-task-detail-overview__facts--meta {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.ai-task-detail-overview__facts--meta dt,
+.ai-task-detail-overview__facts--meta dd {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+@keyframes ai-task-inspection-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ai-task-detail-overview__heading span {
@@ -3285,6 +3335,291 @@ table {
 }
 
 /* AI TASK AUTOMATION END */
+
+/* AI TASK DECISION INTELLIGENCE START */
+
+.ai-task-decision-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ai-task-decision-panel--unavailable {
+  padding: 0.75rem 1rem;
+}
+
+.ai-task-decision-panel__error {
+  color: var(--danger-text);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.ai-task-decision-panel__card {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+}
+
+.ai-task-decision-panel__card--policy {
+  border-color: color-mix(in srgb, var(--border-subtle) 70%, var(--accent-primary) 30%);
+}
+
+.ai-task-decision-panel__card--compact {
+  padding-top: 0.65rem;
+}
+
+.ai-task-decision-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.ai-task-decision-panel__header h3 {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ai-task-decision-panel__header svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.ai-task-decision-panel__subheader {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-task-decision-panel__subheader h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__metrics {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.ai-task-decision-panel__metric span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.ai-task-decision-panel__metric strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ai-task-decision-panel__section-block {
+  margin-top: 0.65rem;
+}
+
+.ai-task-decision-panel__section-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__rationale {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.ai-task-decision-panel__policy-banner {
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-base) 88%, var(--accent-primary) 12%);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__split {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ai-task-decision-panel__compare-column {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+}
+
+.ai-task-decision-panel__compare-rows {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.ai-task-decision-panel__compare-rows div {
+  display: grid;
+  grid-template-columns: minmax(88px, 38%) 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.ai-task-decision-panel__compare-rows dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__compare-rows dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.ai-task-decision-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ai-task-decision-panel__differences {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ai-task-decision-panel__diff,
+.ai-task-decision-panel__concern {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__muted {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.ai-task-decision-panel__actions,
+.ai-task-decision-panel__related-list,
+.ai-task-decision-panel__evidence-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ai-task-decision-panel__action-item,
+.ai-task-decision-panel__related-item {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+}
+
+.ai-task-decision-panel__action-content,
+.ai-task-decision-panel__related-content {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ai-task-decision-panel__action-item strong,
+.ai-task-decision-panel__related-content strong {
+  font-size: 0.8125rem;
+}
+
+.ai-task-decision-panel__action-item p,
+.ai-task-decision-panel__related-reason {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__related-reason span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ai-task-decision-panel__related-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ai-task-decision-panel__related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ai-task-decision-panel__related-link svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.ai-task-decision-panel__action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ai-task-decision-panel__related-item--confirmed {
+  border-color: color-mix(in srgb, var(--border-subtle) 65%, var(--success-text) 35%);
+}
+
+.ai-task-decision-panel__closure {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ai-task-decision-panel__closure-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-task-decision-panel__closure-status > span {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.ai-task-decision-panel__evidence-item {
+  display: grid;
+  gap: 0.2rem;
+}
+
+/* AI TASK DECISION INTELLIGENCE END */
 
 /* AI TASK KPI LOADING START */
 

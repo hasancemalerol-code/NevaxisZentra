@@ -322,6 +322,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskAutomationRule> AiTaskAutomationRules => Set<AiTaskAutomationRule>();
     public DbSet<AiTaskAutomationRuleRevision> AiTaskAutomationRuleRevisions => Set<AiTaskAutomationRuleRevision>();
     public DbSet<AiTaskAutomationExecution> AiTaskAutomationExecutions => Set<AiTaskAutomationExecution>();
+    public DbSet<AiTaskAiAnalysis> AiTaskAiAnalyses => Set<AiTaskAiAnalysis>();
+    public DbSet<AiTaskAiRecommendation> AiTaskAiRecommendations => Set<AiTaskAiRecommendation>();
+    public DbSet<AiTaskRelationship> AiTaskRelationships => Set<AiTaskRelationship>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1732,6 +1735,24 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new AiTaskAutomationExecutionEntityConfiguration());
         modelBuilder.Entity<AiTaskAutomationExecution>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAiAnalysisEntityConfiguration());
+        modelBuilder.Entity<AiTaskAiAnalysis>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskAiRecommendationEntityConfiguration());
+        modelBuilder.Entity<AiTaskAiRecommendation>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskRelationshipEntityConfiguration());
+        modelBuilder.Entity<AiTaskRelationship>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
