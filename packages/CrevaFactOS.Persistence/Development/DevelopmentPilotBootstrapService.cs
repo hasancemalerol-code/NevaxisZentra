@@ -899,6 +899,10 @@ internal sealed class DevelopmentPilotBootstrapService(
             saasIdentityOptions,
             seedTimestampUtc,
             cancellationToken);
+        await DevelopmentPilotSalesDemoAccessSeed.EnsureSalesDemoFullAccessAsync(
+            dbContext,
+            seedTimestampUtc,
+            cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

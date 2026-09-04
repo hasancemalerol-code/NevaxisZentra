@@ -5,7 +5,9 @@ using CrevaFactOS.Persistence.Energy;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.CommercialIntelligence;
+using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasCommercial;
+using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.ShiftAssignment;
 using CrevaFactOS.Persistence.ShiftRisk;
 using CrevaFactOS.Persistence.ShiftWorkforce;
@@ -209,18 +211,37 @@ internal static class CustomerCatalogKeys
         ProductionExecutionPermissionKeys.Complete, ProductionExecutionPermissionKeys.Record,
         QualityPermissionKeys.Read, QualityPermissionKeys.Manage, QualityPermissionKeys.Inspect,
         ExportPermissionKeys.Read, ExportPermissionKeys.Write,
+        ExportPermissionKeys.DocumentManage, ExportPermissionKeys.DocumentVerify,
+        ExportPermissionKeys.PackingManage, ExportPermissionKeys.PackingVerify,
+        ExportPermissionKeys.ShipmentManage, ExportPermissionKeys.BrokerManage,
+        ExportPermissionKeys.BrokerHandoff, ExportPermissionKeys.ComplianceRead,
+        ExportPermissionKeys.ComplianceManage, ExportPermissionKeys.ComplianceVerify,
+        ExportPermissionKeys.CountryResearchRead, ExportPermissionKeys.CountryResearchManage,
+        ExportPermissionKeys.CountryResearchVerify, ExportPermissionKeys.AiRead,
+        ExportPermissionKeys.AiRun, ExportPermissionKeys.AiReview,
         EnergyPermissionKeys.Read, EnergyPermissionKeys.Manage,
         IotPlcPermissionKeys.Read, IotPlcPermissionKeys.Manage,
         OperationalRiskPermissionKeys.Read, OperationalRiskPermissionKeys.Manage,
         CommercialIntelligencePermissionKeys.Read, CommercialIntelligencePermissionKeys.Manage,
         AiTaskPermissionKeys.Read, AiTaskPermissionKeys.Create, AiTaskPermissionKeys.Review,
+        AiTaskPermissionKeys.Assign, AiTaskPermissionKeys.Acknowledge, AiTaskPermissionKeys.Escalate,
+        AiTaskPermissionKeys.Manage, AiTaskPermissionKeys.SlaManage, AiTaskPermissionKeys.EvidenceManage,
+        AiTaskPermissionKeys.ClosureRequest, AiTaskPermissionKeys.ClosureApprove, AiTaskPermissionKeys.Reopen,
+        AiTaskPermissionKeys.AutomationRead, AiTaskPermissionKeys.AutomationManage, AiTaskPermissionKeys.AutomationSimulate,
+        AiTaskPermissionKeys.AiRead, AiTaskPermissionKeys.AiAnalyze, AiTaskPermissionKeys.AiFeedback,
+        AiTaskPermissionKeys.PlaybookRead, AiTaskPermissionKeys.PlaybookManage,
+        AiTaskPermissionKeys.PlaybookRun, AiTaskPermissionKeys.PlaybookOverride,
         TeamsPermissionKeys.Read, TeamsPermissionKeys.Write, TeamsPermissionKeys.Manage,
         MarketRatesPermissionKeys.Read,
         TeamsPermissionKeys.ApprovalsCreate, TeamsPermissionKeys.ApprovalsReview, TeamsPermissionKeys.ApprovalsManage,
         TeamsPermissionKeys.HandoverRead, TeamsPermissionKeys.HandoverCreate, TeamsPermissionKeys.HandoverAcknowledge, TeamsPermissionKeys.HandoverManage,
         TeamsPermissionKeys.DirectRead, TeamsPermissionKeys.DirectWrite, TeamsPermissionKeys.DirectManage,
+        TeamsPermissionKeys.NotificationsRead,
+        ShiftHandoverPermissionKeys.Read, ShiftHandoverPermissionKeys.Manage, ShiftHandoverPermissionKeys.Acknowledge,
         ErpPermissionKeys.Read, ErpPermissionKeys.Manage,
         ErpPermissionKeys.WritebackRequest, ErpPermissionKeys.WritebackApprove, ErpPermissionKeys.WritebackExecute,
         SaasCommercialPermissionKeys.Read,
+        SaasSubscriptionPermissionKeys.Read, SaasSubscriptionPermissionKeys.Manage,
+        SaasBillingPermissionKeys.Read, SaasBillingPermissionKeys.Manage,
     ];
 }
