@@ -122,7 +122,11 @@ public sealed class SingleInstanceManager : IDisposable
     private static bool ActivateExistingWindowByProcessScan()
     {
         var currentProcessId = Environment.ProcessId;
-        var processes = Process.GetProcessesByName("CrevaFactOS.Desktop");
+        var processes = Process.GetProcessesByName("CrevaFactOS");
+        if (processes.Length == 0)
+        {
+            processes = Process.GetProcessesByName("CrevaFactOS.Desktop");
+        }
 
         foreach (var process in processes)
         {

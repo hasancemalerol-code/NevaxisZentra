@@ -1,0 +1,12 @@
+﻿{
+    "shortcut exists":  "PASS",
+    "shortcut target exists":  "PASS",
+    "shortcut target path":  "PASS",
+    "shortcut working directory":  "PASS",
+    "shortcut icon location":  "PASS",
+    "no duplicate shortcuts":  "PASS",
+    "desktop shortcut screenshot":  "PASS",
+    "shortcut launch":  "PASS",
+    "second launch single instance":  "PASS",
+    "close and reopen":  "PASS"
+}

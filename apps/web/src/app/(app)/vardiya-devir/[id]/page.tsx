@@ -91,7 +91,13 @@ export default async function ShiftHandoverDetailPage({
         </div>
 
         {detail.capabilities.canManage && (detail.status === "draft" || detail.status === "ready-for-handover") ? (
-          <form action={addShiftHandoverItemAction.bind(null, detail.id)} className="shift-handover-form-grid" style={{ marginTop: "1rem" }}>
+          <form
+            action={async (formData) => {
+              await addShiftHandoverItemAction(detail.id, formData);
+            }}
+            className="shift-handover-form-grid"
+            style={{ marginTop: "1rem" }}
+          >
             <label>
               Kategori
               <select defaultValue="general" name="category">

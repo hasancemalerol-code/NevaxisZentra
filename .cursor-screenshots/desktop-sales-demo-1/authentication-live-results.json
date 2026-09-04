@@ -1,0 +1,16 @@
+{
+  "web build": "PASS",
+  "web typecheck": "PASS",
+  "/giris": "PASS",
+  "/dashboard": "PASS",
+  "sign-in": "PASS",
+  "MFA": "PASS",
+  "authenticated dashboard": "PASS",
+  "playbook detail": "PASS",
+  "60-second persistence": "PASS",
+  "close/reopen": "PASS",
+  "session restart behavior": "login-required",
+  "dashboard protected diff": 0,
+  "screenshot 20": "PASS",
+  "screenshot 21": "PASS"
+}

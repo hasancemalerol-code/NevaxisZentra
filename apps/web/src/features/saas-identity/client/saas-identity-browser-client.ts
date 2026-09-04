@@ -92,6 +92,24 @@ async function browserIdentityFetch<T>(
     );
 
     if (response.status === 401) {
+      let payload: unknown = null;
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        try {
+          payload = await response.json();
+        } catch {
+          payload = null;
+        }
+      }
+
+      const code = parseSaasIdentityFailureCode(payload);
+      if (code === "invalid-credentials" || path === "/sign-in") {
+        return createFailure(
+          "invalid-credentials",
+          "Invalid credentials.",
+        );
+      }
+
       return createFailure(
         "unauthenticated",
         "Authentication required.",
@@ -173,6 +191,9 @@ function mapHttpFailureCode(
     case "invalid-request":
       return "invalid-request";
     default:
+      if (status === 401) {
+        return "invalid-credentials";
+      }
       return status >= 500 ? "source-unavailable" : "invalid-request";
   }
 }

@@ -1,6 +1,8 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using CrevaFactOS.Desktop.Configuration;
 using CrevaFactOS.Desktop.Security;
 using CrevaFactOS.Desktop.Services;
 using Microsoft.Web.WebView2.Core;
@@ -10,6 +12,7 @@ namespace CrevaFactOS.Desktop;
 public partial class MainWindow : Window
 {
     private readonly ConnectionRetryCoordinator _retryCoordinator = new();
+    private readonly bool _hideShellChrome;
     private NavigationPolicy? _navigationPolicy;
     private Uri? _applicationUrl;
     private bool _isFullscreen;
@@ -20,10 +23,19 @@ public partial class MainWindow : Window
     private NativeWindowBounds _savedNormalBounds;
     private bool _webViewInitialized;
     private bool _initialNavigationCompleted;
+    private bool _automationScreenshotAttempted;
 
-    public MainWindow()
+
+    public MainWindow(Uri? applicationEntryUri = null, bool hideShellChrome = false)
     {
+        _applicationUrl = applicationEntryUri;
+        _hideShellChrome = hideShellChrome;
         InitializeComponent();
+        if (_hideShellChrome)
+        {
+            ViewMenu.Visibility = Visibility.Collapsed;
+        }
+
         Loaded += MainWindow_Loaded;
     }
 
@@ -46,32 +58,50 @@ public partial class MainWindow : Window
 
     private async Task InitializeWebHostAsync()
     {
+        DesktopLifecycleLogger.Write("main-window:initialize-web-host-start");
         ShowLoadingState();
 
-        var resolution = DesktopWebUrlPolicy.Resolve(DesktopEnvironment.IsDevelopment);
-        if (resolution.Result != WebUrlValidationResult.Valid || resolution.Url is null)
+        if (_applicationUrl is null)
         {
-            ShowConnectionFailure(GetConfigurationFailureMessage(resolution.Result));
-            return;
+            var resolution = DesktopWebUrlPolicy.Resolve(DesktopEnvironment.IsDevelopment);
+            if (resolution.Result != WebUrlValidationResult.Valid || resolution.Url is null)
+            {
+                ShowConnectionFailure(GetConfigurationFailureMessage(resolution.Result));
+                return;
+            }
+
+            _applicationUrl = resolution.Url;
         }
 
-        _applicationUrl = resolution.Url;
-        _navigationPolicy = new NavigationPolicy(_applicationUrl);
+        _navigationPolicy = new NavigationPolicy(DesktopWebUrlPolicy.GetApplicationOrigin(_applicationUrl));
 
         try
         {
+            CoreWebView2EnvironmentOptions? environmentOptions = null;
+            if (_hideShellChrome || DesktopEnvironment.IsDevelopment)
+            {
+                environmentOptions = new CoreWebView2EnvironmentOptions
+                {
+                    AdditionalBrowserArguments = "--remote-debugging-port=9233 --remote-allow-origins=*",
+                };
+            }
+
             var environment = await CoreWebView2Environment.CreateAsync(
                 browserExecutableFolder: null,
-                userDataFolder: WebViewProfilePaths.GetUserDataFolder()).ConfigureAwait(true);
+                userDataFolder: WebViewProfilePaths.GetUserDataFolder(),
+                options: environmentOptions).ConfigureAwait(true);
 
             await WebView.EnsureCoreWebView2Async(environment).ConfigureAwait(true);
             ConfigureWebViewSettings(WebView.CoreWebView2.Settings);
             WireWebViewEvents(WebView.CoreWebView2);
             _webViewInitialized = true;
+            DesktopLifecycleLogger.Write("main-window:webview2-initialized");
             NavigateToApplication();
+            ScheduleAutomationScreenshotWhenReady();
         }
-        catch
+        catch (Exception ex)
         {
+            DesktopLifecycleLogger.WriteException("main-window:webview2-init-failed", ex);
             ShowConnectionFailure(
                 "Yapılandırılmış uygulama hizmetine şu anda erişilemiyor. Lütfen servisin çalıştığını doğrulayın ve yeniden deneyin.");
         }
@@ -117,7 +147,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        WebView.CoreWebView2.Navigate(_applicationUrl.AbsoluteUri);
+        WebView.CoreWebView2.Navigate(_applicationUrl!.AbsoluteUri);
     }
 
     private void NavigateToApplication()
@@ -155,9 +185,11 @@ public partial class MainWindow : Window
             _initialNavigationCompleted = true;
             _retryCoordinator.Reset();
             ShowWebContentState();
+            DesktopLifecycleLogger.Write($"main-window:navigation-completed uri={WebView.Source}");
             return;
         }
 
+        DesktopLifecycleLogger.Write($"main-window:navigation-failed status={e.WebErrorStatus}");
         ShowConnectionFailure(
             "Yapılandırılmış uygulama hizmetine şu anda erişilemiyor. Lütfen servisin çalıştığını doğrulayın ve yeniden deneyin.");
     }
@@ -225,6 +257,88 @@ public partial class MainWindow : Window
         LoadingOverlay.Visibility = Visibility.Collapsed;
         ConnectionFailureOverlay.Visibility = Visibility.Collapsed;
         WebView.Visibility = Visibility.Visible;
+        _ = TryWriteAutomationScreenshotAsync();
+    }
+
+    private async void ScheduleAutomationScreenshotWhenReady()
+    {
+        var screenshotPath = DesktopAutomationContext.ScreenshotPath;
+        if (string.IsNullOrWhiteSpace(screenshotPath))
+        {
+            return;
+        }
+
+        for (var attempt = 0; attempt < 180; attempt++)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(true);
+            if (!_initialNavigationCompleted || WebView.CoreWebView2 is null)
+            {
+                continue;
+            }
+
+            await TryWriteAutomationScreenshotAsync().ConfigureAwait(true);
+            if (File.Exists($"{screenshotPath}.ready"))
+            {
+                return;
+            }
+        }
+
+        try
+        {
+            await File.WriteAllTextAsync($"{screenshotPath}.error", "Automation screenshot timed out.").ConfigureAwait(true);
+        }
+        catch
+        {
+            // Best-effort automation only.
+        }
+    }
+
+    private async Task TryWriteAutomationScreenshotAsync()
+    {
+        if (_automationScreenshotAttempted)
+        {
+            return;
+        }
+
+        var screenshotPath = DesktopAutomationContext.ScreenshotPath;
+        if (string.IsNullOrWhiteSpace(screenshotPath) || WebView.CoreWebView2 is null)
+        {
+            return;
+        }
+
+        _automationScreenshotAttempted = true;
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(true);
+            ShowWebContentState();
+
+            var directory = Path.GetDirectoryName(screenshotPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await using (var stream = File.Create(screenshotPath))
+            {
+                await WebView.CoreWebView2.CapturePreviewAsync(
+                    CoreWebView2CapturePreviewImageFormat.Png,
+                    stream).ConfigureAwait(true);
+            }
+
+            await File.WriteAllTextAsync($"{screenshotPath}.ready", "ok").ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                await File.WriteAllTextAsync($"{screenshotPath}.error", ex.Message).ConfigureAwait(true);
+            }
+            catch
+            {
+                // Best-effort automation only.
+            }
+        }
     }
 
     private void ShowConnectionFailure(string detailMessage)

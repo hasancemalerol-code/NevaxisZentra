@@ -43,7 +43,12 @@ export default async function ShiftHandoverListPage() {
 
       {list.capabilities.canManage ? (
         <Section title="Yeni Devir Oluştur">
-          <form action={createShiftHandoverAction} className="shift-handover-form-grid">
+          <form
+            action={async (formData) => {
+              await createShiftHandoverAction(formData);
+            }}
+            className="shift-handover-form-grid"
+          >
             <label>
               Vardiya Tarihi
               <input name="shiftDate" required type="date" />

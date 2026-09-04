@@ -1,0 +1,21 @@
+﻿{
+    "shortcut exists":  "PASS",
+    "web port cleared before cold start":  "PASS",
+    "web port 3001 listening":  "PASS",
+    "web HTTP readiness /giris":  "PASS",
+    "web listener pid":  "PASS",
+    "main window visible":  "PASS",
+    "API readiness":  "PASS",
+    "close reopen main window":  "PASS",
+    "close reopen single listener":  "PASS",
+    "close reopen HTTP readiness":  "PASS",
+    "failure window visible":  "PASS",
+    "runtime root leak diagnostics screenshot":  "PASS",
+    "retry button click":  "PASS",
+    "retry recovery main window":  "PASS",
+    "web startup elapsed seconds":  "19.6",
+    "web cold start port":  "3001",
+    "web readiness url":  "http://127.0.0.1:3001/giris",
+    "runtime root environment clean":  "PASS",
+    "resolved repository root":  "C:\\Projects\\CrevaFactOS"
+}

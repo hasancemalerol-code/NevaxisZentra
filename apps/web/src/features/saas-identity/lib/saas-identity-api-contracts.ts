@@ -105,6 +105,11 @@ export function parseSaasIdentityFailureCode(
     return code;
   }
 
+  const title = (payload as Record<string, unknown>).title;
+  if (typeof title === "string" && title.toLowerCase().includes("invalid credentials")) {
+    return "invalid-credentials";
+  }
+
   const extensions = (payload as Record<string, unknown>).extensions;
   if (extensions && typeof extensions === "object") {
     const extensionCode = (extensions as Record<string, unknown>).code;

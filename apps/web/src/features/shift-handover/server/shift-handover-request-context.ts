@@ -47,7 +47,7 @@ export async function resolveShiftHandoverRequestContext(): Promise<ShiftHandove
     context: {
       mode: "development",
       facilityId: developmentContext.context.facilityId,
-      headers: developmentContext.context.headers,
+      headers: developmentContext.context.requestHeaders,
     },
   };
 }

@@ -1,0 +1,14 @@
+﻿{
+    "desktop build":  "PASS",
+    "startup screenshot":  "PASS",
+    "single instance":  "PASS",
+    "main window dashboard":  "PASS",
+    "API readiness":  "PASS",
+    "web readiness":  "PASS",
+    "ai task center route":  "PASS",
+    "production route":  "PASS",
+    "playbooks route":  "PASS",
+    "playbook run detail route":  "PASS",
+    "restart":  "PASS",
+    "startup failure screenshot":  "PASS"
+}
