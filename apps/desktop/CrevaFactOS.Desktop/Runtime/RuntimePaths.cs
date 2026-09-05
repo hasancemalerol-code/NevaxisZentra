@@ -195,6 +195,9 @@ public static class RuntimePaths
     public static string GetEnvironmentFilePath(string repositoryRoot) =>
         Path.Combine(repositoryRoot, "infrastructure", ".env");
 
+    public static string GetLocalSecretsEnvironmentFilePath(string repositoryRoot) =>
+        Path.Combine(repositoryRoot, "infrastructure", ".env.local");
+
     public static string GetWebEnvironmentFilePath(string repositoryRoot) =>
         Path.Combine(repositoryRoot, "apps", "web", ".env.local");
 

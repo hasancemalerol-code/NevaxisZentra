@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 import { createHmac } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
+import {
+  applyDevelopmentSaasIdentitySecrets,
+  requireDevelopmentSaasIdentitySecret,
+  resolveRepositoryRoot,
+} from "../../../scripts/shared/load-development-saas-identity-secrets.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
@@ -39,34 +44,8 @@ function assert(label, ok, detail = "") {
   console.log(`PASS ${label}${detail ? ` - ${detail}` : ""}`);
 }
 
-function bootstrapSecrets() {
-  const home = process.env.USERPROFILE || process.env.HOME || "";
-  const ids = [
-    "a7824c6f-6aa8-498f-895d-7f9b31bab8e3",
-    "85d2e353-dc82-41df-ae90-9baa4397ee63",
-    "0e3b0257-2b6c-4a42-81dc-cceb6078d79f",
-    "6aa3a2aa-05da-4f17-9e21-8f4415d6c3f8",
-    "e4795037-6822-4158-86cc-66f2bbb7cc33",
-    "97f4a247-01a6-4c89-844a-460d8bcd8197",
-  ];
-  let text = "";
-  for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts", id, `${id}.jsonl`);
-    if (existsSync(p)) text += readFileSync(p, "utf8");
-  }
-  for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret"]) {
-    if (!process.env[key]) {
-      const m = text.match(new RegExp(`${key}='([^']+)'`));
-      if (m?.[1]) process.env[key] = m[1];
-    }
-  }
-}
-
 function requireEnv(name) {
-  bootstrapSecrets();
-  const value = process.env[name];
-  if (!value) fail(`Missing required environment variable ${name}`);
-  return value;
+  return requireDevelopmentSaasIdentitySecret(name, ROOT);
 }
 
 function generateTotp(secret, counterOffset = 0) {
@@ -184,7 +163,7 @@ async function probeBrowserLogin(password) {
 }
 
 async function main() {
-  bootstrapSecrets();
+  applyDevelopmentSaasIdentitySecrets(ROOT);
   const ownerPassword = requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword");
   const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 

@@ -8,14 +8,14 @@ namespace CrevaFactOS.Desktop.Runtime;
 public static class RuntimeIdentityReadinessProbe
 {
     private const string SignInProbeBody =
-        """{"organizationContext":"__desktop_probe__","email":"probe@invalid.local","password":"__probe__","deviceLabel":"desktop-probe"}""";
+        """{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}""";
 
     public static async Task<bool> IsApiIdentityReachableAsync(
         Uri apiBaseUri,
         CancellationToken cancellationToken = default)
     {
         var signInUri = new Uri(apiBaseUri, "/api/identity/sign-in");
-        return await IsIdentitySignInEndpointReachableAsync(signInUri, cancellationToken)
+        return await IsDevelopmentPilotIdentitySignInHealthyAsync(signInUri, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -24,11 +24,11 @@ public static class RuntimeIdentityReadinessProbe
         CancellationToken cancellationToken = default)
     {
         var signInUri = new Uri(webOriginUri, "/api/identity/sign-in");
-        return await IsIdentitySignInEndpointReachableAsync(signInUri, cancellationToken)
+        return await IsDevelopmentPilotIdentitySignInHealthyAsync(signInUri, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    private static async Task<bool> IsIdentitySignInEndpointReachableAsync(
+    private static async Task<bool> IsDevelopmentPilotIdentitySignInHealthyAsync(
         Uri signInUri,
         CancellationToken cancellationToken)
     {
@@ -51,6 +51,11 @@ public static class RuntimeIdentityReadinessProbe
                 return false;
             }
 
+            if (response.StatusCode != HttpStatusCode.Unauthorized)
+            {
+                return false;
+            }
+
             var contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;
             if (!contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
             {
@@ -66,7 +71,21 @@ public static class RuntimeIdentityReadinessProbe
             try
             {
                 using var document = JsonDocument.Parse(body);
-                return document.RootElement.ValueKind == JsonValueKind.Object;
+                if (document.RootElement.ValueKind != JsonValueKind.Object)
+                {
+                    return false;
+                }
+
+                if (!document.RootElement.TryGetProperty("title", out var titleElement) ||
+                    titleElement.ValueKind != JsonValueKind.String)
+                {
+                    return false;
+                }
+
+                return string.Equals(
+                    titleElement.GetString(),
+                    "Invalid credentials.",
+                    StringComparison.Ordinal);
             }
             catch (JsonException)
             {

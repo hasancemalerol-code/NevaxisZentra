@@ -35,6 +35,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         ReportStatus("Sistem hazırlanıyor");
         ImportEnvironmentFile(RuntimePaths.GetEnvironmentFilePath(_repositoryRoot));
+        ImportEnvironmentFile(RuntimePaths.GetLocalSecretsEnvironmentFilePath(_repositoryRoot));
 
         if (options.ManageInfrastructure)
         {
@@ -341,6 +342,9 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 RuntimePaths.GetEnvironmentFilePath(repositoryRoot));
             RuntimePaths.MergeEnvironmentFile(
                 environment,
+                RuntimePaths.GetLocalSecretsEnvironmentFilePath(repositoryRoot));
+            RuntimePaths.MergeEnvironmentFile(
+                environment,
                 RuntimePaths.GetWebEnvironmentFilePath(repositoryRoot));
         }
 
@@ -367,6 +371,10 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             RuntimePaths.MergeEnvironmentFile(
                 environment,
                 RuntimePaths.GetEnvironmentFilePath(repositoryRoot),
+                overwrite: true);
+            RuntimePaths.MergeEnvironmentFile(
+                environment,
+                RuntimePaths.GetLocalSecretsEnvironmentFilePath(repositoryRoot),
                 overwrite: true);
         }
 

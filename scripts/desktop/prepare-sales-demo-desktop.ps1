@@ -67,6 +67,17 @@ if (-not $SkipBootstrap) {
     Assert-Command docker
 }
 
+$ensureSecrets = Join-Path $RepositoryRoot "scripts\desktop\ensure-development-saas-identity-secrets.ps1"
+if (Test-Path $ensureSecrets) {
+    Write-Host "Verifying canonical Development Pilot credentials (no password mutation)..."
+    & $ensureSecrets -RepositoryRoot $RepositoryRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "Development Pilot credential readiness check failed."
+    }
+} else {
+    Write-Warning "Credential readiness script missing: $ensureSecrets"
+}
+
 if (-not $SkipBootstrap) {
     if (-not (Test-Path $bootstrapScript)) {
         throw "Sales-demo bootstrap script missing: $bootstrapScript"

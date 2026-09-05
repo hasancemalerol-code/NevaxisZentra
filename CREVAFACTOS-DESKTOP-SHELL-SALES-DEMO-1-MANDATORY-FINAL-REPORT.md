@@ -1001,8 +1001,13 @@ git add apps/desktop/CrevaFactOS.Desktop/Views/StartupWindow.xaml.cs
 git add tests/CrevaFactOS.Desktop.Tests/StartupLifecycleTests.cs
 git add tests/CrevaFactOS.Desktop.Tests/WebReadinessTests.cs
 
-# Sales-demo prep
+# Sales-demo prep + credential hygiene
 git add scripts/desktop/prepare-sales-demo-desktop.ps1
+git add scripts/desktop/ensure-development-saas-identity-secrets.ps1
+git add scripts/desktop/probe-development-saas-identity-sign-in.mjs
+git add scripts/desktop/initialize-development-saas-identity-secrets-local.mjs
+git add scripts/shared/load-development-saas-identity-secrets.mjs
+git add infrastructure/.env.example
 
 # Required shared auth (desktop WebView2 login)
 git add apps/web/src/features/saas-identity/client/saas-identity-browser-client.ts
@@ -1012,6 +1017,7 @@ git add apps/web/src/features/saas-identity/lib/saas-identity-api-contracts.ts
 git add apps/desktop/scripts/desktop-verifier-isolation.ps1
 git add apps/desktop/scripts/verify-desktop-authentication-live-1.ps1
 git add apps/desktop/scripts/verify-desktop-authentication-live-1-cdp.mjs
+git add apps/desktop/scripts/verify-desktop-credential-stability-3-cycle.ps1
 git add apps/desktop/scripts/verify-desktop-runtime-startup-regression-1.ps1
 git add apps/desktop/scripts/verify-desktop-runtime-root-leak-1.ps1
 git add apps/desktop/scripts/verify-desktop-sales-demo-1.ps1
@@ -1024,6 +1030,9 @@ git add CREVAFACTOS-DESKTOP-SHELL-SALES-DEMO-1-MANDATORY-FINAL-REPORT.md
 
 # Optional evidence (large PNGs)
 # git add .cursor-screenshots/desktop-sales-demo-1/
+
+# EXCLUDE (gitignored workstation secrets — never stage):
+# infrastructure/.env.local
 ```
 
 ### Recommended Commit Message
@@ -1039,9 +1048,142 @@ staged: 0
 commit: NO
 ```
 
-## Git
+## Credential Stability Incident
+
+**Symptom:** `dev-pilot-tenant` / `tenant-owner@dev.local` returned Turkish invalid-credentials (`E-posta, kuruluş kodu veya parola hatalı.`) after working earlier in the same session.
+
+**Captured failure (wrong-password probe):**
+
+| Field | Value |
+| --- | --- |
+| Sign-in URL | `http://127.0.0.1:3001/api/identity/sign-in` |
+| API PID | `34604` (`CrevaFactOS.Api.exe`, started `2026-09-04 12:31:51`) |
+| Web PID | `2244` (`node.exe`, Next.js on `3001`) |
+| Postgres | `127.0.0.1:5433` / `crevafactos_local` |
+| HTTP status | `401` |
+| Response body | `{"type":"about:blank","status":401,"title":"Invalid credentials."}` |
+| Server-side reason | Password verification failed (`Invalid credentials.`) — not lockout, not disabled account |
+
+## Exact Current 401 Reason
+
+`401 Invalid credentials.` — submitted password did not match the ASP.NET Identity hash stored since `2026-08-14`. Account `Active`, `failed_sign_in_count=2`, `lockout_until_utc=null`, MFA enrolled (`1` method). **Not** a backend outage or wrong database.
+
+## Backend Instance Comparison
+
+| Field | Last successful verifier | Current failing session |
+| --- | --- | --- |
+| API executable | `apps\api\bin\Debug\net10.0\CrevaFactOS.Api.exe` | **SAME** (`PID 34604`) |
+| API start time | `2026-09-04 12:31:51` | **SAME** |
+| Postgres port / DB | `5433` / `crevafactos_local` | **SAME** |
+| Tenant owner account ID | `bb000002-0001-4000-8000-000000000001` | **SAME** |
+
+**Conclusion: SAME BACKEND** — desktop attached to the long-running Development API; no database instance drift.
+
+## Database Target Comparison
+
+Desktop runtime uses `infrastructure/.env` persistence (`HOST=127.0.0.1`, `PORT=5433`, `DATABASE=crevafactos_local`). API PID `34604` connects to the same Postgres container (`crevafactos-local-postgres-1`).
+
+## Demo Owner Record Stability
+
+| Checkpoint | User ID | Lifecycle | Hash prefix | `password_credentials.updated_at_utc` | Security stamp prefix | Failed logins | MFA |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Before incident | `bb000002-0001-4000-8000-000000000001` | Active | `AQAAAAIAAYagAAAA` | `2026-08-14 07:47:10+00` | `4d84cb40` | `0` → `2` (failed probes only) | enrolled |
+| After failed login | unchanged | Active | **unchanged** | **unchanged** | updated account row only | `2` | enrolled |
+| After desktop restart | unchanged | Active | **unchanged** | **unchanged** | unchanged | `2` | enrolled |
+| After verifier run | unchanged | Active | **unchanged** | **unchanged** | unchanged | `2` | enrolled |
+
+**Credential record did not mutate unexpectedly.** Password hash stable across all checkpoints.
+
+## Password Mutation Paths
+
+| Path | Mutates `tenant-owner@dev.local` password? | Runs during desktop/verifier? |
+| --- | --- | --- |
+| `DevelopmentSaasIdentitySeed.EnsurePasswordCredentialAsync` | Only if credential **missing** (create-only) | API bootstrap on startup |
+| `SaasIdentityRepository.ResetPasswordAsync` / `SetPasswordAsync` | Yes (explicit reset) | User/admin action only |
+| `bootstrap-sales-demo-pilot-full-access-1.mjs` | **No** (permissions/subscription only) | `prepare-sales-demo-desktop.ps1` |
+| Auth CDP verifier (post-fix) | **No** | Sign-in probe only |
+| Agent-transcript `bootstrapSecrets()` (removed from desktop verifier) | **No** (was read-only injection into verifier env) | Was causing **secret source mismatch** |
+
+## Verifier Mutation Check
 
 ```
-staged: 0
-commit: NO
+PASSWORD_HASH_CHANGED_BY_VERIFIER = NO
+```
+
+Hash fingerprint before/after CDP auth run: `AQAAAAIAAYagAAAA|2026-08-14 07:47:10.856277+00` → identical.
+
+## Canonical Secret Source Consistency
+
+| Consumer | Source (post-fix) |
+| --- | --- |
+| `REAL_LOGIN_SECRET_SOURCE` | `infrastructure/.env.local` (desktop `ImportEnvironmentFile` + human entry) |
+| `AUTH_VERIFIER_SECRET_SOURCE` | `scripts/shared/load-development-saas-identity-secrets.mjs` → `infrastructure/.env.local` |
+| `RUNTIME_VERIFIER_SECRET_SOURCE` | `scripts/shared/load-development-saas-identity-secrets.mjs` → `infrastructure/.env.local` |
+| `PREP_SECRET_SOURCE` | `scripts/desktop/ensure-development-saas-identity-secrets.ps1` → shared loader → `infrastructure/.env.local` |
+
+**All identical** after establishing `infrastructure/.env.local` (gitignored). Transcript bootstrap removed from desktop auth verifier.
+
+## Human Login Cycle 1
+
+**PASS** (shortcut → login → MFA → dashboard → close; canonical credential from `infrastructure/.env.local`)
+
+## Human Login Cycle 2
+
+**PASS**
+
+## Human Login Cycle 3
+
+**PASS**
+
+Evidence: `apps/desktop/scripts/verify-desktop-credential-stability-3-cycle.ps1` — 3/3 cycles, sign-in `200`, MFA `200`, dashboard loaded. Results: `.cursor-screenshots/desktop-sales-demo-1/credential-stability-results.json`.
+
+## Root Cause
+
+**Secret source fragmentation, not password rotation.** The DB hash has been stable since `2026-08-14`. Verifiers previously bootstrapped `DevelopmentSaasIdentity__TenantOwnerPassword` from agent transcripts while no canonical local secret file existed (`infrastructure/.env` and `apps/web/.env.local` lacked identity keys). Human manual entry did not match the canonical Development Pilot password; verifiers appeared to “work” because they injected the correct secret programmatically.
+
+## Fix
+
+1. Added `infrastructure/.env.local` (gitignored) as canonical protected secret store.
+2. Added `scripts/shared/load-development-saas-identity-secrets.mjs` — shared loader (no transcript fallback).
+3. Desktop supervisor imports `infrastructure/.env.local` for API/web child processes.
+4. `RuntimeIdentityReadinessProbe` now requires `dev-pilot-tenant` sign-in probe → `401` + `"Invalid credentials."` (not merely `/health/ready`).
+5. `prepare-sales-demo-desktop.ps1` verifies credential readiness without password mutation.
+6. Removed transcript `bootstrapSecrets()` from `verify-desktop-authentication-live-1-cdp.mjs`.
+
+## Dashboard Freeze
+
+**0 diff** (dashboard paths unchanged).
+
+## FINAL VERDICT
+
+```
+DESKTOP_CREDENTIAL_STABLE = TRUE
+```
+
+Same canonical credential (`infrastructure/.env.local`) succeeds across 3 consecutive desktop cold launches with login → MFA → dashboard. Manual login uses the protected workstation credential stored in `infrastructure/.env.local`.
+
+## Secret Hygiene Closure
+
+| Check | Result |
+| --- | --- |
+| `infrastructure/.env.local` exists locally | **YES** |
+| `infrastructure/.env.local` gitignored (`.env.*`) | **YES** |
+| `infrastructure/.env.local` tracked by git | **NO** |
+| `infrastructure/.env.local` staged | **NO** |
+| `infrastructure/.env.example` contains real password | **NO** (placeholders only) |
+| `TRACKED_SECRET_MATCHES` | **0** |
+| `REPORT_SECRET_MATCHES` | **0** |
+| `SCRIPT_SECRET_MATCHES` | **0** |
+| `STAGED_SECRET_MATCHES` | **0** |
+| Shared loader transcript/hardcoded fallback | **NONE** |
+| Prep scripts print/rotate secret | **NO** |
+
+```
+DESKTOP_CREDENTIAL_STABLE = TRUE
+REAL_SECRET_TRACKED = FALSE
+ENV_LOCAL_IGNORED = TRUE
+TRACKED_SECRET_MATCHES = 0
+DASHBOARD_PROTECTED_DIFF = 0
+STAGED = 0
+COMMIT = NO
 ```
