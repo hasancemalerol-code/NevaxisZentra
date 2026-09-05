@@ -17,7 +17,7 @@ import {
   ShiftHandoverFollowUpTasks,
   ShiftHandoverLifecycleActions,
 } from "@/features/shift-handover/components/shift-handover-actions";
-import { addShiftHandoverItemAction } from "@/features/shift-handover/server/shift-handover-actions";
+import { ShiftHandoverAddItemForm } from "@/features/shift-handover/components/shift-handover-add-item-form";
 import { readShiftHandoverDetail } from "@/features/shift-handover/server/shift-handover-queries";
 import "@/features/shift-handover/components/shift-handover.css";
 
@@ -91,42 +91,7 @@ export default async function ShiftHandoverDetailPage({
         </div>
 
         {detail.capabilities.canManage && (detail.status === "draft" || detail.status === "ready-for-handover") ? (
-          <form
-            action={async (formData) => {
-              await addShiftHandoverItemAction(detail.id, formData);
-            }}
-            className="shift-handover-form-grid"
-            style={{ marginTop: "1rem" }}
-          >
-            <label>
-              Kategori
-              <select defaultValue="general" name="category">
-                {Object.entries(SHIFT_HANDOVER_ITEM_CATEGORIES).map(([value, text]) => (
-                  <option key={value} value={value}>{text}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Başlık
-              <input name="title" required />
-            </label>
-            <label>
-              Açıklama
-              <textarea name="description" rows={3} />
-            </label>
-            <label>
-              Öncelik
-              <select defaultValue="medium" name="severity">
-                {Object.entries(SHIFT_HANDOVER_ITEM_SEVERITIES).map(([value, text]) => (
-                  <option key={value} value={value}>{text}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <input name="requiresFollowUp" type="checkbox" /> Takip gerektirir
-            </label>
-            <Button type="submit">Madde Ekle</Button>
-          </form>
+          <ShiftHandoverAddItemForm handoverId={detail.id} />
         ) : null}
       </Section>
 

@@ -1,0 +1,572 @@
+{
+  "package": "CREVAFACTOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
+  "baseline": "CREVAFACTOS-SALES-DEMO-ALL-MODULES-READINESS-1",
+  "generatedAt": "2026-09-05T00:37:58.343Z",
+  "canonicalRouteCount": 46,
+  "representativeScreenshots": {
+    "01-dashboard.png": "/dashboard",
+    "02-ai-gorev-merkezi.png": "/",
+    "03-playbook-run-detail.png": "/ai-gorevleri/playbooklar?gorunum=calisan",
+    "04-uretim.png": "/uretim",
+    "05-makineler.png": "/makineler",
+    "06-bakim.png": "/bakim",
+    "07-kalite.png": "/kalite",
+    "08-enerji.png": "/enerji",
+    "09-teams.png": "/teams",
+    "10-operasyonel-riskler.png": "/operasyonel-riskler",
+    "11-ticari-zeka.png": "/ticari-zeka/karlilik-yonetim-merkezi",
+    "12-erp-entegrasyonlari.png": "/erp-entegrasyonlari/baglanti",
+    "13-raporlar.png": "/raporlar",
+    "14-ayarlar.png": "/ayarlar"
+  },
+  "salesCriticalFlows": [
+    {
+      "name": "AI Görev Merkezi task surface",
+      "route": "/"
+    },
+    {
+      "name": "Playbooklar library",
+      "route": "/ai-gorevleri/playbooklar"
+    },
+    {
+      "name": "Playbook Çalışan Akışlar",
+      "route": "/ai-gorevleri/playbooklar?gorunum=calisan"
+    },
+    {
+      "name": "Production story",
+      "route": "/uretim"
+    },
+    {
+      "name": "Machines story",
+      "route": "/makineler"
+    },
+    {
+      "name": "Maintenance story",
+      "route": "/bakim"
+    },
+    {
+      "name": "Quality story",
+      "route": "/kalite"
+    },
+    {
+      "name": "Energy story",
+      "route": "/enerji"
+    },
+    {
+      "name": "Commercial intelligence hub",
+      "route": "/ticari-zeka/karlilik-yonetim-merkezi"
+    },
+    {
+      "name": "ERP connection",
+      "route": "/erp-entegrasyonlari/baglanti"
+    }
+  ],
+  "routes": [
+    {
+      "route": "/",
+      "module": "AI Görev Merkezi",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.ai-task-center",
+      "validationLevel": "full",
+      "salesCritical": true,
+      "notes": ""
+    },
+    {
+      "route": "/dashboard",
+      "module": "Dashboard / Operasyon Merkezi",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.dashboard",
+      "validationLevel": "full",
+      "salesCritical": true,
+      "notes": ""
+    },
+    {
+      "route": "/operasyon/yonetim-merkezi",
+      "module": "Operasyon Yönetim Merkezi",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.production",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/teams",
+      "module": "CrevaFactOS Teams",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.teams",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/siparisler",
+      "module": "Siparişler",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.orders",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/planlama",
+      "module": "Planlama",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.planning",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/uretim",
+      "module": "Üretim",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.production",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ihracat",
+      "module": "İhracat",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.export",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/vardiyalar",
+      "module": "Vardiyalar",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "shift-workforce.read",
+      "subscriptionModule": "module.shift-workforce",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/vardiya-devir",
+      "module": "Vardiya Devir Teslimi",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "shift-handover.read",
+      "subscriptionModule": "module.shift-workforce",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/proses-oee",
+      "module": "Proses & OEE",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "process-oee.read",
+      "subscriptionModule": "module.process-oee",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/makineler",
+      "module": "Makineler",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "edge.read",
+      "subscriptionModule": "module.connected-machines",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/kaliplar",
+      "module": "Kalıplar",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "mold.read",
+      "subscriptionModule": "module.mold",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/malzemeler",
+      "module": "Malzemeler",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "material.read",
+      "subscriptionModule": "module.material",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/stok-ve-depo/malzeme-riskleri",
+      "module": "Malzeme Riskleri",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "material.read",
+      "subscriptionModule": "module.material",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/bakim",
+      "module": "Bakım",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "maintenance.read",
+      "subscriptionModule": "module.maintenance",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/kalite",
+      "module": "Kalite Kontrol",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.quality",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/enerji",
+      "module": "Enerji",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "energy.read",
+      "subscriptionModule": "module.energy",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/iot-plc",
+      "module": "IoT & PLC",
+      "navigationGroup": "Fabrika operasyonları",
+      "expectedVisible": true,
+      "requiredPermission": "iot-plc.read",
+      "subscriptionModule": "module.iot-plc",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/operasyonel-riskler",
+      "module": "Operasyonel Riskler",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": "operational-risk.read",
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/malzeme-uygunlugu",
+      "module": "Malzeme Uygunluğu",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/tedarik",
+      "module": "Tedarik Riskleri",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/siparis-termin",
+      "module": "Sipariş & Termin Riskleri",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/maliyet-sapmalari",
+      "module": "Maliyet Sapmaları",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/kapasite",
+      "module": "Kapasite Riskleri",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/riskler/kalite",
+      "module": "Kalite Riskleri",
+      "navigationGroup": "Operasyonel riskler",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.operational-risk",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/satin-alma-fiyat-analizi",
+      "module": "Satın Alma Fiyat Analizi",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/tedarikci-karsilastirmasi",
+      "module": "Tedarikçi Karşılaştırması",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/satis-fiyat-analizi",
+      "module": "Satış Fiyat Analizi",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/urun-karliligi",
+      "module": "Ürün Kârlılığı",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/musteri-karliligi",
+      "module": "Müşteri Kârlılığı",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/malzeme-ve-maliyet-karliligi",
+      "module": "Malzeme ve Maliyet Kârlılığı",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/karlilik-uyarilari",
+      "module": "Kârlılık Uyarıları",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/fiyat-koruma-ve-onay",
+      "module": "Fiyat Koruma ve Onay",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/karlilik-yonetim-merkezi",
+      "module": "Kârlılık Yönetim Merkezi",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": "commercial-intelligence.read",
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ticari-zeka/teklif-riskleri",
+      "module": "Teklif Riskleri",
+      "navigationGroup": "TİCARİ ZEKÂ",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.commercial-intelligence",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/satin-alma/tedarik-riskleri",
+      "module": "Tedarik Riskleri",
+      "navigationGroup": "Satın alma",
+      "expectedVisible": true,
+      "requiredPermission": "erp.read",
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/erp-entegrasyonlari/baglanti",
+      "module": "ERP Bağlantısı",
+      "navigationGroup": "ERP entegrasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/erp-entegrasyonlari/veri-eslestirme",
+      "module": "Veri Eşleştirme",
+      "navigationGroup": "ERP entegrasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/erp-entegrasyonlari/senkronizasyonlar",
+      "module": "Senkronizasyonlar",
+      "navigationGroup": "ERP entegrasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/erp-entegrasyonlari/hata-kuyrugu",
+      "module": "Hata Kuyruğu",
+      "navigationGroup": "ERP entegrasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/erp-entegrasyonlari/saglik",
+      "module": "Entegrasyon Sağlığı",
+      "navigationGroup": "ERP entegrasyonları",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.erp-integration",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/raporlar",
+      "module": "Raporlama & Analitik",
+      "navigationGroup": "Yönetim",
+      "expectedVisible": true,
+      "requiredPermission": null,
+      "subscriptionModule": "module.reporting",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ayarlar",
+      "module": "Ayarlar",
+      "navigationGroup": "Yönetim",
+      "expectedVisible": true,
+      "requiredPermission": "admin-access.read",
+      "subscriptionModule": "(recovery-exempt)",
+      "validationLevel": "full",
+      "salesCritical": false,
+      "notes": ""
+    },
+    {
+      "route": "/ai-gorevleri/playbooklar",
+      "module": "Playbooklar",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": false,
+      "requiredPermission": null,
+      "subscriptionModule": "module.ai-task-center",
+      "validationLevel": "full",
+      "salesCritical": true,
+      "notes": "Sales surface; not in primary sidebar"
+    },
+    {
+      "route": "/ai-gorevleri/otomasyon",
+      "module": "Otomasyon",
+      "navigationGroup": "Çalışma alanı",
+      "expectedVisible": false,
+      "requiredPermission": null,
+      "subscriptionModule": "module.ai-task-center",
+      "validationLevel": "full",
+      "salesCritical": true,
+      "notes": "Sales surface; not in primary sidebar"
+    }
+  ]
+}

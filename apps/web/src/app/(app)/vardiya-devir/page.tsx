@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { PageContent, PageHeader, Section } from "@/components/ui/page";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -9,7 +8,7 @@ import {
   SHIFT_HANDOVER_SHIFT_PERIODS,
   SHIFT_HANDOVER_STATUSES,
 } from "@/features/shift-handover/domain/shift-handover-constants";
-import { createShiftHandoverAction } from "@/features/shift-handover/server/shift-handover-actions";
+import { ShiftHandoverCreateForm } from "@/features/shift-handover/components/shift-handover-create-form";
 import { readShiftHandoverList } from "@/features/shift-handover/server/shift-handover-queries";
 import "@/features/shift-handover/components/shift-handover.css";
 
@@ -43,34 +42,7 @@ export default async function ShiftHandoverListPage() {
 
       {list.capabilities.canManage ? (
         <Section title="Yeni Devir Oluştur">
-          <form
-            action={async (formData) => {
-              await createShiftHandoverAction(formData);
-            }}
-            className="shift-handover-form-grid"
-          >
-            <label>
-              Vardiya Tarihi
-              <input name="shiftDate" required type="date" />
-            </label>
-            <label>
-              Vardiya
-              <select defaultValue="morning" name="shiftPeriod">
-                {Object.entries(SHIFT_HANDOVER_SHIFT_PERIODS).map(([value, text]) => (
-                  <option key={value} value={value}>{text}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Departman / Alan
-              <input name="department" required />
-            </label>
-            <label>
-              Özet
-              <textarea name="summary" rows={3} />
-            </label>
-            <Button type="submit">Taslak Oluştur</Button>
-          </form>
+          <ShiftHandoverCreateForm />
         </Section>
       ) : null}
 
