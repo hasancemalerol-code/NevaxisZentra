@@ -5,6 +5,8 @@ namespace CrevaFactOS.Desktop.Runtime;
 
 public static class RuntimePortInspector
 {
+    public static readonly int[] PackagedWebPortCandidates = [3001, 3011, 3021, 3031];
+
     public static string? TryGetProcessCommandLine(int processId)
     {
         try
@@ -35,6 +37,79 @@ public static class RuntimePortInspector
         }
     }
 
+    public static int? TryGetParentProcessId(int processId)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments =
+                    $"-NoProfile -NonInteractive -Command \"(Get-CimInstance Win32_Process -Filter 'ProcessId={processId}').ParentProcessId\"",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process is null)
+            {
+                return null;
+            }
+
+            var output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit(5000);
+            return int.TryParse(output, out var parentId) && parentId > 0 ? parentId : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static string? TryGetProcessName(int processId)
+    {
+        try
+        {
+            return Process.GetProcessById(processId).ProcessName;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static WebListenerClassification ClassifyWebListener(
+        int processId,
+        string? repositoryRoot = null,
+        string? packagedWebDirectory = null)
+    {
+        if (IsCrevaFactOSWebListener(processId, repositoryRoot, packagedWebDirectory))
+        {
+            var parentId = TryGetParentProcessId(processId);
+            var parentName = parentId is null ? null : TryGetProcessName(parentId.Value);
+            if (parentName is "powershell" or "pwsh" or "cmd")
+            {
+                return WebListenerClassification.CrevaFactOSVerifierOrphan;
+            }
+
+            return WebListenerClassification.CrevaFactOSOwned;
+        }
+
+        var commandLine = TryGetProcessCommandLine(processId);
+        if (string.IsNullOrWhiteSpace(commandLine))
+        {
+            return WebListenerClassification.Unknown;
+        }
+
+        if (LooksLikeWebDevServer(commandLine))
+        {
+            return WebListenerClassification.Foreign;
+        }
+
+        return WebListenerClassification.Unknown;
+    }
+
     public static bool IsCrevaFactOSWebListener(
         int processId,
         string? repositoryRoot = null,
@@ -46,12 +121,7 @@ public static class RuntimePortInspector
             return false;
         }
 
-        var isNextWeb =
-            commandLine.Contains("next", StringComparison.OrdinalIgnoreCase)
-            || commandLine.Contains("@crevafactos/web", StringComparison.OrdinalIgnoreCase)
-            || commandLine.Contains("start-server.js", StringComparison.OrdinalIgnoreCase)
-            || commandLine.Contains("server.js", StringComparison.OrdinalIgnoreCase);
-        if (!isNextWeb)
+        if (!LooksLikeWebDevServer(commandLine))
         {
             return false;
         }
@@ -62,13 +132,30 @@ public static class RuntimePortInspector
             return true;
         }
 
+        if (commandLine.Contains("desktop-runtime", StringComparison.OrdinalIgnoreCase)
+            && commandLine.Contains("CrevaFactOS", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         if (commandLine.Contains("CrevaFactOS", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        return !string.IsNullOrWhiteSpace(repositoryRoot)
-            && commandLine.Contains(repositoryRoot, StringComparison.OrdinalIgnoreCase);
+        if (!string.IsNullOrWhiteSpace(repositoryRoot)
+            && commandLine.Contains(repositoryRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (IsPackagedServerJsWithoutPath(commandLine)
+            && IsInCrevaFactOSDesktopLineage(processId, packagedWebDirectory, repositoryRoot))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public static bool TryTerminateCrevaFactOSWebListener(
@@ -77,9 +164,11 @@ public static class RuntimePortInspector
         string? packagedWebDirectory,
         IList<string> diagnostics)
     {
-        if (!IsCrevaFactOSWebListener(processId, repositoryRoot, packagedWebDirectory))
+        var classification = ClassifyWebListener(processId, repositoryRoot, packagedWebDirectory);
+        if (classification is not WebListenerClassification.CrevaFactOSOwned
+            and not WebListenerClassification.CrevaFactOSVerifierOrphan)
         {
-            diagnostics.Add($"web=skip-terminate-foreign-listener pid={processId}");
+            diagnostics.Add($"web=skip-terminate-foreign-listener pid={processId} classification={classification}");
             return false;
         }
 
@@ -165,5 +254,66 @@ public static class RuntimePortInspector
             diagnostics.Add($"web=terminate-listener-failed pid={processId} error={ex.Message}");
             return false;
         }
+    }
+
+    private static bool LooksLikeWebDevServer(string commandLine) =>
+        commandLine.Contains("next", StringComparison.OrdinalIgnoreCase)
+        || commandLine.Contains("@crevafactos/web", StringComparison.OrdinalIgnoreCase)
+        || commandLine.Contains("start-server.js", StringComparison.OrdinalIgnoreCase)
+        || commandLine.Contains("server.js", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsPackagedServerJsWithoutPath(string commandLine) =>
+        commandLine.Contains("server.js", StringComparison.OrdinalIgnoreCase)
+        && !commandLine.Contains("next dev", StringComparison.OrdinalIgnoreCase)
+        && !commandLine.Contains("next\\dist", StringComparison.OrdinalIgnoreCase)
+        && !commandLine.Contains("next/dist", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsInCrevaFactOSDesktopLineage(
+        int processId,
+        string? packagedWebDirectory,
+        string? repositoryRoot,
+        int maxDepth = 8)
+    {
+        var current = processId;
+        for (var depth = 0; depth < maxDepth; depth++)
+        {
+            var processName = TryGetProcessName(current);
+            if (processName is "CrevaFactOS" or "CrevaFactOS.Desktop")
+            {
+                return true;
+            }
+
+            var commandLine = TryGetProcessCommandLine(current);
+            if (!string.IsNullOrWhiteSpace(commandLine))
+            {
+                if (!string.IsNullOrWhiteSpace(packagedWebDirectory)
+                    && commandLine.Contains(packagedWebDirectory, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (commandLine.Contains("desktop-runtime", StringComparison.OrdinalIgnoreCase)
+                    && commandLine.Contains("CrevaFactOS", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(repositoryRoot)
+                    && commandLine.Contains(repositoryRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            var parentId = TryGetParentProcessId(current);
+            if (parentId is null || parentId.Value <= 0)
+            {
+                break;
+            }
+
+            current = parentId.Value;
+        }
+
+        return false;
     }
 }

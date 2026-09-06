@@ -78,7 +78,8 @@ public partial class App : Application, IAsyncDisposable
                     startupWindow.Dispatcher.Invoke(() => startupWindow.SetStatus(status));
 
                 var result = await _runtimeSupervisor.StartAsync(DesktopRuntimeOptions.ResolveSalesDemoOptions()).ConfigureAwait(true);
-                DesktopLifecycleLogger.Write($"runtime-ready mode={result.RuntimeMode} root={result.RepositoryRoot}");
+                DesktopLifecycleLogger.Write(
+                    $"runtime-ready mode={result.RuntimeMode} root={result.RepositoryRoot} selectedWebPort={result.SelectedWebPort} preferredWebPort={result.PreferredWebPort} webOrigin={result.WebOriginUri}");
 
                 var mainWindow = new MainWindow(result.WebEntryUri, hideShellChrome: DesktopRuntimeOptions.SalesDemo.HideShellChrome);
                 _singleInstanceManager!.StartActivationListener(mainWindow);

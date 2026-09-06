@@ -1,0 +1,9 @@
+﻿{
+    "FOREIGN_PROCESS_KILLED":  0,
+    "desktop exe exists":  "PASS",
+    "stale owned listener started":  "PASS",
+    "ownership recognized and reclaimed":  "PASS",
+    "SELECTED_WEB_PORT after reclaim":  "PASS",
+    "AUTH login MFA dashboard":  "PASS",
+    "Test B - Stale CrevaFactOS listener":  "PASS"
+}

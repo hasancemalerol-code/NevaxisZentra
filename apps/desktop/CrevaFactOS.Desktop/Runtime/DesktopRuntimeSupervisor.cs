@@ -11,6 +11,10 @@ public sealed class RuntimeStartupResult
 
     public required Uri WebOriginUri { get; init; }
 
+    public required int SelectedWebPort { get; init; }
+
+    public required int PreferredWebPort { get; init; }
+
     public required string RepositoryRoot { get; init; }
 
     public required DesktopRuntimeMode RuntimeMode { get; init; }
@@ -77,7 +81,11 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         if (options.ManageWeb)
         {
             ReportStatus("Uygulama hazırlanıyor");
-            await EnsureWebReadyAsync(options, cancellationToken).ConfigureAwait(false);
+            var webOptions = options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null
+                ? await ResolvePackagedWebOptionsAsync(options, cancellationToken).ConfigureAwait(false)
+                : options;
+            await EnsureWebReadyAsync(webOptions, cancellationToken).ConfigureAwait(false);
+            options = webOptions;
         }
         else
         {
@@ -97,10 +105,74 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         {
             WebEntryUri = options.WebEntryUri,
             WebOriginUri = options.WebOriginUri,
+            SelectedWebPort = options.WebPort,
+            PreferredWebPort = options.PreferredWebPort,
             RepositoryRoot = _runtimeRoot,
             RuntimeMode = options.Mode,
             Diagnostics = _diagnostics.ToArray(),
         };
+    }
+
+    private async Task<Configuration.DesktopRuntimeOptions> ResolvePackagedWebOptionsAsync(
+        Configuration.DesktopRuntimeOptions options,
+        CancellationToken cancellationToken)
+    {
+        var occupied = new List<string>();
+
+        foreach (var candidatePort in RuntimePortInspector.PackagedWebPortCandidates)
+        {
+            var candidateOptions = options.WithWebPort(candidatePort);
+            if (!RuntimePortInspector.IsPortListening(candidatePort))
+            {
+                _diagnostics.Add($"web=selected-port={candidatePort} reason=free preferred={options.PreferredWebPort}");
+                return candidateOptions;
+            }
+
+            if (await TryAttachHealthyWebAsync(candidateOptions, TimeSpan.FromSeconds(5), cancellationToken)
+                    .ConfigureAwait(false))
+            {
+                _diagnostics.Add($"web=selected-port={candidatePort} reason=attached-existing preferred={options.PreferredWebPort}");
+                return candidateOptions;
+            }
+
+            var listenerPid = RuntimePortInspector.TryGetListeningProcessId(candidatePort);
+            if (listenerPid is null)
+            {
+                occupied.Add($"{candidatePort}:pid-unknown");
+                continue;
+            }
+
+            var classification = RuntimePortInspector.ClassifyWebListener(
+                listenerPid.Value,
+                _runtimeRoot,
+                _packagedBundle?.WebAppDirectory);
+            _diagnostics.Add(
+                $"web=port-{candidatePort}-listener pid={listenerPid} classification={classification}");
+
+            if (classification is WebListenerClassification.CrevaFactOSOwned
+                or WebListenerClassification.CrevaFactOSVerifierOrphan)
+            {
+                if (!RuntimePortInspector.TryTerminateCrevaFactOSWebListener(
+                        listenerPid.Value,
+                        _runtimeRoot,
+                        _packagedBundle?.WebAppDirectory,
+                        _diagnostics))
+                {
+                    throw new InvalidOperationException(
+                        $"Web portu {candidatePort} yanıt vermiyor ve güvenli şekilde temizlenemedi (PID {listenerPid}).");
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+                _diagnostics.Add(
+                    $"web=selected-port={candidatePort} reason=stale-owned-listener-reclaimed preferred={options.PreferredWebPort}");
+                return candidateOptions;
+            }
+
+            occupied.Add($"{candidatePort}:PID {listenerPid} ({classification})");
+        }
+
+        throw new InvalidOperationException(
+            $"CrevaFactOS için kullanılabilir yerel web portu bulunamadı. {string.Join(", ", occupied)}");
     }
 
     public async ValueTask DisposeAsync()
@@ -306,12 +378,12 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
             if (listenerPid is not null)
             {
-                var listenerOwned = RuntimePortInspector.IsCrevaFactOSWebListener(
+                var classification = RuntimePortInspector.ClassifyWebListener(
                     listenerPid.Value,
                     runtimeRoot,
                     _packagedBundle?.WebAppDirectory);
-                _diagnostics.Add($"web=listener-classification={(listenerOwned ? "crevafactos-owned" : "foreign")}");
-                if (!listenerOwned)
+                _diagnostics.Add($"web=listener-classification={classification}");
+                if (classification is WebListenerClassification.Foreign or WebListenerClassification.Unknown)
                 {
                     throw new InvalidOperationException(
                         $"Web portu {options.WebPort} başka bir süreç tarafından kullanılıyor (PID {listenerPid}). CrevaFactOS web dinleyicisi değil.");
@@ -355,7 +427,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 throw new InvalidOperationException($"Paketlenmiş web sunucusu bulunamadı: {serverScript}");
             }
 
-            var launchCommand = "server.js";
+            var launchCommand = $"\"{serverScript}\"";
             _diagnostics.Add($"web=launch-command=node {launchCommand}");
             _diagnostics.Add($"web=working-directory={_packagedBundle.WebAppDirectory}");
             owned = RuntimeProcess.StartHidden(

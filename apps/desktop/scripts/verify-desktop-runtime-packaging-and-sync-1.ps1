@@ -119,7 +119,14 @@ function Stop-PortListeners([int[]]$Ports) {
         $listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
         if ($null -eq $listeners) { continue }
         foreach ($listener in @($listeners)) {
-            if ($listener.OwningProcess -gt 0) {
+            if ($listener.OwningProcess -le 0) { continue }
+            $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
+            if (-not $proc) { continue }
+            $isCrevaFactOS = $proc.Name -match '^CrevaFactOS' -or
+                ($proc.CommandLine -match 'desktop-runtime') -or
+                ($proc.CommandLine -match 'CrevaFactOS-RC1') -or
+                ($proc.Name -eq 'node.exe' -and $proc.CommandLine -match 'server\.js')
+            if ($isCrevaFactOS) {
                 Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
             }
         }
@@ -127,33 +134,82 @@ function Stop-PortListeners([int[]]$Ports) {
     Start-Sleep -Seconds 3
 }
 
+function Get-PackagedWebPortCandidates {
+    return @(3001, 3011, 3021, 3031)
+}
+
+function Test-CrevaFactOSWebReady([int]$Port) {
+    try {
+        $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
+        $response = Invoke-WebRequest "http://127.0.0.1:$Port/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
+        return $response.StatusCode -eq 401
+    } catch {
+        if ($_.Exception.Response) {
+            return $_.Exception.Response.StatusCode.value__ -eq 401
+        }
+        return $false
+    }
+}
+
+function Wait-PackagedWebReady([int]$TimeoutSeconds = 480) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $logPort = Get-SelectedWebPortFromLifecycleLog
+        if ($logPort -and (Test-CrevaFactOSWebReady $logPort)) { return $logPort }
+        foreach ($port in Get-PackagedWebPortCandidates) {
+            if (Test-CrevaFactOSWebReady $port) { return $port }
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $null
+}
+
+function Get-SelectedWebPortFromLifecycleLog {
+    $logDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "CrevaFactOS\Desktop\runtime\logs"
+    if (-not (Test-Path $logDir)) { return $null }
+    $latest = Get-ChildItem $logDir -Filter "desktop-lifecycle-*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if (-not $latest) { return $null }
+    $content = Get-Content -LiteralPath $latest.FullName -Raw
+    if ($content -match 'selectedWebPort=(\d+)') { return [int]$Matches[1] }
+    if ($content -match 'web=selected-port=(\d+)') { return [int]$Matches[1] }
+    return $null
+}
+
 function Stop-CrevaFactOSDesktopOnly {
     foreach ($name in @("CrevaFactOS", "CrevaFactOS.Desktop", "CrevaFactOS.Api")) {
         Get-Process -Name $name -ErrorAction SilentlyContinue |
             Stop-Process -Force -ErrorAction SilentlyContinue
     }
-    Stop-PortListeners -Ports @(3001, 5000)
+    Stop-PortListeners -Ports @(3001, 3011, 3021, 3031, 5000)
     Start-Sleep -Seconds 4
 }
 
 function Wait-PackagedPortsCleared([int]$TimeoutSeconds = 60) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
-        $webListeners = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue
+        $crevafactosWebOccupied = $false
+        foreach ($port in Get-PackagedWebPortCandidates) {
+            $listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
+            if ($null -eq $listeners) { continue }
+            foreach ($listener in @($listeners)) {
+                $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
+                if ($proc -and (
+                    $proc.Name -match '^CrevaFactOS' -or
+                    ($proc.CommandLine -match 'desktop-runtime') -or
+                    ($proc.CommandLine -match 'CrevaFactOS-RC1'))) {
+                    $crevafactosWebOccupied = $true
+                }
+            }
+        }
         $apiListeners = Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue
-        if ($null -eq $webListeners -and $null -eq $apiListeners) { return $true }
-        Start-Sleep -Seconds 2
-    }
-    return $false
-}
-
-function Wait-PackagedWebReady([int]$TimeoutSeconds = 480) {
-    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-    while ((Get-Date) -lt $deadline) {
-        try {
-            $giris = Invoke-WebRequest "http://127.0.0.1:3001/giris" -UseBasicParsing -TimeoutSec 8
-            if ($giris.StatusCode -ge 200 -and $giris.StatusCode -lt 500) { return $true }
-        } catch { }
+        $crevafactosApiOccupied = $false
+        if ($apiListeners) {
+            foreach ($listener in @($apiListeners)) {
+                $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
+                if ($proc -and $proc.Name -match 'CrevaFactOS') { $crevafactosApiOccupied = $true }
+            }
+        }
+        if (-not $crevafactosWebOccupied -and -not $crevafactosApiOccupied) { return $true }
         Start-Sleep -Seconds 2
     }
     return $false
@@ -179,7 +235,13 @@ Stop-CrevaFactOSDesktopOnly
 Assert-Check "packaged ports cleared before cold start" (Wait-PackagedPortsCleared 90)
 Write-Host "Cold-starting packaged runtime..."
 $launch = Start-Process -FilePath $desktopExe -WorkingDirectory (Split-Path $desktopExe -Parent) -PassThru
-Assert-Check "packaged cold start web ready" (Wait-PackagedWebReady 480)
+$selectedWebPort = Wait-PackagedWebReady 480
+Assert-Check "packaged cold start web ready" ($null -ne $selectedWebPort) "no candidate port ready"
+$logSelectedPort = Get-SelectedWebPortFromLifecycleLog
+if ($logSelectedPort) {
+    Assert-Check "selected web port logged" ($logSelectedPort -eq $selectedWebPort) "log=$logSelectedPort actual=$selectedWebPort"
+}
+Write-Host "SELECTED_WEB_PORT=$selectedWebPort"
 Start-Sleep -Seconds 20
 
 $apiProcess = Get-CimInstance Win32_Process -Filter "Name='CrevaFactOS.Api.exe'" |
@@ -196,7 +258,7 @@ if ($webProcess) {
 }
 
 $env:CREVAFACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR = $screenshotDir
-$env:CREVAFACTOS_WEB_BASE_URL = "http://127.0.0.1:3001"
+$env:CREVAFACTOS_WEB_BASE_URL = "http://127.0.0.1:$selectedWebPort"
 $env:CREVAFACTOS_API_BASE_URL = "http://127.0.0.1:5000"
 $env:CREVAFACTOS_DESKTOP_RUNTIME_MODE = "Packaged"
 $env:CREVAFACTOS_PACKAGED_BUNDLE_ROOT = $BundleRoot

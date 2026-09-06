@@ -34,6 +34,7 @@ public sealed class DesktopRuntimeOptions
         Profile = DesktopRuntimeProfile.SalesDemo,
         ApiPort = 5000,
         WebPort = 3001,
+        PreferredWebPort = 3001,
         WebEntryPath = "/dashboard",
         StartupTimeout = TimeSpan.FromMinutes(3),
         ManageInfrastructure = true,
@@ -49,12 +50,14 @@ public sealed class DesktopRuntimeOptions
         var mode = RuntimePaths.ResolveRuntimeMode();
         var entryPath = Environment.GetEnvironmentVariable(EntryPathEnvironmentVariable);
         var baseOptions = SalesDemo;
+        var preferredWebPort = ResolvePreferredWebPort(mode, baseOptions.WebPort);
 
         return new DesktopRuntimeOptions
         {
             Profile = baseOptions.Profile,
             ApiPort = baseOptions.ApiPort,
-            WebPort = baseOptions.WebPort,
+            WebPort = preferredWebPort,
+            PreferredWebPort = preferredWebPort,
             WebEntryPath = string.IsNullOrWhiteSpace(entryPath)
                 ? baseOptions.WebEntryPath
                 : entryPath.StartsWith('/') ? entryPath : $"/{entryPath}",
@@ -65,6 +68,48 @@ public sealed class DesktopRuntimeOptions
             HideShellChrome = baseOptions.HideShellChrome,
             Mode = mode,
         };
+    }
+
+    public int PreferredWebPort { get; init; } = 3001;
+
+    public DesktopRuntimeOptions WithWebPort(int webPort) =>
+        new()
+        {
+            Profile = Profile,
+            ApiPort = ApiPort,
+            WebPort = webPort,
+            PreferredWebPort = PreferredWebPort,
+            WebEntryPath = WebEntryPath,
+            StartupTimeout = StartupTimeout,
+            ManageInfrastructure = ManageInfrastructure,
+            ManageApi = ManageApi,
+            ManageWeb = ManageWeb,
+            HideShellChrome = HideShellChrome,
+            Mode = Mode,
+        };
+
+    private static int ResolvePreferredWebPort(DesktopRuntimeMode mode, int defaultWebPort)
+    {
+        if (mode != DesktopRuntimeMode.Packaged)
+        {
+            return defaultWebPort;
+        }
+
+        try
+        {
+            var bundle = PackagedRuntimeBundle.TryResolveFromDesktopExecutable();
+            if (bundle is null)
+            {
+                return defaultWebPort;
+            }
+
+            var manifest = bundle.TryReadManifest();
+            return manifest?.WebPort ?? defaultWebPort;
+        }
+        catch
+        {
+            return defaultWebPort;
+        }
     }
 
     public Uri ApiHealthUri => new($"http://127.0.0.1:{ApiPort}/health/ready");

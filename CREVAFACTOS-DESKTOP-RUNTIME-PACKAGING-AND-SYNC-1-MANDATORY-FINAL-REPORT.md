@@ -2,7 +2,7 @@
 
 **FINAL VERDICT: `DESKTOP_RUNTIME_RC1_READY`**
 
-Short-path standalone materialization restored `artifacts/desktop-runtime/CrevaFactOS-RC1`. Fresh packaged CDP sweep **2026-09-06T13:59:14Z**: **46/46 PASS**, **0 ACCESS_BLOCKED**, playbook deep-flow **PASS**, `validation-results.json` refreshed. Facility routes `/planlama`, `/uretim`, `/ihracat` remain **PASS**. Dashboard protected diff **0**.
+Real presenter cold-start with foreign port collision on 3001 is closed: deterministic fallback to 3011, zero foreign kills, full 46-route packaged regression PASS.
 
 ---
 
@@ -653,6 +653,81 @@ No dashboard protected paths modified.
 
 ---
 
+# Real Human Cold-Start Port Collision Incident
+
+## PID 21152 Identity
+
+| Field | Value |
+|---|---|
+| **Process** | `node.exe` (PID **21152**) |
+| **Executable** | `C:\Program Files\nodejs\node.exe` |
+| **Command line** | `next\dist\server\lib\start-server.js` under `C:\Projects\CrevaTendra\...` |
+| **Parent PID** | 28340 (`node ... next dev --port 3001` in CrevaTendra) |
+| **Listening** | `0.0.0.0:3001` and `[::]:3001` |
+| **Classification** | **D. TRULY_FOREIGN_PROCESS** (CrevaTendra dev web, not CrevaFactOS) |
+
+## Original Classification
+
+Packaged startup log correctly reported `web-listener-classification=foreign`. The supervisor threw before fallback existed:
+
+```
+InvalidOperationException: Web portu 3001 başka bir süreç tarafından kullanılıyor (PID 21152). CrevaFactOS web dinleyicisi değil.
+```
+
+## Proven Ownership
+
+PID **21152** is **not** CrevaFactOS-owned. Evidence: command line references `CrevaTendra`, not `desktop-runtime` / `CrevaFactOS-RC1`; parent is CrevaTendra `next dev --port 3001`. Classifier behavior was **correct**; the gap was missing **deterministic fallback**, not misclassification.
+
+## Root Cause
+
+`EnsureWebReadyAsync` treated any foreign listener on the preferred port as a hard failure. Packaged mode had no reserved-port scan (`3001 → 3011 → 3021 → 3031`). Automated verifier cleared port 3001 before cold start, masking the presenter failure.
+
+## Owned Listener Recovery
+
+`RuntimePortInspector.ClassifyWebListener()` + `TryTerminateCrevaFactOSWebListener()` terminate only `CrevaFactOSOwned` or `CrevaFactOSVerifierOrphan` listeners. Packaged `node` launches now use the absolute `server.js` path; parent-lineage checks cover bare `server.js` orphans.
+
+## Foreign Listener Fallback
+
+`DesktopRuntimeSupervisor.ResolvePackagedWebOptionsAsync()` scans `PackagedWebPortCandidates = [3001, 3011, 3021, 3031]`:
+
+1. Free port → use it  
+2. Healthy existing CrevaFactOS web → attach  
+3. Stale owned → safe terminate/reclaim  
+4. Foreign/unknown → skip (never kill)  
+5. All occupied by foreign → `CrevaFactOS için kullanılabilir yerel web portu bulunamadı.`
+
+With PID 21152 on 3001, lifecycle log recorded: `selectedWebPort=3011 preferredWebPort=3001 webOrigin=http://127.0.0.1:3011/`.
+
+## Selected Port Propagation
+
+`RuntimeStartupResult.SelectedWebPort` / `PreferredWebPort` propagate through:
+
+- `PORT` env for Next standalone  
+- `WebOriginUri` / `WebEntryUri` / readiness probes  
+- identity proxy health (`CREVAFACTOS_API_BASE_URL` unchanged on API port 5000)  
+- `MainWindow` WebView2 entry URI  
+- lifecycle diagnostics log  
+- packaging verifier + port-collision verifier (identity-probe-based port discovery)
+
+Manifest `webPort=3001` remains the **preferred** packaged port; session-selected port is runtime state.
+
+## Test A — Free 3001
+**PASS** — Packaged regression cold start `SELECTED_WEB_PORT=3001` with foreign absent; 46/46 routes on `http://127.0.0.1:3001`.
+
+## Test B — Stale CrevaFactOS listener
+**PASS** — Controlled `node server.js` orphan in bundle web directory; ownership recognized, reclaimed, `SELECTED_WEB_PORT=3001`, AUTH/MFA/Dashboard PASS.
+
+## Test C — Foreign 3001 listener
+**PASS** — PID 21152 (CrevaTendra) preserved; Desktop selected **3011**; AUTH/MFA/Dashboard PASS on `http://127.0.0.1:3011` (`FOREIGN_PROCESS_KILLED=0`).
+
+## Real User Cold Start
+**PASS** — With foreign PID 21152 on 3001, Desktop shortcut cold start selected port **3011**, login/MFA/Dashboard PASS.
+
+## Full Packaged Regression
+**46 / 46 PASS** — `validation-results.json` **2026-09-06T15:16:25Z**, `ACCESS_BLOCKED=0`, `PLAYBOOK_DEEP_FLOW_ASSERTION=PASS`.
+
+---
+
 # Git State
 
 | Check | Value |
@@ -665,6 +740,9 @@ No dashboard protected paths modified.
 # Mandatory Metrics
 
 ```
+WEB_PORT_COLLISION_RECOVERY = PASS
+FOREIGN_PROCESS_KILLED = 0
+REAL_DESKTOP_COLD_START = PASS
 DESKTOP_EXE = PASS
 API_RELEASE_PUBLISH = PASS
 NEXT_STANDALONE = PASS
@@ -696,6 +774,7 @@ SOURCE_TREE_JUNCTIONS = 0
 DASHBOARD_PROTECTED_DIFF = 0
 STAGED = 0
 COMMIT = NO
+SELECTED_WEB_PORT = 3001 (free) | 3011 (foreign on 3001)
 ```
 
 **FINAL VERDICT: `DESKTOP_RUNTIME_RC1_READY`**
