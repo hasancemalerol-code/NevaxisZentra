@@ -1,9 +1,22 @@
 ﻿{
     "FOREIGN_PROCESS_KILLED":  0,
     "desktop exe exists":  "PASS",
+    "controlled foreign listener on 3001":  "PASS",
+    "controlled_foreign_listener":  true,
+    "foreign process not killed":  "PASS",
+    "fallback port selected":  "PASS",
+    "deterministic fallback port":  "PASS",
+    "AUTH login MFA dashboard":  "PASS",
+    "Test C - Foreign 3001 listener":  "PASS",
+    "SELECTED_WEB_PORT":  3001,
+    "controlled_foreign_listener_cleaned":  true,
     "stale owned listener started":  "PASS",
     "ownership recognized and reclaimed":  "PASS",
     "SELECTED_WEB_PORT after reclaim":  "PASS",
-    "AUTH login MFA dashboard":  "PASS",
-    "Test B - Stale CrevaFactOS listener":  "PASS"
+    "Test B - Stale CrevaFactOS listener":  "PASS",
+    "Test A - Free 3001":  "PASS",
+    "REAL_DESKTOP_COLD_START preferred port":  "PASS",
+    "Real User Cold Start":  "PASS",
+    "REAL_DESKTOP_COLD_START":  "PASS",
+    "WEB_PORT_COLLISION_RECOVERY":  "PASS"
 }

@@ -1,0 +1,45 @@
+{
+  "mission": "CREVAFACTOS-WEDNESDAY-SALES-DEMO-FINAL-SMOKE-AND-FREEZE-1",
+  "runTimestampUtc": "2026-09-06T16:31:35.000Z",
+  "gitHead": "53b4403ebe0c9a18b53a6d9158772fff796ef45d",
+  "bundleRoot": "artifacts/desktop-runtime/CrevaFactOS-RC1",
+  "bundleManifestSourceCommit": "8a85de598cdde6b5e0a5503d81ce71795a07da49",
+  "bundleRuntimeVersion": "2026.09.09-rc1",
+  "tenant": "dev-pilot-tenant",
+  "database": "crevafactos_local",
+  "schemaVersion": "20260903133347_AddAiTaskClosureEvidenceFoundation",
+  "SOURCE_COMMIT_PENDING": true,
+  "RC1_TAG_PENDING": true,
+  "STAGED": 0,
+  "COMMIT": "NO",
+  "packagedRouteValidation": {
+    "runTimestamp": "2026-09-06T16:21:36.513Z",
+    "passCount": 46,
+    "failCount": 0,
+    "accessBlockedCount": 0,
+    "userFacingConsoleErrors": 0,
+    "selectedWebPort": 3001,
+    "playbookDeepFlow": "PASS",
+    "artifact": ".cursor-screenshots/desktop-runtime-packaging-1/validation-results.json"
+  },
+  "portCollisionValidation": {
+    "runTimestamp": "2026-09-06T16:31:35.145Z",
+    "foreignProcessKilled": 0,
+    "testA": "PASS",
+    "testB": "PASS",
+    "testC": "PASS",
+    "realDesktopColdStart": "PASS",
+    "artifact": ".cursor-screenshots/desktop-runtime-packaging-1/port-collision-results.json"
+  },
+  "databaseFreeze": {
+    "preCleanupBackupSha256": "D4B00B1BEDCD70295E5655DC47913BB102F450E4E4CC5FF903C80AAE7EC51777",
+    "finalBackupSha256": "60CBB988F3D835ECF432BB4BC0928450E1AC8FA66DB2B10A709D2C569470DE3A",
+    "restoreProofPreAiTasks": 107,
+    "restoreProofFinalAiTasks": 6,
+    "liveAiTasks": 6,
+    "liveTeamsMessages": 5,
+    "verifierPollutionAfterSmoke": 0
+  },
+  "verifierAuditNote": "Packaging verifier script exits non-zero on no-source-tree-runtime-dependency when packaged node server.js path contains apps\\web; manual CrevaFactOS-only audit = 0",
+  "technicalVerdict": "CREVAFACTOS_SALES_DEMO_RC1_TECHNICALLY_FROZEN"
+}

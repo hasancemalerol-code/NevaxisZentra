@@ -1,9 +1,9 @@
 {
-  "runTimestamp": "2026-09-06T15:16:25.130Z",
-  "generatedAt": "2026-09-06T15:16:25.131Z",
+  "runTimestamp": "2026-09-06T16:21:36.513Z",
+  "generatedAt": "2026-09-06T16:21:36.526Z",
   "runtimeMode": "Packaged",
   "bundleRoot": "C:\\Projects\\CrevaFactOS\\artifacts\\desktop-runtime\\CrevaFactOS-RC1",
-  "sourceCommit": "0e4e49e3653b633350970d37107e963cfa332df5",
+  "sourceCommit": "53b4403ebe0c9a18b53a6d9158772fff796ef45d",
   "environment": "desktop-webview2",
   "web": "http://127.0.0.1:3001",
   "api": "http://127.0.0.1:5000",
