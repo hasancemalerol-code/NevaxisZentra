@@ -375,7 +375,7 @@ export async function readCommercialSalesPriceWorkspace(
   requestedAssessmentId?: string | null,
   requestedComparisonId?: string | null,
 ): Promise<CommercialSalesPriceWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -553,7 +553,7 @@ export async function readCommercialSalesPriceWorkspace(
 export async function readCommercialSalesPriceAssessmentDetail(
   assessmentId: string,
 ): Promise<CommercialSalesPriceAssessmentDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -569,7 +569,7 @@ export async function readCommercialSalesPriceAssessmentDetail(
 export async function readCommercialSalesPriceComparisonDetail(
   comparisonId: string,
 ): Promise<CommercialSalesPriceComparisonDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

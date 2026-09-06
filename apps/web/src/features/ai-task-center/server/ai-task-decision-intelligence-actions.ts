@@ -11,7 +11,7 @@ import {
   rejectAiTaskRecommendation,
   reviewAiTaskClosure,
 } from "./ai-task-decision-intelligence-api-client";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -20,7 +20,7 @@ async function resolveContext(permissionKey: string) {
   const authorization = await denyUnlessGranted(permissionKey);
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

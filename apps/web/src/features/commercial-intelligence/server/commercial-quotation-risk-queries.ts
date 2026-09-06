@@ -348,7 +348,7 @@ export async function readCommercialQuotationRiskWorkspace(
   requestedAssessmentId?: string | null,
   requestedComparisonId?: string | null,
 ): Promise<CommercialQuotationRiskWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -470,7 +470,7 @@ export async function readCommercialQuotationRiskWorkspace(
 export async function readCommercialQuotationRiskAssessmentDetail(
   assessmentId: string,
 ): Promise<CommercialQuotationRiskAssessmentDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -486,7 +486,7 @@ export async function readCommercialQuotationRiskAssessmentDetail(
 export async function readCommercialQuotationRiskComparisonDetail(
   comparisonId: string,
 ): Promise<CommercialQuotationRiskComparisonDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

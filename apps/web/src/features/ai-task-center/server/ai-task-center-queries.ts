@@ -13,7 +13,7 @@ import { readTeamsWorkInbox } from "../../teams/server/teams-queries";
 import type { AiTaskListRecord } from "./ai-task-mapper";
 import { listAiTasks } from "./ai-task-api-client";
 import { mapRawAiTaskSummary } from "./ai-task-mapper";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { listTeamsChannels } from "../../teams/server/teams-api-client";
 import { resolveTeamsRequestContext } from "../../teams/server/teams-request-context";
 
@@ -103,7 +103,7 @@ export async function readAiTaskCenterUnified(): Promise<AiTaskCenterUnifiedResu
   } as Record<AiTaskClosureQueueKey, number>;
 
   if (canReadTasks) {
-    const contextResult = resolveAiTaskRequestContext();
+    const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
     if (contextResult.status === "failure") {
       return { status: "failure", message: contextResult.message, code: contextResult.code };
     }

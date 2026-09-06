@@ -28,7 +28,7 @@ export async function readMaterialAvailabilityRiskWorkspace(
   assessmentId?: string,
   filters: MaterialAvailabilityRiskListFilters = {},
 ): Promise<MaterialAvailabilityRiskWorkspaceResult> {
-  const contextResult = resolveMaterialRequestContext();
+  const contextResult = await resolveMaterialRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

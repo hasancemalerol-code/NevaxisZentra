@@ -919,7 +919,7 @@ function buildOpportunity(
 }
 
 export async function readEnergyWorkspace(): Promise<EnergyWorkspaceResult> {
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return resolved;
   }
@@ -1141,7 +1141,7 @@ export async function readEnergyWorkspace(): Promise<EnergyWorkspaceResult> {
 export async function readEnergyMeasurementPointDetail(
   reference: string,
 ): Promise<EnergyMeasurementPointDetailResult> {
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return resolved;
   }
@@ -1209,7 +1209,7 @@ export async function readEnergyMeasurementPointDetail(
 export async function readEnergyAssessmentDetail(
   reference: string,
 ): Promise<EnergyAssessmentDetailResult> {
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return resolved;
   }

@@ -20,7 +20,7 @@ export type MoldFollowUpWorkspaceResult =
 export async function readMoldFollowUpWorkspace(
   moldId?: string,
 ): Promise<MoldFollowUpWorkspaceResult> {
-  const contextResult = resolveMoldRequestContext();
+  const contextResult = await resolveMoldRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

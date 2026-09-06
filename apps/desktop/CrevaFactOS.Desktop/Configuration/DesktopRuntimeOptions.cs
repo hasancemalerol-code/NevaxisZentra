@@ -1,5 +1,7 @@
 namespace CrevaFactOS.Desktop.Configuration;
 
+using CrevaFactOS.Desktop.Runtime;
+
 public enum DesktopRuntimeProfile
 {
     SalesDemo,
@@ -25,6 +27,8 @@ public sealed class DesktopRuntimeOptions
 
     public bool HideShellChrome { get; init; } = true;
 
+    public DesktopRuntimeMode Mode { get; init; } = DesktopRuntimeMode.Development;
+
     public static DesktopRuntimeOptions SalesDemo { get; } = new()
     {
         Profile = DesktopRuntimeProfile.SalesDemo,
@@ -42,23 +46,24 @@ public sealed class DesktopRuntimeOptions
 
     public static DesktopRuntimeOptions ResolveSalesDemoOptions()
     {
+        var mode = RuntimePaths.ResolveRuntimeMode();
         var entryPath = Environment.GetEnvironmentVariable(EntryPathEnvironmentVariable);
-        if (string.IsNullOrWhiteSpace(entryPath))
-        {
-            return SalesDemo;
-        }
+        var baseOptions = SalesDemo;
 
         return new DesktopRuntimeOptions
         {
-            Profile = SalesDemo.Profile,
-            ApiPort = SalesDemo.ApiPort,
-            WebPort = SalesDemo.WebPort,
-            WebEntryPath = entryPath.StartsWith('/') ? entryPath : $"/{entryPath}",
-            StartupTimeout = SalesDemo.StartupTimeout,
-            ManageInfrastructure = SalesDemo.ManageInfrastructure,
-            ManageApi = SalesDemo.ManageApi,
-            ManageWeb = SalesDemo.ManageWeb,
-            HideShellChrome = SalesDemo.HideShellChrome,
+            Profile = baseOptions.Profile,
+            ApiPort = baseOptions.ApiPort,
+            WebPort = baseOptions.WebPort,
+            WebEntryPath = string.IsNullOrWhiteSpace(entryPath)
+                ? baseOptions.WebEntryPath
+                : entryPath.StartsWith('/') ? entryPath : $"/{entryPath}",
+            StartupTimeout = baseOptions.StartupTimeout,
+            ManageInfrastructure = baseOptions.ManageInfrastructure,
+            ManageApi = baseOptions.ManageApi,
+            ManageWeb = baseOptions.ManageWeb,
+            HideShellChrome = baseOptions.HideShellChrome,
+            Mode = mode,
         };
     }
 

@@ -64,7 +64,7 @@ export type ProcessOeeShiftComparisonResult =
   | ReadFailure;
 
 async function resolveContext() {
-  const contextResult = resolveProcessOeeRequestContext();
+  const contextResult = await resolveProcessOeeRequestContext();
   if (contextResult.status === "failure") {
     return {
       status: "failure" as const,

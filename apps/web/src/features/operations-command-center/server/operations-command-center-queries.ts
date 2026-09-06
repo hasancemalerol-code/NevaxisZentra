@@ -702,15 +702,11 @@ export async function readOperationsCommandCenterWorkspace(
     "module.ai-task-center",
   );
 
-  const commercialContextResult = commercialAccess === "granted"
-    ? resolveCommercialIntelligenceRequestContext()
-    : null;
-  const materialContextResult = materialAccess === "granted"
-    ? resolveMaterialRequestContext()
-    : null;
-  const moldContextResult = moldAccess === "granted"
-    ? resolveMoldRequestContext()
-    : null;
+  const [commercialContextResult, materialContextResult, moldContextResult] = await Promise.all([
+    commercialAccess === "granted" ? resolveCommercialIntelligenceRequestContext() : Promise.resolve(null),
+    materialAccess === "granted" ? resolveMaterialRequestContext() : Promise.resolve(null),
+    moldAccess === "granted" ? resolveMoldRequestContext() : Promise.resolve(null),
+  ]);
 
   const [
     commercialResult,

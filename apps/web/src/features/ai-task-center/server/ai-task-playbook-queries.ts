@@ -13,7 +13,7 @@ import {
   listAiTaskPlaybookRuns,
   listAiTaskPlaybooks,
 } from "./ai-task-playbook-api-client";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
   fetchCurrentEffectiveAccess,
@@ -84,7 +84,7 @@ export async function readAiTaskPlaybookLibrary(): Promise<AiTaskPlaybookLibrary
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -125,7 +125,7 @@ export async function readAiTaskPlaybookDetail(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -146,7 +146,7 @@ export async function readAiTaskPlaybookRunDetail(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

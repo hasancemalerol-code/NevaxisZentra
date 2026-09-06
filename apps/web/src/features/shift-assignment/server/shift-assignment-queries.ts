@@ -40,7 +40,7 @@ export type ShiftAssignmentContextOptionsResult =
   | ReadFailure;
 
 export async function resolveContext() {
-  const contextResult = resolveShiftWorkforceRequestContext();
+  const contextResult = await resolveShiftWorkforceRequestContext();
   if (contextResult.status === "failure") {
     return {
       status: "failure" as const,

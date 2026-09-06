@@ -13,7 +13,7 @@ import {
   type AiTaskDetailViewModel,
 } from "./ai-task-mapper";
 import { parseMembershipIdFromMemberReference } from "./ai-task-membership";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
   fetchCurrentEffectiveAccess,
@@ -118,7 +118,7 @@ export async function readAiTaskWorkspace(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -202,7 +202,7 @@ export async function readAiTaskDetail(taskId: string): Promise<AiTaskDetailResu
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

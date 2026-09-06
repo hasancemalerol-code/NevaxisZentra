@@ -444,7 +444,7 @@ function freshnessLabel(cases: readonly OperationalRiskCaseSummary[]): string {
 }
 
 export async function readOperationalRiskWorkspace(): Promise<OperationalRiskWorkspaceResult> {
-  const contextResult = resolveOperationalRiskRequestContext();
+  const contextResult = await resolveOperationalRiskRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -520,7 +520,7 @@ export async function readOperationalRiskWorkspace(): Promise<OperationalRiskWor
 }
 
 export async function readOperationalRiskCaseDetail(caseId: string): Promise<OperationalRiskCaseDetailResult> {
-  const contextResult = resolveOperationalRiskRequestContext();
+  const contextResult = await resolveOperationalRiskRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -534,7 +534,7 @@ export async function readOperationalRiskCaseDetail(caseId: string): Promise<Ope
 }
 
 export async function readOperationalRiskRunDetail(runId: string): Promise<OperationalRiskRunDetailResult> {
-  const contextResult = resolveOperationalRiskRequestContext();
+  const contextResult = await resolveOperationalRiskRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

@@ -23,6 +23,7 @@ if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) {
 $desktopProject = Join-Path $RepositoryRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
 $desktopExe = Join-Path $ArtifactRoot "CrevaFactOS.exe"
 $bootstrapScript = Join-Path $RepositoryRoot "apps\web\scripts\bootstrap-sales-demo-pilot-full-access-1.mjs"
+$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-crevafactos-app-icon.py"
 
 function Assert-Command([string]$Name) {
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
@@ -96,6 +97,14 @@ if ($SkipPublish -and (Test-Path $desktopExe)) {
     Write-Host "Skipping desktop publish (-SkipPublish); using existing artifact."
 } else {
     Write-Host "Publishing desktop shell..."
+    if (Test-Path $iconGenerator) {
+        Write-Host "Generating canonical CrevaFactOS desktop icon..."
+        & python $iconGenerator
+        if ($LASTEXITCODE -ne 0) {
+            throw "Desktop icon generation failed."
+        }
+    }
+
     if (Test-Path $ArtifactRoot) {
         Remove-Item -Recurse -Force $ArtifactRoot
     }
@@ -136,6 +145,10 @@ if (-not $SkipShortcut) {
     $shortcut.TargetPath = $desktopExe
     $shortcut.WorkingDirectory = $ArtifactRoot
     $shortcut.Description = "CrevaFactOS AI Factory Operations OS"
+    $shortcut.IconLocation = "$desktopExe,0"
+    $shortcut.Save()
+    # Re-save refreshes Explorer icon cache when the embedded executable icon changes.
+    $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.IconLocation = "$desktopExe,0"
     $shortcut.Save()
     Write-Host "Desktop shortcut: $shortcutPath"

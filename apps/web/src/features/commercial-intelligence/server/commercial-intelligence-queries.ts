@@ -325,7 +325,7 @@ function mapComparisonDetail(item: RawCommercialIntelligenceComparisonDetail): C
 }
 
 export async function readCommercialIntelligenceWorkspace(): Promise<CommercialIntelligenceWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -447,7 +447,7 @@ export async function readCommercialIntelligenceWorkspace(): Promise<CommercialI
 export async function readCommercialIntelligenceAssessmentDetail(
   assessmentId: string,
 ): Promise<CommercialIntelligenceAssessmentDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -463,7 +463,7 @@ export async function readCommercialIntelligenceAssessmentDetail(
 export async function readCommercialIntelligenceComparisonDetail(
   comparisonId: string,
 ): Promise<CommercialIntelligenceComparisonDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

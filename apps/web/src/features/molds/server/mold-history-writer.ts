@@ -9,7 +9,7 @@ import {
 import { resolveMoldRequestContext } from "./mold-request-context";
 
 async function resolveWritableContext() {
-  const contextResult = resolveMoldRequestContext();
+  const contextResult = await resolveMoldRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

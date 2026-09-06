@@ -29,7 +29,7 @@ type ActionResult =
   | Readonly<{ status: "failure"; message: string }>;
 
 async function resolveContext() {
-  const contextResult = resolveMaterialRequestContext();
+  const contextResult = await resolveMaterialRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

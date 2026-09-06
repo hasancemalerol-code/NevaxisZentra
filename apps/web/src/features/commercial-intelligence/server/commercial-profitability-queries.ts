@@ -266,7 +266,7 @@ export async function readCommercialProfitabilityWorkspace(
   requestedComparisonId?: string | null,
   filters: CommercialProfitabilityComparisonApiFilters = {},
 ): Promise<CommercialProfitabilityWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -342,7 +342,7 @@ export async function readCommercialProfitabilityWorkspace(
 export async function readCommercialProfitabilityComparisonDetail(
   comparisonId: string,
 ): Promise<CommercialProfitabilityComparisonDetailResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

@@ -9,7 +9,7 @@ export type ShiftRiskPermissionsResult =
   | Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export async function readShiftRiskPermissions(): Promise<ShiftRiskPermissionsResult> {
-  const contextResult = resolveShiftWorkforceRequestContext();
+  const contextResult = await resolveShiftWorkforceRequestContext();
   if (contextResult.status === "failure") {
     return {
       status: "failure",

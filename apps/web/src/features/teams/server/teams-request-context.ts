@@ -6,7 +6,7 @@ import {
 } from "@/features/saas-identity/server/authenticated-server-fetch";
 import { resolveSaasIdentityRuntimeConfig } from "@/features/saas-identity/server/saas-identity-runtime-config";
 
-import { resolveAiTaskRequestContext } from "../../ai-task-center/server/ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "../../ai-task-center/server/ai-task-request-context";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 
 export type TeamsRequestContext =
@@ -38,7 +38,7 @@ export async function resolveTeamsRequestContext(): Promise<TeamsRequestContextR
     }
   }
 
-  const developmentContext = resolveAiTaskRequestContext();
+  const developmentContext = await resolveAiTaskRequestContextFromIncomingRequest();
   if (developmentContext.status === "failure") {
     return {
       status: "failure",

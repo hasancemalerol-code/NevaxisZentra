@@ -7,6 +7,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import os from "node:os";
 
 const REQUIRED_KEYS = [
   "DevelopmentSaasIdentity__TenantOwnerPassword",
@@ -62,10 +63,16 @@ function parseEnvFile(filePath) {
   return values;
 }
 
+export function getPackagedMachineSecretsPath() {
+  const localAppData = process.env.LOCALAPPDATA || join(os.homedir(), "AppData", "Local");
+  return join(localAppData, "CrevaFactOS", "config", "runtime.env.local");
+}
+
 export function loadDevelopmentSaasIdentitySecrets(repositoryRoot = resolveRepositoryRoot()) {
   const layers = [
     parseEnvFile(join(repositoryRoot, "infrastructure", ".env")),
     parseEnvFile(join(repositoryRoot, "infrastructure", ".env.local")),
+    parseEnvFile(getPackagedMachineSecretsPath()),
   ];
 
   const resolved = new Map();
@@ -129,6 +136,8 @@ export function describeDevelopmentSaasIdentitySecretSources(repositoryRoot = re
   for (const key of REQUIRED_KEYS) {
     if (process.env[key]) {
       sources[key] = "process-env";
+    } else if (parseEnvFile(getPackagedMachineSecretsPath()).has(key)) {
+      sources[key] = "%LOCALAPPDATA%/CrevaFactOS/config/runtime.env.local";
     } else if (parseEnvFile(local).has(key)) {
       sources[key] = "infrastructure/.env.local";
     } else if (parseEnvFile(infra).has(key)) {

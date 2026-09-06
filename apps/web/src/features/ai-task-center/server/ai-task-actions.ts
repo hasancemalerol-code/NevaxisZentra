@@ -24,7 +24,7 @@ import {
   type CreateSourceLinkedAiTaskPayload,
 } from "./ai-task-api-client";
 import { readAiTaskDetail, readAiTaskWorkspace } from "./ai-task-queries";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
@@ -88,7 +88,7 @@ async function resolveCreateContext(): Promise<
   const authorization = await denyUnlessGranted("ai-task.create");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -103,7 +103,7 @@ async function resolveReviewContext(): Promise<
   const authorization = await denyUnlessGranted("ai-task.review");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -120,7 +120,7 @@ async function resolvePermissionContext(
   const authorization = await denyUnlessGranted(permissionKey);
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

@@ -35,7 +35,7 @@ export async function evaluateMoldCompatibilityAllAction(moldId: string) {
     return authorization;
   }
 
-  const contextResult = resolveMoldRequestContext();
+  const contextResult = await resolveMoldRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

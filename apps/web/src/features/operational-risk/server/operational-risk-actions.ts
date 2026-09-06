@@ -26,7 +26,7 @@ async function resolveManageContext(): Promise<
   const authorization = await denyUnlessGranted("operational-risk.manage");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveOperationalRiskRequestContext();
+  const contextResult = await resolveOperationalRiskRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

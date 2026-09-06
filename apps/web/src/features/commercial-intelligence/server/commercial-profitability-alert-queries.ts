@@ -190,7 +190,7 @@ export async function readCommercialProfitabilityAlertWorkspace(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -243,7 +243,7 @@ export async function readCommercialProfitabilityAlertDetail(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

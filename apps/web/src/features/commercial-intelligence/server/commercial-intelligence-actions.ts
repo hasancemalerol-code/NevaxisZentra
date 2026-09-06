@@ -50,7 +50,7 @@ async function resolveManageContext(): Promise<
   const authorization = await denyUnlessGranted("commercial-intelligence.manage");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -611,7 +611,7 @@ export async function createCommercialProfitabilityAlertTaskDraftAction(alertId:
   const authorization = await denyUnlessGranted("ai-task.create");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
   }
@@ -789,7 +789,7 @@ export async function transitionCommercialPricingScenarioAction(input: Readonly<
     if (resolved.status === "failure") return resolved;
   }
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
   }
@@ -824,7 +824,7 @@ export async function createCommercialPricingScenarioTaskDraftAction(scenarioId:
   const authorization = await denyUnlessGranted("ai-task.create");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message, code: contextResult.code };
   }

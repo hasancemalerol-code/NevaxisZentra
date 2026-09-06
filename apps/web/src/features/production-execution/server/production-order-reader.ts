@@ -43,7 +43,7 @@ import {
   parseProductionExecutionEntryListApiResponse,
 } from "./production-execution-entry-api-contracts";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
   type ProductionOrderRequestContext,
 } from "./production-order-request-context";
 import {
@@ -120,7 +120,7 @@ type ResolvedContext =
   | Readonly<{ kind: "context"; context: ProductionOrderRequestContext }>
   | Readonly<{ kind: "failure"; failure: ProductionOrderReadFailure }>;
 
-function resolveReadContext(): ResolvedContext {
+async function resolveReadContext(): Promise<ResolvedContext> {
   const configResult = parseProductionExecutionRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -147,7 +147,7 @@ function resolveReadContext(): ResolvedContext {
     };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(
     configResult.config,
   );
 
@@ -169,7 +169,7 @@ function resolveReadContext(): ResolvedContext {
 export async function readProductionOrders(
   query?: { status?: string; search?: string; limit?: number },
 ): Promise<ProductionOrderListResult> {
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -205,7 +205,7 @@ export async function readProductionOrderById(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -241,7 +241,7 @@ export async function readProductionEntries(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -276,7 +276,7 @@ export async function readDowntimes(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listDowntimes(context, normalizedId, context.facilityId, limit);
@@ -292,7 +292,7 @@ export async function readSetupSessions(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listSetupSessions(context, normalizedId, context.facilityId, limit);
@@ -308,7 +308,7 @@ export async function readCycleEntries(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listCycleEntries(context, normalizedId, context.facilityId, limit);
@@ -323,7 +323,7 @@ export async function readRuntimeSummary(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getRuntimeSummary(context, normalizedId, context.facilityId);
@@ -341,7 +341,7 @@ export async function readExceptions(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listExceptions(context, normalizedId, context.facilityId, limit);
@@ -356,7 +356,7 @@ export async function readHealthSummary(
   if (!normalizedId) {
     return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
   }
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getHealthSummary(context, normalizedId, context.facilityId);
@@ -372,7 +372,7 @@ export async function readShiftAssignments(
 ): Promise<ShiftAssignmentListResult> {
   const normalizedId = productionOrderId.trim();
   if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listShiftAssignments(context, normalizedId, context.facilityId, limit);
@@ -386,7 +386,7 @@ export async function readOperatorAssignments(
 ): Promise<OperatorAssignmentListResult> {
   const normalizedId = productionOrderId.trim();
   if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listOperatorAssignments(context, normalizedId, context.facilityId, limit);
@@ -400,7 +400,7 @@ export async function readHandovers(
 ): Promise<HandoverListResult> {
   const normalizedId = productionOrderId.trim();
   if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "productionOrderId is required.", retryable: false };
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await listHandovers(context, normalizedId, context.facilityId, limit);
@@ -414,7 +414,7 @@ export async function readShiftExecutionSummary(
 ): Promise<ShiftExecutionSummaryResult> {
   const normalizedId = shiftId.trim();
   if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "shiftId is required.", retryable: false };
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getShiftExecutionSummary(context, normalizedId, context.facilityId, date);
@@ -427,7 +427,7 @@ export async function readOperatorExecutionSummary(
 ): Promise<OperatorExecutionSummaryResult> {
   const normalizedId = subjectId.trim();
   if (!normalizedId) return { status: "failure", code: "invalid-scope", message: "subjectId is required.", retryable: false };
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
   const { context } = resolved;
   const result = await getOperatorExecutionSummary(context, normalizedId, context.facilityId);

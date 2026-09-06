@@ -161,7 +161,7 @@ function freshnessLabel(comparisons: readonly CommercialIntelligenceComparisonSu
 export async function readCommercialSupplierComparisonWorkspace(
   requestedComparisonId?: string | null,
 ): Promise<CommercialSupplierComparisonWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

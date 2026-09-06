@@ -1,5 +1,11 @@
 import "./export-case-server-boundary";
 
+import {
+  hasIncomingSessionCookie,
+  readIncomingRequestCookieHeader,
+} from "@/features/saas-identity/server/authenticated-server-fetch";
+import { resolveSaasIdentityRuntimeConfig } from "@/features/saas-identity/server/saas-identity-runtime-config";
+
 import type { ExportRuntimeConfig } from "./export-case-runtime-config";
 
 export type ExportCaseRequestContext = Readonly<{
@@ -98,4 +104,38 @@ export function resolveExportCaseRequestContext(
       "Production API mode requires a trusted server-side authentication bridge.",
     retryable: false,
   };
+}
+
+export async function resolveExportCaseRequestContextForIncomingRequest(
+  config: ExportRuntimeConfig,
+): Promise<ExportCaseRequestContextResult> {
+  const resolved = resolveExportCaseRequestContext(config);
+
+  if (resolved.status === "success" || config.mode !== "api") {
+    return resolved;
+  }
+
+  const apiBaseUrl = config.apiBaseUrl?.trim() ?? "";
+  const facilityId = config.facilityId?.trim() ?? "";
+  const cookieHeader = await readIncomingRequestCookieHeader();
+
+  if (hasIncomingSessionCookie(cookieHeader)) {
+    const identityConfig = resolveSaasIdentityRuntimeConfig();
+    if (identityConfig.status === "success" && apiBaseUrl && facilityId) {
+      return {
+        status: "success",
+        context: {
+          runtimeMode: config.mode,
+          apiBaseUrl,
+          facilityId,
+          correlationId: createCorrelationId(),
+          requestHeaders: {
+            Cookie: cookieHeader,
+          },
+        },
+      };
+    }
+  }
+
+  return resolved;
 }

@@ -56,7 +56,7 @@ import {
 import { resolveCommercialIntelligenceRequestContext } from "./commercial-intelligence-request-context";
 import { listAiTasks } from "../../ai-task-center/server/ai-task-api-client";
 import { mapRawAiTaskSummary } from "../../ai-task-center/server/ai-task-mapper";
-import { resolveAiTaskRequestContext } from "../../ai-task-center/server/ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "../../ai-task-center/server/ai-task-request-context";
 
 const COMMAND_CENTER_LIST_PAGE_SIZE = 100;
 const LENS_PREVIEW_PAGE_SIZE = 5;
@@ -414,7 +414,7 @@ export async function readCommercialProfitabilityCommandCenterWorkspace(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -491,7 +491,7 @@ export async function readCommercialProfitabilityCommandCenterWorkspace(
   const queueTasks: AiTask[] = [];
 
   if (canReadAiTasks) {
-    const aiContextResult = resolveAiTaskRequestContext();
+    const aiContextResult = await resolveAiTaskRequestContextFromIncomingRequest();
     if (aiContextResult.status === "success") {
       const tasksResult = await listAiTasks(aiContextResult.context, {
         sourceModule: "commercial-intelligence",

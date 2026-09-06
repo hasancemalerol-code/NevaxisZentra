@@ -91,7 +91,7 @@ export async function createEnergyTargetAction(input: {
     return { status: "failure", message: "Hedef oluşturmak için energy.manage yetkisi gerekir." };
   }
 
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };
   }
@@ -130,7 +130,7 @@ export async function updateEnergyTargetAction(input: {
     return { status: "failure", message: "Hedef güncellemek için energy.manage yetkisi gerekir." };
   }
 
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };
   }
@@ -179,7 +179,7 @@ export async function evaluateEnergyAssessmentAction(input: {
     };
   }
 
-  const resolved = resolveEnergyRequestContext();
+  const resolved = await resolveEnergyRequestContext();
   if (resolved.status === "failure") {
     return { status: "failure", message: resolved.message };
   }

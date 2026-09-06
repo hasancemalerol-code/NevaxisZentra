@@ -21,7 +21,7 @@ import {
 } from "./ai-task-automation-api-client";
 import { listAiTasks } from "./ai-task-api-client";
 import { mapRawAiTaskSummary } from "./ai-task-mapper";
-import { resolveAiTaskRequestContext } from "./ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
   fetchCurrentEffectiveAccess,
@@ -92,7 +92,7 @@ export async function readAiTaskAutomationWorkspace(): Promise<AiTaskAutomationW
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -134,7 +134,7 @@ export async function readAiTaskAutomationRuleDetail(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -155,7 +155,7 @@ export async function readAiTaskAutomationRuleHistory(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -176,7 +176,7 @@ export async function readAiTaskAutomationSimulation(
     return { status: "failure", message: authorization.message, code: "permission-denied" };
   }
 
-  const contextResult = resolveAiTaskRequestContext();
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

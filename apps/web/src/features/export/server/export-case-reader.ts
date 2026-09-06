@@ -42,7 +42,7 @@ import {
   type ExportCaseApiFailure,
 } from "./export-case-api-client";
 import {
-  resolveExportCaseRequestContext,
+  resolveExportCaseRequestContextForIncomingRequest,
   type ExportCaseRequestContext,
 } from "./export-case-request-context";
 import { parseExportRuntimeConfig } from "./export-case-runtime-config";
@@ -130,7 +130,7 @@ type ResolvedContext =
   | Readonly<{ kind: "context"; context: ExportCaseRequestContext }>
   | Readonly<{ kind: "failure"; failure: ExportCaseReadFailure }>;
 
-function resolveReadContext(): ResolvedContext {
+async function resolveReadContext(): Promise<ResolvedContext> {
   const configResult = parseExportRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -157,7 +157,7 @@ function resolveReadContext(): ResolvedContext {
     };
   }
 
-  const contextResult = resolveExportCaseRequestContext(configResult.config);
+  const contextResult = await resolveExportCaseRequestContextForIncomingRequest(configResult.config);
 
   if (contextResult.status === "failure") {
     return {
@@ -180,7 +180,7 @@ export async function readExportCases(query?: {
   search?: string;
   limit?: number;
 }): Promise<ExportCaseListResult> {
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -217,7 +217,7 @@ export async function readExportCaseById(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -252,7 +252,7 @@ export async function readExportCaseByOrder(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -287,7 +287,7 @@ export async function readExportReadiness(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -322,7 +322,7 @@ export async function readExportDocuments(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -357,7 +357,7 @@ export async function readExportActivity(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -397,7 +397,7 @@ export async function readPacking(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -427,7 +427,7 @@ export async function readPackingReconciliation(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -460,7 +460,7 @@ export async function readShipments(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -491,7 +491,7 @@ export async function readShipment(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -526,7 +526,7 @@ export async function readShipmentReadiness(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -559,7 +559,7 @@ export async function readBrokerWorkspace(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -592,7 +592,7 @@ export async function readComplianceSummary(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await getExportComplianceSummary(resolved.context, normalizedId);
@@ -615,7 +615,7 @@ export async function readTraceability(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await getExportTraceability(resolved.context, normalizedId);
@@ -628,7 +628,7 @@ export async function readCountryResearchCases(query?: {
   countryCode?: string;
   status?: string;
 }): Promise<CountryResearchListResult> {
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await listCountryResearchCases(resolved.context, query);
@@ -651,7 +651,7 @@ export async function readCountryResearchCase(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await getCountryResearchCase(resolved.context, normalizedId);
@@ -664,7 +664,7 @@ export async function readCountryKnowledgeEntries(query?: {
   countryCode?: string;
   verificationStatus?: string;
 }): Promise<CountryKnowledgeListResult> {
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await listCountryKnowledgeEntries(resolved.context, query);

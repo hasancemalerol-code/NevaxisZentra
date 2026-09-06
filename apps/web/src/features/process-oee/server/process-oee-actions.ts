@@ -123,7 +123,7 @@ export async function evaluateProcessOeeAction(
     return authorization;
   }
 
-  const contextResult = resolveProcessOeeRequestContext();
+  const contextResult = await resolveProcessOeeRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

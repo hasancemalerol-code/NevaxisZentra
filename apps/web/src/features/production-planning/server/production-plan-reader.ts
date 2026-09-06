@@ -12,7 +12,7 @@ import type {
 } from "../application/production-plan-repository";
 import { createProductionPlanRepository } from "./production-plan-repository-factory";
 import {
-  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
   type ProductionPlanRequestContext,
   type ProductionPlanRequestContextFailure,
 } from "./production-plan-request-context";
@@ -143,7 +143,7 @@ async function resolveProductionPlanningReadDependencies(): Promise<
   }
 
   const requestContextResult =
-    resolveProductionPlanRequestContext(
+    await resolveProductionPlanRequestContextForIncomingRequest(
       runtimeConfigResult.config,
       scopeResult.scope,
     );

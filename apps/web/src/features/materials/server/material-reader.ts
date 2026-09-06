@@ -95,7 +95,7 @@ export type MaterialRequirementProfileDetailResult =
   | ReadFailure;
 
 async function resolveContext() {
-  const contextResult = resolveMaterialRequestContext();
+  const contextResult = await resolveMaterialRequestContext();
   if (contextResult.status === "failure") {
     return {
       status: "failure" as const,

@@ -5,7 +5,7 @@ import {
   readIncomingRequestCookieHeader,
 } from "@/features/saas-identity/server/authenticated-server-fetch";
 import { resolveSaasIdentityRuntimeConfig } from "@/features/saas-identity/server/saas-identity-runtime-config";
-import { resolveAiTaskRequestContext } from "@/features/ai-task-center/server/ai-task-request-context";
+import { resolveAiTaskRequestContextFromIncomingRequest } from "@/features/ai-task-center/server/ai-task-request-context";
 
 export type ShiftHandoverRequestContext =
   | Readonly<{ mode: "session"; facilityId: string }>
@@ -33,7 +33,7 @@ export async function resolveShiftHandoverRequestContext(): Promise<ShiftHandove
     }
   }
 
-  const developmentContext = resolveAiTaskRequestContext();
+  const developmentContext = await resolveAiTaskRequestContextFromIncomingRequest();
   if (developmentContext.status === "failure") {
     return {
       status: "failure",

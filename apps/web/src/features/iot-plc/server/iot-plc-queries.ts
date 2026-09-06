@@ -548,7 +548,7 @@ function mapProfileSummary(profile: RawIotPlcProfile): IotPlcQualityProfileSumma
 }
 
 export async function readIotPlcWorkspace(): Promise<IotPlcWorkspaceResult> {
-  const contextResult = resolveIotPlcRequestContext();
+  const contextResult = await resolveIotPlcRequestContext();
   if (contextResult.status === "failure") {
     return {
       status: "failure",
@@ -743,7 +743,7 @@ export async function readIotPlcWorkspace(): Promise<IotPlcWorkspaceResult> {
 }
 
 export async function readIotPlcEndpointDetail(reference: string): Promise<IotPlcEndpointDetailResult> {
-  const contextResult = resolveIotPlcRequestContext();
+  const contextResult = await resolveIotPlcRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -797,7 +797,7 @@ export async function readIotPlcEndpointDetail(reference: string): Promise<IotPl
 }
 
 export async function readIotPlcSignalDetail(reference: string): Promise<IotPlcSignalDetailResult> {
-  const contextResult = resolveIotPlcRequestContext();
+  const contextResult = await resolveIotPlcRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -876,7 +876,7 @@ export async function readIotPlcAssessmentDetail(
   assessmentId: string,
   kind: "connectivity" | "signal",
 ): Promise<IotPlcAssessmentDetailResult> {
-  const contextResult = resolveIotPlcRequestContext();
+  const contextResult = await resolveIotPlcRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

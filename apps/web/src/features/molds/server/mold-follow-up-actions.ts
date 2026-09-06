@@ -10,7 +10,7 @@ function revalidateMoldFollowUpRoutes() {
 }
 
 async function resolveContext() {
-  const contextResult = resolveMoldRequestContext();
+  const contextResult = await resolveMoldRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

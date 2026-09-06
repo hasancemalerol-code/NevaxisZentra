@@ -41,7 +41,7 @@ export async function readCommercialCustomerProfitabilityWorkspace(
   requestedComparisonId?: string | null,
   filters: CommercialCustomerProfitabilityApiFilters = { page: 1, pageSize: 25 },
 ): Promise<CommercialCustomerProfitabilityWorkspaceResult> {
-  const contextResult = resolveCommercialIntelligenceRequestContext();
+  const contextResult = await resolveCommercialIntelligenceRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }

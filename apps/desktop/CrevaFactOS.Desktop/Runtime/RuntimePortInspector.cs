@@ -35,7 +35,10 @@ public static class RuntimePortInspector
         }
     }
 
-    public static bool IsCrevaFactOSWebListener(int processId, string? repositoryRoot = null)
+    public static bool IsCrevaFactOSWebListener(
+        int processId,
+        string? repositoryRoot = null,
+        string? packagedWebDirectory = null)
     {
         var commandLine = TryGetProcessCommandLine(processId);
         if (string.IsNullOrWhiteSpace(commandLine))
@@ -46,10 +49,17 @@ public static class RuntimePortInspector
         var isNextWeb =
             commandLine.Contains("next", StringComparison.OrdinalIgnoreCase)
             || commandLine.Contains("@crevafactos/web", StringComparison.OrdinalIgnoreCase)
-            || commandLine.Contains("start-server.js", StringComparison.OrdinalIgnoreCase);
+            || commandLine.Contains("start-server.js", StringComparison.OrdinalIgnoreCase)
+            || commandLine.Contains("server.js", StringComparison.OrdinalIgnoreCase);
         if (!isNextWeb)
         {
             return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(packagedWebDirectory)
+            && commandLine.Contains(packagedWebDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
         }
 
         if (commandLine.Contains("CrevaFactOS", StringComparison.OrdinalIgnoreCase))
@@ -64,9 +74,10 @@ public static class RuntimePortInspector
     public static bool TryTerminateCrevaFactOSWebListener(
         int processId,
         string? repositoryRoot,
+        string? packagedWebDirectory,
         IList<string> diagnostics)
     {
-        if (!IsCrevaFactOSWebListener(processId, repositoryRoot))
+        if (!IsCrevaFactOSWebListener(processId, repositoryRoot, packagedWebDirectory))
         {
             diagnostics.Add($"web=skip-terminate-foreign-listener pid={processId}");
             return false;
@@ -74,6 +85,12 @@ public static class RuntimePortInspector
 
         return TryTerminateProcessTree(processId, diagnostics);
     }
+
+    public static bool TryTerminateCrevaFactOSWebListener(
+        int processId,
+        string? repositoryRoot,
+        IList<string> diagnostics) =>
+        TryTerminateCrevaFactOSWebListener(processId, repositoryRoot, null, diagnostics);
 
     public static bool IsPortListening(int port)
     {

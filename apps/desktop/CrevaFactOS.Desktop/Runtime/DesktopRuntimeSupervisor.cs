@@ -13,6 +13,8 @@ public sealed class RuntimeStartupResult
 
     public required string RepositoryRoot { get; init; }
 
+    public required DesktopRuntimeMode RuntimeMode { get; init; }
+
     public required IReadOnlyList<string> Diagnostics { get; init; }
 }
 
@@ -20,7 +22,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 {
     private readonly List<RuntimeProcess> _ownedProcesses = [];
     private readonly List<string> _diagnostics = [];
-    private string? _repositoryRoot;
+    private string? _runtimeRoot;
+    private PackagedRuntimeBundle? _packagedBundle;
 
     public event Action<string>? StatusChanged;
 
@@ -30,17 +33,28 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         Configuration.DesktopRuntimeOptions options,
         CancellationToken cancellationToken = default)
     {
-        _repositoryRoot = RuntimePaths.ResolveRepositoryRoot();
-        _diagnostics.Add($"repository={_repositoryRoot}");
+        _packagedBundle = PackagedRuntimeBundle.TryResolveFromDesktopExecutable();
+        _runtimeRoot = _packagedBundle?.BundleRoot ?? RuntimePaths.ResolveRepositoryRoot();
+        _diagnostics.Add($"mode={options.Mode}");
+        _diagnostics.Add($"desktop-directory={PackagedRuntimeBundle.ResolveDesktopExecutableDirectory()}");
+        _diagnostics.Add($"packaged-bundle={(_packagedBundle?.BundleRoot ?? "null")}");
+        _diagnostics.Add($"runtime-root={_runtimeRoot}");
 
         ReportStatus("Sistem hazırlanıyor");
-        ImportEnvironmentFile(RuntimePaths.GetEnvironmentFilePath(_repositoryRoot));
-        ImportEnvironmentFile(RuntimePaths.GetLocalSecretsEnvironmentFilePath(_repositoryRoot));
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+        {
+            ImportPackagedConfiguration(_packagedBundle);
+        }
+        else
+        {
+            ImportEnvironmentFile(RuntimePaths.GetEnvironmentFilePath(_runtimeRoot));
+            ImportEnvironmentFile(RuntimePaths.GetLocalSecretsEnvironmentFilePath(_runtimeRoot));
+        }
 
         if (options.ManageInfrastructure)
         {
             ReportStatus("Veritabanı kontrol ediliyor");
-            await EnsurePostgresInfrastructureAsync(cancellationToken).ConfigureAwait(false);
+            await EnsurePostgresInfrastructureAsync(options, cancellationToken).ConfigureAwait(false);
         }
 
         if (options.ManageApi)
@@ -83,7 +97,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         {
             WebEntryUri = options.WebEntryUri,
             WebOriginUri = options.WebOriginUri,
-            RepositoryRoot = _repositoryRoot,
+            RepositoryRoot = _runtimeRoot,
+            RuntimeMode = options.Mode,
             Diagnostics = _diagnostics.ToArray(),
         };
     }
@@ -99,16 +114,32 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
-    private async Task EnsurePostgresInfrastructureAsync(CancellationToken cancellationToken)
+    private async Task EnsurePostgresInfrastructureAsync(
+        Configuration.DesktopRuntimeOptions options,
+        CancellationToken cancellationToken)
     {
-        if (await RuntimeReadinessProbe.IsTcpPortOpenAsync("127.0.0.1", 5432, TimeSpan.FromSeconds(2), cancellationToken)
-                .ConfigureAwait(false))
+        var postgresPort = ResolvePostgresPort();
+        var postgresHost = ResolvePostgresHost();
+
+        if (await RuntimeReadinessProbe.IsTcpPortOpenAsync(
+                postgresHost,
+                postgresPort,
+                TimeSpan.FromSeconds(2),
+                cancellationToken).ConfigureAwait(false))
         {
             _diagnostics.Add("postgres=attached-existing");
+            await ValidateSchemaVersionIfRequiredAsync(options, postgresHost, postgresPort, cancellationToken)
+                .ConfigureAwait(false);
             return;
         }
 
-        var composePath = RuntimePaths.GetInfrastructureComposePath(_repositoryRoot!);
+        if (options.Mode == DesktopRuntimeMode.Packaged)
+        {
+            throw new InvalidOperationException(
+                $"Paketlenmiş çalışma zamanı için PostgreSQL hazır değil ({postgresHost}:{postgresPort}).");
+        }
+
+        var composePath = RuntimePaths.GetInfrastructureComposePath(_runtimeRoot!);
         if (!File.Exists(composePath))
         {
             throw new InvalidOperationException("Yerel altyapı yapılandırması bulunamadı.");
@@ -117,21 +148,14 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         await RunUtilityAsync(
             "docker",
             $"compose -f \"{composePath}\" up -d postgres",
-            _repositoryRoot!,
+            _runtimeRoot!,
             environment: null,
             logPrefix: "docker-postgres",
             ownProcess: false,
             cancellationToken).ConfigureAwait(false);
 
-        var postgresPort = 5432;
-        var configuredPort = Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__PORT");
-        if (int.TryParse(configuredPort, out var parsedPort))
-        {
-            postgresPort = parsedPort;
-        }
-
         var postgresReady = await RuntimeReadinessProbe.IsTcpPortOpenAsync(
-            "127.0.0.1",
+            postgresHost,
             postgresPort,
             TimeSpan.FromSeconds(90),
             cancellationToken).ConfigureAwait(false);
@@ -141,12 +165,37 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         _diagnostics.Add("postgres=started");
+        await ValidateSchemaVersionIfRequiredAsync(options, postgresHost, postgresPort, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private async Task EnsureApiReadyAsync(
         Configuration.DesktopRuntimeOptions options,
         CancellationToken cancellationToken)
     {
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+        {
+            var listenerPid = RuntimePortInspector.TryGetListeningProcessId(options.ApiPort);
+            if (listenerPid is not null)
+            {
+                var commandLine = RuntimePortInspector.TryGetProcessCommandLine(listenerPid.Value) ?? string.Empty;
+                var isPackagedListener = commandLine.Contains(
+                    _packagedBundle.ApiDirectory,
+                    StringComparison.OrdinalIgnoreCase);
+                if (!isPackagedListener)
+                {
+                    _diagnostics.Add($"api=foreign-listener pid={listenerPid}");
+                    if (!RuntimePortInspector.TryTerminateProcessTree(listenerPid.Value, _diagnostics))
+                    {
+                        throw new InvalidOperationException(
+                            $"Paketlenmiş çalışma zamanı için yabancı API dinleyicisi sonlandırılamadı (PID {listenerPid}).");
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
         if (await RuntimeReadinessProbe.WaitForHttpSuccessAsync(
                 options.ApiHealthUri,
                 TimeSpan.FromSeconds(2),
@@ -157,6 +206,21 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                     apiBase,
                     cancellationToken).ConfigureAwait(false))
             {
+                if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+                {
+                    var listenerPid = RuntimePortInspector.TryGetListeningProcessId(options.ApiPort);
+                    var commandLine = listenerPid is null
+                        ? string.Empty
+                        : RuntimePortInspector.TryGetProcessCommandLine(listenerPid.Value) ?? string.Empty;
+                    if (!commandLine.Contains(
+                            _packagedBundle.ApiDirectory,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "Paketlenmiş çalışma zamanı kaynak ağacı API'sine bağlanamaz.");
+                    }
+                }
+
                 _diagnostics.Add("api=attached-existing");
                 return;
             }
@@ -171,14 +235,33 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 $"API portu kullanımda ancak hazır değil (PID {existing.Id}).");
         }
 
-        var apiProject = RuntimePaths.GetApiProjectPath(_repositoryRoot!);
-        var environment = BuildApiEnvironment(options, _repositoryRoot);
-        var owned = RuntimeProcess.StartHidden(
-            "dotnet",
-            $"run --project \"{apiProject}\" --launch-profile http --urls http://127.0.0.1:{options.ApiPort}",
-            _repositoryRoot!,
-            environment,
-            RuntimePaths.CreateLogFilePath("api"));
+        var apiProject = RuntimePaths.GetApiProjectPath(_runtimeRoot!);
+        var environment = BuildApiEnvironment(options, _runtimeRoot, _packagedBundle);
+        RuntimeProcess owned;
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+        {
+            var apiExecutable = _packagedBundle.ApiExecutablePath;
+            if (!File.Exists(apiExecutable))
+            {
+                throw new InvalidOperationException($"Paketlenmiş API bulunamadı: {apiExecutable}");
+            }
+
+            owned = RuntimeProcess.StartHidden(
+                apiExecutable,
+                $"--urls http://127.0.0.1:{options.ApiPort}",
+                _packagedBundle.ApiDirectory,
+                environment,
+                RuntimePaths.CreateLogFilePath("api"));
+        }
+        else
+        {
+            owned = RuntimeProcess.StartHidden(
+                "dotnet",
+                $"run --project \"{apiProject}\" --launch-profile http --urls http://127.0.0.1:{options.ApiPort}",
+                _runtimeRoot!,
+                environment,
+                RuntimePaths.CreateLogFilePath("api"));
+        }
         _ownedProcesses.Add(owned);
         _diagnostics.Add($"api=started pid={owned.ProcessId}");
 
@@ -213,6 +296,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             return;
         }
 
+        var runtimeRoot = _runtimeRoot;
         if (RuntimePortInspector.IsPortListening(options.WebPort))
         {
             var listenerPid = RuntimePortInspector.TryGetListeningProcessId(options.WebPort);
@@ -222,7 +306,10 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
             if (listenerPid is not null)
             {
-                var listenerOwned = RuntimePortInspector.IsCrevaFactOSWebListener(listenerPid.Value, _repositoryRoot);
+                var listenerOwned = RuntimePortInspector.IsCrevaFactOSWebListener(
+                    listenerPid.Value,
+                    runtimeRoot,
+                    _packagedBundle?.WebAppDirectory);
                 _diagnostics.Add($"web=listener-classification={(listenerOwned ? "crevafactos-owned" : "foreign")}");
                 if (!listenerOwned)
                 {
@@ -233,7 +320,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 _diagnostics.Add($"web=stale-listener-on-port-{options.WebPort}");
                 if (!RuntimePortInspector.TryTerminateCrevaFactOSWebListener(
                         listenerPid.Value,
-                        _repositoryRoot,
+                        runtimeRoot,
+                        _packagedBundle?.WebAppDirectory,
                         _diagnostics))
                 {
                     throw new InvalidOperationException(
@@ -254,25 +342,44 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             }
         }
 
-        var (stdoutLog, stderrLog) = RuntimePaths.CreateWebLogPaths(_repositoryRoot);
-        _diagnostics.Add($"web=log-stdout={stdoutLog}");
-        _diagnostics.Add($"web=log-stderr={stderrLog}");
+        var (stdoutLog, stderrLog) = RuntimePaths.CreateWebLogPaths(
+            options.Mode == DesktopRuntimeMode.Development ? runtimeRoot : null);
 
-        var environment = BuildWebEnvironment(options, _repositoryRoot);
-        var launchCommand =
-            $"--filter @crevafactos/web exec next dev -H 127.0.0.1 -p {options.WebPort.ToString(CultureInfo.InvariantCulture)}";
-        _diagnostics.Add($"web=launch-command=pnpm {launchCommand}");
-        _diagnostics.Add($"web=working-directory={_repositoryRoot}");
-        _diagnostics.Add($"web=readiness-url={webProbe}");
-        _diagnostics.Add($"web=timeout-seconds={options.StartupTimeout.TotalSeconds}");
+        var environment = BuildWebEnvironment(options, runtimeRoot, _packagedBundle);
+        RuntimeProcess owned;
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+        {
+            var serverScript = _packagedBundle.WebServerScriptPath;
+            if (!File.Exists(serverScript))
+            {
+                throw new InvalidOperationException($"Paketlenmiş web sunucusu bulunamadı: {serverScript}");
+            }
 
-        var owned = RuntimeProcess.StartHidden(
-            ResolvePnpmExecutable(),
-            launchCommand,
-            _repositoryRoot!,
-            environment,
-            stdoutLog,
-            stderrLog);
+            var launchCommand = "server.js";
+            _diagnostics.Add($"web=launch-command=node {launchCommand}");
+            _diagnostics.Add($"web=working-directory={_packagedBundle.WebAppDirectory}");
+            owned = RuntimeProcess.StartHidden(
+                ResolveNodeExecutable(),
+                launchCommand,
+                _packagedBundle.WebAppDirectory,
+                environment,
+                stdoutLog,
+                stderrLog);
+        }
+        else
+        {
+            var launchCommand =
+                $"--filter @crevafactos/web exec next dev -H 127.0.0.1 -p {options.WebPort.ToString(CultureInfo.InvariantCulture)}";
+            _diagnostics.Add($"web=launch-command=pnpm {launchCommand}");
+            _diagnostics.Add($"web=working-directory={runtimeRoot}");
+            owned = RuntimeProcess.StartHidden(
+                ResolvePnpmExecutable(),
+                launchCommand,
+                runtimeRoot!,
+                environment,
+                stdoutLog,
+                stderrLog);
+        }
         _ownedProcesses.Add(owned);
         _diagnostics.Add($"web=started pid={owned.ProcessId}");
 
@@ -332,33 +439,39 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
     private static Dictionary<string, string> BuildWebEnvironment(
         Configuration.DesktopRuntimeOptions options,
-        string? repositoryRoot)
+        string? runtimeRoot,
+        PackagedRuntimeBundle? packagedBundle)
     {
         var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (!string.IsNullOrWhiteSpace(repositoryRoot))
+        if (packagedBundle is not null)
+        {
+            RuntimePaths.MergePackagedConfiguration(environment, packagedBundle);
+        }
+        else if (!string.IsNullOrWhiteSpace(runtimeRoot))
         {
             RuntimePaths.MergeEnvironmentFile(
                 environment,
-                RuntimePaths.GetEnvironmentFilePath(repositoryRoot));
+                RuntimePaths.GetEnvironmentFilePath(runtimeRoot));
             RuntimePaths.MergeEnvironmentFile(
                 environment,
-                RuntimePaths.GetLocalSecretsEnvironmentFilePath(repositoryRoot));
+                RuntimePaths.GetLocalSecretsEnvironmentFilePath(runtimeRoot));
             RuntimePaths.MergeEnvironmentFile(
                 environment,
-                RuntimePaths.GetWebEnvironmentFilePath(repositoryRoot));
+                RuntimePaths.GetWebEnvironmentFilePath(runtimeRoot));
         }
 
         RuntimePaths.CopyProcessEnvironmentPrefix(environment, "DevelopmentSaasIdentity__");
         environment["CREVAFACTOS_API_BASE_URL"] = $"http://127.0.0.1:{options.ApiPort}";
         environment["PORT"] = options.WebPort.ToString(CultureInfo.InvariantCulture);
         environment["HOSTNAME"] = "127.0.0.1";
-        environment["NODE_ENV"] = "development";
+        environment["NODE_ENV"] = packagedBundle is null ? "development" : "production";
         return environment;
     }
 
     private static Dictionary<string, string> BuildApiEnvironment(
         Configuration.DesktopRuntimeOptions options,
-        string? repositoryRoot)
+        string? runtimeRoot,
+        PackagedRuntimeBundle? packagedBundle)
     {
         var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -366,15 +479,19 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             ["CREVAFACTOS__AUTHENTICATION__MODE"] = "SessionCookie",
         };
 
-        if (!string.IsNullOrWhiteSpace(repositoryRoot))
+        if (packagedBundle is not null)
+        {
+            RuntimePaths.MergePackagedConfiguration(environment, packagedBundle, overwrite: true);
+        }
+        else if (!string.IsNullOrWhiteSpace(runtimeRoot))
         {
             RuntimePaths.MergeEnvironmentFile(
                 environment,
-                RuntimePaths.GetEnvironmentFilePath(repositoryRoot),
+                RuntimePaths.GetEnvironmentFilePath(runtimeRoot),
                 overwrite: true);
             RuntimePaths.MergeEnvironmentFile(
                 environment,
-                RuntimePaths.GetLocalSecretsEnvironmentFilePath(repositoryRoot),
+                RuntimePaths.GetLocalSecretsEnvironmentFilePath(runtimeRoot),
                 overwrite: true);
         }
 
@@ -514,6 +631,129 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         {
             return null;
         }
+    }
+
+    private static string ResolveNodeExecutable()
+    {
+        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        foreach (var segment in path.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var candidate = Path.Combine(segment.Trim(), "node.exe");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new InvalidOperationException("node.exe bulunamadı. Node.js kurulu olmalıdır.");
+    }
+
+    private static void ImportPackagedConfiguration(PackagedRuntimeBundle bundle)
+    {
+        ImportEnvironmentFile(Path.Combine(bundle.ConfigDirectory, "runtime.env"));
+        ImportEnvironmentFile(RuntimePaths.GetPackagedMachineSecretsFilePath());
+    }
+
+    private static string ResolvePostgresHost() =>
+        Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__HOST") ?? "127.0.0.1";
+
+    private static int ResolvePostgresPort()
+    {
+        var configuredPort = Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__PORT");
+        return int.TryParse(configuredPort, out var parsedPort) ? parsedPort : 5432;
+    }
+
+    private async Task ValidateSchemaVersionIfRequiredAsync(
+        Configuration.DesktopRuntimeOptions options,
+        string postgresHost,
+        int postgresPort,
+        CancellationToken cancellationToken)
+    {
+        if (_packagedBundle is null || !File.Exists(_packagedBundle.ExpectedSchemaVersionPath))
+        {
+            return;
+        }
+
+        var expected = File.ReadAllText(_packagedBundle.ExpectedSchemaVersionPath).Trim();
+        if (string.IsNullOrWhiteSpace(expected))
+        {
+            return;
+        }
+
+        var database = Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__DATABASE")
+            ?? "crevafactos_local";
+        var username = Environment.GetEnvironmentVariable("CREVAFACTOS__MIGRATIONS__USERNAME")
+            ?? Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__USERNAME")
+            ?? "crevafactos";
+        var password = Environment.GetEnvironmentVariable("CREVAFACTOS__MIGRATIONS__PASSWORD")
+            ?? Environment.GetEnvironmentVariable("CREVAFACTOS__PERSISTENCE__PASSWORD")
+            ?? string.Empty;
+
+        var query =
+            "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\" DESC LIMIT 1;";
+        var actual = await QueryPostgresScalarAsync(
+            postgresHost,
+            postgresPort,
+            database,
+            username,
+            password,
+            query,
+            cancellationToken).ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(actual))
+        {
+            throw new InvalidOperationException("Veritabanı şema geçmişi bulunamadı.");
+        }
+
+        if (!string.Equals(actual.Trim(), expected, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Veritabanı şema sürümü uyumsuz. Beklenen={expected} Gerçek={actual.Trim()}");
+        }
+
+        _diagnostics.Add($"schema-version=matched {expected}");
+    }
+
+    private static async Task<string?> QueryPostgresScalarAsync(
+        string host,
+        int port,
+        string database,
+        string username,
+        string password,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "docker",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        startInfo.ArgumentList.Add("exec");
+        startInfo.ArgumentList.Add("-i");
+        startInfo.ArgumentList.Add("crevafactos-local-postgres-1");
+        startInfo.ArgumentList.Add("psql");
+        startInfo.ArgumentList.Add("-U");
+        startInfo.ArgumentList.Add(username);
+        startInfo.ArgumentList.Add("-d");
+        startInfo.ArgumentList.Add(database);
+        startInfo.ArgumentList.Add("-tA");
+
+        using var process = Process.Start(startInfo);
+        if (process is null)
+        {
+            return null;
+        }
+
+        await process.StandardInput.WriteLineAsync(query).ConfigureAwait(false);
+        process.StandardInput.Close();
+
+        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        return process.ExitCode == 0 ? output.Trim() : null;
     }
 
     private static string ResolvePnpmExecutable()

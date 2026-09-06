@@ -201,6 +201,47 @@ public static class RuntimePaths
     public static string GetWebEnvironmentFilePath(string repositoryRoot) =>
         Path.Combine(repositoryRoot, "apps", "web", ".env.local");
 
+    public static string GetPackagedMachineSecretsFilePath() =>
+        PackagedRuntimeBundle.GetMachineLocalSecretsPath();
+
+    public static string? TryResolveRuntimeRoot()
+    {
+        var packaged = PackagedRuntimeBundle.TryResolveFromDesktopExecutable();
+        if (packaged is not null)
+        {
+            return packaged.BundleRoot;
+        }
+
+        return TryResolveRepositoryRoot();
+    }
+
+    public static DesktopRuntimeMode ResolveRuntimeMode()
+    {
+        return PackagedRuntimeBundle.TryResolveFromDesktopExecutable() is not null
+            ? DesktopRuntimeMode.Packaged
+            : DesktopRuntimeMode.Development;
+    }
+
+    public static string ResolveEffectiveRuntimeRoot()
+    {
+        var packaged = PackagedRuntimeBundle.TryResolveFromDesktopExecutable();
+        if (packaged is not null)
+        {
+            return packaged.BundleRoot;
+        }
+
+        return ResolveRepositoryRoot();
+    }
+
+    public static void MergePackagedConfiguration(
+        IDictionary<string, string> target,
+        PackagedRuntimeBundle bundle,
+        bool overwrite = false)
+    {
+        MergeEnvironmentFile(target, Path.Combine(bundle.ConfigDirectory, "runtime.env"), overwrite);
+        MergeEnvironmentFile(target, GetPackagedMachineSecretsFilePath(), overwrite);
+    }
+
     public static IEnumerable<KeyValuePair<string, string>> ReadEnvironmentFilePairs(
         string filePath)
     {

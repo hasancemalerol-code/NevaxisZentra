@@ -88,7 +88,7 @@ async function resolveManageContext(): Promise<
   const authorization = await denyUnlessGranted("iot-plc.manage");
   if (authorization.status === "failure") return authorization;
 
-  const contextResult = resolveIotPlcRequestContext();
+  const contextResult = await resolveIotPlcRequestContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

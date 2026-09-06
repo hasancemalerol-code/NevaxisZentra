@@ -5,6 +5,7 @@ import {
   resolveProductionOrderRequestContext,
   type ProductionOrderRequestContext,
 } from "../../production-execution/server/production-order-request-context";
+import { resolveSharedProductionApiRequestContext } from "../../production-execution/server/shared-production-api-request-context";
 import { parseProductionPlanRuntimeConfig } from "../../production-planning/server/production-plan-runtime-config";
 import { resolveProductionPlanRequestContext } from "../../production-planning/server/production-plan-request-context";
 import { resolveProductionPlanningServerScope } from "../../production-planning/server/production-plan-scope";
@@ -69,4 +70,10 @@ export function resolveAiTaskRequestContext(): AiTaskRequestContextResult {
     status: "success",
     context: mapPlanningContext(planningContext.context),
   };
+}
+
+export async function resolveAiTaskRequestContextFromIncomingRequest(): Promise<AiTaskRequestContextResult> {
+  return resolveSharedProductionApiRequestContext(
+    "AI görev istek bağlamı yapılandırılmış çalışma modlarından çözümlenemedi.",
+  );
 }
