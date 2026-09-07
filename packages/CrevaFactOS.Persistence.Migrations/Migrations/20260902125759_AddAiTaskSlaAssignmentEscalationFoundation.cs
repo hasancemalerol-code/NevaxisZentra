@@ -317,32 +317,39 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                       AND already.tenant_role_id = existing.tenant_role_id
                       AND already.permission_definition_id = new_perm.id);
 
-                INSERT INTO ai_task_sla_policies (
-                    id, tenant_id, facility_id, policy_key, name, priority,
-                    acknowledgment_target_minutes, response_target_minutes, resolution_target_minutes,
-                    enabled, version, created_at_utc, updated_at_utc)
-                VALUES
-                    ('bb000001-03e0-4000-8000-0000000003e0', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'critical-default', 'Critical SLA', 'critical', 15, 30, 120, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
-                    ('bb000001-03e1-4000-8000-0000000003e1', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'high-default', 'High SLA', 'high', 30, 60, 240, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
-                    ('bb000001-03e2-4000-8000-0000000003e2', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'medium-default', 'Medium SLA', 'medium', 60, 240, 1440, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
-                    ('bb000001-03e3-4000-8000-0000000003e3', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'low-default', 'Low SLA', 'low', 240, 480, 2880, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00')
-                ON CONFLICT (id) DO NOTHING;
+                DO $$ BEGIN
+                    IF EXISTS (
+                        SELECT 1
+                        FROM tenants
+                        WHERE id = 'bb000001-0001-4000-8000-000000000001') THEN
+                        INSERT INTO ai_task_sla_policies (
+                            id, tenant_id, facility_id, policy_key, name, priority,
+                            acknowledgment_target_minutes, response_target_minutes, resolution_target_minutes,
+                            enabled, version, created_at_utc, updated_at_utc)
+                        VALUES
+                            ('bb000001-03e0-4000-8000-0000000003e0', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'critical-default', 'Critical SLA', 'critical', 15, 30, 120, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
+                            ('bb000001-03e1-4000-8000-0000000003e1', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'high-default', 'High SLA', 'high', 30, 60, 240, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
+                            ('bb000001-03e2-4000-8000-0000000003e2', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'medium-default', 'Medium SLA', 'medium', 60, 240, 1440, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
+                            ('bb000001-03e3-4000-8000-0000000003e3', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'low-default', 'Low SLA', 'low', 240, 480, 2880, TRUE, 1, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00')
+                        ON CONFLICT (id) DO NOTHING;
 
-                INSERT INTO ai_task_routing_rules (
-                    id, tenant_id, facility_id, rule_key, name, sort_order, category, target_type,
-                    target_team_channel_id, enabled, created_at_utc, updated_at_utc)
-                VALUES
-                    ('bb000001-03f0-4000-8000-0000000003f0', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'maintenance-to-bakim', 'Route maintenance tasks to Bakım channel', 10, 'maintenance', 'team-channel',
-                     'bb000001-03d3-4000-8000-0000000003d3', TRUE, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
-                    ('bb000001-03f1-4000-8000-0000000003f1', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'quality-to-kalite', 'Route quality tasks to Kalite channel', 20, 'quality', 'team-channel',
-                     'bb000001-03d2-4000-8000-0000000003d2', TRUE, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00')
-                ON CONFLICT (id) DO NOTHING;
+                        INSERT INTO ai_task_routing_rules (
+                            id, tenant_id, facility_id, rule_key, name, sort_order, category, target_type,
+                            target_team_channel_id, enabled, created_at_utc, updated_at_utc)
+                        VALUES
+                            ('bb000001-03f0-4000-8000-0000000003f0', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'maintenance-to-bakim', 'Route maintenance tasks to Bakım channel', 10, 'maintenance', 'team-channel',
+                             'bb000001-03d3-4000-8000-0000000003d3', TRUE, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00'),
+                            ('bb000001-03f1-4000-8000-0000000003f1', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'quality-to-kalite', 'Route quality tasks to Kalite channel', 20, 'quality', 'team-channel',
+                             'bb000001-03d2-4000-8000-0000000003d2', TRUE, TIMESTAMPTZ '2026-09-02 12:00:00+00', TIMESTAMPTZ '2026-09-02 12:00:00+00')
+                        ON CONFLICT (id) DO NOTHING;
+                    END IF;
+                END $$;
 
                 ALTER TABLE ai_task_escalation_events ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE ai_task_escalation_events FORCE ROW LEVEL SECURITY;

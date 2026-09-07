@@ -7,6 +7,7 @@ const repositoryRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   output: "standalone",
   outputFileTracingRoot: repositoryRoot,
   reactStrictMode: true,
@@ -30,6 +31,22 @@ const nextConfig: NextConfig = {
       {
         source: "/api/saas-subscription/:path*",
         destination: `${apiBaseUrl}/api/saas-subscription/:path*`,
+      },
+      {
+        source: "/api/public/ai-task-access/:path*",
+        destination: `${apiBaseUrl}/api/public/ai-task-access/:path*`,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/gorev",
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
       },
     ];
   },

@@ -52,7 +52,11 @@ public sealed class DevelopmentPilotProductionGuardTests
             Microsoft.Extensions.Options.Options.Create(new DevelopmentPilotOptions
             {
                 Enabled = false,
-            }));
+            }),
+            Microsoft.Extensions.Options.Options.Create(new Persistence.PersistenceOptions()),
+            Microsoft.Extensions.Options.Options.Create(new SaasIdentity.DevelopmentSaasIdentityOptions()),
+            new SaasIdentity.SaasIdentityMfaSecretProtector(
+                Microsoft.AspNetCore.DataProtection.DataProtectionProvider.Create("test")));
 
         var result = await service.BootstrapAsync();
 

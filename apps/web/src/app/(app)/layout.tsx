@@ -23,30 +23,57 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function isClosureDevelopmentApiRuntime(): boolean {
+  return (
+    process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
+    Boolean(process.env.CREVAFACTOS_DEV_AUTH_ISSUER?.trim()) &&
+    Boolean(process.env.CREVAFACTOS_DEV_TENANT_KEY?.trim())
+  );
+}
+
 export default async function ApplicationLayout({ children }: Readonly<{ children: ReactNode }>) {
   noStore();
+  const closureDevRuntime = isClosureDevelopmentApiRuntime();
   const session = await resolveSaasIdentitySession();
 
-  if (session.status === "mfa_pending") {
-    redirect("/mfa-dogrula");
-  }
+  if (!closureDevRuntime) {
+    if (session.status === "mfa_pending") {
+      redirect("/mfa-dogrula");
+    }
 
-  if (session.status === "session_expired") {
-    redirect("/giris?reason=session-expired");
+    if (session.status === "session_expired") {
+      redirect("/giris?reason=session-expired");
+    }
   }
 
   const pathname = await resolveRequestPathname();
-  const subscriptionAccess = await evaluateSubscriptionAccess(pathname);
+  const subscriptionAccess = closureDevRuntime
+    ? {
+        allowed: true,
+        graceWarning: false,
+        denialReason: null,
+        subscription: null,
+        failureKind: null,
+      }
+    : await evaluateSubscriptionAccess(pathname);
   if (!subscriptionAccess.allowed) {
     redirect(resolveSubscriptionAccessRedirect(subscriptionAccess));
   }
 
   const accountDisplayName =
-    session.status === "authenticated" ? session.account.displayName : null;
+    session.status === "authenticated"
+      ? session.account.displayName
+      : closureDevRuntime
+        ? process.env.CREVAFACTOS_DEV_AUTH_SUBJECT ?? "closure-dev-user"
+        : null;
   const emailMasked =
     session.status === "authenticated" ? session.account.emailMasked : null;
   const organizationLabel =
-    session.status === "authenticated" ? session.account.organizationLabel : null;
+    session.status === "authenticated"
+      ? session.account.organizationLabel
+      : closureDevRuntime
+        ? process.env.CREVAFACTOS_DEV_TENANT_KEY ?? null
+        : null;
 
   if (normalizeSubscriptionRoute(pathname) === "/abonelik-erisimi") {
     const access = await fetchCurrentEffectiveAccess();

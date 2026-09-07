@@ -264,22 +264,29 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                       AND already.tenant_role_id = existing.tenant_role_id
                       AND already.permission_definition_id = new_perm.id);
 
-                INSERT INTO ai_task_closure_policies (
-                    id, tenant_id, facility_id, policy_key, name, category, priority,
-                    minimum_evidence_count, required_evidence_types_json,
-                    approval_required, four_eyes_required, resolution_summary_required,
-                    enabled, created_at_utc, updated_at_utc)
-                VALUES
-                    ('bb000001-0400-4000-8000-000000000400', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'critical-maintenance', 'Critical maintenance closure', 'maintenance', 'critical',
-                     1, NULL, TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00'),
-                    ('bb000001-0401-4000-8000-000000000401', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'quality-ncr', 'Quality NCR closure', 'quality', NULL,
-                     1, '["quality-record","note"]', TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00'),
-                    ('bb000001-0402-4000-8000-000000000402', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
-                     'high-priority-default', 'High priority closure', NULL, 'high',
-                     0, NULL, TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00')
-                ON CONFLICT (id) DO NOTHING;
+                DO $$ BEGIN
+                    IF EXISTS (
+                        SELECT 1
+                        FROM tenants
+                        WHERE id = 'bb000001-0001-4000-8000-000000000001') THEN
+                        INSERT INTO ai_task_closure_policies (
+                            id, tenant_id, facility_id, policy_key, name, category, priority,
+                            minimum_evidence_count, required_evidence_types_json,
+                            approval_required, four_eyes_required, resolution_summary_required,
+                            enabled, created_at_utc, updated_at_utc)
+                        VALUES
+                            ('bb000001-0400-4000-8000-000000000400', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'critical-maintenance', 'Critical maintenance closure', 'maintenance', 'critical',
+                             1, NULL, TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00'),
+                            ('bb000001-0401-4000-8000-000000000401', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'quality-ncr', 'Quality NCR closure', 'quality', NULL,
+                             1, '["quality-record","note"]', TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00'),
+                            ('bb000001-0402-4000-8000-000000000402', 'bb000001-0001-4000-8000-000000000001', 'bb000001-0005-4000-8000-000000000005',
+                             'high-priority-default', 'High priority closure', NULL, 'high',
+                             0, NULL, TRUE, TRUE, TRUE, TRUE, TIMESTAMPTZ '2026-09-03 13:00:00+00', TIMESTAMPTZ '2026-09-03 13:00:00+00')
+                        ON CONFLICT (id) DO NOTHING;
+                    END IF;
+                END $$;
 
                 ALTER TABLE ai_task_evidence ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE ai_task_evidence FORCE ROW LEVEL SECURITY;

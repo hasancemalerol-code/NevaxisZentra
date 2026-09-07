@@ -24,4 +24,8 @@ public static class AiTaskPermissionKeys
     public const string PlaybookManage = "ai-task.playbook.manage";
     public const string PlaybookRun = "ai-task.playbook.run";
     public const string PlaybookOverride = "ai-task.playbook.override";
+    public const string DeliveryRead = "ai-task.delivery.read";
+    public const string DeliveryManage = "ai-task.delivery.manage";
+    public const string SecureAccessRead = "ai-task.secure-access.read";
+    public const string SecureAccessManage = "ai-task.secure-access.manage";
 }

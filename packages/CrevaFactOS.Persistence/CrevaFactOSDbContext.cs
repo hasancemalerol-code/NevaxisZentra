@@ -31,6 +31,7 @@ using CrevaFactOS.Persistence.OperationalRisk;
 using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
+using CrevaFactOS.Persistence.AiTasks.Delivery;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.MarketRates;
@@ -331,6 +332,9 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskPlaybookStepDependency> AiTaskPlaybookStepDependencies => Set<AiTaskPlaybookStepDependency>();
     public DbSet<AiTaskPlaybookRun> AiTaskPlaybookRuns => Set<AiTaskPlaybookRun>();
     public DbSet<AiTaskPlaybookRunStep> AiTaskPlaybookRunSteps => Set<AiTaskPlaybookRunStep>();
+    public DbSet<AiTaskDelivery> AiTaskDeliveries => Set<AiTaskDelivery>();
+    public DbSet<AiTaskDeliveryAttempt> AiTaskDeliveryAttempts => Set<AiTaskDeliveryAttempt>();
+    public DbSet<AiTaskSecureAccessGrant> AiTaskSecureAccessGrants => Set<AiTaskSecureAccessGrant>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1798,6 +1802,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskDeliveryEntityConfiguration());
+        modelBuilder.Entity<AiTaskDelivery>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskDeliveryAttemptEntityConfiguration());
+        modelBuilder.Entity<AiTaskDeliveryAttempt>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskSecureAccessGrantEntityConfiguration());
+        modelBuilder.Entity<AiTaskSecureAccessGrant>().HasQueryFilter(g =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && g.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Teams foundation (TEAMS-FOUNDATION-1)
         modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());

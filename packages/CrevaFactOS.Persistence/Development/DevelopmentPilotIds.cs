@@ -1275,6 +1275,18 @@ public static class DevelopmentPilotIds
     public static readonly Guid AiTaskSlaManagePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-0000000000c4");
 
+    public static readonly Guid AiTaskDeliveryReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-0000000000e0");
+
+    public static readonly Guid AiTaskDeliveryManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-0000000000e1");
+
+    public static readonly Guid AiTaskSecureAccessReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-0000000000e2");
+
+    public static readonly Guid AiTaskSecureAccessManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-0000000000e3");
+
     // Operational risk pilot fixtures (0200–020f)
     public static readonly Guid OperationalRiskPilotMaterialCaseId =
         Guid.Parse("bb000001-0200-4000-8000-000000000200");

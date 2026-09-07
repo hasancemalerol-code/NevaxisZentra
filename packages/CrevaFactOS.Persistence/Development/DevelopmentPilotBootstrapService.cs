@@ -512,6 +512,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureAiTaskSlaManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskDeliveryReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskDeliveryReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskDeliveryManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskSecureAccessReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskSecureAccessReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureAiTaskSecureAccessManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureTeamsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureTeamsReadPermissionAssignmentAsync(
@@ -2952,6 +2964,42 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             AiTaskPermissionKeys.SlaManage,
             DevelopmentPilotIds.AiTaskSlaManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskDeliveryReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.DeliveryRead,
+            DevelopmentPilotIds.AiTaskDeliveryReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskDeliveryManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.DeliveryManage,
+            DevelopmentPilotIds.AiTaskDeliveryManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskSecureAccessReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.SecureAccessRead,
+            DevelopmentPilotIds.AiTaskSecureAccessReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureAiTaskSecureAccessManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            AiTaskPermissionKeys.SecureAccessManage,
+            DevelopmentPilotIds.AiTaskSecureAccessManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureTeamsReadPermissionAssignmentAsync(

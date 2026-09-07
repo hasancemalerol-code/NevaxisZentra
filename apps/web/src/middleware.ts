@@ -17,7 +17,17 @@ function isPublicRoute(pathname: string): boolean {
     pathname.startsWith("/health") ||
     pathname.startsWith("/api/identity") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico"
+    pathname === "/favicon.ico" ||
+    pathname === "/gorev" ||
+    pathname.startsWith("/gorev/")
+  );
+}
+
+function isDevelopmentApiBypass(): boolean {
+  return (
+    process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
+    Boolean(process.env.CREVAFACTOS_DEV_AUTH_ISSUER?.trim()) &&
+    Boolean(process.env.CREVAFACTOS_DEV_TENANT_KEY?.trim())
   );
 }
 
@@ -37,6 +47,16 @@ export function middleware(request: NextRequest) {
   }
 
   if (!hasSession) {
+    if (isDevelopmentApiBypass()) {
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-pathname", pathname);
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
     const signInUrl = new URL("/giris", request.url);
     if (pathname !== "/") {
       signInUrl.searchParams.set("returnUrl", pathname);

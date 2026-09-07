@@ -32,6 +32,8 @@ import {
   getAiTaskStatusLabel,
 } from "@/features/ai-task-center/presentation/ai-task-labels";
 import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
+import { readAiTaskDeliveryWorkspace } from "@/features/ai-task-center/server/ai-task-delivery-queries";
+import { AiTaskDeliverySectionClient } from "@/features/ai-task-center/components/ai-task-delivery-section-client";
 import { AiTaskDetailOverviewAiCardClient } from "@/features/ai-task-center/components/ai-task-detail-overview-ai-card-client";
 import { AiTaskDecisionIntelligencePanelClient } from "@/features/ai-task-center/components/ai-task-decision-intelligence-panel-client";
 import { readAiTaskDecisionWorkspace } from "@/features/ai-task-center/server/ai-task-decision-intelligence-queries";
@@ -88,9 +90,15 @@ export default async function AiTaskDetailPage({
   params: Promise<PageParams>;
 }>) {
   const { taskId } = await params;
-  const [result, decisionResult] = await Promise.all([
+  const [result, decisionResult, deliveryWorkspace] = await Promise.all([
     readAiTaskDetail(taskId),
     readAiTaskDecisionWorkspace(taskId),
+    readAiTaskDeliveryWorkspace(taskId).catch(() => ({
+      deliveries: [],
+      grants: [],
+      channels: [],
+      canManage: false,
+    })),
   ]);
 
   if (result.status === "failure") {
@@ -282,6 +290,14 @@ export default async function AiTaskDetailPage({
           >
             <AiTaskDetailTimeline events={task.auditTrail} />
           </Section>
+
+          <AiTaskDeliverySectionClient
+            taskId={taskId}
+            deliveries={deliveryWorkspace.deliveries}
+            grants={deliveryWorkspace.grants}
+            channels={deliveryWorkspace.channels}
+            canManage={deliveryWorkspace.canManage}
+          />
         </div>
 
         <AiTaskOperationsPanelClient

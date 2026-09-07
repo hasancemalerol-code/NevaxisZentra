@@ -1,0 +1,48 @@
+-- Patch ai_tasks schema on closure DB to match current EF model (partial migration chain gap).
+
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS assigned_membership_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS assigned_team_channel_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS acknowledged_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS started_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS resolved_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS escalation_level integer NOT NULL DEFAULT 0;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS escalation_state varchar(20) NOT NULL DEFAULT 'none';
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS sla_policy_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS last_escalated_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS assignment_reason varchar(500) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS assignment_source varchar(40) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS routing_rule_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS routing_metadata_json text NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS parent_task_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS playbook_run_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS playbook_run_step_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS dependency_state varchar(20) NOT NULL DEFAULT 'ready';
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS dependency_block_reason varchar(500) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_state varchar(40) NOT NULL DEFAULT 'open';
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_policy_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS minimum_evidence_required integer NOT NULL DEFAULT 0;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS four_eyes_required boolean NOT NULL DEFAULT false;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS automation_rule_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS automation_rule_version integer NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS automation_override_json text NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS automation_metadata_json text NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS automation_tags_json text NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS resolution_summary varchar(4000) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS resolution_code varchar(50) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_reason varchar(2000) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_approval_required boolean NOT NULL DEFAULT false;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_requested_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_requested_by_membership_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_approved_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_approved_by_membership_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_rejected_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_rejected_by_membership_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS closure_rejection_reason varchar(2000) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS reopened_at_utc timestamptz NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS reopened_by_membership_id uuid NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS reopen_reason varchar(2000) NULL;
+ALTER TABLE ai_tasks ADD COLUMN IF NOT EXISTS final_closed_at_utc timestamptz NULL;
+
+UPDATE ai_tasks SET escalation_state = 'none' WHERE escalation_state IS NULL;
+UPDATE ai_tasks SET dependency_state = 'ready' WHERE dependency_state IS NULL;
+UPDATE ai_tasks SET closure_state = 'open' WHERE closure_state IS NULL;

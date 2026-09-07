@@ -1,0 +1,552 @@
+using CrevaFactOS.Api.Facilities;
+using CrevaFactOS.Persistence.AiTasks;
+using CrevaFactOS.Persistence.AiTasks.Delivery;
+using CrevaFactOS.Persistence.Audit;
+using CrevaFactOS.Persistence.Tenancy;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.Threading.RateLimiting;
+
+namespace CrevaFactOS.Api.AiTasks;
+
+public static class AiTaskDeliveryEndpointRouteBuilderExtensions
+{
+    public static IEndpointRouteBuilder MapAiTaskDeliveryEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var deliveries = endpoints.MapGroup("/api/ai-task-deliveries").RequireAuthorization();
+        deliveries.MapGet("/{deliveryId:guid}", GetDeliveryAsync);
+        deliveries.MapPost("/{deliveryId:guid}/retry", RetryDeliveryAsync);
+        deliveries.MapPost("/{deliveryId:guid}/cancel", CancelDeliveryAsync);
+
+        var tasks = endpoints.MapGroup("/api/ai-tasks").RequireAuthorization();
+        tasks.MapPost("/{taskId:guid}/deliveries", EnqueueDeliveryAsync);
+        tasks.MapGet("/{taskId:guid}/deliveries", ListTaskDeliveriesAsync);
+
+        var channels = endpoints.MapGroup("/api/ai-task-delivery").RequireAuthorization();
+        channels.MapGet("/channels", ListChannelsAsync);
+        channels.MapGet("/health", GetWorkerHealthAsync);
+
+        var management = endpoints.MapGroup("/api/ai-task-deliveries-management").RequireAuthorization();
+        management.MapGet("/", ListDeliveriesAsync);
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> EnqueueDeliveryAsync(
+        Guid taskId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] EnqueueDeliveryRequest request,
+        HttpContext httpContext,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var idempotencyKey = httpContext.Request.Headers.TryGetValue("Idempotency-Key", out var header)
+            && !string.IsNullOrWhiteSpace(header.ToString())
+            ? header.ToString()
+            : request.IdempotencyKey;
+
+        var result = await repository.EnqueueAsync(
+            context,
+            new EnqueueAiTaskDeliveryCommand(
+                taskId,
+                request.Channel,
+                request.RecipientKind,
+                request.RecipientUserId,
+                request.MaskedRecipient,
+                idempotencyKey ?? Guid.NewGuid().ToString("N"),
+                request.DeliveryProjectionJson,
+                request.SecureAccessGrantId,
+                request.MaxAttempts),
+            cancellationToken);
+
+        return result.Success
+            ? TypedResults.Ok(result.Delivery)
+            : AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+    }
+
+    private static async Task<IResult> ListTaskDeliveriesAsync(
+        Guid taskId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var items = await repository.ListForTaskAsync(context, taskId, cancellationToken);
+        return TypedResults.Ok(new { items });
+    }
+
+    private static async Task<IResult> GetDeliveryAsync(
+        Guid deliveryId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var delivery = await repository.GetByIdAsync(context, deliveryId, cancellationToken);
+        return delivery is null
+            ? AiTaskEndpointHelpers.MapFailure(AiTaskDeliveryFailureCodes.NotFound, "Delivery not found.")
+            : TypedResults.Ok(delivery);
+    }
+
+    private static async Task<IResult> RetryDeliveryAsync(
+        Guid deliveryId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.RetryAsync(context, deliveryId, cancellationToken);
+        return result.Success
+            ? TypedResults.Ok(result.Delivery)
+            : AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+    }
+
+    private static async Task<IResult> CancelDeliveryAsync(
+        Guid deliveryId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.CancelAsync(context, deliveryId, cancellationToken);
+        return result.Success
+            ? TypedResults.Ok(result.Delivery)
+            : AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+    }
+
+    private static async Task<IResult> ListChannelsAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryChannelRegistry registry,
+        CorrelationContext correlationContext,
+        IHostEnvironment environment,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var includeDev = environment.IsDevelopment() || environment.EnvironmentName == "Testing";
+        return TypedResults.Ok(new { channels = registry.ListReadiness(includeDev) });
+    }
+
+    private static async Task<IResult> GetWorkerHealthAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskDeliveryRepository repository,
+        CorrelationContext correlationContext,
+        IHostEnvironment environment,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var includeDev = environment.IsDevelopment() || environment.EnvironmentName == "Testing";
+        var health = await repository.GetWorkerHealthAsync(context, includeDev, cancellationToken);
+        return TypedResults.Ok(health);
+    }
+
+    private static async Task<IResult> ListDeliveriesAsync(
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? channel,
+        [FromQuery] string? status,
+        [FromQuery] Guid? taskId,
+        [FromQuery] Guid? recipientUserId,
+        [FromQuery] DateTimeOffset? fromUtc,
+        [FromQuery] DateTimeOffset? toUtc,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        IFacilityAccessResolver facilityAccessResolver = null!,
+        IAiTaskDeliveryRepository repository = null!,
+        CorrelationContext correlationContext = null!,
+        CancellationToken cancellationToken = default)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.DeliveryRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.ListAsync(
+            context,
+            new AiTaskDeliveryListFilters(channel, status, taskId, recipientUserId, fromUtc, toUtc, page, pageSize),
+            cancellationToken);
+        return TypedResults.Ok(result);
+    }
+
+    public static IServiceCollection AddCrevaFactOSAiTaskDelivery(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptions<AiTaskDeliveryOptions>()
+            .Bind(configuration.GetSection(AiTaskDeliveryOptions.SectionName))
+            .PostConfigure(ApplyAiTaskDeliveryEnvironmentOverrides);
+        services.AddScoped<AiTaskSecureAccessTokenService>();
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.Email, "E-posta"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.WhatsApp, "WhatsApp"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.CrevaFactOsTeams, "CrevaFactOS Teams"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.MicrosoftTeams, "Microsoft Teams"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.Sms, "SMS"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, DevelopmentLoopbackAiTaskDeliveryChannelAdapter>();
+        services.AddScoped<IAiTaskDeliveryChannelRegistry, AiTaskDeliveryChannelRegistry>();
+
+        services.AddScoped<IAiTaskDeliveryRepository>(sp =>
+        {
+            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            return db is null
+                ? new UnavailableAiTaskDeliveryRepository()
+                : new AiTaskDeliveryRepository(
+                    db,
+                    sp.GetRequiredService<TenantDatabaseSession>(),
+                    sp.GetRequiredService<IAiTaskDeliveryChannelRegistry>(),
+                    sp.GetRequiredService<IHostEnvironment>());
+        });
+
+        services.AddScoped<IAiTaskSecureAccessRepository>(sp =>
+        {
+            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            return db is null
+                ? new UnavailableAiTaskSecureAccessRepository()
+                : new AiTaskSecureAccessRepository(
+                    db,
+                    sp.GetRequiredService<TenantDatabaseSession>(),
+                    sp.GetRequiredService<AiTaskSecureAccessTokenService>(),
+                    sp.GetRequiredService<TenantContextAccessor>(),
+                    sp.GetRequiredService<IOptions<AiTaskDeliveryOptions>>());
+        });
+
+        services.AddScoped<IAiTaskDeliveryWorker>(sp =>
+        {
+            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            return db is null
+                ? new UnavailableAiTaskDeliveryWorker()
+                : new AiTaskDeliveryWorker(
+                    db,
+                    sp.GetRequiredService<TenantDatabaseSession>(),
+                    sp.GetRequiredService<IAiTaskDeliveryChannelRegistry>(),
+                    sp.GetRequiredService<ITenantContextAccessor>(),
+                    sp.GetRequiredService<IOptions<AiTaskDeliveryOptions>>());
+        });
+
+        services.AddScoped<IAiTaskDeliveryWorkTenantDiscoverer, PostgreSqlAiTaskDeliveryWorkTenantDiscoverer>();
+
+        services.AddHostedService<AiTaskDeliveryBackgroundService>();
+        return services;
+    }
+
+    private static void ApplyAiTaskDeliveryEnvironmentOverrides(AiTaskDeliveryOptions options)
+    {
+        options.WorkerEnabled = GetDeliveryEnvBoolean("WORKER_ENABLED", options.WorkerEnabled);
+        options.LeaseSeconds = GetDeliveryEnvInt32("LEASE_SECONDS", options.LeaseSeconds);
+        options.RetryBaseDelaySeconds = GetDeliveryEnvInt32("RETRY_BASE_DELAY_SECONDS", options.RetryBaseDelaySeconds);
+        options.EnableClosureTtlPolicies = GetDeliveryEnvBoolean(
+            "ENABLE_CLOSURE_TTL_POLICIES",
+            options.EnableClosureTtlPolicies);
+    }
+
+    private static string GetDeliveryEnvValue(string suffix, string fallback) =>
+        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}") ?? fallback;
+
+    private static int GetDeliveryEnvInt32(string suffix, int fallback)
+    {
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}");
+        return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
+    }
+
+    private static bool GetDeliveryEnvBoolean(string suffix, bool fallback)
+    {
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}");
+        return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
+    }
+}
+
+public sealed record EnqueueDeliveryRequest(
+    string Channel,
+    string RecipientKind,
+    Guid? RecipientUserId,
+    string? MaskedRecipient,
+    string? IdempotencyKey,
+    string? DeliveryProjectionJson,
+    Guid? SecureAccessGrantId,
+    int? MaxAttempts);
+
+public static class AiTaskSecureAccessEndpointRouteBuilderExtensions
+{
+    public static IEndpointRouteBuilder MapAiTaskSecureAccessEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var grants = endpoints.MapGroup("/api/ai-task-secure-access").RequireAuthorization();
+        grants.MapPost("/{grantId:guid}/revoke", RevokeGrantAsync);
+        grants.MapPost("/{grantId:guid}/rotate", RotateGrantAsync);
+
+        var tasks = endpoints.MapGroup("/api/ai-tasks").RequireAuthorization();
+        tasks.MapPost("/{taskId:guid}/secure-access", IssueGrantAsync);
+        tasks.MapGet("/{taskId:guid}/secure-access", ListGrantsAsync);
+
+        var publicGroup = endpoints.MapGroup("/api/public/ai-task-access");
+        publicGroup.MapPost("/resolve", ResolvePublicAsync)
+            .AllowAnonymous()
+            .RequireRateLimiting("ai-task-secure-access-resolve");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> IssueGrantAsync(
+        Guid taskId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] IssueSecureAccessRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskSecureAccessRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.SecureAccessManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.IssueAsync(
+            context,
+            new IssueAiTaskSecureAccessCommand(taskId, request.TtlPolicy, request.Scope),
+            cancellationToken);
+
+        if (!result.Success)
+        {
+            return AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+        }
+
+        return TypedResults.Ok(new
+        {
+            grant = result.Grant,
+            secureLinkPath = result.SecureLinkPath,
+            accessToken = result.RawToken,
+        });
+    }
+
+    private static async Task<IResult> ListGrantsAsync(
+        Guid taskId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskSecureAccessRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.SecureAccessRead,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var items = await repository.ListForTaskAsync(context, taskId, cancellationToken);
+        return TypedResults.Ok(new { items });
+    }
+
+    private static async Task<IResult> RevokeGrantAsync(
+        Guid grantId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RevokeSecureAccessRequest? request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskSecureAccessRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.SecureAccessManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.RevokeAsync(context, grantId, request?.Reason, cancellationToken);
+        return result.Success
+            ? TypedResults.Ok(result.Grant)
+            : AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+    }
+
+    private static async Task<IResult> RotateGrantAsync(
+        Guid grantId,
+        [FromQuery] Guid? facilityId,
+        [FromBody] RotateSecureAccessRequest request,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAiTaskSecureAccessRepository repository,
+        CorrelationContext correlationContext,
+        CancellationToken cancellationToken)
+    {
+        var (context, failResult) = await AiTaskEndpointHelpers.ResolvePermissionAccessAsync(
+            facilityId,
+            facilityAccessResolver,
+            correlationContext,
+            AiTaskPermissionKeys.SecureAccessManage,
+            cancellationToken);
+        if (context is null) return failResult!;
+
+        var result = await repository.RotateAsync(context, grantId, request.TtlPolicy, cancellationToken);
+        if (!result.Success)
+        {
+            return AiTaskEndpointHelpers.MapFailure(result.FailureCode!, result.FailureMessage!);
+        }
+
+        return TypedResults.Ok(new
+        {
+            grant = result.Grant,
+            secureLinkPath = result.SecureLinkPath,
+            accessToken = result.RawToken,
+        });
+    }
+
+    private static async Task<IResult> ResolvePublicAsync(
+        [FromBody] ResolveSecureAccessRequest request,
+        IAiTaskSecureAccessRepository repository,
+        CancellationToken cancellationToken)
+    {
+        var result = await repository.ResolvePublicAsync(request.AccessToken, cancellationToken);
+        if (!result.Success)
+        {
+            return TypedResults.Json(
+                new { code = result.FailureCode, message = "Görev bağlantısı kullanılamıyor." },
+                statusCode: StatusCodes.Status404NotFound);
+        }
+
+        return TypedResults.Ok(result.Projection);
+    }
+
+    public static void AddAiTaskSecureAccessRateLimiting(this IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("ai-task-secure-access-resolve", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0,
+                    }));
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
+    }
+}
+
+public sealed record IssueSecureAccessRequest(string TtlPolicy, string Scope = AiTaskSecureAccessScopes.ReadOnly);
+public sealed record RevokeSecureAccessRequest(string? Reason);
+public sealed record RotateSecureAccessRequest(string TtlPolicy);
+public sealed record ResolveSecureAccessRequest(string AccessToken);
+
+internal sealed class AiTaskDeliveryBackgroundService(
+    IServiceProvider serviceProvider,
+    IOptions<AiTaskDeliveryOptions> deliveryOptions) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        if (!deliveryOptions.Value.WorkerEnabled)
+        {
+            return;
+        }
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                using var scope = serviceProvider.CreateScope();
+                var db = scope.ServiceProvider.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+                if (db is null)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                    continue;
+                }
+
+                var discoverer = scope.ServiceProvider.GetRequiredService<IAiTaskDeliveryWorkTenantDiscoverer>();
+                var tenantAccessor = scope.ServiceProvider.GetRequiredService<TenantContextAccessor>();
+                var worker = scope.ServiceProvider.GetRequiredService<IAiTaskDeliveryWorker>();
+                var contexts = await discoverer.DiscoverWorkerContextsAsync(stoppingToken);
+
+                foreach (var context in contexts)
+                {
+                    tenantAccessor.Set(context);
+                    await worker.ProcessBatchAsync(Environment.MachineName, 10, stoppingToken);
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch
+            {
+                // Worker batch failures are surfaced via delivery records and health endpoint.
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+        }
+    }
+}
