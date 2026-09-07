@@ -23,8 +23,13 @@ public sealed class AiTaskDeliveryEntityConfiguration : IEntityTypeConfiguration
         builder.Property(d => d.NextAttemptAtUtc).HasColumnName("next_attempt_at_utc");
         builder.Property(d => d.LeaseOwner).HasColumnName("lease_owner").HasMaxLength(100);
         builder.Property(d => d.LeaseExpiresAtUtc).HasColumnName("lease_expires_at_utc");
+        builder.Property(d => d.Provider).HasColumnName("provider").HasMaxLength(50);
         builder.Property(d => d.ProviderMessageId).HasColumnName("provider_message_id").HasMaxLength(200);
         builder.Property(d => d.ProviderCorrelationId).HasColumnName("provider_correlation_id").HasMaxLength(200);
+        builder.Property(d => d.ProviderStatus).HasColumnName("provider_status").HasMaxLength(30);
+        builder.Property(d => d.ProviderStatusAtUtc).HasColumnName("provider_status_at_utc");
+        builder.Property(d => d.RecipientAddressProtected).HasColumnName("recipient_address_protected");
+        builder.Property(d => d.ConsentStatus).HasColumnName("consent_status").HasMaxLength(30);
         builder.Property(d => d.LastErrorCode).HasColumnName("last_error_code").HasMaxLength(100);
         builder.Property(d => d.LastErrorCategory).HasColumnName("last_error_category").HasMaxLength(30);
         builder.Property(d => d.RequestedByUserId).HasColumnName("requested_by_user_id");

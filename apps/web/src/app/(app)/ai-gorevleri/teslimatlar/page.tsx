@@ -6,6 +6,9 @@ import { Card } from "@/components/ui/card";
 import {
   getAiTaskDeliveryChannelLabel,
   getAiTaskDeliveryStatusLabel,
+  getAiTaskWhatsAppConsentLabel,
+  getAiTaskWhatsAppProviderStatusLabel,
+  getAiTaskWhatsAppReadinessLabel,
 } from "@/features/ai-task-center/presentation/ai-task-delivery-labels";
 import { formatAiTaskShortDateTime } from "@/features/ai-task-center/presentation/ai-task-formatters";
 import { readAiTaskDeliveryManagement } from "@/features/ai-task-center/server/ai-task-delivery-queries";
@@ -45,7 +48,11 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
                   {getAiTaskDeliveryChannelLabel(channel.channelKey)}
                 </div>
                 <div className="text-muted-foreground">
-                  {channel.available ? "Hazır" : "Kanal yapılandırılmadı"}
+                  {channel.channelKey === "whatsapp"
+                    ? getAiTaskWhatsAppReadinessLabel(channel)
+                    : channel.available
+                      ? "Hazır"
+                      : "Henüz yapılandırılmadı"}
                 </div>
               </Card>
             ))}
@@ -58,7 +65,11 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
               <tr>
                 <th className="px-3 py-2">Kanal</th>
                 <th className="px-3 py-2">Durum</th>
+                <th className="px-3 py-2">Sağlayıcı Durumu</th>
                 <th className="px-3 py-2">Alıcı</th>
+                <th className="px-3 py-2">Onay</th>
+                <th className="px-3 py-2">Deneme</th>
+                <th className="px-3 py-2">Hata</th>
                 <th className="px-3 py-2">İstenen</th>
                 <th className="px-3 py-2">Görev</th>
               </tr>
@@ -74,7 +85,19 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
                       {getAiTaskDeliveryStatusLabel(delivery.status)}
                     </Badge>
                   </td>
+                  <td className="px-3 py-2">
+                    {delivery.channel === "whatsapp"
+                      ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
+                      : "—"}
+                  </td>
                   <td className="px-3 py-2">{delivery.maskedRecipient ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    {delivery.channel === "whatsapp"
+                      ? getAiTaskWhatsAppConsentLabel(delivery.consentStatus)
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-2">{delivery.attemptCount}</td>
+                  <td className="px-3 py-2">{delivery.lastErrorCategory ?? "—"}</td>
                   <td className="px-3 py-2">
                     {formatAiTaskShortDateTime(delivery.requestedAtUtc)}
                   </td>

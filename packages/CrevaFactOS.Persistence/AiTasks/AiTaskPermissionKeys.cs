@@ -26,6 +26,9 @@ public static class AiTaskPermissionKeys
     public const string PlaybookOverride = "ai-task.playbook.override";
     public const string DeliveryRead = "ai-task.delivery.read";
     public const string DeliveryManage = "ai-task.delivery.manage";
+    public const string DeliveryWhatsAppView = "ai-task.delivery.whatsapp.view";
+    public const string DeliveryWhatsAppSend = "ai-task.delivery.whatsapp.send";
+    public const string DeliveryWhatsAppConfigure = "ai-task.delivery.whatsapp.configure";
     public const string SecureAccessRead = "ai-task.secure-access.read";
     public const string SecureAccessManage = "ai-task.secure-access.manage";
 }

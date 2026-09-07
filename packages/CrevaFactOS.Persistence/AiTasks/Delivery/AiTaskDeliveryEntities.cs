@@ -19,8 +19,13 @@ public sealed class AiTaskDelivery
     public DateTimeOffset? NextAttemptAtUtc { get; set; }
     public string? LeaseOwner { get; set; }
     public DateTimeOffset? LeaseExpiresAtUtc { get; set; }
+    public string? Provider { get; set; }
     public string? ProviderMessageId { get; set; }
     public string? ProviderCorrelationId { get; set; }
+    public string? ProviderStatus { get; set; }
+    public DateTimeOffset? ProviderStatusAtUtc { get; set; }
+    public string? RecipientAddressProtected { get; set; }
+    public string? ConsentStatus { get; set; }
     public string? LastErrorCode { get; set; }
     public string? LastErrorCategory { get; set; }
     public Guid RequestedByUserId { get; set; }

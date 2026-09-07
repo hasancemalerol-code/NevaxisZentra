@@ -20,6 +20,11 @@ export type RawAiTaskDelivery = Readonly<{
   sentAtUtc: string | null;
   cancelledAtUtc: string | null;
   secureAccessGrantId: string | null;
+  provider: string | null;
+  providerMessageId: string | null;
+  providerStatus: string | null;
+  providerStatusAtUtc: string | null;
+  consentStatus: string | null;
   createdAtUtc: string;
 }>;
 
@@ -137,6 +142,10 @@ export async function enqueueAiTaskDelivery(
     recipientKind: string;
     idempotencyKey: string;
     secureAccessGrantId?: string;
+    maskedRecipient?: string;
+    recipientE164?: string;
+    consentStatus?: string;
+    secureTaskUrl?: string;
   }>,
 ): Promise<RawAiTaskDelivery> {
   return fetchAiTaskDeliveryApi(context, `/api/ai-tasks/${taskId}/deliveries?facilityId=${context.facilityId}`, {

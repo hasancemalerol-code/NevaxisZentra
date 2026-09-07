@@ -46,6 +46,10 @@ export async function enqueueAiTaskDeliveryAction(
     recipientKind: string;
     idempotencyKey: string;
     secureAccessGrantId?: string;
+    maskedRecipient?: string;
+    recipientE164?: string;
+    consentStatus?: string;
+    secureTaskUrl?: string;
   }>,
 ) {
   const context = await requireContext();

@@ -1,6 +1,7 @@
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.AiTasks.Delivery;
+using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +70,10 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
                 idempotencyKey ?? Guid.NewGuid().ToString("N"),
                 request.DeliveryProjectionJson,
                 request.SecureAccessGrantId,
-                request.MaxAttempts),
+                request.MaxAttempts,
+                request.RecipientE164,
+                request.ConsentStatus,
+                request.SecureTaskUrl),
             cancellationToken);
 
         return result.Success
@@ -242,10 +246,17 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
             .Bind(configuration.GetSection(AiTaskDeliveryOptions.SectionName))
             .PostConfigure(ApplyAiTaskDeliveryEnvironmentOverrides);
         services.AddScoped<AiTaskSecureAccessTokenService>();
+        services.AddOptions<WhatsAppBusinessDeliveryOptions>()
+            .Bind(configuration.GetSection(WhatsAppBusinessDeliveryOptions.SectionName))
+            .PostConfigure(ApplyWhatsAppEnvironmentOverrides);
+        services.AddHttpClient(nameof(MetaWhatsAppCloudApiClient));
+        services.AddScoped<WhatsAppSecretProtector>();
+        services.AddScoped<IWhatsAppChannelConfigurationResolver, WhatsAppChannelConfigurationResolver>();
+        services.AddScoped<IMetaWhatsAppCloudApiClient, MetaWhatsAppCloudApiClient>();
+        services.AddScoped<IWhatsAppWebhookProcessor, WhatsAppWebhookProcessor>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
             => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.Email, "E-posta"));
-        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
-            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.WhatsApp, "WhatsApp"));
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, WhatsAppBusinessDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
             => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.CrevaFactOsTeams, "CrevaFactOS Teams"));
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
@@ -264,7 +275,8 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
                     db,
                     sp.GetRequiredService<TenantDatabaseSession>(),
                     sp.GetRequiredService<IAiTaskDeliveryChannelRegistry>(),
-                    sp.GetRequiredService<IHostEnvironment>());
+                    sp.GetRequiredService<IHostEnvironment>(),
+                    sp.GetRequiredService<WhatsAppSecretProtector>());
         });
 
         services.AddScoped<IAiTaskSecureAccessRepository>(sp =>
@@ -297,6 +309,28 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddHostedService<AiTaskDeliveryBackgroundService>();
         return services;
+    }
+
+    private static void ApplyWhatsAppEnvironmentOverrides(WhatsAppBusinessDeliveryOptions options)
+    {
+        options.Enabled = GetWhatsAppEnvBoolean("ENABLED", options.Enabled);
+        options.PhoneNumberId = GetWhatsAppEnvValue("PHONE_NUMBER_ID", options.PhoneNumberId);
+        options.BusinessAccountId = GetWhatsAppEnvValue("BUSINESS_ACCOUNT_ID", options.BusinessAccountId);
+        options.AccessToken = GetWhatsAppEnvValue("ACCESS_TOKEN", options.AccessToken);
+        options.AppSecret = GetWhatsAppEnvValue("APP_SECRET", options.AppSecret);
+        options.WebhookVerifyToken = GetWhatsAppEnvValue("WEBHOOK_VERIFY_TOKEN", options.WebhookVerifyToken);
+        options.DefaultTemplateName = GetWhatsAppEnvValue("DEFAULT_TEMPLATE_NAME", options.DefaultTemplateName);
+        options.DefaultTemplateLanguageCode = GetWhatsAppEnvValue("DEFAULT_TEMPLATE_LANGUAGE_CODE", options.DefaultTemplateLanguageCode);
+        options.TestApiBaseUrl = GetWhatsAppEnvValue("TEST_API_BASE_URL", options.TestApiBaseUrl);
+    }
+
+    private static string? GetWhatsAppEnvValue(string suffix, string? fallback) =>
+        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}") ?? fallback;
+
+    private static bool GetWhatsAppEnvBoolean(string suffix, bool fallback)
+    {
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}");
+        return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
 
     private static void ApplyAiTaskDeliveryEnvironmentOverrides(AiTaskDeliveryOptions options)
@@ -333,7 +367,10 @@ public sealed record EnqueueDeliveryRequest(
     string? IdempotencyKey,
     string? DeliveryProjectionJson,
     Guid? SecureAccessGrantId,
-    int? MaxAttempts);
+    int? MaxAttempts,
+    string? RecipientE164 = null,
+    string? ConsentStatus = null,
+    string? SecureTaskUrl = null);
 
 public static class AiTaskSecureAccessEndpointRouteBuilderExtensions
 {

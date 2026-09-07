@@ -1,3 +1,4 @@
+using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +9,8 @@ public sealed class AiTaskDeliveryRepository(
     CrevaFactOSDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskDeliveryChannelRegistry channelRegistry,
-    IHostEnvironment hostEnvironment) : IAiTaskDeliveryRepository
+    IHostEnvironment hostEnvironment,
+    WhatsAppSecretProtector whatsAppSecretProtector) : IAiTaskDeliveryRepository
 {
     public Task<AiTaskDeliveryWriteResult> EnqueueAsync(
         AiTaskOperationContext context,
@@ -70,6 +72,7 @@ public sealed class AiTaskDeliveryRepository(
                 }
 
                 var now = DateTimeOffset.UtcNow;
+                var projectionJson = BuildDeliveryProjectionJson(command, task);
                 var delivery = new AiTaskDelivery
                 {
                     Id = Guid.NewGuid(),
@@ -83,14 +86,20 @@ public sealed class AiTaskDeliveryRepository(
                     Status = AiTaskDeliveryStatuses.Queued,
                     IdempotencyKey = command.IdempotencyKey.Trim(),
                     PayloadVersion = AiTaskDeliveryConstants.PayloadVersion,
-                    DeliveryProjectionJson = command.DeliveryProjectionJson
-                        ?? AiTaskSafeProjectionBuilder.BuildDeliveryProjectionJson(task),
+                    DeliveryProjectionJson = projectionJson,
                     AttemptCount = 0,
                     MaxAttempts = command.MaxAttempts ?? AiTaskDeliveryConstants.DefaultMaxAttempts,
                     NextAttemptAtUtc = now,
                     RequestedByUserId = context.IdentitySubjectId,
                     RequestedAtUtc = now,
                     SecureAccessGrantId = command.SecureAccessGrantId,
+                    Provider = command.Channel == AiTaskDeliveryChannels.WhatsApp
+                        ? WhatsAppBusinessProviders.MetaWhatsAppCloud
+                        : null,
+                    ConsentStatus = command.ConsentStatus,
+                    RecipientAddressProtected = string.IsNullOrWhiteSpace(command.RecipientE164)
+                        ? null
+                        : whatsAppSecretProtector.Protect(command.RecipientE164.Trim()),
                     CreatedAtUtc = now,
                     UpdatedAtUtc = now,
                 };
@@ -359,6 +368,45 @@ public sealed class AiTaskDeliveryRepository(
         await Task.CompletedTask;
     }
 
+    private string BuildDeliveryProjectionJson(EnqueueAiTaskDeliveryCommand command, AiTask task)
+    {
+        var baseProjection = command.DeliveryProjectionJson
+            ?? AiTaskSafeProjectionBuilder.BuildDeliveryProjectionJson(task);
+
+        if (command.Channel != AiTaskDeliveryChannels.WhatsApp)
+        {
+            return baseProjection;
+        }
+
+        using var document = System.Text.Json.JsonDocument.Parse(baseProjection);
+        var dictionary = new Dictionary<string, object?>();
+        foreach (var property in document.RootElement.EnumerateObject())
+        {
+            dictionary[property.Name] = property.Value.ValueKind switch
+            {
+                System.Text.Json.JsonValueKind.String => property.Value.GetString(),
+                _ => property.Value.GetRawText(),
+            };
+        }
+
+        if (!string.IsNullOrWhiteSpace(command.RecipientE164))
+        {
+            dictionary["recipientE164Protected"] = whatsAppSecretProtector.Protect(command.RecipientE164.Trim());
+        }
+
+        if (!string.IsNullOrWhiteSpace(command.ConsentStatus))
+        {
+            dictionary["consentStatus"] = command.ConsentStatus.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(command.SecureTaskUrl))
+        {
+            dictionary["secureTaskUrl"] = command.SecureTaskUrl.Trim();
+        }
+
+        return System.Text.Json.JsonSerializer.Serialize(dictionary);
+    }
+
     private static AiTaskDeliveryWriteResult Fail(string code, string message) =>
         new(false, code, message, null);
 
@@ -380,6 +428,11 @@ public sealed class AiTaskDeliveryRepository(
         delivery.SentAtUtc,
         delivery.CancelledAtUtc,
         delivery.SecureAccessGrantId,
+        delivery.Provider,
+        delivery.ProviderMessageId,
+        delivery.ProviderStatus,
+        delivery.ProviderStatusAtUtc,
+        delivery.ConsentStatus,
         delivery.CreatedAtUtc);
 
     private static AiTaskDeliveryAttemptReadModel MapAttempt(AiTaskDeliveryAttempt attempt) => new(

@@ -32,6 +32,7 @@ using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.AiTasks.Delivery;
+using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.MarketRates;
@@ -335,6 +336,8 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskDelivery> AiTaskDeliveries => Set<AiTaskDelivery>();
     public DbSet<AiTaskDeliveryAttempt> AiTaskDeliveryAttempts => Set<AiTaskDeliveryAttempt>();
     public DbSet<AiTaskSecureAccessGrant> AiTaskSecureAccessGrants => Set<AiTaskSecureAccessGrant>();
+    public DbSet<AiTaskWhatsAppChannelConfiguration> AiTaskWhatsAppChannelConfigurations => Set<AiTaskWhatsAppChannelConfiguration>();
+    public DbSet<AiTaskDeliveryProviderEvent> AiTaskDeliveryProviderEvents => Set<AiTaskDeliveryProviderEvent>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
     public DbSet<TeamsChannel> TeamsChannels => Set<TeamsChannel>();
@@ -1820,6 +1823,18 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && g.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskWhatsAppChannelConfigurationEntityConfiguration());
+        modelBuilder.Entity<AiTaskWhatsAppChannelConfiguration>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskDeliveryProviderEventEntityConfiguration());
+        modelBuilder.Entity<AiTaskDeliveryProviderEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Teams foundation (TEAMS-FOUNDATION-1)
         modelBuilder.ApplyConfiguration(new TeamsChannelEntityConfiguration());

@@ -169,6 +169,7 @@ app.MapAiTaskPlaybookEndpoints();
 app.MapAiTaskDecisionIntelligenceEndpoints();
 app.MapAiTaskDeliveryEndpoints();
 app.MapAiTaskSecureAccessEndpoints();
+app.MapWhatsAppWebhookEndpoints();
 app.MapTeamsEndpoints();
 app.MapTeamsApprovalEndpoints();
 app.MapTeamsHandoverEndpoints();

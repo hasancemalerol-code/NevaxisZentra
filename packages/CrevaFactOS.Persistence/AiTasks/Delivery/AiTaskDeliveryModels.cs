@@ -9,7 +9,10 @@ public sealed record EnqueueAiTaskDeliveryCommand(
     string IdempotencyKey,
     string? DeliveryProjectionJson,
     Guid? SecureAccessGrantId,
-    int? MaxAttempts = null);
+    int? MaxAttempts = null,
+    string? RecipientE164 = null,
+    string? ConsentStatus = null,
+    string? SecureTaskUrl = null);
 
 public sealed record AiTaskDeliveryReadModel(
     Guid Id,
@@ -29,6 +32,11 @@ public sealed record AiTaskDeliveryReadModel(
     DateTimeOffset? SentAtUtc,
     DateTimeOffset? CancelledAtUtc,
     Guid? SecureAccessGrantId,
+    string? Provider,
+    string? ProviderMessageId,
+    string? ProviderStatus,
+    DateTimeOffset? ProviderStatusAtUtc,
+    string? ConsentStatus,
     DateTimeOffset CreatedAtUtc);
 
 public sealed record AiTaskDeliveryAttemptReadModel(
