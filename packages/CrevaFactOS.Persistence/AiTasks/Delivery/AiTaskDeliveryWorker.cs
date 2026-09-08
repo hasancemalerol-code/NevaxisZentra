@@ -1,3 +1,4 @@
+using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
 using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -185,6 +186,12 @@ public sealed class AiTaskDeliveryWorker(
             {
                 delivery.Provider = WhatsAppBusinessProviders.MetaWhatsAppCloud;
                 delivery.ProviderStatus = WhatsAppProviderStatuses.Accepted;
+                delivery.ProviderStatusAtUtc = completedAt;
+            }
+            else if (delivery.Channel == AiTaskDeliveryChannels.Email)
+            {
+                delivery.Provider = EmailDeliveryProviders.Smtp;
+                delivery.ProviderStatus = EmailProviderStatuses.Accepted;
                 delivery.ProviderStatusAtUtc = completedAt;
             }
             delivery.LastErrorCode = null;

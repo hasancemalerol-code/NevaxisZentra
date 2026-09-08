@@ -146,6 +146,8 @@ export async function enqueueAiTaskDelivery(
     recipientE164?: string;
     consentStatus?: string;
     secureTaskUrl?: string;
+    recipientEmail?: string;
+    recipientEligibility?: string;
   }>,
 ): Promise<RawAiTaskDelivery> {
   return fetchAiTaskDeliveryApi(context, `/api/ai-tasks/${taskId}/deliveries?facilityId=${context.facilityId}`, {

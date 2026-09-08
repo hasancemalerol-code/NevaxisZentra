@@ -50,6 +50,8 @@ export async function enqueueAiTaskDeliveryAction(
     recipientE164?: string;
     consentStatus?: string;
     secureTaskUrl?: string;
+    recipientEmail?: string;
+    recipientEligibility?: string;
   }>,
 ) {
   const context = await requireContext();

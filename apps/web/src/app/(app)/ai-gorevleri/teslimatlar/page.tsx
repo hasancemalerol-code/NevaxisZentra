@@ -9,6 +9,8 @@ import {
   getAiTaskWhatsAppConsentLabel,
   getAiTaskWhatsAppProviderStatusLabel,
   getAiTaskWhatsAppReadinessLabel,
+  getAiTaskEmailProviderStatusLabel,
+  getAiTaskEmailReadinessLabel,
 } from "@/features/ai-task-center/presentation/ai-task-delivery-labels";
 import { formatAiTaskShortDateTime } from "@/features/ai-task-center/presentation/ai-task-formatters";
 import { readAiTaskDeliveryManagement } from "@/features/ai-task-center/server/ai-task-delivery-queries";
@@ -50,9 +52,11 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
                 <div className="text-muted-foreground">
                   {channel.channelKey === "whatsapp"
                     ? getAiTaskWhatsAppReadinessLabel(channel)
-                    : channel.available
-                      ? "Hazır"
-                      : "Henüz yapılandırılmadı"}
+                    : channel.channelKey === "email"
+                      ? getAiTaskEmailReadinessLabel(channel)
+                      : channel.available
+                        ? "Hazır"
+                        : "Henüz yapılandırılmadı"}
                 </div>
               </Card>
             ))}
@@ -88,7 +92,9 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
                   <td className="px-3 py-2">
                     {delivery.channel === "whatsapp"
                       ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
-                      : "—"}
+                      : delivery.channel === "email"
+                        ? getAiTaskEmailProviderStatusLabel(delivery.providerStatus)
+                        : "—"}
                   </td>
                   <td className="px-3 py-2">{delivery.maskedRecipient ?? "—"}</td>
                   <td className="px-3 py-2">

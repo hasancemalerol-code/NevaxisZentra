@@ -32,6 +32,7 @@ using CrevaFactOS.Persistence.Procurement;
 using CrevaFactOS.Persistence.CommercialIntelligence;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.AiTasks.Delivery;
+using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
 using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.ShiftHandover;
@@ -337,6 +338,7 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<AiTaskDeliveryAttempt> AiTaskDeliveryAttempts => Set<AiTaskDeliveryAttempt>();
     public DbSet<AiTaskSecureAccessGrant> AiTaskSecureAccessGrants => Set<AiTaskSecureAccessGrant>();
     public DbSet<AiTaskWhatsAppChannelConfiguration> AiTaskWhatsAppChannelConfigurations => Set<AiTaskWhatsAppChannelConfiguration>();
+    public DbSet<AiTaskEmailChannelConfiguration> AiTaskEmailChannelConfigurations => Set<AiTaskEmailChannelConfiguration>();
     public DbSet<AiTaskDeliveryProviderEvent> AiTaskDeliveryProviderEvents => Set<AiTaskDeliveryProviderEvent>();
 
     // Teams foundation (TEAMS-FOUNDATION-1)
@@ -1826,6 +1828,12 @@ public sealed class CrevaFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new AiTaskWhatsAppChannelConfigurationEntityConfiguration());
         modelBuilder.Entity<AiTaskWhatsAppChannelConfiguration>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AiTaskEmailChannelConfigurationEntityConfiguration());
+        modelBuilder.Entity<AiTaskEmailChannelConfiguration>().HasQueryFilter(c =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);

@@ -1,6 +1,7 @@
 using CrevaFactOS.Api.Facilities;
 using CrevaFactOS.Persistence.AiTasks;
 using CrevaFactOS.Persistence.AiTasks.Delivery;
+using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
 using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Audit;
 using CrevaFactOS.Persistence.Tenancy;
@@ -73,7 +74,9 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
                 request.MaxAttempts,
                 request.RecipientE164,
                 request.ConsentStatus,
-                request.SecureTaskUrl),
+                request.SecureTaskUrl,
+                request.RecipientEmail,
+                request.RecipientEligibility),
             cancellationToken);
 
         return result.Success
@@ -254,8 +257,13 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         services.AddScoped<IWhatsAppChannelConfigurationResolver, WhatsAppChannelConfigurationResolver>();
         services.AddScoped<IMetaWhatsAppCloudApiClient, MetaWhatsAppCloudApiClient>();
         services.AddScoped<IWhatsAppWebhookProcessor, WhatsAppWebhookProcessor>();
-        services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
-            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.Email, "E-posta"));
+        services.AddOptions<EmailDeliveryOptions>()
+            .Bind(configuration.GetSection(EmailDeliveryOptions.SectionName))
+            .PostConfigure(ApplyEmailEnvironmentOverrides);
+        services.AddScoped<EmailSecretProtector>();
+        services.AddScoped<IEmailChannelConfigurationResolver, EmailChannelConfigurationResolver>();
+        services.AddScoped<IEmailTransport, SmtpEmailTransport>();
+        services.AddScoped<IAiTaskDeliveryChannelAdapter, EmailDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, WhatsAppBusinessDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
             => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.CrevaFactOsTeams, "CrevaFactOS Teams"));
@@ -276,7 +284,8 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
                     sp.GetRequiredService<TenantDatabaseSession>(),
                     sp.GetRequiredService<IAiTaskDeliveryChannelRegistry>(),
                     sp.GetRequiredService<IHostEnvironment>(),
-                    sp.GetRequiredService<WhatsAppSecretProtector>());
+                    sp.GetRequiredService<WhatsAppSecretProtector>(),
+                    sp.GetRequiredService<EmailSecretProtector>());
         });
 
         services.AddScoped<IAiTaskSecureAccessRepository>(sp =>
@@ -309,6 +318,41 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddHostedService<AiTaskDeliveryBackgroundService>();
         return services;
+    }
+
+    private static void ApplyEmailEnvironmentOverrides(EmailDeliveryOptions options)
+    {
+        options.Enabled = GetEmailEnvBoolean("ENABLED", options.Enabled);
+        options.SmtpHost = GetEmailEnvValue("SMTP__HOST", options.SmtpHost);
+        options.SmtpPort = GetEmailEnvInt32("SMTP__PORT", options.SmtpPort);
+        options.SecurityMode = GetEmailEnvValue("SMTP__SECURITY_MODE", options.SecurityMode) ?? options.SecurityMode;
+        options.Username = GetEmailEnvValue("SMTP__USERNAME", options.Username);
+        options.Password = GetEmailEnvValue("SMTP__PASSWORD", options.Password);
+        options.FromAddress = GetEmailEnvValue("SMTP__FROM_ADDRESS", options.FromAddress);
+        options.FromDisplayName = GetEmailEnvValue("SMTP__FROM_DISPLAY_NAME", options.FromDisplayName);
+        options.ReplyToAddress = GetEmailEnvValue("SMTP__REPLY_TO_ADDRESS", options.ReplyToAddress);
+        options.TestSmtpHost = GetEmailEnvValue("TEST_SMTP__HOST", options.TestSmtpHost);
+        options.TimeoutSeconds = GetEmailEnvInt32("TIMEOUT_SECONDS", options.TimeoutSeconds);
+        var testPort = Environment.GetEnvironmentVariable("CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__PORT");
+        if (!string.IsNullOrWhiteSpace(testPort))
+        {
+            options.TestSmtpPort = int.Parse(testPort, provider: null);
+        }
+    }
+
+    private static string? GetEmailEnvValue(string suffix, string? fallback) =>
+        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}") ?? fallback;
+
+    private static int GetEmailEnvInt32(string suffix, int fallback)
+    {
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
+        return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
+    }
+
+    private static bool GetEmailEnvBoolean(string suffix, bool fallback)
+    {
+        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
+        return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
 
     private static void ApplyWhatsAppEnvironmentOverrides(WhatsAppBusinessDeliveryOptions options)
@@ -370,7 +414,9 @@ public sealed record EnqueueDeliveryRequest(
     int? MaxAttempts,
     string? RecipientE164 = null,
     string? ConsentStatus = null,
-    string? SecureTaskUrl = null);
+    string? SecureTaskUrl = null,
+    string? RecipientEmail = null,
+    string? RecipientEligibility = null);
 
 public static class AiTaskSecureAccessEndpointRouteBuilderExtensions
 {

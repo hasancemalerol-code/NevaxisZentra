@@ -12,6 +12,9 @@ import {
   getAiTaskWhatsAppConsentLabel,
   getAiTaskWhatsAppProviderStatusLabel,
   getAiTaskWhatsAppReadinessLabel,
+  getAiTaskEmailProviderStatusLabel,
+  getAiTaskEmailReadinessLabel,
+  maskEmailForDisplay,
   AI_TASK_SECURE_ACCESS_TTL_OPTIONS,
 } from "@/features/ai-task-center/presentation/ai-task-delivery-labels";
 import { formatAiTaskShortDateTime } from "@/features/ai-task-center/presentation/ai-task-formatters";
@@ -46,6 +49,7 @@ export function AiTaskDeliverySectionClient({
   const [ttlPolicy, setTtlPolicy] = useState("24h");
   const [whatsappRecipient, setWhatsappRecipient] = useState("");
   const [whatsappConsentKnown, setWhatsappConsentKnown] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const activeGrant = useMemo(
@@ -58,6 +62,10 @@ export function AiTaskDeliverySectionClient({
   );
 
   const whatsappChannel = foundationChannels.find((channel) => channel.channelKey === "whatsapp");
+  const emailChannel = foundationChannels.find((channel) => channel.channelKey === "email");
+  const maskedEmailPreview = emailRecipient.includes("@")
+    ? maskEmailForDisplay(emailRecipient.trim())
+    : null;
 
   return (
     <Card className="border-border/70 bg-card/80 p-5 shadow-sm" data-testid="ai-task-delivery-section">
@@ -174,9 +182,11 @@ export function AiTaskDeliverySectionClient({
               <span className="text-muted-foreground">
                 {channel.channelKey === "whatsapp"
                   ? getAiTaskWhatsAppReadinessLabel(channel)
-                  : channel.available
-                    ? "Hazır"
-                    : "Henüz yapılandırılmadı"}
+                  : channel.channelKey === "email"
+                    ? getAiTaskEmailReadinessLabel(channel)
+                    : channel.available
+                      ? "Hazır"
+                      : "Henüz yapılandırılmadı"}
               </span>
             </div>
           ))}
@@ -242,6 +252,62 @@ export function AiTaskDeliverySectionClient({
         </div>
       ) : null}
 
+      {canManage ? (
+        <div className="mt-5 rounded-lg border border-border/60 bg-muted/10 p-4" data-testid="email-send-section">
+          <h3 className="text-sm font-medium">E-posta ile gönder</h3>
+          {!emailChannel?.available && emailChannel?.reasonCode !== "degraded" ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              E-posta kanalı henüz yapılandırılmadı.
+            </p>
+          ) : (
+            <div className="mt-3 grid gap-3">
+              <label className="grid gap-1 text-sm">
+                <span className="font-medium">Alıcı e-posta</span>
+                <input
+                  className="rounded-md border border-input bg-background px-3 py-2"
+                  placeholder="ornek@firma.com"
+                  value={emailRecipient}
+                  onChange={(event) => setEmailRecipient(event.target.value)}
+                  data-testid="email-recipient-input"
+                />
+              </label>
+              {maskedEmailPreview ? (
+                <p className="text-sm text-muted-foreground" data-testid="email-recipient-masked">
+                  Maskelenmiş alıcı: {maskedEmailPreview}
+                </p>
+              ) : null}
+              <p className="text-sm text-muted-foreground">
+                Güvenli bağlantı: {issuedLink ?? activeGrant ? "Hazır" : "Önce güvenli bağlantı oluşturun"}
+              </p>
+              <Button
+                type="button"
+                disabled={isPending || !issuedLink || !emailRecipient.includes("@")}
+                data-testid="email-send-button"
+                onClick={() =>
+                  startTransition(async () => {
+                    await enqueueAiTaskDeliveryAction(taskId, {
+                      channel: "email",
+                      recipientKind: "external",
+                      idempotencyKey: crypto.randomUUID(),
+                      maskedRecipient: maskedEmailPreview ?? emailRecipient,
+                      recipientEmail: emailRecipient.trim(),
+                      recipientEligibility: "eligible",
+                      secureAccessGrantId: activeGrant?.id,
+                      secureTaskUrl: issuedLink
+                        ? new URL(issuedLink, window.location.origin).toString()
+                        : undefined,
+                    });
+                  })
+                }
+              >
+                <Send className="mr-2 size-3.5" />
+                E-posta ile gönder
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : null}
+
       <div className="mt-5">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Teslimat Geçmişi</h3>
@@ -291,7 +357,9 @@ export function AiTaskDeliverySectionClient({
                     <td className="py-2 pr-3">
                       {delivery.channel === "whatsapp"
                         ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
-                        : "—"}
+                        : delivery.channel === "email"
+                          ? getAiTaskEmailProviderStatusLabel(delivery.providerStatus)
+                          : "—"}
                     </td>
                     <td className="py-2 pr-3">
                       {formatAiTaskShortDateTime(delivery.requestedAtUtc)}

@@ -12,7 +12,9 @@ public sealed record EnqueueAiTaskDeliveryCommand(
     int? MaxAttempts = null,
     string? RecipientE164 = null,
     string? ConsentStatus = null,
-    string? SecureTaskUrl = null);
+    string? SecureTaskUrl = null,
+    string? RecipientEmail = null,
+    string? RecipientEligibility = null);
 
 public sealed record AiTaskDeliveryReadModel(
     Guid Id,

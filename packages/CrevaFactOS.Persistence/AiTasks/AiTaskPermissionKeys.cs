@@ -29,6 +29,9 @@ public static class AiTaskPermissionKeys
     public const string DeliveryWhatsAppView = "ai-task.delivery.whatsapp.view";
     public const string DeliveryWhatsAppSend = "ai-task.delivery.whatsapp.send";
     public const string DeliveryWhatsAppConfigure = "ai-task.delivery.whatsapp.configure";
+    public const string DeliveryEmailView = "ai-task.delivery.email.view";
+    public const string DeliveryEmailSend = "ai-task.delivery.email.send";
+    public const string DeliveryEmailConfigure = "ai-task.delivery.email.configure";
     public const string SecureAccessRead = "ai-task.secure-access.read";
     public const string SecureAccessManage = "ai-task.secure-access.manage";
 }

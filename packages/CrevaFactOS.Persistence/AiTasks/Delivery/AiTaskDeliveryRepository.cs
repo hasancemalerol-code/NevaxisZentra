@@ -1,3 +1,4 @@
+using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
 using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,8 @@ public sealed class AiTaskDeliveryRepository(
     TenantDatabaseSession tenantDatabaseSession,
     IAiTaskDeliveryChannelRegistry channelRegistry,
     IHostEnvironment hostEnvironment,
-    WhatsAppSecretProtector whatsAppSecretProtector) : IAiTaskDeliveryRepository
+    WhatsAppSecretProtector whatsAppSecretProtector,
+    EmailSecretProtector emailSecretProtector) : IAiTaskDeliveryRepository
 {
     public Task<AiTaskDeliveryWriteResult> EnqueueAsync(
         AiTaskOperationContext context,
@@ -93,13 +95,21 @@ public sealed class AiTaskDeliveryRepository(
                     RequestedByUserId = context.IdentitySubjectId,
                     RequestedAtUtc = now,
                     SecureAccessGrantId = command.SecureAccessGrantId,
-                    Provider = command.Channel == AiTaskDeliveryChannels.WhatsApp
-                        ? WhatsAppBusinessProviders.MetaWhatsAppCloud
-                        : null,
+                    Provider = command.Channel switch
+                    {
+                        AiTaskDeliveryChannels.WhatsApp => WhatsAppBusinessProviders.MetaWhatsAppCloud,
+                        AiTaskDeliveryChannels.Email => EmailDeliveryProviders.Smtp,
+                        _ => null,
+                    },
                     ConsentStatus = command.ConsentStatus,
-                    RecipientAddressProtected = string.IsNullOrWhiteSpace(command.RecipientE164)
-                        ? null
-                        : whatsAppSecretProtector.Protect(command.RecipientE164.Trim()),
+                    RecipientAddressProtected = command.Channel switch
+                    {
+                        AiTaskDeliveryChannels.WhatsApp when !string.IsNullOrWhiteSpace(command.RecipientE164)
+                            => whatsAppSecretProtector.Protect(command.RecipientE164.Trim()),
+                        AiTaskDeliveryChannels.Email when !string.IsNullOrWhiteSpace(command.RecipientEmail)
+                            => emailSecretProtector.Protect(command.RecipientEmail.Trim()),
+                        _ => null,
+                    },
                     CreatedAtUtc = now,
                     UpdatedAtUtc = now,
                 };
@@ -373,11 +383,54 @@ public sealed class AiTaskDeliveryRepository(
         var baseProjection = command.DeliveryProjectionJson
             ?? AiTaskSafeProjectionBuilder.BuildDeliveryProjectionJson(task);
 
-        if (command.Channel != AiTaskDeliveryChannels.WhatsApp)
+        if (command.Channel == AiTaskDeliveryChannels.WhatsApp)
         {
-            return baseProjection;
+            return EnrichProjection(baseProjection, dictionary =>
+            {
+                if (!string.IsNullOrWhiteSpace(command.RecipientE164))
+                {
+                    dictionary["recipientE164Protected"] = whatsAppSecretProtector.Protect(command.RecipientE164.Trim());
+                }
+
+                if (!string.IsNullOrWhiteSpace(command.ConsentStatus))
+                {
+                    dictionary["consentStatus"] = command.ConsentStatus.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(command.SecureTaskUrl))
+                {
+                    dictionary["secureTaskUrl"] = command.SecureTaskUrl.Trim();
+                }
+            });
         }
 
+        if (command.Channel == AiTaskDeliveryChannels.Email)
+        {
+            return EnrichProjection(baseProjection, dictionary =>
+            {
+                if (!string.IsNullOrWhiteSpace(command.RecipientEmail))
+                {
+                    dictionary["recipientEmailProtected"] = emailSecretProtector.Protect(command.RecipientEmail.Trim());
+                }
+
+                dictionary["recipientEligibility"] = string.IsNullOrWhiteSpace(command.RecipientEligibility)
+                    ? EmailRecipientEligibility.Eligible
+                    : command.RecipientEligibility.Trim();
+
+                if (!string.IsNullOrWhiteSpace(command.SecureTaskUrl))
+                {
+                    dictionary["secureTaskUrl"] = command.SecureTaskUrl.Trim();
+                }
+            });
+        }
+
+        return baseProjection;
+    }
+
+    private static string EnrichProjection(
+        string baseProjection,
+        Action<Dictionary<string, object?>> enrich)
+    {
         using var document = System.Text.Json.JsonDocument.Parse(baseProjection);
         var dictionary = new Dictionary<string, object?>();
         foreach (var property in document.RootElement.EnumerateObject())
@@ -389,21 +442,7 @@ public sealed class AiTaskDeliveryRepository(
             };
         }
 
-        if (!string.IsNullOrWhiteSpace(command.RecipientE164))
-        {
-            dictionary["recipientE164Protected"] = whatsAppSecretProtector.Protect(command.RecipientE164.Trim());
-        }
-
-        if (!string.IsNullOrWhiteSpace(command.ConsentStatus))
-        {
-            dictionary["consentStatus"] = command.ConsentStatus.Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(command.SecureTaskUrl))
-        {
-            dictionary["secureTaskUrl"] = command.SecureTaskUrl.Trim();
-        }
-
+        enrich(dictionary);
         return System.Text.Json.JsonSerializer.Serialize(dictionary);
     }
 
