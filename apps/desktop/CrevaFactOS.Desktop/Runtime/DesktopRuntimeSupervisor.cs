@@ -245,6 +245,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         Configuration.DesktopRuntimeOptions options,
         CancellationToken cancellationToken)
     {
+        var apiBaseUri = new Uri($"http://127.0.0.1:{options.ApiPort}");
+
         if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
         {
             var listenerPid = RuntimePortInspector.TryGetListeningProcessId(options.ApiPort);
@@ -273,9 +275,9 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 TimeSpan.FromSeconds(2),
                 cancellationToken).ConfigureAwait(false))
         {
-            var apiBase = new Uri($"http://127.0.0.1:{options.ApiPort}");
-            if (await RuntimeIdentityReadinessProbe.IsApiIdentityReachableAsync(
-                    apiBase,
+            if (await RuntimeIdentityReadinessProbe.WaitForApiIdentityReachableAsync(
+                    apiBaseUri,
+                    TimeSpan.FromSeconds(30),
                     cancellationToken).ConfigureAwait(false))
             {
                 if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
@@ -346,8 +348,9 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             throw new TimeoutException("API başlatma zaman aşımına uğradı.");
         }
 
-        var apiIdentityReady = await RuntimeIdentityReadinessProbe.IsApiIdentityReachableAsync(
-            new Uri($"http://127.0.0.1:{options.ApiPort}"),
+        var apiIdentityReady = await RuntimeIdentityReadinessProbe.WaitForApiIdentityReachableAsync(
+            apiBaseUri,
+            options.StartupTimeout,
             cancellationToken).ConfigureAwait(false);
         if (!apiIdentityReady)
         {

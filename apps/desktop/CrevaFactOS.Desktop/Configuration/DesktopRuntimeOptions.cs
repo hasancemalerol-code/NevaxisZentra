@@ -112,7 +112,9 @@ public sealed class DesktopRuntimeOptions
         }
     }
 
-    public Uri ApiHealthUri => new($"http://127.0.0.1:{ApiPort}/health/ready");
+    public Uri ApiHealthUri => Mode == DesktopRuntimeMode.Packaged
+        ? new($"http://127.0.0.1:{ApiPort}/health/live")
+        : new($"http://127.0.0.1:{ApiPort}/health/ready");
 
     public Uri WebOriginUri => new($"http://127.0.0.1:{WebPort}");
 

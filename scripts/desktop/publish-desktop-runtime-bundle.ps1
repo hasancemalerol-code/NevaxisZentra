@@ -5,17 +5,26 @@
 param(
     [string]$RepositoryRoot = "",
     [string]$BundleName = "CrevaFactOS-RC1",
+    [string]$BundleRoot = "",
+    [string]$PackagingWorkRoot = "",
     [switch]$SkipWebBuild,
     [switch]$SkipVerifier
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "desktop-runtime-filesystem.ps1")
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
-$bundleRoot = Join-Path $RepositoryRoot "artifacts\desktop-runtime\$BundleName"
+$bundleRoot = if (-not [string]::IsNullOrWhiteSpace($BundleRoot)) {
+    (Resolve-Path $BundleRoot).Path
+} elseif (-not [string]::IsNullOrWhiteSpace($PackagingWorkRoot)) {
+    Join-Path $PackagingWorkRoot $BundleName
+} else {
+    Join-Path $RepositoryRoot "artifacts\desktop-runtime\$BundleName"
+}
 $desktopProject = Join-Path $RepositoryRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
 $apiProject = Join-Path $RepositoryRoot "apps\api\CrevaFactOS.Api.csproj"
 $webDir = Join-Path $RepositoryRoot "apps\web"
@@ -48,6 +57,11 @@ Write-Host "SOURCE_COMMIT=$sourceCommit"
 Write-Host "SOURCE_BRANCH=$sourceBranch"
 Write-Host "SOURCE_DIRTY=$sourceDirty"
 Write-Host "EXPECTED_SCHEMA_VERSION=$latestMigration"
+if (-not [string]::IsNullOrWhiteSpace($PackagingWorkRoot)) {
+    Write-Host "SHORT_PACKAGING_PATH_USED=TRUE"
+    Write-Host "SHORT_PATH_PRODUCT_DEPENDENCY=FALSE"
+    Write-Host "PACKAGING_WORK_ROOT=$PackagingWorkRoot"
+}
 
 Write-Step "Prerequisites"
 if (Test-Path $iconGenerator) {
@@ -103,12 +117,14 @@ if (-not (Test-Path (Join-Path $standaloneAppSrc "server.js"))) {
 if (Test-Path $webDest) {
     Remove-Item -Recurse -Force $webDest
 }
-Copy-Item -Path $standaloneSrc -Destination $webDest -Recurse -Force
+New-Item -ItemType Directory -Force -Path $webDest | Out-Null
+Invoke-RobocopyDirectory -Source $standaloneSrc -Destination $webDest
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "scripts\desktop\repair-standalone-junctions.ps1") -StandaloneRoot $webDest
+Assert-StandaloneRuntimeModuleResolution -StandaloneRoot $webDest
 New-Item -ItemType Directory -Force -Path (Join-Path $webAppDest ".next") | Out-Null
-Copy-Item -Path $staticSrc -Destination (Join-Path $webAppDest ".next\static") -Recurse -Force
+Invoke-RobocopyDirectory -Source $staticSrc -Destination (Join-Path $webAppDest ".next\static")
 if (Test-Path $publicSrc) {
-    Copy-Item -Path $publicSrc -Destination (Join-Path $webAppDest "public") -Recurse -Force
+    Invoke-RobocopyDirectory -Source $publicSrc -Destination (Join-Path $webAppDest "public")
 }
 
 Write-Step "Publish API Release"

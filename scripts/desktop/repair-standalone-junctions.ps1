@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "desktop-runtime-filesystem.ps1")
 
 if (-not (Test-Path -LiteralPath $StandaloneRoot)) {
     throw "Standalone root not found: $StandaloneRoot"
@@ -39,8 +40,11 @@ function Replace-ReparsePointWithCopy {
         Remove-Item -LiteralPath $tempPath -Recurse -Force
     }
 
-    Copy-Item -LiteralPath $TargetFull -Destination $tempPath -Recurse -Force
-    Remove-Item -LiteralPath $Path -Force -Recurse
+    New-Item -ItemType Directory -Force -Path $tempPath | Out-Null
+    Invoke-RobocopyDirectory -Source $TargetFull -Destination $tempPath
+    if (Test-Path -LiteralPath $Path) {
+        Remove-Item -LiteralPath $Path -Force -Recurse
+    }
     Move-Item -LiteralPath $tempPath -Destination $Path -Force
 }
 
@@ -78,7 +82,8 @@ Get-ChildItem -LiteralPath $internalPackageModules -Force |
             Remove-Item -LiteralPath $destination -Recurse -Force
         }
 
-        Copy-Item -LiteralPath $_.FullName -Destination $destination -Recurse -Force
+        New-Item -ItemType Directory -Force -Path (Split-Path $destination -Parent) | Out-Null
+        Invoke-RobocopyDirectory -Source $_.FullName -Destination $destination
         $repaired++
     }
 
@@ -105,3 +110,4 @@ foreach ($item in $reparsePoints) {
 }
 
 Write-Host "STANDALONE_JUNCTION_REPAIR: repaired=$repaired root=$normalizedRoot"
+Assert-StandaloneRuntimeModuleResolution -StandaloneRoot $normalizedRoot

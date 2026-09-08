@@ -19,6 +19,26 @@ public static class RuntimeIdentityReadinessProbe
             .ConfigureAwait(false);
     }
 
+    public static async Task<bool> WaitForApiIdentityReachableAsync(
+        Uri apiBaseUri,
+        TimeSpan timeout,
+        CancellationToken cancellationToken = default)
+    {
+        var deadline = DateTimeOffset.UtcNow + timeout;
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (await IsApiIdentityReachableAsync(apiBaseUri, cancellationToken).ConfigureAwait(false))
+            {
+                return true;
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+        }
+
+        return false;
+    }
+
     public static async Task<bool> IsWebIdentityProxyReachableAsync(
         Uri webOriginUri,
         CancellationToken cancellationToken = default)

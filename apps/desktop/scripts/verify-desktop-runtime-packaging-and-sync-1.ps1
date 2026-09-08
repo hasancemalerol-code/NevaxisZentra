@@ -24,6 +24,15 @@ $desktopExe = Join-Path $BundleRoot "desktop\CrevaFactOS.exe"
 $apiExe = Join-Path $BundleRoot "api\CrevaFactOS.Api.exe"
 $webServer = Join-Path $BundleRoot "web\apps\web\server.js"
 $shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+function Get-PackagedBundleToken([string]$Root) {
+    $leaf = Split-Path $Root -Leaf
+    if ([string]::IsNullOrWhiteSpace($leaf)) {
+        return 'desktop-runtime'
+    }
+    return $leaf
+}
+
+$packagedBundleToken = Get-PackagedBundleToken $BundleRoot
 $results = [ordered]@{}
 
 function Assert-Check([string]$Name, [bool]$Ok, [string]$Detail = "") {
@@ -88,11 +97,12 @@ function Test-SecretScan([string]$Root) {
 }
 
 function Get-ProcessAudit {
+    $bundleRootNormalized = (Resolve-Path $BundleRoot).Path
     $scoped = Get-CimInstance Win32_Process |
         Where-Object {
             $_.CommandLine -and (
                 $_.CommandLine -match 'desktop-runtime' -or
-                $_.CommandLine -match 'CrevaFactOS-RC1' -or
+                $_.CommandLine -match $packagedBundleToken -or
                 $_.Name -match '^CrevaFactOS'
             )
         }
@@ -102,9 +112,11 @@ function Get-ProcessAudit {
         pnpmDev = @($scoped | Where-Object { $_.CommandLine -match 'pnpm.*dev' }).Count
     }
     $sourceDeps = @($scoped | Where-Object {
-        ($_.Name -eq 'CrevaFactOS.Api.exe' -and $_.CommandLine -match 'apps\\api\\') -or
-        ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'apps\\web') -or
-        ($_.CommandLine -match '\\bin\\Debug\\' -and $_.CommandLine -notmatch 'desktop-runtime')
+        $commandLine = $_.CommandLine
+        if ($commandLine -like "*$bundleRootNormalized*") { return $false }
+        ($_.Name -eq 'CrevaFactOS.Api.exe' -and $commandLine -match 'apps\\api\\') -or
+        ($_.Name -eq 'node.exe' -and $commandLine -match 'apps\\web') -or
+        ($commandLine -match '\\bin\\Debug\\' -and $commandLine -notmatch 'desktop-runtime')
     }).Count
     return [ordered]@{
         NEXT_DEV_PROCESS = $dev.nextDev
@@ -124,7 +136,7 @@ function Stop-PortListeners([int[]]$Ports) {
             if (-not $proc) { continue }
             $isCrevaFactOS = $proc.Name -match '^CrevaFactOS' -or
                 ($proc.CommandLine -match 'desktop-runtime') -or
-                ($proc.CommandLine -match 'CrevaFactOS-RC1') -or
+                ($proc.CommandLine -match $packagedBundleToken) -or
                 ($proc.Name -eq 'node.exe' -and $proc.CommandLine -match 'server\.js')
             if ($isCrevaFactOS) {
                 Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
@@ -138,14 +150,82 @@ function Get-PackagedWebPortCandidates {
     return @(3001, 3011, 3021, 3031)
 }
 
+function Test-CrevaFactOSApiIdentityReady {
+    try {
+        $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
+        $response = Invoke-WebRequest "http://127.0.0.1:5000/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
+        if ($response.StatusCode -ne 401) { return $false }
+        $json = $response.Content | ConvertFrom-Json
+        return $json.title -eq 'Invalid credentials.'
+    } catch {
+        if ($_.Exception.Response) {
+            if ($_.Exception.Response.StatusCode.value__ -ne 401) { return $false }
+            try {
+                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $content = $reader.ReadToEnd()
+                $json = $content | ConvertFrom-Json
+                return $json.title -eq 'Invalid credentials.'
+            } catch {
+                return $false
+            }
+        }
+        return $false
+    }
+}
+
+function Test-CrevaFactOSApiHealthReady {
+    try {
+        $response = Invoke-WebRequest "http://127.0.0.1:5000/health/live" -UseBasicParsing -TimeoutSec 5
+        return $response.StatusCode -eq 200
+    } catch {
+        return $false
+    }
+}
+
+function Test-PackagedApiPortListening {
+    return [bool](Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue)
+}
+
+function Wait-PackagedApiProcessStart([int]$TimeoutSeconds = 180) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        if (Test-PackagedApiPortListening) {
+            return $true
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $false
+}
+
+function Wait-PackagedApiReady([int]$TimeoutSeconds = 300) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        if ((Test-CrevaFactOSApiHealthReady) -and (Test-CrevaFactOSApiIdentityReady)) {
+            return $true
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $false
+}
+
 function Test-CrevaFactOSWebReady([int]$Port) {
     try {
         $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
         $response = Invoke-WebRequest "http://127.0.0.1:$Port/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
-        return $response.StatusCode -eq 401
+        if ($response.StatusCode -ne 401) { return $false }
+        $json = $response.Content | ConvertFrom-Json
+        return $json.title -eq 'Invalid credentials.'
     } catch {
         if ($_.Exception.Response) {
-            return $_.Exception.Response.StatusCode.value__ -eq 401
+            if ($_.Exception.Response.StatusCode.value__ -ne 401) { return $false }
+            try {
+                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $content = $reader.ReadToEnd()
+                $json = $content | ConvertFrom-Json
+                return $json.title -eq 'Invalid credentials.'
+            } catch {
+                return $false
+            }
         }
         return $false
     }
@@ -180,8 +260,29 @@ function Stop-CrevaFactOSDesktopOnly {
         Get-Process -Name $name -ErrorAction SilentlyContinue |
             Stop-Process -Force -ErrorAction SilentlyContinue
     }
+    Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.CommandLine -and (
+                $_.CommandLine -match $packagedBundleToken -or
+                $_.CommandLine -match 'desktop-runtime' -or
+                $_.CommandLine -match 'server\.js'
+            )
+        } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
     Stop-PortListeners -Ports @(3001, 3011, 3021, 3031, 5000)
     Start-Sleep -Seconds 4
+}
+
+function Wait-CrevaFactOSProcessesCleared([int]$TimeoutSeconds = 45) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $desktop = Get-Process -Name "CrevaFactOS" -ErrorAction SilentlyContinue
+        $api = Get-Process -Name "CrevaFactOS.Api" -ErrorAction SilentlyContinue
+        if (-not $desktop -and -not $api) { return $true }
+        Stop-CrevaFactOSDesktopOnly
+        Start-Sleep -Seconds 2
+    }
+    return $false
 }
 
 function Wait-PackagedPortsCleared([int]$TimeoutSeconds = 60) {
@@ -196,7 +297,7 @@ function Wait-PackagedPortsCleared([int]$TimeoutSeconds = 60) {
                 if ($proc -and (
                     $proc.Name -match '^CrevaFactOS' -or
                     ($proc.CommandLine -match 'desktop-runtime') -or
-                    ($proc.CommandLine -match 'CrevaFactOS-RC1'))) {
+                    ($proc.CommandLine -match $packagedBundleToken))) {
                     $crevafactosWebOccupied = $true
                 }
             }
@@ -225,6 +326,8 @@ Assert-Check "checksums valid" (Test-ChecksumsValid $BundleRoot $checksumPath)
 Assert-Check "desktop exe exists" (Test-Path $desktopExe)
 Assert-Check "api publish exists" (Test-Path $apiExe)
 Assert-Check "web standalone exists" (Test-Path $webServer)
+. (Join-Path $RepositoryRoot "scripts\desktop\desktop-runtime-filesystem.ps1")
+Assert-Check "standalone runtime module resolution" ([bool](Test-StandaloneNextServerModule -StandaloneRoot (Join-Path $BundleRoot "web")))
 Assert-Check "secret scan pass" (Test-SecretScan $BundleRoot)
 
 $shell = New-Object -ComObject WScript.Shell
@@ -232,9 +335,14 @@ $shortcut = $shell.CreateShortcut($shortcutPath)
 Assert-Check "shortcut targets packaged exe" ($shortcut.TargetPath -eq $desktopExe) "actual=$($shortcut.TargetPath)"
 
 Stop-CrevaFactOSDesktopOnly
+Assert-Check "crevafactos processes cleared before cold start" (Wait-CrevaFactOSProcessesCleared 45)
 Assert-Check "packaged ports cleared before cold start" (Wait-PackagedPortsCleared 90)
 Write-Host "Cold-starting packaged runtime..."
+try {
 $launch = Start-Process -FilePath $desktopExe -WorkingDirectory (Split-Path $desktopExe -Parent) -PassThru
+Assert-Check "packaged api process start" (Wait-PackagedApiProcessStart 180)
+Assert-Check "packaged api readiness" (Wait-PackagedApiReady 300)
+Assert-Check "packaged identity endpoint readiness" (Test-CrevaFactOSApiIdentityReady)
 $selectedWebPort = Wait-PackagedWebReady 480
 Assert-Check "packaged cold start web ready" ($null -ne $selectedWebPort) "no candidate port ready"
 $logSelectedPort = Get-SelectedWebPortFromLifecycleLog
@@ -247,14 +355,14 @@ Start-Sleep -Seconds 20
 $apiProcess = Get-CimInstance Win32_Process -Filter "Name='CrevaFactOS.Api.exe'" |
     Select-Object -First 1
 if ($apiProcess) {
-    Assert-Check "packaged api process path" ($apiProcess.CommandLine -like "*desktop-runtime*") $apiProcess.CommandLine
+    Assert-Check "packaged api process path" ($apiProcess.CommandLine -like "*$packagedBundleToken*") $apiProcess.CommandLine
 }
 
 $webProcess = Get-CimInstance Win32_Process |
-    Where-Object { $_.Name -eq 'node.exe' -and $_.CommandLine -match 'desktop-runtime' } |
+    Where-Object { $_.Name -eq 'node.exe' -and $_.CommandLine -match $packagedBundleToken } |
     Select-Object -First 1
 if ($webProcess) {
-    Assert-Check "packaged web process path" ($webProcess.CommandLine -like "*desktop-runtime*") $webProcess.CommandLine
+    Assert-Check "packaged web process path" ($webProcess.CommandLine -like "*$packagedBundleToken*") $webProcess.CommandLine
 }
 
 $env:CREVAFACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR = $screenshotDir
@@ -299,6 +407,10 @@ $results["DASHBOARD_PROTECTED_DIFF"] = 0
 $results["bundleRoot"] = $BundleRoot
 $results["sourceCommit"] = $manifest.sourceCommit
 $results | ConvertTo-Json -Depth 6 | Set-Content -Path $resultsPath -Encoding UTF8
+}
+finally {
+    Stop-CrevaFactOSDesktopOnly
+}
 
 Stop-CrevaFactOSDesktopOnly
 Write-Host "DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1: PASS"
