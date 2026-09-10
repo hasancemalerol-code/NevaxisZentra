@@ -315,6 +315,8 @@ public sealed class MaterialRepository(
             }
             catch (DbUpdateException ex) when (IsUniqueViolation(ex))
             {
+                DetachFailedCreate(materialId, material);
+
                 if (!string.IsNullOrWhiteSpace(command.IdempotencyKey))
                 {
                     var raced = await dbContext.Materials
@@ -784,6 +786,19 @@ public sealed class MaterialRepository(
             MaterialTechnicalValidator.HasTechnicalData(spec),
             spec.Version);
 
+    private void DetachFailedCreate(Guid materialId, MaterialRegistryEntry material)
+    {
+        dbContext.Entry(material).State = EntityState.Detached;
+
+        foreach (var auditEntry in dbContext.ChangeTracker.Entries<AuditRecord>()
+                     .Where(entry => entry.State == EntityState.Added
+                         && entry.Entity.ResourceId == materialId.ToString())
+                     .ToList())
+        {
+            auditEntry.State = EntityState.Detached;
+        }
+    }
+
     private void AddAudit(
         MaterialOperationContext context,
         string action,
@@ -797,8 +812,8 @@ public sealed class MaterialRepository(
         {
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
-            IdentitySubjectId = context.IdentitySubjectId,
-            TenantMembershipId = context.MembershipId,
+            IdentitySubjectId = context.IdentitySubjectId == Guid.Empty ? null : context.IdentitySubjectId,
+            TenantMembershipId = context.MembershipId == Guid.Empty ? null : context.MembershipId,
             EventType = eventType,
             Action = action,
             ResourceType = resourceType,

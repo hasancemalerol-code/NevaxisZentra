@@ -20,6 +20,7 @@ using CrevaFactOS.Persistence.SaasSubscription;
 using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
+using CrevaFactOS.Persistence.Integration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -387,6 +388,22 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureErpWritebackApprovePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureErpWritebackExecutePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationMappingManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationQuarantineManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationSecretConfigurePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -2703,6 +2720,60 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ErpPermissionKeys.WritebackExecute,
             DevelopmentPilotIds.ErpWritebackExecutePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.Read,
+            DevelopmentPilotIds.IntegrationReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.Manage,
+            DevelopmentPilotIds.IntegrationManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationRunPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.Run,
+            DevelopmentPilotIds.IntegrationRunPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationMappingManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.MappingManage,
+            DevelopmentPilotIds.IntegrationMappingManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationQuarantineManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.QuarantineManage,
+            DevelopmentPilotIds.IntegrationQuarantineManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationSecretConfigurePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.SecretConfigure,
+            DevelopmentPilotIds.IntegrationSecretConfigurePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(

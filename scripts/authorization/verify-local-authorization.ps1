@@ -3,8 +3,8 @@ param(
     [ValidateRange(1024, 65535)]
     [int]$ApiPort = 5096,
 
-    [ValidateRange(10, 120)]
-    [int]$TimeoutSeconds = 45
+    [ValidateRange(10, 180)]
+    [int]$TimeoutSeconds = 120
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,8 +13,36 @@ $databaseScript = Join-Path $repositoryRoot 'scripts\database\database.ps1'
 $apiProject = Join-Path $repositoryRoot 'apps\api\CrevaFactOS.Api.csproj'
 $artifactDirectory = Join-Path $repositoryRoot 'artifacts\authorization'
 $apiBaseUrl = "http://127.0.0.1:$ApiPort"
-$runtimePort = if ($env:CREVAFACTOS_POSTGRES_PORT) { $env:CREVAFACTOS_POSTGRES_PORT } else { '5432' }
 $apiProcess = $null
+
+function Import-EnvironmentFile {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed -or $trimmed.StartsWith('#')) {
+            continue
+        }
+
+        $parts = $trimmed.Split('=', 2)
+        if ($parts.Count -eq 2 -and -not [Environment]::GetEnvironmentVariable($parts[0], 'Process')) {
+            [Environment]::SetEnvironmentVariable($parts[0], $parts[1], 'Process')
+        }
+    }
+}
+
+Import-EnvironmentFile (Join-Path $repositoryRoot 'infrastructure\.env')
+$runtimePort = if ($env:CREVAFACTOS__PERSISTENCE__PORT) {
+    $env:CREVAFACTOS__PERSISTENCE__PORT
+} elseif ($env:CREVAFACTOS_POSTGRES_PORT) {
+    $env:CREVAFACTOS_POSTGRES_PORT
+} else {
+    '5433'
+}
 
 function Get-DotNetPath {
     $command = Get-Command dotnet -ErrorAction SilentlyContinue
@@ -72,6 +100,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Permission fixture bootstrap failed.' }
 
     New-Item -ItemType Directory -Path $artifactDirectory -Force | Out-Null
+    & (Get-DotNetPath) @('build', $apiProject, '-v', 'q') | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Development API build failed.' }
+
     $apiProcess = Start-Process `
         -FilePath (Get-DotNetPath) `
         -ArgumentList @('run', '--no-build', '--project', $apiProject, '--no-launch-profile') `

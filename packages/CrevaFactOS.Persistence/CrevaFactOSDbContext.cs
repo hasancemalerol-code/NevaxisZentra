@@ -25,6 +25,7 @@ using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Erp;
+using CrevaFactOS.Persistence.Integration;
 using CrevaFactOS.Persistence.Edge;
 using CrevaFactOS.Persistence.IotPlc;
 using CrevaFactOS.Persistence.OperationalRisk;
@@ -460,6 +461,13 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<ErpWritebackRequest> ErpWritebackRequests => Set<ErpWritebackRequest>();
     public DbSet<ErpWritebackApproval> ErpWritebackApprovals => Set<ErpWritebackApproval>();
     public DbSet<ErpEntityMapping> ErpEntityMappings => Set<ErpEntityMapping>();
+
+    // Canonical integration spine
+    public DbSet<IntegrationConnector> IntegrationConnectors => Set<IntegrationConnector>();
+    public DbSet<IntegrationMappingVersion> IntegrationMappingVersions => Set<IntegrationMappingVersion>();
+    public DbSet<IntegrationSyncRun> IntegrationSyncRuns => Set<IntegrationSyncRun>();
+    public DbSet<IntegrationIngestionQuarantine> IntegrationIngestionQuarantine => Set<IntegrationIngestionQuarantine>();
+    public DbSet<IntegrationSourceIdentity> IntegrationSourceIdentities => Set<IntegrationSourceIdentity>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -2313,6 +2321,37 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Canonical integration spine
+        modelBuilder.ApplyConfiguration(new IntegrationConnectorEntityConfiguration());
+        modelBuilder.Entity<IntegrationConnector>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationMappingVersionEntityConfiguration());
+        modelBuilder.Entity<IntegrationMappingVersion>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationSyncRunEntityConfiguration());
+        modelBuilder.Entity<IntegrationSyncRun>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationIngestionQuarantineEntityConfiguration());
+        modelBuilder.Entity<IntegrationIngestionQuarantine>().HasQueryFilter(q =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && q.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationSourceIdentityEntityConfiguration());
+        modelBuilder.Entity<IntegrationSourceIdentity>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

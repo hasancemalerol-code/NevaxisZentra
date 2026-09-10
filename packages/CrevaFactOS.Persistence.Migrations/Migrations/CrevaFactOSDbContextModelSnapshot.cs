@@ -15729,6 +15729,599 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationConnector", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ActiveMappingVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("active_mapping_version_id");
+
+                    b.Property<string>("AuthenticationMode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("authentication_mode");
+
+                    b.Property<string>("CheckpointJson")
+                        .HasColumnType("text")
+                        .HasColumnName("checkpoint_json");
+
+                    b.Property<string>("ConfigurationJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("configuration_json");
+
+                    b.Property<string>("ConnectorKind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("connector_kind");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("direction");
+
+                    b.Property<Guid?>("DomainBindingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("domain_binding_id");
+
+                    b.Property<string>("DomainBindingKind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("domain_binding_kind");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("EndpointOrLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("endpoint_or_location");
+
+                    b.Property<string>("Environment")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("environment");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FailureStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_status");
+
+                    b.Property<string>("FreshnessState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("freshness_state");
+
+                    b.Property<string>("HealthStatus")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("health_status");
+
+                    b.Property<string>("IngressKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ingress_key");
+
+                    b.Property<DateTimeOffset?>("LastAttemptedSyncAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_attempted_sync_at_utc");
+
+                    b.Property<DateTimeOffset?>("LastFailureAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_failure_at_utc");
+
+                    b.Property<DateTimeOffset?>("LastSuccessAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_success_at_utc");
+
+                    b.Property<DateTimeOffset?>("LastSuccessfulSyncAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_successful_sync_at_utc");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ObservabilityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("observability_json");
+
+                    b.Property<string>("OwnerSubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("owner_subject_id");
+
+                    b.Property<string>("QualityState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("quality_state");
+
+                    b.Property<string>("RateLimitState")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("rate_limit_state");
+
+                    b.Property<string>("RetryState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("retry_state");
+
+                    b.Property<string>("ScheduleExpression")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("schedule_expression");
+
+                    b.Property<string>("SecretReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("secret_reference");
+
+                    b.Property<string>("SourceSystemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_system_name");
+
+                    b.Property<string>("SourceSystemType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_system_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SynchronizationMode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("synchronization_mode");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActiveMappingVersionId");
+
+                    b.HasIndex("IngressKey")
+                        .IsUnique()
+                        .HasFilter("ingress_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("integration_connectors", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationIngestionQuarantine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ConnectorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("connector_id");
+
+                    b.Property<string>("EvidenceClass")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_class");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reason_code");
+
+                    b.Property<DateTimeOffset?>("ResolvedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at_utc");
+
+                    b.Property<string>("ResolvedBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("resolved_by_subject_id");
+
+                    b.Property<string>("SafeReason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("safe_reason");
+
+                    b.Property<string>("SourceEntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_entity_type");
+
+                    b.Property<string>("SourceRecordId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_record_id");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_system");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SyncRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sync_run_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("ValidationIssue")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("validation_issue");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConnectorId");
+
+                    b.HasIndex("SyncRunId");
+
+                    b.HasIndex("TenantId", "FacilityId", "OccurredAtUtc");
+
+                    b.ToTable("integration_ingestion_quarantine", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationMappingVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ActivatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("activated_at_utc");
+
+                    b.Property<string>("ActivatedBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("activated_by_subject_id");
+
+                    b.Property<Guid>("ConnectorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("connector_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("MappingJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mapping_json");
+
+                    b.Property<string>("SourceSchemaFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("source_schema_fingerprint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SupersededByMappingVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("superseded_by_mapping_version_id");
+
+                    b.Property<string>("TargetCanonicalEntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("target_canonical_entity_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("ValidatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("validated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_number");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConnectorId", "VersionNumber")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "FacilityId");
+
+                    b.ToTable("integration_mapping_versions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationSourceIdentity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ConnectorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("connector_id");
+
+                    b.Property<string>("ContentFingerprint")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("content_fingerprint");
+
+                    b.Property<string>("EvidenceClass")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_class");
+
+                    b.Property<DateTimeOffset>("FirstSeenAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_seen_at_utc");
+
+                    b.Property<Guid?>("InternalProjectionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("internal_projection_id");
+
+                    b.Property<string>("InternalProjectionType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("internal_projection_type");
+
+                    b.Property<DateTimeOffset>("LastSeenAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at_utc");
+
+                    b.Property<string>("SourceEntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_entity_type");
+
+                    b.Property<string>("SourceRecordId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_record_id");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_system");
+
+                    b.Property<string>("SourceVersion")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source_version");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("ConnectorId", "SourceEntityType", "SourceRecordId")
+                        .IsUnique();
+
+                    b.ToTable("integration_source_identities", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationSyncRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CheckpointAfterJson")
+                        .HasColumnType("text")
+                        .HasColumnName("checkpoint_after_json");
+
+                    b.Property<string>("CheckpointBeforeJson")
+                        .HasColumnType("text")
+                        .HasColumnName("checkpoint_before_json");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<Guid>("ConnectorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("connector_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("error_code");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("error_message");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FailureCategory")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("failure_category");
+
+                    b.Property<string>("ImportIdempotencyKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("import_idempotency_key");
+
+                    b.Property<Guid?>("MappingVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mapping_version_id");
+
+                    b.Property<int>("RecordsAccepted")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_accepted");
+
+                    b.Property<int>("RecordsDuplicate")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_duplicate");
+
+                    b.Property<int>("RecordsQuarantined")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_quarantined");
+
+                    b.Property<int>("RecordsRead")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_read");
+
+                    b.Property<int>("RecordsRejected")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_rejected");
+
+                    b.Property<int>("RecordsUpdated")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_updated");
+
+                    b.Property<Guid?>("RetriedFromSyncRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("retried_from_sync_run_id");
+
+                    b.Property<string>("SourceFingerprint")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("source_fingerprint");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source_type");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TriggeredBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("triggered_by_subject_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MappingVersionId");
+
+                    b.HasIndex("ConnectorId", "ImportIdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("import_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "StartedAtUtc");
+
+                    b.ToTable("integration_sync_runs", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcAuditEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -33021,6 +33614,130 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationConnector", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationMappingVersion", "ActiveMappingVersion")
+                        .WithMany()
+                        .HasForeignKey("ActiveMappingVersionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ActiveMappingVersion");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationIngestionQuarantine", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationConnector", "Connector")
+                        .WithMany()
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationSyncRun", "SyncRun")
+                        .WithMany()
+                        .HasForeignKey("SyncRunId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Connector");
+
+                    b.Navigation("SyncRun");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationMappingVersion", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationConnector", "Connector")
+                        .WithMany("MappingVersions")
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Connector");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationSourceIdentity", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationConnector", "Connector")
+                        .WithMany()
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Connector");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationSyncRun", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationConnector", "Connector")
+                        .WithMany("SyncRuns")
+                        .HasForeignKey("ConnectorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Integration.IntegrationMappingVersion", null)
+                        .WithMany()
+                        .HasForeignKey("MappingVersionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.Facilities.Facility", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "FacilityId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Connector");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcAuditEvent", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -36002,6 +36719,13 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
             modelBuilder.Entity("CrevaFactOS.Persistence.Erp.ErpWritebackRequest", b =>
                 {
                     b.Navigation("Approvals");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.Integration.IntegrationConnector", b =>
+                {
+                    b.Navigation("MappingVersions");
+
+                    b.Navigation("SyncRuns");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.IotPlc.IotPlcEndpoint", b =>

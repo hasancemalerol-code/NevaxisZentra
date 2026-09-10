@@ -2,6 +2,7 @@
   <PropertyGroup>
     <RootNamespace>CrevaFactOS.Persistence.Migrations</RootNamespace>
     <AssemblyName>CrevaFactOS.Persistence.Migrations</AssemblyName>
+    <NoWarn>$(NoWarn);CA1861</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

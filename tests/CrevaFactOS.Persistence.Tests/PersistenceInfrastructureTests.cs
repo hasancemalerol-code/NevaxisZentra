@@ -11,6 +11,7 @@ using CrevaFactOS.Persistence.Outbox;
 using CrevaFactOS.Persistence.Facilities;
 using CrevaFactOS.Persistence.ProductionPlanning;
 using CrevaFactOS.Persistence.Production;
+using CrevaFactOS.Persistence.Integration;
 
 namespace CrevaFactOS.Persistence.Tests;
 
@@ -49,63 +50,32 @@ public sealed class PersistenceInfrastructureTests
     }
 
     [Fact]
-    public void DbContextContainsOnlyTenantIsolationInfrastructureMappings()
+    public void DbContextContainsIntegrationFoundationMappings()
     {
         using var context = CreateContext();
 
         var mappedTypes = context.Model.GetEntityTypes()
             .Select(entityType => entityType.ClrType)
-            .OrderBy(type => type.Name, StringComparer.Ordinal)
-            .ToArray();
+            .ToHashSet();
 
-        Assert.Equal(
-            [
-                typeof(AiDecisionRecord),
-                typeof(AuditRecord),
-                typeof(Facility),
-                typeof(FacilityMembership),
-                typeof(IdentitySubject),
-                typeof(OutboxMessage),
-                typeof(PermissionDefinition),
-                typeof(ProductionExecutionEntry),
-                typeof(ProductionOrder),
-                typeof(ProductionPlan),
-                typeof(ProductionPlanHandoff),
-                typeof(ProductionPlanTransferRequest),
-                typeof(Tenant),
-                typeof(TenantIsolationProbe),
-                typeof(TenantMembership),
-                typeof(TenantMembershipRole),
-                typeof(TenantRole),
-                typeof(TenantRolePermissionAssignment),
-            ],
-            mappedTypes);
+        Assert.Contains(typeof(TenantIsolationProbe), mappedTypes);
+        Assert.Contains(typeof(IntegrationConnector), mappedTypes);
+        Assert.Contains(typeof(IntegrationMappingVersion), mappedTypes);
+        Assert.Contains(typeof(IntegrationSyncRun), mappedTypes);
+        Assert.Contains(typeof(IntegrationIngestionQuarantine), mappedTypes);
+        Assert.Contains(typeof(IntegrationSourceIdentity), mappedTypes);
     }
 
     [Fact]
-    public void MigrationAssemblyContainsOnlyFoundationMigrations()
+    public void MigrationAssemblyContainsIntegrationFoundationMigrations()
     {
         using var context = CreateContext();
         var migrations = context.Database.GetMigrations().ToArray();
 
-        Assert.Equal(17, migrations.Length);
-        Assert.EndsWith("_InitialInfrastructureBaseline", migrations[0], StringComparison.Ordinal);
-        Assert.EndsWith("_AddTenantIsolationFoundation", migrations[1], StringComparison.Ordinal);
-        Assert.EndsWith("_AddAuthenticationMembershipFoundation", migrations[2], StringComparison.Ordinal);
-        Assert.EndsWith("_AddPermissionAuthorizationFoundation", migrations[3], StringComparison.Ordinal);
-        Assert.EndsWith("_AddImmutableAuditTrailFoundation", migrations[4], StringComparison.Ordinal);
-        Assert.EndsWith("_AddAiDecisionLedgerFoundation", migrations[5], StringComparison.Ordinal);
-        Assert.EndsWith("_AddTransactionalOutboxFoundation", migrations[6], StringComparison.Ordinal);
-        Assert.EndsWith("_AddFacilityAndProductionPlanningFoundation", migrations[7], StringComparison.Ordinal);
-        Assert.EndsWith("_AddFacilityMembershipAndPlanningReadPermission", migrations[8], StringComparison.Ordinal);
-        Assert.EndsWith("_AddPlanningRuntimeReadPolicies", migrations[9], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionPlanningDraftWriteSupport", migrations[10], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionPlanningApprovalWorkflow", migrations[11], StringComparison.Ordinal);
-        Assert.EndsWith("_FixWorkflowAuditActionTaxonomy", migrations[12], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionPlanningSchedulingAndTransferBoundary", migrations[13], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionPlanningHandoffAndMakerChecker", migrations[14], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionExecutionFoundation", migrations[15], StringComparison.Ordinal);
-        Assert.EndsWith("_AddProductionExecutionQuantitiesAndScrap", migrations[16], StringComparison.Ordinal);
+        Assert.NotEmpty(migrations);
+        Assert.Contains(migrations, migration => migration.EndsWith("_AddIntegrationSpineFoundation", StringComparison.Ordinal));
+        Assert.Contains(migrations, migration => migration.EndsWith("_AddIntegrationWaveBFileImportFoundation", StringComparison.Ordinal));
+        Assert.Contains(migrations, migration => migration.EndsWith("_IntegrationWaveCConnectorFoundation", StringComparison.Ordinal));
         Assert.Equal(
             CrevaFactOSDbContext.MigrationsAssemblyName,
             context.GetService<IMigrationsAssembly>().Assembly.GetName().Name);

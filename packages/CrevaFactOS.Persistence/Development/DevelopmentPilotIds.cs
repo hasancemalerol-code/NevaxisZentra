@@ -331,6 +331,25 @@ public static class DevelopmentPilotIds
     public static readonly Guid ErpWritebackExecutePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000061");
 
+    // Integration permission definitions (0f01–0f06)
+    public static readonly Guid IntegrationReadPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f01");
+
+    public static readonly Guid IntegrationManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f02");
+
+    public static readonly Guid IntegrationRunPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f03");
+
+    public static readonly Guid IntegrationMappingManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f04");
+
+    public static readonly Guid IntegrationQuarantineManagePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f05");
+
+    public static readonly Guid IntegrationSecretConfigurePermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f06");
+
     // ERP pilot fixture
     public static readonly Guid ErpPilotSimulatorConnectionId =
         Guid.Parse("bb000001-0090-4000-8000-000000000090");

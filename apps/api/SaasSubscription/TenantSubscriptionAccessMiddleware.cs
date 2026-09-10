@@ -83,6 +83,7 @@ public sealed class TenantSubscriptionAccessMiddleware(RequestDelegate next)
 
     private static bool IsExemptPath(string path) =>
         path.StartsWith("/health", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/internal/", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/api/identity", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsRecoveryApiPath(string path) =>

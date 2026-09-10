@@ -103,11 +103,11 @@ internal static class AuditTrailVerifier
                 (@identity_b, 'https://audit.local.test', 'tenant-b-auditor', 'Active', CURRENT_TIMESTAMP),
                 (@identity_without_permission, 'https://audit.local.test', 'membership-only', 'Active', CURRENT_TIMESTAMP);
 
-            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, status, created_at_utc)
+            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, membership_reference, status, created_at_utc)
             VALUES
-                (@membership_a, @tenant_a, @identity_a, 'Active', CURRENT_TIMESTAMP),
-                (@membership_b, @tenant_b, @identity_b, 'Active', CURRENT_TIMESTAMP),
-                (@membership_without_permission, @tenant_a, @identity_without_permission, 'Active', CURRENT_TIMESTAMP);
+                (@membership_a, @tenant_a, @identity_a, 'audit-fixture-a', 'Active', CURRENT_TIMESTAMP),
+                (@membership_b, @tenant_b, @identity_b, 'audit-fixture-b', 'Active', CURRENT_TIMESTAMP),
+                (@membership_without_permission, @tenant_a, @identity_without_permission, 'audit-fixture-without-permission', 'Active', CURRENT_TIMESTAMP);
 
             INSERT INTO tenant_roles (id, tenant_id, key, display_name, status, created_at_utc)
             VALUES

@@ -107,11 +107,11 @@ internal static class PermissionAuthorizationVerifier
                 (@identity_b, 'https://authorization.local.test', 'tenant-b-member', 'Active', CURRENT_TIMESTAMP),
                 (@identity_alone, 'https://authorization.local.test', 'membership-only', 'Active', CURRENT_TIMESTAMP);
 
-            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, status, created_at_utc)
+            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, membership_reference, status, created_at_utc)
             VALUES
-                (@membership_a, @tenant_a, @identity_a, 'Active', CURRENT_TIMESTAMP),
-                (@membership_alone, @tenant_a, @identity_alone, 'Active', CURRENT_TIMESTAMP),
-                (@membership_b, @tenant_b, @identity_b, 'Active', CURRENT_TIMESTAMP);
+                (@membership_a, @tenant_a, @identity_a, 'authorization-fixture-a', 'Active', CURRENT_TIMESTAMP),
+                (@membership_alone, @tenant_a, @identity_alone, 'authorization-fixture-alone', 'Active', CURRENT_TIMESTAMP),
+                (@membership_b, @tenant_b, @identity_b, 'authorization-fixture-b', 'Active', CURRENT_TIMESTAMP);
 
             INSERT INTO tenant_roles (id, tenant_id, key, display_name, status, created_at_utc)
             VALUES

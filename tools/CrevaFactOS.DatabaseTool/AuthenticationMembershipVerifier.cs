@@ -98,12 +98,12 @@ internal static class AuthenticationMembershipVerifier
                 (@inactive_identity_id, @issuer, 'inactive-identity', 'Inactive', CURRENT_TIMESTAMP),
                 (@inactive_tenant_identity_id, @issuer, 'inactive-tenant', 'Active', CURRENT_TIMESTAMP);
 
-            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, status, created_at_utc)
+            INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, membership_reference, status, created_at_utc)
             VALUES
-                ('eeeeeeee-0000-4000-8000-000000000001', @tenant_a_id, @active_identity_id, 'Active', CURRENT_TIMESTAMP),
-                ('eeeeeeee-0000-4000-8000-000000000002', @tenant_a_id, @inactive_membership_identity_id, 'Inactive', CURRENT_TIMESTAMP),
-                ('eeeeeeee-0000-4000-8000-000000000003', @tenant_a_id, @inactive_identity_id, 'Active', CURRENT_TIMESTAMP),
-                ('eeeeeeee-0000-4000-8000-000000000004', @inactive_tenant_id, @inactive_tenant_identity_id, 'Active', CURRENT_TIMESTAMP);
+                ('eeeeeeee-0000-4000-8000-000000000001', @tenant_a_id, @active_identity_id, 'authentication-fixture-active', 'Active', CURRENT_TIMESTAMP),
+                ('eeeeeeee-0000-4000-8000-000000000002', @tenant_a_id, @inactive_membership_identity_id, 'authentication-fixture-inactive-membership', 'Inactive', CURRENT_TIMESTAMP),
+                ('eeeeeeee-0000-4000-8000-000000000003', @tenant_a_id, @inactive_identity_id, 'authentication-fixture-inactive-identity', 'Active', CURRENT_TIMESTAMP),
+                ('eeeeeeee-0000-4000-8000-000000000004', @inactive_tenant_id, @inactive_tenant_identity_id, 'authentication-fixture-inactive-tenant', 'Active', CURRENT_TIMESTAMP);
             """;
         await using var command = new NpgsqlCommand(sql, connection);
         AddFixtureParameters(command);

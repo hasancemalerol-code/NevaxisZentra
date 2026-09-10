@@ -2,6 +2,7 @@ import "./admin-access-server-boundary";
 
 import { cookies } from "next/headers";
 
+import { SAAS_IDENTITY_SESSION_COOKIE } from "@/features/saas-identity/lib/saas-identity-constants";
 import { resolveSaasIdentityRuntimeConfig } from "@/features/saas-identity/server/saas-identity-runtime-config";
 
 export type AdminAccessNavigationVisibility = Readonly<{
@@ -24,6 +25,53 @@ async function readCookieHeader(): Promise<string> {
     .join("; ");
 }
 
+function hasSessionCookie(cookieHeader: string): boolean {
+  return cookieHeader
+    .split(";")
+    .some((part) => part.trim().startsWith(`${SAAS_IDENTITY_SESSION_COOKIE}=`));
+}
+
+function readDevelopmentIdentityHeaders(): Readonly<Record<string, string>> | null {
+  if (process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE !== "development-api") {
+    return null;
+  }
+
+  const issuer = process.env.CREVAFACTOS_DEV_AUTH_ISSUER?.trim();
+  const subject = process.env.CREVAFACTOS_DEV_AUTH_SUBJECT?.trim();
+  const tenantKey = process.env.CREVAFACTOS_DEV_TENANT_KEY?.trim();
+  if (!issuer || !subject || !tenantKey) {
+    return null;
+  }
+
+  return {
+    "X-CrevaFactOS-Dev-Issuer": issuer,
+    "X-CrevaFactOS-Dev-Subject": subject,
+    "X-CrevaFactOS-Tenant": tenantKey,
+  };
+}
+
+function buildEffectiveAccessHeaders(cookieHeader: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (hasSessionCookie(cookieHeader)) {
+    headers.Cookie = cookieHeader;
+    return headers;
+  }
+
+  const developmentHeaders = readDevelopmentIdentityHeaders();
+  if (developmentHeaders) {
+    return { ...headers, ...developmentHeaders };
+  }
+
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader;
+  }
+
+  return headers;
+}
+
 export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiveAccess | null> {
   const config = resolveSaasIdentityRuntimeConfig();
   if (config.status === "failure") {
@@ -33,10 +81,7 @@ export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiv
   try {
     const response = await fetch(`${config.config.apiBaseUrl}/api/admin-access/me/effective-access`, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        Cookie: await readCookieHeader(),
-      },
+      headers: buildEffectiveAccessHeaders(await readCookieHeader()),
       cache: "no-store",
     });
 

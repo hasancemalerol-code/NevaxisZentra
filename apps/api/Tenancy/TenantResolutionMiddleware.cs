@@ -22,6 +22,12 @@ public sealed class TenantResolutionMiddleware(
         TenantContextAccessor tenantContextAccessor,
         ICurrentIdentityAccessor currentIdentityAccessor)
     {
+        if (httpContext.Request.Path.StartsWithSegments("/api/integration/webhooks", StringComparison.OrdinalIgnoreCase))
+        {
+            await next(httpContext);
+            return;
+        }
+
         var session = SaasIdentityEndpointHelpers.GetSessionContext(httpContext);
         if (session is not null)
         {

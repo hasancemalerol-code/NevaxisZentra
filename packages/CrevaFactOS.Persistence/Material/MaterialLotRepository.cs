@@ -1361,8 +1361,8 @@ public sealed class MaterialLotRepository(
         {
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
-            IdentitySubjectId = context.IdentitySubjectId,
-            TenantMembershipId = context.MembershipId,
+            IdentitySubjectId = context.IdentitySubjectId == Guid.Empty ? null : context.IdentitySubjectId,
+            TenantMembershipId = context.MembershipId == Guid.Empty ? null : context.MembershipId,
             EventType = eventType,
             Action = action,
             ResourceType = resourceType,
