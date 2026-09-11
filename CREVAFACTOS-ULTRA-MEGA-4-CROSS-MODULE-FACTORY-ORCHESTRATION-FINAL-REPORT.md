@@ -7,7 +7,7 @@
 | | SHA |
 |---|---|
 | BASELINE_SHA | `1c33bf61b57d5ffc79bbd08faef46f8c5c1759c5` |
-| FINAL_SHA | _(set after commit)_ |
+| FINAL_SHA | `77a43fd` |
 | ORIGIN_MAIN_SHA | `1c33bf61b57d5ffc79bbd08faef46f8c5c1759c5` (baseline) |
 
 ## Architecture inventory
