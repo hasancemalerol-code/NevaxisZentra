@@ -14,7 +14,7 @@ export function AuthShell({
   return (
     <section className="auth-shell" aria-labelledby="auth-shell-title">
       <header className="auth-shell__header">
-        <p className="auth-shell__eyebrow">CrevaFactOS</p>
+        <p className="auth-shell__eyebrow">NEVAXIS FACTOS</p>
         <h1 className="auth-shell__title" id="auth-shell-title">
           {title}
         </h1>
