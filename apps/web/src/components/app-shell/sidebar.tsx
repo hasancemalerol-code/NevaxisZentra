@@ -31,7 +31,7 @@ export function Sidebar({
     >
       <div className="sidebar-brand">
         <Link
-          aria-label="CrevaFactOS ana çalışma alanı"
+          aria-label="NEVAXIS FACTOS ana çalışma alanı"
           className="brand-link"
           href="/"
         >
@@ -39,12 +39,12 @@ export function Sidebar({
             aria-hidden="true"
             className="brand-mark"
           >
-            CF
+            NF
           </span>
 
           <span className="brand-copy">
-            <strong>CrevaFactOS</strong>
-            <small>Factory Operations</small>
+            <small>NEVAXIS</small>
+            <strong>FACTOS</strong>
           </span>
         </Link>
 
