@@ -17,6 +17,11 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         exact: true,
       },
       {
+        label: "Dijital İş Gücü",
+        href: "/dijital-is-gucu",
+        iconKey: "users-round",
+      },
+      {
         label: "Dashboard / Operasyon Merkezi",
         href: "/dashboard",
         iconKey: "layout-dashboard",
@@ -297,6 +302,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Raporlama & Analitik",
         href: "/raporlar",
         iconKey: "chart-no-axes-combined",
+      },
+      {
+        label: "Entegrasyonlar",
+        href: "/ayarlar/entegrasyonlar",
+        iconKey: "cable",
+        permissionKey: "integration.read",
       },
       {
         label: "Ayarlar",

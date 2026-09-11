@@ -205,6 +205,7 @@ body:has(.command-center) {
 
 .command-center__metrics,
 .command-center__quick-actions-strip,
+.command-center__digital-workforce,
 .command-center__decision-grid,
 .command-center__operations-grid,
 .command-center__support-grid {

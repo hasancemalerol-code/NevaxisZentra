@@ -21,6 +21,7 @@ using CrevaFactOS.Persistence.SaasBilling;
 using CrevaFactOS.Persistence.SaasIdentity;
 using CrevaFactOS.Persistence.AdminAccess;
 using CrevaFactOS.Persistence.Integration;
+using CrevaFactOS.Persistence.DigitalWorkforce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -405,6 +406,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureIntegrationSecretConfigurePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceAutonomyManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforcePolicyManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceApprovalDecidePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceKillPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureDigitalWorkforceCostReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeManagePermissionAssignmentAsync(
@@ -914,6 +933,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 tenant.Id,
                 facility.Id,
                 seedTimestampUtc,
+                cancellationToken);
+            await DevelopmentPilotDigitalWorkforceSeed.EnsureDigitalWorkforcePilotDataAsync(
+                dbContext,
+                bootstrapContext.TenantContextAccessor,
+                tenant.Id,
+                facility.Id,
                 cancellationToken);
         }
 
@@ -2774,6 +2799,69 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             IntegrationPermissionKeys.SecretConfigure,
             DevelopmentPilotIds.IntegrationSecretConfigurePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.Read,
+            DevelopmentPilotDigitalWorkforceIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.Manage,
+            DevelopmentPilotDigitalWorkforceIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceAutonomyManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.AutonomyManage,
+            DevelopmentPilotDigitalWorkforceIds.AutonomyManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforcePolicyManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.PolicyManage,
+            DevelopmentPilotDigitalWorkforceIds.PolicyManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceApprovalDecidePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.ApprovalDecide,
+            DevelopmentPilotDigitalWorkforceIds.ApprovalDecidePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceKillPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.Kill,
+            DevelopmentPilotDigitalWorkforceIds.KillPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureDigitalWorkforceCostReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            DigitalWorkforcePermissionKeys.CostRead,
+            DevelopmentPilotDigitalWorkforceIds.CostReadPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(

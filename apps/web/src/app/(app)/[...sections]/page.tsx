@@ -33,7 +33,8 @@ export function generateStaticParams() {
         && item.href !== "/ticari-zeka/fiyat-koruma-ve-onay"
         && item.href !== "/ticari-zeka/karlilik-yonetim-merkezi"
         && item.href !== "/operasyon/yonetim-merkezi"
-        && item.href !== "/teams",
+        && item.href !== "/teams"
+        && item.href !== "/dijital-is-gucu",
     )
     .map((item) => ({
       sections: item.href

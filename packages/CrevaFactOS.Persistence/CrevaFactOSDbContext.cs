@@ -36,6 +36,7 @@ using CrevaFactOS.Persistence.AiTasks.Delivery;
 using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
 using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Teams;
+using CrevaFactOS.Persistence.DigitalWorkforce;
 using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
@@ -365,6 +366,19 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<TeamsDirectMessageAuditEvent> TeamsDirectMessageAuditEvents => Set<TeamsDirectMessageAuditEvent>();
     public DbSet<TeamsNotification> TeamsNotifications => Set<TeamsNotification>();
     public DbSet<TeamsNotificationAuditEvent> TeamsNotificationAuditEvents => Set<TeamsNotificationAuditEvent>();
+
+    // Digital Workforce foundation (ULTRA-MEGA-2)
+    public DbSet<DigitalWorker> DigitalWorkers => Set<DigitalWorker>();
+    public DbSet<DigitalWorkerPolicy> DigitalWorkerPolicies => Set<DigitalWorkerPolicy>();
+    public DbSet<DigitalWorkCase> DigitalWorkCases => Set<DigitalWorkCase>();
+    public DbSet<DigitalWorkCaseParticipant> DigitalWorkCaseParticipants => Set<DigitalWorkCaseParticipant>();
+    public DbSet<DigitalWorkActivity> DigitalWorkActivities => Set<DigitalWorkActivity>();
+    public DbSet<DigitalWorkVerification> DigitalWorkVerifications => Set<DigitalWorkVerification>();
+    public DbSet<DigitalWorkApproval> DigitalWorkApprovals => Set<DigitalWorkApproval>();
+    public DbSet<DigitalWorkHandoff> DigitalWorkHandoffs => Set<DigitalWorkHandoff>();
+    public DbSet<DigitalWorkerUsage> DigitalWorkerUsages => Set<DigitalWorkerUsage>();
+    public DbSet<DigitalWorkerBudget> DigitalWorkerBudgets => Set<DigitalWorkerBudget>();
+    public DbSet<DigitalWorkforceRuntimeState> DigitalWorkforceRuntimeStates => Set<DigitalWorkforceRuntimeState>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -2606,6 +2620,73 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && item.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        // Digital Workforce foundation (ULTRA-MEGA-2)
+        modelBuilder.ApplyConfiguration(new DigitalWorkerEntityConfiguration());
+        modelBuilder.Entity<DigitalWorker>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkerPolicyEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkerPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkCaseEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkCase>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkCaseParticipantEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkCaseParticipant>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkActivityEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkActivity>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkVerificationEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkVerification>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkApprovalEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkApproval>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkHandoffEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkHandoff>().HasQueryFilter(h =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && h.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkerUsageEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkerUsage>().HasQueryFilter(u =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && u.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkerBudgetEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkerBudget>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkforceRuntimeStateEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkforceRuntimeState>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

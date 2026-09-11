@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AiTaskCenterSummary } from "@/components/dashboard/ai-task-center-summary";
 import { CriticalRisksPanel } from "@/components/dashboard/critical-risks-panel";
 import { DailyOperationsSummary } from "@/components/dashboard/daily-operations-summary";
+import { DigitalWorkforceDashboardPanel } from "@/components/dashboard/digital-workforce-panel";
 import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics";
 import { LiveAlarmsPanel } from "@/components/dashboard/live-alarms-panel";
 import { MachineStatusPanel } from "@/components/dashboard/machine-status-panel";
@@ -158,6 +159,13 @@ export default async function DashboardPage() {
         <QuickActionsPanel
           grantedPermissionKeys={grantedPermissionKeys}
         />
+      </section>
+
+      <section
+        aria-label="Dijital İş Gücü"
+        className="command-center__digital-workforce"
+      >
+        <DigitalWorkforceDashboardPanel />
       </section>
 
       <section

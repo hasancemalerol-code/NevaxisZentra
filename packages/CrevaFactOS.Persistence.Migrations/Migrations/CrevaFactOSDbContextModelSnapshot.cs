@@ -8464,6 +8464,894 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("commercial_sales_price_profiles", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("action_type");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EvidenceReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("evidence_reference");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("result");
+
+                    b.Property<string>("SourceClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_classification");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.HasIndex("WorkerId");
+
+                    b.HasIndex("TenantId", "WorkerId", "CreatedAtUtc")
+                        .HasDatabaseName("ix_digital_work_activities_worker");
+
+                    b.ToTable("digital_work_activities", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("action");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("BusinessReason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("business_reason");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTimeOffset?>("DecidedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("decided_at_utc");
+
+                    b.Property<string>("DecidedBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("decided_by_subject_id");
+
+                    b.Property<string>("Decision")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("decision");
+
+                    b.Property<string>("EvidenceJson")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_json");
+
+                    b.Property<DateTimeOffset?>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<string>("Impact")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("impact");
+
+                    b.Property<int>("RiskLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("risk_level");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.HasIndex("WorkerId");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_digital_work_approvals_tenant_status");
+
+                    b.ToTable("digital_work_approvals", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AiCost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("ai_cost");
+
+                    b.Property<string>("AutonomyModeAtStart")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode_at_start");
+
+                    b.Property<string>("BusinessImpact")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("business_impact");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_at_utc");
+
+                    b.Property<string>("ClosureContractKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("closure_contract_key");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CurrentStage")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("current_stage");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<decimal?>("EstimatedTimeSavedMinutes")
+                        .HasColumnType("numeric")
+                        .HasColumnName("estimated_time_saved_minutes");
+
+                    b.Property<Guid?>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsHumanControlled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_human_controlled");
+
+                    b.Property<Guid?>("LinkedAiTaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_ai_task_id");
+
+                    b.Property<string>("MetadataJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("metadata_json");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("outcome");
+
+                    b.Property<Guid>("PrimaryWorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("primary_worker_id");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source");
+
+                    b.Property<string>("SourceClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_classification");
+
+                    b.Property<DateTimeOffset?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("TargetAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("target_at_utc");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("VerificationState")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("verification_state");
+
+                    b.Property<DateTimeOffset?>("VerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrimaryWorkerId");
+
+                    b.HasIndex("TenantId", "PrimaryWorkerId")
+                        .HasDatabaseName("ix_digital_work_cases_tenant_worker");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_digital_work_cases_tenant_status");
+
+                    b.ToTable("digital_work_cases", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCaseParticipant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<string>("HandoffReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("handoff_reason");
+
+                    b.Property<DateTimeOffset>("JoinedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at_utc");
+
+                    b.Property<DateTimeOffset?>("LeftAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("left_at_utc");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("role");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.HasIndex("WorkerId");
+
+                    b.ToTable("digital_work_case_participants", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkHandoff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Dependency")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("dependency");
+
+                    b.Property<Guid>("FromWorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_worker_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("ToWorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.ToTable("digital_work_handoffs", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<decimal>("Confidence")
+                        .HasColumnType("numeric")
+                        .HasColumnName("confidence");
+
+                    b.Property<string>("EvidenceReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("evidence_reference");
+
+                    b.Property<string>("ExpectedState")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("expected_state");
+
+                    b.Property<string>("ObservedState")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("observed_state");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("result");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source");
+
+                    b.Property<string>("SourceClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_classification");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("VerificationType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("verification_type");
+
+                    b.Property<DateTimeOffset?>("VerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at_utc");
+
+                    b.Property<string>("VerifiedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("verified_by");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.ToTable("digital_work_verifications", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AutonomyMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DefaultPolicyProfileJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("default_policy_profile_json");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<Guid?>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("GlobalPauseActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("global_pause_active");
+
+                    b.Property<bool>("IsHumanControlled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_human_controlled");
+
+                    b.Property<bool>("IsKilled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_killed");
+
+                    b.Property<bool>("IsPaused")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_paused");
+
+                    b.Property<string>("Mission")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("mission");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("SourceClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_classification");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_digital_workers_tenant_code");
+
+                    b.ToTable("digital_workers", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerBudget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("DailyConsumed")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_consumed");
+
+                    b.Property<decimal>("DailyLimit")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_limit");
+
+                    b.Property<decimal>("MonthlyConsumed")
+                        .HasColumnType("numeric")
+                        .HasColumnName("monthly_consumed");
+
+                    b.Property<decimal>("MonthlyLimit")
+                        .HasColumnType("numeric")
+                        .HasColumnName("monthly_limit");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("state");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<decimal>("WarningThreshold")
+                        .HasColumnType("numeric")
+                        .HasColumnName("warning_threshold");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkerId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_digital_worker_budgets_worker");
+
+                    b.ToTable("digital_worker_budgets", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AiBudgetDaily")
+                        .HasColumnType("numeric")
+                        .HasColumnName("ai_budget_daily");
+
+                    b.Property<decimal>("AiBudgetMonthly")
+                        .HasColumnType("numeric")
+                        .HasColumnName("ai_budget_monthly");
+
+                    b.Property<decimal>("AiBudgetWarningThreshold")
+                        .HasColumnType("numeric")
+                        .HasColumnName("ai_budget_warning_threshold");
+
+                    b.Property<string>("AllowedActionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("allowed_actions_json");
+
+                    b.Property<string>("AllowedConnectorsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("allowed_connectors_json");
+
+                    b.Property<string>("AllowedToolsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("allowed_tools_json");
+
+                    b.Property<string>("ApprovalRequiredForJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("approval_required_for_json");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<string>("DataScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("data_scope_json");
+
+                    b.Property<string>("EscalationPolicyJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("escalation_policy_json");
+
+                    b.Property<string>("ExternalCommunicationPolicy")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("external_communication_policy");
+
+                    b.Property<string>("FacilityScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("facility_scope_json");
+
+                    b.Property<bool>("KillSwitch")
+                        .HasColumnType("boolean")
+                        .HasColumnName("kill_switch");
+
+                    b.Property<string>("LineScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("line_scope_json");
+
+                    b.Property<string>("MachineScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("machine_scope_json");
+
+                    b.Property<int>("MaxRiskLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_risk_level");
+
+                    b.Property<decimal>("MaxTransactionValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("max_transaction_value");
+
+                    b.Property<string>("ProhibitedActionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("prohibited_actions_json");
+
+                    b.Property<int>("RetryLimit")
+                        .HasColumnType("integer")
+                        .HasColumnName("retry_limit");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TenantScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tenant_scope_json");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.Property<string>("WorkingHoursJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("working_hours_json");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkerId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_digital_worker_policies_worker");
+
+                    b.ToTable("digital_worker_policies", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerUsage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("CaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<decimal>("EstimatedCost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("estimated_cost");
+
+                    b.Property<int>("InputTokens")
+                        .HasColumnType("integer")
+                        .HasColumnName("input_tokens");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("model_name");
+
+                    b.Property<string>("ModelTier")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("model_tier");
+
+                    b.Property<int>("OutputTokens")
+                        .HasColumnType("integer")
+                        .HasColumnName("output_tokens");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("WorkerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("worker_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkerId");
+
+                    b.HasIndex("TenantId", "WorkerId", "CreatedAtUtc")
+                        .HasDatabaseName("ix_digital_worker_usages_worker");
+
+                    b.ToTable("digital_worker_usages", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkforceRuntimeState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<bool>("GlobalKillActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("global_kill_active");
+
+                    b.Property<bool>("GlobalPauseActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("global_pause_active");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_digital_workforce_runtime_states_tenant");
+
+                    b.ToTable("digital_workforce_runtime_states", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Edge.EdgeGateway", b =>
                 {
                     b.Property<Guid>("Id")
@@ -32278,6 +33166,138 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkActivity", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", "Case")
+                        .WithMany("Activities")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithMany()
+                        .HasForeignKey("WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkApproval", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", "Case")
+                        .WithMany("Approvals")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithMany()
+                        .HasForeignKey("WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "PrimaryWorker")
+                        .WithMany()
+                        .HasForeignKey("PrimaryWorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PrimaryWorker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCaseParticipant", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", "Case")
+                        .WithMany("Participants")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithMany()
+                        .HasForeignKey("WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkHandoff", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", "Case")
+                        .WithMany("Handoffs")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkVerification", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", "Case")
+                        .WithMany("Verifications")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerBudget", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithOne("Budget")
+                        .HasForeignKey("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerBudget", "WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerPolicy", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithOne("Policy")
+                        .HasForeignKey("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerPolicy", "WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkerUsage", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", "Worker")
+                        .WithMany()
+                        .HasForeignKey("WorkerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Worker");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.Edge.EdgeGateway", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.Tenancy.Tenant", null)
@@ -36679,6 +37699,26 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("Drivers");
 
                     b.Navigation("Results");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorkCase", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("Approvals");
+
+                    b.Navigation("Handoffs");
+
+                    b.Navigation("Participants");
+
+                    b.Navigation("Verifications");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.DigitalWorkforce.DigitalWorker", b =>
+                {
+                    b.Navigation("Budget");
+
+                    b.Navigation("Policy");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Edge.EdgeGateway", b =>
