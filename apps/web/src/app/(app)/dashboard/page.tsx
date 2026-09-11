@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AiTaskCenterSummary } from "@/components/dashboard/ai-task-center-summary";
 import { CriticalRisksPanel } from "@/components/dashboard/critical-risks-panel";
 import { DailyOperationsSummary } from "@/components/dashboard/daily-operations-summary";
+import { ActiveShiftDashboardPanel } from "@/components/dashboard/active-shift-panel";
 import { DigitalWorkforceDashboardPanel } from "@/components/dashboard/digital-workforce-panel";
 import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics";
 import { LiveAlarmsPanel } from "@/components/dashboard/live-alarms-panel";
@@ -165,6 +166,7 @@ export default async function DashboardPage() {
         aria-label="Dijital İş Gücü"
         className="command-center__digital-workforce"
       >
+        <ActiveShiftDashboardPanel />
         <DigitalWorkforceDashboardPanel />
       </section>
 

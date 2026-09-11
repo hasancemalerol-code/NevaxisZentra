@@ -1,0 +1,129 @@
+.shift-ops-page {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.shift-ops-shell__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.shift-ops-shell__nav a {
+  border: 1px solid var(--border-subtle, #d8dee9);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.875rem;
+}
+
+.shift-ops-shell__nav a[data-active="true"] {
+  background: var(--accent, #0f4c81);
+  color: #fff;
+  border-color: transparent;
+}
+
+.shift-ops-hero {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shift-ops-hero__eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.shift-ops-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.shift-ops-card {
+  border: 1px solid var(--border-subtle, #d8dee9);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--surface-elevated, #fff);
+}
+
+.shift-ops-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.shift-ops-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.shift-ops-status[data-tone="active"] { background: #e8f5e9; color: #1b5e20; }
+.shift-ops-status[data-tone="closing"] { background: #fff3e0; color: #e65100; }
+.shift-ops-status[data-tone="handover-pending"] { background: #fff8e1; color: #f57f17; }
+
+.shift-ops-handover-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 220px 1fr 280px;
+}
+
+@media (max-width: 1100px) {
+  .shift-ops-handover-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shift-ops-item-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shift-ops-item {
+  border: 1px solid var(--border-subtle, #d8dee9);
+  border-radius: 10px;
+  padding: 0.85rem;
+}
+
+.shift-ops-item[data-priority="critical"] {
+  border-color: #c62828;
+  background: #fff5f5;
+}
+
+.shift-ops-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  background: var(--accent, #0f4c81);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.shift-ops-readiness {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.shift-ops-must-know {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shift-ops-must-know li {
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #c62828;
+  background: #fafafa;
+}

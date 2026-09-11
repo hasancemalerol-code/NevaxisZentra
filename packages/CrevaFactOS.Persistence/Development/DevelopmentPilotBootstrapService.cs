@@ -424,6 +424,28 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureDigitalWorkforceCostReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsStartPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsClosePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsHandoverPreparePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsHandoverSubmitPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsHandoverAcceptPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureShiftOperationsOpenItemManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeManagePermissionAssignmentAsync(
@@ -935,6 +957,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 seedTimestampUtc,
                 cancellationToken);
             await DevelopmentPilotDigitalWorkforceSeed.EnsureDigitalWorkforcePilotDataAsync(
+                dbContext,
+                bootstrapContext.TenantContextAccessor,
+                tenant.Id,
+                facility.Id,
+                cancellationToken);
+            await DevelopmentPilotShiftOperationsSeed.EnsureShiftOperationsPilotDataAsync(
                 dbContext,
                 bootstrapContext.TenantContextAccessor,
                 tenant.Id,
@@ -2862,6 +2890,78 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             DigitalWorkforcePermissionKeys.CostRead,
             DevelopmentPilotDigitalWorkforceIds.CostReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.Read,
+            DevelopmentPilotShiftOperationsIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.Manage,
+            DevelopmentPilotShiftOperationsIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsStartPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.Start,
+            DevelopmentPilotShiftOperationsIds.StartPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsClosePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.Close,
+            DevelopmentPilotShiftOperationsIds.ClosePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsHandoverPreparePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.HandoverPrepare,
+            DevelopmentPilotShiftOperationsIds.HandoverPreparePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsHandoverSubmitPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.HandoverSubmit,
+            DevelopmentPilotShiftOperationsIds.HandoverSubmitPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsHandoverAcceptPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.HandoverAccept,
+            DevelopmentPilotShiftOperationsIds.HandoverAcceptPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureShiftOperationsOpenItemManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ShiftOperationsPermissionKeys.OpenItemManage,
+            DevelopmentPilotShiftOperationsIds.OpenItemManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(

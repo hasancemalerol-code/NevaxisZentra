@@ -38,6 +38,7 @@ using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.DigitalWorkforce;
 using CrevaFactOS.Persistence.ShiftHandover;
+using CrevaFactOS.Persistence.ShiftOperations;
 using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
 
@@ -383,6 +384,11 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
     public DbSet<ShiftHandoverEvent> ShiftHandoverEvents => Set<ShiftHandoverEvent>();
+
+    // Shift operations & smart handover (ULTRA-MEGA-3)
+    public DbSet<OperationalShiftInstance> OperationalShiftInstances => Set<OperationalShiftInstance>();
+    public DbSet<ShiftOpenItem> ShiftOpenItems => Set<ShiftOpenItem>();
+    public DbSet<ShiftHandoverAcceptance> ShiftHandoverAcceptances => Set<ShiftHandoverAcceptance>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2016,6 +2022,24 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperationalShiftInstanceEntityConfiguration());
+        modelBuilder.Entity<OperationalShiftInstance>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftOpenItemEntityConfiguration());
+        modelBuilder.Entity<ShiftOpenItem>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ShiftHandoverAcceptanceEntityConfiguration());
+        modelBuilder.Entity<ShiftHandoverAcceptance>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>
