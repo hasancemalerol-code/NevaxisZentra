@@ -7,6 +7,7 @@ import {
 } from "@/features/operations-command-center/application/operations-command-center-filter";
 import { OPERATIONS_COMMAND_CENTER_SUBTITLE } from "@/features/operations-command-center/domain/operations-command-center-labels";
 import { readOperationsCommandCenterWorkspace } from "@/features/operations-command-center/server/operations-command-center-queries";
+import { ProductionManagerWorkspacePanel } from "@/features/production-manager/components/production-manager-workspace-panel";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
 const MODULE_READ_PERMISSIONS = [
@@ -93,5 +94,10 @@ export default async function OperationsCommandCenterPage({
     );
   }
 
-  return <OperationsCommandCenterView workspace={result.workspace} />;
+  return (
+    <>
+      <ProductionManagerWorkspacePanel />
+      <OperationsCommandCenterView workspace={result.workspace} />
+    </>
+  );
 }

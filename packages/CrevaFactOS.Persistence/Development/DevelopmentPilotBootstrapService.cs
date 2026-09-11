@@ -462,6 +462,20 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureFactoryOrchestrationReopenPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerSimulatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerDecidePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerApprovePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureProductionManagerAutonomyManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeManagePermissionAssignmentAsync(
@@ -3023,6 +3037,51 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             FactoryOrchestrationPermissionKeys.Reopen,
             DevelopmentPilotFactoryOrchestrationIds.ReopenPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProductionManagerReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionManagerPermissionKeys.Read,
+            DevelopmentPilotProductionManagerIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProductionManagerSimulatePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionManagerPermissionKeys.Simulate,
+            DevelopmentPilotProductionManagerIds.SimulatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProductionManagerDecidePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionManagerPermissionKeys.Decide,
+            DevelopmentPilotProductionManagerIds.DecidePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProductionManagerApprovePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionManagerPermissionKeys.Approve,
+            DevelopmentPilotProductionManagerIds.ApprovePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureProductionManagerAutonomyManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ProductionManagerPermissionKeys.AutonomyManage,
+            DevelopmentPilotProductionManagerIds.AutonomyManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(

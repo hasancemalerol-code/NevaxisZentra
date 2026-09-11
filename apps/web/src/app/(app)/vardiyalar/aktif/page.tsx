@@ -1,3 +1,4 @@
+import { ProductionManagerShiftBriefPanel } from "@/features/production-manager/components/production-manager-shift-brief-panel";
 import { ShiftOperationsActiveShiftView } from "@/features/shift-operations/components/shift-operations-active-shift-view";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
 
@@ -8,10 +9,13 @@ export default async function VardiyalarAktifPage() {
   }
 
   return (
-    <ShiftOperationsActiveShiftView
-      metrics={workspace.metrics}
-      openItems={workspace.openItems}
-      shift={workspace.currentShift}
-    />
+    <>
+      <ProductionManagerShiftBriefPanel mode="start" />
+      <ShiftOperationsActiveShiftView
+        metrics={workspace.metrics}
+        openItems={workspace.openItems}
+        shift={workspace.currentShift}
+      />
+    </>
   );
 }

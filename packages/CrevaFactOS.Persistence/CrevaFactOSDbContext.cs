@@ -40,6 +40,7 @@ using CrevaFactOS.Persistence.DigitalWorkforce;
 using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.ShiftOperations;
 using CrevaFactOS.Persistence.FactoryOrchestration;
+using CrevaFactOS.Persistence.ProductionManager;
 using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
 
@@ -394,6 +395,16 @@ public sealed class CrevaFactOSDbContext : DbContext
     // Factory orchestration (ULTRA-MEGA-4)
     public DbSet<FactoryCaseDependency> FactoryCaseDependencies => Set<FactoryCaseDependency>();
     public DbSet<FactoryEventCorrelation> FactoryEventCorrelations => Set<FactoryEventCorrelation>();
+
+    // Production Manager (ULTRA-MEGA-5)
+    public DbSet<FactoryStateSnapshot> FactoryStateSnapshots => Set<FactoryStateSnapshot>();
+    public DbSet<FactoryPrediction> FactoryPredictions => Set<FactoryPrediction>();
+    public DbSet<FactoryDecision> FactoryDecisions => Set<FactoryDecision>();
+    public DbSet<FactoryDecisionOption> FactoryDecisionOptions => Set<FactoryDecisionOption>();
+    public DbSet<FactorySimulation> FactorySimulations => Set<FactorySimulation>();
+    public DbSet<FactoryDecisionOutcome> FactoryDecisionOutcomes => Set<FactoryDecisionOutcome>();
+    public DbSet<FactoryDecisionMemory> FactoryDecisionMemories => Set<FactoryDecisionMemory>();
+    public DbSet<ProductionManagerPolicy> ProductionManagerPolicies => Set<ProductionManagerPolicy>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2057,6 +2068,54 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryStateSnapshotEntityConfiguration());
+        modelBuilder.Entity<FactoryStateSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryPredictionEntityConfiguration());
+        modelBuilder.Entity<FactoryPrediction>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryDecisionEntityConfiguration());
+        modelBuilder.Entity<FactoryDecision>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryDecisionOptionEntityConfiguration());
+        modelBuilder.Entity<FactoryDecisionOption>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactorySimulationEntityConfiguration());
+        modelBuilder.Entity<FactorySimulation>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryDecisionOutcomeEntityConfiguration());
+        modelBuilder.Entity<FactoryDecisionOutcome>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryDecisionMemoryEntityConfiguration());
+        modelBuilder.Entity<FactoryDecisionMemory>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionManagerPolicyEntityConfiguration());
+        modelBuilder.Entity<ProductionManagerPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

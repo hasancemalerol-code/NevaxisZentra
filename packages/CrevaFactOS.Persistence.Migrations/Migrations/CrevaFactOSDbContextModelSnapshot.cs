@@ -26174,6 +26174,677 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.ToTable("production_shift_handovers", (string)null);
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActualOutcomeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actual_outcome_json");
+
+                    b.Property<Guid?>("AiDecisionLedgerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_decision_ledger_id");
+
+                    b.Property<string>("ApprovalState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("approval_state");
+
+                    b.Property<string>("AutonomyMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<string>("ConfidenceBand")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("confidence_band");
+
+                    b.Property<decimal>("ConfidenceScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("confidence_score");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DecisionResult")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("decision_result");
+
+                    b.Property<string>("DecisionType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("decision_type");
+
+                    b.Property<decimal?>("EffectivenessScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("effectiveness_score");
+
+                    b.Property<DateTimeOffset?>("ExecutedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("executed_at_utc");
+
+                    b.Property<string>("ExecutionIdempotencyKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("execution_idempotency_key");
+
+                    b.Property<string>("ExpectedOutcomeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_outcome_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid?>("FactoryCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("factory_case_id");
+
+                    b.Property<string>("ProblemSummary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("problem_summary");
+
+                    b.Property<string>("SelectedBy")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("selected_by");
+
+                    b.Property<Guid?>("SelectedOptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("selected_option_id");
+
+                    b.Property<Guid>("StateSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("state_snapshot_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("VerificationCriteriaJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("verification_criteria_json");
+
+                    b.Property<DateTimeOffset?>("VerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StateSnapshotId");
+
+                    b.HasIndex("TenantId", "ExecutionIdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_factory_decisions_tenant_idempotency")
+                        .HasFilter("execution_idempotency_key IS NOT NULL");
+
+                    b.HasIndex("TenantId", "FacilityId", "Status")
+                        .HasDatabaseName("ix_factory_decisions_tenant_facility_status");
+
+                    b.ToTable("factory_decisions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecisionMemory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConditionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("conditions_json");
+
+                    b.Property<string>("ContextJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("context_json");
+
+                    b.Property<Guid>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<string>("DecisionType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("decision_type");
+
+                    b.Property<decimal>("EffectivenessScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("effectiveness_score");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("OutcomeSummary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("outcome_summary");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at_utc");
+
+                    b.Property<string>("SelectedOptionCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("selected_option_code");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "DecisionType")
+                        .HasDatabaseName("ix_factory_decision_memories_tenant_facility_type");
+
+                    b.ToTable("factory_decision_memories", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecisionOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("data_classification");
+
+                    b.Property<Guid>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ExpectedOutcomeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_outcome_json");
+
+                    b.Property<bool>("IsRejected")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_rejected");
+
+                    b.Property<string>("OptionCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("option_code");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<string>("RisksJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("risks_json");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric")
+                        .HasColumnName("score");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DecisionId");
+
+                    b.HasIndex("TenantId", "DecisionId", "OptionCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_factory_decision_options_tenant_decision_code");
+
+                    b.ToTable("factory_decision_options", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecisionOutcome", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActualJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actual_json");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("data_classification");
+
+                    b.Property<Guid>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<decimal>("EffectivenessScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("effectiveness_score");
+
+                    b.Property<string>("ExpectedJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_json");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at_utc");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("result");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("VarianceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("variance_json");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DecisionId")
+                        .HasDatabaseName("ix_factory_decision_outcomes_tenant_decision");
+
+                    b.ToTable("factory_decision_outcomes", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryPrediction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConfidenceBand")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("confidence_band");
+
+                    b.Property<decimal>("ConfidenceScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("confidence_score");
+
+                    b.Property<string>("CorrelationKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correlation_key");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("data_classification");
+
+                    b.Property<string>("EvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_json");
+
+                    b.Property<DateTimeOffset?>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("Horizon")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("horizon");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTimeOffset>("PredictedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("predicted_at_utc");
+
+                    b.Property<string>("PredictionType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("prediction_type");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<Guid?>("StateSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("state_snapshot_id");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "CorrelationKey")
+                        .HasDatabaseName("ix_factory_predictions_tenant_facility_correlation");
+
+                    b.ToTable("factory_predictions", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactorySimulation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ComparisonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("comparison_json");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("data_classification");
+
+                    b.Property<Guid?>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("InputJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("input_json");
+
+                    b.Property<string>("OutputJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("output_json");
+
+                    b.Property<string>("ScenarioType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("scenario_type");
+
+                    b.Property<Guid?>("StateSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("state_snapshot_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("factory_simulations", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryStateSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActiveCasesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("active_cases_json");
+
+                    b.Property<string>("CapacityStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("capacity_state_json");
+
+                    b.Property<DateTimeOffset>("CapturedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at_utc");
+
+                    b.Property<string>("ConstraintsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("constraints_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("freshness_json");
+
+                    b.Property<string>("MachineStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("machine_state_json");
+
+                    b.Property<string>("MaintenanceStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("maintenance_state_json");
+
+                    b.Property<string>("MaterialStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("material_state_json");
+
+                    b.Property<string>("MoldStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mold_state_json");
+
+                    b.Property<string>("ProductionStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("production_state_json");
+
+                    b.Property<string>("QualityStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("quality_state_json");
+
+                    b.Property<string>("ShiftStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("shift_state_json");
+
+                    b.Property<string>("SupplierStateJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("supplier_state_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "CapturedAtUtc")
+                        .HasDatabaseName("ix_factory_state_snapshots_tenant_facility_captured");
+
+                    b.ToTable("factory_state_snapshots", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.ProductionManagerPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AllowedDecisionTypesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("allowed_decision_types_json");
+
+                    b.Property<decimal>("ApprovalThresholdScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("approval_threshold_score");
+
+                    b.Property<string>("AutonomyMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<decimal>("LowConfidenceThreshold")
+                        .HasColumnType("numeric")
+                        .HasColumnName("low_confidence_threshold");
+
+                    b.Property<decimal>("MaxFinancialImpact")
+                        .HasColumnType("numeric")
+                        .HasColumnName("max_financial_impact");
+
+                    b.Property<decimal>("MaxScheduleChangeHours")
+                        .HasColumnType("numeric")
+                        .HasColumnName("max_schedule_change_hours");
+
+                    b.Property<string>("ProhibitedDecisionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("prohibited_decisions_json");
+
+                    b.Property<int>("StaleDataMaxMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("stale_data_max_minutes");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_production_manager_policies_tenant_facility");
+
+                    b.ToTable("production_manager_policies", (string)null);
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.PlanningLogisticsConstraintEvaluation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -36891,6 +37562,28 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecision", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProductionManager.FactoryStateSnapshot", "StateSnapshot")
+                        .WithMany()
+                        .HasForeignKey("StateSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StateSnapshot");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecisionOption", b =>
+                {
+                    b.HasOne("CrevaFactOS.Persistence.ProductionManager.FactoryDecision", "Decision")
+                        .WithMany("Options")
+                        .HasForeignKey("DecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Decision");
+                });
+
             modelBuilder.Entity("CrevaFactOS.Persistence.ProductionPlanning.PlanningLogisticsConstraintEvaluation", b =>
                 {
                     b.HasOne("CrevaFactOS.Persistence.ProductionPlanning.ProductionPlan", null)
@@ -38424,6 +39117,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.Navigation("DowntimeBreakdownRows");
 
                     b.Navigation("Drivers");
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.ProductionManager.FactoryDecision", b =>
+                {
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Quality.QualityControlPlan", b =>

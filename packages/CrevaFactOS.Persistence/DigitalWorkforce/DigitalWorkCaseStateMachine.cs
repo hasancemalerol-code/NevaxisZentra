@@ -8,7 +8,6 @@ public static class DigitalWorkCaseStateMachine
         {
             DigitalWorkCaseStatuses.Analyzing,
             DigitalWorkCaseStatuses.Escalated,
-            DigitalWorkCaseStatuses.Closed,
         },
         [DigitalWorkCaseStatuses.Analyzing] = new(StringComparer.OrdinalIgnoreCase)
         {
