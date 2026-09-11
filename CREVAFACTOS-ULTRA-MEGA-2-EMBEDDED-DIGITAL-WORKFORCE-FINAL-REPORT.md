@@ -9,9 +9,9 @@
 | Field | Value |
 |---|---|
 | BASELINE_SHA (UM-1) | `b2e766eb7299e214917e5312d6baaf59124c2c7f` |
-| UM2_FINAL_COMMIT_SHA | _(set after scoped commit)_ |
-| ORIGIN_MAIN_SHA | _(set after push)_ |
-| LOCAL_REMOTE_HEAD_MATCH | _(set after push)_ |
+| UM2_FINAL_COMMIT_SHA | `bca9480` |
+| ORIGIN_MAIN_SHA | `bca9480` |
+| LOCAL_REMOTE_HEAD_MATCH | TRUE |
 
 ## Infrastructure & Health
 
