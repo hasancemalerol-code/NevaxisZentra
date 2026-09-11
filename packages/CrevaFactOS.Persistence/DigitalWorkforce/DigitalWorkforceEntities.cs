@@ -86,6 +86,19 @@ public sealed class DigitalWorkCase
     public string VerificationState { get; set; } = DigitalWorkVerificationResults.Pending;
     public string ClosureContractKey { get; set; } = string.Empty;
     public string MetadataJson { get; set; } = "{}";
+    public Guid? OrchestrationRootCaseId { get; set; }
+    public Guid? ParentCaseId { get; set; }
+    public string? CorrelationKey { get; set; }
+    public string PrimaryDomain { get; set; } = string.Empty;
+    public string ParticipatingDomainsJson { get; set; } = "[]";
+    public string CurrentBlockerCode { get; set; } = "none";
+    public string RecoveryPlanJson { get; set; } = "{}";
+    public string ImpactGraphJson { get; set; } = "{}";
+    public string DependencyGraphJson { get; set; } = "{}";
+    public string OutcomeVerificationJson { get; set; } = "{}";
+    public bool AdministrativelyClosed { get; set; }
+    public int ReopenCount { get; set; }
+    public DateTimeOffset? BlockerSinceUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
     public long ConcurrencyToken { get; set; }

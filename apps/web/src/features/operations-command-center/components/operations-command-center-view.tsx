@@ -244,6 +244,7 @@ export function OperationsCommandCenterView({
             data-testid="operations-command-center-module-filter"
           >
             <option value="">Tümü</option>
+            <option value="factory">Fabrika vakası</option>
             <option value="production">Üretim</option>
             <option value="quality">Kalite</option>
             <option value="maintenance">Bakım</option>
@@ -289,6 +290,46 @@ export function OperationsCommandCenterView({
             <KpiCard key={card.id} card={card} />
           ))}
         </div>
+      </section>
+
+      <section className="commint-panel" aria-labelledby="operations-command-center-factory-cases-heading">
+        <header className="commint-panel__header">
+          <h2 id="operations-command-center-factory-cases-heading" className="commint-panel__title">
+            Aktif fabrika vakaları
+          </h2>
+        </header>
+        <table className="commint-table" data-testid="operations-command-center-factory-case-table">
+          <thead>
+            <tr>
+              <th>Vaka</th>
+              <th>Önem</th>
+              <th>Bloker</th>
+              <th>Son Aktivite</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workspace.queueItems.filter((item) => item.moduleCode === "factory").length === 0 ? (
+              <tr>
+                <td colSpan={4}>{OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE}</td>
+              </tr>
+            ) : (
+              workspace.queueItems
+                .filter((item) => item.moduleCode === "factory")
+                .map((item) => (
+                  <tr key={item.id} data-testid={`operations-command-center-factory-row-${item.id}`}>
+                    <td>
+                      <Link href={item.deepLinkHref} className="commint-table__link">
+                        {item.title}
+                      </Link>
+                    </td>
+                    <td>{item.statusLabel}</td>
+                    <td>{item.evidenceLabel}</td>
+                    <td>{item.freshnessLabel}</td>
+                  </tr>
+                ))
+            )}
+          </tbody>
+        </table>
       </section>
 
       <section className="commint-panel" aria-labelledby="operations-command-center-queue-heading">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AiTaskCenterSummary } from "@/components/dashboard/ai-task-center-summary";
 import { CriticalRisksPanel } from "@/components/dashboard/critical-risks-panel";
 import { DailyOperationsSummary } from "@/components/dashboard/daily-operations-summary";
+import { ActiveFactoryCasesDashboardPanel } from "@/components/dashboard/active-factory-cases-panel";
 import { ActiveShiftDashboardPanel } from "@/components/dashboard/active-shift-panel";
 import { DigitalWorkforceDashboardPanel } from "@/components/dashboard/digital-workforce-panel";
 import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics";
@@ -167,6 +168,7 @@ export default async function DashboardPage() {
         className="command-center__digital-workforce"
       >
         <ActiveShiftDashboardPanel />
+        <ActiveFactoryCasesDashboardPanel />
         <DigitalWorkforceDashboardPanel />
       </section>
 

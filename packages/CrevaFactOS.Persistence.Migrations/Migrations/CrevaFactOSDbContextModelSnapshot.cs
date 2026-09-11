@@ -8640,6 +8640,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("AdministrativelyClosed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("administratively_closed");
+
                     b.Property<decimal>("AiCost")
                         .HasColumnType("numeric")
                         .HasColumnName("ai_cost");
@@ -8649,6 +8653,10 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("autonomy_mode_at_start");
+
+                    b.Property<DateTimeOffset?>("BlockerSinceUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("blocker_since_utc");
 
                     b.Property<string>("BusinessImpact")
                         .IsRequired()
@@ -8671,15 +8679,31 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("concurrency_token");
 
+                    b.Property<string>("CorrelationKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correlation_key");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CurrentBlockerCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("current_blocker_code");
 
                     b.Property<string>("CurrentStage")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("current_stage");
+
+                    b.Property<string>("DependencyGraphJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("dependency_graph_json");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -8695,6 +8719,11 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("facility_id");
 
+                    b.Property<string>("ImpactGraphJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("impact_graph_json");
+
                     b.Property<bool>("IsHumanControlled")
                         .HasColumnType("boolean")
                         .HasColumnName("is_human_controlled");
@@ -8708,15 +8737,48 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         .HasColumnType("text")
                         .HasColumnName("metadata_json");
 
+                    b.Property<Guid?>("OrchestrationRootCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("orchestration_root_case_id");
+
                     b.Property<string>("Outcome")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("outcome");
 
+                    b.Property<string>("OutcomeVerificationJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("outcome_verification_json");
+
+                    b.Property<Guid?>("ParentCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_case_id");
+
+                    b.Property<string>("ParticipatingDomainsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("participating_domains_json");
+
+                    b.Property<string>("PrimaryDomain")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("primary_domain");
+
                     b.Property<Guid>("PrimaryWorkerId")
                         .HasColumnType("uuid")
                         .HasColumnName("primary_worker_id");
+
+                    b.Property<string>("RecoveryPlanJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recovery_plan_json");
+
+                    b.Property<int>("ReopenCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reopen_count");
 
                     b.Property<bool>("RequiresApproval")
                         .HasColumnType("boolean")
@@ -8781,6 +8843,9 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PrimaryWorkerId");
+
+                    b.HasIndex("TenantId", "CorrelationKey")
+                        .HasDatabaseName("ix_digital_work_cases_tenant_correlation");
 
                     b.HasIndex("TenantId", "PrimaryWorkerId")
                         .HasDatabaseName("ix_digital_work_cases_tenant_worker");
@@ -16520,6 +16585,150 @@ namespace CrevaFactOS.Persistence.Migrations.Migrations
                         {
                             t.HasCheckConstraint("ck_facility_memberships_status", "status IN ('Active', 'Inactive')");
                         });
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.FactoryOrchestration.FactoryCaseDependency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("EdgeType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("edge_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FromNodeKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("from_node_key");
+
+                    b.Property<string>("FromNodeType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("from_node_type");
+
+                    b.Property<string>("LinkedCaseId")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("linked_case_id");
+
+                    b.Property<string>("LinkedTaskId")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("linked_task_id");
+
+                    b.Property<string>("LinkedWorkerId")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("linked_worker_id");
+
+                    b.Property<string>("MetadataJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("metadata_json");
+
+                    b.Property<Guid>("RootCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("root_case_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("ToNodeKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("to_node_key");
+
+                    b.Property<string>("ToNodeType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("to_node_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "RootCaseId")
+                        .HasDatabaseName("ix_factory_case_dependencies_tenant_root");
+
+                    b.ToTable("factory_case_dependencies", (string)null);
+                });
+
+            modelBuilder.Entity("CrevaFactOS.Persistence.FactoryOrchestration.FactoryEventCorrelation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CorrelationKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correlation_key");
+
+                    b.Property<string>("EventCategory")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_category");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("FirstSeenAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_seen_at_utc");
+
+                    b.Property<DateTimeOffset>("LastSeenAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at_utc");
+
+                    b.Property<Guid>("RootCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("root_case_id");
+
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("source_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CorrelationKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_factory_event_correlations_tenant_key");
+
+                    b.HasIndex("TenantId", "FacilityId", "SourceType", "SourceId")
+                        .HasDatabaseName("ix_factory_event_correlations_tenant_source");
+
+                    b.ToTable("factory_event_correlations", (string)null);
                 });
 
             modelBuilder.Entity("CrevaFactOS.Persistence.Identity.IdentitySubject", b =>

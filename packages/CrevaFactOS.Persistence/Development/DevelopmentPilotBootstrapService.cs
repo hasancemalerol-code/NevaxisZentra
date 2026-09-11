@@ -446,6 +446,22 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsOpenItemManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationEscalatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationVerifyPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryOrchestrationReopenPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeManagePermissionAssignmentAsync(
@@ -2962,6 +2978,51 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ShiftOperationsPermissionKeys.OpenItemManage,
             DevelopmentPilotShiftOperationsIds.OpenItemManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryOrchestrationReadPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryOrchestrationPermissionKeys.Read,
+            DevelopmentPilotFactoryOrchestrationIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryOrchestrationManagePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryOrchestrationPermissionKeys.Manage,
+            DevelopmentPilotFactoryOrchestrationIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryOrchestrationEscalatePermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryOrchestrationPermissionKeys.Escalate,
+            DevelopmentPilotFactoryOrchestrationIds.EscalatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryOrchestrationVerifyPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryOrchestrationPermissionKeys.Verify,
+            DevelopmentPilotFactoryOrchestrationIds.VerifyPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryOrchestrationReopenPermissionAssignmentAsync(
+        CrevaFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryOrchestrationPermissionKeys.Reopen,
+            DevelopmentPilotFactoryOrchestrationIds.ReopenPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(

@@ -7,6 +7,7 @@ export type OperationsCommandCenterSourceAvailability =
   | "insufficient-data";
 
 export type OperationsCommandCenterModuleCode =
+  | "factory"
   | "commercial"
   | "production"
   | "quality"

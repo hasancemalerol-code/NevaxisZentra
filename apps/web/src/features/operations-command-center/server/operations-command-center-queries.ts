@@ -60,6 +60,8 @@ import {
   type ProductionOrderRequestContext,
 } from "../../production-execution/server/production-order-request-context";
 import { getQualityNcrFollowUpWorkspace } from "../../quality-control/server/quality-ncr-follow-up-api-client";
+import { listFactoryCases } from "../../factory-orchestration/server/factory-orchestration-api-client";
+import { getFactoryBlockerLabel } from "../../factory-orchestration/domain/factory-orchestration-labels";
 import { fetchCurrentTenantSubscription } from "../../saas-subscription/server/saas-subscription-queries";
 import { isModuleEntitled } from "../../saas-subscription/domain/saas-subscription-labels";
 import type { TenantSubscriptionCurrent } from "../../saas-subscription/domain/saas-subscription-types";
@@ -79,6 +81,7 @@ const LIST_PAGE_SIZE = 100;
  * 9. insufficient-data/data-review items
  */
 const PRIORITY_TIER = {
+  FACTORY_CRITICAL: 50,
   COMMERCIAL_CRITICAL: 100,
   PRODUCTION_REVIEW: 200,
   QUALITY_REVIEW: 300,
@@ -194,6 +197,46 @@ function sortQueueItems(
       "tr",
     );
   });
+}
+
+function buildFactoryCaseItems(
+  cases: readonly Readonly<{
+    id: string;
+    title: string;
+    severity: string;
+    status: string;
+    primaryDomain: string;
+    currentBlockerCode: string;
+    updatedAtUtc: string;
+    requiresApproval: boolean;
+    verificationState: string;
+  }>[],
+): readonly OperationsCommandCenterQueueItem[] {
+  return cases
+    .filter((row) => row.status !== "closed")
+    .map((row) => ({
+      id: `factory:case:${row.id}`,
+      moduleCode: "factory" as const,
+      moduleLabel: getOperationsCommandCenterModuleLabel("factory"),
+      sourceReference: row.id.slice(0, 8).toUpperCase(),
+      title: row.title,
+      statusLabel: `${row.severity} · ${row.status}`,
+      evidenceLabel: getFactoryBlockerLabel(row.currentBlockerCode),
+      freshnessLabel: formatDateTime(row.updatedAtUtc),
+      deepLinkHref: `/operasyon/yonetim-merkezi/vakalar/${row.id}`,
+      itemState: "available" as const,
+      priorityTier:
+        row.severity === "critical" || row.severity === "high"
+          ? PRIORITY_TIER.FACTORY_CRITICAL
+          : PRIORITY_TIER.PRODUCTION_REVIEW,
+      severityRank: SEVERITY_RANK[row.severity] ?? 1,
+      sortTimestampUtc: row.updatedAtUtc,
+      sortTimestampLabel: formatDateTime(row.updatedAtUtc),
+      humanReviewRequired:
+        row.requiresApproval
+        || row.currentBlockerCode !== "none"
+        || row.verificationState === "pending",
+    }));
 }
 
 function buildCommercialItems(
@@ -701,6 +744,12 @@ export async function readOperationsCommandCenterWorkspace(
     "ai-task.read",
     "module.ai-task-center",
   );
+  const factoryAccess = evaluateModuleAccess(
+    access,
+    subscription,
+    "factory-case.read",
+    "module.production",
+  );
 
   const [commercialContextResult, materialContextResult, moldContextResult] = await Promise.all([
     commercialAccess === "granted" ? resolveCommercialIntelligenceRequestContext() : Promise.resolve(null),
@@ -716,6 +765,7 @@ export async function readOperationsCommandCenterWorkspace(
     moldResult,
     materialResult,
     procurementResult,
+    factoryResult,
     aiTaskResult,
   ] = await Promise.all([
     commercialAccess === "granted" && commercialContextResult?.status === "success"
@@ -836,6 +886,22 @@ export async function readOperationsCommandCenterWorkspace(
           value: undefined,
         }),
 
+    factoryAccess === "granted"
+      ? listFactoryCases(productionContext, LIST_PAGE_SIZE).then((result) => ({
+          access: factoryAccess,
+          availability: result.status === "success"
+            ? scopeFromCount(result.value.items.length) === "partial" ? "partial" as const : "available" as const
+            : toSourceAvailability(factoryAccess, result.code),
+          value: result.status === "success" ? result.value.items : undefined,
+          message: result.status === "failure" ? result.message : undefined,
+          count: result.status === "success" ? result.value.items.length : undefined,
+        }))
+      : Promise.resolve({
+          access: factoryAccess,
+          availability: toSourceAvailability(factoryAccess),
+          value: undefined,
+        }),
+
     aiTaskAccess === "granted"
       ? listAiTasks(productionContext, { page: 1, pageSize: LIST_PAGE_SIZE }).then((result) => ({
           access: aiTaskAccess,
@@ -856,6 +922,7 @@ export async function readOperationsCommandCenterWorkspace(
   ]);
 
   const queueItems = sortQueueItems([
+    ...buildFactoryCaseItems(factoryResult.value ?? []),
     ...buildCommercialItems(commercialResult.value ?? []),
     ...buildProductionItems(productionResult.value ?? []),
     ...buildQualityItems(qualityResult.value ?? []),
@@ -869,6 +936,7 @@ export async function readOperationsCommandCenterWorkspace(
   const filteredQueue = filterOperationsCommandCenterQueueItems(queueItems, filters);
 
   const moduleHealth: OperationsCommandCenterModuleHealth[] = [
+    buildModuleHealthEntry("factory", factoryResult),
     buildModuleHealthEntry("commercial", commercialResult),
     buildModuleHealthEntry("production", productionResult),
     buildModuleHealthEntry("quality", qualityResult),

@@ -39,6 +39,7 @@ using CrevaFactOS.Persistence.Teams;
 using CrevaFactOS.Persistence.DigitalWorkforce;
 using CrevaFactOS.Persistence.ShiftHandover;
 using CrevaFactOS.Persistence.ShiftOperations;
+using CrevaFactOS.Persistence.FactoryOrchestration;
 using CrevaFactOS.Persistence.MarketRates;
 using CrevaFactOS.Persistence.Configurations;
 
@@ -389,6 +390,10 @@ public sealed class CrevaFactOSDbContext : DbContext
     public DbSet<OperationalShiftInstance> OperationalShiftInstances => Set<OperationalShiftInstance>();
     public DbSet<ShiftOpenItem> ShiftOpenItems => Set<ShiftOpenItem>();
     public DbSet<ShiftHandoverAcceptance> ShiftHandoverAcceptances => Set<ShiftHandoverAcceptance>();
+
+    // Factory orchestration (ULTRA-MEGA-4)
+    public DbSet<FactoryCaseDependency> FactoryCaseDependencies => Set<FactoryCaseDependency>();
+    public DbSet<FactoryEventCorrelation> FactoryEventCorrelations => Set<FactoryEventCorrelation>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2040,6 +2045,18 @@ public sealed class CrevaFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryCaseDependencyEntityConfiguration());
+        modelBuilder.Entity<FactoryCaseDependency>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryEventCorrelationEntityConfiguration());
+        modelBuilder.Entity<FactoryEventCorrelation>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

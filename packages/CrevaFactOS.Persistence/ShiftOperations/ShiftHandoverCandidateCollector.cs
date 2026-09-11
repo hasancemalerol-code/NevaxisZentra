@@ -42,6 +42,7 @@ public sealed class ShiftHandoverCandidateCollector : IShiftHandoverCandidateCol
             .AsNoTracking()
             .Where(c => c.TenantId == shiftInstance.TenantId &&
                         c.FacilityId == shiftInstance.FacilityId &&
+                        c.ParentCaseId == null &&
                         c.Status != DigitalWorkCaseStatuses.Closed)
             .Include(c => c.PrimaryWorker)
             .Take(50)

@@ -10,6 +10,7 @@ import { readOperationsCommandCenterWorkspace } from "@/features/operations-comm
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
 const MODULE_READ_PERMISSIONS = [
+  "factory-case.read",
   "production.execution.read",
   "material.read",
   "erp.read",

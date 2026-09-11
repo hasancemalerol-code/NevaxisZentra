@@ -27,6 +27,7 @@ export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_ROUTE_PATH =
   "/ticari-zeka/karlilik-yonetim-merkezi";
 
 const MODULE_LABELS: Record<OperationsCommandCenterModuleCode, string> = {
+  factory: "Fabrika vakası",
   commercial: "Ticari zekâ",
   production: "Üretim",
   quality: "Kalite",
