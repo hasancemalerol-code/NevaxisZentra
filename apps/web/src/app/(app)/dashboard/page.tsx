@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       <header className="command-center__titlebar">
         <div className="command-center__titlebar-copy">
           <p className="command-center__eyebrow">
-            CrevaFactOS Operasyon Merkezi
+            NEVAXIS FACTOS Operasyon Merkezi
           </p>
 
           <h1>AI Görev Merkezi</h1>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
             </button>
             <DashboardShowcaseTvAction />
             <Link
-              aria-label="CrevaFact Teams çalışma alanını aç"
+              aria-label="FACTOS Teams çalışma alanını aç"
               className="command-center__teams-button"
               href="/teams"
             >
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
               </span>
 
               <span className="command-center__teams-button-copy">
-                <strong>CrevaFact Teams</strong>
+                <strong>FACTOS Teams</strong>
                 <span>Yeni ekip mesajları</span>
               </span>
 
@@ -245,7 +245,7 @@ export default async function DashboardPage() {
 
       <footer className="command-center__footer">
         <span>
-          CrevaFactOS · Human-in-the-Loop Factory Operating
+          NEVAXIS FACTOS · Human-in-the-Loop Factory Operating
           System
         </span>
 
