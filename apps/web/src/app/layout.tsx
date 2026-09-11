@@ -16,7 +16,7 @@ const config = getWebApplicationConfig();
 export const metadata: Metadata = {
   title: `${config.applicationName} — Factory Operations`,
   description:
-    "CrevaFactOS desktop-first factory operations management platform.",
+    "NEVAXIS FACTOS desktop-first factory operations management platform.",
 };
 
 interface RootLayoutProps {
