@@ -4,6 +4,7 @@ export const FACTOS_BRAND = {
   documentTitleSuffix: "Nevaxis",
   heroImagePath: "/brand/factos-brand-hero.jpg",
   lockupImagePath: "/brand/factos-brand-lockup.png",
+  heroBackgroundColor: "#e9eef2",
   heroAlt:
     "FactOS by NEVAXIS — Üretimi Anlar. Önceden Görür. Harekete Geçirir.",
   lockupAlt: "FactOS by NEVAXIS",
