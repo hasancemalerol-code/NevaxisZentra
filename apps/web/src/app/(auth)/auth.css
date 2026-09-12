@@ -7,13 +7,15 @@
 
 .auth-layout__hero {
   position: relative;
+  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
-  background: linear-gradient(180deg, #f8fbfd 0%, #eef4f8 100%);
+  background: #eef4f8;
 }
 
 .auth-layout__hero-image {
-  object-fit: contain;
-  object-position: center center;
+  object-fit: cover;
+  object-position: 45% center;
 }
 
 .auth-layout__panel {
@@ -237,7 +239,8 @@
 
   .auth-layout__hero {
     min-height: 220px;
-    max-height: 34vh;
+    height: 34vh;
+    max-height: none;
     border-bottom: 1px solid rgb(36 99 167 / 12%);
   }
 
@@ -250,7 +253,7 @@
 @media (max-width: 480px) {
   .auth-layout__hero {
     min-height: 180px;
-    max-height: 28vh;
+    height: 28vh;
   }
 
   .auth-shell__title {
