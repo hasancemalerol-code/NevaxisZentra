@@ -41,23 +41,23 @@ function fileExists(relPath) {
 
 check(
   "ProductionOperatorAssignment.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionOperatorAssignment.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionOperatorAssignment.cs"),
 );
 
 check(
   "IProductionOperatorRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/IProductionOperatorRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/IProductionOperatorRepository.cs"),
 );
 
 check(
   "ProductionOperatorRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionOperatorRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionOperatorRepository.cs"),
 );
 
 // ── 2. ENTITY FIELDS ──────────────────────────────────────────────────────────
 
 const operatorEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOperatorAssignment.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOperatorAssignment.cs",
 );
 
 check(
@@ -100,12 +100,12 @@ check(
 check(
   "ProductionOperatorAssignmentEntityConfiguration.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence/Configurations/ProductionOperatorAssignmentEntityConfiguration.cs",
+    "packages/NevaxisFactOS.Persistence/Configurations/ProductionOperatorAssignmentEntityConfiguration.cs",
   ),
 );
 
 const opConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionOperatorAssignmentEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionOperatorAssignmentEntityConfiguration.cs",
 );
 
 check(
@@ -117,7 +117,7 @@ check(
 // ── 4. PRODUCTION ORDER SUMMARY FIELDS ───────────────────────────────────────
 
 const productionOrder = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check(
@@ -133,7 +133,7 @@ check(
 // ── 5. OPERATOR REPOSITORY ───────────────────────────────────────────────────
 
 const operatorRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionOperatorRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionOperatorRepository.cs",
 );
 
 check(
@@ -171,7 +171,7 @@ check(
 // ── 7. PERMISSIONS ────────────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(

@@ -72,7 +72,7 @@ export function hasIncomingSessionCookie(cookieHeader: string): boolean {
 
   return cookieHeader
     .split(";")
-    .some((part) => part.trim().startsWith("crevafactos.session="));
+    .some((part) => part.trim().startsWith("NevaxisFactOS.session="));
 }
 
 export async function fetchTrustedApi(

@@ -34,13 +34,13 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running ERP-1L core verifier.");
 
-const adapterContract = readRequired("packages/CrevaFactOS.Persistence/Erp/IErpAdapter.cs");
-const adapters = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpAdapters.cs");
-const entities = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpEntities.cs");
-const syncRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpSyncRepository.cs");
+const adapterContract = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpAdapter.cs");
+const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
 );
 
 requireText(entities, "External ERP remains system of record", "ErpEntities");
@@ -56,11 +56,11 @@ requireText(adapters, "ERP-CUST-001", "simulator customer id");
 requireText(adapters, "ABC Plastik Sanayi A.Ş.", "simulator customer name");
 requireText(adapters, "ERP-PRD-001", "simulator product");
 requireText(adapters, "PP CAP 32", "simulator product name");
-const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
 requireText(mikroAdapter, "class MikroErpAdapter", "Mikro adapter");
-const netsisAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+const netsisAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
 requireText(netsisAdapter, "class NetsisErpAdapter", "Netsis adapter implemented");
-const logoAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+const logoAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 
 requireText(entities, "class CanonicalErpCustomer", "canonical customer");
@@ -82,8 +82,8 @@ forbidText(syncRepo, "ProductionOrders", "erp sync must not mutate Production");
 forbidText(syncRepo, "QuantityOnHand", "ErpSyncRepository must not mutate stock quantities");
 forbidText(syncRepo, "Accounting", "erp sync must not mutate accounting");
 
-if (existsSync(resolve(projectRoot, "packages/CrevaFactOS.Persistence/Erp/ErpInventoryRepository.cs"))) {
-  const inventoryRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpInventoryRepository.cs");
+if (existsSync(resolve(projectRoot, "packages/NevaxisFactOS.Persistence/Erp/ErpInventoryRepository.cs"))) {
+  const inventoryRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpInventoryRepository.cs");
   forbidText(inventoryRepo, "StockMovement", "inventory projection must not create stock ledger");
   forbidText(inventoryRepo, "WriteInventory", "no inventory writeback");
 }

@@ -235,7 +235,7 @@ function buildSessionPath(
   return `${path}?${params.toString()}`;
 }
 
-function mapFailureStatus(status: number, payload: unknown): TeamsApiFailure["code"] {
+function mapFailureStatus(status: number, _payload: unknown): TeamsApiFailure["code"] {
   if (status === 401) return "unauthenticated";
   if (status === 403) return "permission-denied";
   if (status === 404) return "not-found";

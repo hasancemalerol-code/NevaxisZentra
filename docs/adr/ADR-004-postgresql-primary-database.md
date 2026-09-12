@@ -2,18 +2,18 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: CrevaFactOS Product & Development
+- Decision owners: NevaxisFactOS Product & Development
 - Scope: Native operational persistence and synchronized projections
 
 ## Context
 
-CrevaFactOS requires relational integrity, transactions, constraints, concurrency control, and tenant isolation for native factory-operation records. It also needs selected projections from systems that remain authoritative for classic ERP data.
+NevaxisFactOS requires relational integrity, transactions, constraints, concurrency control, and tenant isolation for native factory-operation records. It also needs selected projections from systems that remain authoritative for classic ERP data.
 
-Using PostgreSQL as the CrevaFactOS database does not transfer ownership of externally governed records.
+Using PostgreSQL as the NevaxisFactOS database does not transfer ownership of externally governed records.
 
 ## Decision
 
-PostgreSQL is the primary database for CrevaFactOS. Entity Framework Core is the default data-access mechanism. Measured performance-critical queries may use reviewed parameterized SQL.
+PostgreSQL is the primary database for NevaxisFactOS. Entity Framework Core is the default data-access mechanism. Measured performance-critical queries may use reviewed parameterized SQL.
 
 PostgreSQL stores:
 
@@ -51,7 +51,7 @@ freshness_status
 payload_version
 ```
 
-Projection tables use names and APIs that make external ownership clear. They must not masquerade as CrevaFactOS-owned master or ledger tables.
+Projection tables use names and APIs that make external ownership clear. They must not masquerade as NevaxisFactOS-owned master or ledger tables.
 
 ## Integrity and Audit
 

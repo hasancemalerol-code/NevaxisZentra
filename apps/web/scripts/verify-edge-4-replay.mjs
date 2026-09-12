@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const SIM_URL = process.env.EDGE_SIMULATOR_URL ?? "http://localhost:5100";
-const API_BASE = process.env.CREVAFACTOS_API_URL ?? "http://localhost:5000";
-const API_TOKEN = process.env.CREVAFACTOS_DEV_TOKEN ?? "";
-const FACILITY_ID = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_URL ?? "http://localhost:5000";
+const API_TOKEN = process.env.NEVAXIS_FACTOS_DEV_TOKEN ?? "";
+const FACILITY_ID = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 
 function readFile(rel) {
   const abs = resolve(ROOT, rel);
@@ -38,13 +38,13 @@ function assertContains(label, content, text) {
 }
 
 console.log("\n[1] Replay implementation static checks");
-const store = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
-const scenarios = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs");
-const worker = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
-const ingestion = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const store = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
+const scenarios = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs");
+const worker = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
+const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
 
 assertContains("ordered claim batch", store, ".ThenBy(e => e.MachineId)");
-assertContains("source timestamp preserved in buffer", readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeBufferedEvent.cs"), "SourceTimestampUtc");
+assertContains("source timestamp preserved in buffer", readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferedEvent.cs"), "SourceTimestampUtc");
 assertContains("offline buffer 12+ events", scenarios, "BuildOfflineBufferEvents");
 assertContains("poison event fixture", scenarios, "CreatePoisonEvent");
 assertContains("partial failure batch", scenarios, "BuildPartialFailureBatch");
@@ -53,7 +53,7 @@ assertContains("central idempotency preserved", ingestion, "IdempotencyKey == re
 assertContains("duplicate result safe", ingestion, "EdgeIngestResult.Duplicate");
 
 console.log("\n[2] Scenario modes in simulator");
-const program = readFile("tools/CrevaFactOS.MachineSimulator/Program.cs");
+const program = readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs");
 for (const mode of [
   "offline-buffer",
   "recover-replay",
@@ -167,7 +167,7 @@ if (!simOk) {
       console.log("  ℹ API unreachable — skipping central projection checks.");
     }
   } else {
-    console.log("  ℹ No CREVAFACTOS_DEV_TOKEN — skipping API drain/duplicate checks.");
+    console.log("  ℹ No NEVAXIS_FACTOS_DEV_TOKEN — skipping API drain/duplicate checks.");
     await simFetch("/simulate/reliability/scenarios/recover-replay", { method: "POST" });
   }
 

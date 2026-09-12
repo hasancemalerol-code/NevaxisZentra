@@ -36,7 +36,7 @@ function readText(relPath) {
 // ── 1. PERSISTENCE MODEL ──────────────────────────────────────────────────────
 
 const models = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
 );
 
 check("ProductionOrderModels.cs exists", models !== null);
@@ -54,7 +54,7 @@ check("Models have ActiveSetup", models?.includes("ActiveSetup") ?? false);
 // ── 2. RUNTIME SUMMARY CALCULATION ───────────────────────────────────────────
 
 const repo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOperationsRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOperationsRepository.cs",
 );
 
 check("Repo implements GetRuntimeSummaryAsync", repo?.includes("GetRuntimeSummaryAsync") ?? false);
@@ -66,7 +66,7 @@ check("Repo includes active setup in summary", repo?.includes("ActiveSetup") ?? 
 // ── 3. PRODUCTIONORDER DENORMALIZED FIELDS ────────────────────────────────────
 
 const order = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check("ProductionOrder has TotalDowntimeSeconds", order?.includes("TotalDowntimeSeconds") ?? false);
@@ -75,7 +75,7 @@ check("ProductionOrder has ManualCycleCount", order?.includes("ManualCycleCount"
 check("ProductionOrder has TotalManualCycleDurationMilliseconds", order?.includes("TotalManualCycleDurationMilliseconds") ?? false);
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
 );
 check("Migration adds total_downtime_seconds column", migration?.includes("total_downtime_seconds") ?? false);
 check("Migration adds total_setup_seconds column", migration?.includes("total_setup_seconds") ?? false);

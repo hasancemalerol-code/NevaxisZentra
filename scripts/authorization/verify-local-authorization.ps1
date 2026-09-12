@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $databaseScript = Join-Path $repositoryRoot 'scripts\database\database.ps1'
-$apiProject = Join-Path $repositoryRoot 'apps\api\CrevaFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
 $artifactDirectory = Join-Path $repositoryRoot 'artifacts\authorization'
 $apiBaseUrl = "http://127.0.0.1:$ApiPort"
 $apiProcess = $null
@@ -36,10 +36,10 @@ function Import-EnvironmentFile {
 }
 
 Import-EnvironmentFile (Join-Path $repositoryRoot 'infrastructure\.env')
-$runtimePort = if ($env:CREVAFACTOS__PERSISTENCE__PORT) {
-    $env:CREVAFACTOS__PERSISTENCE__PORT
-} elseif ($env:CREVAFACTOS_POSTGRES_PORT) {
-    $env:CREVAFACTOS_POSTGRES_PORT
+$runtimePort = if ($env:NEVAXIS_FACTOS__PERSISTENCE__PORT) {
+    $env:NEVAXIS_FACTOS__PERSISTENCE__PORT
+} elseif ($env:NEVAXIS_FACTOS_POSTGRES_PORT) {
+    $env:NEVAXIS_FACTOS_POSTGRES_PORT
 } else {
     '5433'
 }
@@ -69,9 +69,9 @@ function Invoke-TestRequest {
 function New-IdentityHeaders {
     param([string]$Subject, [string]$Tenant)
     return @{
-        'X-CrevaFactOS-Dev-Issuer' = 'https://authorization.local.test'
-        'X-CrevaFactOS-Dev-Subject' = $Subject
-        'X-CrevaFactOS-Tenant' = $Tenant
+        'X-crevafactos-dev-Issuer' = 'https://authorization.local.test'
+        'X-crevafactos-dev-Subject' = $Subject
+        'X-NevaxisFactOS-Tenant' = $Tenant
     }
 }
 
@@ -82,16 +82,16 @@ function Assert-Status {
     }
 }
 
-$env:CREVAFACTOS__PERSISTENCE__ENABLED = 'true'
-$env:CREVAFACTOS__PERSISTENCE__HOST = '127.0.0.1'
-$env:CREVAFACTOS__PERSISTENCE__PORT = $runtimePort
-$env:CREVAFACTOS__PERSISTENCE__DATABASE = 'crevafactos_local'
-$env:CREVAFACTOS__PERSISTENCE__USERNAME = 'crevafactos_runtime'
-$env:CREVAFACTOS__PERSISTENCE__PASSWORD = 'local_runtime_only_change_me'
-$env:CREVAFACTOS__PERSISTENCE__SSL_MODE = 'Disable'
-$env:CREVAFACTOS__PERSISTENCE__CONNECTION_TIMEOUT_SECONDS = '15'
-$env:CREVAFACTOS__PERSISTENCE__COMMAND_TIMEOUT_SECONDS = '30'
-$env:CREVAFACTOS__AUTHENTICATION__MODE = 'Development'
+$env:NEVAXIS_FACTOS__PERSISTENCE__ENABLED = 'true'
+$env:NEVAXIS_FACTOS__PERSISTENCE__HOST = '127.0.0.1'
+$env:NEVAXIS_FACTOS__PERSISTENCE__PORT = $runtimePort
+$env:NEVAXIS_FACTOS__PERSISTENCE__DATABASE = 'crevafactos_local'
+$env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME = 'crevafactos_runtime'
+$env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = 'local_runtime_only_change_me'
+$env:NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = 'Disable'
+$env:NEVAXIS_FACTOS__PERSISTENCE__CONNECTION_TIMEOUT_SECONDS = '15'
+$env:NEVAXIS_FACTOS__PERSISTENCE__COMMAND_TIMEOUT_SECONDS = '30'
+$env:NEVAXIS_FACTOS__AUTHENTICATION__MODE = 'Development'
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 $env:ASPNETCORE_URLS = $apiBaseUrl
 

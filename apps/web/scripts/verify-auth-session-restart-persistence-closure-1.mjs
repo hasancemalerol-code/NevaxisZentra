@@ -8,13 +8,13 @@ import { fileURLToPath } from "node:url";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const LAUNCHER = join(REPO, "scripts/runtime/start-local-saas-development.ps1");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const DATA_PROTECTION_PATH = join(
   process.env.LOCALAPPDATA ?? "",
-  "CrevaFactOS",
+  "crevafactos",
   "DataProtection-Keys",
 );
 
@@ -25,8 +25,8 @@ const report = {
   finalWebPid: null,
   authenticationMode: "SessionCookie",
   dataProtectionPath: DATA_PROTECTION_PATH,
-  dataProtectionApplicationName: "CrevaFactOS",
-  dataProtectionProcessIdentity: "CrevaFactOS.Api (dotnet)",
+  dataProtectionApplicationName: "crevafactos",
+  dataProtectionProcessIdentity: "NevaxisFactOS.Api (dotnet)",
   fingerprintBeforeApiRestart: null,
   fingerprintAfterApiRestart: null,
   fingerprintBeforeWebRestart: null,
@@ -46,9 +46,9 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__AUTH_RESTART_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -174,7 +174,7 @@ function resolveChromiumExecutable() {
 
 async function sessionFingerprint(context) {
   const cookies = await context.cookies(WEB);
-  const session = cookies.find((cookie) => cookie.name === "crevafactos.session");
+  const session = cookies.find((cookie) => cookie.name === "NevaxisFactOS.session");
   if (!session?.value) return null;
   return createHash("sha256").update(session.value).digest("hex").slice(0, 16);
 }
@@ -242,7 +242,7 @@ await waitForHttp(`${WEB}/giris`);
 
 const { chromium } = await import("playwright");
 const executablePath = resolveChromiumExecutable();
-const profileDir = mkdtempSync(join(tmpdir(), "crevafactos-auth-restart-persist-"));
+const profileDir = mkdtempSync(join(tmpdir(), "NevaxisFactOS-auth-restart-persist-"));
 
 try {
   const browser = await chromium.launchPersistentContext(profileDir, {
@@ -308,7 +308,7 @@ try {
 
     const invalid = await negativeBrowser.newContext();
     await invalid.addCookies([{
-      name: "crevafactos.session",
+      name: "NevaxisFactOS.session",
       value: "invalid-restart-negative-probe",
       domain: new URL(WEB).hostname,
       path: "/",

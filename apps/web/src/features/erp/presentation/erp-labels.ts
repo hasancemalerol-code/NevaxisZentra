@@ -86,7 +86,7 @@ export function getErpNetsisTransportLabel(connectionMode: string, hasTestFixtur
 }
 
 export function getErpNetsisSetupGuidance(): string {
-  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Netsis Bridge yapılandırılmalıdır.";
+  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında NevaxisFactOS Netsis Bridge yapılandırılmalıdır.";
 }
 
 export function getErpMikroConnectionStateLabel(input: {
@@ -139,7 +139,7 @@ export function getErpMikroTransportLabel(connectionMode: string, hasTestFixture
 }
 
 export function getErpMikroSetupGuidance(): string {
-  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Mikro Bridge yapılandırılmalıdır.";
+  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında NevaxisFactOS Mikro Bridge yapılandırılmalıdır.";
 }
 
 export function getErpLogoConnectionStateLabel(input: {
@@ -192,7 +192,7 @@ export function getErpLogoTransportLabel(connectionMode: string, hasTestFixtureC
 }
 
 export function getErpLogoSetupGuidance(): string {
-  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında CrevaFactOS Logo Bridge yapılandırılmalıdır.";
+  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında NevaxisFactOS Logo Bridge yapılandırılmalıdır.";
 }
 
 export function getErpConnectionStatusLabel(status: ErpConnectionStatus | string): string {

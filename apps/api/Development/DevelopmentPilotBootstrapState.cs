@@ -1,4 +1,4 @@
-namespace CrevaFactOS.Api.Development;
+namespace NevaxisFactOS.Api.Development;
 
 public sealed class DevelopmentPilotBootstrapState
 {

@@ -21,9 +21,9 @@ function read(rel) {
 
 console.log("Running TEAMS-FOUNDATION-1 migration verifier.");
 
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260829214322_AddTeamsFoundation.cs");
-const snapshot = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
-const entityConfig = read("packages/CrevaFactOS.Persistence/Teams/TeamsEntityConfigurations.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829214322_AddTeamsFoundation.cs");
+const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisFactOS.Persistence/Teams/TeamsEntityConfigurations.cs");
 
 assert("teams_channels table", migration.includes('name: "teams_channels"'));
 assert("teams_channel_members table", migration.includes('name: "teams_channel_members"'));

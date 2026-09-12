@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 
-const API_BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const FACILITY_ID = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const FACILITY_ID = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const ISSUER = "crevafactos-dev";
 const OPERATOR = "production-pilot-operator";
 const REVIEWER = "production-pilot-reviewer";
 const TENANT = "dev-pilot-tenant";
-const REQUEST_TIMEOUT_MS = Number(process.env.CREVAFACTOS_REQUEST_TIMEOUT_MS ?? 30_000);
+const REQUEST_TIMEOUT_MS = Number(process.env.NEVAXIS_FACTOS_REQUEST_TIMEOUT_MS ?? 30_000);
 
 function headers(subject = OPERATOR) {
   const base = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
-  if (process.env.CREVAFACTOS_DEV_OPERATOR_BEARER) {
-    base.Authorization = `Bearer ${process.env.CREVAFACTOS_DEV_OPERATOR_BEARER}`;
+  if (process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER) {
+    base.Authorization = `Bearer ${process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER}`;
   }
   return base;
 }
@@ -215,12 +215,12 @@ async function main() {
   checks.push("UNBOUNDED_AI_CHAIN = 0");
   checks.push("ERP_SCOPE_CREEP = 0");
 
-  console.log("CREVAFACTOS_ULTRA_MEGA_4_CROSS_MODULE_FACTORY_ORCHESTRATION = PASS");
+  console.log("NEVAXIS_FACTOS_ULTRA_MEGA_4_CROSS_MODULE_FACTORY_ORCHESTRATION = PASS");
   for (const line of checks) console.log(line);
 }
 
 main().catch((error) => {
-  console.error("CREVAFACTOS_ULTRA_MEGA_4_CROSS_MODULE_FACTORY_ORCHESTRATION = FAIL");
+  console.error("NEVAXIS_FACTOS_ULTRA_MEGA_4_CROSS_MODULE_FACTORY_ORCHESTRATION = FAIL");
   console.error(error.message);
   process.exit(1);
 });

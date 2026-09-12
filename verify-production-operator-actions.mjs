@@ -62,12 +62,12 @@ check("Web writer file exists", webWriter !== null);
 check("Server boundary file exists", serverBoundary !== null);
 
 check(
-  "API client does not inject X-CrevaFactOS-Dev-TenantId header",
-  !apiClient?.includes("X-CrevaFactOS-Dev-TenantId") ?? false,
+  "API client does not inject X-crevafactos-dev-TenantId header",
+  !apiClient?.includes("X-crevafactos-dev-TenantId") ?? false,
 );
 check(
-  "API client does not inject X-CrevaFactOS-Dev-SubjectId header",
-  !apiClient?.includes("X-CrevaFactOS-Dev-SubjectId") ?? false,
+  "API client does not inject X-crevafactos-dev-SubjectId header",
+  !apiClient?.includes("X-crevafactos-dev-SubjectId") ?? false,
 );
 check(
   "Web writer is server-only (no 'use client')",
@@ -77,7 +77,7 @@ check(
 // ── 2. OPERATOR IDENTITY IS SERVER-AUTHORITATIVE ─────────────────────────────
 
 const entryRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
 );
 
 check(
@@ -87,7 +87,7 @@ check(
 check(
   "RecordGoodProductionCommand does NOT have a SubjectId field",
   !readText(
-    "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+    "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
   )?.match(/RecordGoodProductionCommand[^)]*SubjectId/) ?? false,
 );
 
@@ -167,7 +167,7 @@ check(
 );
 check(
   "Operator actions does not inject dev auth headers",
-  !operatorActions?.includes("X-CrevaFactOS-Dev") ?? false,
+  !operatorActions?.includes("X-crevafactos-dev") ?? false,
 );
 
 // ── 8. COMPLETION GUARD UI ────────────────────────────────────────────────────
@@ -304,10 +304,10 @@ check(
 // ── 15. DEVELOPMENT PILOT: production.execution.record PERMISSION ─────────────
 
 const pilotBootstrap = readText(
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
 );
 const pilotIds = readText(
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotIds.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIds.cs",
 );
 
 check(

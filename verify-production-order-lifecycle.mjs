@@ -40,7 +40,7 @@ function readText(relPath) {
 // ── STATUS MODEL ─────────────────────────────────────────────────────────────
 
 const statusEnum = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderStatus.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderStatus.cs",
 );
 
 check("ProductionOrderStatus.cs exists", statusEnum !== null);
@@ -54,7 +54,7 @@ for (const s of expectedStatuses) {
 // ── LIFECYCLE TRANSITIONS IN WRITE REPOSITORY ─────────────────────────────────
 
 const writeRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
 );
 
 check("ProductionOrderWriteRepository.cs exists", writeRepo !== null);
@@ -110,7 +110,7 @@ check(
 // ── CONCURRENCY ──────────────────────────────────────────────────────────────
 
 const modelsFile = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
 );
 
 check("ProductionOrderModels.cs exists", modelsFile !== null);
@@ -128,7 +128,7 @@ check(
 // ── IDEMPOTENCY ───────────────────────────────────────────────────────────────
 
 const entityConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionOrderEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionOrderEntityConfiguration.cs",
 );
 
 check("ProductionOrderEntityConfiguration.cs exists", entityConfig !== null);
@@ -140,7 +140,7 @@ check(
 );
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
 );
 
 check(
@@ -168,19 +168,19 @@ check(
 // ── AUDIT & OUTBOX PER TRANSITION ─────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 
 const auditEvents = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditEventTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditEventTypes.cs",
 );
 
 const outboxTypes = readText(
-  "packages/CrevaFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
 );
 
 const productionAudit = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionAuditConstants.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionAuditConstants.cs",
 );
 
 check("ProductionAuditConstants.cs exists", productionAudit !== null);

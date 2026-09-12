@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   BellRing,
   Clock3,
   Factory,
@@ -10,6 +9,7 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+
 
 interface LiveAlarmsPanelProps {
   alarms?: readonly unknown[];
@@ -390,7 +390,7 @@ export function LiveAlarmsPanel({
                 borderBottom:
                   index === visibleAlarms.length - 1
                     ? 0
-                    : styles.item.borderBottom,
+                    : "1px solid #dce5f0",
               }}
             >
               <span

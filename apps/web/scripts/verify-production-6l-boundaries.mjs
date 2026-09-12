@@ -35,13 +35,13 @@ function forbidText(source, forbidden, label) {
 console.log("Running production 6L boundaries verifier.");
 
 const signalReader = readRequired(
-  "packages/CrevaFactOS.Persistence/Production/ProductionPlanningLogisticsSignalReader.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionPlanningLogisticsSignalReader.cs",
 );
 const repository = readRequired(
-  "packages/CrevaFactOS.Persistence/Production/ProductionReportingRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionReportingRepository.cs",
 );
 const engine = readRequired(
-  "packages/CrevaFactOS.Persistence/Production/ProductionReportingEngine.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionReportingEngine.cs",
 );
 
 requireText(signalReader, "PlanningLogisticsConstraintEvaluations", "logistics signal reader");

@@ -1,12 +1,12 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Teams;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Teams;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Teams;
+namespace NevaxisFactOS.Api.Teams;
 
 public static class TeamsEndpointRouteBuilderExtensions
 {
@@ -369,11 +369,11 @@ public sealed record CreateMessageTaskDraftRequest(
 
 public static class TeamsServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSTeams(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSTeams(this IServiceCollection services)
     {
         services.AddScoped<ITeamsNotificationRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsNotificationRepository()
                 : new TeamsNotificationRepository(
@@ -382,7 +382,7 @@ public static class TeamsServiceCollectionExtensions
         });
         services.AddScoped<ITeamsRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsRepository()
                 : new TeamsRepository(
@@ -393,7 +393,7 @@ public static class TeamsServiceCollectionExtensions
         });
         services.AddScoped<ITeamsApprovalRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsApprovalRepository()
                 : new TeamsApprovalRepository(
@@ -403,7 +403,7 @@ public static class TeamsServiceCollectionExtensions
         });
         services.AddScoped<ITeamsHandoverRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsHandoverRepository()
                 : new TeamsHandoverRepository(
@@ -413,7 +413,7 @@ public static class TeamsServiceCollectionExtensions
         });
         services.AddScoped<ITeamsWorkInboxRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsWorkInboxRepository()
                 : new TeamsWorkInboxRepository(
@@ -422,7 +422,7 @@ public static class TeamsServiceCollectionExtensions
         });
         services.AddScoped<ITeamsDirectMessageRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableTeamsDirectMessageRepository()
                 : new TeamsDirectMessageRepository(

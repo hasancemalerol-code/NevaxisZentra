@@ -44,7 +44,7 @@ function assertNotContains(label, content, text) {
 // 1. Cycle entity model
 // ---------------------------------------------------------------------------
 console.log("\n[1] MachineObservedCycle entity");
-const entities = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
 
 assertContains("MachineObservedCycle class", entities, "class MachineObservedCycle");
 assertContains("CycleIdentity field", entities, "string CycleIdentity");
@@ -80,7 +80,7 @@ assertContains("counter-observed event kind", entities, 'CounterObserved = "coun
 // 4. Cycle ingestion service
 // ---------------------------------------------------------------------------
 console.log("\n[4] EdgeCycleIngestionService");
-const cycleSvc = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeCycleIngestionService.cs");
+const cycleSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeCycleIngestionService.cs");
 
 assertContains("IEdgeCycleIngestionService interface", cycleSvc, "interface IEdgeCycleIngestionService");
 assertContains("IngestCycleAsync method", cycleSvc, "IngestCycleAsync");
@@ -101,7 +101,7 @@ assertNotContains("no scrap", cycleSvc, "Scrap");
 // 5. Counter ingestion service
 // ---------------------------------------------------------------------------
 console.log("\n[5] EdgeCounterIngestionService");
-const counterSvc = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeCounterIngestionService.cs");
+const counterSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeCounterIngestionService.cs");
 
 assertContains("IEdgeCounterIngestionService interface", counterSvc, "interface IEdgeCounterIngestionService");
 assertContains("IngestCounterAsync method", counterSvc, "IngestCounterAsync");
@@ -116,7 +116,7 @@ assertNotContains("no Production mutation", counterSvc, "ProductionOrder");
 // 6. Read models
 // ---------------------------------------------------------------------------
 console.log("\n[6] Cycle read models");
-const models = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeModels.cs");
+const models = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
 
 assertContains("ObservedCycleReadModel", models, "ObservedCycleReadModel");
 assertContains("CycleProjectionReadModel", models, "CycleProjectionReadModel");
@@ -134,7 +134,7 @@ assertContains("CounterResetSuspected failure code", models, '"edge.counter.rese
 // 7. Repository
 // ---------------------------------------------------------------------------
 console.log("\n[7] EdgeQueryRepository cycle/counter queries");
-const repo = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs");
+const repo = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
 
 assertContains("ListCycleHistoryAsync method", repo, "ListCycleHistoryAsync");
 assertContains("GetCycleProjectionAsync method", repo, "GetCycleProjectionAsync");
@@ -155,7 +155,7 @@ assertContains("IEdgeCounterIngestionService registered", api, "IEdgeCounterInge
 // 9. Entity configurations
 // ---------------------------------------------------------------------------
 console.log("\n[9] EF Core cycle/counter configurations");
-const configs = readFile("packages/CrevaFactOS.Persistence/Configurations/EdgeEntityConfigurations.cs");
+const configs = readFile("packages/NevaxisFactOS.Persistence/Configurations/EdgeEntityConfigurations.cs");
 
 assertContains("MachineObservedCycleEntityConfiguration", configs, "class MachineObservedCycleEntityConfiguration");
 assertContains("MachineCycleProjectionEntityConfiguration", configs, "class MachineCycleProjectionEntityConfiguration");
@@ -168,7 +168,7 @@ assertContains("machine_counter_observations table", configs, '"machine_counter_
 // 10. Migration
 // ---------------------------------------------------------------------------
 console.log("\n[10] EDGE-2 migration cycle/counter tables");
-const migration = readFile("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
+const migration = readFile("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
 
 assertContains("machine_observed_cycles created", migration, "CREATE TABLE IF NOT EXISTS machine_observed_cycles");
 assertContains("machine_cycle_projection created", migration, "CREATE TABLE IF NOT EXISTS machine_cycle_projection");
@@ -182,7 +182,7 @@ assertContains("RLS read-write for projection", migration, "ApplyTenantRls(migra
 // 11. Simulator cycle scenarios
 // ---------------------------------------------------------------------------
 console.log("\n[11] Simulator cycle/counter scenarios");
-const sim = readFile("tools/CrevaFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const sim = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
 
 assertContains("SimulatedCycle type", sim, "record SimulatedCycle");
 assertContains("SimulatedCounter type", sim, "record SimulatedCounter");
@@ -201,7 +201,7 @@ assertContains("counter values 100-101-102-5", sim, "new SimulatedCounter(\"mach
 // 12. Persistence boundary
 // ---------------------------------------------------------------------------
 console.log("\n[12] Production consumption boundary");
-const dbContext = readFile("packages/CrevaFactOS.Persistence/CrevaFactOSDbContext.cs");
+const dbContext = readFile("packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs");
 assertContains("MachineObservedCycles DbSet", dbContext, "MachineObservedCycles");
 assertContains("MachineCycleProjections DbSet", dbContext, "MachineCycleProjections");
 assertContains("MachineCounterObservations DbSet", dbContext, "MachineCounterObservations");

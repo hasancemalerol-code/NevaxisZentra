@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const WEB = process.env.CREVAFACTOS_WEB_BASE ?? "http://127.0.0.1:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE ?? "http://127.0.0.1:3001";
 
 function fail(message) {
   console.error(`ERP-NETSIS-1 premium UI verification failed: ${message}`);

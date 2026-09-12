@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.ProcessOee;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.ProcessOee;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ProcessOee;
+namespace NevaxisFactOS.Api.ProcessOee;
 
 public static class ProcessOeeEndpointRouteBuilderExtensions
 {
@@ -770,13 +770,13 @@ public sealed record EvaluateShiftComparisonRequest(
 
 public static class ProcessOeeServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSProcessOee(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSProcessOee(this IServiceCollection services)
     {
         services.AddScoped<ProcessOeeEvidenceCollector>();
         services.AddScoped<ProcessOeeStabilityDataCollector>();
         services.AddScoped<IProcessOeeRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableProcessOeeRepository()
                 : new ProcessOeeRepository(

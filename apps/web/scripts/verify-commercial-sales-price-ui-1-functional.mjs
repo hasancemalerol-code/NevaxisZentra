@@ -5,16 +5,16 @@ import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001")
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001")
   .replace("127.0.0.1", "localhost")
   .replace(/\/$/, "");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ROUTE = "/ticari-zeka/satis-fiyat-analizi";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_OVERRIDE_ID = "dd000004-00e7-4000-8000-0000000000e8";
 const READ_PERMISSION_ID = "10000000-0000-4000-8000-000000000082";
-const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-commercial-sales-price-ui-1-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-commercial-sales-price-ui-1-screenshots");
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 const OWNER_SCREENSHOTS = [
@@ -56,11 +56,11 @@ function isBenignDevConsoleError(message) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__COMMINT_SALES_UI_1_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -113,7 +113,7 @@ function resolveChromiumExecutable() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }
@@ -139,8 +139,8 @@ async function authHeaders(context) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
   if (cookieHeader) headers.Cookie = cookieHeader;
-  const csrf = cookies.find((cookie) => cookie.name === "crevafactos.csrf");
-  if (csrf?.value) headers["X-CrevaFactOS-Csrf"] = csrf.value;
+  const csrf = cookies.find((cookie) => cookie.name === "NevaxisFactOS.csrf");
+  if (csrf?.value) headers["X-NevaxisFactOS-Csrf"] = csrf.value;
   return headers;
 }
 

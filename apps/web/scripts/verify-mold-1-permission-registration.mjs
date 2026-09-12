@@ -21,9 +21,9 @@ function requireText(source, expected, label) {
 
 console.log("Running Mold permission-registration verifier.");
 
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs");
-const pilotIds = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotIds.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs");
+const pilotIds = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIds.cs");
 const helpers = readRequired("apps/api/Mold/MoldEndpointHelpers.cs");
 
 requireText(permissions, 'Read = "mold.read"', "MoldPermissionKeys.Read");

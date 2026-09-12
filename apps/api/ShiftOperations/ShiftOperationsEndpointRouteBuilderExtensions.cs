@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.ShiftOperations;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.ShiftOperations;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ShiftOperations;
+namespace NevaxisFactOS.Api.ShiftOperations;
 
 public static class ShiftOperationsEndpointRouteBuilderExtensions
 {
@@ -29,7 +29,7 @@ public static class ShiftOperationsEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSShiftOperations(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSShiftOperations(this IServiceCollection services)
     {
         services.AddScoped<IShiftOperationsRepository, ShiftOperationsRepository>();
         services.AddScoped<IShiftOperationsService, ShiftOperationsService>();

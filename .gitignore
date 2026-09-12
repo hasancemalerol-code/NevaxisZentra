@@ -37,6 +37,7 @@ pnpm-debug.log*
 # .NET
 bin/
 obj/
+.build/
 artifacts/
 TestResults/
 *.nupkg

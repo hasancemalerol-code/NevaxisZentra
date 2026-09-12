@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Energy;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Energy;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.Energy;
+namespace NevaxisFactOS.Api.Energy;
 
 internal static class EnergyEndpointHelpers
 {

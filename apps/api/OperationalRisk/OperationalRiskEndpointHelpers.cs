@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.OperationalRisk;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.OperationalRisk;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.OperationalRisk;
+namespace NevaxisFactOS.Api.OperationalRisk;
 
 internal static class OperationalRiskEndpointHelpers
 {

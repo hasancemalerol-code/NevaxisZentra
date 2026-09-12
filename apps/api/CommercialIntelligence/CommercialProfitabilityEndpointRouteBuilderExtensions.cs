@@ -1,12 +1,12 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.CommercialIntelligence;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.CommercialIntelligence;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.CommercialIntelligence;
+namespace NevaxisFactOS.Api.CommercialIntelligence;
 
 internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
 {
@@ -676,11 +676,11 @@ internal sealed record EvaluateCommercialProfitabilityComparisonRequest(
 
 public static class CommercialProfitabilityServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSCommercialProfitability(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSCommercialProfitability(this IServiceCollection services)
     {
         services.AddScoped<ICommercialProfitabilityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialProfitabilityRepository()
                 : new CommercialProfitabilityRepository(

@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const MIKRO_CONNECTION = "bb000001-0092-4000-8000-000000000092";
 const ISSUER = "crevafactos-dev";
@@ -43,9 +43,9 @@ function headers() {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": OPERATOR,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": OPERATOR,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 
@@ -68,14 +68,14 @@ async function api(method, path, body) {
 
 console.log("Running ERP-MIKRO-1 adapter verifier.");
 
-const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
-const mikroTransport = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/IMikroReadTransport.cs");
-const mikroFixture = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
-const mikroMapper = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroSourceRecords.cs");
-const adapters = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpAdapters.cs");
-const syncRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpSyncRepository.cs");
+const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/IMikroReadTransport.cs");
+const mikroFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
+const mikroMapper = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroSourceRecords.cs");
+const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
 
 requireText(mikroAdapter, "class MikroErpAdapter", "MikroErpAdapter");
 forbidText(adapters, "class MikroErpAdapterPlaceholder", "placeholder removed");
@@ -91,7 +91,7 @@ requireText(mikroMapper, "MikroProductMapper", "product mapping");
 requireText(mikroMapper, "ErpExternalCustomerRecord", "canonical customer mapping");
 requireText(mikroMapper, "ErpExternalProductRecord", "canonical product mapping");
 requireText(mikroTransport, "MikroReadPageRequest", "pagination request");
-const mikroReadPage = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroReadPage.cs");
+const mikroReadPage = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroReadPage.cs");
 requireText(mikroReadPage, "ContinuationToken", "pagination cursor");
 requireText(mikroAdapter, "CancelAfter", "timeout support");
 requireText(mikroAdapter, "CancellationToken", "cancellation support");

@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: CrevaFactOS Product & Development
+- Decision owners: NevaxisFactOS Product & Development
 - Scope: Asynchronous integration and background messaging
 
 ## Context
 
-CrevaFactOS requires asynchronous processing for operational events, AI tasks, notifications, connector synchronization, and Edge telemetry. Directly performing all work inside HTTP requests would couple failures and extend transaction duration.
+NevaxisFactOS requires asynchronous processing for operational events, AI tasks, notifications, connector synchronization, and Edge telemetry. Directly performing all work inside HTTP requests would couple failures and extend transaction duration.
 
 ## Decision
 
@@ -20,7 +20,7 @@ RabbitMQ is used for:
 - Worker jobs and long-running operations
 - Connector and notification work
 - AI Task Center workflow notifications
-- CrevaFactOS Teams routing notifications
+- NevaxisFactOS Teams routing notifications
 - Edge and cloud event transfer where appropriate
 - Retry and dead-letter handling
 

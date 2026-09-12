@@ -27,8 +27,8 @@ console.log("Running MOLD-1 security verifier.");
 
 const endpoints = readRequired("apps/api/Mold/MoldEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Mold/MoldEndpointHelpers.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
 
 requireText(endpoints, "RequireAuthorization", "mold endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "mold endpoints");

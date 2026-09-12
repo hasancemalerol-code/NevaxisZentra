@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "SAAS-ADMIN-1-CLOSURE";
 const CLOSURE_ROLE_INPUT = " SAAS-ADMIN-1-CLOSURE-role ";
@@ -49,7 +49,7 @@ function machinePassword() {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -118,8 +118,8 @@ class CookieJar {
 async function api(method, path, body, jar) {
   const headers = { "Content-Type": "application/json", Accept: "application/json" };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("crevafactos.session") && jar.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.get("crevafactos.csrf");
+  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -196,7 +196,7 @@ async function signInOwner() {
 }
 
 console.log("Running SAAS-ADMIN-1 domain-permissions verifier.");
-readFileSync(resolve(ROOT, "packages/CrevaFactOS.Persistence/AdminAccess/AdminAccessConstants.cs"), "utf8");
+readFileSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/AdminAccess/AdminAccessConstants.cs"), "utf8");
 
 previewClosureFixtures();
 removeClosureFixtures();
@@ -205,7 +205,7 @@ previewClosureFixtures();
 const now = new Date().toISOString();
 db(`
   INSERT INTO identity_subjects (id, external_issuer, external_subject, status, created_at_utc)
-  VALUES ('${CLOSURE_IDENTITY_ID}', 'crevafactos-saas', '${CLOSURE_IDENTITY_ID}', 'Active', '${now}')
+  VALUES ('${CLOSURE_IDENTITY_ID}', 'NevaxisFactOS-saas', '${CLOSURE_IDENTITY_ID}', 'Active', '${now}')
   ON CONFLICT (id) DO NOTHING;
   INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, membership_reference, status, authorization_version, created_at_utc)
   VALUES ('${CLOSURE_MEMBERSHIP_ID}', '${TENANT_ID}', '${CLOSURE_IDENTITY_ID}', '${CLOSURE_MEMBER}', 'Active', 1, '${now}')

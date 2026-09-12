@@ -1,4 +1,4 @@
-# CrevaFactOS Web UI Foundation
+# NevaxisFactOS Web UI Foundation
 
 The Web application is a browser-based, desktop-first factory-operations workspace. UI-01 establishes the shell and reusable visual language only; the locked dashboard data regions and product workflows remain deferred to UI-02 and later packages.
 
@@ -29,7 +29,7 @@ The shell includes semantic landmarks, `aria-current`, a skip link, native links
 
 ## Locked navigation
 
-AI Görev Merkezi, Dashboard / Operasyon Merkezi, Üretim, Planlama, Vardiyalar, Makineler, Kalıplar, Bakım, Kalite, Malzeme Riskleri, Sipariş Operasyonları, CrevaFactOS Teams, Raporlar, Entegrasyonlar, and Ayarlar.
+AI Görev Merkezi, Dashboard / Operasyon Merkezi, Üretim, Planlama, Vardiyalar, Makineler, Kalıplar, Bakım, Kalite, Malzeme Riskleri, Sipariş Operasyonları, NevaxisFactOS Teams, Raporlar, Entegrasyonlar, and Ayarlar.
 
 There are no native accounting, finance, receivables/payables, payroll, official stock-ledger, general purchasing ERP, CRM, HR, WMS, banking, or invoicing routes.
 
@@ -39,7 +39,7 @@ UI-01 performs no API fetching and contains no real factory data, full dashboard
 
 ## Production Planning — development pilot (read-only)
 
-The Planlama module supports three server runtime modes via `CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE`:
+The Planlama module supports three server runtime modes via `NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE`:
 
 | Mode | Purpose |
 | --- | --- |
@@ -56,18 +56,18 @@ The Planlama module supports three server runtime modes via `CREVAFACTOS_PRODUCT
 ### Web development-api mode (local `.env.local` — do not commit)
 
 ```bash
-CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-api
-CREVAFACTOS_API_BASE_URL=http://127.0.0.1:5000
-CREVAFACTOS_DEV_AUTH_ISSUER=crevafactos-dev
-CREVAFACTOS_DEV_AUTH_SUBJECT=planning-pilot-user
-CREVAFACTOS_DEV_TENANT_KEY=dev-pilot-tenant
-CREVAFACTOS_DEV_FACILITY_ID=bb000001-0005-4000-8000-000000000005
+NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-api
+NEVAXIS_FACTOS_API_BASE_URL=http://127.0.0.1:5000
+NEVAXIS_FACTOS_DEV_AUTH_ISSUER=crevafactos-dev
+NEVAXIS_FACTOS_DEV_AUTH_SUBJECT=planning-pilot-user
+NEVAXIS_FACTOS_DEV_TENANT_KEY=dev-pilot-tenant
+NEVAXIS_FACTOS_DEV_FACILITY_ID=bb000001-0005-4000-8000-000000000005
 ```
 
 Start the web app:
 
 ```bash
-pnpm --filter @crevafactos/web dev
+pnpm --filter @nevaxisfactos/web dev
 ```
 
 ### URLs
@@ -77,6 +77,6 @@ pnpm --filter @crevafactos/web dev
 
 ### Return to preview mode
 
-Set `CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-preview` or remove the variable.
+Set `NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE=development-preview` or remove the variable.
 
 **Production-ready değildir:** production auth bridge and multi-facility selection are not part of this pilot.

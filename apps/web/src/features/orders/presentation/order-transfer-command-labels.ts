@@ -20,7 +20,7 @@ export const ORDER_TRANSFER_COMMAND_FAILURE_DESCRIPTIONS = {
   "transfer-not-ready":
     "Sipariş taslağındaki zorunlu kontroller tamamlanmadan bağlı sistem aktarımı başlatılamaz.",
   "target-system-missing":
-    "Aktarım komutu oluşturulmadan önce ERP, MES veya CrevaFactOS hedeflerinden biri seçilmelidir.",
+    "Aktarım komutu oluşturulmadan önce ERP, MES veya NevaxisFactOS hedeflerinden biri seçilmelidir.",
   "approval-missing":
     "Sipariş, geçerli ve izlenebilir bir yetkili kullanıcı onayı olmadan bağlı sisteme aktarılamaz.",
 } satisfies Record<

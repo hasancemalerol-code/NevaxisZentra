@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "SAASIDENT1-CLOSURE";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
@@ -56,7 +56,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -160,12 +160,12 @@ async function identityRequest(method, path, body, jar = new CookieJar()) {
   if (cookieHeader) headers.Cookie = cookieHeader;
 
   if (
-    jar.get("crevafactos.session")
-    && jar.get("crevafactos.csrf")
+    jar.get("NevaxisFactOS.session")
+    && jar.get("NevaxisFactOS.csrf")
     && method !== "GET"
     && !["/api/identity/sign-in", "/api/identity/password/forgot", "/api/identity/password/reset", "/api/identity/email/verify", "/api/identity/invitations/accept"].includes(path)
   ) {
-    headers["X-CrevaFactOS-Csrf"] = jar.get("crevafactos.csrf");
+    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
   }
 
   const response = await fetch(`${BASE}${path}`, {
@@ -266,7 +266,7 @@ function insertClosureAccountFixture(fixture, displayName, lifecycleStatus, incl
     INSERT INTO identity_subjects (id, external_issuer, external_subject, status, created_at_utc)
     VALUES (
       '${fixture.identitySubjectId}',
-      'crevafactos-saas',
+      'NevaxisFactOS-saas',
       '${fixture.accountId}',
       'Active',
       '${now}'
@@ -403,9 +403,9 @@ function assertAuditPayloadsExcludeSecrets() {
 
 console.log("Running SAAS-IDENTITY-1 authentication verifier.");
 
-const constants = readRequired("packages/CrevaFactOS.Persistence/SaasIdentity/SaasIdentityConstants.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/SaasIdentity/SaasIdentityConstants.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
 );
 
 assert("MaxFailedSignInAttempts = 5", constants.includes("public const int MaxFailedSignInAttempts = 5;"));
@@ -450,8 +450,8 @@ const validLogin = await identityRequest(
 );
 assert("valid normalized active-user login → 200", validLogin.status === 200, `status=${validLogin.status}`);
 assert("valid login does not require MFA", validLogin.json?.requiresMfa === false);
-assert("session cookie issued", Boolean(validLogin.jar.get("crevafactos.session")));
-assert("csrf cookie issued", Boolean(validLogin.jar.get("crevafactos.csrf")));
+assert("session cookie issued", Boolean(validLogin.jar.get("NevaxisFactOS.session")));
+assert("csrf cookie issued", Boolean(validLogin.jar.get("NevaxisFactOS.csrf")));
 
 const validMe = await identityRequest("GET", "/api/identity/me", null, validLogin.jar);
 assert("valid login /me → 200", validMe.status === 200, `status=${validMe.status}`);

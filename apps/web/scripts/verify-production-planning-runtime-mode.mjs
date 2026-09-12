@@ -171,11 +171,11 @@ runRuntimeConfigCase(
   "production defaults to api mode",
   {
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "",
-    CREVAFACTOS_API_BASE_URL:
+    NEVAXIS_FACTOS_API_BASE_URL:
       "https://api.example.test",
-    CREVAFACTOS_FACILITY_ID:
+    NEVAXIS_FACTOS_FACILITY_ID:
       "11111111-1111-1111-1111-111111111111",
   },
   "success:api",
@@ -185,11 +185,11 @@ runRuntimeConfigCase(
   "production rejects development-preview",
   {
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
-    CREVAFACTOS_DEV_PREVIEW_TENANT_ID:
-      "tenant-crevafactos",
-    CREVAFACTOS_DEV_PREVIEW_FACILITY_ID:
+    NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
+      "tenant-NevaxisFactOS",
+    NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       "facility-istanbul",
   },
   "failure:configuration-error",
@@ -199,15 +199,15 @@ runRuntimeConfigCase(
   "production rejects development-api",
   {
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-api",
-    CREVAFACTOS_API_BASE_URL:
+    NEVAXIS_FACTOS_API_BASE_URL:
       "https://api.example.test",
-    CREVAFACTOS_DEV_FACILITY_ID:
+    NEVAXIS_FACTOS_DEV_FACILITY_ID:
       "11111111-1111-1111-1111-111111111111",
-    CREVAFACTOS_DEV_AUTH_ISSUER: "dev-issuer",
-    CREVAFACTOS_DEV_AUTH_SUBJECT: "dev-subject",
-    CREVAFACTOS_DEV_TENANT_KEY: "tenant-key",
+    NEVAXIS_FACTOS_DEV_AUTH_ISSUER: "dev-issuer",
+    NEVAXIS_FACTOS_DEV_AUTH_SUBJECT: "dev-subject",
+    NEVAXIS_FACTOS_DEV_TENANT_KEY: "tenant-key",
   },
   "failure:configuration-error",
 );
@@ -216,7 +216,7 @@ runRuntimeConfigCase(
   "unknown runtime mode fails",
   {
     NODE_ENV: "development",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "preview",
   },
   "failure:configuration-error",
@@ -226,10 +226,10 @@ runRuntimeConfigCase(
   "api mode requires base url",
   {
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "api",
-    CREVAFACTOS_API_BASE_URL: "",
-    CREVAFACTOS_FACILITY_ID:
+    NEVAXIS_FACTOS_API_BASE_URL: "",
+    NEVAXIS_FACTOS_FACILITY_ID:
       "11111111-1111-1111-1111-111111111111",
   },
   "failure:configuration-error",
@@ -239,11 +239,11 @@ runRuntimeConfigCase(
   "development-preview requires explicit scope",
   {
     NODE_ENV: "development",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
-    CREVAFACTOS_DEV_PREVIEW_TENANT_ID:
-      "tenant-crevafactos",
-    CREVAFACTOS_DEV_PREVIEW_FACILITY_ID:
+    NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
+      "tenant-NevaxisFactOS",
+    NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       "facility-istanbul",
   },
   "success:development-preview",

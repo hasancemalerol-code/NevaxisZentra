@@ -91,12 +91,12 @@ function forbidText(
 
 const bootstrapService =
   readRepositoryFile(
-    "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
+    "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
   );
 
 const bootstrapExtensions =
   readRepositoryFile(
-    "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotServiceCollectionExtensions.cs",
+    "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotServiceCollectionExtensions.cs",
   );
 
 const hostedBootstrap =
@@ -106,7 +106,7 @@ const hostedBootstrap =
 
 const planSeed =
   readRepositoryFile(
-    "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotProductionPlanSeed.cs",
+    "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProductionPlanSeed.cs",
   );
 
 const programCs =

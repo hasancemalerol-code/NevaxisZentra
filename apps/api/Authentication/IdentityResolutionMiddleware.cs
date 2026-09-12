@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.Identity;
 
-namespace CrevaFactOS.Api.Authentication;
+namespace NevaxisFactOS.Api.Authentication;
 
 public sealed class IdentityResolutionMiddleware(
     RequestDelegate next,

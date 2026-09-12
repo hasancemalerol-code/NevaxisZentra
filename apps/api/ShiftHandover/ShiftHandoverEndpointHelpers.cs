@@ -1,11 +1,11 @@
-﻿using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.ShiftHandover;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.ShiftHandover;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.ShiftHandover;
+namespace NevaxisFactOS.Api.ShiftHandover;
 
 internal static class ShiftHandoverEndpointHelpers
 {

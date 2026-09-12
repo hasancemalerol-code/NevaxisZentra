@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Quality;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Quality;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.Quality;
+namespace NevaxisFactOS.Api.Quality;
 
 internal static class QualityEndpointHelpers
 {

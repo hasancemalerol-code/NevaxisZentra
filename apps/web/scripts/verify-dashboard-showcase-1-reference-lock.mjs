@@ -86,7 +86,7 @@ assert("KPI card order locked", view.includes('const KPI_CARD_ORDER = ['));
 assert("hourly chart title", view.includes("Saatlik Üretim Performansı"));
 assert("OEE components title", view.includes("OEE Bileşenleri"));
 assert("distribution title", view.includes("Üretim Dağılımı"));
-assert("header brand", view.includes("CREVAFACTOS") && view.includes("Fabrika Operasyon Görünümü"));
+assert("header brand", view.includes("NevaxisFactOS") && view.includes("Fabrika Operasyon Görünümü"));
 assert("header refresh label", view.includes("Son güncelleme:"));
 assert("header live label", view.includes("Operasyon akışı izleniyor"));
 assert("fullscreen control only", view.includes("requestFullscreen") && view.includes("exitFullscreen"));

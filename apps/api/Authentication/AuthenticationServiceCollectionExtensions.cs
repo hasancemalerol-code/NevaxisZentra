@@ -1,14 +1,14 @@
-using CrevaFactOS.Persistence.SaasIdentity;
-using CrevaFactOS.Api.SaasIdentity;
+using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisFactOS.Api.SaasIdentity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CrevaFactOS.Api.Authentication;
+namespace NevaxisFactOS.Api.Authentication;
 
 public static class AuthenticationServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSAuthentication(
+    public static IServiceCollection AddNevaxisFactOSAuthentication(
         this IServiceCollection services,
         IConfiguration configuration,
         IHostEnvironment environment)
@@ -84,7 +84,7 @@ public static class AuthenticationServiceCollectionExtensions
             case AuthenticationMode.SessionCookie:
                 if (environment.IsDevelopment())
                 {
-                    const string policyScheme = "CrevaFactOS.SessionOrDevelopment";
+                    const string policyScheme = "NevaxisFactOS.SessionOrDevelopment";
                     services.AddAuthentication(authenticationOptions =>
                         {
                             authenticationOptions.DefaultAuthenticateScheme = policyScheme;
@@ -132,7 +132,7 @@ public static class AuthenticationServiceCollectionExtensions
 
     private static void ApplyEnvironmentOverrides(AuthenticationOptions options)
     {
-        var mode = Environment.GetEnvironmentVariable("CREVAFACTOS__AUTHENTICATION__MODE");
+        var mode = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__AUTHENTICATION__MODE");
         if (!string.IsNullOrWhiteSpace(mode))
         {
             options.Mode = Enum.Parse<AuthenticationMode>(mode, ignoreCase: true);
@@ -142,7 +142,7 @@ public static class AuthenticationServiceCollectionExtensions
         options.Audience = GetEnvironmentValue("AUDIENCE", options.Audience);
 
         var requireHttps = Environment.GetEnvironmentVariable(
-            "CREVAFACTOS__AUTHENTICATION__REQUIRE_HTTPS_METADATA");
+            "NEVAXIS_FACTOS__AUTHENTICATION__REQUIRE_HTTPS_METADATA");
         if (!string.IsNullOrWhiteSpace(requireHttps))
         {
             options.RequireHttpsMetadata = bool.Parse(requireHttps);
@@ -150,5 +150,5 @@ public static class AuthenticationServiceCollectionExtensions
     }
 
     private static string GetEnvironmentValue(string suffix, string fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__AUTHENTICATION__{suffix}") ?? fallback;
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AUTHENTICATION__{suffix}") ?? fallback;
 }

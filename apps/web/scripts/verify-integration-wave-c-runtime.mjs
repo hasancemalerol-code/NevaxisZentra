@@ -8,12 +8,12 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5000";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5000";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const ERP_CONNECTION = "bb000001-0090-4000-8000-000000000090";
 const DB_CONN =
-  process.env.CREVAFACTOS_INTEGRATION_DB_CONN
-  ?? "Host=127.0.0.1;Port=5433;Database=crevafactos_local;Username=crevafactos;Password=local_dev_only_change_me";
+  process.env.NEVAXIS_FACTOS_INTEGRATION_DB_CONN
+  ?? "Host=127.0.0.1;Port=5433;Database=crevafactos_local;Username=NevaxisFactOS;Password=local_dev_only_change_me";
 const ISSUER = "crevafactos-dev";
 const OPERATOR = "production-pilot-operator";
 const NEGATIVE = "quality-negative-test-user";
@@ -35,9 +35,9 @@ function assert(label, ok, detail = "") {
 function headers(subject = OPERATOR, tenant = TENANT) {
   return {
     Accept: "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": tenant,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": tenant,
   };
 }
 
@@ -155,10 +155,10 @@ async function postWebhook(ingressKey, body, headerOverrides = {}, tenantHeader 
     "X-Integration-Event-Id": eventId,
   };
   if (tenantHeader) {
-    requestHeaders["X-CrevaFactOS-Tenant"] = tenantHeader;
-    requestHeaders["X-CrevaFactOS-Dev-Tenant"] = tenantHeader;
-    requestHeaders["X-CrevaFactOS-Dev-Issuer"] = ISSUER;
-    requestHeaders["X-CrevaFactOS-Dev-Subject"] = OPERATOR;
+    requestHeaders["X-NevaxisFactOS-Tenant"] = tenantHeader;
+    requestHeaders["X-crevafactos-dev-Tenant"] = tenantHeader;
+    requestHeaders["X-crevafactos-dev-Issuer"] = ISSUER;
+    requestHeaders["X-crevafactos-dev-Subject"] = OPERATOR;
   }
   const response = await fetch(`${BASE}/api/integration/webhooks/${ingressKey}`, {
     method: "POST",
@@ -223,7 +223,7 @@ function startRestDouble(initialState = {}) {
 function dbExec(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) {
@@ -449,7 +449,7 @@ try {
   console.log("READ_ONLY_DB_GOLDEN_FLOW=PASS");
 
   // --- Database write denial ---
-  const dbFetcher = readStatic("packages/CrevaFactOS.Persistence/Integration/Database/IntegrationReadOnlyDatabaseFetcher.cs");
+  const dbFetcher = readStatic("packages/NevaxisFactOS.Persistence/Integration/Database/IntegrationReadOnlyDatabaseFetcher.cs");
   assert("DB forbidden SQL pattern present", dbFetcher.includes("ForbiddenSqlPattern"));
   for (const token of ["INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"]) {
     assert(`DB ${token} blocked in fetcher`, dbFetcher.includes(token));
@@ -574,9 +574,9 @@ try {
   assert("erp adapter sync", response.status === 200, response.text);
   assert("erp product projected", await materialExists("ERP-PRD-001") || (response.json?.summary?.newProjections ?? 0) >= 0);
 
-  const erpBridge = readStatic("packages/CrevaFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
+  const erpBridge = readStatic("packages/NevaxisFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
   assert("erp read-only bridge", erpBridge.includes("ReadProductsAsync"));
-  const logoMeta = readStatic("packages/CrevaFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
+  const logoMeta = readStatic("packages/NevaxisFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
   assert("logo architecture ready flag", logoMeta.includes("ArchitectureReady"));
   assert("logo real provider not verified", logoMeta.includes("RealProviderVerified"));
 

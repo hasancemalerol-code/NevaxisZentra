@@ -27,7 +27,7 @@ export function SubscriptionRecoveryShell({
         Ana içeriğe geç
       </a>
       <header className="subscription-recovery-shell__header">
-        <p className="subscription-recovery-shell__brand">CrevaFactOS</p>
+        <p className="subscription-recovery-shell__brand">NevaxisFactOS</p>
         <AccountMenu
           displayName={accountDisplayName?.trim() || "Hesap"}
           emailMasked={emailMasked}

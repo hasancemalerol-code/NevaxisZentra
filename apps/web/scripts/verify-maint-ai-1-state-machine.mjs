@@ -19,9 +19,9 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const entities = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
+const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
 const labels = read("apps/web/src/features/maintenance/presentation/maintenance-ai-agent-labels.ts");
-const repo = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
+const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
 
 const statuses = ["draft", "under-review", "approved", "rejected", "stale", "executed", "execution-failed"];
 for (const s of statuses) {

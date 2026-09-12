@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using CrevaFactOS.Persistence.Development;
+using NevaxisFactOS.Persistence.Development;
 
-namespace CrevaFactOS.Api.Development;
+namespace NevaxisFactOS.Api.Development;
 
 public sealed class DevelopmentPilotBootstrapHealthCheck(
     IHostEnvironment environment,

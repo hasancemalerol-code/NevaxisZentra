@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.FactoryOrchestration;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.FactoryOrchestration;
+namespace NevaxisFactOS.Api.FactoryOrchestration;
 
 public static class FactoryOrchestrationEndpointRouteBuilderExtensions
 {
@@ -22,7 +22,7 @@ public static class FactoryOrchestrationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSFactoryOrchestration(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSFactoryOrchestration(this IServiceCollection services)
     {
         services.AddScoped<IFactoryOrchestrationRepository, FactoryOrchestrationRepository>();
         services.AddScoped<IFactoryEventRouter, FactoryEventRouter>();

@@ -282,7 +282,7 @@ export const EDGE_CAPABILITIES = [
   "Dead-letter (zehir/permanent hata) — otomatik silme yok",
   "Kuyruk kapasitesi koruması — sessiz düşürme yok",
   "Çevrimdışı tamponlama + yeniden bağlanma replay",
-  "Makine komutu kuyruğu YOK — yalnızca makine → CrevaFactOS gözlemleri",
+  "Makine komutu kuyruğu YOK — yalnızca makine → NevaxisFactOS gözlemleri",
 ] as const;
 
 export const EDGE_DELIVERY_STATUS_LABELS: Record<string, string> = {

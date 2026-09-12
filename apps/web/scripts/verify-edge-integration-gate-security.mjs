@@ -11,7 +11,7 @@ import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const SCRIPTS = resolve(ROOT, "apps/web/scripts");
-const API_BASE = process.env.CREVAFACTOS_API_URL ?? "http://localhost:5000";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_URL ?? "http://localhost:5000";
 
 function readFile(rel) {
   const abs = resolve(ROOT, rel);
@@ -58,13 +58,13 @@ runPackageVerifier("verify-edge-1-security.mjs");
 runPackageVerifier("verify-edge-4-reliability-security.mjs");
 
 console.log("\n[2] RLS on Edge central tables");
-const migrationDir = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations");
+const migrationDir = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
 const edgeMigrations = readdirSync(migrationDir).filter(
   (f) => f.includes("Edge") && f.endsWith(".cs"),
 );
 assert("Edge migrations present", edgeMigrations.length >= 3, `count=${edgeMigrations.length}`);
 for (const file of edgeMigrations) {
-  const content = readFile(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${file}`);
+  const content = readFile(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${file}`);
   if (content.includes("ENABLE ROW LEVEL SECURITY")) {
     assertContains(`${file}: ENABLE RLS`, content, "ENABLE ROW LEVEL SECURITY");
     assertContains(`${file}: FORCE RLS`, content, "FORCE ROW LEVEL SECURITY");
@@ -75,13 +75,13 @@ console.log("\n[3] Append-only / no history DELETE surface");
 const api = readFile("apps/api/Edge/EdgeEndpointRouteBuilderExtensions.cs");
 assertNotContains("No MapDelete on edge endpoints", api, "MapDelete");
 assertNotContains("No history purge endpoint", api.toLowerCase(), "delete history");
-const ingestion = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
 assertNotContains("Ingestion no RemoveRange events", ingestion, "RemoveRange");
 assertNotContains("Ingestion no machine write", ingestion, "WriteToMachine");
 
 console.log("\n[4] Machine command boundary (static)");
 const edgeUi = readFile("apps/web/src/features/edge/components/edge-workspace-view.tsx");
-const simProgram = readFile("tools/CrevaFactOS.MachineSimulator/Program.cs");
+const simProgram = readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs");
 for (const [label, content] of [
   ["workspace", edgeUi],
   ["simulator", simProgram],

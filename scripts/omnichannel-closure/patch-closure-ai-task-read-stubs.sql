@@ -50,14 +50,14 @@ ALTER TABLE ai_task_evidence FORCE ROW LEVEL SECURITY;
 DO $$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_closure_policies' AND policyname = 'rls_atcp_tenant_select') THEN
         CREATE POLICY rls_atcp_tenant_select ON ai_task_closure_policies FOR SELECT TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_evidence' AND policyname = 'rls_ate_tenant_select') THEN
         CREATE POLICY rls_ate_tenant_select ON ai_task_evidence FOR SELECT TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_evidence' AND policyname = 'rls_ate_tenant_insert') THEN
         CREATE POLICY rls_ate_tenant_insert ON ai_task_evidence FOR INSERT TO crevafactos_runtime
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
 END $$;

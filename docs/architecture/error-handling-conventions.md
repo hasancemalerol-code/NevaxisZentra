@@ -1,4 +1,4 @@
-# CrevaFactOS Hata Yönetimi Standartları
+# NevaxisFactOS Hata Yönetimi Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS uygulamalarında hata üretme, sınıflandırma, taşıma, loglama, kullanıcıya gösterme ve yeniden deneme kurallarını tanımlar.
+Bu belge NevaxisFactOS uygulamalarında hata üretme, sınıflandırma, taşıma, loglama, kullanıcıya gösterme ve yeniden deneme kurallarını tanımlar.
 
 
 

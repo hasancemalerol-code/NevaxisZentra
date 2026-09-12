@@ -147,9 +147,9 @@ foreach ($service in @('postgres', 'rabbitmq')) {
     Write-Host "[healthy] $service"
 }
 
-$managementPort = Get-Setting -Name 'CREVAFACTOS_RABBITMQ_MANAGEMENT_PORT' -Values $settings
-$rabbitUser = Get-Setting -Name 'CREVAFACTOS_RABBITMQ_USERNAME' -Values $settings
-$rabbitPassword = Get-Setting -Name 'CREVAFACTOS_RABBITMQ_PASSWORD' -Values $settings
+$managementPort = Get-Setting -Name 'NEVAXIS_FACTOS_RABBITMQ_MANAGEMENT_PORT' -Values $settings
+$rabbitUser = Get-Setting -Name 'NEVAXIS_FACTOS_RABBITMQ_USERNAME' -Values $settings
+$rabbitPassword = Get-Setting -Name 'NEVAXIS_FACTOS_RABBITMQ_PASSWORD' -Values $settings
 $credentials = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${rabbitUser}:${rabbitPassword}"))
 $managementUri = "http://127.0.0.1:${managementPort}/api/health/checks/local-alarms"
 
@@ -164,4 +164,4 @@ if ($response.status -ne 'ok') {
 }
 
 Write-Host "[reachable] RabbitMQ management API at $managementUri"
-Write-Host '[ready] CrevaFactOS local infrastructure is healthy.'
+Write-Host '[ready] NevaxisFactOS local infrastructure is healthy.'

@@ -1,32 +1,32 @@
 # Shared desktop verifier environment isolation helpers.
-# Negative tests must never leak CREVAFACTOS_DESKTOP_RUNTIME_ROOT beyond the child process.
+# Negative tests must never leak NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT beyond the child process.
 
 function Get-RuntimeRootEnvironmentState {
     return [ordered]@{
-        Process = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", "Process")
-        User    = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", "User")
-        Machine = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", "Machine")
+        Process = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", "Process")
+        User    = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", "User")
+        Machine = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", "Machine")
     }
 }
 
 function Test-KnownVerifierRuntimeRootLeak {
     param([string]$Value)
     if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
-    return $Value -match '(?i)crevafactos-web-readiness-|crevafactos-invalid-runtime|crevafactos-invalid-|invalid-runtime-root|desktop-negative-runtime-'
+    return $Value -match '(?i)NevaxisFactOS-web-readiness-|NevaxisFactOS-invalid-runtime|NevaxisFactOS-invalid-|invalid-runtime-root|desktop-negative-runtime-'
 }
 
 function Clear-KnownDesktopVerifierEnvironmentLeaks {
     foreach ($scope in @("User", "Machine")) {
-        $value = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", $scope)
+        $value = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", $scope)
         if (Test-KnownVerifierRuntimeRootLeak $value) {
-            [Environment]::SetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", $null, $scope)
-            Write-Host "Cleared leaked CREVAFACTOS_DESKTOP_RUNTIME_ROOT from $scope scope: $value"
+            [Environment]::SetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", $null, $scope)
+            Write-Host "Cleared leaked NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT from $scope scope: $value"
         }
     }
 
-    if (Test-KnownVerifierRuntimeRootLeak $env:CREVAFACTOS_DESKTOP_RUNTIME_ROOT) {
-        Remove-Item Env:CREVAFACTOS_DESKTOP_RUNTIME_ROOT -ErrorAction SilentlyContinue
-        Write-Host "Cleared leaked CREVAFACTOS_DESKTOP_RUNTIME_ROOT from Process scope"
+    if (Test-KnownVerifierRuntimeRootLeak $env:NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT) {
+        Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT -ErrorAction SilentlyContinue
+        Write-Host "Cleared leaked NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT from Process scope"
     }
 }
 
@@ -36,7 +36,7 @@ function Assert-RuntimeRootEnvironmentClean {
     foreach ($scope in $state.Keys) {
         $value = $state[$scope]
         if (Test-KnownVerifierRuntimeRootLeak $value) {
-            throw "[$Context] leaked CREVAFACTOS_DESKTOP_RUNTIME_ROOT at $scope scope: $value"
+            throw "[$Context] leaked NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT at $scope scope: $value"
         }
     }
     Write-Host "[$Context] runtime-root environment clean (Process/User/Machine)"
@@ -48,7 +48,7 @@ function Assert-RepositoryRootValid {
         [string]$Context = "verifier"
     )
 
-    $markers = @("CrevaFactOS.sln", "package.json")
+    $markers = @("NevaxisFactOS.sln", "package.json")
     $valid = $false
     foreach ($marker in $markers) {
         if (Test-Path (Join-Path $RepositoryRoot $marker)) {
@@ -71,7 +71,7 @@ function Start-DesktopProcessWithEnvironment {
         [Parameter(Mandatory)][string]$FilePath,
         [string]$WorkingDirectory = "",
         [hashtable]$EnvironmentOverrides = @{},
-        [string[]]$StripInheritedEnvironmentVariables = @("CREVAFACTOS_DESKTOP_RUNTIME_ROOT")
+        [string[]]$StripInheritedEnvironmentVariables = @("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT")
     )
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -115,7 +115,7 @@ function Invoke-NegativeRuntimeRootTest {
         $failLaunch = Start-DesktopProcessWithEnvironment `
             -FilePath $ArtifactExe `
             -WorkingDirectory $ArtifactDir `
-            -EnvironmentOverrides @{ CREVAFACTOS_DESKTOP_RUNTIME_ROOT = $InvalidRoot }
+            -EnvironmentOverrides @{ NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT = $InvalidRoot }
         & $OnFailureWindow $failLaunch $FailureWindowTimeoutSeconds
         Assert-RuntimeRootEnvironmentClean -Context "negative-test-after"
         return $failLaunch

@@ -43,7 +43,7 @@ function readText(relPath) {
 // ── 1. SCRAP REASON FILE ─────────────────────────────────────────────────────
 
 const scrapReasons = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionScrapReason.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionScrapReason.cs",
 );
 
 check("ProductionExecutionScrapReason.cs exists", scrapReasons !== null);
@@ -86,7 +86,7 @@ check(
 // ── 2. SCRAP ENTRY IN REPOSITORY ─────────────────────────────────────────────
 
 const entryRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
 );
 
 check(
@@ -148,7 +148,7 @@ check(
 // ── 4. FAILURE CODES ─────────────────────────────────────────────────────────
 
 const models = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
 );
 
 check(
@@ -171,7 +171,7 @@ check(
 // ── 5. AUDIT TAXONOMY FOR SCRAP ──────────────────────────────────────────────
 
 const auditConst = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionAuditConstants.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionAuditConstants.cs",
 );
 
 check(

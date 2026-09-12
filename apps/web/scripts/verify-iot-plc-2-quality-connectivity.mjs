@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const EVAL_TIME = "2026-08-21T12:00:00.000Z";
 const WINDOW_START = "2026-08-21T11:00:00.000Z";
@@ -31,9 +31,9 @@ function readRequired(relativePath) {
 function actorHeaders(actor = MANAGER) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -77,10 +77,10 @@ function evaluateConnectivityBody(endpointReference, idempotencyKey) {
 
 console.log("Running IOT-PLC-2 quality/connectivity verifier.");
 
-const calculator = readRequired("packages/CrevaFactOS.Persistence/IotPlc/IotPlcIntelligenceCalculator.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/IotPlc/IotPlcIntelligenceConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcIntelligenceCalculator.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcIntelligenceConstants.cs");
 const endpoints = readRequired("apps/api/IotPlc/IotPlcIntelligenceEndpointRouteBuilderExtensions.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
 
 assert("calculator uses numeric sequence regex only", calculator.includes('GeneratedRegex(@"^\\d+$")'));
 assert("no arbitrary textual sequence parsing", !calculator.includes("PILOT-SEQ"));

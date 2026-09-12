@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const WEB = process.env.CREVAFACTOS_WEB_BASE ?? "http://localhost:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE ?? "http://localhost:3001";
 
 function fail(message) {
   console.error(`ERP-2L premium UI verification failed: ${message}`);

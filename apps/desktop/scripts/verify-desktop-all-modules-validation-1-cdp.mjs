@@ -11,16 +11,16 @@ import {
 } from "../../../scripts/shared/load-development-saas-identity-secrets.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
-const CDP_PORT = Number(process.env.CREVAFACTOS_DESKTOP_CDP_PORT ?? "9233");
-const SCREENSHOT_DIR = process.env.CREVAFACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
+const CDP_PORT = Number(process.env.NEVAXIS_FACTOS_DESKTOP_CDP_PORT ?? "9233");
+const SCREENSHOT_DIR = process.env.NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR
   ?? join(ROOT, ".cursor-screenshots/desktop-all-modules-validation-1");
 const RESULTS_JSON = join(SCREENSHOT_DIR, "validation-results.json");
 const MANIFEST_PATH = join(dirname(fileURLToPath(import.meta.url)), "desktop-all-modules-validation-manifest-1.json");
 const ORGANIZATION = "dev-pilot-tenant";
 const EMAIL = "tenant-owner@dev.local";
-const REPRESENTATIVE_ONLY = process.env.CREVAFACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY === "1";
+const REPRESENTATIVE_ONLY = process.env.NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY === "1";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 const ALLOWLISTED_NETWORK_PATTERNS = [
@@ -360,14 +360,14 @@ async function ensureAuthenticated(send, evaluate, ownerPassword, mfaSecret) {
     let mfaOk = false;
     for (const offset of [-1, 0, 1]) {
       const result = await evaluate(`(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
         const res = await fetch("/api/identity/mfa/verify", {
           method: "POST",
           credentials: "include",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
-            "X-CrevaFactOS-Csrf": csrf,
+            "X-NevaxisFactOS-Csrf": csrf,
           },
           body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }),
         });
@@ -620,7 +620,7 @@ async function main() {
       .filter((r) => ["/planlama", "/uretim", "/ihracat"].includes(r.route))
       .map((r) => ({ route: r.route, verdict: r.verdict, classification: r.classification }));
 
-    let sourceCommit = process.env.CREVAFACTOS_SOURCE_COMMIT ?? "";
+    let sourceCommit = process.env.NEVAXIS_FACTOS_SOURCE_COMMIT ?? "";
     if (!sourceCommit) {
       try {
         const { execSync } = await import("node:child_process");
@@ -630,8 +630,8 @@ async function main() {
       }
     }
 
-    const bundleRoot = process.env.CREVAFACTOS_PACKAGED_BUNDLE_ROOT ?? "";
-    const runtimeMode = process.env.CREVAFACTOS_DESKTOP_RUNTIME_MODE ?? "Packaged";
+    const bundleRoot = process.env.NEVAXIS_FACTOS_PACKAGED_BUNDLE_ROOT ?? "";
+    const runtimeMode = process.env.NEVAXIS_FACTOS_DESKTOP_RUNTIME_MODE ?? "Packaged";
     const verdict =
       failCount === 0 &&
       accessBlockedCount === 0 &&
@@ -705,8 +705,8 @@ async function main() {
       output = {
         runTimestamp: new Date().toISOString(),
         generatedAt: new Date().toISOString(),
-        runtimeMode: process.env.CREVAFACTOS_DESKTOP_RUNTIME_MODE ?? "Packaged",
-        bundleRoot: process.env.CREVAFACTOS_PACKAGED_BUNDLE_ROOT ?? "",
+        runtimeMode: process.env.NEVAXIS_FACTOS_DESKTOP_RUNTIME_MODE ?? "Packaged",
+        bundleRoot: process.env.NEVAXIS_FACTOS_PACKAGED_BUNDLE_ROOT ?? "",
         sourceCommit: "unknown",
         routeCount: manifest?.canonicalRouteCount ?? 0,
         passCount: routeResults.filter((r) => r.verdict === "PASS").length,

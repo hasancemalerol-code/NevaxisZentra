@@ -481,7 +481,7 @@ export function ErpWorkspaceView({
 
       <section className="erp-section erp-section--compact" aria-label="Kaynak notu">
         <ErpInfoBanner title="Salt okunur projeksiyon">
-          Harici ERP sistem kayıt sahibidir. CrevaFactOS yalnızca salt okunur kanonik projeksiyonları saklar.
+          Harici ERP sistem kayıt sahibidir. NevaxisFactOS yalnızca salt okunur kanonik projeksiyonları saklar.
         </ErpInfoBanner>
       </section>
     </main>

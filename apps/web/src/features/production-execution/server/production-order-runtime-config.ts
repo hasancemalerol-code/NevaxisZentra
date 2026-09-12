@@ -58,25 +58,25 @@ export function parseProductionExecutionRuntimeConfig(): ProductionExecutionRunt
     normalizeEnvValue(process.env.NODE_ENV) === "production";
 
   const configuredMode = normalizeEnvValue(
-    process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE,
+    process.env.NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE,
   );
 
   const apiBaseUrl = normalizeEnvValue(
-    process.env.CREVAFACTOS_API_BASE_URL,
+    process.env.NEVAXIS_FACTOS_API_BASE_URL,
   );
 
   if (!configuredMode) {
     if (isProduction) {
       const facilityId = normalizeEnvValue(
-        process.env.CREVAFACTOS_FACILITY_ID,
+        process.env.NEVAXIS_FACTOS_FACILITY_ID,
       );
 
       if (!apiBaseUrl) {
-        return fail("CREVAFACTOS_API_BASE_URL is required.");
+        return fail("NEVAXIS_FACTOS_API_BASE_URL is required.");
       }
 
       if (!facilityId) {
-        return fail("CREVAFACTOS_FACILITY_ID is required.");
+        return fail("NEVAXIS_FACTOS_FACILITY_ID is required.");
       }
 
       return {
@@ -86,7 +86,7 @@ export function parseProductionExecutionRuntimeConfig(): ProductionExecutionRunt
     }
 
     return fail(
-      "CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE must be configured outside production.",
+      "NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE must be configured outside production.",
     );
   }
 
@@ -96,7 +96,7 @@ export function parseProductionExecutionRuntimeConfig(): ProductionExecutionRunt
     )
   ) {
     return fail(
-      "CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE is invalid.",
+      "NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE is invalid.",
     );
   }
 
@@ -110,26 +110,26 @@ export function parseProductionExecutionRuntimeConfig(): ProductionExecutionRunt
 
   if (mode === "api" || mode === "development-api") {
     if (!apiBaseUrl) {
-      return fail("CREVAFACTOS_API_BASE_URL is required for API modes.");
+      return fail("NEVAXIS_FACTOS_API_BASE_URL is required for API modes.");
     }
 
     const facilityId =
       mode === "development-api"
-        ? normalizeEnvValue(process.env.CREVAFACTOS_DEV_FACILITY_ID) ||
-          normalizeEnvValue(process.env.CREVAFACTOS_FACILITY_ID)
-        : normalizeEnvValue(process.env.CREVAFACTOS_FACILITY_ID);
+        ? normalizeEnvValue(process.env.NEVAXIS_FACTOS_DEV_FACILITY_ID) ||
+          normalizeEnvValue(process.env.NEVAXIS_FACTOS_FACILITY_ID)
+        : normalizeEnvValue(process.env.NEVAXIS_FACTOS_FACILITY_ID);
 
     if (!facilityId) {
       return fail("A facility identifier is required for API modes.");
     }
 
     if (mode === "development-api") {
-      const issuer = normalizeEnvValue(process.env.CREVAFACTOS_DEV_AUTH_ISSUER);
+      const issuer = normalizeEnvValue(process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER);
       const subject = normalizeEnvValue(
-        process.env.CREVAFACTOS_DEV_AUTH_SUBJECT,
+        process.env.NEVAXIS_FACTOS_DEV_AUTH_SUBJECT,
       );
       const tenantKey = normalizeEnvValue(
-        process.env.CREVAFACTOS_DEV_TENANT_KEY,
+        process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY,
       );
 
       if (!issuer || !subject || !tenantKey) {

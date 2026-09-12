@@ -29,7 +29,7 @@ function requireText(source, expected, label) {
 
 const usageRecord = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/AiUsage/AiUsageRecord.cs",
+  "packages/NevaxisFactOS.Persistence/AiUsage/AiUsageRecord.cs",
 );
 requireText(usageRecord, "class AiUsageRecord", "AiUsageRecord");
 requireText(usageRecord, "CreditsConsumed", "AiUsageRecord");
@@ -38,7 +38,7 @@ requireText(usageRecord, "RunId", "AiUsageRecord");
 
 const meteringInterface = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/AiUsage/IAiUsageMeteringService.cs",
+  "packages/NevaxisFactOS.Persistence/AiUsage/IAiUsageMeteringService.cs",
 );
 requireText(meteringInterface, "interface IAiUsageMeteringService", "IAiUsageMeteringService");
 requireText(meteringInterface, "RecordUsageAsync", "IAiUsageMeteringService");
@@ -47,7 +47,7 @@ requireText(meteringInterface, "AiUsageSummaryReadModel", "IAiUsageMeteringServi
 
 const meteringService = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/AiUsage/AiUsageMeteringService.cs",
+  "packages/NevaxisFactOS.Persistence/AiUsage/AiUsageMeteringService.cs",
 );
 requireText(meteringService, "class AiUsageMeteringService", "AiUsageMeteringService");
 requireText(meteringService, "AiUsageRecords.Add", "AiUsageMeteringService");
@@ -56,14 +56,14 @@ requireText(meteringService, "UnavailableAiUsageMeteringService", "AiUsageMeteri
 
 const entityConfig = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Configurations/AiUsageRecordEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/AiUsageRecordEntityConfiguration.cs",
 );
 requireText(entityConfig, "AiUsageRecord", "AiUsageRecordEntityConfiguration");
 requireText(entityConfig, "ai_usage_records", "AiUsageRecordEntityConfiguration");
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportAiWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportAiWriteRepository.cs",
 );
 requireText(writeRepo, "AiUsageRecords.Add", "ExportAiWriteRepository");
 requireText(writeRepo, "CreditsConsumed", "ExportAiWriteRepository");
@@ -116,7 +116,7 @@ requireText(copilotPanel, "creditsConsumed", "export-ai-copilot-panel");
 
 const migration = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
 );
 requireText(migration, "ai_usage_records", "EXPORT-4L migration");
 requireText(migration, "credits_consumed", "EXPORT-4L migration");

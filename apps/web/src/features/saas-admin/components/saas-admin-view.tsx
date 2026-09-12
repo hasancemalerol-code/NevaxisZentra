@@ -47,7 +47,6 @@ import {
   formatPlanLabel,
   formatSourceProvenance,
   formatSubscriptionStatus,
-  formatUsageLimit,
   listModuleEntitlementSummary,
 } from "@/features/saas-subscription/domain/saas-subscription-labels";
 import type { TenantSubscriptionCurrent } from "@/features/saas-subscription/domain/saas-subscription-types";

@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const MATERIAL_PP = "bb000001-00a2-4000-8000-0000000000a2";
 const MATERIAL_ABS = "bb000001-00a4-4000-8000-0000000000a4";
@@ -35,9 +35,9 @@ function assert(label, ok, detail = "") {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -60,7 +60,7 @@ async function request(method, path, body, actor = ACTOR) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -124,7 +124,7 @@ function cleanupClosureFixtures() {
 console.log("Running MATERIAL-3 requirement/consumption verifier.");
 
 const ready = await fetch(`${BASE}/health/ready`);
-if (!ready.ok) fail("API not ready — start CrevaFactOS.Api first");
+if (!ready.ok) fail("API not ready — start NevaxisFactOS.Api first");
 assert("API ready", ready.ok);
 
 // Complete theoretical requirement via pilot PP profile

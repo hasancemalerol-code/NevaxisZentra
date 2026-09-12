@@ -31,15 +31,15 @@ function requireText(source, expected, label) {
 }
 
 const persistenceFiles = [
-  "packages/CrevaFactOS.Persistence/Export/ExportCase.cs",
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseReadRepository.cs",
-  "packages/CrevaFactOS.Persistence/Export/ExportReadinessEngine.cs",
-  "packages/CrevaFactOS.Persistence/Export/ExportDocument.cs",
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseActivity.cs",
-  "packages/CrevaFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCase.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseReadRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportReadinessEngine.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportDocument.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseActivity.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
   "apps/api/Export/ExportEndpointRouteBuilderExtensions.cs",
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
 ];
 
 for (const relativePath of persistenceFiles) {
@@ -50,7 +50,7 @@ for (const relativePath of persistenceFiles) {
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
 );
 requireText(writeRepo, "EnsureExportCaseForOrderAsync", "ExportCaseWriteRepository");
 requireText(writeRepo, "IsExport", "ExportCaseWriteRepository");
@@ -65,12 +65,12 @@ requireText(endpoints, "/by-order/", "Export endpoints");
 requireText(endpoints, "MapExportEndpoints", "Export endpoints");
 
 const program = readRequired(repoRootUrl, "apps/api/Program.cs");
-requireText(program, "AddCrevaFactOSExport", "Program.cs");
+requireText(program, "AddNevaxisFactOSExport", "Program.cs");
 requireText(program, "MapExportEndpoints", "Program.cs");
 
 const migration = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
 );
 requireText(migration, "export_cases", "Export migration");
 requireText(migration, "export_documents", "Export migration");

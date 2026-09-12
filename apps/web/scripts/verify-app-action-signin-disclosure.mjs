@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const MARKER_ORG = "audit-org-marker";
 const MARKER_EMAIL = "audit-email-marker@example.invalid";

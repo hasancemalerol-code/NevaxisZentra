@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 
-namespace CrevaFactOS.Api.Authorization;
+namespace NevaxisFactOS.Api.Authorization;
 
 public sealed class UniformAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
 {

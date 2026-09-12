@@ -10,7 +10,6 @@ import { getCommercialIntelligenceEvidenceStatusLabel } from "../domain/commerci
 import {
   COMMERCIAL_PROFITABILITY_COMMAND_CENTER_AI_TASK_PARTIAL_NOTE,
   COMMERCIAL_PROFITABILITY_COMMAND_CENTER_PARTIAL_NOTE,
-  COMMERCIAL_PROFITABILITY_COMMAND_CENTER_ROUTE_PATH,
   getCommercialProfitabilityCommandCenterSourceTypeLabel,
 } from "../domain/commercial-profitability-command-center-labels";
 import { getCommercialPricingScenarioLifecycleLabel } from "../domain/commercial-pricing-scenario-labels";

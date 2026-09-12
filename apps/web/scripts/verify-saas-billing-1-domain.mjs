@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "SAAS-BILLING-1-CLOSURE";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
@@ -51,7 +51,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -221,8 +221,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("crevafactos.session") && jar.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.get("crevafactos.csrf");
+  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -260,7 +260,7 @@ console.log("Running SAAS-BILLING-1 domain verifier.");
 
 const endpoints = readRequired("apps/api/SaasBilling/SaasBillingEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/SaasBilling/SaasBillingEndpointHelpers.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/SaasBilling/SaasBillingConstants.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/SaasBilling/SaasBillingConstants.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -324,7 +324,7 @@ const reopenDraft = await api("POST", "/api/saas-billing/invoices/transitions", 
 }, owner);
 assert("issued invoice cannot return to draft", reopenDraft.status === 409, `status=${reopenDraft.status}`);
 
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260815061939_AddSaasBillingAccountInvoicePaymentFoundation.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260815061939_AddSaasBillingAccountInvoicePaymentFoundation.cs");
 assert("issued invoice lines append-only grant", migration.includes("GRANT SELECT, INSERT ON TABLE saas_billing_invoice_lines"));
 assert("issued invoice lines no runtime UPDATE grant", !migration.includes("GRANT SELECT, INSERT, UPDATE ON TABLE saas_billing_invoice_lines"));
 

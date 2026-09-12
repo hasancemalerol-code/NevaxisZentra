@@ -107,7 +107,7 @@ ALTER TABLE ai_task_deliveries ADD CONSTRAINT ck_ai_task_deliveries_status
     CHECK (status IN ('queued','processing','sent','failed-retryable','failed-permanent','dead-letter','cancelled'));
 ALTER TABLE ai_task_deliveries DROP CONSTRAINT IF EXISTS ck_ai_task_deliveries_channel;
 ALTER TABLE ai_task_deliveries ADD CONSTRAINT ck_ai_task_deliveries_channel
-    CHECK (channel IN ('crevafactos-teams','email','whatsapp','microsoft-teams','sms','development-loopback'));
+    CHECK (channel IN ('NevaxisFactOS-teams','email','whatsapp','microsoft-teams','sms','development-loopback'));
 ALTER TABLE ai_task_deliveries DROP CONSTRAINT IF EXISTS ck_ai_task_deliveries_recipient_kind;
 ALTER TABLE ai_task_deliveries ADD CONSTRAINT ck_ai_task_deliveries_recipient_kind
     CHECK (recipient_kind IN ('user','external','secure-link'));
@@ -140,43 +140,43 @@ ALTER TABLE ai_task_secure_access_grants FORCE ROW LEVEL SECURITY;
 DO $$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_deliveries' AND policyname = 'rls_atd_tenant_select') THEN
         CREATE POLICY rls_atd_tenant_select ON ai_task_deliveries FOR SELECT TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_deliveries' AND policyname = 'rls_atd_tenant_insert') THEN
         CREATE POLICY rls_atd_tenant_insert ON ai_task_deliveries FOR INSERT TO crevafactos_runtime
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_deliveries' AND policyname = 'rls_atd_tenant_update') THEN
         CREATE POLICY rls_atd_tenant_update ON ai_task_deliveries FOR UPDATE TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid)
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid)
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
 END $$;
 
 DO $$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_delivery_attempts' AND policyname = 'rls_atda_tenant_select') THEN
         CREATE POLICY rls_atda_tenant_select ON ai_task_delivery_attempts FOR SELECT TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_delivery_attempts' AND policyname = 'rls_atda_tenant_insert') THEN
         CREATE POLICY rls_atda_tenant_insert ON ai_task_delivery_attempts FOR INSERT TO crevafactos_runtime
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
 END $$;
 
 DO $$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_secure_access_grants' AND policyname = 'rls_atsag_tenant_select') THEN
         CREATE POLICY rls_atsag_tenant_select ON ai_task_secure_access_grants FOR SELECT TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_secure_access_grants' AND policyname = 'rls_atsag_tenant_insert') THEN
         CREATE POLICY rls_atsag_tenant_insert ON ai_task_secure_access_grants FOR INSERT TO crevafactos_runtime
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ai_task_secure_access_grants' AND policyname = 'rls_atsag_tenant_update') THEN
         CREATE POLICY rls_atsag_tenant_update ON ai_task_secure_access_grants FOR UPDATE TO crevafactos_runtime
-            USING (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid)
-            WITH CHECK (tenant_id = current_setting('crevafactos.tenant_id', true)::uuid);
+            USING (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid)
+            WITH CHECK (tenant_id = current_setting('NevaxisFactOS.tenant_id', true)::uuid);
     END IF;
 END $$;
 

@@ -2,8 +2,8 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5299").replace(/\/$/, "");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5199").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5299").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5199").replace(/\/$/, "");
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TASK = "bb000001-03d0-4000-8000-0000000003d0";
 const ACTOR = { issuer: "crevafactos-dev", subject: "planning-pilot-user", tenant: "omnichannel-closure-tenant-a" };
@@ -16,9 +16,9 @@ function fail(message) {
 function headers() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ACTOR.issuer,
-    "X-CrevaFactOS-Dev-Subject": ACTOR.subject,
-    "X-CrevaFactOS-Tenant": ACTOR.tenant,
+    "X-crevafactos-dev-Issuer": ACTOR.issuer,
+    "X-crevafactos-dev-Subject": ACTOR.subject,
+    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
   };
 }
 

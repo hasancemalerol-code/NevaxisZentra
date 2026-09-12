@@ -50,8 +50,8 @@ function Reclaim-ProjectPort([int]$Port, [string]$Kind) {
     $cmd = ""
     try { $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId=$ownerPid").CommandLine } catch {}
     $ok = $false
-    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "CrevaFactOS.Api" -and $path -like "*\Projects\CrevaFactOS\*") { $ok = $true }
-    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\CrevaFactOS\*") { $ok = $true }
+    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $path -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
+    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
     if ($Kind -eq "smtp" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*smtp-email-provider-test-double*") { $ok = $true }
     if ($ok) {
         Write-Host "Reclaiming $Kind port $Port PID $ownerPid"
@@ -67,11 +67,11 @@ Reclaim-ProjectPort $webPort "web"
 Reclaim-ProjectPort $smtpPort "smtp"
 Reclaim-ProjectPort $smtpHttpPort "smtp"
 
-# Next.js dev uses a single project lock — reclaim any CrevaFactOS web dev server.
+# Next.js dev uses a single project lock — reclaim any NevaxisFactOS web dev server.
 Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue | ForEach-Object {
     $cmd = $_.CommandLine
-    if ($cmd -like "*\Projects\CrevaFactOS\apps\web*" -and $cmd -like "*next*") {
-        Write-Host "Reclaiming CrevaFactOS web dev PID $($_.ProcessId)"
+    if ($cmd -like "*\Projects\NevaxisFactOS\apps\web*" -and $cmd -like "*next*") {
+        Write-Host "Reclaiming NevaxisFactOS web dev PID $($_.ProcessId)"
         Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     }
 }
@@ -88,10 +88,10 @@ Pop-Location
 $smtpLog = Join-Path $logsDir "smtp-double.log"
 $smtpErr = Join-Path $logsDir "smtp-double.err.log"
 $smtpEnv = @{
-    CREVAFACTOS_EMAIL_TEST_DOUBLE_MODE = "accept"
-    CREVAFACTOS_EMAIL_TEST_DOUBLE_PORT = "$smtpPort"
-    CREVAFACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT = "$smtpHttpPort"
-    CREVAFACTOS_EMAIL_CAPTURE_DIR = $artifactsDir
+    NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_MODE = "accept"
+    NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_PORT = "$smtpPort"
+    NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT = "$smtpHttpPort"
+    NEVAXIS_FACTOS_EMAIL_CAPTURE_DIR = $artifactsDir
 }
 foreach ($k in $smtpEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$smtpEnv[$k]) }
 
@@ -112,22 +112,22 @@ $apiLog = Join-Path $logsDir "closure-api.log"
 $apiErr = Join-Path $logsDir "closure-api.err.log"
 $apiEnv = @{
     ASPNETCORE_ENVIRONMENT = "Development"
-    CREVAFACTOS__PERSISTENCE__ENABLED = "true"
-    CREVAFACTOS__PERSISTENCE__HOST = $EmailClosurePostgresHost
-    CREVAFACTOS__PERSISTENCE__PORT = "$EmailClosurePostgresPort"
-    CREVAFACTOS__PERSISTENCE__DATABASE = $EmailClosureDatabaseName
-    CREVAFACTOS__PERSISTENCE__USERNAME = $EmailClosureRuntimeUser
-    CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-    CREVAFACTOS__PERSISTENCE__SSL_MODE = "Disable"
+    NEVAXIS_FACTOS__PERSISTENCE__ENABLED = "true"
+    NEVAXIS_FACTOS__PERSISTENCE__HOST = $EmailClosurePostgresHost
+    NEVAXIS_FACTOS__PERSISTENCE__PORT = "$EmailClosurePostgresPort"
+    NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $EmailClosureDatabaseName
+    NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $EmailClosureRuntimeUser
+    NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+    NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = "Disable"
     DevelopmentPilot__Enabled = "false"
-    CREVAFACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
-    CREVAFACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = "1"
-    CREVAFACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__ENABLED = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TIMEOUT_SECONDS = "5"
-    CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__HOST = "127.0.0.1"
-    CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__PORT = "$smtpPort"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = "1"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__TIMEOUT_SECONDS = "5"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__HOST = "127.0.0.1"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__PORT = "$smtpPort"
     ASPNETCORE_URLS = $apiBase
 }
 foreach ($k in $apiEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$apiEnv[$k]) }
@@ -148,12 +148,12 @@ if (-not (Wait-HttpReady "$apiBase/health/ready")) {
 $webLog = Join-Path $logsDir "closure-web.log"
 $webErr = Join-Path $logsDir "closure-web.err.log"
 $webEnv = @{
-    CREVAFACTOS_API_BASE_URL = $apiBase
-    CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
-    CREVAFACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
-    CREVAFACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
-    CREVAFACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
-    CREVAFACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
+    NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+    NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
+    NEVAXIS_FACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
+    NEVAXIS_FACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
+    NEVAXIS_FACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
+    NEVAXIS_FACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
     PORT = "$webPort"
 }
 foreach ($k in $webEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$webEnv[$k]) }

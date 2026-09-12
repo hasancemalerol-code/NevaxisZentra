@@ -6,8 +6,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const FACILITY_ID = "bb000001-0005-4000-8000-000000000005";
 const FIXTURE_PREFIX = "APP-ACTION-1A";
@@ -85,8 +85,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("crevafactos.session") && jar.cookies.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.cookies.get("crevafactos.csrf");
+  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -134,7 +134,7 @@ async function fetchWeb(path, jar) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -213,9 +213,9 @@ async function createWithFallback(path, body) {
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-    "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-    "X-CrevaFactOS-Tenant": ORGANIZATION,
+    "X-crevafactos-dev-Issuer": "crevafactos-dev",
+    "X-crevafactos-dev-Subject": "production-pilot-operator",
+    "X-NevaxisFactOS-Tenant": ORGANIZATION,
   };
   const response = await fetch(`${API}${path}?facilityId=${FACILITY_ID}`, {
     method: "POST",

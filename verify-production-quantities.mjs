@@ -48,19 +48,19 @@ function fileExists(relPath) {
 // ── 1. ENTITY FILES EXIST ────────────────────────────────────────────────────
 
 const entryEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionEntry.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionEntry.cs",
 );
 const entryType = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionEntryType.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionEntryType.cs",
 );
 const entryInterface = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionExecutionEntryRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionExecutionEntryRepository.cs",
 );
 const entryRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionEntryRepository.cs",
 );
 const entryConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionExecutionEntryEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionExecutionEntryEntityConfiguration.cs",
 );
 
 check("ProductionExecutionEntry.cs exists", entryEntity !== null);
@@ -158,7 +158,7 @@ check("EntryType enum has Reversal", entryType?.includes("Reversal") ?? false);
 // ── 5. PLANNED QUANTITY ON PRODUCTIONORDER ───────────────────────────────────
 
 const orderEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check(
@@ -185,7 +185,7 @@ check(
 // ── 6. PLANNED QUANTITY MAPPED FROM HANDOFF ──────────────────────────────────
 
 const writeRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
 );
 
 check(
@@ -249,7 +249,7 @@ check(
 // ── 10. QUANTITY SUMMARY INTERFACE ───────────────────────────────────────────
 
 const models = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
 );
 
 check(
@@ -319,7 +319,7 @@ check(
 // ── 13. DBCONTEXT REGISTRATION ───────────────────────────────────────────────
 
 const dbContext = readText(
-  "packages/CrevaFactOS.Persistence/CrevaFactOSDbContext.cs",
+  "packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs",
 );
 
 check(
@@ -341,7 +341,7 @@ check(
 // ── 14. AUDIT / OUTBOX TAXONOMY ──────────────────────────────────────────────
 
 const auditConst = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionAuditConstants.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionAuditConstants.cs",
 );
 
 check(
@@ -364,7 +364,7 @@ check(
 // ── 15. MIGRATION ────────────────────────────────────────────────────────────
 
 const migrationsDir =
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations";
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations";
 const files = fs.existsSync(path.join(ROOT, migrationsDir))
   ? fs.readdirSync(path.join(ROOT, migrationsDir))
   : [];
@@ -441,12 +441,12 @@ const webWriter = readText(
 );
 
 check(
-  "Web reader does not inject X-CrevaFactOS-Dev headers",
-  !webReader?.includes("X-CrevaFactOS-Dev") ?? false,
+  "Web reader does not inject X-crevafactos-dev headers",
+  !webReader?.includes("X-crevafactos-dev") ?? false,
 );
 check(
-  "Web writer does not inject X-CrevaFactOS-Dev headers",
-  !webWriter?.includes("X-CrevaFactOS-Dev") ?? false,
+  "Web writer does not inject X-crevafactos-dev headers",
+  !webWriter?.includes("X-crevafactos-dev") ?? false,
 );
 
 // ── RESULT ───────────────────────────────────────────────────────────────────

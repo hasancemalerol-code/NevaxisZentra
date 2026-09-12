@@ -5,9 +5,9 @@ $root = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $artifacts = Join-Path $root "artifacts/email-closure"
 $apiBase = "http://127.0.0.1:$EmailClosureApiPort"
 $webBase = "http://127.0.0.1:$EmailClosureWebPort"
-$env:CREVAFACTOS_API_BASE_URL = $apiBase
-$env:CREVAFACTOS_WEB_BASE_URL = $webBase
-$env:CREVAFACTOS_EMAIL_TEST_DOUBLE_HTTP_URL = "http://127.0.0.1:$EmailSmtpDoublePreviewPort"
+$env:NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+$env:NEVAXIS_FACTOS_WEB_BASE_URL = $webBase
+$env:NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_HTTP_URL = "http://127.0.0.1:$EmailSmtpDoublePreviewPort"
 
 function Stop-ClosureRuntime {
     $statePath = Join-Path $artifacts "runtime-state.json"
@@ -31,10 +31,10 @@ function Restart-SmtpDouble {
         }
     }
     $smtpEnv = @{
-        CREVAFACTOS_EMAIL_TEST_DOUBLE_MODE = $Mode
-        CREVAFACTOS_EMAIL_TEST_DOUBLE_PORT = "$EmailSmtpDoublePort"
-        CREVAFACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT = "$EmailSmtpDoublePreviewPort"
-        CREVAFACTOS_EMAIL_CAPTURE_DIR = $artifacts
+        NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_MODE = $Mode
+        NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_PORT = "$EmailSmtpDoublePort"
+        NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT = "$EmailSmtpDoublePreviewPort"
+        NEVAXIS_FACTOS_EMAIL_CAPTURE_DIR = $artifacts
     }
     foreach ($k in $smtpEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$smtpEnv[$k]) }
     $proc = Start-Process node -ArgumentList "scripts/smtp-email-provider-test-double.mjs" -WorkingDirectory (Join-Path $root "apps/web") -PassThru -WindowStyle Hidden
@@ -71,20 +71,20 @@ Stop-Process -Id $state.apiPid -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 3
 $apiNoEmailEnv = @{
     ASPNETCORE_ENVIRONMENT = "Development"
-    CREVAFACTOS__PERSISTENCE__ENABLED = "true"
-    CREVAFACTOS__PERSISTENCE__HOST = $EmailClosurePostgresHost
-    CREVAFACTOS__PERSISTENCE__PORT = "$EmailClosurePostgresPort"
-    CREVAFACTOS__PERSISTENCE__DATABASE = $EmailClosureDatabaseName
-    CREVAFACTOS__PERSISTENCE__USERNAME = $EmailClosureRuntimeUser
-    CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-    CREVAFACTOS__PERSISTENCE__SSL_MODE = "Disable"
+    NEVAXIS_FACTOS__PERSISTENCE__ENABLED = "true"
+    NEVAXIS_FACTOS__PERSISTENCE__HOST = $EmailClosurePostgresHost
+    NEVAXIS_FACTOS__PERSISTENCE__PORT = "$EmailClosurePostgresPort"
+    NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $EmailClosureDatabaseName
+    NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $EmailClosureRuntimeUser
+    NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+    NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = "Disable"
     DevelopmentPilot__Enabled = "false"
-    CREVAFACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__ENABLED = "false"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__ENABLED = "false"
     ASPNETCORE_URLS = $apiBase
 }
 foreach ($k in $apiNoEmailEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$apiNoEmailEnv[$k]) }
-Remove-Item Env:CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__HOST -ErrorAction SilentlyContinue
+Remove-Item Env:NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__HOST -ErrorAction SilentlyContinue
 $apiNoEmail = Start-Process dotnet -ArgumentList "run --no-launch-profile --project `"$(Join-Path $root 'apps/api')`" --urls $apiBase" -PassThru -WindowStyle Hidden
 $deadline = (Get-Date).AddSeconds(90)
 $ready = $false
@@ -113,11 +113,11 @@ if ($LASTEXITCODE -ne 0) { throw "web typecheck failed" }
 npm run build
 if ($LASTEXITCODE -ne 0) { throw "web build failed" }
 Pop-Location
-dotnet test tests/CrevaFactOS.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test tests/NevaxisFactOS.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "tests failed" }
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract failed" }
-$env:CREVAFACTOS_EMAIL_MIGRATION_VERIFY_DB = $EmailClosureDatabaseName
+$env:NEVAXIS_FACTOS_EMAIL_MIGRATION_VERIFY_DB = $EmailClosureDatabaseName
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-migration.mjs
 if ($LASTEXITCODE -ne 0) { throw "migration verifier failed" }
 Pop-Location
@@ -126,14 +126,14 @@ Write-Host "=== PRISTINE DB ==="
 $pristine = $EmailClosurePristineDatabaseName
 docker exec $EmailClosurePostgresContainer psql -U $EmailClosureMigrationUser -d postgres -c "DROP DATABASE IF EXISTS $pristine WITH (FORCE);" | Out-Null
 docker exec $EmailClosurePostgresContainer psql -U $EmailClosureMigrationUser -d postgres -c "CREATE DATABASE $pristine;" | Out-Null
-$env:CREVAFACTOS__MIGRATIONS__HOST = $EmailClosurePostgresHost
-$env:CREVAFACTOS__MIGRATIONS__PORT = "$EmailClosurePostgresPort"
-$env:CREVAFACTOS__MIGRATIONS__DATABASE = $pristine
-$env:CREVAFACTOS__MIGRATIONS__USERNAME = $EmailClosureMigrationUser
-$env:CREVAFACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
-$env:CREVAFACTOS__MIGRATIONS__SSL_MODE = "Disable"
-$env:CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
-dotnet tool run dotnet-ef -- database update --project packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj --startup-project packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj --context CrevaFactOSDbContext
+$env:NEVAXIS_FACTOS__MIGRATIONS__HOST = $EmailClosurePostgresHost
+$env:NEVAXIS_FACTOS__MIGRATIONS__PORT = "$EmailClosurePostgresPort"
+$env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE = $pristine
+$env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $EmailClosureMigrationUser
+$env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
+$env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
+$env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
+dotnet tool run dotnet-ef -- database update --project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --startup-project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --context NevaxisFactOSDbContext
 if ($LASTEXITCODE -ne 0) { Stop-ClosureRuntime; throw "pristine migration failed" }
 
 Stop-ClosureRuntime

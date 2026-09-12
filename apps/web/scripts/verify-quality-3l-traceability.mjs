@@ -35,11 +35,11 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 3L traceability verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityReportingEndpointRouteBuilderExtensions.cs");
-const traceabilityRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityTraceabilityRepository.cs");
+const traceabilityRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityTraceabilityRepository.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809160000_AddQualityTraceabilitySnapshots.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809160000_AddQualityTraceabilitySnapshots.cs",
 );
-const entities = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityEntities.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityEntities.cs");
 const domain = readRequired("apps/web/src/features/quality-control/domain/quality-control.ts");
 const contracts = readRequired("apps/web/src/features/quality-control/server/quality-control-api-contracts.ts");
 const client = readRequired("apps/web/src/features/quality-control/server/quality-control-api-client.ts");

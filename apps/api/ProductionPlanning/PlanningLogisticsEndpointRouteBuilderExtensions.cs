@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.ProductionPlanning;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.ProductionPlanning;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ProductionPlanning;
+namespace NevaxisFactOS.Api.ProductionPlanning;
 
 public static class PlanningLogisticsEndpointRouteBuilderExtensions
 {

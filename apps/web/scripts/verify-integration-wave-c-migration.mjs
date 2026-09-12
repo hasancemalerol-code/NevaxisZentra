@@ -28,7 +28,7 @@ function readRequired(relativePath) {
 function db(sql, database) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -38,23 +38,23 @@ function db(sql, database) {
 function readMigrationConnectionEnv(database) {
   return {
     ...process.env,
-    CREVAFACTOS__MIGRATIONS__HOST: "127.0.0.1",
-    CREVAFACTOS__MIGRATIONS__PORT: "5433",
-    CREVAFACTOS__MIGRATIONS__DATABASE: database,
-    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
-    CREVAFACTOS__MIGRATIONS__PASSWORD:
-      process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
-      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+    NEVAXIS_FACTOS__MIGRATIONS__HOST: "127.0.0.1",
+    NEVAXIS_FACTOS__MIGRATIONS__PORT: "5433",
+    NEVAXIS_FACTOS__MIGRATIONS__DATABASE: database,
+    NEVAXIS_FACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    NEVAXIS_FACTOS__MIGRATIONS__PASSWORD:
+      process.env.NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.NEVAXIS_FACTOS_POSTGRES_PASSWORD
       ?? "local_dev_only_change_me",
-    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
-    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "300",
+    NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "300",
   };
 }
 
 function runMigrationApply(database) {
   const migrationProject = resolve(
     ROOT,
-    "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj",
+    "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj",
   );
   return spawnSync(
     "dotnet",
@@ -70,7 +70,7 @@ function runMigrationApply(database) {
       "--startup-project",
       migrationProject,
       "--context",
-      "CrevaFactOSDbContext",
+      "NevaxisFactOSDbContext",
     ],
     { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv(database) },
   );
@@ -78,15 +78,15 @@ function runMigrationApply(database) {
 
 console.log("Running INTEGRATION-WAVE-C migration verifier.");
 
-const waveC = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${WAVE_C_MIGRATION}.cs`);
-const snapshot = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
+const waveC = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${WAVE_C_MIGRATION}.cs`);
+const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
 
 assert("wave-c migration adds ingress_key", waveC.includes("ingress_key"));
 assert("wave-c migration adds ingress resolver function", waveC.includes("resolve_integration_ingress_connector"));
 assert("snapshot includes ingress_key", snapshot.includes("ingress_key"));
 assert("snapshot ingress index filter", snapshot.includes('HasFilter("ingress_key IS NOT NULL")'));
 
-const targetDb = process.env.CREVAFACTOS_INTEGRATION_MIGRATION_VERIFY_DB ?? "crevafactos_integration_wave_c_1";
+const targetDb = process.env.NEVAXIS_FACTOS_INTEGRATION_MIGRATION_VERIFY_DB ?? "NEVAXIS_FACTOS_integration_wave_c_1";
 const applyResult = runMigrationApply(targetDb);
 assert("migration apply succeeds", applyResult.status === 0, `${applyResult.stdout}${applyResult.stderr}`.slice(-800));
 

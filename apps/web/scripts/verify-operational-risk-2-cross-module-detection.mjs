@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const PILOT_PROFILE = "bb000001-0210-4000-8000-000000000210";
 const TERMINAL_CASE = "bb000001-0218-4000-8000-000000000218";
@@ -42,7 +42,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -52,9 +52,9 @@ function db(sql) {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -91,11 +91,11 @@ function removeClosureFixtures() {
 
 console.log("Running OPERATIONAL-RISK-2 cross-module detection verifier.");
 
-const adapters = readRequired("packages/CrevaFactOS.Persistence/OperationalRisk/OperationalRiskSourceAdapters.cs");
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/OperationalRisk/OperationalRiskDetectionEvaluator.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/OperationalRisk/OperationalRiskDetectionConstants.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/OperationalRisk/OperationalRiskDetectionRepository.cs");
-const energyCalc = readRequired("packages/CrevaFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
+const adapters = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskSourceAdapters.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionEvaluator.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionConstants.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionRepository.cs");
+const energyCalc = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
 
 assert("IOperationalRiskEvidenceSource contract", adapters.includes("IOperationalRiskEvidenceSource"));
 assert("energy adapter reads assessments only", adapters.includes("EnergyIntelligenceAssessments"));

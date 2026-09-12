@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
-$desktopExe = 'C:\Projects\CrevaFactOS\apps\desktop\CrevaFactOS.Desktop\bin\Debug\net10.0-windows\CrevaFactOS.Desktop.exe'
+$desktopExe = 'C:\Projects\NevaxisFactOS\apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe'
 $webUrl = 'http://127.0.0.1:3001/dashboard'
 
 function Stop-DesktopProcesses {
-    Get-Process -Name 'CrevaFactOS.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name 'NevaxisFactOS.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 1
 }
 
@@ -43,7 +43,7 @@ Write-Host 'Stopping existing desktop instances...'
 Stop-DesktopProcesses
 
 Write-Host 'Launching desktop against canonical web runtime...'
-$env:CREVAFACTOS_DESKTOP_WEB_URL = $webUrl
+$env:NEVAXIS_FACTOS_DESKTOP_WEB_URL = $webUrl
 $first = Start-Process -FilePath $desktopExe -PassThru
 $firstHandle = Wait-MainWindow $first 45000
 Start-Sleep -Seconds 12

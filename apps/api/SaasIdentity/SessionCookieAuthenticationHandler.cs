@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
-using CrevaFactOS.Persistence.SaasIdentity;
+using NevaxisFactOS.Persistence.SaasIdentity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace CrevaFactOS.Api.SaasIdentity;
+namespace NevaxisFactOS.Api.SaasIdentity;
 
 public sealed class SessionCookieAuthenticationHandler(
     ISaasIdentityRepository identityRepository,
@@ -13,7 +13,7 @@ public sealed class SessionCookieAuthenticationHandler(
     UrlEncoder encoder)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public const string SchemeName = "CrevaFactOS.SessionCookie";
+    public const string SchemeName = "NevaxisFactOS.SessionCookie";
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -55,5 +55,5 @@ public sealed class SessionCookieAuthenticationHandler(
 
 public static class SaasIdentityHttpContextKeys
 {
-    public const string SessionContext = "CrevaFactOS.SaasIdentity.SessionContext";
+    public const string SessionContext = "NevaxisFactOS.SaasIdentity.SessionContext";
 }

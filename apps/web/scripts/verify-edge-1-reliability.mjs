@@ -11,9 +11,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const API_BASE = process.env.CREVAFACTOS_API_URL ?? "http://localhost:5000";
-const API_TOKEN = process.env.CREVAFACTOS_DEV_TOKEN ?? "";
-const FACILITY_ID = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_URL ?? "http://localhost:5000";
+const API_TOKEN = process.env.NEVAXIS_FACTOS_DEV_TOKEN ?? "";
+const FACILITY_ID = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 
 function readFile(rel) {
   const abs = resolve(ROOT, rel);
@@ -43,11 +43,11 @@ function assertContains(label, content, text) {
 // ---------------------------------------------------------------------------
 
 console.log("\n[1] Idempotency implementation");
-const ingestion = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
 
 assertContains("Duplicate check queries by IdempotencyKey", ingestion, "IdempotencyKey == request.IdempotencyKey");
 assertContains("EdgeIngestResult.Duplicate returned on dup", ingestion, "EdgeIngestResult.Duplicate");
-const modelsFile = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeModels.cs");
+const modelsFile = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
 assertContains("Accepted false on duplicate", modelsFile, "Accepted = false, IsDuplicate = true");
 assertContains("No exception on duplicate — safe failure preservation", ingestion, "EdgeIngestResult.Duplicate");
 
@@ -80,7 +80,7 @@ assertContains("IsReadyForProduction derived from Running status", ingestion, 'M
 console.log("\n[4] Failure preservation (Unavailable paths)");
 
 assertContains("UnavailableEdgeIngestionService returns Failure not throws", ingestion, "Task.FromResult(EdgeIngestResult.Failure");
-const repo = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs");
+const repo = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
 assertContains("UnavailableEdgeQueryRepository list returns empty (no throws)", repo, "Task.FromResult<IReadOnlyList<EdgeGatewayReadModel>>([])");
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ assertContains("UnavailableEdgeQueryRepository list returns empty (no throws)", 
 // ---------------------------------------------------------------------------
 
 console.log("\n[5] MachineSimulator determinism");
-const scenarios = readFile("tools/CrevaFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const scenarios = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
 
 assertContains("CNC-001 has at least one cycle-start", scenarios, '"cycle-start"');
 assertContains("PRESS-001 has heartbeat", scenarios, '"PRESS-001"');
@@ -120,7 +120,7 @@ async function apiRequest(method, path, body) {
 let liveSkipped = false;
 
 if (!API_TOKEN) {
-  console.log("  ℹ Skipping live tests (no CREVAFACTOS_DEV_TOKEN).");
+  console.log("  ℹ Skipping live tests (no NEVAXIS_FACTOS_DEV_TOKEN).");
   liveSkipped = true;
 } else {
   try {

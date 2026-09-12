@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.ProductionPlanning;
+using NevaxisFactOS.Persistence.ProductionPlanning;
 
-namespace CrevaFactOS.Api.ProductionPlanning;
+namespace NevaxisFactOS.Api.ProductionPlanning;
 
 public sealed record ProductionPlanWriteOperationContext(
     Guid TenantId,

@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.IotPlc;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.IotPlc;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.IotPlc;
+namespace NevaxisFactOS.Api.IotPlc;
 
 public static class IotPlcEndpointRouteBuilderExtensions
 {
@@ -529,11 +529,11 @@ public static class IotPlcEndpointRouteBuilderExtensions
         lastSuccessfulObservationAtUtc = health.LastSuccessfulObservationAtUtc,
     };
 
-    public static IServiceCollection AddCrevaFactOSIotPlc(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSIotPlc(this IServiceCollection services)
     {
         services.AddScoped<IIotPlcRepository>(sp =>
         {
-            var dbContext = sp.GetService<CrevaFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableIotPlcRepository()
                 : new IotPlcRepository(dbContext, sp.GetRequiredService<TenantDatabaseSession>());

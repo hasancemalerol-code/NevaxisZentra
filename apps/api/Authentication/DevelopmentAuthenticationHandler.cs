@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace CrevaFactOS.Api.Authentication;
+namespace NevaxisFactOS.Api.Authentication;
 
 public sealed class DevelopmentAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -11,9 +11,9 @@ public sealed class DevelopmentAuthenticationHandler(
     UrlEncoder encoder)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public const string SchemeName = "CrevaFactOS.Development";
-    public const string IssuerHeader = "X-CrevaFactOS-Dev-Issuer";
-    public const string SubjectHeader = "X-CrevaFactOS-Dev-Subject";
+    public const string SchemeName = "NevaxisFactOS.Development";
+    public const string IssuerHeader = "X-crevafactos-dev-Issuer";
+    public const string SubjectHeader = "X-crevafactos-dev-Subject";
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {

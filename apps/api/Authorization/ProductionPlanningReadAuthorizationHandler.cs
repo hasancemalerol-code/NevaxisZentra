@@ -1,8 +1,8 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Authorization;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
-namespace CrevaFactOS.Api.Authorization;
+namespace NevaxisFactOS.Api.Authorization;
 
 public sealed class ProductionPlanningReadAuthorizationHandler(
     IFacilityAccessResolver facilityAccessResolver)

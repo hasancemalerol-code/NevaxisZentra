@@ -1,4 +1,4 @@
-# CrevaFactOS User Roles
+# NevaxisFactOS User Roles
 
 - Status: Locked
 - Date: 2026-08-04
@@ -20,7 +20,7 @@ authenticated user
   + current state
 ```
 
-CrevaFactOS does not create finance, accounting, receivables/payables, payroll, official inventory, or general purchasing ERP roles. Users from those units receive only the operational read, task, review, approval, or connector permissions needed in CrevaFactOS.
+NevaxisFactOS does not create finance, accounting, receivables/payables, payroll, official inventory, or general purchasing ERP roles. Users from those units receive only the operational read, task, review, approval, or connector permissions needed in NevaxisFactOS.
 
 ## Initial Operational Roles
 
@@ -47,7 +47,7 @@ Organizations may compose narrower role bundles. Permission names and risk polic
 
 ## Unit Routing
 
-AI Task Center and CrevaFactOS Teams can route work to:
+AI Task Center and NevaxisFactOS Teams can route work to:
 
 - Purchasing
 - Warehouse/material

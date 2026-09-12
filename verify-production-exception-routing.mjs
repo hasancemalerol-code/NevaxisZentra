@@ -41,7 +41,7 @@ function fileExists(relPath) {
 // ── 1. EXCEPTION ENTITY ROUTING FIELDS ───────────────────────────────────────
 
 const exceptionEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionExecutionException.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionExecutionException.cs",
 );
 
 check(
@@ -67,7 +67,7 @@ check(
 // ── 2. ENTITY CONFIGURATION ───────────────────────────────────────────────────
 
 const exceptionConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionExecutionExceptionEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionExecutionExceptionEntityConfiguration.cs",
 );
 
 check(
@@ -79,7 +79,7 @@ check(
 // ── 3. REPOSITORY CONTRACT ────────────────────────────────────────────────────
 
 const exceptionRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionExceptionRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionExceptionRepository.cs",
 );
 
 check(
@@ -122,7 +122,7 @@ check(
 // ── 6. PERMISSIONS ────────────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -133,7 +133,7 @@ check(
 // ── 7. RESOLVED EXCEPTION GUARD ───────────────────────────────────────────────
 
 const writeRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
 );
 
 check(
@@ -176,7 +176,7 @@ check(
 // ── 10. AUDIT TAXONOMY ───────────────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 
 check(

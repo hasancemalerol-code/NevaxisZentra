@@ -1,5 +1,5 @@
 {
-  "name": "crevafactos",
+  "name": "nevaxisfactos",
   "version": "0.0.0",
   "private": true,
   "description": "AI Factory Operations Assistant and AI Production Manager monorepo.",
@@ -10,10 +10,10 @@
     "pnpm": "11.20.0"
   },
   "scripts": {
-    "dev:web": "pnpm --filter @crevafactos/web dev",
+    "dev:web": "pnpm --filter @nevaxisfactos/web dev",
     "dev:api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/start-dev-api.ps1",
-    "dev:worker": "dotnet run --project apps/worker/CrevaFactOS.Worker.csproj",
-    "dev:edge-agent": "dotnet run --project apps/edge-agent/CrevaFactOS.EdgeAgent.csproj",
+    "dev:worker": "dotnet run --project apps/worker/NevaxisFactOS.Worker.csproj",
+    "dev:edge-agent": "dotnet run --project apps/edge-agent/NevaxisFactOS.EdgeAgent.csproj",
     "infra:config": "docker compose -f infrastructure/compose.yaml config",
     "infra:start": "docker compose -f infrastructure/compose.yaml up -d",
     "infra:stop": "docker compose -f infrastructure/compose.yaml stop",
@@ -37,13 +37,13 @@
     "db:migrations:apply": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-apply",
     "db:migrations:rollback": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-rollback",
     "db:migrations:script": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-script",
-    "build:web": "pnpm --filter @crevafactos/web build",
-    "build:dotnet": "dotnet build CrevaFactOS.sln",
+    "build:web": "pnpm --filter @nevaxisfactos/web build",
+    "build:dotnet": "dotnet build NevaxisFactOS.sln",
     "build": "pnpm run build:web && pnpm run build:dotnet",
-    "lint": "pnpm --filter @crevafactos/web lint",
-    "typecheck": "pnpm --filter @crevafactos/web typecheck",
-    "test:web": "pnpm --filter @crevafactos/web test",
-    "test:dotnet": "dotnet test CrevaFactOS.sln",
+    "lint": "pnpm --filter @nevaxisfactos/web lint",
+    "typecheck": "pnpm --filter @nevaxisfactos/web typecheck",
+    "test:web": "pnpm --filter @nevaxisfactos/web test",
+    "test:dotnet": "dotnet test NevaxisFactOS.sln",
     "test": "pnpm run test:web && pnpm run test:dotnet",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }

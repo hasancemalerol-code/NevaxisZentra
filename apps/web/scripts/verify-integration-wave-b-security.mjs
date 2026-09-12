@@ -4,8 +4,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5000";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5000";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const UNAUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const ISSUER = "crevafactos-dev";
 const OPERATOR = "production-pilot-operator";
@@ -32,9 +32,9 @@ function headers(subject = OPERATOR, tenant = TENANT) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": tenant,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": tenant,
   };
 }
 
@@ -69,9 +69,9 @@ console.log("Running INTEGRATION-WAVE-B security verifier.");
 
 const endpoints = readRequired("apps/api/Integration/IntegrationEndpointRouteBuilderExtensions.cs");
 const endpointHelpers = readRequired("apps/api/Integration/IntegrationEndpointHelpers.cs");
-const orchestrator = readRequired("packages/CrevaFactOS.Persistence/Integration/FileImport/IntegrationFileImportOrchestrator.cs");
+const orchestrator = readRequired("packages/NevaxisFactOS.Persistence/Integration/FileImport/IntegrationFileImportOrchestrator.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260910101730_AddIntegrationSpineFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260910101730_AddIntegrationSpineFoundation.cs",
 );
 
 assert("integration.read used", endpointHelpers.includes("IntegrationPermissionKeys.Read"));

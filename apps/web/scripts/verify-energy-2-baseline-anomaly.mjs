@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ACTOR = {
   issuer: "crevafactos-dev",
@@ -33,9 +33,9 @@ function forbidText(source, forbidden, label) {
 function headers() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ACTOR.issuer,
-    "X-CrevaFactOS-Dev-Subject": ACTOR.subject,
-    "X-CrevaFactOS-Tenant": ACTOR.tenant,
+    "X-crevafactos-dev-Issuer": ACTOR.issuer,
+    "X-crevafactos-dev-Subject": ACTOR.subject,
+    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
   };
 }
 
@@ -62,9 +62,9 @@ function mad(values, center) {
 
 console.log("Running ENERGY-2 baseline/anomaly verifier.");
 
-const constants = readRequired("packages/CrevaFactOS.Persistence/Energy/EnergyIntelligenceConstants.cs");
-const calculator = readRequired("packages/CrevaFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotEnergyIntelligenceSeed.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotEnergyIntelligenceSeed.cs");
 
 assert("rule-set ENERGY-2.0", constants.includes("ENERGY-2.0"));
 assert("minimum comparable windows 6", constants.includes("MinimumComparableWindows = 6"));

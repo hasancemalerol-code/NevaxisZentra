@@ -16,7 +16,7 @@ const COST_BASIS = "net";
 const PRICE_BASIS_GROSS_NET = "net";
 const SALES_UNIT_PRICE = 100;
 const MARGIN_DELTA_THRESHOLD = 0.05;
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -110,10 +110,10 @@ const PILOT_RUNS = {
 };
 
 const COMPARISON_SOURCE_FILES = [
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonEvaluator.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonOperations.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonContracts.cs",
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonEvaluator.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonOperations.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonContracts.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs",
   "apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -148,7 +148,7 @@ function readRequired(relativePath) {
 }
 
 function readProvenance() {
-  const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+  const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
   const match = constants.match(/ProfitabilityComparisonDevelopmentPilotProvenance\s*=\s*\n\s*"([^"]+)"/);
   if (!match) fail("ProfitabilityComparisonDevelopmentPilotProvenance not found in CommercialIntelligenceConstants.cs");
   return match[1];
@@ -157,7 +157,7 @@ function readProvenance() {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -169,7 +169,7 @@ function dbExec(sql) {
     "docker",
     [
       "exec",
-      "crevafactos-local-postgres-1",
+      "NevaxisFactOS-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
@@ -190,9 +190,9 @@ function dbExec(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -564,11 +564,11 @@ function reconcileRun(apiRun, label) {
 
 console.log("Running COMMERCIAL-PROFITABILITY-2 trend/cost-scope verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonEvaluator.cs");
-const operations = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonOperations.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonEvaluator.cs");
+const operations = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonOperations.cs");
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs");
-const comparisonSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const comparisonSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
 const provenance = readProvenance();
 
 assert("temporal contribution trend evaluator", evaluator.includes("EvaluateTemporalContributionTrend"));
@@ -577,7 +577,7 @@ assert("customer contribution position evaluator", evaluator.includes("EvaluateC
 assert("material contribution position evaluator", evaluator.includes("EvaluateMaterialContributionPosition"));
 assert("non-overlap validation", operations.includes("must not overlap"));
 assert("comparison endpoints present", endpoints.includes("/comparisons"));
-assert("direct-material-cost-increase driver", readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonContracts.cs").includes("direct-material-cost-increase"));
+assert("direct-material-cost-increase driver", readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityComparisonContracts.cs").includes("direct-material-cost-increase"));
 assert("contribution-deterioration outcome", evaluator.includes("ContributionDeterioration") || evaluator.includes("contribution-deterioration"));
 assert("default adverse margin delta 0.05", constants.includes("DefaultProfitabilityMaximumAdverseContributionMarginDelta = 0.05m"));
 assert("default favorable margin delta 0.05", constants.includes("DefaultProfitabilityMinimumFavorableContributionMarginDelta = 0.05m"));

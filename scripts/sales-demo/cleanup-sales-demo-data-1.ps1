@@ -1,4 +1,4 @@
-# CREVAFACTOS-SALES-DEMO-FINAL-DATA-CLEANUP-AND-FREEZE-1
+# NevaxisFactOS-SALES-DEMO-FINAL-DATA-CLEANUP-AND-FREEZE-1
 # Development Pilot precision cleanup — dev-pilot-tenant / crevafactos_local only.
 
 [CmdletBinding()]
@@ -8,7 +8,7 @@ param(
     [string]$Mode,
     [string]$TenantCode = 'dev-pilot-tenant',
     [string]$DatabaseName = 'crevafactos_local',
-    [string]$ContainerName = 'crevafactos-local-postgres-1',
+    [string]$ContainerName = 'NevaxisFactOS-local-postgres-1',
     [string]$RepositoryRoot = ''
 )
 
@@ -37,13 +37,13 @@ function Assert-DevEnvironment {
 }
 
 function Invoke-PsqlScalar([string]$Sql) {
-    $result = $Sql | docker exec -i $ContainerName psql -U crevafactos -d $DatabaseName -t -A 2>&1
+    $result = $Sql | docker exec -i $ContainerName psql -U NevaxisFactOS -d $DatabaseName -t -A 2>&1
     if ($LASTEXITCODE -ne 0) { throw "psql failed: $result" }
     return ($result | Out-String).Trim()
 }
 
 function Invoke-PsqlFile([string]$Path) {
-    Get-Content -LiteralPath $Path -Raw | docker exec -i $ContainerName psql -U crevafactos -d $DatabaseName -v ON_ERROR_STOP=1 2>&1
+    Get-Content -LiteralPath $Path -Raw | docker exec -i $ContainerName psql -U NevaxisFactOS -d $DatabaseName -v ON_ERROR_STOP=1 2>&1
     if ($LASTEXITCODE -ne 0) { throw "psql file failed: $Path" }
 }
 
@@ -60,7 +60,7 @@ function Get-InventoryCounts {
     }
     # Fallback parse for non-aligned output
     if ($counts.Count -eq 0) {
-        $raw = docker exec $ContainerName psql -U crevafactos -d $DatabaseName -t -A -F '|' -f /dev/stdin 2>&1
+        $raw = docker exec $ContainerName psql -U NevaxisFactOS -d $DatabaseName -t -A -F '|' -f /dev/stdin 2>&1
     }
     return $counts
 }
@@ -79,7 +79,7 @@ SELECT * FROM (VALUES
 ) AS v(id, tenant_id, facility_id, channel_id, author_tenant_membership_id, body, idempotency_key, idempotency_payload_fingerprint, created_at_utc)
 WHERE NOT EXISTS (SELECT 1 FROM teams_messages m WHERE m.id = v.id);
 '@
-    $sql | docker exec -i $ContainerName psql -U crevafactos -d $DatabaseName -v ON_ERROR_STOP=1 | Out-Null
+    $sql | docker exec -i $ContainerName psql -U NevaxisFactOS -d $DatabaseName -v ON_ERROR_STOP=1 | Out-Null
     return 4
 }
 
@@ -92,7 +92,7 @@ Write-Host "Mode: $Mode"
 
 # Parse dry-run counts via docker copy approach
 $dryRunSql = Join-Path $SqlDir 'cleanup-sales-demo-data-1-dry-run.sql'
-$dryRunOutput = Get-Content $dryRunSql -Raw | docker exec -i $ContainerName psql -U crevafactos -d $DatabaseName 2>&1 | Out-String
+$dryRunOutput = Get-Content $dryRunSql -Raw | docker exec -i $ContainerName psql -U NevaxisFactOS -d $DatabaseName 2>&1 | Out-String
 
 $inventory = [ordered]@{
     recordsReviewed = 0

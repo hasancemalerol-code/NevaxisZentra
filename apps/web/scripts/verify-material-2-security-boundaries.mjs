@@ -28,9 +28,9 @@ console.log("Running MATERIAL-2 security/boundary verifier.");
 const endpoints = readRequired("apps/api/Material/MaterialLotEndpointRouteBuilderExtensions.cs");
 const materialEndpoints = readRequired("apps/api/Material/MaterialEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Material/MaterialEndpointHelpers.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/MaterialPermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialLotRepository.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MaterialPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotRepository.cs");
 
 requireText(endpoints, "RequireAuthorization", "lot endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "lot endpoints");
@@ -50,7 +50,7 @@ requireText(bootstrap, "EnsureMaterialReadPermissionAssignmentAsync", "material 
 requireText(bootstrap, "EnsureMaterialManagePermissionAssignmentAsync", "material manage seed");
 requireText(bootstrap, "EnsureMaterialLotPilotRecordsAsync", "lot pilot seed");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const PILOT_LOT = "bb000001-00aa-4000-8000-0000000000aa";
@@ -81,19 +81,19 @@ const ready = await fetch(`${BASE}/health/ready`);
 if (ready.status !== 200) fail(`API not ready: ${ready.status}`);
 
 const operatorHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "production-pilot-operator",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-reviewer",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 
 const missingAuth = await liveRequest("GET", `/api/materials/lots/workspace-summary?facilityId=${FACILITY}`);

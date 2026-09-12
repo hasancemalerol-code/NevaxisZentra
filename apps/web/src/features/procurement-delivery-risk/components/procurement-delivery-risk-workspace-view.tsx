@@ -86,7 +86,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
     workspace.assessments[0]?.id ??
     "";
 
-  const selectedRow = useMemo(
+  const _selectedRow = useMemo(
     () => workspace.assessments.find((row) => row.id === selectedAssessmentId),
     [workspace.assessments, selectedAssessmentId],
   );

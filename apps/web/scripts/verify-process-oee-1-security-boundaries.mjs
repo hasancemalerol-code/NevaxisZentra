@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 
@@ -30,9 +30,9 @@ console.log("Running PROCESS-OEE-1 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/ProcessOee/ProcessOeeEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/ProcessOee/ProcessOeeEndpointHelpers.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260812172702_AddProcessOeeFoundation.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/ProcessOeePermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812172702_AddProcessOeeFoundation.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ProcessOeePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -65,19 +65,19 @@ const ready = await fetch(`${BASE}/health/ready`);
 assert("API ready", ready.status === 200, `status=${ready.status}`);
 
 const operatorHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "production-pilot-operator",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-reviewer",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 
 assert("missing auth → 401", (await liveRequest("GET", `/api/process-oee/workspace-summary?facilityId=${FACILITY}`)) === 401);

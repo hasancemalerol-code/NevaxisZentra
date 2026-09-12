@@ -35,11 +35,11 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 2L NCR verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityNcrEndpointRouteBuilderExtensions.cs");
-const lifecycle = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityNcrLifecycleEngine.cs");
-const ncrRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
-const signalReader = readRequired("packages/CrevaFactOS.Persistence/Quality/ProductionQualitySignalReader.cs");
+const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNcrLifecycleEngine.cs");
+const ncrRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
+const signalReader = readRequired("packages/NevaxisFactOS.Persistence/Quality/ProductionQualitySignalReader.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
 );
 const domain = readRequired("apps/web/src/features/quality-control/domain/quality-control.ts");
 const contracts = readRequired("apps/web/src/features/quality-control/server/quality-control-api-contracts.ts");

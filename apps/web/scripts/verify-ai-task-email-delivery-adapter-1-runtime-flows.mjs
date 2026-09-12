@@ -5,8 +5,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5211").replace(/\/$/, "");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5211").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TASK = "bb000001-03d0-4000-8000-0000000003d0";
 const RECIPIENT = "retry.test@company.com";
@@ -24,9 +24,9 @@ function fail(message) {
 function headers(tenant) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-    "X-CrevaFactOS-Dev-Subject": tenant === TENANT_B ? "omnichannel-closure-tenant-b-owner" : "planning-pilot-user",
-    "X-CrevaFactOS-Tenant": tenant,
+    "X-crevafactos-dev-Issuer": "crevafactos-dev",
+    "X-crevafactos-dev-Subject": tenant === TENANT_B ? "omnichannel-closure-tenant-b-owner" : "planning-pilot-user",
+    "X-NevaxisFactOS-Tenant": tenant,
   };
 }
 
@@ -151,12 +151,12 @@ async function readDeliveryFromDb(idempotencyKey) {
     "docker",
     [
       "exec",
-      "crevafactos-local-postgres-1",
+      "NevaxisFactOS-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
       "-d",
-      "crevafactos_email_closure_1",
+      "NEVAXIS_FACTOS_email_closure_1",
       "-t",
       "-A",
       "-c",

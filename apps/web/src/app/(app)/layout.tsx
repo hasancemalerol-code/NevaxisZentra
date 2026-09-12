@@ -25,9 +25,9 @@ export const dynamic = "force-dynamic";
 
 function isClosureDevelopmentApiRuntime(): boolean {
   return (
-    process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
-    Boolean(process.env.CREVAFACTOS_DEV_AUTH_ISSUER?.trim()) &&
-    Boolean(process.env.CREVAFACTOS_DEV_TENANT_KEY?.trim())
+    process.env.NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
+    Boolean(process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER?.trim()) &&
+    Boolean(process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY?.trim())
   );
 }
 
@@ -64,7 +64,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     session.status === "authenticated"
       ? session.account.displayName
       : closureDevRuntime
-        ? process.env.CREVAFACTOS_DEV_AUTH_SUBJECT ?? "closure-dev-user"
+        ? process.env.NEVAXIS_FACTOS_DEV_AUTH_SUBJECT ?? "closure-dev-user"
         : null;
   const emailMasked =
     session.status === "authenticated" ? session.account.emailMasked : null;
@@ -72,7 +72,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     session.status === "authenticated"
       ? session.account.organizationLabel
       : closureDevRuntime
-        ? process.env.CREVAFACTOS_DEV_TENANT_KEY ?? null
+        ? process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY ?? null
         : null;
 
   if (normalizeSubscriptionRoute(pathname) === "/abonelik-erisimi") {

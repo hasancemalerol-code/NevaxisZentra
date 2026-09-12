@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { setTimeout as delay } from "node:timers/promises";
 
-const PORT = Number(process.env.CREVAFACTOS_DESKTOP_CDP_PORT ?? "9233");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
+const PORT = Number(process.env.NEVAXIS_FACTOS_DESKTOP_CDP_PORT ?? "9233");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
 
 export async function waitForCdp(timeoutMs = 120000) {
   const deadline = Date.now() + timeoutMs;

@@ -40,7 +40,7 @@ function forbidText(source, forbidden, label) {
 
 const engine = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportReadinessEngine.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportReadinessEngine.cs",
 );
 requireText(engine, "source-order-linked", "ExportReadinessEngine");
 requireText(engine, "destination-country-known", "ExportReadinessEngine");
@@ -52,7 +52,7 @@ forbidText(engine, "USA requires", "ExportReadinessEngine");
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
 );
 requireText(writeRepo, "RegisterDocumentAsync", "ExportCaseWriteRepository");
 requireText(writeRepo, "VerifyDocumentAsync", "ExportCaseWriteRepository");

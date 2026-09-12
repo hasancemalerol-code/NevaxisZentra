@@ -1,12 +1,12 @@
-using CrevaFactOS.Persistence.MarketRates;
+using NevaxisFactOS.Persistence.MarketRates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.MarketRates;
+namespace NevaxisFactOS.Api.MarketRates;
 
 public static class MarketRatesServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSMarketRates(
+    public static IServiceCollection AddNevaxisFactOSMarketRates(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -32,12 +32,12 @@ public static class MarketRatesServiceCollectionExtensions
         services.AddScoped<MarketRateSourceSynchronizer>();
         services.AddScoped<IMarketRateRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMarketRateRepository()
                 : new MarketRateRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<CrevaFactOS.Persistence.Tenancy.TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.Tenancy.TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<MarketRateSourceSynchronizer>(),
                     serviceProvider.GetRequiredService<IExchangeRateProvider>());
         });
@@ -68,9 +68,9 @@ public static class MarketRatesServiceCollectionExtensions
         string suffix,
         IConfiguration configuration,
         string fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__MARKET_RATES__{suffix}")
-        ?? configuration[$"CREVAFACTOS:MARKET_RATES:{suffix}"]
-        ?? configuration[$"CREVAFACTOS__MARKET_RATES__{suffix}"]
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__MARKET_RATES__{suffix}")
+        ?? configuration[$"NevaxisFactOS:MARKET_RATES:{suffix}"]
+        ?? configuration[$"NEVAXIS_FACTOS__MARKET_RATES__{suffix}"]
         ?? configuration[$"{ExchangeRateProviderOptions.SectionName}:{MapConfigKey(suffix)}"]
         ?? fallback;
 

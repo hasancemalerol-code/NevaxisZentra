@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.SaasIdentity;
-using CrevaFactOS.Persistence.SaasIdentity;
-using CrevaFactOS.Persistence.Tenancy;
-using CrevaFactOS.Persistence.Identity;
+using NevaxisFactOS.Api.SaasIdentity;
+using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence.Identity;
 
-namespace CrevaFactOS.Api.Tenancy;
+namespace NevaxisFactOS.Api.Tenancy;
 
 public sealed class TenantResolutionMiddleware(
     RequestDelegate next,
@@ -15,7 +15,8 @@ public sealed class TenantResolutionMiddleware(
             new EventId(1001, nameof(TenantResolutionFailed)),
             "Tenant resolution failed without exposing tenant or connection details.");
 
-    public const string HeaderName = "X-CrevaFactOS-Tenant";
+    public const string HeaderName = "X-NevaxisFactOS-Tenant";
+    public const string LegacyHeaderName = "X-CrevaFactOS-Tenant";
 
     public async Task InvokeAsync(
         HttpContext httpContext,
@@ -31,7 +32,7 @@ public sealed class TenantResolutionMiddleware(
         var session = SaasIdentityEndpointHelpers.GetSessionContext(httpContext);
         if (session is not null)
         {
-            if (httpContext.Request.Headers.TryGetValue(HeaderName, out var sessionHeaderValues)
+            if (TryGetTenantHeader(httpContext.Request.Headers, out var sessionHeaderValues)
                 && !HeaderMatchesTrustedSession(sessionHeaderValues, session))
             {
                 await WriteProblemAsync(
@@ -47,7 +48,7 @@ public sealed class TenantResolutionMiddleware(
             return;
         }
 
-        if (!httpContext.Request.Headers.TryGetValue(HeaderName, out var values))
+        if (!TryGetTenantHeader(httpContext.Request.Headers, out var values))
         {
             await next(httpContext);
             return;
@@ -112,6 +113,18 @@ public sealed class TenantResolutionMiddleware(
 
         tenantContextAccessor.Set(context);
         await next(httpContext);
+    }
+
+    private static bool TryGetTenantHeader(
+        IHeaderDictionary headers,
+        out Microsoft.Extensions.Primitives.StringValues values)
+    {
+        if (headers.TryGetValue(HeaderName, out values))
+        {
+            return true;
+        }
+
+        return headers.TryGetValue(LegacyHeaderName, out values);
     }
 
     private static bool HeaderMatchesTrustedSession(

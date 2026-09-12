@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const CONNECTION = "bb000001-0090-4000-8000-000000000090";
@@ -47,9 +47,9 @@ function headers(subject = OPERATOR) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 
@@ -98,11 +98,11 @@ console.log("Running ERP-4L security verifier.");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
 );
-const productionRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpProductionRepository.cs");
-const writebackRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const permissionKeys = readRequired("packages/CrevaFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
+const productionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpProductionRepository.cs");
+const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
+const permissionKeys = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
 
 requireText(permissionKeys, "WritebackRequest", "writeback request permission");
 requireText(permissionKeys, "WritebackApprove", "writeback approve permission");
@@ -179,7 +179,7 @@ try {
   const crossTenant = await fetch(`${BASE}/api/erp/documents?facilityId=${FACILITY}`, {
     headers: {
       ...headers(OPERATOR),
-      "X-CrevaFactOS-Tenant": "other-tenant-not-pilot",
+      "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
     },
   });
   if (crossTenant.status !== 403) {

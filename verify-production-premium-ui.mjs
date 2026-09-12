@@ -238,7 +238,7 @@ check(
 );
 check(
   "No direct browser API calls",
-  !has(listPage, "fetch(", "X-CrevaFactOS-Dev"),
+  !has(listPage, "fetch(", "X-crevafactos-dev"),
 );
 check(
   "globals.css not referenced",
@@ -313,7 +313,7 @@ check(
 );
 check(
   "No direct browser API calls",
-  !has(detailPage, "fetch(", "X-CrevaFactOS-Dev"),
+  !has(detailPage, "fetch(", "X-crevafactos-dev"),
 );
 
 // ─── 5. Production Order Card ──────────────────────────────────────────────────

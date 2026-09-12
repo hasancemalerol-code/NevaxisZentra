@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.DigitalWorkforce;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.DigitalWorkforce;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.DigitalWorkforce;
+namespace NevaxisFactOS.Api.DigitalWorkforce;
 
 public static class DigitalWorkforceEndpointRouteBuilderExtensions
 {
@@ -42,7 +42,7 @@ public static class DigitalWorkforceEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSDigitalWorkforce(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSDigitalWorkforce(this IServiceCollection services)
     {
         services.AddScoped<IDigitalWorkforceRepository, DigitalWorkforceRepository>();
         services.AddScoped<IDigitalWorkforceRuntimeService, DigitalWorkforceRuntimeService>();

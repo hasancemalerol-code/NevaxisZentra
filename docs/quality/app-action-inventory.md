@@ -6,7 +6,7 @@
 | --- | --- |
 | Package | APP-ACTION-AUDIT-1 |
 | Date | 2026-08-14 |
-| Repository | `C:\Projects\CrevaFactOS` |
+| Repository | `C:\Projects\NevaxisFactOS` |
 | Baseline commit | `6adcd89b7f5761f720307f65ebffea181569eff2` |
 | Baseline subject | `feat(saas): add tenant and facility authorization foundation` |
 | ADMIN-ACCESS-1 committed | Yes (this baseline) |
@@ -16,7 +16,7 @@
 | Dependencies changed | No |
 | Commit taken | No |
 | Web runtime | `http://127.0.0.1:3001` (Next.js 16.3.0 / Turbopack) |
-| API runtime | `http://127.0.0.1:5000` (`CREVAFACTOS__AUTHENTICATION__MODE=SessionCookie`) |
+| API runtime | `http://127.0.0.1:5000` (`NEVAXIS_FACTOS__AUTHENTICATION__MODE=SessionCookie`) |
 | Viewport | 1600×1000 (browser lock + ADMIN-ACCESS-1 verifier contract) |
 | Route source | `apps/web/src/lib/navigation/primary-navigation.ts`, `apps/web/src/app/**/page.tsx`, catch-all `apps/web/src/app/(app)/[...sections]/page.tsx` |
 | Session used | Tenant-owner (MFA completed via identity API, not printed). Restricted personas: machine-responsible, materials-sales, maintenance-team. |
@@ -38,7 +38,7 @@ HTTP results are from authenticated GET to `http://127.0.0.1:3001` (redirect: ma
 | `/ai-gorevleri/ai-task-001` | AI Task Center | 200 | Hammadde stoğu üretim planını karşılamıyor | Implemented (preview) | none | 2 | 6 | 0 | 6 |
 | `/ai-gorevleri/yeni` | AI Task Center | 404 | (none) | Missing page | none | 0 | 0 | 1 | 0 |
 | `/dashboard` | Dashboard | 200 | AI Görev Merkezi | Implemented (preview) | none | 18 | 12 | 3 | 4 |
-| `/teams` | CrevaFactOS Teams | 200 | CrevaFactOS Teams | Honest placeholder | none | 0* | 0 | 0 | 1 |
+| `/teams` | NevaxisFactOS Teams | 200 | NevaxisFactOS Teams | Honest placeholder | none | 0* | 0 | 0 | 1 |
 | `/siparisler` | Orders | 200 | Siparişler | Implemented (preview) | none | 12 | 1 | 0 | 0 |
 | `/siparisler/order-draft-001` | Orders | 200 | Ağustos enjeksiyon parça siparişi | Implemented (preview) | none | 4 | 2 | 0† | 2 |
 | `/planlama` | Planning | 200 | Üretim Planlama | Implemented | none | 8 | 0 | 0 | 0 |
@@ -193,7 +193,7 @@ Source: `app/(app)/layout.tsx` → `resolvePermissionAwareNavigation()` → `App
 | ID | Control | Type | Class | Permission | Notes |
 | --- | --- | --- | --- | --- | --- |
 | CTL-S-01 | Ana içeriğe geç | navigation | WORKING_LOCAL_INTERACTION | — | `#main-content` exists |
-| CTL-S-02 | CrevaFactOS brand | navigation | WORKING_NAVIGATION | — | href `/` |
+| CTL-S-02 | NevaxisFactOS brand | navigation | WORKING_NAVIGATION | — | href `/` |
 | CTL-S-03 | Kenar çubuğunu daralt/genişlet | local UI | WORKING_LOCAL_INTERACTION | — | `onClick={onToggle}` |
 | CTL-S-04–38 | 35 primary nav links | navigation | WORKING_NAVIGATION or PERMISSION_HIDDEN | see §9 | Filter only when `permissionKey` set |
 | CTL-S-39 | Şirket / tesis seçimi | local UI | UNIMPLEMENTED_BUT_ACTIVE | none | Enabled; future copy in aria-label |
@@ -222,7 +222,7 @@ Source: `app/(app)/layout.tsx` → `resolvePermissionAwareNavigation()` → `App
 | CTL-AI-03 | KPI links / filter bar / presets / reset / cards | WORKING_NAVIGATION + WORKING_LOCAL_INTERACTION | `ai-task-kpi-links.tsx`, `ai-task-workspace.tsx`, cards → `/ai-gorevleri/${id}` 200 for `ai-task-001` |
 | CTL-AI-04 | İncelemeye gönder / Onayla / Uygula / Ertele / Reddet / Yeniden değerlendir | DISABLED_WITH_REASON | `ai-task-action-panel.tsx` titles: “Gerçek … servisi henüz bağlı değil.” |
 
-### 8.4 CrevaFactOS Teams / Energy / IoT / Operational Risk / Commercial Intelligence / Reports / Settings
+### 8.4 NevaxisFactOS Teams / Energy / IoT / Operational Risk / Commercial Intelligence / Reports / Settings
 
 Catch-all `SectionPlaceholderPage` when `href` is in `navigationItems`. HTTP 200, badge “Yer tutucu”, EmptyState says content will come later. **Not classified as broken.** No page-level CTA. Shell only.
 

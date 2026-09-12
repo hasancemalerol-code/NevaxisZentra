@@ -12,6 +12,7 @@ import {
 
 import type { CSSProperties } from "react";
 
+
 type HealthStatus = "healthy" | "attention";
 
 interface HealthItem {
@@ -270,7 +271,7 @@ export function SystemHealthPanel() {
                 borderRight:
                   index === healthItems.length - 1
                     ? 0
-                    : styles.item.borderRight,
+                    : "1px solid #dce5f0",
               }}
             >
               <span

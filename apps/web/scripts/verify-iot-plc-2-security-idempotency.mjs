@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const OTHER_FACILITY = "bb000001-0006-4000-8000-000000000006";
 const CLOSURE_PREFIX = "IOTPLC2-SEC";
@@ -30,7 +30,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -40,9 +40,9 @@ function db(sql) {
 function actorHeaders(actor = MANAGER) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -66,7 +66,7 @@ function countAssessments(prefix) {
 
 console.log("Running IOT-PLC-2 security/idempotency verifier.");
 
-const permissionKeys = readRequired("packages/CrevaFactOS.Persistence/IotPlc/IotPlcPermissionKeys.cs");
+const permissionKeys = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcPermissionKeys.cs");
 assert("no new permission keys", !permissionKeys.includes("iot-plc.intelligence"));
 assert("reuses read key", permissionKeys.includes("iot-plc.read"));
 assert("reuses manage key", permissionKeys.includes("iot-plc.manage"));

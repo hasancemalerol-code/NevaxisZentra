@@ -35,7 +35,7 @@ function readText(relPath) {
 // ── 1. ENTITY ─────────────────────────────────────────────────────────────────
 
 const entity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionSetupSession.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionSetupSession.cs",
 );
 
 check("ProductionSetupSession.cs exists", entity !== null);
@@ -49,7 +49,7 @@ check("Entity has Version", entity?.includes("public uint Version") ?? false);
 // ── 2. ENTITY CONFIGURATION ──────────────────────────────────────────────────
 
 const config = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionSetupSessionEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionSetupSessionEntityConfiguration.cs",
 );
 
 check("ProductionSetupSessionEntityConfiguration.cs exists", config !== null);
@@ -59,7 +59,7 @@ check("Config has index on ProductionOrderId", config?.includes("ProductionOrder
 // ── 3. PERMISSION KEYS ───────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -70,7 +70,7 @@ check(
 // ── 4. AUDIT/OUTBOX TAXONOMY ─────────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 check(
   "AuditActions contains production.order.setup.start",
@@ -82,7 +82,7 @@ check(
 );
 
 const outbox = readText(
-  "packages/CrevaFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
 );
 check(
   "OutboxMessageTypes contains production-order-setup-started",
@@ -96,7 +96,7 @@ check(
 // ── 5. MIGRATION ──────────────────────────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
 );
 
 check("3L migration file exists", migration !== null);
@@ -111,7 +111,7 @@ check("Migration adds setup permission definitions", migration?.includes("produc
 // ── 6. REPOSITORY ─────────────────────────────────────────────────────────────
 
 const repo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOperationsRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOperationsRepository.cs",
 );
 
 check("Repo implements StartSetupSessionAsync", repo?.includes("StartSetupSessionAsync") ?? false);

@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
-    [string]$ProductionWebUrl = $env:CREVAFACTOS_DESKTOP_PRODUCTION_WEB_URL,
+    [string]$ProductionWebUrl = $env:NEVAXIS_FACTOS_DESKTOP_PRODUCTION_WEB_URL,
 
     [switch]$AllowDevelopmentDistribution,
 
@@ -31,8 +31,8 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 . "$PSScriptRoot\..\distribution\DesktopDistributionVersion.ps1"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
-$desktopProject = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
-$installerProject = Join-Path $repoRoot "apps\desktop\installer\CrevaFactOS.Desktop.Installer.wixproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
+$installerProject = Join-Path $repoRoot "apps\desktop\installer\NevaxisFactOS.Desktop.Installer.wixproj"
 $redistDir = Join-Path $repoRoot "apps\desktop\installer\redistributables"
 $redistCacheDir = Join-Path $repoRoot "apps\desktop\installer\.cache\webview2"
 $redistManifest = Join-Path $redistDir "webview2-bootstrapper.json"
@@ -72,7 +72,7 @@ if ($urlValidation.Valid) {
     )
 }
 elseif (-not $AllowDevelopmentDistribution) {
-    throw "Production packaging blocked: CREVAFACTOS_DESKTOP_PRODUCTION_WEB_URL is missing or invalid ($($urlValidation.Reason)). Pass -AllowDevelopmentDistribution to produce a Development-only artifact."
+    throw "Production packaging blocked: NEVAXIS_FACTOS_DESKTOP_PRODUCTION_WEB_URL is missing or invalid ($($urlValidation.Reason)). Pass -AllowDevelopmentDistribution to produce a Development-only artifact."
 }
 
 $artifactDir = Join-Path $OutputRoot $Version
@@ -85,7 +85,7 @@ if (Test-Path $artifactDir) {
 }
 New-Item -ItemType Directory -Force -Path $publishDir, $stagingDir | Out-Null
 
-Write-Host "Publishing CrevaFactOS Desktop $Version ($distributionMode)..."
+Write-Host "Publishing NevaxisFactOS Desktop $Version ($distributionMode)..."
 
 dotnet publish $desktopProject `
     -c Release `
@@ -97,9 +97,9 @@ dotnet publish $desktopProject `
     @publishProperties `
     -o $publishDir
 
-$exePath = Join-Path $publishDir "CrevaFactOS.Desktop.exe"
+$exePath = Join-Path $publishDir "NevaxisFactOS.Desktop.exe"
 if (-not (Test-Path $exePath)) {
-    throw "Publish did not produce CrevaFactOS.Desktop.exe"
+    throw "Publish did not produce NevaxisFactOS.Desktop.exe"
 }
 
 function Ensure-WebView2Bootstrapper {
@@ -129,11 +129,11 @@ $bootstrapperPath = Ensure-WebView2Bootstrapper
 $supportPublishDir = Join-Path $artifactDir "publish-support"
 if (Test-Path $supportPublishDir) { Remove-Item -Recurse -Force $supportPublishDir }
 New-Item -ItemType Directory -Force -Path $supportPublishDir | Out-Null
-Get-ChildItem -Path $publishDir -Force | Where-Object { $_.Name -ne "CrevaFactOS.Desktop.exe" } | ForEach-Object {
+Get-ChildItem -Path $publishDir -Force | Where-Object { $_.Name -ne "NevaxisFactOS.Desktop.exe" } | ForEach-Object {
     Copy-Item -Path $_.FullName -Destination (Join-Path $supportPublishDir $_.Name) -Recurse -Force
 }
 
-$portableZipName = "CrevaFactOS-Desktop-$Version-win-x64.zip"
+$portableZipName = "NevaxisFactOS-Desktop-$Version-win-x64.zip"
 $portableZipPath = Join-Path $artifactDir $portableZipName
 if (Test-Path $portableZipPath) { Remove-Item -Force $portableZipPath }
 & tar.exe -a -c -f $portableZipPath -C $publishDir .
@@ -141,7 +141,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Failed to create portable ZIP at $portableZipPath"
 }
 
-$msiName = "CrevaFactOS-Desktop-Setup-$Version-x64.msi"
+$msiName = "NevaxisFactOS-Desktop-Setup-$Version-x64.msi"
 $msiPath = Join-Path $artifactDir $msiName
 
 Push-Location (Join-Path $repoRoot "apps\desktop\installer")
@@ -150,8 +150,8 @@ try {
     $wixArgs = @(
         "build", "Package.wxs",
         "-arch", "x64",
-        "-d", "ProductName=CrevaFactOS",
-        "-d", "Publisher=CrevaFactOS",
+        "-d", "ProductName=NevaxisFactOS",
+        "-d", "Publisher=NevaxisFactOS",
         "-d", "ProductVersion=$msiProductVersion",
         "-d", "UpgradeCode={8C4E2F91-6D3A-4B17-9E2C-1A5F00000001}",
         "-d", "PublishDir=$publishDir",
@@ -179,10 +179,10 @@ function Invoke-OptionalAuthenticodeSigning {
         [Parameter(Mandatory = $true)][string[]]$Paths
     )
 
-    $thumbprint = $env:CREVAFACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT
-    $pfxPath = $env:CREVAFACTOS_DESKTOP_CODESIGN_PFX_PATH
-    $pfxPassword = $env:CREVAFACTOS_DESKTOP_CODESIGN_PFX_PASSWORD
-    $timestampUrl = if ($env:CREVAFACTOS_DESKTOP_CODESIGN_TIMESTAMP_URL) { $env:CREVAFACTOS_DESKTOP_CODESIGN_TIMESTAMP_URL } else { "http://timestamp.digicert.com" }
+    $thumbprint = $env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT
+    $pfxPath = $env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_PFX_PATH
+    $pfxPassword = $env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_PFX_PASSWORD
+    $timestampUrl = if ($env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_TIMESTAMP_URL) { $env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_TIMESTAMP_URL } else { "http://timestamp.digicert.com" }
 
     if ([string]::IsNullOrWhiteSpace($thumbprint) -and [string]::IsNullOrWhiteSpace($pfxPath)) {
         return "UNSIGNED_DEVELOPMENT"
@@ -199,7 +199,7 @@ function Invoke-OptionalAuthenticodeSigning {
         }
         else {
             if ([string]::IsNullOrWhiteSpace($pfxPassword)) {
-                throw "CREVAFACTOS_DESKTOP_CODESIGN_PFX_PASSWORD is required when using a PFX path."
+                throw "NEVAXIS_FACTOS_DESKTOP_CODESIGN_PFX_PASSWORD is required when using a PFX path."
             }
 
             & signtool.exe sign /fd SHA256 /tr $timestampUrl /td SHA256 /f $pfxPath /p $pfxPassword $path | Out-Null
@@ -224,7 +224,7 @@ $commitHash = (git -C $repoRoot rev-parse HEAD).Trim()
 $buildUtc = (Get-Date).ToUniversalTime().ToString("o")
 
 $manifest = [ordered]@{
-    product = "CrevaFactOS"
+    product = "NevaxisFactOS"
     version = $Version
     architecture = "x64"
     buildConfiguration = "Release"
@@ -258,7 +258,7 @@ $checksumPath = Join-Path $artifactDir "SHA256SUMS.txt"
 
 if ($IncludeDiagnostics) {
     New-Item -ItemType Directory -Force -Path $diagnosticsDir | Out-Null
-    $diagZip = Join-Path $artifactDir "CrevaFactOS-Desktop-$Version-diagnostics-win-x64.zip"
+    $diagZip = Join-Path $artifactDir "NevaxisFactOS-Desktop-$Version-diagnostics-win-x64.zip"
     dotnet publish $desktopProject -c Release -r win-x64 --self-contained true /p:DesktopIncludeDebugSymbolsInPublish=true /p:DebugType=portable /p:DebugSymbols=true @publishProperties -o (Join-Path $diagnosticsDir "publish-symbols")
     if (Test-Path $diagZip) { Remove-Item -Force $diagZip }
     Compress-Archive -Path (Join-Path $diagnosticsDir "*") -DestinationPath $diagZip

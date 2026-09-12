@@ -5,8 +5,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 
 function fail(message) {
@@ -92,8 +92,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("crevafactos.session") && jar.cookies.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.cookies.get("crevafactos.csrf");
+  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -113,7 +113,7 @@ async function signInPendingOwner() {
     deviceLabel: "app-action-1a-mfa-exit",
   }, jar);
   if (result.status !== 200) fail("owner password sign-in failed");
-  if (!jar.cookies.get("crevafactos.session")) fail("pending MFA session cookie missing");
+  if (!jar.cookies.get("NevaxisFactOS.session")) fail("pending MFA session cookie missing");
   return jar;
 }
 
@@ -178,8 +178,8 @@ async function exerciseExit(intent) {
   });
   jar.ingest(exit.response);
   assert(`${intent} redirects to giris`, exit.status === 303 && /\/giris(?:\?|$)/.test(new URL(exit.location, WEB).pathname));
-  assert(`${intent} cleared session cookie`, !jar.cookies.get("crevafactos.session"));
-  assert(`${intent} cleared csrf cookie`, !jar.cookies.get("crevafactos.csrf"));
+  assert(`${intent} cleared session cookie`, !jar.cookies.get("NevaxisFactOS.session"));
+  assert(`${intent} cleared csrf cookie`, !jar.cookies.get("NevaxisFactOS.csrf"));
 
   const stale = new CookieJar();
   stale.cookies = pendingCookies;

@@ -19,10 +19,10 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const service = read("packages/CrevaFactOS.Persistence/Maintenance/PredictiveRiskEvaluationService.cs");
-const entities = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenancePredictiveRiskEntities.cs");
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811160000_AddMaintenancePredictiveRiskFoundation.cs");
-const repository = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
+const service = read("packages/NevaxisFactOS.Persistence/Maintenance/PredictiveRiskEvaluationService.cs");
+const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskEntities.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811160000_AddMaintenancePredictiveRiskFoundation.cs");
+const repository = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
 
 assert("rule-set version constant", entities.includes("MAINT-PRED-RISK-V1"));
 assert("risk bands", entities.includes("MaintenancePredictiveRiskBands"));

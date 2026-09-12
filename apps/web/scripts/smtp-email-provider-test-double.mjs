@@ -10,13 +10,13 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const MODE = process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_MODE ?? "accept";
-const SMTP_PORT = Number(process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_PORT ?? 19025);
-const HTTP_PORT = Number(process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT ?? 19026);
-const CAPTURE_DIR = process.env.CREVAFACTOS_EMAIL_CAPTURE_DIR ?? resolve(ROOT, "artifacts/email-closure");
+const MODE = process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_MODE ?? "accept";
+const SMTP_PORT = Number(process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_PORT ?? 19025);
+const HTTP_PORT = Number(process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_HTTP_PORT ?? 19026);
+const CAPTURE_DIR = process.env.NEVAXIS_FACTOS_EMAIL_CAPTURE_DIR ?? resolve(ROOT, "artifacts/email-closure");
 const CAPTURE_FILE = resolve(CAPTURE_DIR, "captured-messages.jsonl");
-const EXPECTED_USER = process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_USERNAME ?? "closure-smtp-user";
-const EXPECTED_PASSWORD = process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_PASSWORD ?? "closure-smtp-password";
+const EXPECTED_USER = process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_USERNAME ?? "closure-smtp-user";
+const EXPECTED_PASSWORD = process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_PASSWORD ?? "closure-smtp-password";
 
 mkdirSync(CAPTURE_DIR, { recursive: true });
 
@@ -131,7 +131,7 @@ function createSmtpServer() {
       }
     };
 
-    send("220 crevafactos-email-test-double ESMTP");
+    send("220 NevaxisFactOS-email-test-double ESMTP");
 
     socket.on("data", (chunk) => {
       if (shouldHang) return;
@@ -153,7 +153,7 @@ function createSmtpServer() {
 
           acceptSequence += 1;
           const parsed = parseMime(dataBuffer);
-          const messageId = parsed.messageId ?? `<test-double-${Date.now()}.${acceptSequence}@closure.crevafactos.local>`;
+          const messageId = parsed.messageId ?? `<test-double-${Date.now()}.${acceptSequence}@closure.NevaxisFactOS.local>`;
           recordCapture({
             capturedAtUtc: new Date().toISOString(),
             mode: MODE,
@@ -183,7 +183,7 @@ function createSmtpServer() {
             socket.destroy();
             return;
           }
-          const extensions = ["250-crevafactos-email-test-double Hello", "250-AUTH LOGIN PLAIN", "250 STARTTLS"];
+          const extensions = ["250-NevaxisFactOS-email-test-double Hello", "250-AUTH LOGIN PLAIN", "250 STARTTLS"];
           extensions.forEach((ext, idx) => {
             if (idx === extensions.length - 1) send(ext);
             else send(ext);

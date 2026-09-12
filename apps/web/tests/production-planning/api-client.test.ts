@@ -19,9 +19,9 @@ const requestContext = {
     "development-headers" as const,
   correlationId: "correlation-id",
   requestHeaders: {
-    "X-CrevaFactOS-Dev-Issuer": "issuer",
-    "X-CrevaFactOS-Dev-Subject": "subject",
-    "X-CrevaFactOS-Tenant": "tenant",
+    "X-crevafactos-dev-Issuer": "issuer",
+    "X-crevafactos-dev-Subject": "subject",
+    "X-NevaxisFactOS-Tenant": "tenant",
   },
 };
 

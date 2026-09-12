@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ACTOR = {
   issuer: "crevafactos-dev",
@@ -24,16 +24,16 @@ function assert(label, ok, detail = "") {
 function headers() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ACTOR.issuer,
-    "X-CrevaFactOS-Dev-Subject": ACTOR.subject,
-    "X-CrevaFactOS-Tenant": ACTOR.tenant,
+    "X-crevafactos-dev-Issuer": ACTOR.issuer,
+    "X-crevafactos-dev-Subject": ACTOR.subject,
+    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -189,7 +189,7 @@ const scrappedRow = spawnSync(
   "docker",
   [
     "exec",
-    "crevafactos-local-postgres-1",
+    "NevaxisFactOS-local-postgres-1",
     "psql",
     "-U",
     "crevafactos",

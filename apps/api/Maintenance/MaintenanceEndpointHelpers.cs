@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Maintenance;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Maintenance;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.Maintenance;
+namespace NevaxisFactOS.Api.Maintenance;
 
 internal static class MaintenanceEndpointHelpers
 {

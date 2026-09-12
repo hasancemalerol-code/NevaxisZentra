@@ -1,13 +1,13 @@
-using CrevaFactOS.Api.Authentication;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.SaasCommercial;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Authentication;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.SaasCommercial;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.SaasCommercial;
+namespace NevaxisFactOS.Api.SaasCommercial;
 
 public static class SaasCommercialEndpointRouteBuilderExtensions
 {
@@ -145,11 +145,11 @@ public static class SaasCommercialEndpointRouteBuilderExtensions
 
 public static class SaasCommercialServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSSaasCommercial(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSSaasCommercial(this IServiceCollection services)
     {
         services.AddScoped<ISaasCommercialRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableSaasCommercialRepository()
                 : new SaasCommercialRepository(

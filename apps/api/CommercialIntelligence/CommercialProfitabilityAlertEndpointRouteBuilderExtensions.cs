@@ -1,14 +1,14 @@
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.CommercialIntelligence;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.CommercialIntelligence;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.CommercialIntelligence;
+namespace NevaxisFactOS.Api.CommercialIntelligence;
 
 internal static class CommercialProfitabilityAlertEndpointRouteBuilderExtensions
 {
@@ -369,11 +369,11 @@ public sealed record TransitionCommercialProfitabilityAlertRequest(
 
 public static class CommercialProfitabilityAlertServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSCommercialProfitabilityAlerts(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSCommercialProfitabilityAlerts(this IServiceCollection services)
     {
         services.AddScoped<ICommercialProfitabilityAlertRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialProfitabilityAlertRepository()
                 : new CommercialProfitabilityAlertRepository(

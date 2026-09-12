@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+
 import Link from "next/link";
 
 import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
@@ -343,7 +344,7 @@ export function MaintenanceStatusPanel({
                 borderBottom:
                   index === visibleItems.length - 1
                     ? 0
-                    : styles.row.borderBottom,
+                    : "1px solid #dce5f0",
               }}
             >
               <span

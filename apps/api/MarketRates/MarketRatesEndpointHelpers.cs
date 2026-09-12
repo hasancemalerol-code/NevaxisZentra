@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.MarketRates;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.MarketRates;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.MarketRates;
+namespace NevaxisFactOS.Api.MarketRates;
 
 internal static class MarketRatesEndpointHelpers
 {

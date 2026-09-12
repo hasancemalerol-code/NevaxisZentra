@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const URETIM_CHANNEL = "bb000001-03d1-4000-8000-0000000003d1";
 const REVIEWER_MEMBERSHIP = "bb000001-0021-4000-8000-000000000021";
@@ -30,9 +30,9 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -51,9 +51,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(OWNER)) {
 console.log("Running TEAMS-WORK-INBOX-1 security verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsWorkInboxEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsConstants.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
 
 assert("inbox route", endpoints.includes("/api/teams/work-inbox"));
 assert("read resolver", endpoints.includes("ResolveReadAccessAsync"));

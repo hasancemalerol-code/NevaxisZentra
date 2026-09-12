@@ -119,11 +119,11 @@ export function resolveProductionPlanRequestContext(
         correlationId:
           createCorrelationId(),
         requestHeaders: {
-          "X-CrevaFactOS-Dev-Issuer":
+          "X-crevafactos-dev-Issuer":
             developmentAuth.issuer,
-          "X-CrevaFactOS-Dev-Subject":
+          "X-crevafactos-dev-Subject":
             developmentAuth.subject,
-          "X-CrevaFactOS-Tenant":
+          "X-NevaxisFactOS-Tenant":
             developmentAuth.tenantKey,
         },
       },

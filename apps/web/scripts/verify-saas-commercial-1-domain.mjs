@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const DEV_PLAN_CODE = "dev-pilot-local-commercial";
 const DEV_PLAN_ID = "bb000001-00e0-4000-8000-0000000000e0";
 const DEV_MONTHLY_VERSION_ID = "bb000001-00e2-4000-8000-0000000000e2";
@@ -34,7 +34,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -46,7 +46,7 @@ function dbExpectFailure(sql) {
     "docker",
     [
       "exec",
-      "crevafactos-local-postgres-1",
+      "NevaxisFactOS-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
@@ -65,9 +65,9 @@ function dbExpectFailure(sql) {
 function headers(actor = MANAGER) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -180,10 +180,10 @@ function insertClosureVersion(versionId, planId, versionNumber, cadence, effecti
 
 console.log("Running SAAS-COMMERCIAL-1 domain verifier.");
 
-const conversions = readRequired("packages/CrevaFactOS.Persistence/SaasCommercial/SaasCommercialConstants.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/SaasCommercial/SaasCommercialRepository.cs");
+const conversions = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialConstants.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialRepository.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
 );
 
 assert("plan code normalizer", conversions.includes("NormalizePlanCode"));

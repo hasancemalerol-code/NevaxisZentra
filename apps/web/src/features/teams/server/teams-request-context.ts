@@ -19,8 +19,8 @@ export type TeamsRequestContextResult =
 
 function resolveFacilityId(): string {
   return (
-    process.env.CREVAFACTOS_DEV_FACILITY_ID?.trim()
-    ?? process.env.CREVAFACTOS_FACILITY_ID?.trim()
+    process.env.NEVAXIS_FACTOS_DEV_FACILITY_ID?.trim()
+    ?? process.env.NEVAXIS_FACTOS_FACILITY_ID?.trim()
     ?? ""
   );
 }

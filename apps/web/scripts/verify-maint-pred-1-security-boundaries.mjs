@@ -20,10 +20,10 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const repo = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceConditionRepository.cs");
+const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceConditionRepository.cs");
 const endpoints = read("apps/api/Maintenance/MaintenanceConditionEndpointRouteBuilderExtensions.cs");
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811120000_AddMaintenanceConditionIntelligenceFoundation.cs");
-const edgeRepo = read("packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811120000_AddMaintenanceConditionIntelligenceFoundation.cs");
+const edgeRepo = read("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
 
 assert("maintenance read access", endpoints.includes("ResolveReadAccessAsync"));
 assert("edge read-only consumption", repo.includes("MachineTelemetrySamples"));

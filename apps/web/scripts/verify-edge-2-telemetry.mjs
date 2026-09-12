@@ -44,7 +44,7 @@ function assertNotContains(label, content, text) {
 // 1. Telemetry entity model
 // ---------------------------------------------------------------------------
 console.log("\n[1] MachineTelemetrySample entity");
-const entities = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
 
 assertContains("MachineTelemetrySample class", entities, "class MachineTelemetrySample");
 assertContains("NumericValue field", entities, "double? NumericValue");
@@ -93,7 +93,7 @@ assertContains("projection has UpdatedAtUtc", entities, "DateTimeOffset UpdatedA
 // 5. Entity configurations
 // ---------------------------------------------------------------------------
 console.log("\n[5] EF Core entity configurations");
-const configs = readFile("packages/CrevaFactOS.Persistence/Configurations/EdgeEntityConfigurations.cs");
+const configs = readFile("packages/NevaxisFactOS.Persistence/Configurations/EdgeEntityConfigurations.cs");
 assertContains("MachineTelemetrySampleEntityConfiguration", configs, "class MachineTelemetrySampleEntityConfiguration");
 assertContains("MachineLatestTelemetryEntityConfiguration", configs, "class MachineLatestTelemetryEntityConfiguration");
 assertContains("machine_telemetry table", configs, '"machine_telemetry"');
@@ -105,7 +105,7 @@ assertContains("metric+time index", configs, "MetricKey, t.SourceTimestampUtc");
 // 6. Ingestion service
 // ---------------------------------------------------------------------------
 console.log("\n[6] EdgeTelemetryIngestionService");
-const svc = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeTelemetryIngestionService.cs");
+const svc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeTelemetryIngestionService.cs");
 assertContains("IEdgeTelemetryIngestionService interface", svc, "interface IEdgeTelemetryIngestionService");
 assertContains("IngestTelemetryAsync method", svc, "IngestTelemetryAsync");
 assertContains("duplicate check by idempotency key", svc, "IdempotencyKey == request.IdempotencyKey");
@@ -121,7 +121,7 @@ assertNotContains("no OEE", svc, "OEE");
 // 7. Read models and DTOs
 // ---------------------------------------------------------------------------
 console.log("\n[7] Telemetry read models");
-const models = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeModels.cs");
+const models = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
 assertContains("TelemetrySampleReadModel record", models, "TelemetrySampleReadModel");
 assertContains("LatestTelemetryReadModel record", models, "LatestTelemetryReadModel");
 assertContains("TelemetryIngestRequest record", models, "TelemetryIngestRequest");
@@ -134,7 +134,7 @@ assertContains("TelemetryOutOfOrder failure code", models, '"edge.telemetry.out-
 // 8. Repository
 // ---------------------------------------------------------------------------
 console.log("\n[8] EdgeQueryRepository telemetry queries");
-const repo = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs");
+const repo = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
 assertContains("ListLatestTelemetryAsync method", repo, "ListLatestTelemetryAsync");
 assertContains("ListTelemetryHistoryAsync method", repo, "ListTelemetryHistoryAsync");
 assertContains("from/to time range support", repo, "from.HasValue");
@@ -157,7 +157,7 @@ assertContains("IEdgeTelemetryIngestionService registered", api, "IEdgeTelemetry
 // 10. Migration
 // ---------------------------------------------------------------------------
 console.log("\n[10] EDGE-2 migration");
-const migration = readFile("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
+const migration = readFile("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
 assertContains("machine_telemetry table created", migration, "CREATE TABLE IF NOT EXISTS machine_telemetry");
 assertContains("machine_latest_telemetry table created", migration, "CREATE TABLE IF NOT EXISTS machine_latest_telemetry");
 assertContains("idempotency unique index", migration, "ix_machine_telemetry_idempotency");
@@ -169,7 +169,7 @@ assertContains("quality check constraint", migration, "quality IN ('good', 'unce
 // 11. Simulator
 // ---------------------------------------------------------------------------
 console.log("\n[11] Simulator telemetry scenario");
-const sim = readFile("tools/CrevaFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const sim = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
 assertContains("SimulatedTelemetry type", sim, "record SimulatedTelemetry");
 assertContains("TypedTelemetry in event", sim, "TypedTelemetry");
 assertContains("temperature_zone_1 fixture", sim, '"temperature_zone_1"');
@@ -187,7 +187,7 @@ assertNotContains("no machine write commands", sim, "WriteTag");
 console.log("\n[12] Tenant/facility isolation");
 assertContains("FacilityId on MachineTelemetrySample", entities, "public Guid FacilityId");
 assertContains("TenantId on MachineTelemetrySample", entities, "public Guid TenantId");
-const dbContext = readFile("packages/CrevaFactOS.Persistence/CrevaFactOSDbContext.cs");
+const dbContext = readFile("packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs");
 assertContains("MachineTelemetrySamples DbSet", dbContext, "MachineTelemetrySamples");
 assertContains("MachineLatestTelemetries DbSet", dbContext, "MachineLatestTelemetries");
 assertContains("telemetry query filter by tenant", dbContext, "MachineTelemetrySample");

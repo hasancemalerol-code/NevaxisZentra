@@ -39,7 +39,7 @@ function fileExists(relPath) {
 // ── 1. ENTITY ─────────────────────────────────────────────────────────────────
 
 const entity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionDowntime.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionDowntime.cs",
 );
 
 check("ProductionDowntime.cs exists", entity !== null);
@@ -58,7 +58,7 @@ check("ProductionDowntime has Version", entity?.includes("public uint Version") 
 // ── 2. ENTITY CONFIGURATION ──────────────────────────────────────────────────
 
 const config = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionDowntimeEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionDowntimeEntityConfiguration.cs",
 );
 
 check("ProductionDowntimeEntityConfiguration.cs exists", config !== null);
@@ -69,7 +69,7 @@ check("Config has FK to production_orders", config?.includes("production_order_i
 // ── 3. PERMISSION KEYS ───────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -80,7 +80,7 @@ check(
 // ── 4. AUDIT/OUTBOX TAXONOMY ─────────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 check(
   "AuditActions contains production.order.downtime.start",
@@ -92,7 +92,7 @@ check(
 );
 
 const auditEvents = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditEventTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditEventTypes.cs",
 );
 check(
   "AuditEventTypes contains production.order.downtime.started",
@@ -104,7 +104,7 @@ check(
 );
 
 const outbox = readText(
-  "packages/CrevaFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
 );
 check(
   "OutboxMessageTypes contains production-order-downtime-started",
@@ -118,7 +118,7 @@ check(
 // ── 5. MIGRATION ──────────────────────────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
 );
 
 check("3L migration file exists", migration !== null);
@@ -132,7 +132,7 @@ check("Migration adds downtime permission definitions", migration?.includes("pro
 // ── 6. REPOSITORY ─────────────────────────────────────────────────────────────
 
 const repo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOperationsRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOperationsRepository.cs",
 );
 
 check("ProductionOperationsRepository.cs exists", repo !== null);

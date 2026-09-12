@@ -19,13 +19,13 @@ import {
   requireEnv,
 } from "./saas-payments-1-verifier-lib.mjs";
 
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const VIEWPORTS = [
   { width: 1600, height: 1000, label: "1600x1000" },
   { width: 1024, height: 900, label: "1024x900" },
 ];
-const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-saas-payments-1");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-saas-payments-1");
 const CARD_NOT_CONFIGURED = "Kartla ödeme sağlayıcısı henüz yapılandırılmadı.";
 const CARD_SANDBOX = "Test ortamı — gerçek tahsilat yapılmaz";
 const RETURN_VERIFY_MESSAGE = "Ödeme sonucu doğrulanıyor";
@@ -144,7 +144,7 @@ async function runViewportValidation(page, viewportLabel, mode, returnUrl) {
     const payButton = page.getByRole("button", { name: "Kartla öde" });
     assert(`${viewportLabel} Kartla öde visible`, await payButton.isVisible());
     assert(`${viewportLabel} Kartla öde enabled for owner`, !(await payButton.isDisabled()));
-    assert(`${viewportLabel} no card form in CrevaFactOS`, (await page.locator("input[name*='card'], input[autocomplete='cc-number']").count()) === 0);
+    assert(`${viewportLabel} no card form in NevaxisFactOS`, (await page.locator("input[name*='card'], input[autocomplete='cc-number']").count()) === 0);
   }
 
   await assertNoHorizontalOverflow(page, viewportLabel);

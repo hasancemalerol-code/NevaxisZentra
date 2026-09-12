@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Integration;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Integration;
 
-namespace CrevaFactOS.Api.Integration;
+namespace NevaxisFactOS.Api.Integration;
 
 internal static class IntegrationEndpointHelpers
 {

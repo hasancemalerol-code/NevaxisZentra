@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const SHORTAGE_ASSESSMENT = "bb000001-00b3-4000-8000-0000000000b3";
@@ -39,16 +39,16 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -72,10 +72,10 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running INVENTORY-RISK-FOUNDATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialAvailabilityRiskEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialRequirementRepository.cs");
-const riskRepository = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialAvailabilityRiskRepository.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
-const calculator = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialRequirementRepository.cs");
+const riskRepository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskRepository.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
 
 assert("workspace endpoint registered", endpoints.includes('MapGet("/workspace"'));
 assert("evaluate endpoint registered", endpoints.includes('MapPost("/evaluate"'));
@@ -143,7 +143,7 @@ spawnSync(
   "docker",
   [
     "exec",
-    "crevafactos-local-postgres-1",
+    "NevaxisFactOS-local-postgres-1",
     "psql",
     "-U",
     "crevafactos",

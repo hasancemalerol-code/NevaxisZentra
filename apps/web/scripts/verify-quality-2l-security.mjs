@@ -37,12 +37,12 @@ console.log("Running quality 2L security verifier.");
 const endpoints = readRequired("apps/api/Quality/QualityNcrEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Quality/QualityEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
 );
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/QualityPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/QualityPermissionKeys.cs");
 const apiClient = readRequired("apps/web/src/features/quality-control/server/quality-control-api-client.ts");
 const writer = readRequired("apps/web/src/features/quality-control/server/quality-control-writer.ts");
-const ncrRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
+const ncrRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
 
 requireText(endpoints, "IFacilityAccessResolver", "NCR endpoints");
 requireText(endpoints, "QualityPermissionKeys.NcrManage", "NCR endpoints");

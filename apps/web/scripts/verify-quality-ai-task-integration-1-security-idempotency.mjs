@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const CONFIRMED_NCR = "bb000001-0063-4000-8000-000000000063";
@@ -29,9 +29,9 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -50,9 +50,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running QUALITY-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityNcrFollowUpEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
-const presentation = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityFollowUpPresentationBuilder.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityFollowUpConstants.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
+const presentation = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityFollowUpPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityFollowUpConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes('MapPost("/ncr-follow-up/{ncrId:guid}/task-draft"'));
 assert("follow-up requires ncr manage permission", endpoints.includes("QualityPermissionKeys.NcrManage"));

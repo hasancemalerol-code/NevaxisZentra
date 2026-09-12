@@ -1,20 +1,20 @@
-# CrevaFactOS Human-in-the-Loop and Unit Routing Model
+# NevaxisFactOS Human-in-the-Loop and Unit Routing Model
 
 - Status: Locked
 - Version: 2.0
 - Date: 2026-08-04
-- Communication application: CrevaFactOS Teams
+- Communication application: NevaxisFactOS Teams
 - Authoritative workflow: AI Task Center
 
 ## Purpose
 
-This document defines how analysis becomes a controlled factory-operation action. CrevaFactOS is not a fully autonomous factory-management system, and AI cannot approve its own work.
+This document defines how analysis becomes a controlled factory-operation action. NevaxisFactOS is not a fully autonomous factory-management system, and AI cannot approve its own work.
 
 ## Authority
 
-AI Task Center owns task, assignment, evidence, review, approval, delegation, expiry, execution, and result state. Web and CrevaFactOS Teams reference the same task and approval identifiers and transitions.
+AI Task Center owns task, assignment, evidence, review, approval, delegation, expiry, execution, and result state. Web and NevaxisFactOS Teams reference the same task and approval identifiers and transitions.
 
-CrevaFactOS Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. A Teams message, emoji, reaction, or read receipt is not itself an approval unless it invokes a validated AI Task Center decision action.
+NevaxisFactOS Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. A Teams message, emoji, reaction, or read receipt is not itself an approval unless it invokes a validated AI Task Center decision action.
 
 ## Standard Flow
 
@@ -25,11 +25,11 @@ ERP + machines + order channels + documents
   -> authorized AI agent
   -> analysis + evidence + freshness + confidence + risk + bounded proposal
   -> authoritative AI Task Center task and approval request
-  -> Web and/or CrevaFactOS Teams routing
+  -> Web and/or NevaxisFactOS Teams routing
   -> authorized human review
   -> approve / reject / correct / delegate / expire
   -> permission, approval, freshness, and current-state revalidation
-  -> CrevaFactOS action / approved ERP write-back / approved Edge command
+  -> NevaxisFactOS action / approved ERP write-back / approved Edge command
   -> outcome verification and reconciliation
   -> audit + AI Decision Ledger
 ```

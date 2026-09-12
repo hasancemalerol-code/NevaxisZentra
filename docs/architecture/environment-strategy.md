@@ -1,4 +1,4 @@
-# CrevaFactOS Ortam Stratejisi
+# NevaxisFactOS Ortam Stratejisi
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS için local, test, staging ve production ortamlarının nasıl ayrılacağını, yapılandırılacağını ve işletileceğini tanımlar.
+Bu belge NevaxisFactOS için local, test, staging ve production ortamlarının nasıl ayrılacağını, yapılandırılacağını ve işletileceğini tanımlar.
 
 
 
@@ -36,7 +36,7 @@ Amaçlar:
 
 
 
-CrevaFactOS en az aşağıdaki ortamları destekleyecektir:
+NevaxisFactOS en az aşağıdaki ortamları destekleyecektir:
 
 
 

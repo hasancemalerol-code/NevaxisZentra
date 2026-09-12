@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.SaasBilling.Payments;
+using NevaxisFactOS.Persistence.SaasBilling.Payments;
 
-namespace CrevaFactOS.Api.SaasBilling.Payments;
+namespace NevaxisFactOS.Api.SaasBilling.Payments;
 
 public sealed class NotConfiguredSaasPaymentProvider : ISaasPaymentProvider
 {

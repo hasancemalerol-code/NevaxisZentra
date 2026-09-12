@@ -78,7 +78,7 @@ function requireEnv(name) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -91,24 +91,24 @@ function readMigrationConnectionEnv() {
   const persistence = appsettings.Persistence ?? {};
   return {
     ...process.env,
-    CREVAFACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
-    CREVAFACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
-    CREVAFACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
-    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
-    CREVAFACTOS__MIGRATIONS__PASSWORD:
-      process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
-      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+    NEVAXIS_FACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
+    NEVAXIS_FACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
+    NEVAXIS_FACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
+    NEVAXIS_FACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    NEVAXIS_FACTOS__MIGRATIONS__PASSWORD:
+      process.env.NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.NEVAXIS_FACTOS_POSTGRES_PASSWORD
       ?? "local_dev_only_change_me",
-    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
-    CREVAFACTOS__MIGRATIONS__CONNECTION_TIMEOUT_SECONDS: "15",
-    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
+    NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    NEVAXIS_FACTOS__MIGRATIONS__CONNECTION_TIMEOUT_SECONDS: "15",
+    NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
   };
 }
 
 function runSecondMigrationApply() {
   const migrationProject = resolve(
     ROOT,
-    "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj",
+    "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj",
   );
   return spawnSync(
     "dotnet",
@@ -124,7 +124,7 @@ function runSecondMigrationApply() {
       "--startup-project",
       migrationProject,
       "--context",
-      "CrevaFactOSDbContext",
+      "NevaxisFactOSDbContext",
     ],
     {
       cwd: ROOT,
@@ -389,7 +389,7 @@ const tenantOwnerPassword = requireEnv("DevelopmentSaasIdentity__TenantOwnerPass
 const activeUserPassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassword");
 const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 
-const snapshot = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
+const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
 const endpoints = readRequired("apps/api/SaasIdentity/SaasIdentityEndpointRouteBuilderExtensions.cs");
 const authExtensions = readRequired("apps/api/Authentication/AuthenticationServiceCollectionExtensions.cs");
 const authConstants = readRequired("apps/web/src/features/saas-identity/lib/saas-identity-constants.ts");
@@ -400,8 +400,8 @@ const resetPage = readRequired("apps/web/src/app/(auth)/sifre-sifirla/page.tsx")
 const invitationPage = readRequired("apps/web/src/app/(auth)/davet/kabul/page.tsx");
 
 for (const migrationInfo of MIGRATIONS) {
-  const migration = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.cs`);
-  const designer = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.Designer.cs`);
+  const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.cs`);
+  const designer = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.Designer.cs`);
 
   assert(`${migrationInfo.id} migration source present`, migration.includes(migrationInfo.marker));
   assert(`${migrationInfo.id} designer present`, designer.includes(migrationInfo.marker));
@@ -417,7 +417,7 @@ for (const migrationInfo of MIGRATIONS) {
 }
 
 const fixMigration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814095248_FixSaasIdentitySessionResolutionFunction.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814095248_FixSaasIdentitySessionResolutionFunction.cs",
 );
 const migrationFunctionBody = extractMigrationFunctionBody(fixMigration);
 const liveFunctionDefinition = db(`SELECT pg_get_functiondef('${FUNCTION_NAME}(text)'::regprocedure)`);
@@ -469,7 +469,7 @@ const functionOwner = db(`
   JOIN pg_roles r ON r.oid = p.proowner
   WHERE p.proname = '${FUNCTION_NAME}'
 `);
-assert("function owner is crevafactos", functionOwner === "crevafactos", functionOwner);
+assert("function owner is NevaxisFactOS", functionOwner === "crevafactos", functionOwner);
 assert("function owner is not crevafactos_runtime", functionOwner !== "crevafactos_runtime");
 
 const publicExecute = Number(db(`

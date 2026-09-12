@@ -19,7 +19,7 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const repo = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
+const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
 const endpoints = read("apps/api/Maintenance/MaintenanceAiEndpointRouteBuilderExtensions.cs");
 const ui = read("apps/web/src/features/maintenance/components/maintenance-ai-assistant-section.tsx");
 const sidebar = read("apps/web/src/components/app-shell/sidebar.tsx");

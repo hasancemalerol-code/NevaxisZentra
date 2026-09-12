@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5011";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5011";
 const AUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const NONEXISTENT_FACILITY = "bb000001-0005-4000-8000-000000000098";
@@ -45,9 +45,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -70,15 +70,15 @@ const parentEndpoints = readRequired(
 );
 const helpers = readRequired("apps/api/Maintenance/MaintenanceEndpointHelpers.cs");
 const resolver = readRequired("apps/api/Facilities/FacilityAccessResolver.cs");
-const pilotIds = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotIds.cs");
+const pilotIds = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIds.cs");
 const bootstrap = readRequired(
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs",
 );
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
 );
 const executionRepo = readRequired(
-  "packages/CrevaFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs",
 );
 
 requireText(parentEndpoints, 'MapGroup("/api/maintenance").RequireAuthorization()', "maintenance group auth");
@@ -157,7 +157,7 @@ try {
     "/api/maintenance/preventive-dues",
     OPERATOR,
     AUTHORIZED_FACILITY,
-    { "X-CrevaFactOS-Tenant": "other-tenant" },
+    { "X-NevaxisFactOS-Tenant": "other-tenant" },
   );
   if (crossTenantStatus !== 403) {
     fail(`cross-tenant access must return HTTP 403, got ${crossTenantStatus}.`);

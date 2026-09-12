@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -19,9 +19,9 @@ function assert(label, ok, detail = "") {
 
 function headers() {
   return {
-    "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-    "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-    "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+    "X-crevafactos-dev-Issuer": "crevafactos-dev",
+    "X-crevafactos-dev-Subject": "production-pilot-operator",
+    "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
   };
 }
 
@@ -33,7 +33,7 @@ async function list(query) {
 
 console.log("Running MOLD-1 pagination/ordering live verifier.");
 
-const repo = readFileSync(resolve(ROOT, "packages/CrevaFactOS.Persistence/Mold/MoldRepository.cs"), "utf8").replaceAll("\r\n", "\n");
+const repo = readFileSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/Mold/MoldRepository.cs"), "utf8").replaceAll("\r\n", "\n");
 assert("ordering documented in repository", repo.includes(".OrderBy(m => m.CodeNormalized)") && repo.includes(".ThenBy(m => m.Name)"));
 
 const defaultPage = await list("page=1");

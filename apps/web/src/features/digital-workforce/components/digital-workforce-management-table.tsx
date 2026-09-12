@@ -10,7 +10,6 @@ import {
   AUTONOMY_MODE_ORDER,
   DIGITAL_WORKFORCE_COST_NOTE,
   DIGITAL_WORKFORCE_FULL_NOTE,
-  STAGE_LABELS,
 } from "../domain/digital-workforce-labels";
 import type {
   DigitalAutonomyMode,
@@ -18,7 +17,7 @@ import type {
   DigitalWorkerId,
   DigitalWorkerRuntimeStatus,
 } from "../domain/digital-workforce-types";
-import { AutonomyChips, DemoBadge, StatusChip } from "./digital-workforce-primitives";
+import { AutonomyChips, StatusChip } from "./digital-workforce-primitives";
 
 type WorkerFilter =
   | "all"

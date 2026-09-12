@@ -1,6 +1,6 @@
-# CrevaFactOS Security Documentation
+# NevaxisFactOS Security Documentation
 
-CrevaFactOS is a multi-tenant AI Factory Operations Assistant operating above ERP and factory systems. It is not a replacement ERP and does not gain authority merely by synchronizing external data.
+NevaxisFactOS is a multi-tenant AI Factory Operations Assistant operating above ERP and factory systems. It is not a replacement ERP and does not gain authority merely by synchronizing external data.
 
 ## Security Boundaries
 
@@ -39,7 +39,7 @@ edge_commands.approve
 audit.read
 ```
 
-Permission names describe bounded operations. Permissions for native finance, accounting, official stock, payroll, or general purchasing ledgers are not defined because those are not CrevaFactOS-owned modules.
+Permission names describe bounded operations. Permissions for native finance, accounting, official stock, payroll, or general purchasing ledgers are not defined because those are not NevaxisFactOS-owned modules.
 
 ## Critical Action Controls
 
@@ -49,7 +49,7 @@ ERP writes are allowlisted, approval-bound, safe to retry, reconciled, and audit
 
 ## Edge Safety
 
-Edge Agent connects through least-privilege, per-installation identity. Telemetry is read-first. Approved machine commands remain bounded and may be rejected by local safety logic. Emergency stops, interlocks, safety PLCs, and hard-real-time controls cannot be overridden from CrevaFactOS.
+Edge Agent connects through least-privilege, per-installation identity. Telemetry is read-first. Approved machine commands remain bounded and may be rejected by local safety logic. Emergency stops, interlocks, safety PLCs, and hard-real-time controls cannot be overridden from NevaxisFactOS.
 
 ## Data and Secrets
 

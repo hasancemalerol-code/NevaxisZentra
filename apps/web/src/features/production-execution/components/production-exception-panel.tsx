@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, CheckCircle2, Eye, MessageSquare, Plus, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Eye, MessageSquare, Plus } from "lucide-react";
 
 import type {
   ProductionExecutionExceptionSummary,

@@ -1,4 +1,4 @@
-# Loads infrastructure/.env (when present) and starts the CrevaFactOS API for local development.
+# Loads infrastructure/.env (when present) and starts the NevaxisFactOS API for local development.
 # Matches the Import-EnvironmentFile contract used by scripts/database/database.ps1.
 
 [CmdletBinding()]
@@ -9,7 +9,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$apiProject = Join-Path $repositoryRoot 'apps\api\CrevaFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
 
 function Import-EnvironmentFile {
     param([string]$Path)
@@ -36,7 +36,7 @@ Import-EnvironmentFile (Join-Path $repositoryRoot 'infrastructure\.env')
 function Set-PersistenceValue {
     param([string]$Suffix, [string]$LegacyName, [string]$DefaultValue)
 
-    $name = "CREVAFACTOS__PERSISTENCE__$Suffix"
+    $name = "NEVAXIS_FACTOS__PERSISTENCE__$Suffix"
     if ([Environment]::GetEnvironmentVariable($name, 'Process')) {
         return
     }
@@ -49,13 +49,13 @@ function Set-PersistenceValue {
     [Environment]::SetEnvironmentVariable($name, $value, 'Process')
 }
 
-Set-PersistenceValue 'ENABLED' 'CREVAFACTOS_PERSISTENCE_ENABLED' 'true'
-Set-PersistenceValue 'HOST' 'CREVAFACTOS_POSTGRES_HOST' '127.0.0.1'
-Set-PersistenceValue 'PORT' 'CREVAFACTOS_POSTGRES_PORT' '5432'
-Set-PersistenceValue 'DATABASE' 'CREVAFACTOS_POSTGRES_DATABASE' 'crevafactos_local'
-Set-PersistenceValue 'USERNAME' 'CREVAFACTOS_PERSISTENCE_USERNAME' 'crevafactos_runtime'
-Set-PersistenceValue 'PASSWORD' 'CREVAFACTOS_PERSISTENCE_PASSWORD' 'local_runtime_only_change_me'
-Set-PersistenceValue 'SSL_MODE' 'CREVAFACTOS_PERSISTENCE_SSL_MODE' 'Disable'
+Set-PersistenceValue 'ENABLED' 'NEVAXIS_FACTOS_PERSISTENCE_ENABLED' 'true'
+Set-PersistenceValue 'HOST' 'NEVAXIS_FACTOS_POSTGRES_HOST' '127.0.0.1'
+Set-PersistenceValue 'PORT' 'NEVAXIS_FACTOS_POSTGRES_PORT' '5432'
+Set-PersistenceValue 'DATABASE' 'NEVAXIS_FACTOS_POSTGRES_DATABASE' 'crevafactos_local'
+Set-PersistenceValue 'USERNAME' 'NEVAXIS_FACTOS_PERSISTENCE_USERNAME' 'crevafactos_runtime'
+Set-PersistenceValue 'PASSWORD' 'NEVAXIS_FACTOS_PERSISTENCE_PASSWORD' 'local_runtime_only_change_me'
+Set-PersistenceValue 'SSL_MODE' 'NEVAXIS_FACTOS_PERSISTENCE_SSL_MODE' 'Disable'
 
 Push-Location $repositoryRoot
 try {

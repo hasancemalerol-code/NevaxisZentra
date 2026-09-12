@@ -1,12 +1,12 @@
-using CrevaFactOS.Persistence.AdminAccess;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.SaasSubscription;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence.AdminAccess;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.SaasSubscription;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Http;
 
-namespace CrevaFactOS.Api.SaasSubscription;
+namespace NevaxisFactOS.Api.SaasSubscription;
 
 internal static class SaasSubscriptionEndpointHelpers
 {

@@ -6,8 +6,8 @@ import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const READ_PERMISSION_ID = "10000000-0000-4000-8000-000000000080";
@@ -34,7 +34,7 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__OPRISK_UI_1_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -88,8 +88,8 @@ async function api(method, path, body, jar, headers = {}) {
   const requestHeaders = { Accept: "application/json", ...headers };
   if (body) requestHeaders["Content-Type"] = "application/json";
   if (jar?.header()) requestHeaders.Cookie = jar.header();
-  if (jar?.cookies.get("crevafactos.session") && jar.cookies.get("crevafactos.csrf") && method !== "GET") {
-    requestHeaders["X-CrevaFactOS-Csrf"] = jar.cookies.get("crevafactos.csrf");
+  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
+    requestHeaders["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, { method, headers: requestHeaders, body: body ? JSON.stringify(body) : undefined });
   jar?.ingest(response);
@@ -101,9 +101,9 @@ async function api(method, path, body, jar, headers = {}) {
 async function devApi(method, path, body, actor) {
   return api(method, path, body, null, {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   });
 }
 
@@ -136,7 +136,7 @@ function navigationSource() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }

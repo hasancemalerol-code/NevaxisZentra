@@ -4,8 +4,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -22,9 +22,9 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__SUBSCRIPTION_RECURRENCE_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -105,8 +105,8 @@ async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { Accept: "application/json", ...extraHeaders };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("crevafactos.session") && jar.cookies.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.cookies.get("crevafactos.csrf");
+  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -172,7 +172,7 @@ assert("missing auth redirects away from dashboard", missingAuth.status === 307 
 const missingAuthApi = await api("GET", "/api/saas-subscription/current");
 assert("missing auth subscription/current -> 401", missingAuthApi.status === 401, `status=${missingAuthApi.status}`);
 const crossTenant = await api("GET", "/api/saas-subscription/current", undefined, jar, {
-  "X-CrevaFactOS-Tenant": "other-tenant-not-pilot",
+  "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
 });
 assert("cross-tenant denied", crossTenant.status === 403, `status=${crossTenant.status}`);
 
@@ -200,7 +200,7 @@ if (subscriptionId) {
 }
 
 const staleCookieResponse = await fetch(`${WEB}/dashboard`, {
-  headers: { Cookie: "crevafactos.session=invalid-local-recurrence-probe" },
+  headers: { Cookie: "NevaxisFactOS.session=invalid-local-recurrence-probe" },
   redirect: "manual",
 });
 const staleLocation = staleCookieResponse.headers.get("location") ?? "";

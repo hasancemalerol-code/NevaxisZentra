@@ -35,7 +35,7 @@ function readText(relPath) {
 // ── 1. ENTITY ─────────────────────────────────────────────────────────────────
 
 const entity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionCycleEntry.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionCycleEntry.cs",
 );
 
 check("ProductionCycleEntry.cs exists", entity !== null);
@@ -51,7 +51,7 @@ check("No Version on cycle entry (immutable)", !(entity?.includes("public uint V
 // ── 2. ENTITY CONFIGURATION ──────────────────────────────────────────────────
 
 const config = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionCycleEntryEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionCycleEntryEntityConfiguration.cs",
 );
 
 check("ProductionCycleEntryEntityConfiguration.cs exists", config !== null);
@@ -61,7 +61,7 @@ check("Config has index on ProductionOrderId", config?.includes("ProductionOrder
 // ── 3. MIGRATION ──────────────────────────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808100000_AddProductionExecutionOperationsAndCycles.cs",
 );
 
 check("Migration creates production_cycle_entries table", migration?.includes("CREATE TABLE IF NOT EXISTS production_cycle_entries") ?? false);
@@ -76,7 +76,7 @@ check("Migration source constrained to manual only", migration?.includes("source
 // ── 4. PRODUCTIONORDER OPERATIONAL FIELDS ────────────────────────────────────
 
 const order = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check("ProductionOrder has ManualCycleCount", order?.includes("ManualCycleCount") ?? false);
@@ -87,7 +87,7 @@ check("Migration adds manual_cycle_count column", migration?.includes("manual_cy
 // ── 5. CYCLE NUMBERING ────────────────────────────────────────────────────────
 
 const repo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOperationsRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOperationsRepository.cs",
 );
 
 check("Repo implements RecordManualCycleAsync", repo?.includes("RecordManualCycleAsync") ?? false);

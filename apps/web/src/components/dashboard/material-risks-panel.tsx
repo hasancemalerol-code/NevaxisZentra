@@ -10,6 +10,7 @@ import Link from "next/link";
 
 import type { CSSProperties } from "react";
 
+
 import {
   canOpenDashboardTarget,
   DASHBOARD_MATERIAL_WORKSPACE_TARGET,
@@ -535,7 +536,7 @@ export function MaterialRisksPanel({
                       borderBottom:
                         index === visibleRisks.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <div style={styles.identity}>
@@ -583,7 +584,7 @@ export function MaterialRisksPanel({
                       borderBottom:
                         index === visibleRisks.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span style={styles.stock}>
@@ -597,7 +598,7 @@ export function MaterialRisksPanel({
                       borderBottom:
                         index === visibleRisks.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span style={styles.threshold}>
@@ -611,7 +612,7 @@ export function MaterialRisksPanel({
                       borderBottom:
                         index === visibleRisks.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span
@@ -634,7 +635,7 @@ export function MaterialRisksPanel({
                       borderBottom:
                         index === visibleRisks.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span

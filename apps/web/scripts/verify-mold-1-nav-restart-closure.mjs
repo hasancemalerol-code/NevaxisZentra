@@ -14,7 +14,7 @@ const ROOT = process.env.MOLD_CLOSURE_ROOT ?? resolve(dirname(fileURLToPath(impo
 const WEB_ROOT = resolve(ROOT, "apps/web");
 const ENV_LOCAL = resolve(WEB_ROOT, ".env.local");
 const MANAGER_SUBJECT = "production-pilot-operator";
-const API_BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const WEB_BASE = process.env.MOLD_BROWSER_BASE_URL ?? "http://localhost:3001";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TENANT = "dev-pilot-tenant";
@@ -51,7 +51,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -62,7 +62,7 @@ function ps(headers, path, method = "GET", body) {
   const args = [
     "-NoProfile",
     "-Command",
-    `$h=@{'X-CrevaFactOS-Dev-Issuer'='crevafactos-dev';'X-CrevaFactOS-Dev-Subject'='${headers.subject}';'X-CrevaFactOS-Tenant'='${headers.tenant}';'Content-Type'='application/json'}; try { (Invoke-WebRequest -Uri '${API_BASE}${path}' -Method ${method} -Headers $h ${body ? `-Body '${JSON.stringify(body)}'` : ""} -UseBasicParsing).StatusCode } catch { $_.Exception.Response.StatusCode.value__ }`,
+    `$h=@{'X-crevafactos-dev-Issuer'='crevafactos-dev';'X-crevafactos-dev-Subject'='${headers.subject}';'X-NevaxisFactOS-Tenant'='${headers.tenant}';'Content-Type'='application/json'}; try { (Invoke-WebRequest -Uri '${API_BASE}${path}' -Method ${method} -Headers $h ${body ? `-Body '${JSON.stringify(body)}'` : ""} -UseBasicParsing).StatusCode } catch { $_.Exception.Response.StatusCode.value__ }`,
   ];
   const result = spawnSync("powershell", args, { encoding: "utf8" });
   return Number(result.stdout.trim());
@@ -102,12 +102,12 @@ function startApi() {
   return spawnSync("powershell", [
     "-NoProfile",
     "-Command",
-    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/CrevaFactOS.Api.csproj','--no-build'`,
+    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/NevaxisFactOS.Api.csproj','--no-build'`,
   ], { encoding: "utf8" });
 }
 
 function buildApi() {
-  const result = spawnSync("dotnet", ["build", "apps/api/CrevaFactOS.Api.csproj", "--no-restore"], {
+  const result = spawnSync("dotnet", ["build", "apps/api/NevaxisFactOS.Api.csproj", "--no-restore"], {
     cwd: ROOT,
     encoding: "utf8",
   });
@@ -134,7 +134,7 @@ async function waitForWeb(timeoutMs = 90000) {
 
 function startRoleWeb(subject, port = 3001) {
   stopPid(getListeningPid(port), `web:${port}`);
-  const subjectArg = subject ? `set CREVAFACTOS_DEV_AUTH_SUBJECT=${subject}&& ` : "";
+  const subjectArg = subject ? `set NEVAXIS_FACTOS_DEV_AUTH_SUBJECT=${subject}&& ` : "";
   spawnSync("powershell", [
     "-NoProfile",
     "-Command",
@@ -162,7 +162,7 @@ async function waitForWebPort(port, timeoutMs = 90000) {
 
 function envLocalSubjectUnchanged() {
   const content = readFileSync(ENV_LOCAL, "utf8");
-  return /CREVAFACTOS_DEV_AUTH_SUBJECT=production-pilot-operator/.test(content);
+  return /NEVAXIS_FACTOS_DEV_AUTH_SUBJECT=production-pilot-operator/.test(content);
 }
 
 async function browserSidebarProof(role, baseUrl = WEB_BASE) {

@@ -522,7 +522,7 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
       <header className="factory-showcase__header">
         <div className="factory-showcase__brand">
           <span aria-hidden="true" className="factory-showcase__brand-mark">CF</span>
-          <strong>CREVAFACTOS</strong>
+          <strong>NevaxisFactOS</strong>
           <span aria-hidden="true" className="factory-showcase__brand-divider" />
           <span>Fabrika Operasyon Görünümü</span>
         </div>

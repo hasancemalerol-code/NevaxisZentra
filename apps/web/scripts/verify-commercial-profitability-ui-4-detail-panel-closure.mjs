@@ -28,7 +28,7 @@ function bootstrapSecrets() {
   const ids = ["a7824c6f-6aa8-498f-895d-7f9b31bab8e3", "85d2e353-dc82-41df-ae90-9baa4397ee63", "0e3b0257-2b6c-4a42-81dc-cceb6078d79f"];
   let text = "";
   for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts", id, `${id}.jsonl`);
+    const p = join(home, ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts", id, `${id}.jsonl`);
     if (existsSync(p)) text += readFileSync(p, "utf8");
   }
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret"]) {
@@ -191,12 +191,12 @@ try {
         awaitPromise: true,
         returnByValue: true,
         expression: `(async () => {
-          const csrfPair = document.cookie.split(";").map((p) => p.trim()).find((p) => p.startsWith("crevafactos.csrf="));
-          const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("crevafactos.csrf=".length)) : "";
+          const csrfPair = document.cookie.split(";").map((p) => p.trim()).find((p) => p.startsWith("NevaxisFactOS.csrf="));
+          const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("NevaxisFactOS.csrf=".length)) : "";
           const response = await fetch("/api/identity/mfa/verify", {
             method: "POST",
             credentials: "include",
-            headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf },
+            headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf },
             body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }),
           });
           return { status: response.status };
@@ -260,9 +260,9 @@ try {
   const apiDetail = await fetch(`${API}/api/commercial-intelligence/profitability/comparisons/${encodeURIComponent(rowId)}?facilityId=bb000001-0005-4000-8000-000000000005`, {
     headers: {
       Accept: "application/json",
-      "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-      "X-CrevaFactOS-Dev-Subject": "planning-pilot-user",
-      "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+      "X-crevafactos-dev-Issuer": "crevafactos-dev",
+      "X-crevafactos-dev-Subject": "planning-pilot-user",
+      "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
     },
   });
   assert("detail API returns 200", apiDetail.status === 200, String(apiDetail.status));

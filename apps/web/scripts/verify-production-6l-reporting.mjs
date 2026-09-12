@@ -35,8 +35,8 @@ function forbidText(source, forbidden, label) {
 console.log("Running production 6L reporting verifier.");
 
 const endpoints = readRequired("apps/api/Production/ProductionReportingEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Production/ProductionReportingRepository.cs");
-const models = readRequired("packages/CrevaFactOS.Persistence/Production/ProductionReportingModels.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionReportingRepository.cs");
+const models = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionReportingModels.cs");
 const program = readRequired("apps/api/Program.cs");
 
 requireText(endpoints, "MapGroup(\"/api/production/reporting\")", "reporting endpoints");

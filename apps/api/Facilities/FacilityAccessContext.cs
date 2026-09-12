@@ -1,4 +1,4 @@
-namespace CrevaFactOS.Api.Facilities;
+namespace NevaxisFactOS.Api.Facilities;
 
 public sealed record FacilityAccessContext(
     Guid TenantId,

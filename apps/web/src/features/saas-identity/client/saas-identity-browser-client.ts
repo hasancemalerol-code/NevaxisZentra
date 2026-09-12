@@ -26,7 +26,7 @@ function resolveBrowserApiBaseUrl(): string {
     return window.location.origin.replace(/\/$/, "");
   }
 
-  const configured = process.env.NEXT_PUBLIC_CREVAFACTOS_API_BASE_URL?.trim();
+  const configured = process.env.NEXT_PUBLIC_NEVAXIS_FACTOS_API_BASE_URL?.trim();
   if (configured) {
     return configured.replace(/\/$/, "");
   }

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NevaxisFactOS.DatabaseTool</RootNamespace>
+    <AssemblyName>NevaxisFactOS.DatabaseTool</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <ProjectReference Include="..\..\packages\NevaxisFactOS.Persistence\NevaxisFactOS.Persistence.csproj" />
+  </ItemGroup>
+</Project>

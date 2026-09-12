@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const apiBaseUrl = process.env.CREVAFACTOS_API_BASE_URL?.replace(/\/$/, "");
+const apiBaseUrl = process.env.NEVAXIS_FACTOS_API_BASE_URL?.replace(/\/$/, "");
 const repositoryRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 const nextConfig: NextConfig = {

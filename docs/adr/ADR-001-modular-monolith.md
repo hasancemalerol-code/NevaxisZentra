@@ -2,13 +2,13 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: CrevaFactOS Product & Development
+- Decision owners: NevaxisFactOS Product & Development
 - Scope: Backend application architecture
 - Product-boundary interpretation: ADR-011
 
 ## Context
 
-CrevaFactOS combines tightly related production-planning, shift, machine, mold, maintenance, quality, risk, task, approval, audit, and integration workflows. Beginning with distributed microservices would add deployment, observability, consistency, and debugging cost before domain boundaries are proven.
+NevaxisFactOS combines tightly related production-planning, shift, machine, mold, maintenance, quality, risk, task, approval, audit, and integration workflows. Beginning with distributed microservices would add deployment, observability, consistency, and debugging cost before domain boundaries are proven.
 
 A layerless monolith would make tenant, permission, audit, and module boundaries difficult to protect.
 
@@ -46,7 +46,7 @@ Cross-module communication uses:
 - Material and Supplier Risk
 - Delivery and Bottleneck Risk
 - AI Operations
-- CrevaFactOS Teams
+- NevaxisFactOS Teams
 
 Names describe bounded operational capabilities, not classic ERP ownership. External customer, supplier, personnel, stock, finance, accounting, official order, and purchasing records are accessed through integration references and projections according to ADR-011.
 

@@ -43,16 +43,16 @@ function assertNotContains(label, content, text) {
 }
 
 const EDGE4_SOURCES = [
-  "tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs",
-  "tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs",
-  "tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeRetryPolicy.cs",
-  "tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs",
-  "tools/CrevaFactOS.MachineSimulator/Program.cs",
+  "tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs",
+  "tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs",
+  "tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeRetryPolicy.cs",
+  "tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs",
+  "tools/NevaxisFactOS.MachineSimulator/Program.cs",
 ];
 
 console.log("\n[1] Retry classification and backoff");
-const retry = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeRetryPolicy.cs");
-const worker = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
+const retry = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeRetryPolicy.cs");
+const worker = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
 assertContains("retryable 408", retry, "408");
 assertContains("retryable 429", retry, "429");
 assertContains("retryable 5xx", retry, ">= 500");
@@ -63,16 +63,16 @@ assertContains("network unavailable retry", worker, "NetworkUnavailable");
 assertContains("timeout handling", worker, "Timeout");
 
 console.log("\n[2] Stale in-flight and concurrency");
-const store = readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
+const store = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
 assertContains("ClaimBatch lease", store, "InFlightLeaseId");
 assertContains("RecoverStaleInFlight", store, "RecoverStaleInFlight");
-assertContains("InFlightLeaseTimeout", readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "InFlightLeaseTimeout");
+assertContains("InFlightLeaseTimeout", readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "InFlightLeaseTimeout");
 assertContains("write lock on enqueue", store, "_writeLock");
 
 console.log("\n[3] Buffer capacity");
 assertContains("capacity exceeded code", store, "CapacityExceeded");
-assertContains("MaxBufferedEvents", readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "DefaultMaxBufferedEvents");
-assertContains("buffer-capacity-test scenario", readFile("tools/CrevaFactOS.MachineSimulator/Program.cs"), "buffer-capacity-test");
+assertContains("MaxBufferedEvents", readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "DefaultMaxBufferedEvents");
+assertContains("buffer-capacity-test scenario", readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs"), "buffer-capacity-test");
 
 console.log("\n[4] No machine commands / downstream mutation");
 for (const src of EDGE4_SOURCES) {
@@ -100,7 +100,7 @@ assertContains("POST events/ingest", worker, "/api/edge/events/ingest");
 assertNotContains("no parallel replay pipeline", worker, "/api/edge/replay");
 
 console.log("\n[7] No new NuGet dependency for local buffer");
-const csproj = readFile("tools/CrevaFactOS.MachineSimulator/CrevaFactOS.MachineSimulator.csproj");
+const csproj = readFile("tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj");
 assertNotContains("no SQLite package churn", csproj, "Microsoft.Data.Sqlite");
 assertNotContains("no Kafka", allEdge4, "Kafka");
 const pkgLock = readOpt("pnpm-lock.yaml");
@@ -109,7 +109,7 @@ if (pkgLock) {
 }
 
 console.log("\n[8] Live backoff not hot-loop (static proof)");
-assertContains("WorkerPollInterval", readFile("tools/CrevaFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "WorkerPollInterval");
+assertContains("WorkerPollInterval", readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs"), "WorkerPollInterval");
 assertContains("MaximumDelay bound", retry, "MaximumDelay");
 
 console.log(`\n${"─".repeat(55)}`);

@@ -13,7 +13,7 @@ const TENANT = "bb000001-0001-4000-8000-000000000001";
 const BOUNDARY_PREFIX = "COMMSALE1-BOUNDARY";
 const SOURCE_EVIDENCE_KIND = "manual-development-simulator";
 const PRICE_BASIS_GROSS_NET = "net";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -21,15 +21,15 @@ const MANAGER = {
 };
 
 const SALES_SOURCE_FILES = [
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvaluator.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvidenceReader.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceRepository.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceModels.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEntities.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEntityConfigurations.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceIdempotencyFingerprint.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceSalesPriceContracts.cs",
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvaluator.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvidenceReader.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceRepository.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceModels.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEntities.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEntityConfigurations.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceIdempotencyFingerprint.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceSalesPriceContracts.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs",
   "apps/api/CommercialIntelligence/CommercialSalesPriceEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -60,7 +60,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -70,9 +70,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -174,10 +174,10 @@ function insertBoundaryObservations({
 
 console.log("Running COMMERCIAL-SALES-PRICE-1 price-analysis verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvaluator.cs");
-const reader = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvidenceReader.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvaluator.cs");
+const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs");
 
 assert("median helper present", evaluator.includes("ComputeMedian"));
 assert("signed variance helper present", evaluator.includes("ComputeSignedVarianceRatio"));

@@ -21,8 +21,8 @@ function read(rel) {
 
 console.log("Running TEAMS-NOTIFICATIONS-1 migration verifier.");
 
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260830153612_AddTeamsNotifications.cs");
-const snapshot = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260830153612_AddTeamsNotifications.cs");
+const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
 
 assert("notifications table", migration.includes("teams_notifications"));
 assert("audit table", migration.includes("teams_notification_audit_events"));

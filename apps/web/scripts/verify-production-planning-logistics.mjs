@@ -35,22 +35,22 @@ function forbidText(source, forbidden, label) {
 console.log("Running production planning logistics verifier.");
 
 const engine = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEngine.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEngine.cs",
 );
 const sourceReader = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsSourceReader.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsSourceReader.cs",
 );
 const bufferPolicy = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsModels.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsModels.cs",
 );
 const riskPolicy = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsRiskPolicy.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsRiskPolicy.cs",
 );
 const endpoints = readRequired(
   "apps/api/ProductionPlanning/PlanningLogisticsEndpointRouteBuilderExtensions.cs",
 );
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
 );
 
 requireText(engine, "PlanningLogisticsConstraintEngine", "PlanningLogisticsConstraintEngine");
@@ -95,7 +95,7 @@ requireText(migration, "ROW LEVEL SECURITY", "Migration");
 forbidText(migration, "CREATE TABLE export_shipments", "Migration");
 
 const entity = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEvaluation.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEvaluation.cs",
 );
 forbidText(entity, "CarrierName", "PlanningLogisticsConstraintEvaluation");
 forbidText(entity, "BookingReference", "PlanningLogisticsConstraintEvaluation");

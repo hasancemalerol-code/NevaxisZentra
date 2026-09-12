@@ -19,8 +19,8 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const repo = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
-const entities = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
+const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
+const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
 const ui = read("apps/web/src/features/maintenance/components/maintenance-ai-assistant-section.tsx");
 
 assert("stale status code", entities.includes("Stale"));

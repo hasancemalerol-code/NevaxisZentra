@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB_URL = process.env.CREVAFACTOS_WEB_URL ?? "http://localhost:3001";
+const WEB_URL = process.env.NEVAXIS_FACTOS_WEB_URL ?? "http://localhost:3001";
 
 function readFile(rel) {
   const abs = resolve(ROOT, rel);

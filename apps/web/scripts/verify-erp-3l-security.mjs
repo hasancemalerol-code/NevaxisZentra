@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const CONNECTION = "bb000001-0090-4000-8000-000000000090";
@@ -45,9 +45,9 @@ function headers(subject = OPERATOR) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 
@@ -80,11 +80,11 @@ console.log("Running ERP-3L security verifier.");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
 );
-const inventoryRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpInventoryRepository.cs");
-const entities = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpEntities.cs");
-const adapters = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpAdapters.cs");
+const inventoryRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpInventoryRepository.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
 
 requireText(endpoints, "ErpPermissionKeys.Sync", "inventory sync permission");
 requireText(endpoints, "ResolveReadAccessAsync", "inventory read permission");
@@ -132,7 +132,7 @@ try {
   const crossTenant = await fetch(`${BASE}/api/erp/inventory/availability?facilityId=${FACILITY}`, {
     headers: {
       ...headers(OPERATOR),
-      "X-CrevaFactOS-Tenant": "other-tenant-not-pilot",
+      "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
     },
   });
   if (crossTenant.status !== 403) {

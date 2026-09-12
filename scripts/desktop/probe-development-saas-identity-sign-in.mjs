@@ -5,8 +5,8 @@ import {
   resolveRepositoryRoot,
 } from "../shared/load-development-saas-identity-secrets.mjs";
 
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
 
 function fail(message) {
   console.error(`CREDENTIAL-READINESS probe failed: ${message}`);

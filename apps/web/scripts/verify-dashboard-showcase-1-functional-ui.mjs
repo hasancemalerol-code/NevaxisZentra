@@ -6,13 +6,13 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const VIEWPORTS = [
   { width: 1920, height: 1080, label: "1920x1080" },
   { width: 3840, height: 2160, label: "3840x2160" },
 ];
-const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-dashboard-showcase-1");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-dashboard-showcase-1");
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
 const KPI_LABELS = [
@@ -195,7 +195,7 @@ async function exerciseShowcase(page, label) {
 
   const bodyText = await page.locator("body").innerText();
   assert(`${label} header title`, bodyText.includes("Fabrika Operasyon Görünümü"));
-  assert(`${label} brand text`, bodyText.includes("CREVAFACTOS"));
+  assert(`${label} brand text`, bodyText.includes("NevaxisFactOS"));
   assert(`${label} live status`, bodyText.includes("Operasyon akışı izleniyor"));
   assert(`${label} refresh label`, bodyText.includes("Son güncelleme:"));
   assert(`${label} hourly chart`, bodyText.includes("Saatlik Üretim Performansı"));

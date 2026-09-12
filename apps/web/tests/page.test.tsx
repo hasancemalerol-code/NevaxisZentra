@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Activity } from "lucide-react";
 
-import HomePage from "../src/app/(app)/page";
 import { GET as getHealth } from "../src/app/health/route";
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
@@ -12,15 +12,18 @@ import { KpiCard } from "../src/components/ui/card";
 import { PageHeader } from "../src/components/ui/page";
 import { navigationItems, primaryNavigation } from "../src/lib/navigation/primary-navigation";
 
-test("renders the polished shell preview without implying real operational data", () => {
-  const markup = renderToStaticMarkup(<HomePage />);
-
-  assert.match(markup, /Operasyon karar merkezi|Operasyon çalışma alanı/);
-  assert.match(markup, /UI önizleme/);
-  assert.match(
-    markup,
-    /Gerçek görev verisi bağlı değil|Gerçek veri bağlantısı sonraki entegrasyon paketlerinde uygulanacaktır/,
+test("renders the AI task center home without implying live operational data", async () => {
+  const { AiTaskListPageContent } = await import(
+    "../src/features/ai-task-center/components/ai-task-list-page-content"
   );
+  const element = await AiTaskListPageContent({
+    listPath: "/",
+    showCreateAction: true,
+  });
+  const markup = renderToStaticMarkup(element as ReactElement);
+
+  assert.match(markup, /AI Görev Merkezi/);
+  assert.match(markup, /Gerçek görev verisi bağlı değil/);
   assert.doesNotMatch(markup, /Active Production Orders|Live Alarms/);
 });
 
@@ -48,7 +51,7 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
       .replaceAll("&", "&amp;");
     assert.match(markup, new RegExp(escapedLabel));
   }
-  assert.equal(navigationItems.length, 33);
+  assert.equal(navigationItems.length, 45);
   assert.ok(
     navigationItems.some(
       (item) => item.label === "İhracat" && item.href === "/ihracat",

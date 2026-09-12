@@ -36,12 +36,12 @@ console.log("Running maintenance 1L core verifier.");
 
 const endpoints = readRequired("apps/api/Maintenance/MaintenanceEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Maintenance/MaintenanceEndpointHelpers.cs");
-const lifecycle = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
-const requestRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
-const workOrderRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
+const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const workOrderRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
 const program = readRequired("apps/api/Program.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
 );
 const bakimPage = readRequired("apps/web/src/app/(app)/bakim/page.tsx");
 const dashboardView = readRequired(
@@ -54,7 +54,7 @@ requireText(endpoints, "/requests", "maintenance endpoints");
 requireText(endpoints, "/work-orders/{workOrderId:guid}/complete", "maintenance endpoints");
 requireText(endpoints, "ResolveExecuteAccessAsync", "maintenance endpoints");
 requireText(helpers, "MaintenancePermissionKeys.Execute", "MaintenanceEndpointHelpers");
-requireText(program, "AddCrevaFactOSMaintenance", "Program.cs");
+requireText(program, "AddNevaxisFactOSMaintenance", "Program.cs");
 requireText(program, "MapMaintenanceEndpoints", "Program.cs");
 
 requireText(lifecycle, "CanTransitionWorkOrder", "MaintenanceLifecycleEngine");

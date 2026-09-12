@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
 const PERSON001 = "bb000001-00d0-4000-8000-0000000000d0";
@@ -38,7 +38,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -48,9 +48,9 @@ function db(sql) {
 function headers(actor = MANAGER) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -146,9 +146,9 @@ function competencyBody(idempotencyKey, overrides = {}) {
 
 console.log("Running SHIFT-WORKFORCE-1 domain/sync verifier.");
 
-const synchronizer = readRequired("packages/CrevaFactOS.Persistence/ShiftWorkforce/ShiftWorkforceSourceSynchronizer.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/ShiftWorkforce/ShiftWorkforceRepository.cs");
-const provider = readRequired("packages/CrevaFactOS.Persistence/ShiftWorkforce/LocalDevelopmentWorkforceSourceProvider.cs");
+const synchronizer = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/ShiftWorkforceSourceSynchronizer.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/ShiftWorkforceRepository.cs");
+const provider = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/LocalDevelopmentWorkforceSourceProvider.cs");
 
 assert("source synchronizer ApplyErpOwnedFields", synchronizer.includes("ApplyErpOwnedFields"));
 assert("sync preserves competencies comment", synchronizer.includes("SourceFingerprint"));

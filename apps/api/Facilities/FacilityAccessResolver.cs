@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Authentication;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Authentication;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.Facilities;
+namespace NevaxisFactOS.Api.Facilities;
 
 public sealed class FacilityAccessResolver(
     ICurrentIdentityAccessor identityAccessor,

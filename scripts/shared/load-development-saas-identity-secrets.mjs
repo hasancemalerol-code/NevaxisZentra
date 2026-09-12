@@ -24,7 +24,7 @@ const OPTIONAL_KEYS = [
 export function resolveRepositoryRoot(startDir = dirname(fileURLToPath(import.meta.url))) {
   let current = resolve(startDir);
   for (let depth = 0; depth < 8; depth += 1) {
-    if (existsSync(join(current, "CrevaFactOS.sln"))) {
+    if (existsSync(join(current, "NevaxisFactOS.sln"))) {
       return current;
     }
     const parent = dirname(current);
@@ -33,7 +33,7 @@ export function resolveRepositoryRoot(startDir = dirname(fileURLToPath(import.me
     }
     current = parent;
   }
-  throw new Error("CrevaFactOS repository root not found.");
+  throw new Error("NevaxisFactOS repository root not found.");
 }
 
 function parseEnvFile(filePath) {
@@ -65,7 +65,7 @@ function parseEnvFile(filePath) {
 
 export function getPackagedMachineSecretsPath() {
   const localAppData = process.env.LOCALAPPDATA || join(os.homedir(), "AppData", "Local");
-  return join(localAppData, "CrevaFactOS", "config", "runtime.env.local");
+  return join(localAppData, "crevafactos", "config", "runtime.env.local");
 }
 
 export function loadDevelopmentSaasIdentitySecrets(repositoryRoot = resolveRepositoryRoot()) {
@@ -137,7 +137,7 @@ export function describeDevelopmentSaasIdentitySecretSources(repositoryRoot = re
     if (process.env[key]) {
       sources[key] = "process-env";
     } else if (parseEnvFile(getPackagedMachineSecretsPath()).has(key)) {
-      sources[key] = "%LOCALAPPDATA%/CrevaFactOS/config/runtime.env.local";
+      sources[key] = "%LOCALAPPDATA%/NevaxisFactOS/config/runtime.env.local";
     } else if (parseEnvFile(local).has(key)) {
       sources[key] = "infrastructure/.env.local";
     } else if (parseEnvFile(infra).has(key)) {

@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
-$repoRoot = "C:\Projects\CrevaFactOS"
-$desktopExe = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\bin\Debug\net10.0-windows\CrevaFactOS.Desktop.exe"
-$shotDir = "C:\Users\studiocreva\Pictures\CrevaFactOS-Desktop-Shell-1-Fullscreen-Visual-Closure"
-$rejected = "C:\Users\studiocreva\Pictures\CrevaFactOS-Desktop-Shell-1-Closure\02-fullscreen-borderless.png"
+$repoRoot = "C:\Projects\NevaxisFactOS"
+$desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe"
+$shotDir = "C:\Users\studiocreva\Pictures\NevaxisFactOS-Desktop-Shell-1-Fullscreen-Visual-Closure"
+$rejected = "C:\Users\studiocreva\Pictures\NevaxisFactOS-Desktop-Shell-1-Closure\02-fullscreen-borderless.png"
 New-Item -ItemType Directory -Force -Path $shotDir | Out-Null
 
 Add-Type @'
@@ -191,7 +191,7 @@ function Report-Shot([string]$label, [string]$path, [FcCapture+NB]$win, [FcCaptu
   Write-Host "  crop/resize/composition: NO"
 }
 
-Get-Process CrevaFactOS.Desktop -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process NevaxisFactOS.Desktop -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep 1
 $api = Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
 $web = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -199,19 +199,19 @@ if (-not $api) { throw "API not listening on port 5000" }
 if (-not $web) { throw "Web not listening on port 3001" }
 Invoke-WebRequest -Uri "http://127.0.0.1:5000/health/ready" -UseBasicParsing -TimeoutSec 5 | Out-Null
 Invoke-WebRequest -Uri "http://127.0.0.1:3001/giris" -UseBasicParsing -TimeoutSec 5 | Out-Null
-$env:CREVAFACTOS_DESKTOP_WEB_URL = "http://127.0.0.1:3001"
+$env:NEVAXIS_FACTOS_DESKTOP_WEB_URL = "http://127.0.0.1:3001"
 $p = Start-Process -FilePath $desktopExe -PassThru
 $h = [FcCapture]::Wait($p,45000)
 $loadDeadline = (Get-Date).AddSeconds(60)
 do {
   Start-Sleep -Seconds 2
   [FcCapture]::Focus($h)
-  $probePath = Join-Path $env:TEMP "crevafactos-load-probe.png"
+  $probePath = Join-Path $env:TEMP "NevaxisFactOS-load-probe.png"
   [void][FcCapture]::PrintCap($h, $probePath)
   $probeSize = (Get-Item $probePath).Length
   Write-Host "Load probe PNG bytes: $probeSize"
 } while ((Get-Date) -lt $loadDeadline -and $probeSize -lt 80000)
-if ($probeSize -lt 80000) { throw "CrevaFactOS /giris did not render before timeout (probe bytes=$probeSize)" }
+if ($probeSize -lt 80000) { throw "NevaxisFactOS /giris did not render before timeout (probe bytes=$probeSize)" }
 Remove-Item $probePath -ErrorAction SilentlyContinue
 $mon = [FcCapture]::Mon($h)
 $dpi = [FcCapture]::GetDpiForWindow($h)
@@ -268,7 +268,7 @@ Report-Shot "Restored normal" $restPath $restWin $restClient $mon $dpi "PrintWin
 
 $dup = Start-Process -FilePath $desktopExe -PassThru
 Start-Sleep -Seconds 2
-$count = (Get-Process -Name CrevaFactOS.Desktop -ErrorAction SilentlyContinue).Count
+$count = (Get-Process -Name NevaxisFactOS.Desktop -ErrorAction SilentlyContinue).Count
 Write-Host "Process/window count after duplicate launch: $count (duplicate PID $($dup.Id))"
 if ($count -ne 1) { throw "Expected one desktop instance" }
 if (-not $dup.HasExited) { throw "Duplicate process did not exit" }

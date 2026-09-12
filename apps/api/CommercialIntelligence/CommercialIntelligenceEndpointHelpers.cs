@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.CommercialIntelligence;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.CommercialIntelligence;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.CommercialIntelligence;
+namespace NevaxisFactOS.Api.CommercialIntelligence;
 
 internal static class CommercialIntelligenceEndpointHelpers
 {

@@ -5,8 +5,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 
 function fail(message) {
@@ -90,8 +90,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("crevafactos.session") && jar.cookies.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.cookies.get("crevafactos.csrf");
+  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -152,7 +152,7 @@ assert("no future-work shell aria labels remain", !/işlev ileriki pakette eklen
 
 const signOut = await api("POST", "/api/identity/sign-out", undefined, owner);
 assert("sign-out succeeds", signOut.status === 200 || signOut.status === 204);
-assert("session cookie cleared", !owner.cookies.has("crevafactos.session") || owner.cookies.get("crevafactos.session") === "");
+assert("session cookie cleared", !owner.cookies.has("NevaxisFactOS.session") || owner.cookies.get("NevaxisFactOS.session") === "");
 
 const revokedJar = owner.clone();
 const revoked = await api("GET", "/api/admin-access/me/effective-access", undefined, revokedJar);

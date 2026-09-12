@@ -35,27 +35,27 @@ function forbidText(source, forbidden, label) {
 console.log("Running export integration ownership verifier.");
 
 const exportCase = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportCase.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCase.cs",
 );
 requireText(exportCase, "SourceOrderId", "ExportCase");
 requireText(exportCase, "SourceOrderReference", "ExportCase");
 forbidText(exportCase, "DuplicateOrder", "ExportCase");
 
 const exportWrite = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
 );
 requireText(exportWrite, "EnsureExportCaseForOrderAsync", "ExportCaseWriteRepository");
 requireText(exportWrite, "IsExport", "ExportCaseWriteRepository");
 
 const shipment = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportShipment.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportShipment.cs",
 );
 requireText(shipment, "ExportCaseId", "ExportShipment");
 requireText(shipment, "PlannedPickupAtUtc", "ExportShipment");
 forbidText(shipment, "ProductionPlanId", "ExportShipment");
 
 const planningEntity = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEvaluation.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsConstraintEvaluation.cs",
 );
 requireText(planningEntity, "SourceExportCaseId", "PlanningLogisticsConstraintEvaluation");
 requireText(planningEntity, "SourceShipmentId", "PlanningLogisticsConstraintEvaluation");
@@ -65,7 +65,7 @@ forbidText(planningEntity, "BookingReference", "PlanningLogisticsConstraintEvalu
 forbidText(planningEntity, "TrackingReference", "PlanningLogisticsConstraintEvaluation");
 
 const planningReader = readRequired(
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsSourceReader.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsSourceReader.cs",
 );
 forbidText(planningReader, "ExportBrokerCorrections", "PlanningLogisticsSourceReader");
 forbidText(planningReader, "ExportCompliance", "PlanningLogisticsSourceReader");
@@ -73,7 +73,7 @@ forbidText(planningReader, "ExportCountryCompliance", "PlanningLogisticsSourceRe
 requireText(planningReader, "ExportHandoffReady", "PlanningLogisticsSourceReader");
 
 const aiProvider = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/DeterministicExportAiProvider.cs",
+  "packages/NevaxisFactOS.Persistence/Export/DeterministicExportAiProvider.cs",
 );
 forbidText(aiProvider, "ModifyProduction", "DeterministicExportAiProvider");
 forbidText(aiProvider, "SubmitCustoms", "DeterministicExportAiProvider");
@@ -81,7 +81,7 @@ forbidText(aiProvider, "CreateBooking", "DeterministicExportAiProvider");
 requireText(aiProvider, "BuildReadinessOutput", "DeterministicExportAiProvider");
 
 const aiSafety = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/Export4LEnums.cs",
+  "packages/NevaxisFactOS.Persistence/Export/Export4LEnums.cs",
 );
 requireText(aiSafety, "ExportAiProposedActionType", "Export4LEnums");
 
@@ -92,7 +92,7 @@ requireText(orderDraft, "isExport", "order-draft.ts");
 requireText(orderDraft, "destinationCountryCode", "order-draft.ts");
 
 const traceability = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportTraceabilityReadRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportTraceabilityReadRepository.cs",
 );
 requireText(traceability, "SourceOrderReference", "ExportTraceabilityReadRepository");
 requireText(traceability, "ExportCaseId", "ExportTraceabilityReadRepository");

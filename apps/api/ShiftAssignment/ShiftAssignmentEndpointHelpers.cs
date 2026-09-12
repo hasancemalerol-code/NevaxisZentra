@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.ShiftAssignment;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.ShiftAssignment;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.ShiftAssignment;
+namespace NevaxisFactOS.Api.ShiftAssignment;
 
 internal static class ShiftAssignmentEndpointHelpers
 {

@@ -11,6 +11,7 @@ import {
 
 import type { CSSProperties } from "react";
 
+
 import { DashboardNavigationAction } from "./dashboard-navigation-action";
 import { DASHBOARD_MACHINE_WORKSPACE_TARGET } from "./dashboard-navigation";
 

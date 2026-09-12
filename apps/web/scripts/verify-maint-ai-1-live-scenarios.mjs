@@ -3,12 +3,12 @@ import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
 const ISSUER = "crevafactos-dev";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const REVIEWER = "planning-pilot-reviewer";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const ASSET = "ASSET-CNC-001";
 
 function fail(msg) {
@@ -25,16 +25,16 @@ function headers(subject = OPERATOR) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 
 function db(sql) {
   const r = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (r.status !== 0) fail(r.stderr || r.stdout);
@@ -98,7 +98,7 @@ try {
 
   const providerFailPrep = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
       `UPDATE maintenance_asset_machine_mappings SET asset_name = 'AI-PROVIDER-FAIL probe' WHERE asset_reference = 'ASSET-PRESS-001' AND facility_id = '${FACILITY}'::uuid`],
     { encoding: "utf8" },
   );
@@ -106,7 +106,7 @@ try {
   const providerFail = await json("POST", `/api/maintenance/assets/ASSET-PRESS-001/ai-drafts/generate?facilityId=${FACILITY}`);
   spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
       `UPDATE maintenance_asset_machine_mappings SET asset_name = 'Pres Makinesi 001' WHERE asset_reference = 'ASSET-PRESS-001' AND facility_id = '${FACILITY}'::uuid`],
     { encoding: "utf8" },
   );
@@ -114,7 +114,7 @@ try {
 
   const invalidPrep = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
       `UPDATE maintenance_ai_action_drafts SET status = 'stale' WHERE asset_reference = '${ASSET}' AND status IN ('draft','under-review'); UPDATE maintenance_asset_machine_mappings SET asset_name = 'INVALID-AI-OUTPUT probe' WHERE asset_reference = '${ASSET}' AND facility_id = '${FACILITY}'::uuid`],
     { encoding: "utf8" },
   );
@@ -124,7 +124,7 @@ try {
   const invalidOut = await json("POST", `/api/maintenance/assets/${ASSET}/ai-drafts/generate?facilityId=${FACILITY}`);
   spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
       `UPDATE maintenance_asset_machine_mappings SET asset_name = 'CNC Tezgâh 001' WHERE asset_reference = '${ASSET}' AND facility_id = '${FACILITY}'::uuid`],
     { encoding: "utf8" },
   );
@@ -134,7 +134,7 @@ try {
   assert("stale-test draft generated", staleGen.status === 200);
   spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
       `UPDATE maintenance_ai_action_drafts SET input_fingerprint = 'forced-stale-fingerprint' WHERE id = '${staleGen.data.draftId}'::uuid`],
     { encoding: "utf8" },
   );

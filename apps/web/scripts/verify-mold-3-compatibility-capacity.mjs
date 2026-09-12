@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const PRESS_MACHINE = "bb000001-0096-4000-8000-000000000096";
 const CNC_MACHINE = "bb000001-0095-4000-8000-000000000095";
@@ -22,9 +22,9 @@ function assert(label, ok, detail = "") {
 function headers(actor = MANAGE_ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -47,7 +47,7 @@ async function request(method, path, body, actor = MANAGE_ACTOR) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);

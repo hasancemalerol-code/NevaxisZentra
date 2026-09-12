@@ -1,4 +1,4 @@
-# CrevaFactOS Logging ve Gözlemlenebilirlik Standartları
+# NevaxisFactOS Logging ve Gözlemlenebilirlik Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS uygulamalarında loglama, metrik, tracing, health check, alarm ve operasyonel gözlemlenebilirlik standartlarını tanımlar.
+Bu belge NevaxisFactOS uygulamalarında loglama, metrik, tracing, health check, alarm ve operasyonel gözlemlenebilirlik standartlarını tanımlar.
 
 
 

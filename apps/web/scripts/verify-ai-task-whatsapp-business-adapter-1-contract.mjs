@@ -23,7 +23,7 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const migrationPath = resolve(ROOT, `packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION}.cs`);
+const migrationPath = resolve(ROOT, `packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION}.cs`);
 assert("migration file exists", existsSync(migrationPath));
 const migration = readFileSync(migrationPath, "utf8").replaceAll("\r\n", "\n");
 assert("whatsapp channel config table", migration.includes("ai_task_whatsapp_channel_configurations"));
@@ -32,10 +32,10 @@ assert("RLS FORCE", migration.includes("FORCE ROW LEVEL SECURITY"));
 assert("whatsapp permissions", migration.includes("ai-task.delivery.whatsapp.send"));
 assert("no raw access token in migration", !migration.includes("ACCESS_TOKEN"));
 
-const adapterPath = resolve(ROOT, "packages/CrevaFactOS.Persistence/AiTasks/Delivery/WhatsApp/WhatsAppBusinessDeliveryAdapter.cs");
+const adapterPath = resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/WhatsApp/WhatsAppBusinessDeliveryAdapter.cs");
 const adapter = readFileSync(adapterPath, "utf8");
 assert("canonical channel whatsapp", adapter.includes('AiTaskDeliveryChannels.WhatsApp'));
-assert("provider meta-whatsapp-cloud", adapter.includes("meta-whatsapp-cloud") || readFileSync(resolve(ROOT, "packages/CrevaFactOS.Persistence/AiTasks/Delivery/WhatsApp/WhatsAppBusinessDeliveryConstants.cs"), "utf8").includes("meta-whatsapp-cloud"));
+assert("provider meta-whatsapp-cloud", adapter.includes("meta-whatsapp-cloud") || readFileSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/WhatsApp/WhatsAppBusinessDeliveryConstants.cs"), "utf8").includes("meta-whatsapp-cloud"));
 
 const webhookPath = resolve(ROOT, "apps/api/AiTasks/WhatsAppWebhookEndpointRouteBuilderExtensions.cs");
 const webhook = readFileSync(webhookPath, "utf8");
@@ -46,7 +46,7 @@ assert("raw body buffering", webhook.includes("EnableBuffering"));
 const apiPath = resolve(ROOT, "apps/api/AiTasks/AiTaskDeliveryEndpointRouteBuilderExtensions.cs");
 const api = readFileSync(apiPath, "utf8");
 assert("whatsapp adapter registered", api.includes("WhatsAppBusinessDeliveryAdapter"));
-assert("env override pattern", api.includes("CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__"));
+assert("env override pattern", api.includes("NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__"));
 
 const uiPath = resolve(ROOT, "apps/web/src/features/ai-task-center/components/ai-task-delivery-section-client.tsx");
 const ui = readFileSync(uiPath, "utf8");
@@ -57,13 +57,13 @@ const labelsPath = resolve(ROOT, "apps/web/src/features/ai-task-center/presentat
 const labels = readFileSync(labelsPath, "utf8");
 assert("turkish readiness labels", labels.includes("Yapılandırılmadı") && labels.includes("Kimlik bilgileri geçersiz"));
 
-const testsPath = resolve(ROOT, "tests/CrevaFactOS.Persistence.Tests/AiTaskWhatsAppBusinessAdapterTests.cs");
+const testsPath = resolve(ROOT, "tests/NevaxisFactOS.Persistence.Tests/AiTaskWhatsAppBusinessAdapterTests.cs");
 assert("whatsapp tests file exists", existsSync(testsPath));
 const testRun = spawnSync(
   "dotnet",
   [
     "test",
-    resolve(ROOT, "tests/CrevaFactOS.Persistence.Tests/CrevaFactOS.Persistence.Tests.csproj"),
+    resolve(ROOT, "tests/NevaxisFactOS.Persistence.Tests/NevaxisFactOS.Persistence.Tests.csproj"),
     "--filter",
     "FullyQualifiedName~WhatsApp",
     "--no-restore",
@@ -82,6 +82,6 @@ assert("dashboard protected diff", DASHBOARD_PATHS.every((p) => {
   return !existsSync(full) || true;
 }));
 
-assert("email adapter not implemented", !existsSync(resolve(ROOT, "packages/CrevaFactOS.Persistence/AiTasks/Delivery/Email")));
+assert("email adapter not implemented", !existsSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/Email")));
 
 console.log("WHATSAPP-BUSINESS-ADAPTER-1 contract verification complete.");

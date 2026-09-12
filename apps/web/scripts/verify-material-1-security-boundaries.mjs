@@ -27,9 +27,9 @@ console.log("Running MATERIAL-1 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Material/MaterialEndpointHelpers.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260812104059_AddMaterialRegistryTechnicalSpecifications.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/MaterialPermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812104059_AddMaterialRegistryTechnicalSpecifications.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MaterialPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 requireText(endpoints, "RequireAuthorization", "material endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "material endpoints");
@@ -54,7 +54,7 @@ requireText(bootstrap, "EnsureMaterialManagePermissionAssignmentAsync(\n        
 forbidText(bootstrap, "EnsureMaterialManagePermissionAssignmentAsync(\n            dbContext, tenant.Id, tenantRole.Id", "tenant role must not receive material manage");
 forbidText(bootstrap, "EnsureMaterialManagePermissionAssignmentAsync(\n            dbContext, tenant.Id, reviewerRole.Id", "reviewer must not receive material manage");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 
@@ -75,19 +75,19 @@ const ready = await fetch(`${BASE}/health/ready`);
 if (ready.status !== 200) fail(`API not ready: ${ready.status}`);
 
 const operatorHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "production-pilot-operator",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-reviewer",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 
 const missingAuth = await liveRequest("GET", `/api/materials/workspace-summary?facilityId=${FACILITY}`);

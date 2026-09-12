@@ -1,13 +1,13 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Edge;
-using CrevaFactOS.Persistence.Maintenance;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Edge;
+using NevaxisFactOS.Persistence.Maintenance;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Maintenance;
+namespace NevaxisFactOS.Api.Maintenance;
 
 public static class MaintenanceConditionEndpointRouteBuilderExtensions
 {
@@ -242,13 +242,13 @@ public static class MaintenanceConditionEndpointRouteBuilderExtensions
             : TypedResults.Ok(new { evaluated = false });
     }
 
-    public static IServiceCollection AddCrevaFactOSMaintenanceCondition(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSMaintenanceCondition(this IServiceCollection services)
     {
         services.AddScoped<IConditionEvaluationService, ConditionEvaluationService>();
         services.AddScoped<IPredictiveRiskEvaluationService, PredictiveRiskEvaluationService>();
         services.AddScoped<IMaintenanceConditionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableMaintenanceConditionRepository();
@@ -262,7 +262,7 @@ public static class MaintenanceConditionEndpointRouteBuilderExtensions
 
         services.AddScoped<IMaintenancePredictiveRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableMaintenancePredictiveRiskRepository();

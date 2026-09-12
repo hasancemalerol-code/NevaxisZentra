@@ -14,8 +14,6 @@ import {
 import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 
-type ActionFailure = Readonly<{ status: "failure"; message: string }>;
-
 async function resolveContext(permissionKey: string) {
   const authorization = await denyUnlessGranted(permissionKey);
   if (authorization.status === "failure") return authorization;

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NevaxisFactOS.Worker</RootNamespace>
+    <AssemblyName>NevaxisFactOS.Worker</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\..\packages\NevaxisFactOS.Configuration\NevaxisFactOS.Configuration.csproj" />
+  </ItemGroup>
+</Project>

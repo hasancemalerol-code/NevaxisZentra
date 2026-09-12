@@ -35,12 +35,12 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 1L core verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityEndpointRouteBuilderExtensions.cs");
-const engine = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityEvaluationEngine.cs");
-const inspectionRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityInspectionRepository.cs");
-const contextReader = readRequired("packages/CrevaFactOS.Persistence/Quality/ProductionOrderContextReader.cs");
+const engine = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityEvaluationEngine.cs");
+const inspectionRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityInspectionRepository.cs");
+const contextReader = readRequired("packages/NevaxisFactOS.Persistence/Quality/ProductionOrderContextReader.cs");
 const program = readRequired("apps/api/Program.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
 );
 const kalitePage = readRequired("apps/web/src/app/(app)/kalite/page.tsx");
 const dashboardView = readRequired(
@@ -52,7 +52,7 @@ requireText(endpoints, "MapGroup(\"/api/quality\")", "quality endpoints");
 requireText(endpoints, "/control-plans", "quality endpoints");
 requireText(endpoints, "/inspections/{inspectionId:guid}/release", "quality endpoints");
 requireText(endpoints, "QualityPermissionKeys.Release", "quality endpoints");
-requireText(program, "AddCrevaFactOSQuality", "Program.cs");
+requireText(program, "AddNevaxisFactOSQuality", "Program.cs");
 requireText(program, "MapQualityEndpoints", "Program.cs");
 
 requireText(engine, "EvaluateMeasurement", "QualityEvaluationEngine");

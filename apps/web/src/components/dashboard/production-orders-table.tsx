@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+
 import Link from "next/link";
 
 import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";
@@ -643,7 +644,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <strong style={styles.orderNumber}>
@@ -670,7 +671,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <div style={styles.product}>
@@ -690,7 +691,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span style={styles.machine}>
@@ -704,7 +705,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <div style={styles.progress}>
@@ -744,7 +745,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span style={styles.due}>
@@ -758,7 +759,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span
@@ -782,7 +783,7 @@ export function ProductionOrdersTable({
                       borderBottom:
                         index === visibleOrders.length - 1
                           ? 0
-                          : styles.bodyCell.borderBottom,
+                          : "1px solid #dce5f0",
                     }}
                   >
                     <span

@@ -1,6 +1,6 @@
-# CrevaFactOS API
+# NevaxisFactOS API
 
-ASP.NET Core modular monolith backend for CrevaFactOS.
+ASP.NET Core modular monolith backend for NevaxisFactOS.
 
 ## Development pilot — Production Planning read flow
 
@@ -10,7 +10,7 @@ This pilot seeds tenant, membership, role permission, facility, facility members
 
 1. Start local PostgreSQL (see [infrastructure/README.md](../../infrastructure/README.md)).
 2. Apply migrations: `pnpm db:migrate` from the repository root.
-3. Enable persistence on the API (`CREVAFACTOS__PERSISTENCE__ENABLED=true` and connection settings).
+3. Enable persistence on the API (`NEVAXIS_FACTOS__PERSISTENCE__ENABLED=true` and connection settings).
 
 ### Enable development bootstrap
 
@@ -36,7 +36,7 @@ The bootstrap assigns only `production.planning.read` to the pilot role.
 ### Start API
 
 ```bash
-dotnet run --project apps/api/CrevaFactOS.Api.csproj
+dotnet run --project apps/api/NevaxisFactOS.Api.csproj
 ```
 
 On startup the hosted bootstrap runs once when enabled. It is idempotent: repeated runs do not create duplicates.

@@ -118,7 +118,7 @@ export function AiTaskExecutionPanel({
   const execution = task.execution;
   const state = resolveExecutionState(task);
 
-  const targetSystem =
+  const _targetSystem =
     execution?.targetSystem ??
     task.recommendation.targetSystem;
 

@@ -1,4 +1,4 @@
-namespace CrevaFactOS.Api.ProductionPlanning;
+namespace NevaxisFactOS.Api.ProductionPlanning;
 
 public sealed record ProductionPlanSummaryDto(
     Guid Id,

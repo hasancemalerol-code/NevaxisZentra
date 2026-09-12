@@ -1,5 +1,5 @@
 {
-  "name": "@crevafactos/web",
+  "name": "@nevaxisfactos/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/page.test.tsx",
+    "test": "tsx --tsconfig tests/tsconfig.test.json --import ./tests/setup/register-next-mocks.mjs --test tests/page.test.tsx",
     "verify:production-planning": "node scripts/verify-production-planning-release.mjs && node scripts/verify-production-planning-maker-checker.mjs && node scripts/verify-production-planning-handoff.mjs && node scripts/verify-production-planning-final-hardening.mjs"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.3.0",
+    "server-only": "0.0.1",
     "tsx": "^4.20.0",
     "typescript": "5.9.3"
   },

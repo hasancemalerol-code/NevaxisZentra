@@ -5,14 +5,14 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
 const ISSUER = "crevafactos-dev";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const REVIEWER = "planning-pilot-reviewer";
 const NEGATIVE = "quality-negative-test-user";
 const OTHER_TENANT = "dev-other-tenant";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const EVAL_PATH = `/api/maintenance/condition/risk/evaluate?facilityId=${FACILITY}`;
 const OVERVIEW_PATH = `/api/maintenance/condition/risk/overview?facilityId=${FACILITY}`;
@@ -37,9 +37,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -52,7 +52,7 @@ async function statusFor(method, path, subject = OPERATOR, extra = {}) {
 function dbCount(sql) {
   const r = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (r.status !== 0) fail(r.stderr || r.stdout);
@@ -100,7 +100,7 @@ try {
   const unauthFacility = await statusFor("POST", `/api/maintenance/condition/risk/evaluate?facilityId=${UNAUTH_FACILITY}`, OPERATOR);
   assert("unauthorized facility POST evaluate → 403", unauthFacility === 403, `got ${unauthFacility}`);
 
-  const crossTenant = await statusFor("POST", EVAL_PATH, OPERATOR, { "X-CrevaFactOS-Tenant": OTHER_TENANT });
+  const crossTenant = await statusFor("POST", EVAL_PATH, OPERATOR, { "X-NevaxisFactOS-Tenant": OTHER_TENANT });
   assert("cross-tenant POST evaluate → 403", crossTenant === 403, `got ${crossTenant}`);
 
   const readGet = await statusFor("GET", OVERVIEW_PATH, REVIEWER);

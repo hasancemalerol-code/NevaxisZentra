@@ -42,7 +42,7 @@ function readText(relPath) {
 // ── RLS ENFORCEMENT ──────────────────────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
 );
 
 check("Migration file exists", migration !== null);
@@ -59,7 +59,7 @@ check(
 
 check(
   "RLS SELECT policy uses tenant_id check",
-  migration?.includes("crevafactos.tenant_id") ?? false,
+  migration?.includes("NevaxisFactOS.tenant_id") ?? false,
 );
 
 check(
@@ -113,7 +113,7 @@ check(
 // ── CONCURRENCY ON ALL WRITE COMMANDS ─────────────────────────────────────────
 
 const writeRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
 );
 
 const writeMethods = ["StartAsync", "PauseAsync", "ResumeAsync", "CompleteAsync"];
@@ -156,8 +156,8 @@ for (const file of clientFiles) {
 
   check(
     `${path.basename(file)} does not inject dev auth headers`,
-    !content.includes("X-CrevaFactOS-Dev") &&
-      !content.includes("X-CrevaFactOS-Tenant") &&
+    !content.includes("X-crevafactos-dev") &&
+      !content.includes("X-NevaxisFactOS-Tenant") &&
       !content.includes("tenantKey"),
   );
 }
@@ -203,7 +203,7 @@ check(
 // ── TENANT ISOLATION IN REPOSITORY ───────────────────────────────────────────
 
 const readRepoImpl = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderReadRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderReadRepository.cs",
 );
 
 check("ProductionOrderReadRepository.cs exists", readRepoImpl !== null);

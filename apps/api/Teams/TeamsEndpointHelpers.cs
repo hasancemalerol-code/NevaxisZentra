@@ -1,12 +1,12 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.OperationalRisk;
-using CrevaFactOS.Persistence.Teams;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.OperationalRisk;
+using NevaxisFactOS.Persistence.Teams;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.Teams;
+namespace NevaxisFactOS.Api.Teams;
 
 internal static class TeamsEndpointHelpers
 {

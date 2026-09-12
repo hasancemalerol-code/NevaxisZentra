@@ -30,7 +30,7 @@ function readRequired(relativePath) {
 function db(sql, database) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -43,20 +43,20 @@ function readMigrationConnectionEnv(database) {
   const persistence = appsettings.Persistence ?? {};
   return {
     ...process.env,
-    CREVAFACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
-    CREVAFACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
-    CREVAFACTOS__MIGRATIONS__DATABASE: database,
-    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
-    CREVAFACTOS__MIGRATIONS__PASSWORD: process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
-      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+    NEVAXIS_FACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
+    NEVAXIS_FACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
+    NEVAXIS_FACTOS__MIGRATIONS__DATABASE: database,
+    NEVAXIS_FACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    NEVAXIS_FACTOS__MIGRATIONS__PASSWORD: process.env.NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.NEVAXIS_FACTOS_POSTGRES_PASSWORD
       ?? "local_dev_only_change_me",
-    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
-    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "300",
+    NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "300",
   };
 }
 
 function runMigrationApply(database) {
-  const migrationProject = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
     [
@@ -71,7 +71,7 @@ function runMigrationApply(database) {
       "--startup-project",
       migrationProject,
       "--context",
-      "CrevaFactOSDbContext",
+      "NevaxisFactOSDbContext",
     ],
     { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv(database) },
   );
@@ -79,12 +79,12 @@ function runMigrationApply(database) {
 
 console.log("Running WHATSAPP-BUSINESS-ADAPTER-1 migration verifier.");
 
-const migration = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
+const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
 assert("provider columns on deliveries", migration.includes('name: "provider"') && migration.includes('name: "provider_status"'));
 assert("event hash unique index", migration.includes("ux_ai_task_delivery_provider_events_tenant_hash"));
 assert("FORCE RLS", migration.includes("FORCE ROW LEVEL SECURITY"));
 
-const targetDb = process.env.CREVAFACTOS_WHATSAPP_MIGRATION_VERIFY_DB ?? "crevafactos_local";
+const targetDb = process.env.NEVAXIS_FACTOS_WHATSAPP_MIGRATION_VERIFY_DB ?? "crevafactos_local";
 const applyResult = runMigrationApply(targetDb);
 const applyOutput = `${applyResult.stdout}${applyResult.stderr}`;
 assert("migration apply succeeds", applyResult.status === 0, applyOutput.slice(-800));

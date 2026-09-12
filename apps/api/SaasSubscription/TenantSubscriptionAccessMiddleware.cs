@@ -1,7 +1,7 @@
-using CrevaFactOS.Persistence.SaasSubscription;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence.SaasSubscription;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.SaasSubscription;
+namespace NevaxisFactOS.Api.SaasSubscription;
 
 public sealed class TenantSubscriptionAccessMiddleware(RequestDelegate next)
 {

@@ -16,7 +16,7 @@ const QUOTATION_SOURCE_KIND = "manual-development-simulator";
 const PRICE_BASIS_GROSS_NET = "net";
 const WINDOW_START = "2026-02-01T00:00:00.000Z";
 const WINDOW_END = "2026-06-15T12:00:00.000Z";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -24,15 +24,15 @@ const MANAGER = {
 };
 
 const QUOTATION_SOURCE_FILES = [
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskRepository.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskModels.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntities.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntityConfigurations.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskIdempotencyFingerprint.cs",
-  "packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskContracts.cs",
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskRepository.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskModels.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntities.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntityConfigurations.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskIdempotencyFingerprint.cs",
+  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskContracts.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs",
   "apps/api/CommercialIntelligence/CommercialQuotationRiskEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -143,7 +143,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -153,9 +153,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -313,10 +313,10 @@ function windowSalesPrices(materialId, windowStartUtc, windowEndUtc, setCode) {
 
 console.log("Running COMMERCIAL-QUOTATION-RISK-1 domain-assessment verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs");
-const reader = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs");
+const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs");
 
 assert("median helper present", evaluator.includes("ComputeMedian"));
 assert("signed variance helper present", evaluator.includes("ComputeSignedPriceVarianceRatio"));

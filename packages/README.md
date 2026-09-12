@@ -1,8 +1,8 @@
-# CrevaFactOS Shared Packages
+# NevaxisFactOS Shared Packages
 
 
 
-Bu klasör, CrevaFactOS uygulamaları arasında kontrollü biçimde paylaşılacak ortak paketleri içerir.
+Bu klasör, NevaxisFactOS uygulamaları arasında kontrollü biçimde paylaşılacak ortak paketleri içerir.
 
 
 
@@ -14,7 +14,7 @@ Bu klasör, CrevaFactOS uygulamaları arasında kontrollü biçimde paylaşılac
 
 
 
-CrevaFactOS tasarım sisteminin temel görsel değerlerini içerir.
+NevaxisFactOS tasarım sisteminin temel görsel değerlerini içerir.
 
 
 
@@ -152,7 +152,7 @@ Kapsam:
 
 
 
-CrevaFactOS metinleri ve yerelleştirme altyapısını içerir.
+NevaxisFactOS metinleri ve yerelleştirme altyapısını içerir.
 
 
 

@@ -1,4 +1,4 @@
-# CrevaFactOS Ürün Konumlandırması
+# NevaxisFactOS Ürün Konumlandırması
 
 
 
@@ -6,7 +6,7 @@
 
 - Tarih: 2026-08-04
 
-- Ürün: CrevaFactOS
+- Ürün: NevaxisFactOS
 
 - Kategori: AI Factory Operations Assistant
 
@@ -18,11 +18,11 @@
 
 
 
-CrevaFactOS, plastik enjeksiyon ve kalıp üreticilerinin mevcut ERP, insan kaynakları, iletişim ve makine sistemlerini değiştirmeden çalışan yapay zekâ fabrika operasyon asistanıdır.
+NevaxisFactOS, plastik enjeksiyon ve kalıp üreticilerinin mevcut ERP, insan kaynakları, iletişim ve makine sistemlerini değiştirmeden çalışan yapay zekâ fabrika operasyon asistanıdır.
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -48,7 +48,7 @@ CrevaFactOS:
 
 
 
-CrevaFactOS klasik bir ERP değildir.
+NevaxisFactOS klasik bir ERP değildir.
 
 
 
@@ -56,7 +56,7 @@ Mevcut ERP sistemleri finans, muhasebe, cari, resmî stok, müşteri, tedarikçi
 
 
 
-CrevaFactOS bu sistemlerden aldığı verileri operasyonel karar, plan, görev, risk ve aksiyona dönüştürür.
+NevaxisFactOS bu sistemlerden aldığı verileri operasyonel karar, plan, görev, risk ve aksiyona dönüştürür.
 
 
 
@@ -80,7 +80,7 @@ Alternatif satış mesajı:
 
 
 
-> CrevaFactOS, üretim müdürünüzün sipariş, planlama, vardiya, makine, kalıp ve bakım takibini yapay zekâ ile destekler.
+> NevaxisFactOS, üretim müdürünüzün sipariş, planlama, vardiya, makine, kalıp ve bakım takibini yapay zekâ ile destekler.
 
 
 
@@ -88,7 +88,7 @@ Alternatif satış mesajı:
 
 
 
-CrevaFactOS fabrikanın dağınık verilerini günlük operasyon kararlarına dönüştürür.
+NevaxisFactOS fabrikanın dağınık verilerini günlük operasyon kararlarına dönüştürür.
 
 
 
@@ -224,7 +224,7 @@ oluşabilir.
 
 
 
-CrevaFactOS bu içerikleri analiz ederek onaya hazır sipariş taslağı oluşturur.
+NevaxisFactOS bu içerikleri analiz ederek onaya hazır sipariş taslağı oluşturur.
 
 
 
@@ -286,7 +286,7 @@ olduğu için süreç karmaşıklaşır.
 
 
 
-CrevaFactOS bu verileri birleştirerek alternatif üretim planları hazırlar.
+NevaxisFactOS bu verileri birleştirerek alternatif üretim planları hazırlar.
 
 
 
@@ -320,7 +320,7 @@ oluşabilir.
 
 
 
-CrevaFactOS üretim programıyla personel uygunluğunu birleştirerek vardiya ve görev planı hazırlar.
+NevaxisFactOS üretim programıyla personel uygunluğunu birleştirerek vardiya ve görev planı hazırlar.
 
 
 
@@ -332,7 +332,7 @@ ERP sistemleri çoğunlukla canlı makine durumunu göstermez.
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -380,7 +380,7 @@ oluşabilir.
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -408,7 +408,7 @@ Fabrikadaki riskler çoğu zaman sorun ortaya çıktıktan sonra fark edilir.
 
 
 
-CrevaFactOS aşağıdaki riskleri önceden tespit etmeyi hedefler:
+NevaxisFactOS aşağıdaki riskleri önceden tespit etmeyi hedefler:
 
 
 
@@ -544,7 +544,7 @@ AI tek bir sonuç vermek yerine alternatif senaryolar hazırlayabilir.
 
 
 
-Vardiya planlama CrevaFactOS'un kilitli çekirdek özelliğidir.
+Vardiya planlama NevaxisFactOS'un kilitli çekirdek özelliğidir.
 
 
 
@@ -596,7 +596,7 @@ hazırlar.
 
 
 
-CrevaFactOS bordro veya personel özlük sistemi değildir.
+NevaxisFactOS bordro veya personel özlük sistemi değildir.
 
 
 
@@ -762,7 +762,7 @@ Kapsam:
 
 
 
-CrevaFactOS ana stok sistemi değildir.
+NevaxisFactOS ana stok sistemi değildir.
 
 
 
@@ -948,7 +948,7 @@ Her görev mümkün olduğunda aşağıdaki bilgileri gösterir:
 
 
 
-CrevaFactOS varsayılan olarak tam otonom fabrika yönetimi yapmaz.
+NevaxisFactOS varsayılan olarak tam otonom fabrika yönetimi yapmaz.
 
 
 
@@ -980,7 +980,7 @@ Veriyi al
 
 ## Task and Communication Authority
 
-AI Task Center is authoritative for factory-operation tasks and approvals. CrevaFactOS Teams is the internal messaging, routing, task-interaction, approval-viewing, and shift-communication application. Web and Teams reference the same task and approval records.
+AI Task Center is authoritative for factory-operation tasks and approvals. NevaxisFactOS Teams is the internal messaging, routing, task-interaction, approval-viewing, and shift-communication application. Web and Teams reference the same task and approval records.
 
 Tasks may route to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management without transferring data ownership or execution permission.
 

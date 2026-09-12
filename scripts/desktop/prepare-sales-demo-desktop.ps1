@@ -1,4 +1,4 @@
-# Prepares CrevaFactOS Windows desktop sales-demo artifact and desktop shortcut.
+# Prepares NevaxisFactOS Windows desktop sales-demo artifact and desktop shortcut.
 # Run once before the Wednesday presentation — NOT during the meeting.
 
 [CmdletBinding()]
@@ -17,13 +17,13 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) {
-    $ArtifactRoot = Join-Path $RepositoryRoot "artifacts\desktop\CrevaFactOS"
+    $ArtifactRoot = Join-Path $RepositoryRoot "artifacts\desktop\NevaxisFactOS"
 }
 
-$desktopProject = Join-Path $RepositoryRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
-$desktopExe = Join-Path $ArtifactRoot "CrevaFactOS.exe"
+$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
+$desktopExe = Join-Path $ArtifactRoot "NevaxisFactOS.exe"
 $bootstrapScript = Join-Path $RepositoryRoot "apps\web\scripts\bootstrap-sales-demo-pilot-full-access-1.mjs"
-$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-crevafactos-app-icon.py"
+$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-NevaxisFactOS-app-icon.py"
 
 function Assert-Command([string]$Name) {
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
@@ -31,34 +31,34 @@ function Assert-Command([string]$Name) {
     }
 }
 
-Write-Host "CrevaFactOS sales-demo desktop preparation"
+Write-Host "NevaxisFactOS sales-demo desktop preparation"
 Write-Host "Repository: $RepositoryRoot"
 
 function Test-KnownVerifierRuntimeRootLeak {
     param([string]$Value)
     if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
-    return $Value -match '(?i)crevafactos-web-readiness-|crevafactos-invalid-runtime|crevafactos-invalid-|invalid-runtime-root|desktop-negative-runtime-'
+    return $Value -match '(?i)NevaxisFactOS-web-readiness-|NevaxisFactOS-invalid-runtime|NevaxisFactOS-invalid-|invalid-runtime-root|desktop-negative-runtime-'
 }
 
 function Clear-KnownDesktopVerifierEnvironmentLeaks {
     foreach ($scope in @("User", "Machine")) {
-        $value = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", $scope)
+        $value = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", $scope)
         if (Test-KnownVerifierRuntimeRootLeak $value) {
-            [Environment]::SetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", $null, $scope)
-            Write-Warning "Removed leaked CREVAFACTOS_DESKTOP_RUNTIME_ROOT from $scope scope: $value"
+            [Environment]::SetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", $null, $scope)
+            Write-Warning "Removed leaked NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT from $scope scope: $value"
         }
     }
-    if (Test-KnownVerifierRuntimeRootLeak $env:CREVAFACTOS_DESKTOP_RUNTIME_ROOT) {
-        Remove-Item Env:CREVAFACTOS_DESKTOP_RUNTIME_ROOT -ErrorAction SilentlyContinue
-        Write-Warning "Removed leaked CREVAFACTOS_DESKTOP_RUNTIME_ROOT from Process scope"
+    if (Test-KnownVerifierRuntimeRootLeak $env:NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT) {
+        Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT -ErrorAction SilentlyContinue
+        Write-Warning "Removed leaked NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT from Process scope"
     }
 }
 
 Clear-KnownDesktopVerifierEnvironmentLeaks
 foreach ($scope in @("Process", "User", "Machine")) {
-    $value = [Environment]::GetEnvironmentVariable("CREVAFACTOS_DESKTOP_RUNTIME_ROOT", $scope)
+    $value = [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT", $scope)
     if (Test-KnownVerifierRuntimeRootLeak $value) {
-        throw "Desktop preparation blocked: CREVAFACTOS_DESKTOP_RUNTIME_ROOT at $scope scope points to verifier fixture: $value"
+        throw "Desktop preparation blocked: NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT at $scope scope points to verifier fixture: $value"
     }
 }
 
@@ -98,7 +98,7 @@ if ($SkipPublish -and (Test-Path $desktopExe)) {
 } else {
     Write-Host "Publishing desktop shell..."
     if (Test-Path $iconGenerator) {
-        Write-Host "Generating canonical CrevaFactOS desktop icon..."
+        Write-Host "Generating canonical NevaxisFactOS desktop icon..."
         & python $iconGenerator
         if ($LASTEXITCODE -ne 0) {
             throw "Desktop icon generation failed."
@@ -131,9 +131,9 @@ Write-Host "Desktop artifact: $desktopExe"
 if (-not $SkipShortcut) {
     $shell = New-Object -ComObject WScript.Shell
     $desktopFolder = [Environment]::GetFolderPath("Desktop")
-    $shortcutPath = Join-Path $desktopFolder "CrevaFactOS.lnk"
+    $shortcutPath = Join-Path $desktopFolder "NevaxisFactOS.lnk"
 
-    foreach ($duplicateName in @("CrevaFactOS.lnk", "CrevaFactOS Desktop.lnk")) {
+    foreach ($duplicateName in @("NevaxisFactOS.lnk", "NevaxisFactOS Desktop.lnk")) {
         $duplicatePath = Join-Path $desktopFolder $duplicateName
         if ($duplicatePath -ne $shortcutPath -and (Test-Path $duplicatePath)) {
             Remove-Item $duplicatePath -Force
@@ -144,7 +144,7 @@ if (-not $SkipShortcut) {
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $desktopExe
     $shortcut.WorkingDirectory = $ArtifactRoot
-    $shortcut.Description = "CrevaFactOS AI Factory Operations OS"
+    $shortcut.Description = "NevaxisFactOS AI Factory Operations OS"
     $shortcut.IconLocation = "$desktopExe,0"
     $shortcut.Save()
     # Re-save refreshes Explorer icon cache when the embedded executable icon changes.

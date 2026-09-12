@@ -206,7 +206,6 @@ export function ProductionOperatorActions({
                 step="1"
                 placeholder="0"
                 className="input input-large"
-                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>
@@ -266,7 +265,6 @@ export function ProductionOperatorActions({
                 step="1"
                 placeholder="0"
                 className="input input-large"
-                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>

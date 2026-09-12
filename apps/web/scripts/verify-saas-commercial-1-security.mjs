@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const CATALOG_PATH = "/api/saas-commercial/catalog";
 
 function fail(message) {
@@ -29,7 +29,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -74,10 +74,10 @@ console.log("Running SAAS-COMMERCIAL-1 security/boundary verifier.");
 const endpoints = readRequired("apps/api/SaasCommercial/SaasCommercialEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/SaasCommercial/SaasCommercialEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
 );
-const permissions = readRequired("packages/CrevaFactOS.Persistence/SaasCommercial/SaasCommercialPermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -98,19 +98,19 @@ assert("helpers return 401 without identity", helpers.includes("TypedResults.Una
 assert("helpers return 403 without permission", helpers.includes("Authorization denied"));
 
 const managerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const crossTenantHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-user",
-  "X-CrevaFactOS-Tenant": "unknown-tenant-key",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-user",
+  "X-NevaxisFactOS-Tenant": "unknown-tenant-key",
 };
 
 const ready = await fetch(`${BASE}/health/ready`);

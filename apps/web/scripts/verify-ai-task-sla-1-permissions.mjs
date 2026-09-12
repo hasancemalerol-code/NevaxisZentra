@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const CLOSURE_PREFIX = "AI-TASK-SLA1-CLOSURE";
@@ -31,9 +31,9 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -84,9 +84,9 @@ function sampleCreateBody(overrides = {}) {
 console.log("Running AI-TASK-SLA-1 permissions verifier.");
 
 const operationsEndpoints = readRequired("apps/api/AiTasks/AiTaskOperationsEndpointRouteBuilderExtensions.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/AiTasks/AiTaskPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskPermissionKeys.cs");
 const actions = readRequired("apps/web/src/features/ai-task-center/server/ai-task-actions.ts");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260902125759_AddAiTaskSlaAssignmentEscalationFoundation.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260902125759_AddAiTaskSlaAssignmentEscalationFoundation.cs");
 
 assert("assign permission key", permissions.includes("ai-task.assign"));
 assert("acknowledge permission key", permissions.includes("ai-task.acknowledge"));

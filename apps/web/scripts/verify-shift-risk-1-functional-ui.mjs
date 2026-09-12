@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 
 function fail(message) {
   console.error(`SHIFT-RISK-1 functional UI verification failed: ${message}`);

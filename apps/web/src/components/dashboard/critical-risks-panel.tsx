@@ -9,6 +9,7 @@ import {
 
 import type { CSSProperties } from "react";
 
+
 import { DashboardNavigationAction } from "./dashboard-navigation-action";
 import {
   resolveCriticalRiskTarget,
@@ -391,7 +392,7 @@ export function CriticalRisksPanel({
                 borderBottom:
                   index === visibleRisks.length - 1
                     ? 0
-                    : styles.riskLink.borderBottom,
+                    : "1px solid #dce5f0",
               }}
               target={target}
             >

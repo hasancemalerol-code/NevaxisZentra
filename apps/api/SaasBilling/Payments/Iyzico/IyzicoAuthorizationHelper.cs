@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CrevaFactOS.Api.SaasBilling.Payments.Iyzico;
+namespace NevaxisFactOS.Api.SaasBilling.Payments.Iyzico;
 
 internal static class IyzicoAuthorizationHelper
 {

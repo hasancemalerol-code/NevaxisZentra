@@ -7,8 +7,8 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://localhost:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE ?? "http://localhost:3001";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://localhost:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE ?? "http://localhost:3001";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const CONNECTION = "bb000001-0090-4000-8000-000000000090";
 const ISSUER = "crevafactos-dev";
@@ -44,9 +44,9 @@ function headers() {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": OPERATOR,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": OPERATOR,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 
@@ -69,9 +69,9 @@ async function api(method, path, body) {
 
 console.log("Running ERP-2L reconciliation verifier.");
 
-const mappingRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpMappingRepository.cs");
+const mappingRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpMappingRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
 
 requireText(mappingRepo, "ListCustomerReconciliationAsync", "ErpMappingRepository");
 requireText(mappingRepo, "ListProductReconciliationAsync", "ErpMappingRepository");

@@ -41,27 +41,27 @@ function fileExists(relPath) {
 
 check(
   "ProductionShift.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionShift.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionShift.cs"),
 );
 
 check(
   "ProductionOrderShiftAssignment.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionOrderShiftAssignment.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionOrderShiftAssignment.cs"),
 );
 
 check(
   "IProductionShiftRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/IProductionShiftRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/IProductionShiftRepository.cs"),
 );
 
 check(
   "ProductionShiftRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionShiftRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionShiftRepository.cs"),
 );
 
 // ── 2. SHIFT ENTITY FIELDS ────────────────────────────────────────────────────
 
-const shiftEntity = readText("packages/CrevaFactOS.Persistence/Production/ProductionShift.cs");
+const shiftEntity = readText("packages/NevaxisFactOS.Persistence/Production/ProductionShift.cs");
 
 check(
   "ProductionShift has Code field",
@@ -91,7 +91,7 @@ check(
 // ── 3. SHIFT ASSIGNMENT ENTITY FIELDS ─────────────────────────────────────────
 
 const assignmentEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderShiftAssignment.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderShiftAssignment.cs",
 );
 
 check(
@@ -134,19 +134,19 @@ check(
 check(
   "ProductionShiftEntityConfiguration.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence/Configurations/ProductionShiftEntityConfiguration.cs",
+    "packages/NevaxisFactOS.Persistence/Configurations/ProductionShiftEntityConfiguration.cs",
   ),
 );
 
 check(
   "ProductionOrderShiftAssignmentEntityConfiguration.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence/Configurations/ProductionOrderShiftAssignmentEntityConfiguration.cs",
+    "packages/NevaxisFactOS.Persistence/Configurations/ProductionOrderShiftAssignmentEntityConfiguration.cs",
   ),
 );
 
 const shiftConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionOrderShiftAssignmentEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionOrderShiftAssignmentEntityConfiguration.cs",
 );
 
 check(
@@ -159,7 +159,7 @@ check(
 // ── 5. ORDER SUMMARY FIELDS ───────────────────────────────────────────────────
 
 const productionOrder = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check(
@@ -190,7 +190,7 @@ check(
 // ── 6. REPOSITORY CONTRACT ────────────────────────────────────────────────────
 
 const shiftRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionShiftRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionShiftRepository.cs",
 );
 
 check(
@@ -232,7 +232,7 @@ check(
 // ── 9. PERMISSIONS ────────────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -268,12 +268,12 @@ check(
 check(
   "Migration 20260808130000_AddProductionShiftResourceExecution.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
   ),
 );
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
 );
 
 check(

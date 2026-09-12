@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
+
 import Link from "next/link";
 
 import { hasDashboardPermission } from "@/components/dashboard/dashboard-permission";

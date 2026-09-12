@@ -11,13 +11,13 @@ import {
 } from "../../../scripts/shared/load-development-saas-identity-secrets.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
-const CDP_PORT = Number(process.env.CREVAFACTOS_DESKTOP_CDP_PORT ?? "9233");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
+const CDP_PORT = Number(process.env.NEVAXIS_FACTOS_DESKTOP_CDP_PORT ?? "9233");
 const ORGANIZATION = "dev-pilot-tenant";
 const EMAIL = "tenant-owner@dev.local";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-const SCREENSHOT_DIR = process.env.CREVAFACTOS_DESKTOP_SCREENSHOT_DIR
+const SCREENSHOT_DIR = process.env.NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_DIR
   ?? join(ROOT, ".cursor-screenshots/desktop-sales-demo-1");
 
 async function captureWebViewPng(send, fileName) {
@@ -335,14 +335,14 @@ async function main() {
       const mfaResult = await evaluate(
         send,
         `(() => {
-          const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
+          const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
           return fetch("/api/identity/mfa/verify", {
             method: "POST",
             credentials: "include",
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
-              "X-CrevaFactOS-Csrf": csrf,
+              "X-NevaxisFactOS-Csrf": csrf,
             },
             body: JSON.stringify({ totpCode: ${JSON.stringify(totp)} }),
           }).then(async (response) => ({

@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.ShiftWorkforce;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.ShiftWorkforce;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.ShiftWorkforce;
+namespace NevaxisFactOS.Api.ShiftWorkforce;
 
 internal static class ShiftWorkforceEndpointHelpers
 {

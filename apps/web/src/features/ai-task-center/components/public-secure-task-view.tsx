@@ -78,7 +78,7 @@ export function PublicSecureTaskView() {
       <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-10">
         <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
           <div className="mb-6 text-center">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/60">CrevaFactOS</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/60">NevaxisFactOS</p>
             <h1 className="mt-2 text-2xl font-semibold">Güvenli Görev Paylaşımı</h1>
           </div>
 

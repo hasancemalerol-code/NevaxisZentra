@@ -81,7 +81,7 @@ assertNotContains("No predictive maintenance", all, "predictive");
 assertNotContains("No kök neden root-cause claim", all.replace(/kök neden analizi YOK/gi, ""), "kök neden analizi");
 
 console.log("\n[6] No secrets / credentials");
-assertNotContains("No CREVAFACTOS_DEV_TOKEN in UI", all, "CREVAFACTOS_DEV_TOKEN");
+assertNotContains("No NEVAXIS_FACTOS_DEV_TOKEN in UI", all, "NEVAXIS_FACTOS_DEV_TOKEN");
 assertNotContains("No password field", all, "password");
 assertNotContains("No apiKey display", all, "apiKey");
 

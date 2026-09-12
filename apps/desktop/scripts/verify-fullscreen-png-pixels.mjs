@@ -218,7 +218,7 @@ if (stripRows === 0 && !expectReject) {
     if (p.b >= p.r && p.b >= 120 && p.g >= 100) blueRows++;
   }
   if (blueRows < 20) {
-    failures.push("CrevaFactOS web surface not detected (insufficient blue-gradient rows; page may not be loaded)");
+    failures.push("NevaxisFactOS web surface not detected (insufficient blue-gradient rows; page may not be loaded)");
   }
 }
 

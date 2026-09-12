@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <RootNamespace>CrevaFactOS.NetsisBridge</RootNamespace>
-    <AssemblyName>CrevaFactOS.NetsisBridge</AssemblyName>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\packages\CrevaFactOS.Persistence\CrevaFactOS.Persistence.csproj" />
-  </ItemGroup>
-</Project>

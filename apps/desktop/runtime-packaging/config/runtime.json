@@ -1,6 +1,6 @@
 {
-  "productName": "CrevaFactOS",
-  "runtimeLabel": "CrevaFactOS Sales Demo RC1",
+  "productName": "NevaxisFactOS",
+  "runtimeLabel": "NevaxisFactOS Sales Demo RC1",
   "webPort": 3001,
   "apiPort": 5000,
   "databaseHost": "127.0.0.1",
@@ -8,5 +8,5 @@
   "databaseName": "crevafactos_local",
   "canonicalRouteCount": 46,
   "facilityId": "bb000001-0005-4000-8000-000000000005",
-  "facilityConfigKey": "CREVAFACTOS_FACILITY_ID"
+  "facilityConfigKey": "NEVAXIS_FACTOS_FACILITY_ID"
 }

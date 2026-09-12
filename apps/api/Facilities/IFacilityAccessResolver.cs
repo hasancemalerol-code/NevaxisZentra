@@ -1,4 +1,4 @@
-namespace CrevaFactOS.Api.Facilities;
+namespace NevaxisFactOS.Api.Facilities;
 
 public interface IFacilityAccessResolver
 {

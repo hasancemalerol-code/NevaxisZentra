@@ -22,10 +22,10 @@ function read(rel) {
 console.log("Running PROCUREMENT-AI-TASK-INTEGRATION-1 migration verifier.");
 
 const migration = read(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260829201502_AddProcurementDeliveryRiskFollowUpTaskIntegration.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829201502_AddProcurementDeliveryRiskFollowUpTaskIntegration.cs",
 );
-const entityConfig = read("packages/CrevaFactOS.Persistence/Configurations/ProcurementDeliveryRiskEntityConfigurations.cs");
-const snapshot = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisFactOS.Persistence/Configurations/ProcurementDeliveryRiskEntityConfigurations.cs");
+const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
 
 assert("follow_up_status column", migration.includes("follow_up_status"));
 assert("linked_ai_task_id column", migration.includes("linked_ai_task_id"));

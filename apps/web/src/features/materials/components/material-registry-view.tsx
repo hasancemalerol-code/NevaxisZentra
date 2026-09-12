@@ -1262,7 +1262,7 @@ export function MaterialRegistryView({
                     <article className="material-overview-card material-overview-card--wide">
                       <h3 className="material-overview-card__title">Kaynak ve ERP Referansı</h3>
                       <p className="material-form-hint">
-                        ERP kaynaklı kayıtlarda sistem-of-record ERP&apos;dir; bu ekran CrevaFactOS malzeme kaydı
+                        ERP kaynaklı kayıtlarda sistem-of-record ERP&apos;dir; bu ekran NevaxisFactOS malzeme kaydı
                         bağlamını gösterir.
                       </p>
                       <dl className="material-registry-meta-grid">

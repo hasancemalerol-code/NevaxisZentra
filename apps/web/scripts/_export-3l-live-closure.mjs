@@ -19,9 +19,9 @@ const fail = (k, d = "") => { failures++; console.error(`❌ ${k}${d ? `: ${d}` 
 const h = (subject = OPERATOR, extra = {}) => ({
   Accept: "application/json",
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": ISSUER,
-  "X-CrevaFactOS-Dev-Subject": subject,
-  "X-CrevaFactOS-Tenant": TENANT,
+  "X-crevafactos-dev-Issuer": ISSUER,
+  "X-crevafactos-dev-Subject": subject,
+  "X-NevaxisFactOS-Tenant": TENANT,
   ...extra,
 });
 
@@ -71,7 +71,7 @@ async function main() {
       category: "documentation",
       title: "Link closure finding",
       summary: "Development fixture source.",
-      sourcePublisher: "CrevaFactOS Dev",
+      sourcePublisher: "NevaxisFactOS Dev",
       sourceTitle: "Closure fixture",
       confidence: 70,
       blockingPotential: false,
@@ -134,7 +134,7 @@ async function main() {
     name: `DE Satisfy Closure ${satisfyStamp}`,
     effectiveFrom: "2026-08-08",
     sourceTitle: "Satisfy closure fixture",
-    sourcePublisher: "CrevaFactOS Dev",
+    sourcePublisher: "NevaxisFactOS Dev",
   });
   const satisfyPackId = r.json?.rulePackId ?? r.json?.id;
   let satisfyPackVer = r.json?.version ?? 1;
@@ -197,7 +197,7 @@ async function main() {
     name: `DE Demo v2 Closure ${Date.now()}`,
     effectiveFrom: "2026-08-08",
     sourceTitle: "Development fixture v2",
-    sourcePublisher: "CrevaFactOS Dev",
+    sourcePublisher: "NevaxisFactOS Dev",
   });
   const pack2Id = r.json?.rulePackId ?? r.json?.id;
   let pack2Ver = r.json?.version ?? 1;
@@ -242,7 +242,7 @@ async function main() {
       category: "documentation",
       title: "Closure knowledge entry",
       summary: "Historical observation from research.",
-      sourcePublisher: "CrevaFactOS Dev",
+      sourcePublisher: "NevaxisFactOS Dev",
       sourceTitle: "Research fixture",
       authority: "historical-observation",
       createdFromResearchCaseId: researchId,
@@ -283,7 +283,7 @@ async function main() {
     name: `DE Concurrency ${Date.now()}`,
     effectiveFrom: "2026-08-08",
     sourceTitle: "Concurrency fixture",
-    sourcePublisher: "CrevaFactOS Dev",
+    sourcePublisher: "NevaxisFactOS Dev",
   });
   const concPackId = r.json?.rulePackId ?? r.json?.id;
   const concPackVer = r.json?.version ?? 1;

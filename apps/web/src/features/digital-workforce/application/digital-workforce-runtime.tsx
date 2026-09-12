@@ -96,8 +96,8 @@ export function DigitalWorkforceRuntimeProvider({
   apiError?: string | null;
 }>) {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [approvals, setApprovals] = useState(initialApprovals);
-  const [activity, setActivity] = useState(initialActivity);
+  const [approvals, _setApprovals] = useState(initialApprovals);
+  const [activity, _setActivity] = useState(initialActivity);
   const [error, setError] = useState(apiError);
   const [isPending, startTransition] = useTransition();
 

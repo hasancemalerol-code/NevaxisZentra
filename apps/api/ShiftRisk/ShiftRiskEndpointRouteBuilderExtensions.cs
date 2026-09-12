@@ -1,12 +1,12 @@
 using System.Globalization;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.ShiftRisk;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.ShiftRisk;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ShiftRisk;
+namespace NevaxisFactOS.Api.ShiftRisk;
 
 public static class ShiftRiskEndpointRouteBuilderExtensions
 {
@@ -683,11 +683,11 @@ public sealed record EvaluateWorkforceContinuityRequest(
 
 public static class ShiftRiskServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSShiftRisk(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSShiftRisk(this IServiceCollection services)
     {
         services.AddScoped<IShiftRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableShiftRiskRepository()
                 : new ShiftRiskRepository(

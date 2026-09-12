@@ -7,12 +7,12 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5011";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5011";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const ISSUER = "crevafactos-dev";
 const AUTHORIZED_FACILITY =
-  process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+  process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 
 function fail(message) {
   console.error(`Maintenance 3L reliability verification failed: ${message}`);
@@ -43,9 +43,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -53,11 +53,11 @@ function headers(subject = OPERATOR, extra = {}) {
 console.log("Running maintenance 3L reliability verifier.");
 
 const reliabilityRepo = readRequired(
-  "packages/CrevaFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
 );
-const entities = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceEntities.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceEntities.cs");
 const seed = readRequired(
-  "packages/CrevaFactOS.Persistence/Development/DevelopmentPilotMaintenanceReliabilitySeed.cs",
+  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotMaintenanceReliabilitySeed.cs",
 );
 
 requireText(entities, "MaintenanceFailureCategory", "failure category enum");

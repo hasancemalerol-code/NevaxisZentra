@@ -36,7 +36,7 @@ console.log("Running quality integration gate verifier.");
 
 // QUALITY-1L
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Quality/QualityEvaluationEngine.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityEvaluationEngine.cs"),
   "EvaluateMeasurement",
   "QUALITY-1L engine",
 );
@@ -53,7 +53,7 @@ requireText(
   "QUALITY-2L NCR endpoints",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Quality/QualityNonconformanceRepository.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs"),
   "DuplicateNonconformance",
   "QUALITY-2L duplicate guard",
 );
@@ -65,7 +65,7 @@ requireText(
   "QUALITY-3L reporting",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Quality/QualityTraceabilityRepository.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityTraceabilityRepository.cs"),
   "GetProductHistoryAsync",
   "QUALITY-3L traceability",
 );
@@ -89,7 +89,7 @@ requireText(
 
 // Integration wiring
 requireText(readRequired("apps/api/Program.cs"), "MapQualityEndpoints", "Program.cs");
-requireText(readRequired("apps/api/Program.cs"), "AddCrevaFactOSQuality", "Program.cs");
+requireText(readRequired("apps/api/Program.cs"), "AddNevaxisFactOSQuality", "Program.cs");
 
 forbidText(
   readRequired("apps/api/Quality/QualityEndpointRouteBuilderExtensions.cs"),

@@ -50,8 +50,8 @@ function Reclaim-ProjectPort([int]$Port, [string]$Kind) {
     $cmd = ""
     try { $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId=$ownerPid").CommandLine } catch {}
     $ok = $false
-    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "CrevaFactOS.Api" -and $path -like "*\Projects\CrevaFactOS\*") { $ok = $true }
-    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\CrevaFactOS\*") { $ok = $true }
+    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $path -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
+    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
     if ($Kind -eq "double" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*meta-whatsapp-provider-test-double*") { $ok = $true }
     if ($ok) {
         Write-Host "Reclaiming $Kind port $Port PID $ownerPid"
@@ -91,26 +91,26 @@ $apiLog = Join-Path $logsDir "closure-api.log"
 $apiErr = Join-Path $logsDir "closure-api.err.log"
 $apiEnv = @{
     ASPNETCORE_ENVIRONMENT = "Development"
-    CREVAFACTOS__PERSISTENCE__ENABLED = "true"
-    CREVAFACTOS__PERSISTENCE__HOST = $WhatsAppClosurePostgresHost
-    CREVAFACTOS__PERSISTENCE__PORT = "$WhatsAppClosurePostgresPort"
-    CREVAFACTOS__PERSISTENCE__DATABASE = $WhatsAppClosureDatabaseName
-    CREVAFACTOS__PERSISTENCE__USERNAME = $WhatsAppClosureRuntimeUser
-    CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-    CREVAFACTOS__PERSISTENCE__SSL_MODE = "Disable"
+    NEVAXIS_FACTOS__PERSISTENCE__ENABLED = "true"
+    NEVAXIS_FACTOS__PERSISTENCE__HOST = $WhatsAppClosurePostgresHost
+    NEVAXIS_FACTOS__PERSISTENCE__PORT = "$WhatsAppClosurePostgresPort"
+    NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $WhatsAppClosureDatabaseName
+    NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $WhatsAppClosureRuntimeUser
+    NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+    NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = "Disable"
     DevelopmentPilot__Enabled = "false"
-    CREVAFACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
-    CREVAFACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__ENABLED = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__PHONE_NUMBER_ID = "test-phone-id"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__BUSINESS_ACCOUNT_ID = "test-business-account"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__ACCESS_TOKEN = "test-access-token"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__APP_SECRET = "whatsapp-test-app-secret"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__WEBHOOK_VERIFY_TOKEN = "whatsapp-test-verify-token"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__DEFAULT_TEMPLATE_NAME = "crevafactos_task_notification"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__DEFAULT_TEMPLATE_LANGUAGE_CODE = "tr"
-    CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__TEST_API_BASE_URL = $doubleBase
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__PHONE_NUMBER_ID = "test-phone-id"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__BUSINESS_ACCOUNT_ID = "test-business-account"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__ACCESS_TOKEN = "test-access-token"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__APP_SECRET = "whatsapp-test-app-secret"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__WEBHOOK_VERIFY_TOKEN = "whatsapp-test-verify-token"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__DEFAULT_TEMPLATE_NAME = "NEVAXIS_FACTOS_task_notification"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__DEFAULT_TEMPLATE_LANGUAGE_CODE = "tr"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__TEST_API_BASE_URL = $doubleBase
     ASPNETCORE_URLS = $apiBase
 }
 foreach ($k in $apiEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$apiEnv[$k]) }
@@ -131,12 +131,12 @@ if (-not (Wait-HttpReady "$apiBase/health/ready")) {
 $webLog = Join-Path $logsDir "closure-web.log"
 $webErr = Join-Path $logsDir "closure-web.err.log"
 $webEnv = @{
-    CREVAFACTOS_API_BASE_URL = $apiBase
-    CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
-    CREVAFACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
-    CREVAFACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
-    CREVAFACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
-    CREVAFACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
+    NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+    NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
+    NEVAXIS_FACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
+    NEVAXIS_FACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
+    NEVAXIS_FACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
+    NEVAXIS_FACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
     PORT = "$webPort"
 }
 foreach ($k in $webEnv.Keys) { Set-Item -Path "env:$k" -Value ([string]$webEnv[$k]) }

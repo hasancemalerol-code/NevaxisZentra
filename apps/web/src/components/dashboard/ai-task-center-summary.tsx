@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
+
 import { getAiTaskPreviewById } from "@/features/ai-task-center/data/ai-task-preview-data";
 
 import {
@@ -431,7 +432,7 @@ export function AiTaskCenterSummary({
                 borderBottom:
                   index === visibleTasks.length - 1
                     ? 0
-                    : styles.item.borderBottom,
+                    : "1px solid #dce5f0",
               }}
             >
               <span

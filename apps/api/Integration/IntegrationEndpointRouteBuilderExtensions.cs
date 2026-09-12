@@ -1,23 +1,24 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Integration;
-using CrevaFactOS.Persistence.Integration.FileImport;
-using CrevaFactOS.Persistence.Integration.Mapping;
-using CrevaFactOS.Persistence.Integration.Connectors;
-using CrevaFactOS.Persistence.Integration.Database;
-using CrevaFactOS.Persistence.Integration.Erp;
-using CrevaFactOS.Persistence.Integration.FolderWatch;
-using CrevaFactOS.Persistence.Integration.Projections;
-using CrevaFactOS.Persistence.Integration.Rest;
-using CrevaFactOS.Persistence.Integration.Sync;
-using CrevaFactOS.Persistence.Integration.Webhook;
-using CrevaFactOS.Persistence.Material;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using Microsoft.AspNetCore.Mvc;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Integration;
+using NevaxisFactOS.Persistence.Integration.FileImport;
+using NevaxisFactOS.Persistence.Integration.Mapping;
+using NevaxisFactOS.Persistence.Integration.Connectors;
+using NevaxisFactOS.Persistence.Integration.Database;
+using NevaxisFactOS.Persistence.Integration.Erp;
+using NevaxisFactOS.Persistence.Integration.FolderWatch;
+using NevaxisFactOS.Persistence.Integration.Projections;
+using NevaxisFactOS.Persistence.Integration.Rest;
+using NevaxisFactOS.Persistence.Integration.Sync;
+using NevaxisFactOS.Persistence.Integration.Webhook;
+using NevaxisFactOS.Persistence.Material;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
-namespace CrevaFactOS.Api.Integration;
+namespace NevaxisFactOS.Api.Integration;
 
 public static class IntegrationEndpointRouteBuilderExtensions
 {
@@ -48,7 +49,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSIntegration(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSIntegration(this IServiceCollection services)
     {
         services.AddHttpClient("integration-rest");
         services.AddSingleton<IIntegrationConnectorImplementation, SimulatedIntegrationConnectorImplementation>();
@@ -71,7 +72,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
 
         services.AddScoped<IIntegrationMappingRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableIntegrationMappingRepository()
                 : new IntegrationMappingRepository(
@@ -81,7 +82,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
 
         services.AddScoped<IIntegrationConnectorRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableIntegrationConnectorRepository()
                 : new IntegrationConnectorRepository(
@@ -583,10 +584,11 @@ public static class IntegrationEndpointRouteBuilderExtensions
         Guid connectorId,
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
-        TenantDatabaseSession tenantDatabaseSession,
-        CrevaFactOSDbContext dbContext,
+        IServiceProvider services,
         CancellationToken cancellationToken)
     {
+        var tenantDatabaseSession = services.GetRequiredService<TenantDatabaseSession>();
+        var dbContext = services.GetRequiredService<NevaxisFactOSDbContext>();
         var (context, failResult) = await IntegrationEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, cancellationToken);
         if (context is null)
@@ -626,10 +628,11 @@ public static class IntegrationEndpointRouteBuilderExtensions
         Guid connectorId,
         Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
-        TenantDatabaseSession tenantDatabaseSession,
-        CrevaFactOSDbContext dbContext,
+        IServiceProvider services,
         CancellationToken cancellationToken)
     {
+        var tenantDatabaseSession = services.GetRequiredService<TenantDatabaseSession>();
+        var dbContext = services.GetRequiredService<NevaxisFactOSDbContext>();
         var (context, failResult) = await IntegrationEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, cancellationToken);
         if (context is null)

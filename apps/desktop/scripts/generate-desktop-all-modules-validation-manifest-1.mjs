@@ -134,8 +134,8 @@ function parsePrimaryNavigation() {
 
 const routes = parsePrimaryNavigation();
 const manifest = {
-  package: "CREVAFACTOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
-  baseline: "CREVAFACTOS-SALES-DEMO-ALL-MODULES-READINESS-1",
+  package: "NevaxisFactOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
+  baseline: "NevaxisFactOS-SALES-DEMO-ALL-MODULES-READINESS-1",
   generatedAt: new Date().toISOString(),
   canonicalRouteCount: routes.length,
   representativeScreenshots: {

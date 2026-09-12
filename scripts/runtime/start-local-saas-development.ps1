@@ -1,5 +1,5 @@
-# Canonical local CrevaFactOS SaaS development runtime (API 5000 + web 3001).
-# No secrets. Refuses duplicate CrevaFactOS listeners on the target ports.
+# Canonical local NevaxisFactOS SaaS development runtime (API 5000 + web 3001).
+# No secrets. Refuses duplicate NevaxisFactOS listeners on the target ports.
 
 [CmdletBinding()]
 param(
@@ -9,13 +9,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$apiProject = Join-Path $repositoryRoot 'apps\api\CrevaFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
 $apiPort = 5000
 $webPort = 3001
 $apiBaseUrl = "http://127.0.0.1:$apiPort"
 $webBaseUrl = "http://127.0.0.1:$webPort"
 
-function Test-CrevaFactOSListener {
+function Test-NevaxisFactOSListener {
     param(
         [int]$Port,
         [string]$ExpectedPathFragment
@@ -34,7 +34,7 @@ function Test-CrevaFactOSListener {
 
     $path = $process.Path
     if ($ExpectedPathFragment -and $path -and ($path -notlike "*$ExpectedPathFragment*")) {
-        throw "Port $Port is owned by a non-CrevaFactOS process: $($process.ProcessName) ($path)."
+        throw "Port $Port is owned by a non-NevaxisFactOS process: $($process.ProcessName) ($path)."
     }
 
     return [PSCustomObject]@{
@@ -71,24 +71,24 @@ function Wait-HttpStatus {
     throw "Timed out waiting for $Url to return HTTP $ExpectedStatus."
 }
 
-Write-Host "CrevaFactOS local SaaS development launcher"
+Write-Host "NevaxisFactOS local SaaS development launcher"
 Write-Host "Repository: $repositoryRoot"
 
-$existingApi = Test-CrevaFactOSListener -Port $apiPort -ExpectedPathFragment 'CrevaFactOS.Api'
-$existingWeb = Test-CrevaFactOSListener -Port $webPort -ExpectedPathFragment 'node'
+$existingApi = Test-NevaxisFactOSListener -Port $apiPort -ExpectedPathFragment 'NevaxisFactOS.Api'
+$existingWeb = Test-NevaxisFactOSListener -Port $webPort -ExpectedPathFragment 'node'
 
 if ($existingApi -and -not $SkipApi) {
-    throw "CrevaFactOS API already listening on port $apiPort (PID $($existingApi.ProcessId)). Stop it before launching a duplicate."
+    throw "NevaxisFactOS API already listening on port $apiPort (PID $($existingApi.ProcessId)). Stop it before launching a duplicate."
 }
 
 if ($existingWeb -and -not $SkipWeb) {
-    throw "CrevaFactOS web already listening on port $webPort (PID $($existingWeb.ProcessId)). Stop it before launching a duplicate."
+    throw "NevaxisFactOS web already listening on port $webPort (PID $($existingWeb.ProcessId)). Stop it before launching a duplicate."
 }
 
 if (-not $SkipApi) {
     $apiCommand = @(
         "`$env:ASPNETCORE_ENVIRONMENT='Development';",
-        "`$env:CREVAFACTOS__AUTHENTICATION__MODE='SessionCookie';",
+        "`$env:NEVAXIS_FACTOS__AUTHENTICATION__MODE='SessionCookie';",
         "dotnet run --project `"$apiProject`" --urls `"$apiBaseUrl`" --no-build"
     ) -join ' '
 
@@ -107,11 +107,11 @@ if (-not $SkipApi) {
 
 if (-not $SkipWeb) {
     $webCommand = @(
-        "`$env:CREVAFACTOS_API_BASE_URL='$apiBaseUrl';",
-        "pnpm --filter @crevafactos/web dev -- -p $webPort"
+        "`$env:NEVAXIS_FACTOS_API_BASE_URL='$apiBaseUrl';",
+        "pnpm --filter @nevaxisfactos/web dev -- -p $webPort"
     ) -join ' '
 
-    Write-Host "Starting web on $webBaseUrl with CREVAFACTOS_API_BASE_URL=$apiBaseUrl..."
+    Write-Host "Starting web on $webBaseUrl with NEVAXIS_FACTOS_API_BASE_URL=$apiBaseUrl..."
     Start-Process -FilePath 'powershell.exe' -ArgumentList @(
         '-NoProfile',
         '-ExecutionPolicy', 'Bypass',

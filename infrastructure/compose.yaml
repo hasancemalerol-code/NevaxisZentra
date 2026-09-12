@@ -1,15 +1,15 @@
-name: crevafactos-local
+name: NevaxisFactOS-local
 
 services:
   postgres:
     image: postgres:17.6-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${CREVAFACTOS_POSTGRES_DATABASE:-crevafactos_local}
-      POSTGRES_USER: ${CREVAFACTOS_POSTGRES_USERNAME:-crevafactos}
-      POSTGRES_PASSWORD: ${CREVAFACTOS_POSTGRES_PASSWORD:-local_dev_only_change_me}
+      POSTGRES_DB: ${NEVAXIS_FACTOS_POSTGRES_DATABASE:-crevafactos_local}
+      POSTGRES_USER: ${NEVAXIS_FACTOS_POSTGRES_USERNAME:-NevaxisFactOS}
+      POSTGRES_PASSWORD: ${NEVAXIS_FACTOS_POSTGRES_PASSWORD:-local_dev_only_change_me}
     ports:
-      - "${CREVAFACTOS_POSTGRES_PORT:-5432}:5432"
+      - "${NEVAXIS_FACTOS_POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -25,11 +25,11 @@ services:
     image: rabbitmq:4.1.4-management-alpine
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: ${CREVAFACTOS_RABBITMQ_USERNAME:-crevafactos}
-      RABBITMQ_DEFAULT_PASS: ${CREVAFACTOS_RABBITMQ_PASSWORD:-local_dev_only_change_me}
+      RABBITMQ_DEFAULT_USER: ${NEVAXIS_FACTOS_RABBITMQ_USERNAME:-NevaxisFactOS}
+      RABBITMQ_DEFAULT_PASS: ${NEVAXIS_FACTOS_RABBITMQ_PASSWORD:-local_dev_only_change_me}
     ports:
-      - "${CREVAFACTOS_RABBITMQ_AMQP_PORT:-5672}:5672"
-      - "${CREVAFACTOS_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      - "${NEVAXIS_FACTOS_RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${NEVAXIS_FACTOS_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -43,11 +43,11 @@ services:
 
 volumes:
   postgres-data:
-    name: crevafactos-local-postgres-data
+    name: NevaxisFactOS-local-postgres-data
   rabbitmq-data:
-    name: crevafactos-local-rabbitmq-data
+    name: NevaxisFactOS-local-rabbitmq-data
 
 networks:
   local-infrastructure:
-    name: crevafactos-local-network
+    name: NevaxisFactOS-local-network
     driver: bridge

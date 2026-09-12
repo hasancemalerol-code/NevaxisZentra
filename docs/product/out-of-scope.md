@@ -1,4 +1,4 @@
-# CrevaFactOS Kapsam Dışı Alanlar
+# NevaxisFactOS Kapsam Dışı Alanlar
 
 
 
@@ -6,7 +6,7 @@
 
 - Tarih: 2026-08-04
 
-- Ürün: CrevaFactOS
+- Ürün: NevaxisFactOS
 
 - Kategori: AI Factory Operations Assistant
 
@@ -18,7 +18,7 @@
 
 
 
-Bu belge CrevaFactOS içinde geliştirilmemesi gereken klasik ERP, muhasebe, bordro ve ana kayıt sistemi işlevlerini tanımlar.
+Bu belge NevaxisFactOS içinde geliştirilmemesi gereken klasik ERP, muhasebe, bordro ve ana kayıt sistemi işlevlerini tanımlar.
 
 
 
@@ -28,7 +28,7 @@ Amaçlar:
 
 - Ürün kapsamının kontrolsüz genişlemesini önlemek
 
-- CrevaFactOS'u klasik ERP ürününe dönüştürmemek
+- NevaxisFactOS'u klasik ERP ürününe dönüştürmemek
 
 - AI üretim ve fabrika operasyonları odağını korumak
 
@@ -46,7 +46,7 @@ Amaçlar:
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -68,7 +68,7 @@ CrevaFactOS:
 
 
 
-CrevaFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel AI planlarına, risklere, görevlere ve onaylı aksiyonlara dönüştürür.
+NevaxisFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel AI planlarına, risklere, görevlere ve onaylı aksiyonlara dönüştürür.
 
 
 
@@ -76,7 +76,7 @@ CrevaFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel A
 
 
 
-CrevaFactOS içinde bağımsız genel muhasebe sistemi geliştirilmeyecektir.
+NevaxisFactOS içinde bağımsız genel muhasebe sistemi geliştirilmeyecektir.
 
 
 
@@ -110,7 +110,7 @@ Bu veriler gerekli olduğunda mevcut ERP veya muhasebe sisteminden okunabilir.
 
 
 
-CrevaFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için kullanabilir.
+NevaxisFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için kullanabilir.
 
 
 
@@ -118,7 +118,7 @@ CrevaFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için k
 
 
 
-CrevaFactOS bağımsız cari hesap defteri oluşturmayacaktır.
+NevaxisFactOS bağımsız cari hesap defteri oluşturmayacaktır.
 
 
 
@@ -144,7 +144,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS mevcut ERP'den:
+NevaxisFactOS mevcut ERP'den:
 
 
 
@@ -168,7 +168,7 @@ gibi özet verileri alabilir.
 
 
 
-CrevaFactOS resmî faturalama sistemi olmayacaktır.
+NevaxisFactOS resmî faturalama sistemi olmayacaktır.
 
 
 
@@ -198,7 +198,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS sevkiyat veya sipariş tamamlandığında mevcut ERP'ye faturalama için görev veya bilgi gönderebilir.
+NevaxisFactOS sevkiyat veya sipariş tamamlandığında mevcut ERP'ye faturalama için görev veya bilgi gönderebilir.
 
 
 
@@ -210,7 +210,7 @@ Resmî belge mevcut ERP veya muhasebe sistemi tarafından oluşturulur.
 
 
 
-CrevaFactOS banka veya ödeme sistemi değildir.
+NevaxisFactOS banka veya ödeme sistemi değildir.
 
 
 
@@ -238,7 +238,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS operasyonel karar için nakit veya ödeme riskini mevcut ERP'den okuyabilir.
+NevaxisFactOS operasyonel karar için nakit veya ödeme riskini mevcut ERP'den okuyabilir.
 
 
 
@@ -250,7 +250,7 @@ AI doğrudan banka işlemi başlatamaz.
 
 
 
-CrevaFactOS resmî veya ana stok defteri olmayacaktır.
+NevaxisFactOS resmî veya ana stok defteri olmayacaktır.
 
 
 
@@ -282,7 +282,7 @@ Ana stok miktarı mevcut ERP veya depo sisteminde tutulur.
 
 
 
-CrevaFactOS bu verileri:
+NevaxisFactOS bu verileri:
 
 
 
@@ -306,7 +306,7 @@ için kullanır.
 
 
 
-CrevaFactOS genel amaçlı depo yönetim sistemi olmayacaktır.
+NevaxisFactOS genel amaçlı depo yönetim sistemi olmayacaktır.
 
 
 
@@ -352,7 +352,7 @@ Ancak üretim operasyonu için gerekli aşağıdaki bilgiler analiz kapsamında 
 
 
 
-CrevaFactOS tam kapsamlı satın alma kayıt sistemi olmayacaktır.
+NevaxisFactOS tam kapsamlı satın alma kayıt sistemi olmayacaktır.
 
 
 
@@ -378,7 +378,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -398,7 +398,7 @@ CrevaFactOS:
 
 
 
-CrevaFactOS bordro sistemi değildir.
+NevaxisFactOS bordro sistemi değildir.
 
 
 
@@ -428,7 +428,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS vardiya planında fazla mesai ihtiyacını gösterebilir.
+NevaxisFactOS vardiya planında fazla mesai ihtiyacını gösterebilir.
 
 
 
@@ -440,7 +440,7 @@ Maaş ve resmî ücret hesabı mevcut bordro veya İK sisteminde yapılır.
 
 
 
-CrevaFactOS personel ana kayıt sistemi olmayacaktır.
+NevaxisFactOS personel ana kayıt sistemi olmayacaktır.
 
 
 
@@ -470,7 +470,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS vardiya planlama için yalnızca gerekli operasyonel personel verisini kullanabilir:
+NevaxisFactOS vardiya planlama için yalnızca gerekli operasyonel personel verisini kullanabilir:
 
 
 
@@ -494,7 +494,7 @@ CrevaFactOS vardiya planlama için yalnızca gerekli operasyonel personel verisi
 
 
 
-CrevaFactOS kapsamlı İK yönetim platformu olmayacaktır.
+NevaxisFactOS kapsamlı İK yönetim platformu olmayacaktır.
 
 
 
@@ -530,7 +530,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS genel amaçlı müşteri ilişkileri yönetimi sistemi olmayacaktır.
+NevaxisFactOS genel amaçlı müşteri ilişkileri yönetimi sistemi olmayacaktır.
 
 
 
@@ -556,7 +556,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli müşteri verilerini kullanır.
+NevaxisFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli müşteri verilerini kullanır.
 
 
 
@@ -564,7 +564,7 @@ CrevaFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli müş
 
 
 
-CrevaFactOS bütün satış süreçlerinin ana sistemi olmayacaktır.
+NevaxisFactOS bütün satış süreçlerinin ana sistemi olmayacaktır.
 
 
 
@@ -590,7 +590,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut ERP sipariş sistemiyle entegre olabilir.
+NevaxisFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut ERP sipariş sistemiyle entegre olabilir.
 
 
 
@@ -598,7 +598,7 @@ CrevaFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut 
 
 
 
-CrevaFactOS bütün şirket belgelerini yöneten genel DMS ürünü olmayacaktır.
+NevaxisFactOS bütün şirket belgelerini yöneten genel DMS ürünü olmayacaktır.
 
 
 
@@ -620,7 +620,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
+NevaxisFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
 
 
 
@@ -644,7 +644,7 @@ CrevaFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
 
 
 
-CrevaFactOS Jira, Asana veya genel proje yönetim platformunun yerine geçmez.
+NevaxisFactOS Jira, Asana veya genel proje yönetim platformunun yerine geçmez.
 
 
 
@@ -664,7 +664,7 @@ Kapsam dışı işlevler:
 
 
 
-CrevaFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
+NevaxisFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
 
 
 
@@ -688,7 +688,7 @@ CrevaFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
 
 
 
-Bakım CrevaFactOS kapsamındadır ancak ürün bütün sektörlere yönelik bağımsız CMMS olarak konumlandırılmayacaktır.
+Bakım NevaxisFactOS kapsamındadır ancak ürün bütün sektörlere yönelik bağımsız CMMS olarak konumlandırılmayacaktır.
 
 
 
@@ -716,7 +716,7 @@ Bakım yetenekleri plastik enjeksiyon ve kalıp üretimi bağlamında geliştiri
 
 
 
-CrevaFactOS üretim operasyonlarını takip eder ancak bütün üretim sektörlerine uygun genel MES olarak geliştirilmez.
+NevaxisFactOS üretim operasyonlarını takip eder ancak bütün üretim sektörlerine uygun genel MES olarak geliştirilmez.
 
 
 
@@ -746,7 +746,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS makine güvenlik sistemi değildir.
+NevaxisFactOS makine güvenlik sistemi değildir.
 
 
 
@@ -776,7 +776,7 @@ Bu kontroller yerel makine ve PLC üzerinde kalır.
 
 
 
-CrevaFactOS bu sistemleri devre dışı bırakamaz.
+NevaxisFactOS bu sistemleri devre dışı bırakamaz.
 
 
 
@@ -784,7 +784,7 @@ CrevaFactOS bu sistemleri devre dışı bırakamaz.
 
 
 
-CrevaFactOS kullanıcıya veya AI'a sınırsız makine komutu yetkisi vermez.
+NevaxisFactOS kullanıcıya veya AI'a sınırsız makine komutu yetkisi vermez.
 
 
 
@@ -818,7 +818,7 @@ Desteklenen komutlar allowlist ve açık onay ile sınırlandırılır.
 
 
 
-CrevaFactOS varsayılan olarak tam otonom fabrika sistemi değildir.
+NevaxisFactOS varsayılan olarak tam otonom fabrika sistemi değildir.
 
 
 
@@ -888,7 +888,7 @@ AI yalnızca sürümlenmiş ve izinli tool sözleşmelerini kullanır.
 
 
 
-CrevaFactOS kurumun bütün verilerini toplayan sınırsız genel veri ambarı olmayacaktır.
+NevaxisFactOS kurumun bütün verilerini toplayan sınırsız genel veri ambarı olmayacaktır.
 
 
 
@@ -918,7 +918,7 @@ Operational Data Hub yalnızca fabrika operasyon kararı için gerekli verileri 
 
 
 
-CrevaFactOS mevcut ERP'nin bütün tablo ve alanlarını kopyalamaz.
+NevaxisFactOS mevcut ERP'nin bütün tablo ve alanlarını kopyalamaz.
 
 
 
@@ -946,7 +946,7 @@ Yalnızca operasyonel karar için gerekli kanonik alanlar tutulur.
 
 
 
-CrevaFactOS system-of-record olarak belirlenmemiş verileri tek taraflı değiştiremez.
+NevaxisFactOS system-of-record olarak belirlenmemiş verileri tek taraflı değiştiremez.
 
 
 
@@ -976,7 +976,7 @@ Bu veriler yalnızca desteklenen ve onaylanan write-back akışıyla kaynak sist
 
 
 
-CrevaFactOS bütün uygulamalar için genel RPA ürünü olmayacaktır.
+NevaxisFactOS bütün uygulamalar için genel RPA ürünü olmayacaktır.
 
 
 
@@ -1004,7 +1004,7 @@ RPA benzeri adaptörler yalnızca API bulunmayan belirli ERP entegrasyonları i�
 
 
 
-CrevaFactOS genel low-code veya no-code uygulama geliştirme platformu değildir.
+NevaxisFactOS genel low-code veya no-code uygulama geliştirme platformu değildir.
 
 
 
@@ -1034,7 +1034,7 @@ Yapılandırılabilir alanlar kontrollü ürün sınırlarında kalır.
 
 
 
-CrevaFactOS yalnızca raporlama ürünü değildir ve sınırsız BI platformu da olmayacaktır.
+NevaxisFactOS yalnızca raporlama ürünü değildir ve sınırsız BI platformu da olmayacaktır.
 
 
 
@@ -1054,7 +1054,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir AI çıktıları sunar.
+NevaxisFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir AI çıktıları sunar.
 
 
 
@@ -1062,7 +1062,7 @@ CrevaFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir A
 
 
 
-Enerji verileri operasyonel analizde kullanılabilir ancak CrevaFactOS bağımsız enerji yönetimi ve faturalama sistemi değildir.
+Enerji verileri operasyonel analizde kullanılabilir ancak NevaxisFactOS bağımsız enerji yönetimi ve faturalama sistemi değildir.
 
 
 
@@ -1082,7 +1082,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS:
+NevaxisFactOS:
 
 
 
@@ -1104,7 +1104,7 @@ analiz edebilir.
 
 
 
-CrevaFactOS tam kapsamlı İSG ana sistemi değildir.
+NevaxisFactOS tam kapsamlı İSG ana sistemi değildir.
 
 
 
@@ -1132,7 +1132,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS genel lojistik veya filo yönetim ürünü değildir.
+NevaxisFactOS genel lojistik veya filo yönetim ürünü değildir.
 
 
 
@@ -1156,7 +1156,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu takip edebilir.
+NevaxisFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu takip edebilir.
 
 
 
@@ -1164,7 +1164,7 @@ CrevaFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu
 
 
 
-CrevaFactOS genel tedarikçi pazaryeri değildir.
+NevaxisFactOS genel tedarikçi pazaryeri değildir.
 
 
 
@@ -1262,7 +1262,7 @@ ile sınırlandırılabilir.
 
 
 
-CrevaFactOS genel Master Data Management platformu olmayacaktır.
+NevaxisFactOS genel Master Data Management platformu olmayacaktır.
 
 
 
@@ -1282,7 +1282,7 @@ Kapsam dışı:
 
 
 
-CrevaFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
+NevaxisFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
 
 
 
@@ -1290,7 +1290,7 @@ CrevaFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
 
 
 
-CrevaFactOS satışı için müşterinin mevcut ERP'sini bırakması istenmez.
+NevaxisFactOS satışı için müşterinin mevcut ERP'sini bırakması istenmez.
 
 
 
@@ -1302,7 +1302,7 @@ CrevaFactOS satışı için müşterinin mevcut ERP'sini bırakması istenmez.
 
 
 
-ERP değiştirme projesi CrevaFactOS satışının ön koşulu değildir.
+ERP değiştirme projesi NevaxisFactOS satışının ön koşulu değildir.
 
 
 
@@ -1364,11 +1364,11 @@ Yapay veya anonimleştirilmiş veri kullanılmalıdır.
 
 
 
-Aşağıdaki alanlar CrevaFactOS içinde analiz ve karar desteği olarak bulunur ancak ana kayıt sistemi değildir:
+Aşağıdaki alanlar NevaxisFactOS içinde analiz ve karar desteği olarak bulunur ancak ana kayıt sistemi değildir:
 
 
 
-| Alan | CrevaFactOS rolü | Ana kaynak |
+| Alan | NevaxisFactOS rolü | Ana kaynak |
 
 | --- | --- | --- |
 
@@ -1576,7 +1576,7 @@ Klasik ERP kapsamı sessizce geri eklenemez.
 
 
 
-CrevaFactOS'un görevi:
+NevaxisFactOS'un görevi:
 
 
 
@@ -1584,5 +1584,5 @@ CrevaFactOS'un görevi:
 
 
 
-CrevaFactOS'un görevi mevcut ERP'yi yeniden geliştirmek değildir.
+NevaxisFactOS'un görevi mevcut ERP'yi yeniden geliştirmek değildir.
 

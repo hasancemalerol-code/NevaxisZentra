@@ -1,6 +1,6 @@
-# CrevaFactOS omnichannel closure — isolated database constants (no credentials in reports)
-$script:ClosureDatabaseName = "crevafactos_omnichannel_closure"
-$script:ClosurePostgresContainer = "crevafactos-local-postgres-1"
+# NevaxisFactOS omnichannel closure — isolated database constants (no credentials in reports)
+$script:ClosureDatabaseName = "NEVAXIS_FACTOS_omnichannel_closure"
+$script:ClosurePostgresContainer = "NevaxisFactOS-local-postgres-1"
 $script:ClosurePostgresHost = "127.0.0.1"
 $script:ClosurePostgresPort = 5433
 $script:ClosureMigrationUser = "crevafactos"

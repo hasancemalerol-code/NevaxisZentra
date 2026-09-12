@@ -89,9 +89,9 @@ export function resolveExportCaseRequestContext(
         facilityId,
         correlationId: createCorrelationId(),
         requestHeaders: {
-          "X-CrevaFactOS-Dev-Issuer": developmentAuth.issuer,
-          "X-CrevaFactOS-Dev-Subject": developmentAuth.subject,
-          "X-CrevaFactOS-Tenant": developmentAuth.tenantKey,
+          "X-crevafactos-dev-Issuer": developmentAuth.issuer,
+          "X-crevafactos-dev-Subject": developmentAuth.subject,
+          "X-NevaxisFactOS-Tenant": developmentAuth.tenantKey,
         },
       },
     };

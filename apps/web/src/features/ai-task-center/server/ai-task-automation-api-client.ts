@@ -49,7 +49,7 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number, payload: unknown): AiTaskAutomationApiFailure["code"] {
+function mapFailureStatus(status: number, _payload: unknown): AiTaskAutomationApiFailure["code"] {
   if (status === 401) return "unauthenticated";
   if (status === 403) return "permission-denied";
   if (status === 404) return "not-found";

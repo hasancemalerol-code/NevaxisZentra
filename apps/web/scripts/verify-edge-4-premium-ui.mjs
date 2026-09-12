@@ -9,7 +9,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB_URL = process.env.CREVAFACTOS_WEB_URL ?? "http://localhost:3001";
+const WEB_URL = process.env.NEVAXIS_FACTOS_WEB_URL ?? "http://localhost:3001";
 
 function readFile(rel) {
   const abs = resolve(ROOT, rel);
@@ -67,7 +67,7 @@ assertContains("replay banner", readFile("apps/web/src/features/edge/presentatio
 console.log("\n[3] Simulator disclaimer + no secrets");
 assertContains("simulator disclaimer", workspace, "gerçek makine bağlantısı değildir");
 assertNotContains("no raw UUID primary in buffer table", workspace, "{event.id}");
-assertNotContains("no secret in UI", workspace, "CREVAFACTOS_DEV_TOKEN");
+assertNotContains("no secret in UI", workspace, "NEVAXIS_FACTOS_DEV_TOKEN");
 assertNotContains("no false real-machine claim", workspace, "gerçek makine doğrulandı");
 
 console.log("\n[4] edge-labels EDGE-4");

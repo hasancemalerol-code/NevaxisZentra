@@ -1,13 +1,13 @@
-using CrevaFactOS.Api.SaasBilling.Payments.Iyzico;
-using CrevaFactOS.Persistence.SaasBilling.Payments;
+using NevaxisFactOS.Api.SaasBilling.Payments.Iyzico;
+using NevaxisFactOS.Persistence.SaasBilling.Payments;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.SaasBilling.Payments;
+namespace NevaxisFactOS.Api.SaasBilling.Payments;
 
 public static class SaasPaymentServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSSaasPayments(
+    public static IServiceCollection AddNevaxisFactOSSaasPayments(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -45,9 +45,9 @@ public static class SaasPaymentServiceCollectionExtensions
         string suffix,
         IConfiguration configuration,
         string fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__SAAS_PAYMENT__{suffix}")
-        ?? configuration[$"CREVAFACTOS:SAAS_PAYMENT:{suffix}"]
-        ?? configuration[$"CREVAFACTOS__SAAS_PAYMENT__{suffix}"]
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__SAAS_PAYMENT__{suffix}")
+        ?? configuration[$"NevaxisFactOS:SAAS_PAYMENT:{suffix}"]
+        ?? configuration[$"NEVAXIS_FACTOS__SAAS_PAYMENT__{suffix}"]
         ?? fallback;
 
     private static bool IsSandboxConfigured(SaasPaymentProviderOptions options) =>

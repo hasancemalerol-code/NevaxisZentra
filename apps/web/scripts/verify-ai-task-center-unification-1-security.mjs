@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const RUN_SUFFIX = Date.now();
@@ -41,7 +41,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -51,9 +51,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -73,9 +73,9 @@ console.log("Running AI-TASK-CENTER-UNIFICATION-1 security verifier.");
 
 const centerQueries = readRequired("apps/web/src/features/ai-task-center/server/ai-task-center-queries.ts");
 const composition = readRequired("apps/web/src/features/ai-task-center/application/ai-task-center-composition.ts");
-const workInboxRepo = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
-const originResolver = readRequired("packages/CrevaFactOS.Persistence/AiTasks/AiTaskListOriginResolver.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/AiTasks/AiTaskRepository.cs");
+const workInboxRepo = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const originResolver = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskListOriginResolver.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskRepository.cs");
 const aiTaskEndpoints = readRequired("apps/api/AiTasks/AiTaskEndpointRouteBuilderExtensions.cs");
 
 assert("permission union gate", centerQueries.includes('denyUnlessAnyGranted(["ai-task.read", "teams.read"])'));

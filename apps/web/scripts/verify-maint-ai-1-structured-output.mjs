@@ -19,9 +19,9 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const services = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiAgentServices.cs");
-const models = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
-const repo = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
+const services = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentServices.cs");
+const models = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
+const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
 
 assert("structured output record", models.includes("MaintenanceAiStructuredOutput"));
 assert("summary field required", models.includes("Summary"));

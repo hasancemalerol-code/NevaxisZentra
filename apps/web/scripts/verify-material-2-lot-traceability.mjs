@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
 const MATERIAL_PP = "bb000001-00a2-4000-8000-0000000000a2";
@@ -54,16 +54,16 @@ function readRequired(relativePath) {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -174,9 +174,9 @@ function assertClosureCleanupComplete() {
 
 console.log("Running MATERIAL-2 lot/traceability verifier.");
 
-const stateMachine = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialLotLifecycleStateMachine.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialLotRepository.cs");
-const validator = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialLotValidator.cs");
+const stateMachine = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotLifecycleStateMachine.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotRepository.cs");
+const validator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotValidator.cs");
 
 assert("lot state machine present", stateMachine.includes("MaterialLotStatus.Closed"));
 assert("lot repository idempotency", repository.includes("CreateIdempotencyKey"));

@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.MarketRates;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.MarketRates;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.MarketRates;
+namespace NevaxisFactOS.Api.MarketRates;
 
 public static class MarketRatesEndpointRouteBuilderExtensions
 {

@@ -1,3 +1,3 @@
-namespace CrevaFactOS.Api.Facilities;
+namespace NevaxisFactOS.Api.Facilities;
 
 public sealed record ProductionPlanningFacilityResource(Guid FacilityId);

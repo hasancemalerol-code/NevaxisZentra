@@ -36,12 +36,12 @@ console.log("Running ERP-1L security verifier.");
 
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
 );
-const connectionRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpConnectionRepository.cs");
-const entities = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpEntities.cs");
+const connectionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpConnectionRepository.cs");
+const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
 
 requireText(endpoints, "RequireAuthorization", "erp endpoints");
 requireText(permissions, "erp.read", "ErpPermissionKeys");

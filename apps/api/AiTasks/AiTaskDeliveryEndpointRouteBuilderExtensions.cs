@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.AiTasks.Delivery;
-using CrevaFactOS.Persistence.AiTasks.Delivery.Email;
-using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.AiTasks.Delivery;
+using NevaxisFactOS.Persistence.AiTasks.Delivery.Email;
+using NevaxisFactOS.Persistence.AiTasks.Delivery.WhatsApp;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Threading.RateLimiting;
 
-namespace CrevaFactOS.Api.AiTasks;
+namespace NevaxisFactOS.Api.AiTasks;
 
 public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 {
@@ -241,7 +241,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         return TypedResults.Ok(result);
     }
 
-    public static IServiceCollection AddCrevaFactOSAiTaskDelivery(
+    public static IServiceCollection AddNevaxisFactOSAiTaskDelivery(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -266,7 +266,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         services.AddScoped<IAiTaskDeliveryChannelAdapter, EmailDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, WhatsAppBusinessDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
-            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.CrevaFactOsTeams, "CrevaFactOS Teams"));
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.NevaxisFactOSTeams, "NevaxisFactOS Teams"));
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
             => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.MicrosoftTeams, "Microsoft Teams"));
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
@@ -276,7 +276,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskDeliveryRepository>(sp =>
         {
-            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
             return db is null
                 ? new UnavailableAiTaskDeliveryRepository()
                 : new AiTaskDeliveryRepository(
@@ -290,7 +290,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskSecureAccessRepository>(sp =>
         {
-            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
             return db is null
                 ? new UnavailableAiTaskSecureAccessRepository()
                 : new AiTaskSecureAccessRepository(
@@ -303,7 +303,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskDeliveryWorker>(sp =>
         {
-            var db = sp.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
             return db is null
                 ? new UnavailableAiTaskDeliveryWorker()
                 : new AiTaskDeliveryWorker(
@@ -333,7 +333,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         options.ReplyToAddress = GetEmailEnvValue("SMTP__REPLY_TO_ADDRESS", options.ReplyToAddress);
         options.TestSmtpHost = GetEmailEnvValue("TEST_SMTP__HOST", options.TestSmtpHost);
         options.TimeoutSeconds = GetEmailEnvInt32("TIMEOUT_SECONDS", options.TimeoutSeconds);
-        var testPort = Environment.GetEnvironmentVariable("CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__PORT");
+        var testPort = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__TEST_SMTP__PORT");
         if (!string.IsNullOrWhiteSpace(testPort))
         {
             options.TestSmtpPort = int.Parse(testPort, provider: null);
@@ -341,17 +341,17 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
     }
 
     private static string? GetEmailEnvValue(string suffix, string? fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}") ?? fallback;
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}") ?? fallback;
 
     private static int GetEmailEnvInt32(string suffix, int fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
     }
 
     private static bool GetEmailEnvBoolean(string suffix, bool fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__EMAIL__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
 
@@ -369,11 +369,11 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
     }
 
     private static string? GetWhatsAppEnvValue(string suffix, string? fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}") ?? fallback;
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}") ?? fallback;
 
     private static bool GetWhatsAppEnvBoolean(string suffix, bool fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
 
@@ -388,17 +388,17 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
     }
 
     private static string GetDeliveryEnvValue(string suffix, string fallback) =>
-        Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}") ?? fallback;
+        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__{suffix}") ?? fallback;
 
     private static int GetDeliveryEnvInt32(string suffix, int fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
     }
 
     private static bool GetDeliveryEnvBoolean(string suffix, bool fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"CREVAFACTOS__AI_TASK_DELIVERY__{suffix}");
+        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__AI_TASK_DELIVERY__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : bool.Parse(value);
     }
 }
@@ -602,7 +602,7 @@ internal sealed class AiTaskDeliveryBackgroundService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
+                var db = scope.ServiceProvider.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
                 if (db is null)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);

@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
 
 Add-Type -AssemblyName System.Drawing
@@ -18,7 +18,7 @@ public static class Capture18 {
   public static IntPtr? FindMain(int timeoutMs) {
     var deadline = Environment.TickCount + timeoutMs;
     while (Environment.TickCount < deadline) {
-      foreach (var name in new[] { "CrevaFactOS", "CrevaFactOS.Desktop" }) {
+      foreach (var name in new[] { "crevafactos", "NevaxisFactOS.Desktop" }) {
         foreach (var process in Process.GetProcessesByName(name)) {
           process.Refresh();
           if (process.MainWindowHandle == IntPtr.Zero) continue;
@@ -43,7 +43,7 @@ public static class Capture18 {
 "@
 
 Clear-KnownDesktopVerifierEnvironmentLeaks
-Get-Process -Name "CrevaFactOS","CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name "crevafactos","NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
 foreach ($listener in @(Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue)) {
     Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
 }

@@ -1,9 +1,9 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Quality;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Quality;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Quality;
+namespace NevaxisFactOS.Api.Quality;
 
 public static class QualityReportingEndpointRouteBuilderExtensions
 {

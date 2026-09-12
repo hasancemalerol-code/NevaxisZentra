@@ -5,8 +5,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const CLOSURE_PREFIX = "AI-TASK-SLA1-LIVE";
 const RUN_SUFFIX = Date.now();
@@ -51,7 +51,7 @@ function bootstrapSecrets() {
   ];
   let text = "";
   for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts", id, `${id}.jsonl`);
+    const p = join(home, ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts", id, `${id}.jsonl`);
     if (existsSync(p)) text += readFileSync(p, "utf8");
   }
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret"]) {
@@ -91,18 +91,18 @@ function generateTotp(secret, counterOffset = 0) {
 function managerHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": MANAGER.issuer,
-    "X-CrevaFactOS-Dev-Subject": MANAGER.subject,
-    "X-CrevaFactOS-Tenant": MANAGER.tenant,
+    "X-crevafactos-dev-Issuer": MANAGER.issuer,
+    "X-crevafactos-dev-Subject": MANAGER.subject,
+    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
   };
 }
 
 function reviewerHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": REVIEWER.issuer,
-    "X-CrevaFactOS-Dev-Subject": REVIEWER.subject,
-    "X-CrevaFactOS-Tenant": REVIEWER.tenant,
+    "X-crevafactos-dev-Issuer": REVIEWER.issuer,
+    "X-crevafactos-dev-Subject": REVIEWER.subject,
+    "X-NevaxisFactOS-Tenant": REVIEWER.tenant,
   };
 }
 
@@ -121,7 +121,7 @@ async function apiJson(method, path, body, headers = managerHeaders()) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -351,8 +351,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
         return { status: res.status };
       })()`,
     });

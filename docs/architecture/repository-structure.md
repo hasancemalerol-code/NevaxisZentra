@@ -1,4 +1,4 @@
-# CrevaFactOS Repository Structure
+# NevaxisFactOS Repository Structure
 
 ## Purpose
 
@@ -7,7 +7,7 @@ This document defines the intended monorepo layout and dependency boundaries. Th
 ## Intended Layout
 
 ```text
-crevafactos/
+NevaxisFactOS/
 ├── apps/
 │   ├── web/              # Next.js operational Web application
 │   ├── api/              # ASP.NET Core modular-monolith API
@@ -34,7 +34,7 @@ crevafactos/
 │   └── security/
 ├── scripts/
 ├── .github/workflows/
-├── CrevaFactOS.sln
+├── NevaxisFactOS.sln
 ├── Directory.Build.props
 ├── global.json
 ├── package.json
@@ -48,10 +48,10 @@ crevafactos/
 - `worker` performs durable asynchronous work and cannot bypass application permissions or approval rules.
 - `ai-orchestrator` uses versioned tools and never accesses databases, queues, ERP, or machines directly.
 - `mobile` is a task-focused field client using the same authoritative task and approval records.
-- `teams` is the CrevaFactOS Teams application. Its deployment packaging may be decided separately, but its logical application boundary is locked and it uses AI Task Center as the task and approval authority.
+- `teams` is the NevaxisFactOS Teams application. Its deployment packaging may be decided separately, but its logical application boundary is locked and it uses AI Task Center as the task and approval authority.
 - `edge-agent` handles allowlisted factory-local connectivity while local safety remains authoritative.
 
-CrevaFactOS Teams does not maintain parallel task or approval state.
+NevaxisFactOS Teams does not maintain parallel task or approval state.
 
 ## Shared Package Rules
 

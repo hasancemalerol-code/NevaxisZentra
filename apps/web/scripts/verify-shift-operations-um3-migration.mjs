@@ -5,11 +5,11 @@ import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 const migration = readFileSync(
-  resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260911191746_AddShiftOperationsSmartHandoverFoundation.cs"),
+  resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260911191746_AddShiftOperationsSmartHandoverFoundation.cs"),
   "utf8",
 );
 const grants = readFileSync(
-  resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260911193739_AddShiftOperationsRuntimeGrants.cs"),
+  resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260911193739_AddShiftOperationsRuntimeGrants.cs"),
   "utf8",
 );
 

@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const URETIM_CHANNEL = "bb000001-03d1-4000-8000-0000000003d1";
 const OWNER = { issuer: "crevafactos-dev", subject: "planning-pilot-user", tenant: "dev-pilot-tenant" };
@@ -29,9 +29,9 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -51,9 +51,9 @@ console.log("Running TEAMS-TASK-COLLABORATION-1 security/idempotency verifier.")
 
 const endpoints = readRequired("apps/api/Teams/TeamsEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsRepository.cs");
-const presentation = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsMessageTaskPresentationBuilder.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Teams/TeamsConstants.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsRepository.cs");
+const presentation = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsMessageTaskPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
 
 assert("task draft endpoint", endpoints.includes("/task-draft"));
 assert("message source context endpoint", endpoints.includes("/source-context"));

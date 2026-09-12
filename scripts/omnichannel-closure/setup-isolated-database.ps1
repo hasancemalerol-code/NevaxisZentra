@@ -1,7 +1,7 @@
 # Creates isolated PostgreSQL database and applies canonical EF migrations.
 # NEVER targets crevafactos_local.
 param(
-    [string]$PostgresPassword = $env:CREVAFACTOS_POSTGRES_PASSWORD
+    [string]$PostgresPassword = $env:NEVAXIS_FACTOS_POSTGRES_PASSWORD
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,7 +12,7 @@ if ([string]::IsNullOrWhiteSpace($PostgresPassword)) {
 }
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "../..")
-$migrationProject = Join-Path $root "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj"
+$migrationProject = Join-Path $root "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"
 
 Write-Host "Creating isolated database: $ClosureDatabaseName"
 $existsResult = docker exec $ClosurePostgresContainer psql -U $ClosureMigrationUser -d postgres -t -A -c "SELECT 1 FROM pg_database WHERE datname = '$ClosureDatabaseName'" 2>&1
@@ -24,17 +24,17 @@ if ($exists -ne "1") {
     Write-Host "Database already exists - reusing for closure."
 }
 
-$env:CREVAFACTOS__MIGRATIONS__HOST = $ClosurePostgresHost
-$env:CREVAFACTOS__MIGRATIONS__PORT = "$ClosurePostgresPort"
-$env:CREVAFACTOS__MIGRATIONS__DATABASE = $ClosureDatabaseName
-$env:CREVAFACTOS__MIGRATIONS__USERNAME = $ClosureMigrationUser
-$env:CREVAFACTOS__MIGRATIONS__PASSWORD = $PostgresPassword
-$env:CREVAFACTOS__MIGRATIONS__SSL_MODE = "Disable"
-$env:CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
+$env:NEVAXIS_FACTOS__MIGRATIONS__HOST = $ClosurePostgresHost
+$env:NEVAXIS_FACTOS__MIGRATIONS__PORT = "$ClosurePostgresPort"
+$env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE = $ClosureDatabaseName
+$env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $ClosureMigrationUser
+$env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = $PostgresPassword
+$env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
+$env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
 
 Write-Host "Applying EF migrations to $ClosureDatabaseName ..."
 Push-Location $root
-dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context CrevaFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context NevaxisFactOSDbContext
 if ($LASTEXITCODE -ne 0) { throw "Migration apply failed." }
 Pop-Location
 

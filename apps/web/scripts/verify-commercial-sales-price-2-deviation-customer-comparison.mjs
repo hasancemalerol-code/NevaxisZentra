@@ -14,7 +14,7 @@ const CLOSURE_PREFIX = "COMMSALE2-CLOSURE";
 const BOUNDARY_PREFIX = "COMMSALE2-BOUNDARY";
 const SOURCE_EVIDENCE_KIND = "manual-development-simulator";
 const PRICE_BASIS_GROSS_NET = "net";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -74,7 +74,7 @@ const FIXTURE_PREFIXES = [CLOSURE_PREFIX, BOUNDARY_PREFIX];
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -86,7 +86,7 @@ function dbExec(sql) {
     "docker",
     [
       "exec",
-      "crevafactos-local-postgres-1",
+      "NevaxisFactOS-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
@@ -107,9 +107,9 @@ function dbExec(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -324,17 +324,17 @@ function reconcileRun(apiRun, label) {
 
 console.log("Running COMMERCIAL-SALES-PRICE-2 deviation/customer-comparison verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceComparisonEvaluator.cs");
-const operations = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceComparisonOperations.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceComparisonEvaluator.cs");
+const operations = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialSalesPriceComparisonOperations.cs");
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialSalesPriceEndpointRouteBuilderExtensions.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs");
-const comparisonSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceComparisonSeed.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceSeed.cs");
+const comparisonSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialSalesPriceComparisonSeed.cs");
 
 assert("comparison evaluator present", evaluator.includes("EvaluateTemporalDeviation"));
 assert("customer position evaluator present", evaluator.includes("EvaluateCustomerPricePosition"));
 assert("non-overlap validation", operations.includes("must not overlap"));
 assert("comparison endpoints present", endpoints.includes("/comparisons"));
-assert("sales-price-decrease driver", readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceSalesPriceContracts.cs").includes("sales-price-decrease"));
+assert("sales-price-decrease driver", readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceSalesPriceContracts.cs").includes("sales-price-decrease"));
 assert("positive-price-variance outcome", evaluator.includes("PositivePriceVariance") || evaluator.includes("positive-price-variance"));
 forbidText(evaluator, "guaranteed savings", "evaluator");
 forbidText(evaluator, "recommended customer", "evaluator");

@@ -36,7 +36,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -57,20 +57,20 @@ function readMigrationConnectionEnv() {
   const persistence = appsettings.Persistence ?? {};
   return {
     ...process.env,
-    CREVAFACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
-    CREVAFACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
-    CREVAFACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
-    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
-    CREVAFACTOS__MIGRATIONS__PASSWORD: process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
-      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+    NEVAXIS_FACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
+    NEVAXIS_FACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
+    NEVAXIS_FACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
+    NEVAXIS_FACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    NEVAXIS_FACTOS__MIGRATIONS__PASSWORD: process.env.NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.NEVAXIS_FACTOS_POSTGRES_PASSWORD
       ?? "local_dev_only_change_me",
-    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
-    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
+    NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
   };
 }
 
 function runMigrationApply() {
-  const migrationProject = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
     [
@@ -85,7 +85,7 @@ function runMigrationApply() {
       "--startup-project",
       migrationProject,
       "--context",
-      "CrevaFactOSDbContext",
+      "NevaxisFactOSDbContext",
     ],
     {
       cwd: ROOT,
@@ -97,8 +97,8 @@ function runMigrationApply() {
 
 console.log("Running AI-TASK-CENTER-1 migration verifier.");
 
-const migration = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("migration creates ai_tasks", migration.includes('name: "ai_tasks"'));
 assert("migration creates ai_task_audit_events", migration.includes('name: "ai_task_audit_events"'));

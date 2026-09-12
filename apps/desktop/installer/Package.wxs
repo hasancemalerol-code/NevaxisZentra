@@ -11,7 +11,7 @@
            Compressed="yes"
            Codepage="65001">
 
-    <MajorUpgrade DowngradeErrorMessage="CrevaFactOS'in daha yeni bir sürümü zaten yüklü. Kurulum durduruldu." />
+    <MajorUpgrade DowngradeErrorMessage="NEVAXIS FACTOS'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
 
     <MediaTemplate EmbedCab="yes" />
 
@@ -30,7 +30,7 @@
 
     <ui:WixUI Id="WixUI_InstallDir" />
 
-    <Feature Id="MainFeature" Title="CrevaFactOS Desktop" Level="1">
+    <Feature Id="MainFeature" Title="NEVAXIS FACTOS Desktop" Level="1">
       <ComponentRef Id="MainExecutableComponent" />
       <ComponentRef Id="StartMenuCleanupComponent" />
       <ComponentGroupRef Id="PublishedApplicationSupportFiles" />
@@ -38,32 +38,32 @@
     </Feature>
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="CrevaFactOS">
+      <Directory Id="INSTALLFOLDER" Name="NevaxisFactOS">
         <Directory Id="DesktopAppFolder" Name="Desktop" />
       </Directory>
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="ApplicationProgramsFolder" Name="CrevaFactOS" />
+      <Directory Id="ApplicationProgramsFolder" Name="NEVAXIS FACTOS" />
     </StandardDirectory>
 
     <StandardDirectory Id="DesktopFolder" />
 
     <Component Id="MainExecutableComponent" Directory="DesktopAppFolder" Guid="*">
-      <File Id="CrevaFactOSDesktopExe"
-            Source="$(var.PublishDir)\CrevaFactOS.Desktop.exe"
+      <File Id="NevaxisFactOSDesktopExe"
+            Source="$(var.PublishDir)\NevaxisFactOS.Desktop.exe"
             KeyPath="yes">
         <Shortcut Id="StartMenuShortcut"
                   Directory="ApplicationProgramsFolder"
                   Advertise="yes"
-                  Name="CrevaFactOS"
-                  Description="CrevaFactOS fabrika operasyonlari masaustu uygulamasi"
+                  Name="NEVAXIS FACTOS"
+                  Description="NEVAXIS FACTOS fabrika operasyonlari masaustu uygulamasi"
                   WorkingDirectory="DesktopAppFolder" />
         <Shortcut Id="DesktopShortcut"
                   Directory="DesktopFolder"
                   Advertise="yes"
-                  Name="CrevaFactOS"
-                  Description="CrevaFactOS fabrika operasyonlari masaustu uygulamasi"
+                  Name="NEVAXIS FACTOS"
+                  Description="NEVAXIS FACTOS fabrika operasyonlari masaustu uygulamasi"
                   WorkingDirectory="DesktopAppFolder" />
       </File>
     </Component>
@@ -72,7 +72,7 @@
                Directory="DesktopAppFolder"
                Guid="B4E8C2A1-7F3D-4E56-9C0A-1D2E3F4A5B6C">
       <RegistryValue Root="HKLM"
-                     Key="Software\CrevaFactOS\Desktop"
+                     Key="Software\NevaxisFactOS\Desktop"
                      Name="StartMenuCleanup"
                      Type="integer"
                      Value="1"
@@ -107,9 +107,9 @@
       <Custom Action="InstallWebView2Runtime" After="InstallFiles" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
     </InstallExecuteSequence>
 
-    <util:CloseApplication Id="CloseCrevaFactOSDesktop"
-                           Target="CrevaFactOS.Desktop.exe"
-                           Description="CrevaFactOS calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
+    <util:CloseApplication Id="CloseNevaxisFactOSDesktop"
+                           Target="NevaxisFactOS.Desktop.exe"
+                           Description="NEVAXIS FACTOS calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
                            CloseMessage="yes"
                            RebootPrompt="no"
                            TerminateProcess="0"

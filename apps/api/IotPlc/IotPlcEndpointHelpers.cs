@@ -1,8 +1,8 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.IotPlc;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.IotPlc;
 
-namespace CrevaFactOS.Api.IotPlc;
+namespace NevaxisFactOS.Api.IotPlc;
 
 internal static class IotPlcEndpointHelpers
 {

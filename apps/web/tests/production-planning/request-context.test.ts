@@ -89,13 +89,13 @@ test("development-api mode uses server-side development headers", () => {
   if (contextResult.status === "success") {
     assert.equal(
       contextResult.context.requestHeaders[
-        "X-CrevaFactOS-Dev-Issuer"
+        "X-crevafactos-dev-Issuer"
       ],
       "dev-issuer",
     );
     assert.equal(
       contextResult.context.requestHeaders[
-        "X-CrevaFactOS-Tenant"
+        "X-NevaxisFactOS-Tenant"
       ],
       "tenant-key",
     );

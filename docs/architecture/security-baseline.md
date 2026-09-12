@@ -1,4 +1,4 @@
-# CrevaFactOS Güvenlik Temel Standardı
+# NevaxisFactOS Güvenlik Temel Standardı
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS platformu için bütün uygulama, modül, entegrasyon ve geliştirme paketlerinde uygulanması gereken minimum güvenlik gereksinimlerini tanımlar.
+Bu belge NevaxisFactOS platformu için bütün uygulama, modül, entegrasyon ve geliştirme paketlerinde uygulanması gereken minimum güvenlik gereksinimlerini tanımlar.
 
 
 
@@ -58,7 +58,7 @@ Bir modül veya müşteri daha güçlü güvenlik gereksinimine sahip olabilir a
 
 
 
-CrevaFactOS aşağıdaki ilkeleri uygular:
+NevaxisFactOS aşağıdaki ilkeleri uygular:
 
 
 

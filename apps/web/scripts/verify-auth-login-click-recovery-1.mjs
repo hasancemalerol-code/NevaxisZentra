@@ -6,8 +6,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
 const ORGANIZATION = "dev-pilot-tenant";
 const PROTECTED_ROUTE = "/ayarlar";
 const MARKER_ORG = "audit-org-marker";
@@ -31,9 +31,9 @@ function readRequired(relativePath) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__AUTH_LOGIN_CLICK_RECOVERY_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -148,7 +148,7 @@ function describeCookie(setCookies, name) {
 }
 
 function cookieHeaderFromSetCookies(setCookies) {
-  return ["crevafactos.session", "crevafactos.csrf"]
+  return ["NevaxisFactOS.session", "NevaxisFactOS.csrf"]
     .map((name) => cookiePair(setCookies, name))
     .filter(Boolean)
     .map((pair) => `${pair.name}=${pair.value}`)
@@ -210,7 +210,7 @@ assertNoHardcodedCredentials("identity browser client source", clientSource);
 assertNoHardcodedCredentials("sign-in page source", pageSource);
 assert("authentication request builder does not hardcode credentials", !/password:\s*["'][^"']+["']/.test(clientSource));
 assert("development API authentication mode is SessionCookie", /"Mode"\s*:\s*"SessionCookie"/.test(apiDevConfig));
-assert("launchSettings keeps SessionCookie authentication", /CREVAFACTOS__AUTHENTICATION__MODE/.test(apiLaunchSettings) && /SessionCookie/.test(apiLaunchSettings));
+assert("launchSettings keeps SessionCookie authentication", /NEVAXIS_FACTOS__AUTHENTICATION__MODE/.test(apiLaunchSettings) && /SessionCookie/.test(apiLaunchSettings));
 assert("launchSettings uses 127.0.0.1 for the API host", /http:\/\/127\.0\.0\.1:5000/.test(apiLaunchSettings));
 assert("identity bootstrap forwards the browser session cookie", /readIncomingRequestCookieHeader/.test(trustedFetchSource) && /requestHeaders\.set\("Cookie"/.test(trustedFetchSource));
 assert("API /me remains authorization-gated", /MapGet\("\/me", GetMeAsync\)\.RequireAuthorization\(\)/.test(identityMeSource));
@@ -257,7 +257,7 @@ assert("valid credentials create an authenticated session redirect", normal.stat
 assert("valid login redirects away from /giris", /\/(dashboard|mfa-dogrula)/.test(normal.location), normal.location);
 assert(
   "valid credentials create an authenticated session",
-  normal.cookies.some((cookie) => cookie.includes("crevafactos.session=")),
+  normal.cookies.some((cookie) => cookie.includes("NevaxisFactOS.session=")),
   normal.cookies.join("; "),
 );
 
@@ -278,8 +278,8 @@ assert(
   normal.location,
 );
 
-const sessionCookie = describeCookie(normal.cookies, "crevafactos.session");
-const csrfCookie = describeCookie(normal.cookies, "crevafactos.csrf");
+const sessionCookie = describeCookie(normal.cookies, "NevaxisFactOS.session");
+const csrfCookie = describeCookie(normal.cookies, "NevaxisFactOS.csrf");
 assert("session cookie is issued with a non-empty opaque value", Boolean(sessionCookie?.valueLength), JSON.stringify(sessionCookie));
 assert("session cookie path is /", sessionCookie?.path === "/", JSON.stringify(sessionCookie));
 assert("session cookie has no Domain attribute", sessionCookie?.domain == null, JSON.stringify(sessionCookie));
@@ -320,7 +320,7 @@ assert(
 const dashboardHtml = await dashboard.text();
 assert(
   "authenticated dashboard returns application content",
-  dashboardHtml.includes("account-menu") || dashboardHtml.includes("Oturum açık") || dashboardHtml.includes("CrevaFactOS"),
+  dashboardHtml.includes("account-menu") || dashboardHtml.includes("Oturum açık") || dashboardHtml.includes("crevafactos"),
 );
 assert("authenticated dashboard is not the sign-in page", !dashboardHtml.includes("auth-form"));
 
@@ -344,7 +344,7 @@ assert(
 );
 
 const crossTenant = await fetchWithSession(`${API}/api/identity/me`, sessionHeader, {
-  headers: { "X-CrevaFactOS-Tenant": "foreign-tenant" },
+  headers: { "X-NevaxisFactOS-Tenant": "foreign-tenant" },
 });
 const crossTenantJson = await crossTenant.json().catch(() => null);
 assert(
@@ -353,12 +353,12 @@ assert(
   `status=${crossTenant.status} title=${crossTenantJson?.title ?? ""}`,
 );
 
-const csrf = cookiePair(normal.cookies, "crevafactos.csrf")?.value ?? "";
+const csrf = cookiePair(normal.cookies, "NevaxisFactOS.csrf")?.value ?? "";
 const signOut = await fetchWithSession(`${WEB}/api/identity/sign-out`, sessionHeader, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Csrf": csrf,
+    "X-NevaxisFactOS-Csrf": csrf,
   },
   body: "{}",
 });
@@ -696,15 +696,15 @@ try {
         return { ok: true, via: "menu" };
       }
       const csrfPair = document.cookie.split(";").map((part) => part.trim())
-        .find((part) => part.startsWith("crevafactos.csrf="));
-      const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("crevafactos.csrf=".length)) : "";
+        .find((part) => part.startsWith("NevaxisFactOS.csrf="));
+      const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("NevaxisFactOS.csrf=".length)) : "";
       const response = await fetch("/api/identity/sign-out", {
         method: "POST",
         credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-CrevaFactOS-Csrf": csrf,
+          "X-NevaxisFactOS-Csrf": csrf,
         },
       });
       if (!response.ok) {

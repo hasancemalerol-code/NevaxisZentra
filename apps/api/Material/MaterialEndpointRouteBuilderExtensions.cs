@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Material;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Material;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Material;
+namespace NevaxisFactOS.Api.Material;
 
 public static class MaterialEndpointRouteBuilderExtensions
 {
@@ -516,11 +516,11 @@ internal static class MaterialApiMapper
 
 public static class MaterialServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSMaterial(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSMaterial(this IServiceCollection services)
     {
         services.AddScoped<IMaterialRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaterialRepository()
                 : new MaterialRepository(
@@ -530,7 +530,7 @@ public static class MaterialServiceCollectionExtensions
 
         services.AddScoped<IMaterialLotRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaterialLotRepository()
                 : new MaterialLotRepository(
@@ -540,7 +540,7 @@ public static class MaterialServiceCollectionExtensions
 
         services.AddScoped<IMaterialRequirementRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaterialRequirementRepository()
                 : new MaterialRequirementRepository(
@@ -550,7 +550,7 @@ public static class MaterialServiceCollectionExtensions
 
         services.AddScoped<IMaterialAvailabilityRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaterialAvailabilityRiskRepository()
                 : new MaterialAvailabilityRiskRepository(

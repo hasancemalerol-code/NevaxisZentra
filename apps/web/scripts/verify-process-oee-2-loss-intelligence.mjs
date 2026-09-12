@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const TENANT = "bb000001-0001-4000-8000-000000000001";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const MACHINE = "bb000001-0096-4000-8000-000000000096";
@@ -47,7 +47,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8", maxBuffer: 20 * 1024 * 1024 },
   );
   if (result.status !== 0) {
@@ -59,9 +59,9 @@ function db(sql) {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -418,10 +418,10 @@ async function boundedEvaluate(windowStartIso, windowEndIso, idempotencyKey, ove
 
 console.log("Running PROCESS-OEE-2 loss intelligence verifier.");
 
-const calculator = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeLossCalculator.cs");
-const lossConstants = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeLossConstants.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260812185022_AddProcessOeeLossDrivers.cs");
-const entityConfig = readRequired("packages/CrevaFactOS.Persistence/Configurations/ProcessOeeEntityConfigurations.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeLossCalculator.cs");
+const lossConstants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeLossConstants.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812185022_AddProcessOeeLossDrivers.cs");
+const entityConfig = readRequired("packages/NevaxisFactOS.Persistence/Configurations/ProcessOeeEntityConfigurations.cs");
 
 assert("calculator uses loss rule set constant", calculator.includes("ProcessOeeLossConstants.RuleSetVersion"));
 assert("calculator uses leading loss method constant", calculator.includes("ProcessOeeLossConstants.LeadingLossMethod"));

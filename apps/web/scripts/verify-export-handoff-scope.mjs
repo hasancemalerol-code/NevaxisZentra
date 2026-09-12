@@ -51,7 +51,7 @@ forbidText(endpoints, "pod", "Export endpoints");
 forbidText(endpoints, "freight-marketplace", "Export endpoints");
 
 const brokerRepo = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportBrokerWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportBrokerWriteRepository.cs",
 );
 requireText(brokerRepo, "PreparePackageAsync", "ExportBrokerWriteRepository");
 requireText(brokerRepo, "SendPackageAsync", "ExportBrokerWriteRepository");
@@ -61,13 +61,13 @@ requireText(brokerRepo, "ResolveCorrectionAsync", "ExportBrokerWriteRepository")
 forbidText(brokerRepo, "SubmitDeclaration", "ExportBrokerWriteRepository");
 
 const brokerPackageDoc = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportBrokerPackageDocument.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportBrokerPackageDocument.cs",
 );
 requireText(brokerPackageDoc, "DocumentId", "ExportBrokerPackageDocument");
 requireText(brokerPackageDoc, "PackageVersionId", "ExportBrokerPackageDocument");
 
 const shipmentEntity = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportShipment.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportShipment.cs",
 );
 requireText(shipmentEntity, "PlannedPickupAtUtc", "ExportShipment");
 requireText(shipmentEntity, "ShipmentReference", "ExportShipment");
@@ -75,7 +75,7 @@ requireText(shipmentEntity, "IncotermCode", "ExportShipment");
 forbidText(shipmentEntity, "GpsLatitude", "ExportShipment");
 
 const readiness = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportReadinessEngine.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportReadinessEngine.cs",
 );
 requireText(readiness, "EvaluateBrokerCorrectionsClear", "ExportReadinessEngine");
 requireText(readiness, "EvaluatePackingDataComplete", "ExportReadinessEngine");

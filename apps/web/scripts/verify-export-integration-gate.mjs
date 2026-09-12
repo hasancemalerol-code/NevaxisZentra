@@ -37,13 +37,13 @@ console.log("Running export integration gate verifier.");
 // EXPORT-1L
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
   ),
   "export_cases",
   "EXPORT-1L migration",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Export/ExportReadinessEngine.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Export/ExportReadinessEngine.cs"),
   "ExportReadinessEngine",
   "EXPORT-1L readiness",
 );
@@ -56,13 +56,13 @@ requireText(
 // EXPORT-2L
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808160000_AddExportPackingShipmentAndBrokerWorkspace.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808160000_AddExportPackingShipmentAndBrokerWorkspace.cs",
   ),
   "export_shipments",
   "EXPORT-2L migration",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Export/ExportPackingUnit.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Export/ExportPackingUnit.cs"),
   "ExportPackingUnit",
   "EXPORT-2L packing",
 );
@@ -70,13 +70,13 @@ requireText(
 // EXPORT-3L
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808180000_AddExportCountryComplianceAndResearch.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808180000_AddExportCountryComplianceAndResearch.cs",
   ),
   "export_country_compliance_rules",
   "EXPORT-3L migration",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Export/ExportTraceabilityReadRepository.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Export/ExportTraceabilityReadRepository.cs"),
   "GetTraceabilityAsync",
   "EXPORT-3L traceability",
 );
@@ -84,18 +84,18 @@ requireText(
 // EXPORT-4L
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
   ),
   "export_ai_analysis_runs",
   "EXPORT-4L migration",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/Export/ExportAiContextBuilder.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/Export/ExportAiContextBuilder.cs"),
   "BuildForExportCaseAsync",
   "EXPORT-4L AI context",
 );
 requireText(
-  readRequired("packages/CrevaFactOS.Persistence/AiUsage/AiUsageMeteringService.cs"),
+  readRequired("packages/NevaxisFactOS.Persistence/AiUsage/AiUsageMeteringService.cs"),
   "RecordUsageAsync",
   "EXPORT-4L metering",
 );
@@ -108,14 +108,14 @@ requireText(ihracatPage, "/ihracat/ulke-arastirma", "EXPORT-UI-1");
 // PLANNING-LOGISTICS-1L integration
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
+    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
   ),
   "planning_logistics_constraint_evaluations",
   "Planning Logistics migration",
 );
 requireText(
   readRequired(
-    "packages/CrevaFactOS.Persistence/ProductionPlanning/PlanningLogisticsExportReadinessNormalizer.cs",
+    "packages/NevaxisFactOS.Persistence/ProductionPlanning/PlanningLogisticsExportReadinessNormalizer.cs",
   ),
   "ResolveNormalizedBlockingReason",
   "Planning Logistics normalizer",
@@ -127,7 +127,7 @@ requireText(
 );
 
 const intelligence = readRequired(
-  "packages/CrevaFactOS.Persistence/Export/ExportCrossModuleIntelligence.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportCrossModuleIntelligence.cs",
 );
 requireText(intelligence, "ExportPlanningLogisticsConstraintRef", "Cross-module intelligence");
 requireText(intelligence, "LoadPlanningAsync", "Cross-module intelligence");

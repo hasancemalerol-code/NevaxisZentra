@@ -52,7 +52,6 @@ export async function prepareHandoff(
 
   const url = buildHandoffUrl(context, productionPlanId);
 
-  // eslint-disable-next-line @typescript-eslint/init-declarations
   let response: Response;
 
   try {

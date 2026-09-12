@@ -38,7 +38,7 @@ function forbidText(source, forbidden, label) {
 
 const permissions = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
 );
 requireText(permissions, 'export.read', "ExportPermissionKeys");
 requireText(permissions, 'export.write', "ExportPermissionKeys");
@@ -59,7 +59,7 @@ forbidText(endpoints, ".MapMethods(", "Export endpoints");
 
 const migration = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808140000_AddExportCaseReadinessAndDocumentCore.cs",
 );
 requireText(migration, "ENABLE ROW LEVEL SECURITY", "Export migration");
 requireText(migration, "FORCE ROW LEVEL SECURITY", "Export migration");

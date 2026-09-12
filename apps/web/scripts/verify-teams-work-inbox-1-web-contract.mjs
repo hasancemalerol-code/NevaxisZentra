@@ -29,7 +29,7 @@ const apiClient = read("apps/web/src/features/teams/server/teams-api-client.ts")
 const actions = read("apps/web/src/features/teams/server/teams-actions.ts");
 const constants = read("apps/web/src/features/teams/domain/teams-constants.ts");
 const endpoints = read("apps/api/Teams/TeamsWorkInboxEndpointRouteBuilderExtensions.cs");
-const repository = read("packages/CrevaFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const repository = read("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
 
 assert("inbox index link", page.includes("teams-work-inbox-index-link"));
 assert("workspace inbox link", client.includes("teams-channel-work-inbox-link"));

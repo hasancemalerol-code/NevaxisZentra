@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { createServer } from "node:http";
 
-const PORT = Number(process.env.CREVAFACTOS_WHATSAPP_TEST_DOUBLE_PORT ?? 18999);
-const MODE = process.env.CREVAFACTOS_WHATSAPP_TEST_DOUBLE_MODE ?? "accept";
+const PORT = Number(process.env.NEVAXIS_FACTOS_WHATSAPP_TEST_DOUBLE_PORT ?? 18999);
+const MODE = process.env.NEVAXIS_FACTOS_WHATSAPP_TEST_DOUBLE_MODE ?? "accept";
 let acceptMessageSequence = 0;
 
 const server = createServer((req, res) => {

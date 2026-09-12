@@ -18,9 +18,9 @@ function fail(k, d = "") { failures++; console.error(`❌ ${k}${d ? `: ${d}` : "
 const h = (subject = OPERATOR, extra = {}) => ({
   Accept: "application/json",
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": ISSUER,
-  "X-CrevaFactOS-Dev-Subject": subject,
-  "X-CrevaFactOS-Tenant": TENANT,
+  "X-crevafactos-dev-Issuer": ISSUER,
+  "X-crevafactos-dev-Subject": subject,
+  "X-NevaxisFactOS-Tenant": TENANT,
   ...extra,
 });
 const q = (path, facility = FACILITY) =>
@@ -54,7 +54,7 @@ async function main() {
       name: "DE Closure Demo",
       effectiveFrom: "2026-01-01",
       sourceTitle: "Development fixture",
-      sourcePublisher: "CrevaFactOS Dev",
+      sourcePublisher: "NevaxisFactOS Dev",
     });
     if (r.status === 200 || r.status === 201) {
       packId = r.json.rulePackId ?? r.json.id;
@@ -116,7 +116,7 @@ async function main() {
       category: "documentation",
       title: "Demo finding",
       summary: "Commercial invoice required for demo workflow.",
-      sourcePublisher: "CrevaFactOS Development Fixture",
+      sourcePublisher: "NevaxisFactOS Development Fixture",
       sourceTitle: "DE-DEMO source",
       confidence: 80,
       blockingPotential: true,

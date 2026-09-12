@@ -37,9 +37,9 @@ console.log("Running maintenance 1L security verifier.");
 const endpoints = readRequired("apps/api/Maintenance/MaintenanceEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Maintenance/MaintenanceEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
 );
-const requestRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
 
 requireText(endpoints, "RequireAuthorization", "maintenance endpoints");
 requireText(helpers, "MaintenancePermissionKeys.Read", "MaintenanceEndpointHelpers");

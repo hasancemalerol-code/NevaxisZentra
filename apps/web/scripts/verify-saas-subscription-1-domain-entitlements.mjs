@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "SAAS-SUBSCRIPTION-1-CLOSURE";
 const DEV_PLAN_VERSION_ID = "bb000001-00e2-4000-8000-0000000000e2";
@@ -43,7 +43,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -187,8 +187,8 @@ class CookieJar {
 async function api(method, path, body, jar) {
   const headers = { "Content-Type": "application/json", Accept: "application/json" };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("crevafactos.session") && jar.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.get("crevafactos.csrf");
+  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -253,13 +253,13 @@ async function transitionSubscription(jar, subscriptionId, targetStatus, expecte
 
 console.log("Running SAAS-SUBSCRIPTION-1 domain-entitlements verifier.");
 
-const conversions = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionConstants.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionRepository.cs");
+const conversions = readRequired("packages/NevaxisFactOS.Persistence/SaasSubscription/SaasSubscriptionConstants.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/SaasSubscription/SaasSubscriptionRepository.cs");
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814220344_AddSaasTenantSubscriptionEntitlementEnforcement.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814220344_AddSaasTenantSubscriptionEntitlementEnforcement.cs",
 );
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/TenantEntitlementEvaluator.cs");
-const moduleEntitlements = readRequired("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/SaasSubscription/TenantEntitlementEvaluator.cs");
+const moduleEntitlements = readRequired("packages/NevaxisFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
 const webSubscriptionLabels = readRequired("apps/web/src/features/saas-subscription/domain/saas-subscription-labels.ts");
 
 assert("subscription status conversions", conversions.includes("SaasSubscriptionStatuses.Active"));
@@ -269,7 +269,7 @@ assert("repository idempotency hash", repository.includes("HashCommand"));
 assert("repository concurrency conflict", repository.includes("SaasSubscriptionFailureCodes.ConcurrencyConflict"));
 assert("limit evaluator usage", evaluator.includes("ResolveUsageAsync"));
 assert("unique current subscription index", migration.includes("ux_saas_tenant_subscriptions_tenant_current"));
-assert("bootstrap seed idempotency guard", readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotSaasSubscriptionSeed.cs").includes("DevPilotTenantSubscriptionId"));
+assert("bootstrap seed idempotency guard", readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotSaasSubscriptionSeed.cs").includes("DevPilotTenantSubscriptionId"));
 assert(
   "factory showcase shares dashboard module mapping",
   moduleEntitlements.includes('("/fabrika-vitrini", EntitlementCodes.Dashboard)'),

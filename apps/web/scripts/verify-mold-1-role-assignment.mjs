@@ -25,7 +25,7 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running Mold role-assignment verifier.");
 
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 requireText(bootstrap, "EnsureMoldReadPermissionAssignmentAsync", "mold read seed");
 requireText(bootstrap, "EnsureMoldManagePermissionAssignmentAsync", "mold manage seed");

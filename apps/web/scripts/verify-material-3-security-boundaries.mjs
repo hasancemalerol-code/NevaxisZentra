@@ -26,8 +26,8 @@ console.log("Running MATERIAL-3 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialRequirementEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Material/MaterialEndpointHelpers.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Material/MaterialRequirementRepository.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260812145938_AddMaterialRequirementConsumptionIntelligence.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialRequirementRepository.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812145938_AddMaterialRequirementConsumptionIntelligence.cs");
 
 requireText(endpoints, "RequireAuthorization", "requirement endpoints");
 requireText(endpoints, "ResolveReadAccessAsync", "requirement read access");
@@ -43,7 +43,7 @@ forbidText(repository, "ErpInventoryRepository", "repository must not mutate ERP
 forbidText(repository, "CreateErp", "repository must not create ERP records");
 forbidText(migration, "GRANT DELETE", "append-only tables must not grant DELETE");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const MATERIAL_PP = "bb000001-00a2-4000-8000-0000000000a2";
@@ -51,16 +51,16 @@ const PILOT_PP_PROFILE = "bb000001-00ae-4000-8000-0000000000ae";
 
 const READ_ACTOR = {
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-reviewer",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 
 const MANAGE_ACTOR = {
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "production-pilot-operator",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 
 async function liveRequest(method, path, body, headers = MANAGE_ACTOR) {
@@ -105,9 +105,9 @@ assertLive("unauthorized facility HTTP 403", unauthFacility.status === 403);
 
 const NEGATIVE_ACTOR = {
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const unauthorizedActor = await liveRequest("GET", `/api/materials/${MATERIAL_PP}/requirement-overview?facilityId=${FACILITY}`, null, NEGATIVE_ACTOR);
 assertLive("unauthorized actor HTTP 403", unauthorizedActor.status === 403);

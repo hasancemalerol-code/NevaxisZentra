@@ -163,7 +163,6 @@ export function MaterialRequirementPanel({
     if (!loaded) {
       void refreshOverview();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load only when materialId changes
   }, [loaded, materialId]);
 
   function selectProfile(profile: MaterialRequirementProfileSummary) {

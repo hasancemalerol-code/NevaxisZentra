@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const SHIFT = "bb000001-0040-4000-8000-000000000040";
@@ -47,7 +47,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -57,9 +57,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -104,9 +104,9 @@ function pilotShiftDate() {
 console.log("Running SHIFT-RISK-2 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/ShiftRisk/ShiftRiskEndpointRouteBuilderExtensions.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
-const fingerprint = readRequired("packages/CrevaFactOS.Persistence/ShiftRisk/ShiftRiskIdempotencyFingerprint.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
+const fingerprint = readRequired("packages/NevaxisFactOS.Persistence/ShiftRisk/ShiftRiskIdempotencyFingerprint.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("continuity evaluate endpoint", endpoints.includes("/workforce-continuity/evaluations"));
 assert("continuity overview endpoint", endpoints.includes("/workforce-continuity/overview"));

@@ -44,7 +44,7 @@ function assertNotContains(label, content, text) {
 // ---------------------------------------------------------------------------
 
 console.log("\n[1] Read-only adapter contract");
-const adapter = readFile("packages/CrevaFactOS.Persistence/Edge/IEdgeGatewayAdapter.cs");
+const adapter = readFile("packages/NevaxisFactOS.Persistence/Edge/IEdgeGatewayAdapter.cs");
 
 assertContains("IsReadOnly enforced in interface", adapter, "bool IsReadOnly => true");
 assertNotContains("No write method in interface", adapter, "WriteAsync");
@@ -58,7 +58,7 @@ assertNotContains("No start method exposed", adapter, "StartMachine");
 // ---------------------------------------------------------------------------
 
 console.log("\n[2] Simulator adapter security");
-const simAdapter = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeSimulatorAdapter.cs");
+const simAdapter = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeSimulatorAdapter.cs");
 
 assertNotContains("No hardcoded password", simAdapter, 'Password = "');
 assertNotContains("No hardcoded token", simAdapter, 'Token = "');
@@ -73,7 +73,7 @@ assertNotContains("No OPC UA write node", simAdapter, "WriteNodeAsync");
 // ---------------------------------------------------------------------------
 
 console.log("\n[3] Ingestion service boundary");
-const ingestion = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
 
 assertNotContains("Does not touch ProductionOrder", ingestion, "ProductionOrders");
 assertNotContains("Does not touch MaintenanceWorkOrder", ingestion, "MaintenanceWorkOrders");
@@ -86,7 +86,7 @@ assertContains("Uses transaction via SaveChangesAsync", ingestion, "SaveChangesA
 // ---------------------------------------------------------------------------
 
 console.log("\n[4] Migration append-only enforcement");
-const migration = readFile("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260810120000_AddEdgeGatewayMachineFoundation.cs");
+const migration = readFile("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810120000_AddEdgeGatewayMachineFoundation.cs");
 
 assertContains("machine_events INSERT only (no UPDATE)", migration, "GRANT SELECT, INSERT ON TABLE machine_events");
 assertNotContains("machine_events must not allow UPDATE", migration, "GRANT SELECT, INSERT, UPDATE ON TABLE machine_events");
@@ -112,8 +112,8 @@ assertNotContains("No anonymous endpoint", api, ".AllowAnonymous()");
 // ---------------------------------------------------------------------------
 
 console.log("\n[6] Provider isolation");
-const edgeIngestionFile = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs");
-const edgeRepoFile = readFile("packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs");
+const edgeIngestionFile = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const edgeRepoFile = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
 
 assertNotContains("Ingestion does not reference Logo", edgeIngestionFile, "LogoErpAdapter");
 assertNotContains("Ingestion does not reference Mikro", edgeIngestionFile, "MikroErpAdapter");
@@ -125,8 +125,8 @@ assertNotContains("Repo does not reference ERP adapters", edgeRepoFile, "IErpAda
 // ---------------------------------------------------------------------------
 
 console.log("\n[7] MachineSimulator no real PLC");
-const simScenarios = readFile("tools/CrevaFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
-const simProgram = readFile("tools/CrevaFactOS.MachineSimulator/Program.cs");
+const simScenarios = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const simProgram = readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs");
 
 assertNotContains("Scenarios: no OPC UA", simScenarios, "OpcUaClient");
 assertNotContains("Scenarios: no MQTT", simScenarios, "MqttClient");
@@ -142,9 +142,9 @@ assertNotContains("Program: no write to machine", simProgram, "WriteToMachine");
 
 console.log("\n[8] No production/maintenance mutation");
 const edgeFiles = [
-  "packages/CrevaFactOS.Persistence/Edge/EdgeEntities.cs",
-  "packages/CrevaFactOS.Persistence/Edge/EdgeIngestionService.cs",
-  "packages/CrevaFactOS.Persistence/Edge/EdgeRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs",
+  "packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs",
+  "packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs",
   "apps/api/Edge/EdgeEndpointRouteBuilderExtensions.cs",
 ];
 

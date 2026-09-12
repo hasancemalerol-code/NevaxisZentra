@@ -87,7 +87,7 @@ forbidText(workflowWriter, "backgroundApprove", "workflow-writer.ts");
 
 // 5. Approval actor comes from server request context (not client body)
 requireText(workflowWriter, "resolveProductionPlanRequestContext", "workflow-writer.ts");
-requireText(requestContext, "X-CrevaFactOS-Dev-Subject", "production-plan-request-context.ts (dev actor)");
+requireText(requestContext, "X-crevafactos-dev-Subject", "production-plan-request-context.ts (dev actor)");
 
 // 6. Preview mode blocks approval writes
 requireText(workflowWriter, "development-preview", "workflow-writer.ts");

@@ -1,12 +1,12 @@
-using CrevaFactOS.Api.Authentication;
-using CrevaFactOS.Api.SaasIdentity;
-using CrevaFactOS.Persistence.AdminAccess;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Authentication;
+using NevaxisFactOS.Api.SaasIdentity;
+using NevaxisFactOS.Persistence.AdminAccess;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.AdminAccess;
+namespace NevaxisFactOS.Api.AdminAccess;
 
 internal static class AdminAccessEndpointHelpers
 {

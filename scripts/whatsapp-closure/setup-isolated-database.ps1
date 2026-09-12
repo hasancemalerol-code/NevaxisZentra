@@ -1,6 +1,6 @@
-# Creates crevafactos_whatsapp_closure_1 and applies canonical EF migrations + closure seeds.
+# Creates NEVAXIS_FACTOS_whatsapp_closure_1 and applies canonical EF migrations + closure seeds.
 param(
-    [string]$PostgresPassword = $env:CREVAFACTOS_POSTGRES_PASSWORD
+    [string]$PostgresPassword = $env:NEVAXIS_FACTOS_POSTGRES_PASSWORD
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,7 @@ if ([string]::IsNullOrWhiteSpace($PostgresPassword)) {
 }
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "../..")
-$migrationProject = Join-Path $root "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj"
+$migrationProject = Join-Path $root "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"
 $db = $WhatsAppClosureDatabaseName
 
 Write-Host "Creating isolated WhatsApp closure database: $db"
@@ -24,16 +24,16 @@ if ($exists -ne "1") {
     Write-Host "Database exists - reusing after verification."
 }
 
-$env:CREVAFACTOS__MIGRATIONS__HOST = $WhatsAppClosurePostgresHost
-$env:CREVAFACTOS__MIGRATIONS__PORT = "$WhatsAppClosurePostgresPort"
-$env:CREVAFACTOS__MIGRATIONS__DATABASE = $db
-$env:CREVAFACTOS__MIGRATIONS__USERNAME = $WhatsAppClosureMigrationUser
-$env:CREVAFACTOS__MIGRATIONS__PASSWORD = $PostgresPassword
-$env:CREVAFACTOS__MIGRATIONS__SSL_MODE = "Disable"
-$env:CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "600"
+$env:NEVAXIS_FACTOS__MIGRATIONS__HOST = $WhatsAppClosurePostgresHost
+$env:NEVAXIS_FACTOS__MIGRATIONS__PORT = "$WhatsAppClosurePostgresPort"
+$env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE = $db
+$env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $WhatsAppClosureMigrationUser
+$env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = $PostgresPassword
+$env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
+$env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "600"
 
 Push-Location $root
-dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context CrevaFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context NevaxisFactOSDbContext
 if ($LASTEXITCODE -ne 0) { throw "Migration apply failed." }
 Pop-Location
 

@@ -292,7 +292,7 @@ export function buildPolicyComparisonView(
   const suggestedPriority = triage?.suggestedPriority
     ? getAiTaskPriorityLabel(triage.suggestedPriority as AiTaskPriority)
     : "—";
-  const suggestedTeam = triage?.suggestedTeamChannelId
+  const _suggestedTeam = triage?.suggestedTeamChannelId
     ? resolveAutomationTeamChannelLabel(triage.suggestedTeamChannelId)
     : getAiTaskDecisionDepartmentLabel(triage?.suggestedDepartment);
 

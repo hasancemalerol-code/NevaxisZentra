@@ -1,4 +1,4 @@
-# CREVAFACTOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1
+# NevaxisFactOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1
 # Cold-starts real Desktop Shell shortcut and validates all 46 canonical sales-demo routes in WebView2.
 
 $ErrorActionPreference = "Stop"
@@ -6,9 +6,9 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
 
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-all-modules-validation-1"
-$desktopProject = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
 $manifestScript = Join-Path $PSScriptRoot "generate-desktop-all-modules-validation-manifest-1.mjs"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-all-modules-validation-1-cdp.mjs"
 $ensureSecrets = Join-Path $repoRoot "scripts\desktop\ensure-development-saas-identity-secrets.ps1"
@@ -20,8 +20,8 @@ function Assert-Check([string]$Name, [bool]$Ok, [string]$Detail = "") {
     if (-not $Ok) { throw "$Name failed$(if ($Detail) { ": $Detail" } else { '' })" }
 }
 
-function Stop-CrevaFactOSDesktopOnly {
-    Get-Process -Name "CrevaFactOS", "CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisFactOSDesktopOnly {
+    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 4
 }
 
@@ -68,14 +68,14 @@ if ($LASTEXITCODE -ne 0) { throw "Manifest generation failed." }
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
 
 Write-Host "Publishing desktop artifact (if not locked)..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\CrevaFactOS") 2>&1 | Out-Null
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS") 2>&1 | Out-Null
 
-Stop-CrevaFactOSDesktopOnly
+Stop-NevaxisFactOSDesktopOnly
 Write-Host "Cold-starting Desktop Shell from shortcut..."
 $launch = Start-Process -FilePath $shortcutPath -PassThru
 Assert-Check "desktop web ready after cold start" (Wait-DesktopWebReady 480)
 
-$env:CREVAFACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR = $screenshotDir
+$env:NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_SCREENSHOT_DIR = $screenshotDir
 Write-Host "Running WebView2 all-modules CDP validation..."
 & node $cdpScript
 if ($LASTEXITCODE -ne 0) { throw "Desktop all-modules CDP validation failed." }
@@ -88,13 +88,13 @@ Assert-Check "all routes pass" ($fullPayload.passCount -eq 46 -and $fullPayload.
 Assert-Check "user-facing console errors" ($fullPayload.userFacingConsoleErrors -eq 0) "errors=$($fullPayload.userFacingConsoleErrors)"
 
 # Final cold restart representative check
-Stop-CrevaFactOSDesktopOnly
+Stop-NevaxisFactOSDesktopOnly
 $relaunch = Start-Process -FilePath $shortcutPath -PassThru
 Assert-Check "cold restart web ready" (Wait-DesktopWebReady 360)
-$env:CREVAFACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY = "1"
+$env:NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY = "1"
 & node $cdpScript
 if ($LASTEXITCODE -ne 0) { throw "Post-restart representative validation failed." }
-Remove-Item Env:CREVAFACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY -ErrorAction SilentlyContinue
+Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY -ErrorAction SilentlyContinue
 
 $payload = Get-Content $validationJson -Raw | ConvertFrom-Json
 Assert-Check "post-restart representative pass" ($payload.failCount -eq 0)
@@ -107,6 +107,6 @@ $results["passCount"] = $fullPayload.passCount
 $results["failCount"] = $fullPayload.failCount
 $results | ConvertTo-Json | Set-Content -Path (Join-Path $screenshotDir "validation-run-summary.json") -Encoding UTF8
 
-Stop-CrevaFactOSDesktopOnly
+Stop-NevaxisFactOSDesktopOnly
 Clear-KnownDesktopVerifierEnvironmentLeaks
 Write-Host "DESKTOP-ALL-MODULES-VALIDATION-1: PASS"

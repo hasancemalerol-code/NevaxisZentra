@@ -1,6 +1,6 @@
 {
-  "package": "CREVAFACTOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
-  "baseline": "CREVAFACTOS-SALES-DEMO-ALL-MODULES-READINESS-1",
+  "package": "NevaxisFactOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
+  "baseline": "NevaxisFactOS-SALES-DEMO-ALL-MODULES-READINESS-1",
   "generatedAt": "2026-09-05T00:37:58.343Z",
   "canonicalRouteCount": 46,
   "representativeScreenshots": {
@@ -97,7 +97,7 @@
     },
     {
       "route": "/teams",
-      "module": "CrevaFactOS Teams",
+      "module": "NevaxisFactOS Teams",
       "navigationGroup": "Çalışma alanı",
       "expectedVisible": true,
       "requiredPermission": null,

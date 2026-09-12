@@ -34,16 +34,16 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running ERP-MIKRO-1 security verifier.");
 
-const mikroAdapter = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
-const mikroBridgeTransport = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroBridgeReadTransport.cs");
-const mikroBridgeProgram = readRequired("tools/CrevaFactOS.MikroBridge/Program.cs");
-const mikroBridgeReadme = readRequired("tools/CrevaFactOS.MikroBridge/README.md");
-const repoSupport = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpRepositorySupport.cs");
+const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroBridgeTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroBridgeReadTransport.cs");
+const mikroBridgeProgram = readRequired("tools/NevaxisFactOS.MikroBridge/Program.cs");
+const mikroBridgeReadme = readRequired("tools/NevaxisFactOS.MikroBridge/README.md");
+const repoSupport = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpRepositorySupport.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const writebackRepo = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const mikroFixture = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotErpSeed.cs");
-const adapters = readRequired("packages/CrevaFactOS.Persistence/Erp/ErpAdapters.cs");
+const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
+const mikroFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotErpSeed.cs");
+const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
 
 forbidText(mikroAdapter, "password=", "no plaintext password");
 forbidText(mikroAdapter, "connectionstring", "no connection string");
@@ -69,7 +69,7 @@ forbidText(mikroAdapter, "IErpWritebackAdapter", "Mikro writeback unsupported");
 forbidText(writebackRepo, "MikroErpAdapter", "Mikro writeback unsupported");
 requireText(mikroAdapter, "MikroTransportErrorCodes", "sanitized error model");
 requireText(seed, "EnsureErpMikroTestConnectionAsync", "dev-only mikro test seed");
-const mikroCredentialRefs = readRequired("packages/CrevaFactOS.Persistence/Erp/Mikro/MikroTransportKind.cs");
+const mikroCredentialRefs = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroTransportKind.cs");
 requireText(mikroCredentialRefs, "mikro-test-fixture", "test fixture credential reference");
 forbidText(seed, "Status = ErpConnectionStatuses.Healthy", "test fixture not production healthy claim at seed");
 forbidText(mikroAdapter, "LogoErpAdapter", "no Logo fallback");

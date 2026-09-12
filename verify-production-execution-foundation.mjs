@@ -42,7 +42,7 @@ function fileExists(relPath) {
 // ── 1. DISTINCT PRODUCTION PERMISSIONS ───────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -85,36 +85,36 @@ check(
 // ── 2. BOUNDED CONTEXT SEPARATION ────────────────────────────────────────────
 
 check(
-  "Production bounded context exists at packages/CrevaFactOS.Persistence/Production/",
-  fileExists("packages/CrevaFactOS.Persistence/Production"),
+  "Production bounded context exists at packages/NevaxisFactOS.Persistence/Production/",
+  fileExists("packages/NevaxisFactOS.Persistence/Production"),
 );
 
 check(
   "ProductionOrder.cs entity exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs"),
 );
 
 check(
   "ProductionOrderStatus.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence/Production/ProductionOrderStatus.cs",
+    "packages/NevaxisFactOS.Persistence/Production/ProductionOrderStatus.cs",
   ),
 );
 
 const productionOrder = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
 );
 
 check(
   "ProductionOrder is NOT in ProductionPlanning namespace",
   productionOrder !== null &&
-    !productionOrder.includes("namespace CrevaFactOS.Persistence.ProductionPlanning"),
+    !productionOrder.includes("namespace NevaxisFactOS.Persistence.ProductionPlanning"),
 );
 
 check(
   "ProductionOrder is in Production namespace",
   productionOrder?.includes(
-    "namespace CrevaFactOS.Persistence.Production",
+    "namespace NevaxisFactOS.Persistence.Production",
   ) ?? false,
 );
 
@@ -152,7 +152,7 @@ for (const field of requiredFields) {
 // ── 4. STATUS MODEL ───────────────────────────────────────────────────────────
 
 const statusModel = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderStatus.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderStatus.cs",
 );
 
 for (const status of ["Ready", "InProgress", "Paused", "Completed", "Cancelled"]) {
@@ -165,10 +165,10 @@ for (const status of ["Ready", "InProgress", "Paused", "Completed", "Cancelled"]
 // ── 5. REPOSITORY CONTRACTS ───────────────────────────────────────────────────
 
 const readRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionOrderReadRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionOrderReadRepository.cs",
 );
 const writeRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionOrderWriteRepository.cs",
 );
 
 check("IProductionOrderReadRepository.cs exists", readRepo !== null);
@@ -241,10 +241,10 @@ check(
 // ── 8. MIGRATION ─────────────────────────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.cs",
 );
 const migrationDesigner = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.Designer.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807200000_AddProductionExecutionFoundation.Designer.cs",
 );
 
 check("AddProductionExecutionFoundation migration exists", migration !== null);
@@ -281,7 +281,7 @@ check(
 // ── 9. AUDIT TAXONOMY ────────────────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 
 check(
@@ -297,7 +297,7 @@ check(
 // ── 10. OUTBOX TAXONOMY ──────────────────────────────────────────────────────
 
 const outboxTypes = readText(
-  "packages/CrevaFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
+  "packages/NevaxisFactOS.Persistence/Outbox/OutboxMessageTypes.cs",
 );
 
 check(
@@ -366,17 +366,17 @@ const lifecycleActions = readText(
 check("Lifecycle actions component is client-only", lifecycleActions?.includes('"use client"') ?? false);
 
 check(
-  "Client component does not inject X-CrevaFactOS-Dev headers",
+  "Client component does not inject X-crevafactos-dev headers",
   lifecycleActions !== null &&
-    !lifecycleActions.includes("X-CrevaFactOS-Dev") &&
-    !lifecycleActions.includes("X-CrevaFactOS-Tenant"),
+    !lifecycleActions.includes("X-crevafactos-dev") &&
+    !lifecycleActions.includes("X-NevaxisFactOS-Tenant"),
 );
 
 // ── 14. NO MACHINE/EDGE IMPLEMENTATION ───────────────────────────────────────
 
 const productionFiles = [
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrder.cs",
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
   "apps/api/Production/ProductionExecutionEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -395,8 +395,8 @@ for (const file of productionFiles) {
 // ── 15. NO PLANNING DEPENDENCY REVERSAL ──────────────────────────────────────
 
 const planningFiles = [
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanHandoff.cs",
-  "packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoff.cs",
+  "packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs",
 ];
 
 for (const file of planningFiles) {
@@ -408,7 +408,7 @@ for (const file of planningFiles) {
 
   check(
     `Planning file ${path.basename(file)} does not import Production namespace`,
-    !content.includes("using CrevaFactOS.Persistence.Production;"),
+    !content.includes("using NevaxisFactOS.Persistence.Production;"),
   );
 }
 

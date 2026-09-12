@@ -7,7 +7,7 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3000";
+const BASE = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3000";
 
 function fail(message) {
   console.error(`Maintenance 3L premium UI verification failed: ${message}`);

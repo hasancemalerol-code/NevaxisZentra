@@ -1,14 +1,14 @@
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Erp;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Erp;
-using CrevaFactOS.Persistence.Procurement;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Erp;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Erp;
+using NevaxisFactOS.Persistence.Procurement;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.Procurement;
+namespace NevaxisFactOS.Api.Procurement;
 
 internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
 {
@@ -304,12 +304,12 @@ public static class ProcurementEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSProcurement(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSProcurement(this IServiceCollection services)
     {
         services.AddScoped<IProcurementDeliveryRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetRequiredService<CrevaFactOS.Persistence.CrevaFactOSDbContext>();
-            var tenantDatabaseSession = serviceProvider.GetRequiredService<CrevaFactOS.Persistence.Tenancy.TenantDatabaseSession>();
+            var dbContext = serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+            var tenantDatabaseSession = serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.Tenancy.TenantDatabaseSession>();
             return new ProcurementDeliveryRiskRepository(dbContext, tenantDatabaseSession);
         });
 

@@ -62,7 +62,6 @@ async function executeWorkflowPost(
 
   const url = buildWorkflowUrl(context, productionPlanId, action);
 
-  // eslint-disable-next-line @typescript-eslint/init-declarations
   let response: Response;
 
   try {

@@ -5,16 +5,16 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
 const ISSUER = "crevafactos-dev";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const REVIEWER = "planning-pilot-reviewer";
 const NEGATIVE = "quality-negative-test-user";
 const OTHER_TENANT = "dev-other-tenant";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
-const ASSET = process.env.CREVAFACTOS_ASSET ?? "ASSET-CNC-001";
+const ASSET = process.env.NEVAXIS_FACTOS_ASSET ?? "ASSET-CNC-001";
 
 function read(rel) {
   const abs = resolve(ROOT, rel);
@@ -36,9 +36,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -97,7 +97,7 @@ try {
   const unauthFacility = await statusFor("POST", `/api/maintenance/assets/${ASSET}/ai-drafts/generate?facilityId=${UNAUTH_FACILITY}`, OPERATOR);
   assert("unauthorized facility POST generate → 403", unauthFacility === 403, `got ${unauthFacility}`);
 
-  const crossTenant = await statusFor("POST", generatePath, OPERATOR, undefined, { "X-CrevaFactOS-Tenant": OTHER_TENANT });
+  const crossTenant = await statusFor("POST", generatePath, OPERATOR, undefined, { "X-NevaxisFactOS-Tenant": OTHER_TENANT });
   assert("cross-tenant POST generate → 403", crossTenant === 403, `got ${crossTenant}`);
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

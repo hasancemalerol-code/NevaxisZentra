@@ -7,7 +7,7 @@ export type OrderTargetSystem = NonNullable<
 export const ORDER_TARGET_SYSTEM_LABELS = {
   erp: "ERP",
   mes: "MES",
-  crevafactos: "CrevaFactOS",
+  crevafactos: "NEVAXIS FACTOS",
 } satisfies Record<OrderTargetSystem, string>;
 
 export const ORDER_TARGET_SYSTEM_DESCRIPTIONS = {
@@ -16,7 +16,7 @@ export const ORDER_TARGET_SYSTEM_DESCRIPTIONS = {
   mes:
     "Siparişe bağlı üretim talebi veya üretim emri bağlı MES sistemine iletilir.",
   crevafactos:
-    "Sipariş CrevaFactOS içinde takip edilir ve bağlı operasyon akışlarına yönlendirilir.",
+    "Sipariş NEVAXIS FACTOS içinde takip edilir ve bağlı operasyon akışlarına yönlendirilir.",
 } satisfies Record<OrderTargetSystem, string>;
 
 export function getOrderTargetSystemLabel(

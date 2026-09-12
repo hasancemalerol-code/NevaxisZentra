@@ -26,9 +26,9 @@ const panel = read("apps/web/src/components/dashboard/piyasa-ozeti-panel.tsx");
 const queries = read("apps/web/src/features/dashboard/server/market-rates-queries.ts");
 const apiClient = read("apps/web/src/features/dashboard/server/market-rates-api-client.ts");
 const endpoints = read("apps/api/MarketRates/MarketRatesEndpointRouteBuilderExtensions.cs");
-const provider = read("packages/CrevaFactOS.Persistence/MarketRates/IExchangeRateProvider.cs");
+const provider = read("packages/NevaxisFactOS.Persistence/MarketRates/IExchangeRateProvider.cs");
 const notConfigured = read("apps/api/MarketRates/NotConfiguredExchangeRateProvider.cs");
-const repository = read("packages/CrevaFactOS.Persistence/MarketRates/MarketRateRepository.cs");
+const repository = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRateRepository.cs");
 
 assert("dashboard panel mounted", dashboardPage.includes("PiyasaOzetiPanel"));
 assert("compact context strip placement", dashboardPage.includes("command-center__titlebar-context-strip"));

@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.AiTasks;
+namespace NevaxisFactOS.Api.AiTasks;
 
 public static class AiTaskAutomationEndpointRouteBuilderExtensions
 {

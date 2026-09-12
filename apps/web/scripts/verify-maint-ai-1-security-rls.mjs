@@ -23,7 +23,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const r = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (r.status !== 0) {
@@ -33,7 +33,7 @@ function db(sql) {
   return r.stdout.trim();
 }
 
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811190000_AddMaintenanceAiAgentFoundation.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811190000_AddMaintenanceAiAgentFoundation.cs");
 
 assert("RLS enabled on drafts", migration.includes("ENABLE ROW LEVEL SECURITY"));
 assert("FORCE RLS on drafts", migration.includes("FORCE ROW LEVEL SECURITY"));

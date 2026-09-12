@@ -5,8 +5,8 @@ import { spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const FACILITY_CODE = "pilot-facility";
 const ACTOR_A_EMAIL = "tenant-owner@dev.local";
@@ -48,9 +48,9 @@ function assert(label, ok, detail = "") {
 
 function actorHeaders(actor) {
   return {
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
     "Content-Type": "application/json",
   };
 }
@@ -68,7 +68,7 @@ function bootstrapSecrets() {
   ];
   let text = "";
   for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts", id, `${id}.jsonl`);
+    const p = join(home, ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts", id, `${id}.jsonl`);
     if (existsSync(p)) text += readFileSync(p, "utf8");
   }
   for (const key of [
@@ -213,8 +213,8 @@ try {
         awaitPromise: true,
         returnByValue: true,
         expression: `(async () => {
-          const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-          const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
+          const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+          const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
           return { status: res.status };
         })()`,
       });
@@ -251,8 +251,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-        await fetch("/api/identity/sign-out", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf }, body: "{}" });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        await fetch("/api/identity/sign-out", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf }, body: "{}" });
       })()`,
     });
   }
@@ -262,8 +262,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/admin-access/members", { credentials: "include", headers: { Accept: "application/json", "X-CrevaFactOS-Csrf": csrf } });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/admin-access/members", { credentials: "include", headers: { Accept: "application/json", "X-NevaxisFactOS-Csrf": csrf } });
         return { status: res.status, json: await res.json().catch(() => null) };
       })()`,
     });
@@ -279,8 +279,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/admin-access/members/${memberReference}/effective-access", { credentials: "include", headers: { Accept: "application/json", "X-CrevaFactOS-Csrf": csrf } });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/admin-access/members/${memberReference}/effective-access", { credentials: "include", headers: { Accept: "application/json", "X-NevaxisFactOS-Csrf": csrf } });
         return { status: res.status, json: await res.json().catch(() => null) };
       })()`,
     });
@@ -290,10 +290,10 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
         const res = await fetch("/api/admin-access/members/${memberReference}/facilities", {
           method: "PUT", credentials: "include",
-          headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf },
+          headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf },
           body: JSON.stringify({ facilityCodes: [${JSON.stringify(FACILITY_CODE)}], expectedAuthorizationVersion: ${version}, idempotencyKey: "teams-direct-live-fac-${RUN_SUFFIX}" }),
         });
         return { status: res.status };
@@ -304,8 +304,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/admin-access/members/${memberReference}/effective-access", { credentials: "include", headers: { Accept: "application/json", "X-CrevaFactOS-Csrf": csrf } });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/admin-access/members/${memberReference}/effective-access", { credentials: "include", headers: { Accept: "application/json", "X-NevaxisFactOS-Csrf": csrf } });
         return { status: res.status, json: await res.json().catch(() => null) };
       })()`,
     });
@@ -314,10 +314,10 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/crevafactos\\.csrf=([^;]+)/) || [])[1] || "");
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
         const res = await fetch("/api/admin-access/members/${memberReference}/roles", {
           method: "PUT", credentials: "include",
-          headers: { Accept: "application/json", "Content-Type": "application/json", "X-CrevaFactOS-Csrf": csrf },
+          headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf },
           body: JSON.stringify({ roleReferences: [${JSON.stringify(REVIEWER_ROLE)}], expectedAuthorizationVersion: ${versionAfter}, idempotencyKey: "teams-direct-live-role-${RUN_SUFFIX}" }),
         });
         return { status: res.status };

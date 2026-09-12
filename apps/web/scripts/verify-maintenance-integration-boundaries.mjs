@@ -7,12 +7,12 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const ISSUER = "crevafactos-dev";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 
 function fail(message) {
   console.error(`Maintenance integration boundaries verification failed: ${message}`);
@@ -43,20 +43,20 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
 
 console.log("Running maintenance integration boundaries verifier.");
 
-const workOrderRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
-const requestRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
-const executionRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
-const reliabilityRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs");
-const lifecycle = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
+const workOrderRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const executionRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
+const reliabilityRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs");
+const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
 const reportingEndpoints = readRequired(
   "apps/api/Maintenance/MaintenanceReportingEndpointRouteBuilderExtensions.cs",
 );

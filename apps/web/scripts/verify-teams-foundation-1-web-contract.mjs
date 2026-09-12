@@ -31,9 +31,9 @@ const taskSection = read("apps/web/src/features/teams/components/ai-task-teams-c
 const taskPage = read("apps/web/src/app/(app)/ai-gorevleri/[taskId]/page.tsx");
 const sections = read("apps/web/src/app/(app)/[...sections]/page.tsx");
 const subscription = read("apps/web/src/features/saas-subscription/domain/saas-subscription-labels.ts");
-const backendEntitlements = read("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
+const backendEntitlements = read("packages/NevaxisFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
 const endpoints = read("apps/api/Teams/TeamsEndpointRouteBuilderExtensions.cs");
-const constants = read("packages/CrevaFactOS.Persistence/Teams/TeamsConstants.cs");
+const constants = read("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
 
 assert("dedicated /teams page", page.includes("TeamsWorkspaceClient"));
 assert("teams.read gate", page.includes('forbidUnlessGranted("teams.read")'));

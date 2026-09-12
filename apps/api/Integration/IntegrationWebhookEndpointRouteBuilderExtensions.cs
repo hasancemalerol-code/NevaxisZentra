@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.Integration.Webhook;
+using NevaxisFactOS.Persistence.Integration.Webhook;
 
-namespace CrevaFactOS.Api.Integration;
+namespace NevaxisFactOS.Api.Integration;
 
 public static class IntegrationWebhookEndpointRouteBuilderExtensions
 {

@@ -6,6 +6,7 @@ import {
 
 import type { CSSProperties } from "react";
 
+
 import type {
   MoldStatusItem,
   RiskLevel,
@@ -433,7 +434,7 @@ export function MoldStatusPanel({
                   borderBottom:
                     index === visibleMolds.length - 1
                       ? 0
-                      : styles.row.borderBottom,
+                      : "1px solid #dce5f0",
                 }}
                 target={DASHBOARD_MOLD_WORKSPACE_TARGET}
               >

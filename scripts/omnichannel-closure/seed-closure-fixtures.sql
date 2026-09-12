@@ -1,5 +1,5 @@
 -- Omnichannel closure deterministic fixtures (Tenant A + Tenant B).
--- Applied as migration user; isolated to crevafactos_omnichannel_closure only.
+-- Applied as migration user; isolated to NEVAXIS_FACTOS_omnichannel_closure only.
 
 -- Tenant A
 INSERT INTO tenants (id, tenant_key, display_name, status, created_at_utc)

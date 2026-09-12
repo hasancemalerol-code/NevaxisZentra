@@ -4,17 +4,17 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5211").replace(/\/$/, "");
-const SMTP_HTTP = (process.env.CREVAFACTOS_EMAIL_TEST_DOUBLE_HTTP_URL ?? "http://127.0.0.1:19026").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5211").replace(/\/$/, "");
+const SMTP_HTTP = (process.env.NEVAXIS_FACTOS_EMAIL_TEST_DOUBLE_HTTP_URL ?? "http://127.0.0.1:19026").replace(/\/$/, "");
 const CAPTURE_FILE = resolve(ROOT, "artifacts/email-closure/captured-messages.jsonl");
-const FACILITY = process.env.CREVAFACTOS_EMAIL_GOLDEN_FACILITY ?? "bb000001-0005-4000-8000-000000000005";
-const TASK = process.env.CREVAFACTOS_EMAIL_GOLDEN_TASK ?? "bb000001-03d0-4000-8000-0000000003d0";
-const RECIPIENT = process.env.CREVAFACTOS_EMAIL_GOLDEN_RECIPIENT ?? "hakan@company.com";
+const FACILITY = process.env.NEVAXIS_FACTOS_EMAIL_GOLDEN_FACILITY ?? "bb000001-0005-4000-8000-000000000005";
+const TASK = process.env.NEVAXIS_FACTOS_EMAIL_GOLDEN_TASK ?? "bb000001-03d0-4000-8000-0000000003d0";
+const RECIPIENT = process.env.NEVAXIS_FACTOS_EMAIL_GOLDEN_RECIPIENT ?? "hakan@company.com";
 const ACTOR = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
-  tenant: process.env.CREVAFACTOS_EMAIL_GOLDEN_TENANT ?? "omnichannel-closure-tenant-a",
+  tenant: process.env.NEVAXIS_FACTOS_EMAIL_GOLDEN_TENANT ?? "omnichannel-closure-tenant-a",
 };
 
 function fail(message) {
@@ -25,9 +25,9 @@ function fail(message) {
 function headers(tenant = ACTOR.tenant) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ACTOR.issuer,
-    "X-CrevaFactOS-Dev-Subject": ACTOR.subject,
-    "X-CrevaFactOS-Tenant": tenant,
+    "X-crevafactos-dev-Issuer": ACTOR.issuer,
+    "X-crevafactos-dev-Subject": ACTOR.subject,
+    "X-NevaxisFactOS-Tenant": tenant,
   };
 }
 
@@ -126,8 +126,8 @@ try {
   }
 }
 
-if (!captured?.subject?.includes("CrevaFactOS") || !captured?.subject?.includes("bildirimi")) fail("EMAIL_SUBJECT missing");
-if (!captured?.from?.includes("closure.crevafactos") && !captured?.from?.includes("CrevaFactOS")) fail("EMAIL_FROM missing");
+if (!captured?.subject?.includes("crevafactos") || !captured?.subject?.includes("bildirimi")) fail("EMAIL_SUBJECT missing");
+if (!captured?.from?.includes("closure.NevaxisFactOS") && !captured?.from?.includes("crevafactos")) fail("EMAIL_FROM missing");
 if (!captured?.toMasked && !captured?.rcptTo) fail("EMAIL_RECIPIENT missing");
 const bodyBlob = `${captured?.plainTextBody ?? ""}\n${captured?.htmlBody ?? ""}`;
 if (!captured?.plainTextBody?.includes("Factory Operations")) fail("EMAIL_PLAIN_TEXT_PART missing");

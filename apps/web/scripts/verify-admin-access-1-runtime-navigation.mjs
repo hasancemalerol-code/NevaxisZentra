@@ -6,8 +6,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "ADMINACCESS1-CLOSURE";
 const SALES_MEMBER = "mem_bb000003021340008000000000000213";
@@ -69,8 +69,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("crevafactos.session") && jar.get("crevafactos.csrf") && method !== "GET") {
-    headers["X-CrevaFactOS-Csrf"] = jar.get("crevafactos.csrf");
+  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
+    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,

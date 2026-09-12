@@ -6,7 +6,7 @@ import { applyDevelopmentSaasIdentitySecrets, resolveRepositoryRoot } from "../s
 const repositoryRoot = resolveRepositoryRoot(process.argv[1] ?? process.cwd());
 applyDevelopmentSaasIdentitySecrets(repositoryRoot);
 
-const targetDir = join(process.env.LOCALAPPDATA ?? "", "CrevaFactOS", "config");
+const targetDir = join(process.env.LOCALAPPDATA ?? "", "crevafactos", "config");
 mkdirSync(targetDir, { recursive: true });
 const targetPath = join(targetDir, "runtime.env.local");
 
@@ -17,8 +17,8 @@ const keys = [
   "DevelopmentSaasIdentity__ActiveUserPassword",
   "DevelopmentSaasIdentity__DeactivatedUserPassword",
   "DevelopmentSaasIdentity__NoMembershipUserPassword",
-  "CREVAFACTOS__PERSISTENCE__PASSWORD",
-  "CREVAFACTOS__MIGRATIONS__PASSWORD",
+  "NEVAXIS_FACTOS__PERSISTENCE__PASSWORD",
+  "NEVAXIS_FACTOS__MIGRATIONS__PASSWORD",
 ];
 
 const lines = [];

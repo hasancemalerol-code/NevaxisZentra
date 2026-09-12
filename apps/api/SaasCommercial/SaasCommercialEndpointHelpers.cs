@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Authentication;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.SaasCommercial;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Authentication;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.SaasCommercial;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.SaasCommercial;
+namespace NevaxisFactOS.Api.SaasCommercial;
 
 internal static class SaasCommercialEndpointHelpers
 {

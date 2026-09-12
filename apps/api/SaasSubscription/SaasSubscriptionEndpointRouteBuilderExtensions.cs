@@ -1,13 +1,13 @@
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.SaasCommercial;
-using CrevaFactOS.Persistence.SaasSubscription;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.SaasCommercial;
+using NevaxisFactOS.Persistence.SaasSubscription;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.SaasSubscription;
+namespace NevaxisFactOS.Api.SaasSubscription;
 
 public static class SaasSubscriptionEndpointRouteBuilderExtensions
 {
@@ -265,9 +265,9 @@ public static class SaasSubscriptionEndpointRouteBuilderExtensions
 
 public static class SaasSubscriptionApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSSaasSubscriptionApi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSSaasSubscriptionApi(this IServiceCollection services)
     {
-        services.AddCrevaFactOSSaasSubscription();
+        services.AddNevaxisFactOSSaasSubscription();
         return services;
     }
 }

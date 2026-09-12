@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 
 const ACTORS = {
@@ -27,7 +27,7 @@ function assert(label, ok, detail = "") {
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -37,9 +37,9 @@ function dbCount(sql) {
 async function getWorkspaceSummary(subject) {
   const response = await fetch(`${BASE}/api/molds/workspace-summary?facilityId=${FACILITY}`, {
     headers: {
-      "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-      "X-CrevaFactOS-Dev-Subject": subject,
-      "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+      "X-crevafactos-dev-Issuer": "crevafactos-dev",
+      "X-crevafactos-dev-Subject": subject,
+      "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
     },
     cache: "no-store",
   });

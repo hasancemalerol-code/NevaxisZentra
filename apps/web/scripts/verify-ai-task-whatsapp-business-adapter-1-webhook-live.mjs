@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 import { createHmac } from "node:crypto";
 
-const API = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5199").replace(/\/$/, "");
-const FACILITY = process.env.CREVAFACTOS_WHATSAPP_GOLDEN_FACILITY ?? "bb000001-0005-4000-8000-000000000005";
-const TASK = process.env.CREVAFACTOS_WHATSAPP_GOLDEN_TASK ?? "bb000001-03d0-4000-8000-0000000003d0";
-const APP_SECRET = process.env.CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__APP_SECRET ?? "whatsapp-test-app-secret";
-const VERIFY_TOKEN = process.env.CREVAFACTOS__AI_TASK_DELIVERY__WHATSAPP__WEBHOOK_VERIFY_TOKEN ?? "whatsapp-test-verify-token";
+const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5199").replace(/\/$/, "");
+const FACILITY = process.env.NEVAXIS_FACTOS_WHATSAPP_GOLDEN_FACILITY ?? "bb000001-0005-4000-8000-000000000005";
+const TASK = process.env.NEVAXIS_FACTOS_WHATSAPP_GOLDEN_TASK ?? "bb000001-03d0-4000-8000-0000000003d0";
+const APP_SECRET = process.env.NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__APP_SECRET ?? "whatsapp-test-app-secret";
+const VERIFY_TOKEN = process.env.NEVAXIS_FACTOS__AI_TASK_DELIVERY__WHATSAPP__WEBHOOK_VERIFY_TOKEN ?? "whatsapp-test-verify-token";
 const ACTOR = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
-  tenant: process.env.CREVAFACTOS_WHATSAPP_GOLDEN_TENANT ?? "omnichannel-closure-tenant-a",
+  tenant: process.env.NEVAXIS_FACTOS_WHATSAPP_GOLDEN_TENANT ?? "omnichannel-closure-tenant-a",
 };
 
 function fail(message) {
@@ -20,9 +20,9 @@ function fail(message) {
 function headers() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ACTOR.issuer,
-    "X-CrevaFactOS-Dev-Subject": ACTOR.subject,
-    "X-CrevaFactOS-Tenant": ACTOR.tenant,
+    "X-crevafactos-dev-Issuer": ACTOR.issuer,
+    "X-crevafactos-dev-Subject": ACTOR.subject,
+    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
   };
 }
 

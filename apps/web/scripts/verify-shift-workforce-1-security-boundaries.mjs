@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const PERSON001 = "bb000001-00d0-4000-8000-0000000000d0";
@@ -33,7 +33,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -60,9 +60,9 @@ console.log("Running SHIFT-WORKFORCE-1 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/ShiftWorkforce/ShiftWorkforceEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/ShiftWorkforce/ShiftWorkforceEndpointHelpers.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260813020000_AddShiftWorkforceFoundation.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/ShiftWorkforce/ShiftWorkforcePermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260813020000_AddShiftWorkforceFoundation.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/ShiftWorkforcePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -83,29 +83,29 @@ assert("manager manage grant", bootstrap.includes("EnsureShiftWorkforceManagePer
 assert("reviewer read grant", bootstrap.includes("EnsureShiftWorkforceReadPermissionAssignmentAsync(\n            dbContext, tenant.Id, reviewerRole.Id"));
 
 const managerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-reviewer",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const operatorHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "production-pilot-operator",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "production-pilot-operator",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "quality-negative-test-user",
-  "X-CrevaFactOS-Tenant": "dev-pilot-tenant",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "quality-negative-test-user",
+  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
 };
 const crossTenantHeaders = {
-  "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-  "X-CrevaFactOS-Dev-Subject": "planning-pilot-user",
-  "X-CrevaFactOS-Tenant": "unknown-tenant-key",
+  "X-crevafactos-dev-Issuer": "crevafactos-dev",
+  "X-crevafactos-dev-Subject": "planning-pilot-user",
+  "X-NevaxisFactOS-Tenant": "unknown-tenant-key",
 };
 
 const ready = await fetch(`${BASE}/health/ready`);

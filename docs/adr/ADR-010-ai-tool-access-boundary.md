@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: CrevaFactOS Product & Development
+- Decision owners: NevaxisFactOS Product & Development
 - Scope: AI data access, proposals, approvals, and controlled execution
 
 ## Context

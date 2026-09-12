@@ -22,4 +22,4 @@ if ($LASTEXITCODE -ne 0) {
     throw "Packaged runtime local secret deployment failed."
 }
 
-Write-Host "Target: $env:LOCALAPPDATA\CrevaFactOS\config\runtime.env.local"
+Write-Host "Target: $env:LOCALAPPDATA\NevaxisFactOS\config\runtime.env.local"

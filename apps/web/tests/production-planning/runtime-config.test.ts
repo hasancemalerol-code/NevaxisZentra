@@ -33,11 +33,11 @@ function setProcessEnv(
 test("production defaults to api mode", () => {
   setProcessEnv({
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       undefined,
-    CREVAFACTOS_API_BASE_URL:
+    NEVAXIS_FACTOS_API_BASE_URL:
       "https://api.example.test",
-    CREVAFACTOS_FACILITY_ID:
+    NEVAXIS_FACTOS_FACILITY_ID:
       "11111111-1111-1111-1111-111111111111",
   });
 
@@ -54,7 +54,7 @@ test("production defaults to api mode", () => {
 test("production rejects development-preview mode", () => {
   setProcessEnv({
     NODE_ENV: "production",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
   });
 
@@ -74,7 +74,7 @@ test("production rejects development-preview mode", () => {
 test("development requires explicit runtime mode", () => {
   setProcessEnv({
     NODE_ENV: "development",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       undefined,
   });
 
@@ -87,11 +87,11 @@ test("development requires explicit runtime mode", () => {
 test("development-preview requires preview scope config", () => {
   setProcessEnv({
     NODE_ENV: "development",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
-    CREVAFACTOS_DEV_PREVIEW_TENANT_ID:
+    NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
       undefined,
-    CREVAFACTOS_DEV_PREVIEW_FACILITY_ID:
+    NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       undefined,
   });
 
@@ -104,11 +104,11 @@ test("development-preview requires preview scope config", () => {
 test("development-preview succeeds with explicit preview scope", () => {
   setProcessEnv({
     NODE_ENV: "development",
-    CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
+    NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
-    CREVAFACTOS_DEV_PREVIEW_TENANT_ID:
-      "tenant-crevafactos",
-    CREVAFACTOS_DEV_PREVIEW_FACILITY_ID:
+    NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
+      "tenant-NevaxisFactOS",
+    NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       "facility-istanbul",
   });
 

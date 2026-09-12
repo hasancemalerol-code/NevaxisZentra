@@ -19,10 +19,10 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const engine = read("packages/CrevaFactOS.Persistence/Maintenance/ConditionEvaluationService.cs");
-const entities = read("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceConditionEntities.cs");
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811120000_AddMaintenanceConditionIntelligenceFoundation.cs");
-const seed = read("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotMaintenanceConditionSeed.cs");
+const engine = read("packages/NevaxisFactOS.Persistence/Maintenance/ConditionEvaluationService.cs");
+const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceConditionEntities.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811120000_AddMaintenanceConditionIntelligenceFoundation.cs");
+const seed = read("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotMaintenanceConditionSeed.cs");
 
 for (const text of ["MaintenanceConditionStatuses", "MaintenanceConditionDataSufficiencyLevels", "MaintenanceConditionMetricDefinition"]) {
   assert(`entities contain ${text}`, entities.includes(text));

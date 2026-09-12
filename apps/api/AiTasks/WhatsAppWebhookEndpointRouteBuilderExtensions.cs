@@ -1,8 +1,8 @@
-using CrevaFactOS.Persistence.AiTasks.Delivery.WhatsApp;
+using NevaxisFactOS.Persistence.AiTasks.Delivery.WhatsApp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace CrevaFactOS.Api.AiTasks;
+namespace NevaxisFactOS.Api.AiTasks;
 
 public static class WhatsAppWebhookEndpointRouteBuilderExtensions
 {

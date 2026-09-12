@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Energy;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Energy;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Energy;
+namespace NevaxisFactOS.Api.Energy;
 
 public static class EnergyEndpointRouteBuilderExtensions
 {
@@ -298,11 +298,11 @@ public static class EnergyEndpointRouteBuilderExtensions
         calculatedAtUtc = allocation.CalculatedAtUtc,
     };
 
-    public static IServiceCollection AddCrevaFactOSEnergy(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSEnergy(this IServiceCollection services)
     {
         services.AddScoped<IEnergyRepository>(sp =>
         {
-            var dbContext = sp.GetService<CrevaFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEnergyRepository()
                 : new EnergyRepository(dbContext, sp.GetRequiredService<TenantDatabaseSession>());

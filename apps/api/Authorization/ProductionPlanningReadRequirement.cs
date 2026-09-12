@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace CrevaFactOS.Api.Authorization;
+namespace NevaxisFactOS.Api.Authorization;
 
 public sealed class ProductionPlanningReadRequirement : IAuthorizationRequirement;

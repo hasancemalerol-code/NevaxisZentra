@@ -1,8 +1,7 @@
-﻿import "./shift-handover-server-boundary";
+import "./shift-handover-server-boundary";
 
 import { fetchTrustedApi } from "@/features/saas-identity/server/authenticated-server-fetch";
 
-import { resolveShiftHandoverRequestContext } from "./shift-handover-request-context";
 import type { ShiftHandoverRequestContext } from "./shift-handover-request-context";
 
 export type { ShiftHandoverRequestContext } from "./shift-handover-request-context";
@@ -157,7 +156,7 @@ async function request<T>(
       return { status: "success", value: payload as T };
     }
 
-    const apiBaseUrl = (process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
+    const apiBaseUrl = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
     const response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
       headers: {

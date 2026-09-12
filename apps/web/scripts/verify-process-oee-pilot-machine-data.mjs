@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const INJ1 = "bb000001-0096-4000-8000-000000000096";
 const INJ2 = "bb000001-0103-4000-8000-000000000103";
@@ -46,7 +46,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8", maxBuffer: 20 * 1024 * 1024 },
   );
   if (result.status !== 0) {
@@ -58,9 +58,9 @@ function db(sql) {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -213,11 +213,11 @@ function countByPrefix(table, column, prefixes) {
 
 console.log("Running PROCESS-OEE pilot machine data verifier.");
 
-const edgeSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
-const oeeSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotProcessOeeSeed.cs");
-const hygiene = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotProcessOeeFixtureHygiene.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
-const calculator = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
+const edgeSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
+const oeeSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcessOeeSeed.cs");
+const hygiene = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcessOeeFixtureHygiene.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
 
 assert("injection machine seed INJ-001", edgeSeed.includes('"INJ-001"') && edgeSeed.includes("Plastik Enjeksiyon Makinesi 001"));
 assert("injection machine seed INJ-002", edgeSeed.includes('"INJ-002"') && edgeSeed.includes("Plastik Enjeksiyon Makinesi 002"));

@@ -14,7 +14,6 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { QualityDashboardKpi } from "@/features/quality-control/components/quality-dashboard-kpi";
 import type {

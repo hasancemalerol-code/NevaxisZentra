@@ -8,12 +8,12 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const WEB = process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const ISSUER = "crevafactos-dev";
-const FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const PILOT_WO = "bb000001-0081-4000-8000-000000000081";
 const PILOT_PLAN = "bb000001-0082-4000-8000-000000000082";
 const PILOT_OVERDUE_DUE = "bb000001-0086-4000-8000-000000000086";
@@ -47,9 +47,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -122,7 +122,7 @@ console.log("Running maintenance integration gate verifier.");
 
 // Package wiring — 1L + 2L + 3L + UI-1
 requireText(readRequired("apps/api/Program.cs"), "MapMaintenanceEndpoints", "Program.cs");
-requireText(readRequired("apps/api/Program.cs"), "AddCrevaFactOSMaintenance", "Program.cs");
+requireText(readRequired("apps/api/Program.cs"), "AddNevaxisFactOSMaintenance", "Program.cs");
 requireText(
   readRequired("apps/api/Maintenance/MaintenanceEndpointRouteBuilderExtensions.cs"),
   "/requests/{requestId:guid}/convert-to-work-order",
@@ -451,7 +451,7 @@ try {
   stopPid(canonicalPidBefore, "canonical API on 5000");
   const restarted = spawn(
     process.platform === "win32" ? "dotnet.exe" : "dotnet",
-    ["run", "--project", "apps/api/CrevaFactOS.Api.csproj", "--no-launch-profile"],
+    ["run", "--project", "apps/api/NevaxisFactOS.Api.csproj", "--no-launch-profile"],
     {
       cwd: projectRoot,
       detached: true,

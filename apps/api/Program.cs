@@ -1,128 +1,128 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using CrevaFactOS.Configuration;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Tenancy;
-using CrevaFactOS.Api.Tenancy;
-using CrevaFactOS.Api.Authentication;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Api.Authorization;
+using NevaxisFactOS.Configuration;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Tenancy;
+using NevaxisFactOS.Api.Authentication;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
-using CrevaFactOS.Api.Audit;
-using CrevaFactOS.Api.Development;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Api.Export;
-using CrevaFactOS.Api.Production;
-using CrevaFactOS.Api.ProductionPlanning;
-using CrevaFactOS.Api.Maintenance;
-using CrevaFactOS.Api.Quality;
-using CrevaFactOS.Api.Material;
-using CrevaFactOS.Api.Mold;
-using CrevaFactOS.Api.ProcessOee;
-using CrevaFactOS.Api.Procurement;
-using CrevaFactOS.Api.ShiftWorkforce;
-using CrevaFactOS.Api.ShiftAssignment;
-using CrevaFactOS.Api.ShiftRisk;
-using CrevaFactOS.Api.Energy;
-using CrevaFactOS.Api.SaasCommercial;
-using CrevaFactOS.Api.SaasIdentity;
-using CrevaFactOS.Api.SaasSubscription;
-using CrevaFactOS.Api.SaasBilling;
-using CrevaFactOS.Api.AdminAccess;
-using CrevaFactOS.Api.Erp;
-using CrevaFactOS.Api.Integration;
-using CrevaFactOS.Api.DigitalWorkforce;
-using CrevaFactOS.Api.Edge;
-using CrevaFactOS.Api.IotPlc;
-using CrevaFactOS.Api.OperationalRisk;
-using CrevaFactOS.Api.CommercialIntelligence;
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Teams;
-using CrevaFactOS.Api.ShiftHandover;
-using CrevaFactOS.Api.ShiftOperations;
-using CrevaFactOS.Api.FactoryOrchestration;
-using CrevaFactOS.Api.ProductionManager;
-using CrevaFactOS.Api.MarketRates;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.AiDecisions;
-using CrevaFactOS.Persistence.Outbox;
-using CrevaFactOS.Persistence.Development;
+using NevaxisFactOS.Api.Audit;
+using NevaxisFactOS.Api.Development;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Api.Export;
+using NevaxisFactOS.Api.Production;
+using NevaxisFactOS.Api.ProductionPlanning;
+using NevaxisFactOS.Api.Maintenance;
+using NevaxisFactOS.Api.Quality;
+using NevaxisFactOS.Api.Material;
+using NevaxisFactOS.Api.Mold;
+using NevaxisFactOS.Api.ProcessOee;
+using NevaxisFactOS.Api.Procurement;
+using NevaxisFactOS.Api.ShiftWorkforce;
+using NevaxisFactOS.Api.ShiftAssignment;
+using NevaxisFactOS.Api.ShiftRisk;
+using NevaxisFactOS.Api.Energy;
+using NevaxisFactOS.Api.SaasCommercial;
+using NevaxisFactOS.Api.SaasIdentity;
+using NevaxisFactOS.Api.SaasSubscription;
+using NevaxisFactOS.Api.SaasBilling;
+using NevaxisFactOS.Api.AdminAccess;
+using NevaxisFactOS.Api.Erp;
+using NevaxisFactOS.Api.Integration;
+using NevaxisFactOS.Api.DigitalWorkforce;
+using NevaxisFactOS.Api.Edge;
+using NevaxisFactOS.Api.IotPlc;
+using NevaxisFactOS.Api.OperationalRisk;
+using NevaxisFactOS.Api.CommercialIntelligence;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Teams;
+using NevaxisFactOS.Api.ShiftHandover;
+using NevaxisFactOS.Api.ShiftOperations;
+using NevaxisFactOS.Api.FactoryOrchestration;
+using NevaxisFactOS.Api.ProductionManager;
+using NevaxisFactOS.Api.MarketRates;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.AiDecisions;
+using NevaxisFactOS.Persistence.Outbox;
+using NevaxisFactOS.Persistence.Development;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration["Application:Name"] ??= "CrevaFactOS API";
+builder.Configuration["Application:Name"] ??= "NevaxisFactOS API";
 ValidateConfiguration(builder.Configuration);
 
 builder.Services.AddSingleton<DevelopmentPilotBootstrapState>();
 builder.Services.AddHealthChecks()
     .AddCheck<DevelopmentPilotBootstrapHealthCheck>("development-pilot-bootstrap");
 builder.Services.AddInfrastructureOptions(builder.Configuration);
-builder.Services.AddCrevaFactOSPersistence(builder.Configuration, builder.Environment);
-builder.Services.AddCrevaFactOSAuthentication(
+builder.Services.AddNevaxisFactOSPersistence(builder.Configuration, builder.Environment);
+builder.Services.AddNevaxisFactOSAuthentication(
     builder.Configuration,
     builder.Environment);
 builder.Services.AddAuthorization(PermissionPolicies.AddInfrastructurePolicies);
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-builder.Services.AddCrevaFactOSFacilityAccess();
-builder.Services.AddCrevaFactOSProductionPlanning();
-builder.Services.AddCrevaFactOSProductionExecution();
-builder.Services.AddCrevaFactOSQuality();
-builder.Services.AddCrevaFactOSMold();
-builder.Services.AddCrevaFactOSMaterial();
-builder.Services.AddCrevaFactOSProcessOee();
-builder.Services.AddCrevaFactOSShiftWorkforce();
-builder.Services.AddCrevaFactOSShiftAssignment();
-builder.Services.AddCrevaFactOSShiftRisk();
-builder.Services.AddCrevaFactOSEnergy();
-builder.Services.AddCrevaFactOSEnergyIntelligence();
-builder.Services.AddCrevaFactOSSaasCommercial();
-builder.Services.AddCrevaFactOSSaasSubscriptionApi();
-builder.Services.AddCrevaFactOSSaasBillingApi(builder.Configuration);
-builder.Services.AddCrevaFactOSSaasIdentity();
-builder.Services.AddCrevaFactOSAdminAccess();
-builder.Services.AddCrevaFactOSMaintenance();
-builder.Services.AddCrevaFactOSExport();
-builder.Services.AddCrevaFactOSErp();
-builder.Services.AddCrevaFactOSIntegration();
-builder.Services.AddCrevaFactOSDigitalWorkforce();
-builder.Services.AddCrevaFactOSProcurement();
-builder.Services.AddCrevaFactOSEdge();
-builder.Services.AddCrevaFactOSIotPlc();
-builder.Services.AddCrevaFactOSIotPlcIntelligence();
-builder.Services.AddCrevaFactOSOperationalRisk();
-builder.Services.AddCrevaFactOSAiTasks();
-builder.Services.AddCrevaFactOSAiTaskDelivery(builder.Configuration);
+builder.Services.AddNevaxisFactOSFacilityAccess();
+builder.Services.AddNevaxisFactOSProductionPlanning();
+builder.Services.AddNevaxisFactOSProductionExecution();
+builder.Services.AddNevaxisFactOSQuality();
+builder.Services.AddNevaxisFactOSMold();
+builder.Services.AddNevaxisFactOSMaterial();
+builder.Services.AddNevaxisFactOSProcessOee();
+builder.Services.AddNevaxisFactOSShiftWorkforce();
+builder.Services.AddNevaxisFactOSShiftAssignment();
+builder.Services.AddNevaxisFactOSShiftRisk();
+builder.Services.AddNevaxisFactOSEnergy();
+builder.Services.AddNevaxisFactOSEnergyIntelligence();
+builder.Services.AddNevaxisFactOSSaasCommercial();
+builder.Services.AddNevaxisFactOSSaasSubscriptionApi();
+builder.Services.AddNevaxisFactOSSaasBillingApi(builder.Configuration);
+builder.Services.AddNevaxisFactOSSaasIdentity();
+builder.Services.AddNevaxisFactOSAdminAccess();
+builder.Services.AddNevaxisFactOSMaintenance();
+builder.Services.AddNevaxisFactOSExport();
+builder.Services.AddNevaxisFactOSErp();
+builder.Services.AddNevaxisFactOSIntegration();
+builder.Services.AddNevaxisFactOSDigitalWorkforce();
+builder.Services.AddNevaxisFactOSProcurement();
+builder.Services.AddNevaxisFactOSEdge();
+builder.Services.AddNevaxisFactOSIotPlc();
+builder.Services.AddNevaxisFactOSIotPlcIntelligence();
+builder.Services.AddNevaxisFactOSOperationalRisk();
+builder.Services.AddNevaxisFactOSAiTasks();
+builder.Services.AddNevaxisFactOSAiTaskDelivery(builder.Configuration);
 builder.Services.AddAiTaskSecureAccessRateLimiting();
-builder.Services.AddCrevaFactOSTeams();
-builder.Services.AddCrevaFactOSShiftHandover();
-builder.Services.AddCrevaFactOSShiftOperations();
-builder.Services.AddCrevaFactOSFactoryOrchestration();
-builder.Services.AddCrevaFactOSProductionManager();
-builder.Services.AddCrevaFactOSMarketRates(builder.Configuration);
-builder.Services.AddCrevaFactOSCommercialIntelligence();
-builder.Services.AddCrevaFactOSCommercialSalesPrice();
-builder.Services.AddCrevaFactOSCommercialQuotationRisk();
-builder.Services.AddCrevaFactOSCommercialProfitability();
-builder.Services.AddCrevaFactOSCommercialProfitabilityAlerts();
-builder.Services.AddCrevaFactOSCommercialPricingScenarios();
+builder.Services.AddNevaxisFactOSTeams();
+builder.Services.AddNevaxisFactOSShiftHandover();
+builder.Services.AddNevaxisFactOSShiftOperations();
+builder.Services.AddNevaxisFactOSFactoryOrchestration();
+builder.Services.AddNevaxisFactOSProductionManager();
+builder.Services.AddNevaxisFactOSMarketRates(builder.Configuration);
+builder.Services.AddNevaxisFactOSCommercialIntelligence();
+builder.Services.AddNevaxisFactOSCommercialSalesPrice();
+builder.Services.AddNevaxisFactOSCommercialQuotationRisk();
+builder.Services.AddNevaxisFactOSCommercialProfitability();
+builder.Services.AddNevaxisFactOSCommercialProfitabilityAlerts();
+builder.Services.AddNevaxisFactOSCommercialPricingScenarios();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, UniformAuthorizationResultHandler>();
 
-CrevaFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
+NevaxisFactOS.Persistence.Development.DevelopmentPilotServiceCollectionExtensions
     .ValidateDevelopmentPilotProductionGuard(
         builder.Configuration,
         builder.Environment);
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddCrevaFactOSDevelopmentPilot(
+    builder.Services.AddNevaxisFactOSDevelopmentPilot(
         builder.Configuration,
         builder.Environment);
-    builder.Services.AddCrevaFactOSDevelopmentPilotHostedBootstrap(
+    builder.Services.AddNevaxisFactOSDevelopmentPilotHostedBootstrap(
         builder.Environment);
     builder.Services.AddSingleton<
-        CrevaFactOS.Persistence.ProductionPlanning.IProductionPlanTransferAdapter,
-        CrevaFactOS.Persistence.ProductionPlanning.FakeProductionPlanTransferAdapter>();
+        NevaxisFactOS.Persistence.ProductionPlanning.IProductionPlanTransferAdapter,
+        NevaxisFactOS.Persistence.ProductionPlanning.FakeProductionPlanTransferAdapter>();
 }
 
 var app = builder.Build();

@@ -1,5 +1,5 @@
-# CREVAFACTOS-DESKTOP-SHELL-RUNTIME-ROOT-TEST-LEAK-CLOSURE-1
-# Proves verifier negative tests do not leak CREVAFACTOS_DESKTOP_RUNTIME_ROOT.
+# NevaxisFactOS-DESKTOP-SHELL-RUNTIME-ROOT-TEST-LEAK-CLOSURE-1
+# Proves verifier negative tests do not leak NEVAXIS_FACTOS_DESKTOP_RUNTIME_ROOT.
 
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path

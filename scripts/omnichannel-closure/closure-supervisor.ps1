@@ -1,4 +1,4 @@
-# CrevaFactOS omnichannel closure runtime supervisor.
+# NevaxisFactOS omnichannel closure runtime supervisor.
 # Starts API + Web, waits for readiness, records PIDs/logs, stops only owned processes.
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/closure-constants.ps1"
@@ -45,7 +45,7 @@ if (-not (Test-PortFree $apiPort)) {
     $ownerPid = $listener.OwningProcess
     $owner = Get-Process -Id $ownerPid -ErrorAction SilentlyContinue
     $ownerPath = if ($owner) { $owner.Path } else { "" }
-    if ($owner -and $owner.ProcessName -eq "CrevaFactOS.Api" -and $ownerPath -like "*\Projects\CrevaFactOS\*") {
+    if ($owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $ownerPath -like "*\Projects\NevaxisFactOS\*") {
         Write-Host "Reclaiming stale closure API on port $apiPort (PID $ownerPid)"
         Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
@@ -74,7 +74,7 @@ if (-not (Test-PortFree $webPort)) {
             }
         } catch {}
     }
-    if (-not $reclaimed -and $owner -and $owner.ProcessName -eq "node" -and $ownerCmd -like "*\Projects\CrevaFactOS\*") {
+    if (-not $reclaimed -and $owner -and $owner.ProcessName -eq "node" -and $ownerCmd -like "*\Projects\NevaxisFactOS\*") {
         Write-Host "Reclaiming stale closure web on port $webPort (PID $ownerPid)"
         Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
@@ -95,18 +95,18 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
 
 $apiEnv = @{
     ASPNETCORE_ENVIRONMENT = "Development"
-    CREVAFACTOS__PERSISTENCE__ENABLED = "true"
-    CREVAFACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
-    CREVAFACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
-    CREVAFACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
-    CREVAFACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
-    CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-    CREVAFACTOS__PERSISTENCE__SSL_MODE = "Disable"
+    NEVAXIS_FACTOS__PERSISTENCE__ENABLED = "true"
+    NEVAXIS_FACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
+    NEVAXIS_FACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
+    NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
+    NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
+    NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+    NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = "Disable"
     DevelopmentPilot__Enabled = "false"
-    CREVAFACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = if ($env:CLOSURE_LEASE_SECONDS) { $env:CLOSURE_LEASE_SECONDS } else { "5" }
-    CREVAFACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = if ($env:CLOSURE_RETRY_BASE_DELAY_SECONDS) { $env:CLOSURE_RETRY_BASE_DELAY_SECONDS } else { "1" }
-    CREVAFACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = if ($env:CLOSURE_WORKER_ENABLED) { $env:CLOSURE_WORKER_ENABLED } else { "true" }
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = if ($env:CLOSURE_LEASE_SECONDS) { $env:CLOSURE_LEASE_SECONDS } else { "5" }
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = if ($env:CLOSURE_RETRY_BASE_DELAY_SECONDS) { $env:CLOSURE_RETRY_BASE_DELAY_SECONDS } else { "1" }
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = if ($env:CLOSURE_WORKER_ENABLED) { $env:CLOSURE_WORKER_ENABLED } else { "true" }
     ASPNETCORE_URLS = $apiBase
 }
 
@@ -131,12 +131,12 @@ if (-not (Wait-HttpReady "$apiBase/health/ready")) {
 $webProc = $null
 if (-not $skipWeb) {
 $webEnv = @{
-    CREVAFACTOS_API_BASE_URL = $apiBase
-    CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
-    CREVAFACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
-    CREVAFACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
-    CREVAFACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
-    CREVAFACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
+    NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+    NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE = "development-api"
+    NEVAXIS_FACTOS_DEV_AUTH_ISSUER = "crevafactos-dev"
+    NEVAXIS_FACTOS_DEV_AUTH_SUBJECT = "planning-pilot-user"
+    NEVAXIS_FACTOS_DEV_TENANT_KEY = "omnichannel-closure-tenant-a"
+    NEVAXIS_FACTOS_DEV_FACILITY_ID = "bb000001-0005-4000-8000-000000000005"
     PORT = "$webPort"
 }
 

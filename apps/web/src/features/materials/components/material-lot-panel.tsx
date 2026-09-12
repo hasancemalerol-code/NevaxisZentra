@@ -196,7 +196,6 @@ export function MaterialLotPanel({
     if (!loaded) {
       void refreshLots();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load only when materialId changes
   }, [loaded, materialId]);
 
   function selectLot(lot: MaterialLotSummary) {

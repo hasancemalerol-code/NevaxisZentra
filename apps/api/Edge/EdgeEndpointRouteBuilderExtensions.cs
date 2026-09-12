@@ -1,20 +1,20 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Edge;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Edge;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Hosting;
 
-namespace CrevaFactOS.Api.Edge;
+namespace NevaxisFactOS.Api.Edge;
 
 public static class EdgeServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSEdge(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSEdge(this IServiceCollection services)
     {
         services.AddScoped<IEdgeQueryRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeQueryRepository()
                 : new EdgeQueryRepository(
@@ -24,7 +24,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeIngestionService()
                 : new EdgeIngestionService(
@@ -34,7 +34,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeTelemetryIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeTelemetryIngestionService()
                 : new EdgeTelemetryIngestionService(
@@ -44,7 +44,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeCycleIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeCycleIngestionService()
                 : new EdgeCycleIngestionService(
@@ -54,7 +54,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeCounterIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeCounterIngestionService()
                 : new EdgeCounterIngestionService(
@@ -64,7 +64,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeDowntimeIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeDowntimeIngestionService()
                 : new EdgeDowntimeIngestionService(
@@ -74,7 +74,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeAlarmIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeAlarmIngestionService()
                 : new EdgeAlarmIngestionService(
@@ -84,7 +84,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeSetupIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeSetupIngestionService()
                 : new EdgeSetupIngestionService(
@@ -94,7 +94,7 @@ public static class EdgeServiceCollectionExtensions
 
         services.AddScoped<IEdgeScrapIngestionService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableEdgeScrapIngestionService()
                 : new EdgeScrapIngestionService(

@@ -49,7 +49,7 @@ const program = readRequired("apps/api/Program.cs");
 requireText(program, "MapProductionPlanningLogisticsEndpoints", "Program.cs");
 
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808210000_AddPlanningLogisticsConstraints.cs",
 );
 requireText(migration, "REVOKE ALL", "Migration");
 requireText(migration, "GRANT SELECT, INSERT, UPDATE", "Migration");

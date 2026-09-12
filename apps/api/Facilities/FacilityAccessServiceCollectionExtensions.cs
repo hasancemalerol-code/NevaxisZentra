@@ -1,18 +1,18 @@
-using CrevaFactOS.Api.Authorization;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Authorization;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Authorization;
 
-namespace CrevaFactOS.Api.Facilities;
+namespace NevaxisFactOS.Api.Facilities;
 
 public static class FacilityAccessServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSFacilityAccess(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSFacilityAccess(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IFacilityAccessReadStore>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableFacilityAccessReadStore()
                 : new PostgreSqlFacilityAccessReadStore(

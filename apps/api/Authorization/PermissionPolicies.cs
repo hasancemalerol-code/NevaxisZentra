@@ -1,7 +1,7 @@
-using CrevaFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
-namespace CrevaFactOS.Api.Authorization;
+namespace NevaxisFactOS.Api.Authorization;
 
 public static class PermissionPolicies
 {

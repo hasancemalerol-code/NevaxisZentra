@@ -1,13 +1,13 @@
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Maintenance;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Maintenance;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Maintenance;
+namespace NevaxisFactOS.Api.Maintenance;
 
 internal static class MaintenancePredictiveRiskEndpointRouteBuilderExtensions
 {

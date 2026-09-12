@@ -28,7 +28,6 @@ import {
   DemoBadge,
   LifecycleTrack,
   StatusChip,
-  VerifiedBadge,
   WorkCaseCard,
 } from "./digital-workforce-primitives";
 

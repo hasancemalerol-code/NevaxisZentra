@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
@@ -24,16 +24,16 @@ function assert(label, ok, detail = "") {
 function headers(subject, tenant = "dev-pilot-tenant") {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": "crevafactos-dev",
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": tenant,
+    "X-crevafactos-dev-Issuer": "crevafactos-dev",
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": tenant,
   };
 }
 
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -89,7 +89,7 @@ const unauthorizedList = await request("GET", `/api/molds?facilityId=${FACILITY}
 assert("unauthorized actor list → 403", unauthorizedList.status === 403);
 
 const migration = readFileSync(
-  resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs"),
+  resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs"),
   "utf8",
 );
 assert("RLS in migration", migration.includes("ENABLE ROW LEVEL SECURITY") && migration.includes("FORCE ROW LEVEL SECURITY"));
@@ -101,7 +101,7 @@ for (const table of ["molds", "mold_lifecycle_events", "mold_counter_snapshots"]
 
 function runtimeTenantCount(tenantId, whereClause = "") {
   const output = db(
-    `SET ROLE crevafactos_runtime; SELECT set_config('crevafactos.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM molds ${whereClause};`,
+    `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisFactOS.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM molds ${whereClause};`,
   );
   const lines = output.split("\n").map((line) => line.trim()).filter(Boolean);
   return Number(lines.at(-1));

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-const API_BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
-const FACILITY_ID = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const API_BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const FACILITY_ID = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const ISSUER = "crevafactos-dev";
 const OPERATOR = "production-pilot-operator";
 const TENANT = "dev-pilot-tenant";
-const REQUEST_TIMEOUT_MS = Number(process.env.CREVAFACTOS_REQUEST_TIMEOUT_MS ?? 30_000);
-const FLOW_TIMEOUT_MS = Number(process.env.CREVAFACTOS_FLOW_TIMEOUT_MS ?? 180_000);
-const RESUME_FROM = process.env.CREVAFACTOS_DW_RESUME_FROM ?? "";
-const SKIP_PREFIX = process.env.CREVAFACTOS_DW_SKIP_PREFIX === "1";
+const REQUEST_TIMEOUT_MS = Number(process.env.NEVAXIS_FACTOS_REQUEST_TIMEOUT_MS ?? 30_000);
+const FLOW_TIMEOUT_MS = Number(process.env.NEVAXIS_FACTOS_FLOW_TIMEOUT_MS ?? 180_000);
+const RESUME_FROM = process.env.NEVAXIS_FACTOS_DW_RESUME_FROM ?? "";
+const SKIP_PREFIX = process.env.NEVAXIS_FACTOS_DW_SKIP_PREFIX === "1";
 
 const GOLDEN_FLOW_ORDER = [
   "PRODUCTION_RECOVERY_GOLDEN_FLOW",
@@ -34,12 +34,12 @@ function headers(subject = OPERATOR) {
   const base = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
-  if (process.env.CREVAFACTOS_DEV_OPERATOR_BEARER) {
-    base.Authorization = `Bearer ${process.env.CREVAFACTOS_DEV_OPERATOR_BEARER}`;
+  if (process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER) {
+    base.Authorization = `Bearer ${process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER}`;
   }
   return base;
 }

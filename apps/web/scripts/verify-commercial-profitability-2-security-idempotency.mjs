@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const MATERIAL = "bb000001-03c0-4000-8000-0000000003c0";
 const PROFILE = "bb000001-0310-4000-8000-000000000310";
@@ -43,7 +43,7 @@ function readRequired(relativePath) {
 }
 
 function readProvenance() {
-  const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+  const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
   const match = constants.match(/ProfitabilityComparisonDevelopmentPilotProvenance\s*=\s*\n\s*"([^"]+)"/);
   if (!match) fail("ProfitabilityComparisonDevelopmentPilotProvenance not found in CommercialIntelligenceConstants.cs");
   return match[1];
@@ -56,7 +56,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -66,9 +66,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -105,10 +105,10 @@ console.log("Running COMMERCIAL-PROFITABILITY-2 security/idempotency verifier.")
 
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointHelpers.cs");
-const migration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260827155607_AddCommercialProfitabilityComparisonIntelligence.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
-const comparisonSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs");
+const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260827155607_AddCommercialProfitabilityComparisonIntelligence.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const comparisonSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilityComparisonSeed.cs");
 
 assert("comparison endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("comparison list endpoint", endpoints.includes('MapGet("/comparisons"'));

@@ -1,11 +1,11 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Mold;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Mold;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Mold;
+namespace NevaxisFactOS.Api.Mold;
 
 public static class MoldEndpointRouteBuilderExtensions
 {
@@ -471,11 +471,11 @@ internal static class MoldApiMapper
 
 public static class MoldServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSMold(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSMold(this IServiceCollection services)
     {
         services.AddScoped<IMoldRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMoldRepository()
                 : new MoldRepository(
@@ -485,7 +485,7 @@ public static class MoldServiceCollectionExtensions
 
         services.AddScoped<IMoldHistoryRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMoldHistoryRepository()
                 : new MoldHistoryRepository(
@@ -495,7 +495,7 @@ public static class MoldServiceCollectionExtensions
 
         services.AddScoped<IMoldCompatibilityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMoldCompatibilityRepository()
                 : new MoldCompatibilityRepository(
@@ -505,7 +505,7 @@ public static class MoldServiceCollectionExtensions
 
         services.AddScoped<IMoldFollowUpRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMoldFollowUpRepository()
                 : new MoldFollowUpRepository(

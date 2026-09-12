@@ -13,7 +13,7 @@ const TENANT = "bb000001-0001-4000-8000-000000000001";
 const BOUNDARY_PREFIX = "COMMINT1-BOUNDARY";
 const ISOLATION_PREFIX = "COMMINT1-RATIO-ISOLATION";
 const SUPPLIER_BOUNDARY = "SUP-RATIO-ISO";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -45,7 +45,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -55,9 +55,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -217,11 +217,11 @@ function insertBoundarySpreadObservations() {
 
 console.log("Running COMMERCIAL-INTELLIGENCE-1 price-analysis verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePurchasePriceEvaluator.cs");
-const reader = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePriceEvidenceReader.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceSeed.cs");
-const ratioMigration = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260824134830_RelaxCommercialPurchasePriceRatioUpperBounds.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePurchasePriceEvaluator.cs");
+const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePriceEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceSeed.cs");
+const ratioMigration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260824134830_RelaxCommercialPurchasePriceRatioUpperBounds.cs");
 
 assert("median helper present", evaluator.includes("ComputeMedian"));
 assert("signed variance helper present", evaluator.includes("ComputeSignedVarianceRatio"));

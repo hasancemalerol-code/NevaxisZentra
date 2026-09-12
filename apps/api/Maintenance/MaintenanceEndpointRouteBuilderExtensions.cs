@@ -1,12 +1,12 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Maintenance;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Maintenance;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.Maintenance;
+namespace NevaxisFactOS.Api.Maintenance;
 
 public static class MaintenanceEndpointRouteBuilderExtensions
 {
@@ -717,11 +717,11 @@ internal sealed record CreateWorkOrderFromPlanApiRequest(uint ExpectedVersion);
 
 public static class MaintenanceServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSMaintenance(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSMaintenance(this IServiceCollection services)
     {
         services.AddScoped<IMaintenanceRequestRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaintenanceRequestRepository()
                 : new MaintenanceRequestRepository(
@@ -731,7 +731,7 @@ public static class MaintenanceServiceCollectionExtensions
 
         services.AddScoped<IMaintenanceWorkOrderRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableMaintenanceWorkOrderRepository()
                 : new MaintenanceWorkOrderRepository(
@@ -741,7 +741,7 @@ public static class MaintenanceServiceCollectionExtensions
 
         services.AddScoped<IPreventiveMaintenancePlanRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailablePreventiveMaintenancePlanRepository()
                 : new PreventiveMaintenancePlanRepository(
@@ -749,10 +749,10 @@ public static class MaintenanceServiceCollectionExtensions
                     serviceProvider.GetRequiredService<TenantDatabaseSession>());
         });
 
-        services.AddCrevaFactOSMaintenanceExecution();
-        services.AddCrevaFactOSMaintenanceReporting();
-        services.AddCrevaFactOSMaintenanceCondition();
-        services.AddCrevaFactOSMaintenanceAi();
+        services.AddNevaxisFactOSMaintenanceExecution();
+        services.AddNevaxisFactOSMaintenanceReporting();
+        services.AddNevaxisFactOSMaintenanceCondition();
+        services.AddNevaxisFactOSMaintenanceAi();
 
         return services;
     }

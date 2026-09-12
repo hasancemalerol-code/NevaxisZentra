@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const OVERDUE_LINE = "bb000001-00c1-4000-8000-0000000000c1";
 const INSUFFICIENT_LINE = "bb000001-00c5-4000-8000-0000000000c5";
@@ -32,9 +32,9 @@ function readRequired(relativePath) {
 function headers() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": MANAGER.issuer,
-    "X-CrevaFactOS-Dev-Subject": MANAGER.subject,
-    "X-CrevaFactOS-Tenant": MANAGER.tenant,
+    "X-crevafactos-dev-Issuer": MANAGER.issuer,
+    "X-crevafactos-dev-Subject": MANAGER.subject,
+    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
   };
 }
 
@@ -56,10 +56,10 @@ function isNullishQuantity(value) {
 
 console.log("Running PROCUREMENT-RISK-FOUNDATION-1 domain assessment verifier.");
 
-const calculator = readRequired("packages/CrevaFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotProcurementDeliveryRiskSeed.cs");
-const poSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotErpPurchaseOrderSeed.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcurementDeliveryRiskSeed.cs");
+const poSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotErpPurchaseOrderSeed.cs");
 
 assert("calculator assess method", calculator.includes("AssessLine"));
 assert("calculator overdue branch", calculator.includes("ProcurementDeliveryRiskStatuses.Overdue"));

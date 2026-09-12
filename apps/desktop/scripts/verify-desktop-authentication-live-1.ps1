@@ -1,13 +1,13 @@
-# CREVAFACTOS-DESKTOP-SHELL-AUTHENTICATION-LIVE-CLOSURE-1
+# NevaxisFactOS-DESKTOP-SHELL-AUTHENTICATION-LIVE-CLOSURE-1
 # Validates real shortcut login -> MFA -> authenticated dashboard in WebView2.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
-$desktopProject = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-authentication-live-1-cdp.mjs"
 $results = [ordered]@{}
 
@@ -34,7 +34,7 @@ public static class DesktopAuthCapture {
   public static IntPtr? FindMainWindow(int timeoutMs) {
     var deadline = Environment.TickCount + timeoutMs;
     while (Environment.TickCount < deadline) {
-      foreach (var name in new[] { "CrevaFactOS", "CrevaFactOS.Desktop" }) {
+      foreach (var name in new[] { "crevafactos", "NevaxisFactOS.Desktop" }) {
         foreach (var process in Process.GetProcessesByName(name)) {
           process.Refresh();
           if (process.MainWindowHandle == IntPtr.Zero || !IsWindowVisible(process.MainWindowHandle)) continue;
@@ -63,8 +63,8 @@ public static class DesktopAuthCapture {
 }
 "@
 
-function Stop-CrevaFactOSDesktop {
-    Get-Process -Name "CrevaFactOS", "CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisFactOSDesktop {
+    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 3
 }
 
@@ -85,11 +85,11 @@ function Test-IdentityProxy {
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 Clear-KnownDesktopVerifierEnvironmentLeaks
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Assert-RuntimeRootEnvironmentClean -Context "auth-live-start"
 
 Write-Host "Publishing desktop artifact..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\CrevaFactOS")
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS")
 if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
@@ -133,7 +133,7 @@ for ($attempt = 0; $attempt -lt 30; $attempt++) {
 Assert-Check "main window visible after auth" $found.HasValue
 
 # Session restart test
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Start-Sleep -Seconds 3
 $relaunch = Start-Process -FilePath $shortcutPath -PassThru
 $restartDeadline = (Get-Date).AddMinutes(5)
@@ -157,7 +157,7 @@ $restartBehavior = if ($restartOnDashboard) { "session-persists" } else { "login
 $results["session restart behavior"] = $restartBehavior
 Write-Host "Session restart behavior: $restartBehavior"
 
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Assert-RepositoryRootValid -RepositoryRoot $repoRoot -Context "auth-live-final"
 Assert-RuntimeRootEnvironmentClean -Context "auth-live-final"
 $results | ConvertTo-Json | Set-Content -Path (Join-Path $screenshotDir "authentication-live-results.json") -Encoding UTF8

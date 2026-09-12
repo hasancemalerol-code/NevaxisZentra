@@ -1,4 +1,4 @@
-# CrevaFactOS Bağımlılık Kuralları
+# NevaxisFactOS Bağımlılık Kuralları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS içindeki uygulamalar, backend modülleri, katmanlar, ortak paketler ve harici sistemler arasındaki bağımlılık kurallarını tanımlar.
+Bu belge NevaxisFactOS içindeki uygulamalar, backend modülleri, katmanlar, ortak paketler ve harici sistemler arasındaki bağımlılık kurallarını tanımlar.
 
 
 

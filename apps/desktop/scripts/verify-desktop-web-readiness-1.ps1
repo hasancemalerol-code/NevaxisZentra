@@ -1,11 +1,11 @@
-# CREVAFACTOS-DESKTOP-SHELL-WEB-READINESS-TIMEOUT-CLOSURE-1
+# NevaxisFactOS-DESKTOP-SHELL-WEB-READINESS-TIMEOUT-CLOSURE-1
 # Validates web cold start from real desktop shortcut.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
 $results = [ordered]@{}
 
@@ -56,7 +56,7 @@ public static class WebReadinessProbe {
   public static IntPtr? FindMainWindow(int timeoutMs) {
     var deadline = Environment.TickCount + timeoutMs;
     while (Environment.TickCount < deadline) {
-      foreach (var name in new[] { "CrevaFactOS", "CrevaFactOS.Desktop" }) {
+      foreach (var name in new[] { "crevafactos", "NevaxisFactOS.Desktop" }) {
         foreach (var process in Process.GetProcessesByName(name)) {
           process.Refresh();
           if (process.MainWindowHandle == IntPtr.Zero) continue;
@@ -74,10 +74,10 @@ public static class WebReadinessProbe {
 }
 "@
 
-function Stop-CrevaFactOSDesktop {
-    Get-Process -Name "CrevaFactOS", "CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisFactOSDesktop {
+    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 3
-    Get-Process -Name "CrevaFactOS", "CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
 }
 
 function Stop-UnhealthyWebListener {
@@ -102,9 +102,9 @@ function Test-WebHttpReadiness {
     } catch { return $false }
 }
 
-function Get-CrevaFactOSProcessCount {
+function Get-NevaxisFactOSProcessCount {
     $count = 0
-    foreach ($name in @("CrevaFactOS", "CrevaFactOS.Desktop")) {
+    foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop")) {
         $count += @(Get-Process -Name $name -ErrorAction SilentlyContinue).Count
     }
     return $count
@@ -125,13 +125,13 @@ function Wait-ForWebAndMainWindow {
             }
         }
         if ($webReady -and $mainReady) { return @{ WebReady = $true; MainReady = $true; MainHandle = $mainHandle } }
-        if ((Get-CrevaFactOSProcessCount) -eq 0 -and -not $webReady) { break }
+        if ((Get-NevaxisFactOSProcessCount) -eq 0 -and -not $webReady) { break }
         Start-Sleep -Seconds 2
     }
     return @{ WebReady = $webReady; MainReady = $mainReady; MainHandle = $mainHandle }
 }
 
-function Stop-CrevaFactOSWebListener {
+function Stop-NevaxisFactOSWebListener {
     $listeners = @(Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue)
     foreach ($listener in $listeners) {
         Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
@@ -172,20 +172,20 @@ function Invoke-RetryButton([IntPtr]$WindowHandle) {
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 Clear-KnownDesktopVerifierEnvironmentLeaks
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Stop-UnhealthyWebListener
 Assert-RuntimeRootEnvironmentClean -Context "web-readiness-start"
 
-$desktopProject = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
 Write-Host "Publishing desktop artifact..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\CrevaFactOS")
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS")
 if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
 
 # Phase 1: cold web start (stop only web listener; keep API/postgres)
-Stop-CrevaFactOSDesktop
-Stop-CrevaFactOSWebListener
+Stop-NevaxisFactOSDesktop
+Stop-NevaxisFactOSWebListener
 Assert-Check "web port cleared before cold start" (-not (Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue))
 
 $startedAt = Get-Date
@@ -212,7 +212,7 @@ Assert-Check "API readiness" $apiReady
 
 # Phase 2: close/reopen without stale port drift
 $firstWebPid = if ($listeners.Count -ge 1) { $listeners[0].OwningProcess } else { 0 }
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Start-Sleep -Seconds 3
 $reopen = Start-Process -FilePath $shortcutPath -PassThru
 $reopenResult = Wait-ForWebAndMainWindow -Deadline (Get-Date).AddMinutes(5)
@@ -220,13 +220,13 @@ Assert-Check "close reopen main window" $reopenResult.MainReady
 $reopenListeners = @(Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue)
 Assert-Check "close reopen single listener" ($reopenListeners.Count -eq 1) "count=$($reopenListeners.Count)"
 Assert-Check "close reopen HTTP readiness" $reopenResult.WebReady
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Start-Sleep -Seconds 2
 
 # Phase 3: failure window -> Yeniden Dene -> recovery (child-process env only)
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 $invalidRoot = Join-Path $env:TEMP ("desktop-negative-runtime-" + [guid]::NewGuid().ToString("N"))
-$artifactExe = Join-Path $repoRoot "artifacts\desktop\CrevaFactOS\CrevaFactOS.exe"
+$artifactExe = Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS\NevaxisFactOS.exe"
 $artifactDir = Split-Path $artifactExe -Parent
 $script:failureHandle = [IntPtr]::Zero
 $failLaunch = Invoke-NegativeRuntimeRootTest -ArtifactExe $artifactExe -ArtifactDir $artifactDir -InvalidRoot $invalidRoot -OnFailureWindow {
@@ -234,7 +234,7 @@ $failLaunch = Invoke-NegativeRuntimeRootTest -ArtifactExe $artifactExe -Artifact
     Start-Sleep -Seconds 8
     $failureDeadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $failureDeadline -and $script:failureHandle -eq [IntPtr]::Zero) {
-        foreach ($name in @("CrevaFactOS", "CrevaFactOS.Desktop")) {
+        foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop")) {
             foreach ($process in Get-Process -Name $name -ErrorAction SilentlyContinue) {
                 $process.Refresh()
                 if ($process.MainWindowHandle -eq [IntPtr]::Zero) { continue }
@@ -257,7 +257,7 @@ $failLaunch = Invoke-NegativeRuntimeRootTest -ArtifactExe $artifactExe -Artifact
 }
 $retryResult = Wait-ForWebAndMainWindow -Deadline (Get-Date).AddMinutes(5)
 Assert-Check "retry recovery main window" ($retryResult.MainReady -and $retryResult.WebReady)
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 
 Assert-RepositoryRootValid -RepositoryRoot $repoRoot -Context "web-readiness-final"
 Assert-RuntimeRootEnvironmentClean -Context "web-readiness-final"
@@ -269,6 +269,6 @@ $results["runtime root environment clean"] = "PASS"
 $results["resolved repository root"] = $repoRoot
 $results | ConvertTo-Json | Set-Content -Path (Join-Path $screenshotDir "web-readiness-results.json") -Encoding UTF8
 Write-Host "WEB-READINESS-TIMEOUT-CLOSURE-1: PASS (web startup ${webElapsed}s)"
-Stop-CrevaFactOSDesktop
+Stop-NevaxisFactOSDesktop
 Clear-KnownDesktopVerifierEnvironmentLeaks
 Assert-RuntimeRootEnvironmentClean -Context "web-readiness-exit"

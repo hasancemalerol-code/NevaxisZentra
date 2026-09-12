@@ -85,13 +85,13 @@ function isProductionEnvironment(): boolean {
 
 function readApiBaseUrl(): string {
   return normalizeEnvValue(
-    process.env.CREVAFACTOS_API_BASE_URL,
+    process.env.NEVAXIS_FACTOS_API_BASE_URL,
   );
 }
 
 function readFacilityId(): string {
   return normalizeEnvValue(
-    process.env.CREVAFACTOS_FACILITY_ID,
+    process.env.NEVAXIS_FACTOS_FACILITY_ID,
   );
 }
 
@@ -99,13 +99,13 @@ function readDevelopmentAuth():
   | ProductionPlanRuntimeConfig["developmentAuth"]
   | null {
   const issuer = normalizeEnvValue(
-    process.env.CREVAFACTOS_DEV_AUTH_ISSUER,
+    process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER,
   );
   const subject = normalizeEnvValue(
-    process.env.CREVAFACTOS_DEV_AUTH_SUBJECT,
+    process.env.NEVAXIS_FACTOS_DEV_AUTH_SUBJECT,
   );
   const tenantKey = normalizeEnvValue(
-    process.env.CREVAFACTOS_DEV_TENANT_KEY,
+    process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY,
   );
 
   if (!issuer || !subject || !tenantKey) {
@@ -125,12 +125,12 @@ function readPreviewScope(): Readonly<{
 }> | null {
   const previewTenantId = normalizeEnvValue(
     process.env
-      .CREVAFACTOS_DEV_PREVIEW_TENANT_ID,
+      .NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID,
   );
   const previewFacilityId =
     normalizeEnvValue(
       process.env
-        .CREVAFACTOS_DEV_PREVIEW_FACILITY_ID,
+        .NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID,
     );
 
   if (!previewTenantId || !previewFacilityId) {
@@ -148,7 +148,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
     isProductionEnvironment();
   const configuredMode = normalizeEnvValue(
     process.env
-      .CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE,
+      .NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE,
   );
 
   if (!configuredMode) {
@@ -158,7 +158,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
 
       if (!apiBaseUrl) {
         return createConfigurationFailure(
-          "CREVAFACTOS_API_BASE_URL is required for API runtime modes.",
+          "NEVAXIS_FACTOS_API_BASE_URL is required for API runtime modes.",
         );
       }
 
@@ -179,7 +179,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
     }
 
     return createConfigurationFailure(
-      "CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE must be explicitly configured outside production.",
+      "NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE must be explicitly configured outside production.",
     );
   }
 
@@ -189,7 +189,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
 
   if (!mode) {
     return createConfigurationFailure(
-      "CREVAFACTOS_PRODUCTION_PLANNING_RUNTIME_MODE is invalid.",
+      "NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE is invalid.",
     );
   }
 
@@ -210,7 +210,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
 
     if (!apiBaseUrl) {
       return createConfigurationFailure(
-        "CREVAFACTOS_API_BASE_URL is required for API runtime modes.",
+        "NEVAXIS_FACTOS_API_BASE_URL is required for API runtime modes.",
       );
     }
 
@@ -218,7 +218,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
       mode === "development-api"
         ? normalizeEnvValue(
             process.env
-              .CREVAFACTOS_DEV_FACILITY_ID,
+              .NEVAXIS_FACTOS_DEV_FACILITY_ID,
           ) || readFacilityId()
         : readFacilityId();
 

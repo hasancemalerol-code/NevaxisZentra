@@ -1,4 +1,4 @@
-# CrevaFactOS Test Stratejisi
+# NevaxisFactOS Test Stratejisi
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS platformunda uygulanacak test yaklaşımını, test katmanlarını, kapsam kurallarını, ortamları ve kalite kapılarını tanımlar.
+Bu belge NevaxisFactOS platformunda uygulanacak test yaklaşımını, test katmanlarını, kapsam kurallarını, ortamları ve kalite kapılarını tanımlar.
 
 
 
@@ -64,7 +64,7 @@ Her test:
 
 
 
-CrevaFactOS aşağıdaki test dağılımını hedefler:
+NevaxisFactOS aşağıdaki test dağılımını hedefler:
 
 
 

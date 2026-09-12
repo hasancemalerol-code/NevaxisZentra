@@ -1,14 +1,14 @@
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.CommercialIntelligence;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.CommercialIntelligence;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CrevaFactOS.Api.CommercialIntelligence;
+namespace NevaxisFactOS.Api.CommercialIntelligence;
 
 internal static class CommercialPricingScenarioEndpointRouteBuilderExtensions
 {
@@ -561,11 +561,11 @@ public sealed record TransitionCommercialPricingScenarioRequest(
 
 public static class CommercialPricingScenarioServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrevaFactOSCommercialPricingScenarios(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSCommercialPricingScenarios(this IServiceCollection services)
     {
         services.AddScoped<ICommercialPricingScenarioRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<CrevaFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialPricingScenarioRepository()
                 : new CommercialPricingScenarioRepository(

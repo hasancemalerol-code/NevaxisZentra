@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.ProcessOee;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.ProcessOee;
+using NevaxisFactOS.Persistence.Tenancy;
 
-namespace CrevaFactOS.Api.ProcessOee;
+namespace NevaxisFactOS.Api.ProcessOee;
 
 internal static class ProcessOeeEndpointHelpers
 {

@@ -1,13 +1,13 @@
-# CrevaFactOS Desktop Installer
+# NevaxisFactOS Desktop Installer
 
 ## Shortcut behavior (Development and production installers)
 
 The per-machine MSI always creates both shortcuts:
 
-- **All-users Start Menu:** `%ProgramData%\Microsoft\Windows\Start Menu\Programs\CrevaFactOS\CrevaFactOS.lnk`
-- **All-users Public Desktop:** `%Public%\Desktop\CrevaFactOS.lnk`
+- **All-users Start Menu:** `%ProgramData%\Microsoft\Windows\Start Menu\Programs\NevaxisFactOS\NevaxisFactOS.lnk`
+- **All-users Public Desktop:** `%Public%\Desktop\NevaxisFactOS.lnk`
 
-There is no optional desktop-shortcut checkbox. Shortcuts are advertised on `CrevaFactOS.Desktop.exe` and converted to standard `.lnk` files at install time via `DISABLEADVTSHORTCUTS=1`.
+There is no optional desktop-shortcut checkbox. Shortcuts are advertised on `NevaxisFactOS.Desktop.exe` and converted to standard `.lnk` files at install time via `DISABLEADVTSHORTCUTS=1`.
 
 ## WebView2 bootstrapper
 

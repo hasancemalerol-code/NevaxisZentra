@@ -1,4 +1,4 @@
-# CrevaFactOS Yapılandırma Standartları
+# NevaxisFactOS Yapılandırma Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge CrevaFactOS uygulamalarında kullanılan configuration kaynaklarını, isimlendirme kurallarını, environment ayrımını, secret yönetimini ve doğrulama ilkelerini tanımlar.
+Bu belge NevaxisFactOS uygulamalarında kullanılan configuration kaynaklarını, isimlendirme kurallarını, environment ayrımını, secret yönetimini ve doğrulama ilkelerini tanımlar.
 
 
 

@@ -35,8 +35,8 @@ function Stop-ClosureRuntime {
 }
 
 function Stop-ProjectClosureApi {
-    Get-Process -Name "CrevaFactOS.Api" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Path -like "*\Projects\CrevaFactOS\*" } |
+    Get-Process -Name "NevaxisFactOS.Api" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -like "*\Projects\NevaxisFactOS\*" } |
         ForEach-Object {
             Write-Host "Stopping project closure API PID $($_.Id)"
             Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
@@ -49,16 +49,16 @@ Stop-ProjectClosureApi
 
 Write-Host "=== PHASE A: C# PROOFS (no API worker competition) ==="
 $apiBase = "http://127.0.0.1:5199"
-$env:CREVAFACTOS_API_BASE_URL = $apiBase
-$env:CREVAFACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
-$env:CREVAFACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
-$env:CREVAFACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
-$env:CREVAFACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
-$env:CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-$env:CREVAFACTOS_CLOSURE_LIVE = "1"
+$env:NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+$env:NEVAXIS_FACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
+$env:NEVAXIS_FACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
+$env:NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
+$env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
+$env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+$env:NEVAXIS_FACTOS_CLOSURE_LIVE = "1"
 
 Write-Host "=== LIVE C# PROOFS (dual-worker, lease recovery) ==="
-dotnet test "tests/CrevaFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannelClosureLiveTests" -v q
+dotnet test "tests/NevaxisFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannelClosureLiveTests" -v q
 if ($LASTEXITCODE -ne 0) { Stop-ClosureRuntime; throw "Live C# proofs failed" }
 
 Write-Host "=== PHASE B: START SUPERVISOR (worker enabled) ==="
@@ -73,8 +73,8 @@ if (-not (Test-Path $statePath)) { throw "Supervisor failed to write runtime sta
 $state = Get-Content $statePath | ConvertFrom-Json
 $apiBase = "http://127.0.0.1:$($state.apiPort)"
 $webBase = "http://127.0.0.1:$($state.webPort)"
-$env:CREVAFACTOS_API_BASE_URL = $apiBase
-$env:CREVAFACTOS_WEB_BASE_URL = $webBase
+$env:NEVAXIS_FACTOS_API_BASE_URL = $apiBase
+$env:NEVAXIS_FACTOS_WEB_BASE_URL = $webBase
 
 Write-Host "=== LIVE API PROOFS ==="
 node "$PSScriptRoot/run-live-closure-proofs.mjs"
@@ -87,18 +87,18 @@ Start-Sleep -Seconds 3
 $apiLog = Join-Path $artifacts "logs/closure-api-restart.log"
 foreach ($k in @{
     ASPNETCORE_ENVIRONMENT = "Development"
-    CREVAFACTOS__PERSISTENCE__ENABLED = "true"
-    CREVAFACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
-    CREVAFACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
-    CREVAFACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
-    CREVAFACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
-    CREVAFACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
-    CREVAFACTOS__PERSISTENCE__SSL_MODE = "Disable"
+    NEVAXIS_FACTOS__PERSISTENCE__ENABLED = "true"
+    NEVAXIS_FACTOS__PERSISTENCE__HOST = $ClosurePostgresHost
+    NEVAXIS_FACTOS__PERSISTENCE__PORT = "$ClosurePostgresPort"
+    NEVAXIS_FACTOS__PERSISTENCE__DATABASE = $ClosureDatabaseName
+    NEVAXIS_FACTOS__PERSISTENCE__USERNAME = $ClosureRuntimeUser
+    NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
+    NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE = "Disable"
     DevelopmentPilot__Enabled = "false"
-    CREVAFACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
-    CREVAFACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
-    CREVAFACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = "1"
-    CREVAFACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__ENABLE_CLOSURE_TTL_POLICIES = "true"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__LEASE_SECONDS = "5"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__RETRY_BASE_DELAY_SECONDS = "1"
+    NEVAXIS_FACTOS__AI_TASK_DELIVERY__WORKER_ENABLED = "true"
     ASPNETCORE_URLS = $apiBase
 }.GetEnumerator()) {
     Set-Item -Path "env:$($k.Key)" -Value $k.Value
@@ -108,9 +108,9 @@ Start-Sleep -Seconds 20
 $restartOk = $false
 for ($i = 0; $i -lt 60; $i++) {
     $list = Invoke-RestMethod -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/deliveries?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
-        "X-CrevaFactOS-Dev-Issuer"="crevafactos-dev"
-        "X-CrevaFactOS-Dev-Subject"="planning-pilot-user"
-        "X-CrevaFactOS-Tenant"="omnichannel-closure-tenant-a"
+        "X-crevafactos-dev-Issuer"="crevafactos-dev"
+        "X-crevafactos-dev-Subject"="planning-pilot-user"
+        "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"
     }
     $item = $list.items | Where-Object { $_.idempotencyKey -eq "closure-restart-002" } | Select-Object -First 1
     if ($item -and $item.status -eq "sent") { $restartOk = $true; break }
@@ -120,7 +120,7 @@ if (-not $restartOk) { Stop-Process -Id $apiProc.Id -Force -ErrorAction Silently
 Write-Host "OUTBOX_RESTART_DURABILITY=PASS"
 
 Write-Host "=== SCREENSHOTS + GOLDEN FLOW ==="
-$env:CREVAFACTOS_WEB_BASE_URL = $webBase
+$env:NEVAXIS_FACTOS_WEB_BASE_URL = $webBase
 node (Join-Path $root "apps/web/scripts/capture-ai-task-omnichannel-foundation-1-screenshots.mjs")
 if ($LASTEXITCODE -ne 0) { Stop-ClosureRuntime; throw "Screenshot capture failed" }
 
@@ -138,7 +138,7 @@ if ($LASTEXITCODE -ne 0) { throw "web build failed" }
 node scripts/verify-ai-task-omnichannel-foundation-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract verifier failed" }
 Pop-Location
-dotnet test "tests/CrevaFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test "tests/NevaxisFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "unit tests failed" }
 
 Stop-ClosureRuntime

@@ -1,7 +1,7 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.ProductionManager;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.ProductionManager;
 
-namespace CrevaFactOS.Api.ProductionManager;
+namespace NevaxisFactOS.Api.ProductionManager;
 
 internal static class ProductionManagerEndpointHelpers
 {

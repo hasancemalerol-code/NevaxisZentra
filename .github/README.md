@@ -1,8 +1,8 @@
-# CrevaFactOS GitHub Configuration
+# NevaxisFactOS GitHub Configuration
 
 
 
-Bu klasör, CrevaFactOS repository'sinin GitHub tabanlı geliştirme ve kalite süreçlerini içerir.
+Bu klasör, NevaxisFactOS repository'sinin GitHub tabanlı geliştirme ve kalite süreçlerini içerir.
 
 
 

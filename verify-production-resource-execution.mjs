@@ -82,7 +82,7 @@ check(
 // ── 3. SHIFT REPOSITORY ────────────────────────────────────────────────────────
 
 const shiftRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionShiftRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionShiftRepository.cs",
 );
 
 check(
@@ -93,7 +93,7 @@ check(
 // ── 4. PRODUCTION ORDER MODELS ────────────────────────────────────────────────
 
 const orderModels = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionOrderModels.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderModels.cs",
 );
 
 check(
@@ -146,7 +146,7 @@ check(
 // ── 7. MIGRATION INCLUDES 5L COLUMNS ─────────────────────────────────────────
 
 const migration = readText(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808130000_AddProductionShiftResourceExecution.cs",
 );
 
 check(
@@ -163,7 +163,7 @@ check(
 // ── 8. DB CONTEXT REGISTRATION ───────────────────────────────────────────────
 
 const dbContext = readText(
-  "packages/CrevaFactOS.Persistence/CrevaFactOSDbContext.cs",
+  "packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs",
 );
 
 check(

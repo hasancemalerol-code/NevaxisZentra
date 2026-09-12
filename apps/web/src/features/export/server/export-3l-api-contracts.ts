@@ -169,7 +169,7 @@ function parseRulePack(raw: unknown): ParseResult<CountryRulePackSummary> {
   });
 }
 
-function parseComplianceRule(
+function _parseComplianceRule(
   raw: unknown,
 ): ParseResult<CountryComplianceRuleSummary> {
   if (typeof raw !== "object" || raw === null) {

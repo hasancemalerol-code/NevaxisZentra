@@ -8,13 +8,13 @@ import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const WEB_ROOT = join(REPO_ROOT, "apps/web");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "OPRISK-UI-FUNCTIONAL-CLOSURE";
 const CLOSURE_OVERRIDE_ID = "dd000003-00e6-4000-8000-0000000000e6";
-const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-operational-risk-runtime-closure-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-operational-risk-runtime-closure-screenshots");
 const WINDOW_START = "2026-08-21T08:00:00.000Z";
 const WINDOW_END = "2026-08-21T12:00:00.000Z";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -79,7 +79,7 @@ function isBenignDevConsoleError(message) {
 
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__OPRISK_UI_1_BOOTSTRAPPED === "1") return;
-  const transcript = join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl");
+  const transcript = join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl");
   const text = existsSync(transcript) ? readFileSync(transcript, "utf8") : "";
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret", "DevelopmentSaasIdentity__ActiveUserPassword"]) {
     if (!process.env[key]?.trim()) {
@@ -126,7 +126,7 @@ function resolveChromiumExecutable() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }
@@ -189,14 +189,14 @@ async function authHeaders(context) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
   if (cookieHeader) headers.Cookie = cookieHeader;
-  const csrf = cookies.find((cookie) => cookie.name === "crevafactos.csrf");
-  if (csrf?.value) headers["X-CrevaFactOS-Csrf"] = csrf.value;
+  const csrf = cookies.find((cookie) => cookie.name === "NevaxisFactOS.csrf");
+  if (csrf?.value) headers["X-NevaxisFactOS-Csrf"] = csrf.value;
   return headers;
 }
 
 async function sessionFingerprint(context) {
   const cookies = await context.cookies();
-  const session = cookies.find((cookie) => cookie.name === "crevafactos.session");
+  const session = cookies.find((cookie) => cookie.name === "NevaxisFactOS.session");
   if (!session?.value) return { hasSession: false, fingerprint: "none" };
   const fingerprint = createHash("sha256").update(session.value).digest("hex").slice(0, 12);
   return { hasSession: true, fingerprint };
@@ -371,9 +371,9 @@ function restartCanonicalApi() {
   const beforePid = listenerPid(5000);
   report.restart.apiPidBefore = beforePid;
   if (beforePid) spawnSync("taskkill", ["/PID", String(beforePid), "/F"], { stdio: "ignore" });
-  spawn("dotnet", ["run", "--project", join(REPO_ROOT, "apps/api/CrevaFactOS.Api.csproj"), "--urls", "http://127.0.0.1:5000", "--no-build"], {
+  spawn("dotnet", ["run", "--project", join(REPO_ROOT, "apps/api/NevaxisFactOS.Api.csproj"), "--urls", "http://127.0.0.1:5000", "--no-build"], {
     cwd: REPO_ROOT,
-    env: { ...process.env, ASPNETCORE_ENVIRONMENT: "Development", CREVAFACTOS__AUTHENTICATION__MODE: "SessionCookie" },
+    env: { ...process.env, ASPNETCORE_ENVIRONMENT: "Development", NEVAXIS_FACTOS__AUTHENTICATION__MODE: "SessionCookie" },
     detached: true,
     stdio: "ignore",
   }).unref();
@@ -406,7 +406,7 @@ function restartCanonicalWeb() {
     : ["exec", "next", "dev", "-p", "3001"];
   spawn(command, args, {
     cwd: WEB_ROOT,
-    env: { ...process.env, CREVAFACTOS_API_BASE_URL: "http://127.0.0.1:5000" },
+    env: { ...process.env, NEVAXIS_FACTOS_API_BASE_URL: "http://127.0.0.1:5000" },
     detached: true,
     stdio: "ignore",
   }).unref();
@@ -662,7 +662,7 @@ try {
 
   const invalidContext = await browser.newContext({ deviceScaleFactor: 1 });
   await invalidContext.addCookies([{
-    name: "crevafactos.session",
+    name: "NevaxisFactOS.session",
     value: "invalid-operational-risk-functional-closure",
     domain: "localhost",
     path: "/",

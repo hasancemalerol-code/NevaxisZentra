@@ -20,18 +20,18 @@ function read(rel) {
   return readFileSync(resolve(ROOT, rel), "utf8").replaceAll("\r\n", "\n");
 }
 
-const lifecycle = read("packages/CrevaFactOS.Persistence/ShiftHandover/ShiftHandoverLifecycleEngine.cs");
-const repository = read("packages/CrevaFactOS.Persistence/ShiftHandover/ShiftHandoverRepository.cs");
+const lifecycle = read("packages/NevaxisFactOS.Persistence/ShiftHandover/ShiftHandoverLifecycleEngine.cs");
+const repository = read("packages/NevaxisFactOS.Persistence/ShiftHandover/ShiftHandoverRepository.cs");
 const api = read("apps/api/ShiftHandover/ShiftHandoverEndpointRouteBuilderExtensions.cs");
-const presentation = read("packages/CrevaFactOS.Persistence/ShiftHandover/ShiftHandoverPresentationBuilder.cs");
+const presentation = read("packages/NevaxisFactOS.Persistence/ShiftHandover/ShiftHandoverPresentationBuilder.cs");
 const nav = read("apps/web/src/lib/navigation/primary-navigation.ts");
-const subscription = read("packages/CrevaFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
+const subscription = read("packages/NevaxisFactOS.Persistence/SaasSubscription/SaasSubscriptionModuleEntitlements.cs");
 
 assert("no backward after acknowledge", lifecycle.includes("ShiftHandoverStatuses.Acknowledged, ShiftHandoverStatuses.Completed"));
 assert("tenant scoped reads", repository.includes("h.TenantId == context.TenantId"));
 assert("facility scoped reads", repository.includes("h.FacilityId == context.FacilityId"));
 assert("canonical ai task create", api.includes("CreateSourceLinkedTaskAsync"));
-assert("no duplicate task table", !read("packages/CrevaFactOS.Persistence/CrevaFactOSDbContext.cs").includes("shift_handover_tasks"));
+assert("no duplicate task table", !read("packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs").includes("shift_handover_tasks"));
 assert("source module constant", presentation.includes("ShiftHandoverConstants.SourceModule"));
 assert("single nav entry", (nav.match(/label:\s*"Vardiya Devir Teslimi"/g) ?? []).length === 1);
 assert("permission gated nav", nav.includes('permissionKey: "shift-handover.read"'));

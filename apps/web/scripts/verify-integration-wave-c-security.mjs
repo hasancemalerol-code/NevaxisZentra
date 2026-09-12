@@ -23,11 +23,11 @@ function readRequired(relativePath) {
 
 console.log("Running INTEGRATION-WAVE-C security verifier.");
 
-const ssrf = readRequired("packages/CrevaFactOS.Persistence/Integration/Rest/IntegrationRestSsrfGuard.cs");
-const db = readRequired("packages/CrevaFactOS.Persistence/Integration/Database/IntegrationReadOnlyDatabaseFetcher.cs");
-const webhook = readRequired("packages/CrevaFactOS.Persistence/Integration/Webhook/IntegrationWebhookIngestionService.cs");
-const folder = readRequired("packages/CrevaFactOS.Persistence/Integration/FolderWatch/IntegrationFolderWatchScanner.cs");
-const erp = readRequired("packages/CrevaFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
+const ssrf = readRequired("packages/NevaxisFactOS.Persistence/Integration/Rest/IntegrationRestSsrfGuard.cs");
+const db = readRequired("packages/NevaxisFactOS.Persistence/Integration/Database/IntegrationReadOnlyDatabaseFetcher.cs");
+const webhook = readRequired("packages/NevaxisFactOS.Persistence/Integration/Webhook/IntegrationWebhookIngestionService.cs");
+const folder = readRequired("packages/NevaxisFactOS.Persistence/Integration/FolderWatch/IntegrationFolderWatchScanner.cs");
+const erp = readRequired("packages/NevaxisFactOS.Persistence/Integration/Erp/IntegrationErpRecordBridge.cs");
 const endpoints = readRequired("apps/api/Integration/IntegrationEndpointRouteBuilderExtensions.cs");
 
 assert("SSRF scheme guard", ssrf.includes("UriSchemeHttps"));

@@ -1,4 +1,4 @@
-# CrevaFactOS Local Development Infrastructure
+# NevaxisFactOS Local Development Infrastructure
 
 FOUND-02 provides only the local PostgreSQL and RabbitMQ development dependencies. It does not create database schemas, migrations, queues, exchanges, policies, connectors, or product behavior.
 
@@ -47,9 +47,9 @@ It removes the local containers, network, and both named data volumes. It is nev
 
 | Service | Host | Default port | Local identity |
 | --- | --- | ---: | --- |
-| PostgreSQL | `127.0.0.1` | `5432` | Database `crevafactos_local`, user `crevafactos` |
-| RabbitMQ AMQP | `localhost` | `5672` | User `crevafactos` |
-| RabbitMQ Management | `http://localhost:15672` | `15672` | User `crevafactos` |
+| PostgreSQL | `127.0.0.1` | `5432` | Database `crevafactos_local`, user `NevaxisFactOS` |
+| RabbitMQ AMQP | `localhost` | `5672` | User `NevaxisFactOS` |
+| RabbitMQ Management | `http://localhost:15672` | `15672` | User `NevaxisFactOS` |
 
 The example password is `local_dev_only_change_me`. It is intentionally non-secret and suitable only for an isolated developer workstation.
 
@@ -65,17 +65,17 @@ The PostgreSQL development default uses explicit IPv4 (`127.0.0.1`) so a local I
 
 The verifier fails clearly if Docker Desktop is unavailable, a service is absent or unhealthy, credentials do not match, or the management endpoint cannot be reached.
 
-Application `/health/live` never depends on PostgreSQL. `/health/ready` remains independent by default; PostgreSQL is included only when both `CREVAFACTOS__PERSISTENCE__ENABLED` and `CREVAFACTOS__PERSISTENCE__HEALTH_CHECKS_ENABLED` are `true`.
+Application `/health/live` never depends on PostgreSQL. `/health/ready` remains independent by default; PostgreSQL is included only when both `NEVAXIS_FACTOS__PERSISTENCE__ENABLED` and `NEVAXIS_FACTOS__PERSISTENCE__HEALTH_CHECKS_ENABLED` are `true`.
 
 ## Application Configuration Binding
 
-`CrevaFactOS.Configuration` provides typed PostgreSQL and RabbitMQ endpoint options. It binds the `Infrastructure` configuration section and the documented `CREVAFACTOS_*` environment variables.
+`NevaxisFactOS.Configuration` provides typed PostgreSQL and RabbitMQ endpoint options. It binds the `Infrastructure` configuration section and the documented `NEVAXIS_FACTOS_*` environment variables.
 
 API, Worker, and Edge Agent retain the FOUND-02 infrastructure endpoint options. FOUND-03 additionally gives only the API an optional persistence registration. Worker and Edge Agent do not reference persistence.
 
 ## Persistence and Migrations
 
-The API persistence layer is disabled by default. Local commands read `infrastructure/.env` when present, fall back to the documented workstation defaults, and allow process-level `CREVAFACTOS__PERSISTENCE__*` variables to override those values. Copy `.env.example` before changing ports or credentials.
+The API persistence layer is disabled by default. Local commands read `infrastructure/.env` when present, fall back to the documented workstation defaults, and allow process-level `NEVAXIS_FACTOS__PERSISTENCE__*` variables to override those values. Copy `.env.example` before changing ports or credentials.
 
 Restore the pinned EF tool once after cloning:
 
@@ -111,7 +111,7 @@ Never commit `infrastructure/.env`, passwords, or connection strings. Diagnostic
 
 ## Authentication and tenant selection
 
-FOUND-05 keeps `X-CrevaFactOS-Tenant` only as a selector. It may contain a tenant UUID or stable tenant key, but it cannot establish context for an anonymous caller. The API first authenticates issuer/subject claims, resolves an exact active `identity_subjects` row, and then calls `resolve_active_tenant_membership(uuid, text)`. Tenant context is created only when identity, tenant, and membership are all active. Every tenant or membership mismatch uses the same response to prevent enumeration.
+FOUND-05 keeps `X-NevaxisFactOS-Tenant` only as a selector. It may contain a tenant UUID or stable tenant key, but it cannot establish context for an anonymous caller. The API first authenticates issuer/subject claims, resolves an exact active `identity_subjects` row, and then calls `resolve_active_tenant_membership(uuid, text)`. Tenant context is created only when identity, tenant, and membership are all active. Every tenant or membership mismatch uses the same response to prevent enumeration.
 
 `/health/live` and `/health/ready` remain anonymous and tenant-neutral. In Development only, `GET /internal/tenant-context` reports authentication state, identity-resolution state, tenant-context state, and the resolved internal UUIDs. It exposes no claims, tokens, issuer secrets, memberships, lists, or mutation behavior.
 
@@ -120,14 +120,14 @@ Middleware order is explicit: routing, authentication, identity resolution, tena
 ### Authentication modes
 
 - `Disabled` is the repository default while no identity provider is configured.
-- `Development` uses the isolated `CrevaFactOS.Development` handler. Deterministic requests provide `X-CrevaFactOS-Dev-Issuer` and `X-CrevaFactOS-Dev-Subject`; both are identity assertions for local fixtures, not passwords or tokens. Registration throws if this mode is selected outside the `Development` environment.
-- `JwtBearer` uses ASP.NET Core JWT bearer authentication with configured `Authority`, `Audience`, HTTPS metadata, issuer, audience, lifetime, and signature validation. CrevaFactOS does not issue tokens.
+- `Development` uses the isolated `NevaxisFactOS.Development` handler. Deterministic requests provide `X-crevafactos-dev-Issuer` and `X-crevafactos-dev-Subject`; both are identity assertions for local fixtures, not passwords or tokens. Registration throws if this mode is selected outside the `Development` environment.
+- `JwtBearer` uses ASP.NET Core JWT bearer authentication with configured `Authority`, `Audience`, HTTPS metadata, issuer, audience, lifetime, and signature validation. NevaxisFactOS does not issue tokens.
 
 Production must use externally issued bearer tokens and must never enable development headers. No login, registration, password, MFA, or token-issuance endpoint exists.
 
-The API runtime uses `CREVAFACTOS__PERSISTENCE__*`. Explicit EF commands use the separate `CREVAFACTOS__MIGRATIONS__*` settings. The migration role requires narrowly controlled DDL and role-management authority because `AddTenantIsolationFoundation` creates the non-login `crevafactos_runtime` role. Local verification enables login with the development-only runtime password outside the production migration. Production credential provisioning belongs to deployment secret management.
+The API runtime uses `NEVAXIS_FACTOS__PERSISTENCE__*`. Explicit EF commands use the separate `NEVAXIS_FACTOS__MIGRATIONS__*` settings. The migration role requires narrowly controlled DDL and role-management authority because `AddTenantIsolationFoundation` creates the non-login `crevafactos_runtime` role. Local verification enables login with the development-only runtime password outside the production migration. Production credential provisioning belongs to deployment secret management.
 
-PostgreSQL isolation uses transaction-local `crevafactos.tenant_id`, `current_tenant_id()`, RLS, and `FORCE ROW LEVEL SECURITY`. Missing context produces zero visible rows and rejects writes. `pnpm db:tenant-isolation:verify` creates deterministic temporary tenant A/B fixtures outside migrations, tests reads and all write directions through the non-superuser runtime role, proves pooled physical-connection reuse does not retain context, and removes the fixture rows afterward.
+PostgreSQL isolation uses transaction-local `NevaxisFactOS.tenant_id`, `current_tenant_id()`, RLS, and `FORCE ROW LEVEL SECURITY`. Missing context produces zero visible rows and rejects writes. `pnpm db:tenant-isolation:verify` creates deterministic temporary tenant A/B fixtures outside migrations, tests reads and all write directions through the non-superuser runtime role, proves pooled physical-connection reuse does not retain context, and removes the fixture rows afterward.
 
 `pnpm db:authentication-membership:verify` is opt-in local bootstrap/verification tooling. It creates deterministic temporary identities, tenants, and memberships through migration credentials, verifies exact identity and active-membership resolution plus membership RLS through the restricted runtime role, and removes all fixtures. Production migrations contain no seed account or credential.
 
@@ -153,7 +153,7 @@ FOUND-07 records infrastructure security and operational evidence; it is not the
 
 The stable FOUND-07 event taxonomy is limited to authentication, tenant access, authorization, audit-write failure, and infrastructure-configuration rejection. Metadata must be a shallow JSON object of at most 20 keys and 4 KiB; strings, key names, and arrays are bounded. Password, token, secret, authorization, cookie, connection-string, and API-key values are replaced with `[REDACTED]`. Raw headers, bodies, credentials, and exception stacks are prohibited.
 
-`X-CrevaFactOS-Correlation-Id` accepts only a non-empty canonical UUID; invalid or missing input produces a new request-scoped UUID returned in the response header. `GET /internal/audit/recent` exists only in Development, returns at most 25 tenant-scoped records without metadata, and requires `system.audit.read`. Retention, archival, partitioning, export, product events, and durable product-transaction audit policy are deferred.
+`X-NevaxisFactOS-Correlation-Id` accepts only a non-empty canonical UUID; invalid or missing input produces a new request-scoped UUID returned in the response header. `GET /internal/audit/recent` exists only in Development, returns at most 25 tenant-scoped records without metadata, and requires `system.audit.read`. Retention, archival, partitioning, export, product events, and durable product-transaction audit policy are deferred.
 
 `pnpm db:audit-trail:verify` proves append, actor evidence, metadata limits, tenant A/B RLS, pooled isolation, cross-tenant rejection, and runtime update/delete/truncate rejection against PostgreSQL. `pnpm audit:verify` exercises the real permission-protected diagnostic endpoint and correlation propagation, then removes all temporary fixtures.
 
@@ -174,4 +174,4 @@ Container ports remain unchanged; only workstation ports are overridden.
 - RabbitMQ uses only the minimal default local user and `/` virtual host created by the official image.
 - No business tables or business migrations, queues, exchanges, users, additional vhosts, or policies are created.
 - EF Core/Npgsql are isolated to the persistence baseline and connectivity tool. No application RabbitMQ client package is installed.
-- These services are development dependencies, not CrevaFactOS product modules.
+- These services are development dependencies, not NevaxisFactOS product modules.

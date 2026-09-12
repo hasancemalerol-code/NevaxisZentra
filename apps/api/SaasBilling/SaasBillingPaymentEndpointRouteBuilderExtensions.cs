@@ -1,15 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.Identity;
-using CrevaFactOS.Persistence.SaasBilling;
-using CrevaFactOS.Persistence.SaasBilling.Payments;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.SaasBilling;
+using NevaxisFactOS.Persistence.SaasBilling.Payments;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.SaasBilling;
+namespace NevaxisFactOS.Api.SaasBilling;
 
 public static class SaasBillingPaymentEndpointRouteBuilderExtensions
 {
@@ -151,7 +151,7 @@ public static class SaasBillingPaymentEndpointRouteBuilderExtensions
         ISaasBillingRepository repository,
         ISaasPaymentProvider paymentProvider,
         TenantContextAccessor tenantContextAccessor,
-        CrevaFactOSDbContext dbContext,
+        NevaxisFactOSDbContext dbContext,
         CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {

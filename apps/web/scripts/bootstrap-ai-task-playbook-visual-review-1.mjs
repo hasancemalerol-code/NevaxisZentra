@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 
-const API = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const PREFIX = "AI-TASK-PLAYBOOK-VISUAL-REVIEW-1";
 const PLAYBOOK_KEY = `${PREFIX}-CRITICAL-MACHINE`;
@@ -42,9 +42,9 @@ function assert(label, ok, detail = "") {
 function managerHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": MANAGER.issuer,
-    "X-CrevaFactOS-Dev-Subject": MANAGER.subject,
-    "X-CrevaFactOS-Tenant": MANAGER.tenant,
+    "X-crevafactos-dev-Issuer": MANAGER.issuer,
+    "X-crevafactos-dev-Subject": MANAGER.subject,
+    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
   };
 }
 
@@ -59,7 +59,7 @@ async function api(path, init = {}) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(`db query failed: ${result.stderr || result.stdout}`);

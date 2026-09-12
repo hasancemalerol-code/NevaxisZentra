@@ -7,12 +7,12 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
-const TENANT = process.env.CREVAFACTOS_TENANT ?? "dev-pilot-tenant";
-const OPERATOR = process.env.CREVAFACTOS_SUBJECT ?? "production-pilot-operator";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
+const TENANT = process.env.NEVAXIS_FACTOS_TENANT ?? "dev-pilot-tenant";
+const OPERATOR = process.env.NEVAXIS_FACTOS_SUBJECT ?? "production-pilot-operator";
 const NEGATIVE = "quality-negative-test-user";
 const ISSUER = "crevafactos-dev";
-const AUTHORIZED_FACILITY = process.env.CREVAFACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
+const AUTHORIZED_FACILITY = process.env.NEVAXIS_FACTOS_FACILITY_ID ?? "bb000001-0005-4000-8000-000000000005";
 const UNAUTHORIZED_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const PILOT_PLAN = "bb000001-0082-4000-8000-000000000082";
 
@@ -45,9 +45,9 @@ function headers(subject = OPERATOR, extra = {}) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": subject,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": subject,
+    "X-NevaxisFactOS-Tenant": TENANT,
     ...extra,
   };
 }
@@ -72,15 +72,15 @@ const reportingEndpoints = readRequired(
 );
 const helpers = readRequired("apps/api/Maintenance/MaintenanceEndpointHelpers.cs");
 const migrationCore = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
 );
 const migrationExec = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
 );
-const auditConstants = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceAuditConstants.cs");
-const requestRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
-const workOrderRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
-const executionRepo = readRequired("packages/CrevaFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
+const auditConstants = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAuditConstants.cs");
+const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const workOrderRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const executionRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
 
 requireText(endpoints, "RequireAuthorization", "maintenance endpoints");
 requireText(helpers, "MaintenancePermissionKeys.Read", "helpers");
@@ -172,7 +172,7 @@ try {
     `/api/maintenance/requests?facilityId=${AUTHORIZED_FACILITY}`,
     undefined,
     OPERATOR,
-    { "X-CrevaFactOS-Tenant": "other-tenant" },
+    { "X-NevaxisFactOS-Tenant": "other-tenant" },
   );
   if (crossTenantRequest !== 403) {
     fail(`cross-tenant request read must return HTTP 403, got ${crossTenantRequest}.`);
@@ -183,7 +183,7 @@ try {
     `/api/maintenance/reporting/overview?facilityId=${AUTHORIZED_FACILITY}`,
     undefined,
     OPERATOR,
-    { "X-CrevaFactOS-Tenant": "other-tenant" },
+    { "X-NevaxisFactOS-Tenant": "other-tenant" },
   );
   if (crossTenantReporting !== 403) {
     fail(`cross-tenant reporting read must return HTTP 403, got ${crossTenantReporting}.`);

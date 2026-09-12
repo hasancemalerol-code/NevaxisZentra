@@ -1,4 +1,4 @@
-namespace CrevaFactOS.Api.Authentication;
+namespace NevaxisFactOS.Api.Authentication;
 
 public enum AuthenticationMode
 {

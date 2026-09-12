@@ -68,17 +68,17 @@ function readDevelopmentEnvLocalValue(key: string): string {
 }
 
 export function resolveSaasIdentityRuntimeConfig(): SaasIdentityRuntimeConfigResult {
-  const localDevApiBaseUrl = readDevelopmentEnvLocalValue("CREVAFACTOS_API_BASE_URL");
+  const localDevApiBaseUrl = readDevelopmentEnvLocalValue("NEVAXIS_FACTOS_API_BASE_URL");
   const apiBaseUrl =
     normalizeEnvValue(localDevApiBaseUrl)
-    || normalizeEnvValue(process.env.CREVAFACTOS_API_BASE_URL)
+    || normalizeEnvValue(process.env.NEVAXIS_FACTOS_API_BASE_URL)
     || (process.env.NODE_ENV === "development" ? CANONICAL_DEV_API_BASE_URL : "");
 
   if (!apiBaseUrl) {
     return {
       status: "failure",
       code: "configuration-error",
-      message: "CREVAFACTOS_API_BASE_URL is required.",
+      message: "NEVAXIS_FACTOS_API_BASE_URL is required.",
       retryable: false,
     };
   }

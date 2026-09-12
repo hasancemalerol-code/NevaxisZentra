@@ -52,7 +52,6 @@ export async function scheduleProductionPlan(
 
   const url = buildScheduleUrl(context, productionPlanId);
 
-  // eslint-disable-next-line @typescript-eslint/init-declarations
   let response: Response;
 
   try {

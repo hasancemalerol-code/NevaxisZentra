@@ -5,11 +5,11 @@ import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://localhost:3001")
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001")
   .replace("127.0.0.1", "localhost")
   .replace(/\/$/, "");
 const ORGANIZATION = "dev-pilot-tenant";
-const SCREENSHOT_DIR = join(tmpdir(), "crevafactos-iot-plc-ui-1-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-iot-plc-ui-1-screenshots");
 const OWNER_SCREENSHOTS = [
   { width: 1600, height: 1000, filename: "iot-plc-ui-1-final-overview-owner-1600x1000.png", tabId: "overview", label: "owner-overview-1600x1000" },
   { width: 1600, height: 1000, filename: "iot-plc-ui-1-final-connections-owner-1600x1000.png", tabId: "connections", label: "owner-connections-1600x1000" },
@@ -40,9 +40,9 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__IOT_PLC_UI_1_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-CrevaFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -566,7 +566,7 @@ async function assertWorkspaceStructure(page, label, options = {}) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);

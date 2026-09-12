@@ -34,9 +34,9 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running production 6L analytics verifier.");
 
-const engine = readRequired("packages/CrevaFactOS.Persistence/Production/ProductionReportingEngine.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Production/ProductionReportingRepository.cs");
-const models = readRequired("packages/CrevaFactOS.Persistence/Production/ProductionReportingModels.cs");
+const engine = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionReportingEngine.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionReportingRepository.cs");
+const models = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionReportingModels.cs");
 
 requireText(engine, "ComputeYieldPercent", "ProductionReportingEngine");
 requireText(engine, "ComputeCompletionRatePercent", "ProductionReportingEngine");

@@ -1,8 +1,8 @@
-export const SAAS_IDENTITY_SESSION_COOKIE = "crevafactos.session";
+export const SAAS_IDENTITY_SESSION_COOKIE = "NevaxisFactOS.session";
 
-export const SAAS_IDENTITY_CSRF_COOKIE = "crevafactos.csrf";
+export const SAAS_IDENTITY_CSRF_COOKIE = "NevaxisFactOS.csrf";
 
-export const SAAS_IDENTITY_CSRF_HEADER = "X-CrevaFactOS-Csrf";
+export const SAAS_IDENTITY_CSRF_HEADER = "X-NevaxisFactOS-Csrf";
 
 export const SAAS_IDENTITY_API_PREFIX = "/api/identity";
 

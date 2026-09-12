@@ -14,7 +14,7 @@ const CLOSURE_PREFIX = "COMMQUOTE2-CLOSURE";
 const BOUNDARY_PREFIX = "COMMQUOTE2-BOUNDARY";
 const QUOTATION_SOURCE_KIND = "manual-development-simulator";
 const PRICE_BASIS_GROSS_NET = "net";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -71,7 +71,7 @@ const FIXTURE_PREFIXES = [CLOSURE_PREFIX, BOUNDARY_PREFIX];
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -83,7 +83,7 @@ function dbExec(sql) {
     "docker",
     [
       "exec",
-      "crevafactos-local-postgres-1",
+      "NevaxisFactOS-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
@@ -104,9 +104,9 @@ function dbExec(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -304,16 +304,16 @@ function reconcileRun(apiRun, label) {
 
 console.log("Running COMMERCIAL-QUOTATION-RISK-2 trend/customer-comparison verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonEvaluator.cs");
-const operations = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonOperations.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonEvaluator.cs");
+const operations = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonOperations.cs");
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialQuotationRiskEndpointRouteBuilderExtensions.cs");
-const comparisonSeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskComparisonSeed.cs");
+const comparisonSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskComparisonSeed.cs");
 
 assert("temporal risk trend evaluator", evaluator.includes("EvaluateTemporalRiskTrend"));
 assert("customer risk position evaluator", evaluator.includes("EvaluateCustomerRiskPosition"));
 assert("non-overlap validation", operations.includes("must not overlap"));
 assert("comparison endpoints present", endpoints.includes("/comparisons"));
-assert("risk-incidence-increase driver", readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonContracts.cs").includes("risk-incidence-increase"));
+assert("risk-incidence-increase driver", readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskComparisonContracts.cs").includes("risk-incidence-increase"));
 assert("risk-decrease outcome", evaluator.includes("RiskDecrease") || evaluator.includes("risk-decrease"));
 forbidText(evaluator, "guaranteed savings", "evaluator");
 forbidText(evaluator, "recommended customer", "evaluator");

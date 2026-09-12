@@ -1,0 +1,98 @@
+<Window x:Class="NevaxisFactOS.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="NEVAXIS FACTOS"
+        WindowState="Maximized"
+        MinWidth="1024"
+        MinHeight="720"
+        Width="1600"
+        Height="1000"
+        Background="{StaticResource BrandBackgroundBrush}"
+        KeyDown="MainWindow_KeyDown">
+    <DockPanel LastChildFill="True">
+        <Menu x:Name="ViewMenu"
+              DockPanel.Dock="Top"
+              Background="{StaticResource BrandBackgroundBrush}">
+            <MenuItem Header="_Görünüm">
+                <MenuItem Header="Geri" InputGestureText="Alt+Left" Click="GoBack_Click" />
+                <MenuItem Header="İleri" InputGestureText="Alt+Right" Click="GoForward_Click" />
+                <MenuItem Header="Yenile" InputGestureText="Ctrl+R" Click="Refresh_Click" />
+                <Separator />
+                <MenuItem Header="Tam ekran" InputGestureText="F11" Click="ToggleFullscreen_Click" />
+            </MenuItem>
+        </Menu>
+
+        <Grid x:Name="HostGrid">
+            <wv2:WebView2 x:Name="WebView"
+                          Visibility="Collapsed" />
+
+            <Border x:Name="LoadingOverlay"
+                    Background="{StaticResource BrandBackgroundBrush}"
+                    Visibility="Visible">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Width="420">
+                    <TextBlock Text="NEVAXIS FACTOS"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource BrandPrimaryBrush}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="AI Factory Operations OS"
+                               FontSize="14"
+                               Foreground="{StaticResource BrandMutedBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,24" />
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="4"
+                                 Foreground="{StaticResource BrandPrimaryBrush}"
+                                 Background="{StaticResource BrandBorderBrush}" />
+                    <TextBlock Text="Uygulama yükleniyor…"
+                               FontSize="13"
+                               Foreground="{StaticResource BrandMutedBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,16,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="ConnectionFailureOverlay"
+                    Background="{StaticResource BrandBackgroundBrush}"
+                    Visibility="Collapsed">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Width="520">
+                    <TextBlock Text="NEVAXIS FACTOS"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource BrandPrimaryBrush}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="NevaxisFactOS bağlantısı kurulamadı"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource BrandForegroundBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,24,0,12"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center" />
+                    <TextBlock x:Name="ConnectionFailureDetailText"
+                               Text="Yapılandırılmış uygulama hizmetine şu anda erişilemiyor. Lütfen servisin çalıştığını doğrulayın ve yeniden deneyin."
+                               FontSize="14"
+                               Foreground="{StaticResource BrandMutedBrush}"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               Margin="0,0,0,24" />
+                    <Button x:Name="RetryButton"
+                            Content="Yeniden dene"
+                            AutomationProperties.Name="Yeniden dene"
+                            Width="160"
+                            Height="36"
+                            HorizontalAlignment="Center"
+                            Background="{StaticResource BrandPrimaryBrush}"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Click="RetryButton_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

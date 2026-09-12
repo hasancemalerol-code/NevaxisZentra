@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const WEB = (process.env.CREVAFACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
+const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:5311").replace(/\/$/, "");
 const TASK = "bb000001-03d0-4000-8000-0000000003d0";
 const OUT = join(ROOT, ".cursor-screenshots/ai-task-email-delivery-adapter-1");
 const chrome = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";

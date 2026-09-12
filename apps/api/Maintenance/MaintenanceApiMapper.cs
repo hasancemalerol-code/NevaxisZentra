@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.Maintenance;
+using NevaxisFactOS.Persistence.Maintenance;
 
-namespace CrevaFactOS.Api.Maintenance;
+namespace NevaxisFactOS.Api.Maintenance;
 
 internal static class MaintenanceApiMapper
 {

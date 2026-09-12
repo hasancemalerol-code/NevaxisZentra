@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const UNAUTH_FACILITY = "bb000001-0005-4000-8000-000000000099";
 const OVERDUE_ASSESSMENT = "bb000001-00c8-4000-8000-0000000000c8";
@@ -35,16 +35,16 @@ function readRequired(relativePath) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -66,9 +66,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running PROCUREMENT-RISK-FOUNDATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Procurement/ProcurementDeliveryRiskEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/CrevaFactOS.Persistence/Procurement/ProcurementDeliveryRiskRepository.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
-const calculator = readRequired("packages/CrevaFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
+const repository = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskRepository.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
 
 assert("workspace endpoint registered", endpoints.includes('MapGet("/workspace"'));
 assert("evaluate endpoint registered", endpoints.includes('MapPost("/evaluate"'));
@@ -133,7 +133,7 @@ const aiTaskCountBefore = dbCount("SELECT COUNT(*) FROM ai_tasks");
 
 spawnSync(
   "docker",
-  ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+  ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
     `DELETE FROM procurement_delivery_risk_assessments WHERE purchase_order_line_id = '${ON_TRACK_LINE}' AND id != 'bb000001-00cb-4000-8000-0000000000cb';`],
   { encoding: "utf8" },
 );

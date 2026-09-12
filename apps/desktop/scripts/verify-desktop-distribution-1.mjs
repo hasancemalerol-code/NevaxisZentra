@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * verify-desktop-distribution-1.mjs
- * CREVAFACTOS-DESKTOP-DISTRIBUTION-1 permanent verifiers.
+ * NevaxisFactOS-DESKTOP-DISTRIBUTION-1 permanent verifiers.
  */
 
 import { createHash } from "node:crypto";
@@ -70,7 +70,7 @@ function scanForForbiddenSecrets(rootDir) {
     "BEGIN PRIVATE KEY",
     "Password = \"",
     "connectionString",
-    "CREVAFACTOS_DEV_",
+    "NEVAXIS_FACTOS_DEV_",
   ];
 
   const stack = [rootDir];
@@ -112,7 +112,7 @@ const publishScript = read("apps/desktop/scripts/publish-desktop-distribution.ps
 const props = read("apps/desktop/distribution/DesktopDistribution.props");
 assert("Desktop distribution props exist", props.includes("DesktopDistributionUpgradeCode"));
 assert("Publish script accepts -Version", publishScript.includes("-Version"));
-assert("Publish script reads CREVAFACTOS_DESKTOP_PRODUCTION_WEB_URL", publishScript.includes("CREVAFACTOS_DESKTOP_PRODUCTION_WEB_URL"));
+assert("Publish script reads NEVAXIS_FACTOS_DESKTOP_PRODUCTION_WEB_URL", publishScript.includes("NEVAXIS_FACTOS_DESKTOP_PRODUCTION_WEB_URL"));
 assert("Semantic version validation exists", versionScript.includes("Test-DesktopSemanticVersion"));
 assert("UpgradeCode is stable", props.includes("{8C4E2F91-6D3A-4B17-9E2C-1A5F00000001}"));
 
@@ -138,7 +138,7 @@ assert("MajorUpgrade/downgrade prevention exists", packageWxs.includes("MajorUpg
 assert("UpgradeCode referenced", packageWxs.includes("UpgradeCode"));
 assert("Start Menu shortcut exists", packageWxs.includes("StartMenuShortcut"));
 assert("Desktop shortcut exists", packageWxs.includes("DesktopShortcut"));
-assert("No cosmetic desktop shortcut checkbox property", !packageWxs.includes("CREVAFACTOSDESKTOPDESKTOPSHORTCUT"));
+assert("No cosmetic desktop shortcut checkbox property", !packageWxs.includes("NevaxisFactOSDESKTOPDESKTOPSHORTCUT"));
 assert("No WixUI exit optional checkbox", !packageWxs.includes("WIXUI_EXITDIALOGOPTIONALCHECKBOX"));
 assert("WebView2 prerequisite handling exists", packageWxs.includes("WEBVIEW2RUNTIMEINSTALLED"));
 assert("Turkish downgrade message exists", packageWxs.includes("daha yeni bir sürümü"));
@@ -146,16 +146,16 @@ assert("Close running app prompt exists", packageWxs.includes("CloseApplication"
 assert("Uninstall does not remove WebView2 profile", !packageWxs.includes("WebView2") || !packageWxs.includes("LocalApplicationData"));
 
 console.log("\n[4] Self-contained publish settings");
-const csproj = read("apps/desktop/CrevaFactOS.Desktop/CrevaFactOS.Desktop.csproj");
+const csproj = read("apps/desktop/NevaxisFactOS.Desktop/NevaxisFactOS.Desktop.csproj");
 assert("Targets win-x64", csproj.includes("win-x64"));
 assert("Trimming not forced on", !csproj.includes("<PublishTrimmed>true</PublishTrimmed>"));
 assert("Single-file not forced on", !csproj.includes("<PublishSingleFile>true</PublishSingleFile>"));
 assert("Debug symbols disabled by default for publish", csproj.includes("DesktopIncludeDebugSymbolsInPublish"));
 
 console.log("\n[5] Signing-state honesty");
-assert("Signing via environment only", publishScript.includes("CREVAFACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT"));
+assert("Signing via environment only", publishScript.includes("NEVAXIS_FACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT"));
 assert("Manifest records signingState", publishScript.includes("signingState"));
-assert("No committed certificate paths", !publishScript.includes(".pfx") || publishScript.includes("env:CREVAFACTOS_DESKTOP_CODESIGN_PFX_PATH"));
+assert("No committed certificate paths", !publishScript.includes(".pfx") || publishScript.includes("env:NEVAXIS_FACTOS_DESKTOP_CODESIGN_PFX_PATH"));
 
 console.log("\n[6] Artifact reconciliation");
 const artifactDir = latestVersionDir();
@@ -182,7 +182,7 @@ if (!artifactDir) {
   );
   assert(
     "Unsigned artifact not labeled signed",
-    manifest.signingState !== "SIGNED_PRODUCTION" || process.env.CREVAFACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT || process.env.CREVAFACTOS_DESKTOP_CODESIGN_PFX_PATH,
+    manifest.signingState !== "SIGNED_PRODUCTION" || process.env.NEVAXIS_FACTOS_DESKTOP_CODESIGN_CERT_THUMBPRINT || process.env.NEVAXIS_FACTOS_DESKTOP_CODESIGN_PFX_PATH,
   );
 
   const secretHits = scanForForbiddenSecrets(join(artifactDir, "publish"));

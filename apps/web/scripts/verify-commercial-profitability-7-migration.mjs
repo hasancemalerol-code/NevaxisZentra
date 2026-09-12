@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MIGRATION_ID = "20260828143401_AddCommercialPricingScenariosFoundation";
 const MIGRATION_BASENAME = `${MIGRATION_ID}.cs`;
 const DESIGNER_BASENAME = `${MIGRATION_ID}.Designer.cs`;
@@ -46,7 +46,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -67,21 +67,21 @@ function readMigrationConnectionEnv() {
   const persistence = appsettings.Persistence ?? {};
   return {
     ...process.env,
-    CREVAFACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
-    CREVAFACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
-    CREVAFACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
-    CREVAFACTOS__MIGRATIONS__USERNAME: "crevafactos",
-    CREVAFACTOS__MIGRATIONS__PASSWORD: process.env.CREVAFACTOS__MIGRATIONS__PASSWORD
-      ?? process.env.CREVAFACTOS_POSTGRES_PASSWORD
+    NEVAXIS_FACTOS__MIGRATIONS__HOST: persistence.Host ?? "127.0.0.1",
+    NEVAXIS_FACTOS__MIGRATIONS__PORT: String(persistence.Port ?? 5432),
+    NEVAXIS_FACTOS__MIGRATIONS__DATABASE: persistence.Database ?? "crevafactos_local",
+    NEVAXIS_FACTOS__MIGRATIONS__USERNAME: "crevafactos",
+    NEVAXIS_FACTOS__MIGRATIONS__PASSWORD: process.env.NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+      ?? process.env.NEVAXIS_FACTOS_POSTGRES_PASSWORD
       ?? "local_dev_only_change_me",
-    CREVAFACTOS__MIGRATIONS__SSL_MODE: "Disable",
-    CREVAFACTOS__MIGRATIONS__CONNECTION_TIMEOUT_SECONDS: "15",
-    CREVAFACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
+    NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE: "Disable",
+    NEVAXIS_FACTOS__MIGRATIONS__CONNECTION_TIMEOUT_SECONDS: "15",
+    NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS: "120",
   };
 }
 
 function runMigrationApply() {
-  const migrationProject = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/CrevaFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
     [
@@ -96,7 +96,7 @@ function runMigrationApply() {
       "--startup-project",
       migrationProject,
       "--context",
-      "CrevaFactOSDbContext",
+      "NevaxisFactOSDbContext",
     ],
     {
       cwd: ROOT,
@@ -186,7 +186,7 @@ function startApi() {
   spawnSync("powershell", [
     "-NoProfile",
     "-Command",
-    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/CrevaFactOS.Api.csproj'`,
+    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/NevaxisFactOS.Api.csproj'`,
   ], { encoding: "utf8" });
 }
 
@@ -214,11 +214,11 @@ async function restartApiCycle(label) {
 
 console.log("Running COMMERCIAL-PROFITABILITY-7 migration verifier.");
 
-const migration = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
-const designer = readRequired(`packages/CrevaFactOS.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
-const snapshot = readRequired("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
-const constants = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialPricingScenarioConstants.cs");
-const profitabilitySeed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
+const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
+const designer = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
+const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialPricingScenarioConstants.cs");
+const profitabilitySeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
 
 assert("migration source present", migration.includes("AddCommercialPricingScenariosFoundation"));
 assert("designer present", designer.includes("AddCommercialPricingScenariosFoundation"));
@@ -303,7 +303,7 @@ for (const tableName of RLS_TABLES) {
     SELECT COUNT(*) FROM pg_policies
     WHERE tablename = '${tableName}'
       AND policyname LIKE 'rls_%_tenant_select'
-      AND qual LIKE '%current_setting(''crevafactos.tenant_id''%'
+      AND qual LIKE '%current_setting(''NevaxisFactOS.tenant_id''%'
   `));
   assert(`${tableName} tenant select policy`, tenantSelectPolicy >= 1, `count=${tenantSelectPolicy}`);
 
@@ -311,7 +311,7 @@ for (const tableName of RLS_TABLES) {
     SELECT COUNT(*) FROM pg_policies
     WHERE tablename = '${tableName}'
       AND policyname LIKE 'rls_%_tenant_insert'
-      AND with_check LIKE '%current_setting(''crevafactos.tenant_id''%'
+      AND with_check LIKE '%current_setting(''NevaxisFactOS.tenant_id''%'
   `));
   assert(`${tableName} tenant insert policy`, tenantInsertPolicy >= 1, `count=${tenantInsertPolicy}`);
 }
@@ -320,8 +320,8 @@ const scenariosUpdatePolicy = Number(db(`
   SELECT COUNT(*) FROM pg_policies
   WHERE tablename = '${SCENARIOS_TABLE}'
     AND policyname LIKE 'rls_%_tenant_update'
-    AND qual LIKE '%current_setting(''crevafactos.tenant_id''%'
-    AND with_check LIKE '%current_setting(''crevafactos.tenant_id''%'
+    AND qual LIKE '%current_setting(''NevaxisFactOS.tenant_id''%'
+    AND with_check LIKE '%current_setting(''NevaxisFactOS.tenant_id''%'
 `));
 assert("scenarios tenant update policy", scenariosUpdatePolicy >= 1, `count=${scenariosUpdatePolicy}`);
 

@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const PROFILE = "bb000001-0310-4000-8000-000000000310";
 const EVIDENCE_WITHIN = "bb000001-0321-4000-8000-000000000321";
@@ -43,7 +43,7 @@ function forbidText(source, forbidden, label) {
 }
 
 function discoverMigrationBasename() {
-  const migrationsDir = resolve(ROOT, "packages/CrevaFactOS.Persistence.Migrations/Migrations");
+  const migrationsDir = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
   const match = readdirSync(migrationsDir)
     .filter((name) => name.endsWith(".cs") && !name.endsWith(".Designer.cs"))
     .find((name) => name.includes("AddCommercialProfitabilityIntelligenceFoundation"));
@@ -56,7 +56,7 @@ function discoverMigrationBasename() {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -66,9 +66,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -113,7 +113,7 @@ function removeClosureFixtures() {
 console.log("Running COMMERCIAL-PROFITABILITY-1 security/idempotency verifier.");
 
 const migrationBasename = discoverMigrationBasename();
-const migrationPath = `packages/CrevaFactOS.Persistence.Migrations/Migrations/${migrationBasename}`;
+const migrationPath = `packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationBasename}`;
 if (!existsSync(resolve(ROOT, migrationPath))) {
   fail(`Missing migration file ${migrationPath}`);
 }
@@ -121,8 +121,8 @@ if (!existsSync(resolve(ROOT, migrationPath))) {
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointHelpers.cs");
 const migration = readRequired(migrationPath);
-const permissions = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
-const bootstrap = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", helpers.includes("ResolveReadAccessAsync"));

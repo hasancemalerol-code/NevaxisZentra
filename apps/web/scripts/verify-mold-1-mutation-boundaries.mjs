@@ -21,7 +21,7 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running MOLD-1 mutation-boundary verifier.");
 
-const repo = readRequired("packages/CrevaFactOS.Persistence/Mold/MoldRepository.cs");
+const repo = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldRepository.cs");
 const endpoints = readRequired("apps/api/Mold/MoldEndpointRouteBuilderExtensions.cs");
 
 forbidText(repo, "MaintenanceRequests", "maintenance boundary");

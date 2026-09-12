@@ -1,13 +1,13 @@
-# CREVAFACTOS-DESKTOP-RUNTIME-STARTUP-REGRESSION-CLOSURE-1
+# NevaxisFactOS-DESKTOP-RUNTIME-STARTUP-REGRESSION-CLOSURE-1
 # Three consecutive real shortcut cold launches with web lifecycle proof.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "CrevaFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
-$desktopProject = Join-Path $repoRoot "apps\desktop\CrevaFactOS.Desktop\CrevaFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-authentication-live-1-cdp.mjs"
 $results = [ordered]@{}
 
@@ -17,8 +17,8 @@ function Assert-Check([string]$Name, [bool]$Ok, [string]$Detail = "") {
     if (-not $Ok) { throw "$Name failed$(if ($Detail) { ": $Detail" } else { '' })" }
 }
 
-function Stop-CrevaFactOSDesktopOnly {
-    Get-Process -Name "CrevaFactOS", "CrevaFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisFactOSDesktopOnly {
+    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 4
 }
 
@@ -77,7 +77,7 @@ public static class RuntimeRegressionWindowProbe {
   public static bool MainWindowVisible(int timeoutMs) {
     var deadline = Environment.TickCount + timeoutMs;
     while (Environment.TickCount < deadline) {
-      foreach (var name in new[] { "CrevaFactOS", "CrevaFactOS.Desktop" }) {
+      foreach (var name in new[] { "crevafactos", "NevaxisFactOS.Desktop" }) {
         foreach (var process in Process.GetProcessesByName(name)) {
           process.Refresh();
           if (process.MainWindowHandle == IntPtr.Zero || !IsWindowVisible(process.MainWindowHandle)) continue;
@@ -101,11 +101,11 @@ function Wait-MainWindow([int]$TimeoutSeconds = 360) {
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 Clear-KnownDesktopVerifierEnvironmentLeaks
-Stop-CrevaFactOSDesktopOnly
+Stop-NevaxisFactOSDesktopOnly
 Assert-RuntimeRootEnvironmentClean -Context "runtime-regression-start"
 
 Write-Host "Publishing desktop artifact..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\CrevaFactOS")
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS")
 if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
@@ -120,7 +120,7 @@ $cycleIndex = 0
 foreach ($cycle in $cycles) {
     $cycleIndex++
     Write-Host "=== $($cycle.Name) ==="
-    Stop-CrevaFactOSDesktopOnly
+    Stop-NevaxisFactOSDesktopOnly
     $closedState = Get-Port3001State
     $results["cycle-$cycleIndex-port-when-desktop-closed"] = $closedState
     Write-Host "Port 3001 when desktop closed: $closedState"
@@ -151,12 +151,12 @@ foreach ($cycle in $cycles) {
     if ($cycleIndex -eq 3) {
         Write-Host "Cycle 3: 60-second stability hold..."
         Start-Sleep -Seconds 60
-        Assert-Check "60 second stability desktop alive" ([bool](Get-Process -Name CrevaFactOS -ErrorAction SilentlyContinue))
+        Assert-Check "60 second stability desktop alive" ([bool](Get-Process -Name NevaxisFactOS -ErrorAction SilentlyContinue))
         Assert-Check "60 second stability /dashboard" ((Invoke-WebRequest "http://127.0.0.1:3001/dashboard" -UseBasicParsing -TimeoutSec 15).StatusCode -eq 200)
         Assert-Check "60 second stability API" ((Invoke-WebRequest "http://127.0.0.1:5000/health/ready" -UseBasicParsing -TimeoutSec 10).StatusCode -eq 200)
     }
 
-    Stop-CrevaFactOSDesktopOnly
+    Stop-NevaxisFactOSDesktopOnly
     $results[$cycle.Name] = "PASS"
 }
 
@@ -165,4 +165,4 @@ Assert-RuntimeRootEnvironmentClean -Context "runtime-regression-final"
 $results["FINAL VERDICT"] = "DESKTOP_SALES_DEMO_READY"
 $results | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $screenshotDir "runtime-startup-regression-results.json") -Encoding UTF8
 Clear-KnownDesktopVerifierEnvironmentLeaks
-Write-Host "CREVAFACTOS-DESKTOP-RUNTIME-STARTUP-REGRESSION-CLOSURE-1: PASS"
+Write-Host "NevaxisFactOS-DESKTOP-RUNTIME-STARTUP-REGRESSION-CLOSURE-1: PASS"

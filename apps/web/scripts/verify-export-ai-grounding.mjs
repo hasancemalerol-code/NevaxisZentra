@@ -35,7 +35,7 @@ function forbidText(source, forbidden, label) {
 
 const entities = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportAiEntities.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportAiEntities.cs",
 );
 requireText(entities, "PromptVersion", "ExportAiEntities");
 requireText(entities, "ReasoningSummary", "ExportAiEntities");
@@ -46,7 +46,7 @@ forbidText(entities, "RawReasoning", "ExportAiEntities");
 
 const models = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/Export4LModels.cs",
+  "packages/NevaxisFactOS.Persistence/Export/Export4LModels.cs",
 );
 requireText(models, "ExportAiPromptVersions", "Export4LModels");
 requireText(models, "ExportAiSourceReference", "Export4LModels");
@@ -58,7 +58,7 @@ forbidText(models, "ChainOfThought", "Export4LModels");
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence/Export/ExportAiWriteRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Export/ExportAiWriteRepository.cs",
 );
 requireText(writeRepo, "ResolvePromptVersion", "ExportAiWriteRepository");
 requireText(writeRepo, "ExportAiPromptVersions", "ExportAiWriteRepository");
@@ -110,7 +110,7 @@ forbidText(copilotPanel, "chainOfThought", "export-ai-copilot-panel");
 
 const migration = readRequired(
   repoRootUrl,
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260808200000_AddExportAiCopilotAndRecommendations.cs",
 );
 requireText(migration, "prompt_version", "EXPORT-4L migration");
 requireText(migration, "reasoning_summary", "EXPORT-4L migration");

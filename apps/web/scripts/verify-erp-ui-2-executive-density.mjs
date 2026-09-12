@@ -7,8 +7,8 @@ const scriptsDirectory = dirname(currentFilePath);
 const webRoot = resolve(scriptsDirectory, "..");
 const projectRoot = resolve(webRoot, "../..");
 
-const WEB = process.env.CREVAFACTOS_WEB_BASE ?? "http://127.0.0.1:3001";
-const BASE = process.env.CREVAFACTOS_API_BASE ?? "http://127.0.0.1:5000";
+const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE ?? "http://127.0.0.1:3001";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ISSUER = "crevafactos-dev";
 const OPERATOR = "production-pilot-operator";
@@ -43,9 +43,9 @@ function headers() {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": OPERATOR,
-    "X-CrevaFactOS-Tenant": TENANT,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": OPERATOR,
+    "X-NevaxisFactOS-Tenant": TENANT,
   };
 }
 

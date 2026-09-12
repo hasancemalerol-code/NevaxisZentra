@@ -64,7 +64,6 @@ export async function createTransferRequest(
 
   const url = buildTransferRequestUrl(context, productionPlanId);
 
-  // eslint-disable-next-line @typescript-eslint/init-declarations
   let response: Response;
 
   try {
@@ -119,7 +118,6 @@ export async function executeTransfer(
 
   const url = buildTransferExecuteUrl(context, productionPlanId, transferRequestId);
 
-  // eslint-disable-next-line @typescript-eslint/init-declarations
   let response: Response;
 
   try {

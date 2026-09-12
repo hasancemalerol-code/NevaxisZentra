@@ -36,8 +36,8 @@ console.log("Running quality 3L security/UI verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityReportingEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Quality/QualityEndpointHelpers.cs");
-const reportingRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityReportingRepository.cs");
-const traceabilityRepo = readRequired("packages/CrevaFactOS.Persistence/Quality/QualityTraceabilityRepository.cs");
+const reportingRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityReportingRepository.cs");
+const traceabilityRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityTraceabilityRepository.cs");
 const apiClient = readRequired("apps/web/src/features/quality-control/server/quality-control-api-client.ts");
 const writer = readRequired("apps/web/src/features/quality-control/server/quality-control-writer.ts");
 const reportingPage = readRequired("apps/web/src/app/(app)/kalite/raporlama/page.tsx");

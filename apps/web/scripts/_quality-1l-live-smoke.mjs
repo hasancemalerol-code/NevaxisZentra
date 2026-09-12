@@ -19,9 +19,9 @@ function fail(k, d = "") { failures++; console.error(`❌ ${k}${d ? `: ${d}` : "
 const h = (subject = OPERATOR, extra = {}) => ({
   Accept: "application/json",
   "Content-Type": "application/json",
-  "X-CrevaFactOS-Dev-Issuer": ISSUER,
-  "X-CrevaFactOS-Dev-Subject": subject,
-  "X-CrevaFactOS-Tenant": TENANT,
+  "X-crevafactos-dev-Issuer": ISSUER,
+  "X-crevafactos-dev-Subject": subject,
+  "X-NevaxisFactOS-Tenant": TENANT,
   ...extra,
 });
 const q = (path, facility = FACILITY) =>
@@ -133,7 +133,7 @@ async function main() {
     method: "GET",
     headers: {
       Accept: "application/json",
-      "X-CrevaFactOS-Dev-Subject": "missing-auth-subject",
+      "X-crevafactos-dev-Subject": "missing-auth-subject",
     },
   });
   if (r.status === 401) pass("401-unauthenticated", "ok");

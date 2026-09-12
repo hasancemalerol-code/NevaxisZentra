@@ -11,7 +11,7 @@ const MATERIAL_BOUNDARY = "bb000001-00a3-4000-8000-0000000000a3";
 const PROFILE = "bb000001-0220-4000-8000-000000000220";
 const TENANT = "bb000001-0001-4000-8000-000000000001";
 const BOUNDARY_PREFIX = "COMMINT2-BOUNDARY";
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const MANAGER = {
   issuer: "crevafactos-dev",
   subject: "planning-pilot-user",
@@ -58,7 +58,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -68,9 +68,9 @@ function db(sql) {
 function actorHeaders(actor) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -171,13 +171,13 @@ function insertBoundaryHighVarianceObservations() {
 
 console.log("Running COMMERCIAL-INTELLIGENCE-2 deviation/supplier-comparison verifier.");
 
-const evaluator = readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialPurchasePriceComparisonEvaluator.cs");
-const seed = readRequired("packages/CrevaFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceComparisonSeed.cs");
+const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialPurchasePriceComparisonEvaluator.cs");
+const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceComparisonSeed.cs");
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointRouteBuilderExtensions.cs");
 
 assert("comparison evaluator present", evaluator.includes("EvaluateTemporalDeviation"));
 assert("supplier position evaluator present", evaluator.includes("EvaluateSupplierPricePosition"));
-assert("non-overlap validation in repository", readRequired("packages/CrevaFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceComparisonOperations.cs").includes("must not overlap"));
+assert("non-overlap validation in repository", readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceComparisonOperations.cs").includes("must not overlap"));
 assert("comparison endpoints present", endpoints.includes("/comparisons"));
 forbidText(evaluator, "recommended supplier", "evaluator");
 forbidText(evaluator, "guaranteed savings", "evaluator");

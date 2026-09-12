@@ -21,9 +21,9 @@ export async function denyUnlessGranted(
   | Readonly<{ status: "failure"; message: string }>
 > {
   if (
-    process.env.CREVAFACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
-    process.env.CREVAFACTOS_DEV_AUTH_ISSUER?.trim() &&
-    process.env.CREVAFACTOS_DEV_TENANT_KEY?.trim()
+    process.env.NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
+    process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER?.trim() &&
+    process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY?.trim()
   ) {
     return { status: "granted" };
   }

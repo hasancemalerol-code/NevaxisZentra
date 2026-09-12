@@ -21,11 +21,11 @@ function read(rel) {
 
 console.log("Running TEAMS-TASK-COLLABORATION-1 migration verifier.");
 
-const migration = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260829230114_AddTeamsMessageTaskLinks.cs");
-const designer = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260829230114_AddTeamsMessageTaskLinks.Designer.cs");
-const snapshot = read("packages/CrevaFactOS.Persistence.Migrations/Migrations/CrevaFactOSDbContextModelSnapshot.cs");
-const entityConfig = read("packages/CrevaFactOS.Persistence/Teams/TeamsEntityConfigurations.cs");
-const entities = read("packages/CrevaFactOS.Persistence/Teams/TeamsEntities.cs");
+const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829230114_AddTeamsMessageTaskLinks.cs");
+const designer = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829230114_AddTeamsMessageTaskLinks.Designer.cs");
+const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisFactOS.Persistence/Teams/TeamsEntityConfigurations.cs");
+const entities = read("packages/NevaxisFactOS.Persistence/Teams/TeamsEntities.cs");
 
 assert("teams_message_task_links table", migration.includes('name: "teams_message_task_links"'));
 assert("link purpose column", migration.includes("link_purpose"));

@@ -1,10 +1,10 @@
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence.Authorization;
-using CrevaFactOS.Persistence.ProductionManager;
-using CrevaFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence.Authorization;
+using NevaxisFactOS.Persistence.ProductionManager;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ProductionManager;
+namespace NevaxisFactOS.Api.ProductionManager;
 
 public static class ProductionManagerEndpointRouteBuilderExtensions
 {
@@ -23,7 +23,7 @@ public static class ProductionManagerEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSProductionManager(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSProductionManager(this IServiceCollection services)
     {
         services.AddScoped<IProductionManagerRepository, ProductionManagerRepository>();
         services.AddScoped<IProductionManagerService, ProductionManagerService>();

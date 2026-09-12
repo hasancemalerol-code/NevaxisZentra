@@ -5,7 +5,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://localhost:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://localhost:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const MACHINE = "bb000001-0096-4000-8000-000000000096";
 const PREFIX = `poe1-calc-${Date.now()}`;
@@ -34,7 +34,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -44,9 +44,9 @@ function db(sql) {
 function headers(actor = ACTOR) {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": actor.issuer,
-    "X-CrevaFactOS-Dev-Subject": actor.subject,
-    "X-CrevaFactOS-Tenant": actor.tenant,
+    "X-crevafactos-dev-Issuer": actor.issuer,
+    "X-crevafactos-dev-Subject": actor.subject,
+    "X-NevaxisFactOS-Tenant": actor.tenant,
   };
 }
 
@@ -163,9 +163,9 @@ function readFailureCode(json) {
 
 console.log("Running PROCESS-OEE-1 calculation verifier.");
 
-const constants = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
-const calculator = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
-const operating = readRequired("packages/CrevaFactOS.Persistence/ProcessOee/ProcessOeeOperatingTimeCalculator.cs");
+const constants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
+const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
+const operating = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeOperatingTimeCalculator.cs");
 assert("rule-set PROCESS-OEE-V1", constants.includes("PROCESS-OEE-V1"));
 assert("availability formula", calculator.includes("OperatingSeconds") && calculator.includes("PlannedProductionSeconds"));
 assert("performance raw warning", calculator.includes("performance-above-100"));

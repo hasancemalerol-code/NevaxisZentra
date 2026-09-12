@@ -1,14 +1,15 @@
-using CrevaFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.Audit;
 
-namespace CrevaFactOS.Api.Audit;
+namespace NevaxisFactOS.Api.Audit;
 
 public sealed class CorrelationContextMiddleware(RequestDelegate next)
 {
-    public const string HeaderName = "X-CrevaFactOS-Correlation-Id";
+    public const string HeaderName = "X-NevaxisFactOS-Correlation-Id";
+    public const string LegacyHeaderName = "X-CrevaFactOS-Correlation-Id";
 
     public async Task InvokeAsync(HttpContext httpContext, CorrelationContext correlationContext)
     {
-        var correlationId = ResolveIncoming(httpContext.Request.Headers[HeaderName]);
+        var correlationId = ResolveIncoming(httpContext.Request.Headers);
         correlationContext.Set(correlationId, httpContext.TraceIdentifier);
         httpContext.Response.OnStarting(() =>
         {
@@ -18,11 +19,20 @@ public sealed class CorrelationContextMiddleware(RequestDelegate next)
         await next(httpContext);
     }
 
-    private static Guid ResolveIncoming(Microsoft.Extensions.Primitives.StringValues values) =>
-        values.Count == 1
-        && values[0] is { Length: <= 36 } value
-        && Guid.TryParseExact(value, "D", out var parsed)
-        && parsed != Guid.Empty
-            ? parsed
-            : Guid.NewGuid();
+    private static Guid ResolveIncoming(IHeaderDictionary headers)
+    {
+        foreach (var headerName in new[] { HeaderName, LegacyHeaderName })
+        {
+            var values = headers[headerName];
+            if (values.Count == 1
+                && values[0] is { Length: <= 36 } value
+                && Guid.TryParseExact(value, "D", out var parsed)
+                && parsed != Guid.Empty)
+            {
+                return parsed;
+            }
+        }
+
+        return Guid.NewGuid();
+    }
 }

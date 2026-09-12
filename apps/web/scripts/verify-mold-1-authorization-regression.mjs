@@ -30,7 +30,7 @@ const moldReader = readRequired("apps/web/src/features/molds/server/mold-reader.
 const moldApiClient = readRequired("apps/web/src/features/molds/server/mold-api-client.ts");
 const page = readRequired("apps/web/src/app/(app)/kaliplar/page.tsx");
 const helpers = readRequired("apps/api/Mold/MoldEndpointHelpers.cs");
-const permissions = readRequired("packages/CrevaFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MoldPermissionKeys.cs");
 
 requireText(permissions, "mold.read", "normalized read permission key");
 requireText(permissions, "mold.manage", "normalized manage permission key");

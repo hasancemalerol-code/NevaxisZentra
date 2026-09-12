@@ -31,8 +31,8 @@ const centerQueries = read("apps/web/src/features/ai-task-center/server/ai-task-
 const centerItem = read("apps/web/src/features/ai-task-center/domain/ai-task-center-item.ts");
 const navigation = read("apps/web/src/lib/navigation/primary-navigation.ts");
 const dashboard = read("apps/web/src/app/(app)/dashboard/page.tsx");
-const workInboxRepo = read("packages/CrevaFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
-const originResolver = read("packages/CrevaFactOS.Persistence/AiTasks/AiTaskListOriginResolver.cs");
+const workInboxRepo = read("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const originResolver = read("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskListOriginResolver.cs");
 const nextEnv = read("apps/web/next-env.d.ts");
 
 assert("home uses unified list content", home.includes("AiTaskListPageContent"));

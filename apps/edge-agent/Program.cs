@@ -2,9 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using CrevaFactOS.Configuration;
+using NevaxisFactOS.Configuration;
 
-namespace CrevaFactOS.EdgeAgent;
+namespace NevaxisFactOS.EdgeAgent;
 
 public static class Program
 {
@@ -16,7 +16,7 @@ public static class EdgeAgentApplication
     public static IHost BuildHost(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
-        builder.Configuration["Application:Name"] ??= "CrevaFactOS Edge Agent";
+        builder.Configuration["Application:Name"] ??= "NevaxisFactOS Edge Agent";
 
         ValidateConfiguration(builder.Configuration);
         builder.Services.AddInfrastructureOptions(builder.Configuration);

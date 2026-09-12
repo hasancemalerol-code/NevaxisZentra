@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * verify-desktop-shell-1-security.mjs
- * CREVAFACTOS-DESKTOP-SHELL-1 structural and security verifier.
+ * NevaxisFactOS-DESKTOP-SHELL-1 structural and security verifier.
  */
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -9,7 +9,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const DESKTOP_ROOT = join(ROOT, "apps/desktop/CrevaFactOS.Desktop");
+const DESKTOP_ROOT = join(ROOT, "apps/desktop/NevaxisFactOS.Desktop");
 
 let passed = 0;
 let failed = 0;
@@ -65,8 +65,8 @@ function collectSourceFiles(dir) {
 }
 
 console.log("\n[1] Desktop host location and technology");
-const csproj = readFile("apps/desktop/CrevaFactOS.Desktop/CrevaFactOS.Desktop.csproj");
-assert("Desktop project exists under apps/desktop/CrevaFactOS.Desktop", existsSync(DESKTOP_ROOT));
+const csproj = readFile("apps/desktop/NevaxisFactOS.Desktop/NevaxisFactOS.Desktop.csproj");
+assert("Desktop project exists under apps/desktop/NevaxisFactOS.Desktop", existsSync(DESKTOP_ROOT));
 assert("Uses WPF", csproj.includes("<UseWPF>true</UseWPF>"));
 assert("Uses WebView2 package", csproj.includes("Microsoft.Web.WebView2"));
 assertNotContains("Does not use Electron", csproj, "electron");
@@ -79,16 +79,16 @@ assertNotContains("No Next.js imports", desktopSources, "next/");
 assertNotContains("No globals.css reuse", desktopSources, "globals.css");
 
 console.log("\n[3] URL policy and credentials");
-const urlPolicy = readFile("apps/desktop/CrevaFactOS.Desktop/Security/DesktopWebUrlPolicy.cs");
-assertContains("Uses CREVAFACTOS_DESKTOP_WEB_URL", urlPolicy, "CREVAFACTOS_DESKTOP_WEB_URL");
+const urlPolicy = readFile("apps/desktop/NevaxisFactOS.Desktop/Security/DesktopWebUrlPolicy.cs");
+assertContains("Uses NEVAXIS_FACTOS_DESKTOP_WEB_URL", urlPolicy, "NEVAXIS_FACTOS_DESKTOP_WEB_URL");
 assertContains("Development default localhost", urlPolicy, "http://127.0.0.1:3001");
 assertContains("Production HTTPS requirement", urlPolicy, "HttpsRequiredInProduction");
 assertNotContains("No embedded password", urlPolicy, "Password = \"");
 assertNotContains("No embedded token", urlPolicy, "Token = \"");
 
 console.log("\n[4] Navigation and WebView security");
-const navigationPolicy = readFile("apps/desktop/CrevaFactOS.Desktop/Security/NavigationPolicy.cs");
-const mainWindow = readFile("apps/desktop/CrevaFactOS.Desktop/MainWindow.xaml.cs");
+const navigationPolicy = readFile("apps/desktop/NevaxisFactOS.Desktop/Security/NavigationPolicy.cs");
+const mainWindow = readFile("apps/desktop/NevaxisFactOS.Desktop/MainWindow.xaml.cs");
 assertContains("Blocks file scheme", navigationPolicy, "\"file\"");
 assertContains("Blocks javascript scheme", navigationPolicy, "\"javascript\"");
 assertContains("External https browser routing", navigationPolicy, "OpenInSystemBrowser");
@@ -96,21 +96,21 @@ assertContains("Certificate errors fail closed", mainWindow, "CoreWebView2Server
 assertContains("Permission requests denied", mainWindow, "CoreWebView2PermissionState.Deny");
 assertContains(
   "Production DevTools gated",
-  readFile("apps/desktop/CrevaFactOS.Desktop/Services/DesktopEnvironment.cs"),
-  "CREVAFACTOS_DESKTOP_ENABLE_DEVTOOLS",
+  readFile("apps/desktop/NevaxisFactOS.Desktop/Services/DesktopEnvironment.cs"),
+  "NEVAXIS_FACTOS_DESKTOP_ENABLE_DEVTOOLS",
 );
 
 console.log("\n[5] Session profile outside repository");
-const profilePaths = readFile("apps/desktop/CrevaFactOS.Desktop/Services/WebViewProfilePaths.cs");
+const profilePaths = readFile("apps/desktop/NevaxisFactOS.Desktop/Services/WebViewProfilePaths.cs");
 assertContains("Uses LocalApplicationData", profilePaths, "LocalApplicationData");
-assertContains("Product-specific profile folder", profilePaths, "CrevaFactOS");
+assertContains("Product-specific profile folder", profilePaths, "NevaxisFactOS");
 assertNotContains("Profile not in repo", profilePaths, "Projects");
 
 console.log("\n[6] Single instance and connection recovery");
-const singleInstance = readFile("apps/desktop/CrevaFactOS.Desktop/Services/SingleInstanceManager.cs");
-const mainWindowXaml = readFile("apps/desktop/CrevaFactOS.Desktop/MainWindow.xaml");
-assertContains("Single-instance mutex", singleInstance, "CrevaFactOS.Desktop.SingleInstance");
-assertContains("Turkish connection failure message", mainWindowXaml, "CrevaFactOS bağlantısı kurulamadı");
+const singleInstance = readFile("apps/desktop/NevaxisFactOS.Desktop/Services/SingleInstanceManager.cs");
+const mainWindowXaml = readFile("apps/desktop/NevaxisFactOS.Desktop/MainWindow.xaml");
+assertContains("Single-instance mutex", singleInstance, "NevaxisFactOS.Desktop.SingleInstance");
+assertContains("Turkish connection failure message", mainWindowXaml, "NevaxisFactOS bağlantısı kurulamadı");
 assertContains("Retry button wired", mainWindowXaml, "Yeniden dene");
 assertContains("Retry handler exists", mainWindow, "RetryButton_Click");
 

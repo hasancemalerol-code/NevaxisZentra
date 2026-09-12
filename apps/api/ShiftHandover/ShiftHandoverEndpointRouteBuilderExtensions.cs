@@ -1,14 +1,14 @@
-﻿using System.Globalization;
-using CrevaFactOS.Api.AiTasks;
-using CrevaFactOS.Api.Facilities;
-using CrevaFactOS.Persistence;
-using CrevaFactOS.Persistence.AiTasks;
-using CrevaFactOS.Persistence.Audit;
-using CrevaFactOS.Persistence.ShiftHandover;
-using CrevaFactOS.Persistence.Tenancy;
+using System.Globalization;
+using NevaxisFactOS.Api.AiTasks;
+using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Persistence;
+using NevaxisFactOS.Persistence.AiTasks;
+using NevaxisFactOS.Persistence.Audit;
+using NevaxisFactOS.Persistence.ShiftHandover;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrevaFactOS.Api.ShiftHandover;
+namespace NevaxisFactOS.Api.ShiftHandover;
 
 public static class ShiftHandoverEndpointRouteBuilderExtensions
 {
@@ -32,17 +32,17 @@ public static class ShiftHandoverEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddCrevaFactOSShiftHandover(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisFactOSShiftHandover(this IServiceCollection services)
     {
         services.AddScoped<IShiftHandoverRepository>(sp =>
         {
-            var dbContext = sp.GetService<CrevaFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
             return dbContext is null
                 ? new UnavailableShiftHandoverRepository()
                 : new ShiftHandoverRepository(
                     dbContext,
                     sp.GetRequiredService<TenantDatabaseSession>(),
-                    sp.GetRequiredService<CrevaFactOS.Persistence.Teams.ITeamsNotificationRepository>());
+                    sp.GetRequiredService<NevaxisFactOS.Persistence.Teams.ITeamsNotificationRepository>());
         });
 
         return services;

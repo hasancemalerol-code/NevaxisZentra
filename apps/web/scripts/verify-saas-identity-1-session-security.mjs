@@ -6,14 +6,14 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BASE = process.env.CREVAFACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
+const BASE = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const ORG = "dev-pilot-tenant";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
 const CLOSURE_PREFIX = "SAASIDENT1-CLOSURE";
 const RUN_SUFFIX = Date.now();
-const SESSION_COOKIE = "crevafactos.session";
-const CSRF_COOKIE = "crevafactos.csrf";
-const CSRF_HEADER = "X-CrevaFactOS-Csrf";
+const SESSION_COOKIE = "NevaxisFactOS.session";
+const CSRF_COOKIE = "NevaxisFactOS.csrf";
+const CSRF_HEADER = "X-NevaxisFactOS-Csrf";
 const ACTIVE_EMAIL = "active-user@dev.local";
 const TENANT_OWNER_EMAIL = "tenant-owner@dev.local";
 function fail(message) {
@@ -47,7 +47,7 @@ function sqlEscape(value) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "crevafactos-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -317,7 +317,7 @@ function insertClosureAccount({ suffix, email, lifecycleStatus = "Active" }) {
 
   db(`
     INSERT INTO identity_subjects (id, external_issuer, external_subject, status, created_at_utc)
-    VALUES ('${subjectId}', 'crevafactos-saas', '${accountId}', 'Active', '${now}');
+    VALUES ('${subjectId}', 'NevaxisFactOS-saas', '${accountId}', 'Active', '${now}');
     INSERT INTO saas_identity_accounts (
       id, account_reference, email_normalized, display_name, lifecycle_status,
       email_verified_at_utc, failed_sign_in_count, lockout_until_utc, security_stamp,
@@ -415,7 +415,7 @@ const closurePassword = `ClosurePass1!${RUN_SUFFIX}`;
 console.log("Running SAAS-IDENTITY-1 session-security verifier.");
 
 const migration = readRequired(
-  "packages/CrevaFactOS.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
+  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
 );
 assert("sessions table defines token_hash", migration.includes("token_hash = table.Column<string>"));
 forbidText(migration, "session_token = table.Column", "sessions migration");

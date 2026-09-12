@@ -3,7 +3,6 @@ import {
   Bell,
   CheckCircle2,
   CirclePlay,
-  Clock3,
   Hand,
   History,
   ShieldCheck,

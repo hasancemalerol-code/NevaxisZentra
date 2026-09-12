@@ -53,23 +53,23 @@ console.log("Running production planning handoff verifier.");
 
 // Backend persistence
 const handoffEntity = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanHandoff.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoff.cs"),
   "ProductionPlanHandoff.cs",
 );
 const handoffRepository = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffRepository.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffRepository.cs"),
   "ProductionPlanHandoffRepository.cs",
 );
 const handoffModels = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffModels.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffModels.cs"),
   "ProductionPlanHandoffModels.cs",
 );
 const handoffStatus = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffStatus.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffStatus.cs"),
   "ProductionPlanHandoffStatus.cs",
 );
 const handoffEntityConfig = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/Configurations/ProductionPlanHandoffEntityConfiguration.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/Configurations/ProductionPlanHandoffEntityConfiguration.cs"),
   "ProductionPlanHandoffEntityConfiguration.cs",
 );
 const handoffApiService = readRequiredFile(
@@ -81,23 +81,23 @@ const endpointExtensions = readRequiredFile(
   "ProductionPlanningEndpointRouteBuilderExtensions.cs",
 );
 const permissionKeys = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/Authorization/ProductionPlanningPermissionKeys.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/Authorization/ProductionPlanningPermissionKeys.cs"),
   "ProductionPlanningPermissionKeys.cs",
 );
 const auditEventTypes = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/Audit/AuditEventTypes.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/Audit/AuditEventTypes.cs"),
   "AuditEventTypes.cs",
 );
 const auditActions = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/Audit/AuditActions.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs"),
   "AuditActions.cs",
 );
 const outboxMessageTypes = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence/Outbox/OutboxMessageTypes.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence/Outbox/OutboxMessageTypes.cs"),
   "OutboxMessageTypes.cs",
 );
 const migration = readRequiredFile(
-  resolveProjectPath("packages/CrevaFactOS.Persistence.Migrations/Migrations/20260807150000_AddProductionPlanningHandoffAndMakerChecker.cs"),
+  resolveProjectPath("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807150000_AddProductionPlanningHandoffAndMakerChecker.cs"),
   "20260807150000_AddProductionPlanningHandoffAndMakerChecker.cs",
 );
 
@@ -226,7 +226,7 @@ forbidText(handoffPanel, "üretim emri oluşturuldu", "production-plan-handoff-p
 
 // 25. Production module dependency does not exist
 const productionModuleExists = existsSync(
-  resolveProjectPath("packages/CrevaFactOS.Production"),
+  resolveProjectPath("packages/NevaxisFactOS.Production"),
 );
 if (productionModuleExists) {
   fail("Production module package must not exist in this phase.");

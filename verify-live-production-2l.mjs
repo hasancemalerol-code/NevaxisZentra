@@ -57,17 +57,17 @@ function section(title) {
 function operatorHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": OPERATOR_SUBJECT,
-    "X-CrevaFactOS-Tenant": TENANT_KEY,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": OPERATOR_SUBJECT,
+    "X-NevaxisFactOS-Tenant": TENANT_KEY,
   };
 }
 function plannerHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-CrevaFactOS-Dev-Issuer": ISSUER,
-    "X-CrevaFactOS-Dev-Subject": PLANNER_SUBJECT,
-    "X-CrevaFactOS-Tenant": TENANT_KEY,
+    "X-crevafactos-dev-Issuer": ISSUER,
+    "X-crevafactos-dev-Subject": PLANNER_SUBJECT,
+    "X-NevaxisFactOS-Tenant": TENANT_KEY,
   };
 }
 function noAuthHeaders() {

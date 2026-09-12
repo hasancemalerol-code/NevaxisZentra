@@ -41,23 +41,23 @@ function fileExists(relPath) {
 
 check(
   "ProductionShiftHandover.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionShiftHandover.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionShiftHandover.cs"),
 );
 
 check(
   "IProductionHandoverRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/IProductionHandoverRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/IProductionHandoverRepository.cs"),
 );
 
 check(
   "ProductionHandoverRepository.cs exists",
-  fileExists("packages/CrevaFactOS.Persistence/Production/ProductionHandoverRepository.cs"),
+  fileExists("packages/NevaxisFactOS.Persistence/Production/ProductionHandoverRepository.cs"),
 );
 
 // ── 2. ENTITY FIELDS ──────────────────────────────────────────────────────────
 
 const handoverEntity = readText(
-  "packages/CrevaFactOS.Persistence/Production/ProductionShiftHandover.cs",
+  "packages/NevaxisFactOS.Persistence/Production/ProductionShiftHandover.cs",
 );
 
 check(
@@ -96,12 +96,12 @@ check(
 check(
   "ProductionShiftHandoverEntityConfiguration.cs exists",
   fileExists(
-    "packages/CrevaFactOS.Persistence/Configurations/ProductionShiftHandoverEntityConfiguration.cs",
+    "packages/NevaxisFactOS.Persistence/Configurations/ProductionShiftHandoverEntityConfiguration.cs",
   ),
 );
 
 const handoverConfig = readText(
-  "packages/CrevaFactOS.Persistence/Configurations/ProductionShiftHandoverEntityConfiguration.cs",
+  "packages/NevaxisFactOS.Persistence/Configurations/ProductionShiftHandoverEntityConfiguration.cs",
 );
 
 check(
@@ -112,7 +112,7 @@ check(
 // ── 4. REPOSITORY CONTRACT ────────────────────────────────────────────────────
 
 const handoverRepo = readText(
-  "packages/CrevaFactOS.Persistence/Production/IProductionHandoverRepository.cs",
+  "packages/NevaxisFactOS.Persistence/Production/IProductionHandoverRepository.cs",
 );
 
 check(
@@ -139,7 +139,7 @@ check(
 // ── 7. PERMISSIONS ────────────────────────────────────────────────────────────
 
 const permKeys = readText(
-  "packages/CrevaFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
+  "packages/NevaxisFactOS.Persistence/Authorization/ProductionExecutionPermissionKeys.cs",
 );
 
 check(
@@ -168,7 +168,7 @@ check(
 // ── 9. AUDIT TAXONOMY ────────────────────────────────────────────────────────
 
 const auditActions = readText(
-  "packages/CrevaFactOS.Persistence/Audit/AuditActions.cs",
+  "packages/NevaxisFactOS.Persistence/Audit/AuditActions.cs",
 );
 
 check(

@@ -1,8 +1,8 @@
-# CrevaFactOS Documentation
+# NevaxisFactOS Documentation
 
 
 
-Bu klasör, CrevaFactOS ürün, mimari, güvenlik ve teknik karar belgelerini içerir.
+Bu klasör, NevaxisFactOS ürün, mimari, güvenlik ve teknik karar belgelerini içerir.
 
 
 

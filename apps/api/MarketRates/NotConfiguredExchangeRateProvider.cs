@@ -1,6 +1,6 @@
-using CrevaFactOS.Persistence.MarketRates;
+using NevaxisFactOS.Persistence.MarketRates;
 
-namespace CrevaFactOS.Api.MarketRates;
+namespace NevaxisFactOS.Api.MarketRates;
 
 public sealed class NotConfiguredExchangeRateProvider : IExchangeRateProvider
 {

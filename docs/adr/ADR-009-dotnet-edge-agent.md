@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: CrevaFactOS Product & Development
+- Decision owners: NevaxisFactOS Product & Development
 - Scope: Factory-local machine, PLC, device, and network integrations
 
 ## Context
@@ -11,7 +11,7 @@ Factory devices often use OPC UA, Modbus, MQTT, serial protocols, TCP sockets, v
 
 ## Decision
 
-CrevaFactOS uses a separate .NET Edge Agent in `apps/edge-agent` for factory-local connectivity.
+NevaxisFactOS uses a separate .NET Edge Agent in `apps/edge-agent` for factory-local connectivity.
 
 Edge Agent responsibilities include:
 
