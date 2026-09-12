@@ -686,6 +686,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             seedTimestampUtc,
             cancellationToken);
 
+        await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
+            dbContext,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
+        await DevelopmentPilotSaasSubscriptionSeed.EnsureDevelopmentSubscriptionAsync(
+            dbContext,
+            tenant.Id,
+            operatorIdentity.Id.ToString(),
+            seedTimestampUtc,
+            cancellationToken);
+
         var productionPlanCount = 0;
         if (pilotOptions.ProductionPlanSeedEnabled)
         {
@@ -950,17 +962,6 @@ internal sealed class DevelopmentPilotBootstrapService(
             operatorIdentity.Id.ToString(),
             seedTimestampUtc,
             cancellationToken);
-        await DevelopmentPilotSaasCommercialSeed.EnsureSaasCommercialDevelopmentCatalogAsync(
-                dbContext,
-                operatorIdentity.Id.ToString(),
-                seedTimestampUtc,
-                cancellationToken);
-            await DevelopmentPilotSaasSubscriptionSeed.EnsureDevelopmentSubscriptionAsync(
-                dbContext,
-                tenant.Id,
-                operatorIdentity.Id.ToString(),
-                seedTimestampUtc,
-                cancellationToken);
             await DevelopmentPilotTeamsSeed.EnsureTeamsPilotDataAsync(
                 dbContext,
                 tenant.Id,
@@ -1027,6 +1028,12 @@ internal sealed class DevelopmentPilotBootstrapService(
             tenantMembership.Id,
             productionPlanCount);
     }
+
+    public Task EnsurePaidAccessAsync(CancellationToken cancellationToken = default) =>
+        DevelopmentPilotAccessEnsureService.EnsurePaidAccessAsync(
+            persistenceOptions,
+            options,
+            cancellationToken);
 
     private static async Task<Tenant> EnsureTenantAsync(
         NevaxisFactOSDbContext dbContext,

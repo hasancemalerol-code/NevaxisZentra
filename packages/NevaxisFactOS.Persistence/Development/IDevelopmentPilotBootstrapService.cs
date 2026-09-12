@@ -4,6 +4,8 @@ public interface IDevelopmentPilotBootstrapService
 {
     Task<DevelopmentPilotBootstrapResult> BootstrapAsync(
         CancellationToken cancellationToken = default);
+
+    Task EnsurePaidAccessAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed record DevelopmentPilotBootstrapResult(

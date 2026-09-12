@@ -107,6 +107,25 @@ export async function ProductionManagerWorkspacePanel() {
           </ul>
         </section>
       ) : null}
+
+      {workspace.recentDecisions.length > 0 ? (
+        <section data-testid="production-manager-autonomous-feed">
+          <h3>Otonom Aksiyon Akışı</h3>
+          <ul>
+            {workspace.recentDecisions.slice(0, 5).map((item) => (
+              <li key={item.id}>
+                <Link href={`/operasyon/yonetim-merkezi/kararlar/${item.id}`}>
+                  {item.title}
+                </Link>
+                <p>{getProductionManagerStatusLabel(item.status)}</p>
+                {item.effectivenessScore != null ? (
+                  <p>Etkinlik: {item.effectivenessScore}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </section>
   );
 }

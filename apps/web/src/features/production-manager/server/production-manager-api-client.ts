@@ -127,3 +127,78 @@ export async function getProductionManagerDecision(
     `/api/production-manager/decisions/${decisionId}`,
   );
 }
+
+export type ProductionManagerSimulationRowApi = Readonly<{
+  optionCode: string;
+  label: string;
+  onTimeProbability: number;
+  productionCompletionPercent: number;
+  capacityUtilizationPercent: number;
+  downtimeHours: number;
+  materialRisk: string;
+  qualityRisk: string;
+  requiresApproval: boolean;
+  estimatedRecoveryHours: number;
+}>;
+
+export type ProductionManagerSimulationApi = Readonly<{
+  scenarioType: string;
+  output: string;
+  comparison: string;
+  rows: readonly ProductionManagerSimulationRowApi[];
+  dataClassification: string;
+}>;
+
+export async function simulateProductionManagerScenario(
+  context: ProductionOrderRequestContext,
+  body: Readonly<{
+    scenarioType: string;
+    machineId?: string;
+    orderId?: string;
+    moldId?: string;
+    materialId?: string;
+    delayHours?: number;
+    capacityAdjustmentPercent?: number;
+  }>,
+) {
+  return productionManagerFetch<ProductionManagerSimulationApi>(context, "/api/production-manager/simulate", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function approveProductionManagerDecision(
+  context: ProductionOrderRequestContext,
+  decisionId: string,
+  body: Readonly<{ approved: boolean; notes?: string; concurrencyToken: number }>,
+) {
+  return productionManagerFetch<ProductionManagerDecisionApi>(
+    context,
+    `/api/production-manager/decisions/${decisionId}/approve`,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export async function executeProductionManagerDecision(
+  context: ProductionOrderRequestContext,
+  decisionId: string,
+  body: Readonly<{ selectedOptionId?: string; idempotencyKey?: string; concurrencyToken: number }>,
+) {
+  return productionManagerFetch<ProductionManagerDecisionApi>(
+    context,
+    `/api/production-manager/decisions/${decisionId}/execute`,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export async function verifyProductionManagerDecision(
+  context: ProductionOrderRequestContext,
+  decisionId: string,
+  body: Readonly<{ actualOutcomeJson: string; concurrencyToken: number }>,
+) {
+  return productionManagerFetch<ProductionManagerDecisionApi>(
+    context,
+    `/api/production-manager/decisions/${decisionId}/verify`,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}

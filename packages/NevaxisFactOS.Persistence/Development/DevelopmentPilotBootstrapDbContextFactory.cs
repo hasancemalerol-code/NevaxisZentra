@@ -21,7 +21,7 @@ internal static class DevelopmentPilotBootstrapDbContextFactory
             Host = GetMigrationValue("HOST", runtimeOptions.Host),
             Port = GetMigrationInt32("PORT", runtimeOptions.Port),
             Database = GetMigrationValue("DATABASE", runtimeOptions.Database),
-            Username = GetMigrationValue("USERNAME", "crevafactos"),
+            Username = NormalizeMigrationUsername(GetMigrationValue("USERNAME", "crevafactos")),
             Password = GetMigrationValue("PASSWORD", "local_dev_only_change_me"),
             SslMode = GetMigrationValue("SSL_MODE", runtimeOptions.SslMode),
             ConnectionTimeoutSeconds = runtimeOptions.ConnectionTimeoutSeconds,
@@ -52,4 +52,9 @@ internal static class DevelopmentPilotBootstrapDbContextFactory
         var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__MIGRATIONS__{suffix}");
         return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
     }
+
+    private static string NormalizeMigrationUsername(string username) =>
+        string.Equals(username, "NevaxisFactOS", StringComparison.OrdinalIgnoreCase)
+            ? "crevafactos"
+            : username;
 }

@@ -31,6 +31,8 @@ public sealed class PersistenceOptionsTests
         string invalidValue,
         string expectedFailure)
     {
+        using var _ = PersistenceEnvironmentTestScope.SuppressOverrides();
+
         var values = ValidConfiguration();
         values[invalidKey] = invalidValue;
 

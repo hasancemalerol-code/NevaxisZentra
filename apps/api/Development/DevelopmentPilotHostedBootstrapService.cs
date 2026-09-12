@@ -25,11 +25,31 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
         if (bootstrapService is null)
         {
+            Console.Error.WriteLine(
+                "Development pilot bootstrap skipped: IDevelopmentPilotBootstrapService is not registered.");
             serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
             return;
         }
 
-        _ = await bootstrapService.BootstrapAsync(cancellationToken);
+        try
+        {
+            await bootstrapService.EnsurePaidAccessAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine(
+                $"Development pilot paid-access ensure failed: {exception.Message}");
+        }
+
+        try
+        {
+            _ = await bootstrapService.BootstrapAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Main bootstrap may fail on re-seed; paid-access ensure runs separately.
+        }
+
         serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
     }
 

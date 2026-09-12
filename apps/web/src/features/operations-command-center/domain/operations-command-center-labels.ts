@@ -28,6 +28,7 @@ export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_ROUTE_PATH =
 
 const MODULE_LABELS: Record<OperationsCommandCenterModuleCode, string> = {
   factory: "Fabrika vakası",
+  "production-manager": "AI Üretim Yöneticisi",
   commercial: "Ticari zekâ",
   production: "Üretim",
   quality: "Kalite",

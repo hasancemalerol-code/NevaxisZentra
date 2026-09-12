@@ -17,7 +17,7 @@ public sealed class DesktopShellWiringTests
     {
         var profilePath = WebViewProfilePaths.GetUserDataFolder();
 
-        Assert.Contains("crevafactos", profilePath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("NevaxisFactOS", profilePath, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Projects", profilePath, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("NevaxisFactOS.Desktop", profilePath, StringComparison.Ordinal);
     }

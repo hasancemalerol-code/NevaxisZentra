@@ -10,6 +10,8 @@ public sealed class InfrastructureOptionsTests
     [Fact]
     public void OptionalInfrastructureDoesNotRequireCredentials()
     {
+        using var _ = SmokeTestEnvironmentScope.SuppressOverrides();
+
         var configuration = new ConfigurationBuilder().Build();
         var services = new ServiceCollection();
         services.AddInfrastructureOptions(configuration);
@@ -26,6 +28,8 @@ public sealed class InfrastructureOptionsTests
     [Fact]
     public void RequiredPostgreSqlRejectsMissingCredentials()
     {
+        using var _ = SmokeTestEnvironmentScope.SuppressOverrides();
+
         var configuration = new ConfigurationBuilder().Build();
         var services = new ServiceCollection();
         services.AddInfrastructureOptions(

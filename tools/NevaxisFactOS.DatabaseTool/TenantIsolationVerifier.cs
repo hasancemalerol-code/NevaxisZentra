@@ -20,6 +20,7 @@ internal static class TenantIsolationVerifier
             PostgreSqlConnectionFactory.BuildConnectionString(migrationOptions));
         await administrativeConnection.OpenAsync();
 
+        await EnsureCurrentTenantIdFunctionAsync(administrativeConnection);
         await LocalRuntimeRoleProvisioner.ProvisionAsync(administrativeConnection, runtimeOptions.Password);
         await SeedAsync(administrativeConnection);
 
@@ -37,6 +38,29 @@ internal static class TenantIsolationVerifier
         Console.WriteLine("Tenant A / tenant B PostgreSQL RLS isolation verified.");
         Console.WriteLine("Missing tenant context failed closed for reads and writes.");
         Console.WriteLine("Pooled connection reuse did not leak transaction-scoped tenant context.");
+    }
+
+    private static async Task EnsureCurrentTenantIdFunctionAsync(NpgsqlConnection connection)
+    {
+        const string sql = """
+            CREATE OR REPLACE FUNCTION current_tenant_id()
+            RETURNS uuid
+            LANGUAGE sql
+            STABLE
+            PARALLEL SAFE
+            AS $function$
+                SELECT NULLIF(
+                    COALESCE(
+                        NULLIF(current_setting('NevaxisFactOS.tenant_id', true), ''),
+                        NULLIF(current_setting('CrevaFactOS.tenant_id', true), '')),
+                    '')::uuid
+            $function$;
+
+            REVOKE ALL ON FUNCTION current_tenant_id() FROM PUBLIC;
+            GRANT EXECUTE ON FUNCTION current_tenant_id() TO crevafactos_runtime;
+            """;
+        await using var command = new NpgsqlCommand(sql, connection);
+        await command.ExecuteNonQueryAsync();
     }
 
     private static async Task SeedAsync(NpgsqlConnection connection)
@@ -102,7 +126,8 @@ internal static class TenantIsolationVerifier
         await using (var tenantATransaction = await connection.BeginTransactionAsync())
         {
             await SetTenantAsync(connection, TenantAId);
-            Require(await CountVisibleProbesAsync(connection) == 1, "Tenant A did not see exactly its own probe row.");
+            var tenantACount = await CountVisibleProbesAsync(connection);
+            Require(tenantACount == 1, $"Tenant A did not see exactly its own probe row (saw {tenantACount}).");
             Require(await CountProbeAsync(connection, ProbeBId) == 0, "Tenant A read tenant B's probe row.");
             Require(await UpdateProbeAsync(connection, ProbeBId) == 0, "Tenant A updated tenant B's probe row.");
             Require(await DeleteProbeAsync(connection, ProbeBId) == 0, "Tenant A deleted tenant B's probe row.");

@@ -20,11 +20,11 @@ public static class AuthenticationServiceCollectionExtensions
         var options = configuration
             .GetSection(AuthenticationOptions.SectionName)
             .Get<AuthenticationOptions>() ?? new AuthenticationOptions();
-        ApplyEnvironmentOverrides(options);
+        ApplyEnvironmentOverrides(options, environment);
 
         services.AddOptions<AuthenticationOptions>()
             .Bind(configuration.GetSection(AuthenticationOptions.SectionName))
-            .PostConfigure(ApplyEnvironmentOverrides);
+            .PostConfigure(configured => ApplyEnvironmentOverrides(configured, environment));
 
         switch (options.Mode)
         {
@@ -130,12 +130,18 @@ public static class AuthenticationServiceCollectionExtensions
         return services;
     }
 
-    private static void ApplyEnvironmentOverrides(AuthenticationOptions options)
+    private static void ApplyEnvironmentOverrides(
+        AuthenticationOptions options,
+        IHostEnvironment environment)
     {
         var mode = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__AUTHENTICATION__MODE");
         if (!string.IsNullOrWhiteSpace(mode))
         {
-            options.Mode = Enum.Parse<AuthenticationMode>(mode, ignoreCase: true);
+            var parsedMode = Enum.Parse<AuthenticationMode>(mode, ignoreCase: true);
+            if (parsedMode != AuthenticationMode.Development || environment.IsDevelopment())
+            {
+                options.Mode = parsedMode;
+            }
         }
 
         options.Authority = GetEnvironmentValue("AUTHORITY", options.Authority);

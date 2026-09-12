@@ -245,6 +245,7 @@ export function OperationsCommandCenterView({
           >
             <option value="">Tümü</option>
             <option value="factory">Fabrika vakası</option>
+            <option value="production-manager">AI Üretim Yöneticisi</option>
             <option value="production">Üretim</option>
             <option value="quality">Kalite</option>
             <option value="maintenance">Bakım</option>

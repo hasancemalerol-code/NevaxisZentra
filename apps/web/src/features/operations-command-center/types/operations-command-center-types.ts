@@ -8,6 +8,7 @@ export type OperationsCommandCenterSourceAvailability =
 
 export type OperationsCommandCenterModuleCode =
   | "factory"
+  | "production-manager"
   | "commercial"
   | "production"
   | "quality"

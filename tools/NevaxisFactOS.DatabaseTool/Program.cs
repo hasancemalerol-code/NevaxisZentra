@@ -1,10 +1,12 @@
 using NevaxisFactOS.Persistence;
 using NevaxisFactOS.DatabaseTool;
+using NevaxisFactOS.Persistence.Development;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Net.Sockets;
 
 var operation = args.FirstOrDefault()?.ToLowerInvariant() ?? "verify";
-var options = operation == "state"
+var options = operation is "state" or "development-pilot-paid-access-ensure"
     ? DatabaseConfiguration.LoadMigrations()
     : DatabaseConfiguration.LoadRuntime();
 
@@ -56,6 +58,99 @@ try
     if (operation == "permission-authorization-cleanup")
     {
         await PermissionAuthorizationVerifier.CleanupFixturesAsync();
+        return 0;
+    }
+
+    if (operation == "development-pilot-paid-access-ensure")
+    {
+        var pilotOptions = new DevelopmentPilotOptions { Enabled = true };
+        await DevelopmentPilotAccessEnsureService.EnsurePaidAccessAsync(
+            Options.Create(options),
+            Options.Create(pilotOptions));
+
+        await using var verifyConnection = new NpgsqlConnection(
+            PostgreSqlConnectionFactory.BuildConnectionString(options));
+        await verifyConnection.OpenAsync();
+        await using var verifyCommand = new NpgsqlCommand(
+            """
+            SELECT COUNT(*)
+            FROM saas_tenant_subscriptions
+            WHERE tenant_id = @tenant_id AND is_current;
+            """,
+            verifyConnection);
+        verifyCommand.Parameters.AddWithValue(
+            "tenant_id",
+            DevelopmentPilotIds.TenantId);
+        var count = Convert.ToInt64(await verifyCommand.ExecuteScalarAsync(), System.Globalization.CultureInfo.InvariantCulture);
+
+        await using var tenantCommand = new NpgsqlCommand(
+            """
+            SELECT id::text, tenant_key
+            FROM tenants
+            WHERE tenant_key = 'dev-pilot-tenant' OR id = @tenant_id
+            ORDER BY tenant_key;
+            """,
+            verifyConnection);
+        tenantCommand.Parameters.AddWithValue("tenant_id", DevelopmentPilotIds.TenantId);
+        await using var tenantReader = await tenantCommand.ExecuteReaderAsync();
+        while (await tenantReader.ReadAsync())
+        {
+            Console.WriteLine(
+                $"Tenant row: id={tenantReader.GetString(0)} key={tenantReader.GetString(1)}");
+        }
+        await tenantReader.CloseAsync();
+
+        await using var subscriptionCommand = new NpgsqlCommand(
+            """
+            SELECT id::text, tenant_id::text, is_current, subscription_status
+            FROM saas_tenant_subscriptions
+            WHERE tenant_id = @tenant_id;
+            """,
+            verifyConnection);
+        subscriptionCommand.Parameters.AddWithValue("tenant_id", DevelopmentPilotIds.TenantId);
+        await using var subscriptionReader = await subscriptionCommand.ExecuteReaderAsync();
+        while (await subscriptionReader.ReadAsync())
+        {
+            Console.WriteLine(
+                $"Subscription row: id={subscriptionReader.GetString(0)} tenant={subscriptionReader.GetString(1)} current={subscriptionReader.GetBoolean(2)} status={subscriptionReader.GetString(3)}");
+        }
+        await subscriptionReader.CloseAsync();
+
+        Console.WriteLine($"Development pilot paid access ensured (current subscriptions: {count}).");
+
+        var runtimeOptions = DatabaseConfiguration.LoadRuntime();
+        runtimeOptions.Host = options.Host;
+        runtimeOptions.Port = options.Port;
+        runtimeOptions.Database = options.Database;
+        await using var runtimeConnection = new NpgsqlConnection(
+            PostgreSqlConnectionFactory.BuildConnectionString(runtimeOptions));
+        await runtimeConnection.OpenAsync();
+        await using var runtimeTransaction = await runtimeConnection.BeginTransactionAsync();
+        await using (var setTenant = new NpgsqlCommand(
+                         "SELECT set_config('NevaxisFactOS.tenant_id', @tenant_id, false);",
+                         runtimeConnection,
+                         runtimeTransaction))
+        {
+            setTenant.Parameters.AddWithValue("tenant_id", DevelopmentPilotIds.TenantId.ToString("D"));
+            await setTenant.ExecuteNonQueryAsync();
+        }
+
+        await using var runtimeCountCommand = new NpgsqlCommand(
+            """
+            SELECT current_user,
+                   current_setting('NevaxisFactOS.tenant_id', true),
+                   COUNT(*)
+            FROM saas_tenant_subscriptions
+            WHERE is_current;
+            """,
+            runtimeConnection,
+            runtimeTransaction);
+        await using var runtimeReader = await runtimeCountCommand.ExecuteReaderAsync();
+        await runtimeReader.ReadAsync();
+        Console.WriteLine(
+            $"Runtime-role user={runtimeReader.GetString(0)} tenant setting={runtimeReader.GetString(1)} visible current subscriptions={runtimeReader.GetInt64(2)}.");
+        await runtimeReader.CloseAsync();
+        await runtimeTransaction.CommitAsync();
         return 0;
     }
 
@@ -156,6 +251,6 @@ catch (NpgsqlException exception) when (exception.InnerException is SocketExcept
 }
 catch (Exception exception)
 {
-    Console.Error.WriteLine($"PostgreSQL query failed ({exception.GetType().Name}). No credentials were logged.");
+    Console.Error.WriteLine($"PostgreSQL query failed ({exception.GetType().Name}): {exception.Message}");
     return 5;
 }

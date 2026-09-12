@@ -60,8 +60,15 @@ import {
   type ProductionOrderRequestContext,
 } from "../../production-execution/server/production-order-request-context";
 import { getQualityNcrFollowUpWorkspace } from "../../quality-control/server/quality-ncr-follow-up-api-client";
-import { listFactoryCases } from "../../factory-orchestration/server/factory-orchestration-api-client";
+import { getProductionManagerWorkspace } from "../../production-manager/server/production-manager-api-client";
+import type { ProductionManagerDecisionApi } from "../../production-manager/server/production-manager-api-client";
+import {
+  getProductionManagerConfidenceLabel,
+  getProductionManagerDecisionTypeLabel,
+  getProductionManagerStatusLabel,
+} from "../../production-manager/domain/production-manager-labels";
 import { getFactoryBlockerLabel } from "../../factory-orchestration/domain/factory-orchestration-labels";
+import { listFactoryCases } from "../../factory-orchestration/server/factory-orchestration-api-client";
 import { fetchCurrentTenantSubscription } from "../../saas-subscription/server/saas-subscription-queries";
 import { isModuleEntitled } from "../../saas-subscription/domain/saas-subscription-labels";
 import type { TenantSubscriptionCurrent } from "../../saas-subscription/domain/saas-subscription-types";
@@ -83,6 +90,7 @@ const LIST_PAGE_SIZE = 100;
 const PRIORITY_TIER = {
   FACTORY_CRITICAL: 50,
   COMMERCIAL_CRITICAL: 100,
+  PRODUCTION_MANAGER: 150,
   PRODUCTION_REVIEW: 200,
   QUALITY_REVIEW: 300,
   MAINTENANCE_HIGH: 400,
@@ -533,6 +541,46 @@ function buildProcurementItems(
     });
 }
 
+function buildProductionManagerDecisionItems(
+  decisions: readonly ProductionManagerDecisionApi[],
+  stateCapturedAtUtc: string,
+): readonly OperationsCommandCenterQueueItem[] {
+  return decisions
+    .filter((row) =>
+      row.status === "pending-approval"
+      || row.status === "proposed"
+      || row.status === "approved")
+    .map((row) => {
+      const isDataReview = row.confidenceBand === "insufficient-data";
+      const severityRank =
+        row.confidenceBand === "low" ? 3
+        : row.confidenceBand === "medium" ? 2
+        : row.confidenceBand === "high" ? 1
+        : 0;
+
+      return {
+        id: `production-manager:decision:${row.id}`,
+        moduleCode: "production-manager" as const,
+        moduleLabel: getOperationsCommandCenterModuleLabel("production-manager"),
+        sourceReference: row.id.slice(0, 8).toUpperCase(),
+        title: row.title,
+        statusLabel: `${getProductionManagerDecisionTypeLabel(row.decisionType)} · ${getProductionManagerStatusLabel(row.status)}`,
+        evidenceLabel: getProductionManagerConfidenceLabel(row.confidenceBand),
+        freshnessLabel: formatDateTime(stateCapturedAtUtc),
+        deepLinkHref: `/operasyon/yonetim-merkezi/kararlar/${row.id}`,
+        itemState: isDataReview ? "insufficient-data" as const : "available" as const,
+        priorityTier: isDataReview ? PRIORITY_TIER.DATA_REVIEW : PRIORITY_TIER.PRODUCTION_MANAGER,
+        severityRank,
+        sortTimestampUtc: stateCapturedAtUtc,
+        sortTimestampLabel: formatDateTime(stateCapturedAtUtc),
+        humanReviewRequired:
+          row.status === "pending-approval"
+          || row.status === "proposed"
+          || (row.status === "approved" && row.approvalState === "approved"),
+      };
+    });
+}
+
 function buildAiTaskItems(
   tasks: readonly ReturnType<typeof mapRawAiTaskSummary>[],
 ): readonly OperationsCommandCenterQueueItem[] {
@@ -750,6 +798,12 @@ export async function readOperationsCommandCenterWorkspace(
     "factory-case.read",
     "module.production",
   );
+  const productionManagerAccess = evaluateModuleAccess(
+    access,
+    subscription,
+    "production-manager.read",
+    "module.production",
+  );
 
   const [commercialContextResult, materialContextResult, moldContextResult] = await Promise.all([
     commercialAccess === "granted" ? resolveCommercialIntelligenceRequestContext() : Promise.resolve(null),
@@ -766,6 +820,7 @@ export async function readOperationsCommandCenterWorkspace(
     materialResult,
     procurementResult,
     factoryResult,
+    productionManagerResult,
     aiTaskResult,
   ] = await Promise.all([
     commercialAccess === "granted" && commercialContextResult?.status === "success"
@@ -902,6 +957,20 @@ export async function readOperationsCommandCenterWorkspace(
           value: undefined,
         }),
 
+    productionManagerAccess === "granted"
+      ? getProductionManagerWorkspace(productionContext).then((result) => ({
+          access: productionManagerAccess,
+          availability: result.status === "success" ? "available" as const : toSourceAvailability(productionManagerAccess, result.code),
+          value: result.status === "success" ? result.value : undefined,
+          message: result.status === "failure" ? result.message : undefined,
+          count: result.status === "success" ? result.value.pendingDecisions.length : undefined,
+        }))
+      : Promise.resolve({
+          access: productionManagerAccess,
+          availability: toSourceAvailability(productionManagerAccess),
+          value: undefined,
+        }),
+
     aiTaskAccess === "granted"
       ? listAiTasks(productionContext, { page: 1, pageSize: LIST_PAGE_SIZE }).then((result) => ({
           access: aiTaskAccess,
@@ -924,6 +993,10 @@ export async function readOperationsCommandCenterWorkspace(
   const queueItems = sortQueueItems([
     ...buildFactoryCaseItems(factoryResult.value ?? []),
     ...buildCommercialItems(commercialResult.value ?? []),
+    ...buildProductionManagerDecisionItems(
+      productionManagerResult.value?.pendingDecisions ?? [],
+      productionManagerResult.value?.stateCapturedAtUtc ?? "",
+    ),
     ...buildProductionItems(productionResult.value ?? []),
     ...buildQualityItems(qualityResult.value ?? []),
     ...buildMaintenanceItems(maintenanceResult.value ?? []),
@@ -937,6 +1010,7 @@ export async function readOperationsCommandCenterWorkspace(
 
   const moduleHealth: OperationsCommandCenterModuleHealth[] = [
     buildModuleHealthEntry("factory", factoryResult),
+    buildModuleHealthEntry("production-manager", productionManagerResult),
     buildModuleHealthEntry("commercial", commercialResult),
     buildModuleHealthEntry("production", productionResult),
     buildModuleHealthEntry("quality", qualityResult),

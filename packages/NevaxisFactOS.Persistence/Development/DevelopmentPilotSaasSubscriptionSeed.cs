@@ -6,12 +6,6 @@ namespace NevaxisFactOS.Persistence.Development;
 
 internal static class DevelopmentPilotSaasSubscriptionSeed
 {
-    private static readonly DateTimeOffset DevPeriodStartUtc =
-        new(2026, 8, 1, 0, 0, 0, TimeSpan.Zero);
-
-    private static readonly DateTimeOffset DevPeriodEndUtc =
-        new(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
-
     internal static async Task EnsureDevelopmentSubscriptionAsync(
         NevaxisFactOSDbContext dbContext,
         Guid tenantId,
@@ -19,9 +13,30 @@ internal static class DevelopmentPilotSaasSubscriptionSeed
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
     {
-        if (await dbContext.SaasTenantSubscriptions.AsNoTracking()
-                .AnyAsync(subscription => subscription.Id == DevelopmentPilotIds.DevPilotTenantSubscriptionId, cancellationToken))
+        var periodStartUtc = seedTimestampUtc.AddMonths(-1);
+        var periodEndUtc = seedTimestampUtc.AddYears(1);
+
+        var existing = await dbContext.SaasTenantSubscriptions
+            .SingleOrDefaultAsync(
+                subscription => subscription.Id == DevelopmentPilotIds.DevPilotTenantSubscriptionId,
+                cancellationToken);
+
+        if (existing is not null)
         {
+            if (existing.CurrentPeriodEndUtc < seedTimestampUtc
+                || !string.Equals(existing.SubscriptionStatus, SaasSubscriptionStatuses.Active, StringComparison.Ordinal))
+            {
+                existing.SubscriptionStatus = SaasSubscriptionStatuses.Active;
+                existing.CurrentPeriodStartUtc = periodStartUtc;
+                existing.CurrentPeriodEndUtc = periodEndUtc;
+                existing.GraceUntilUtc = null;
+                existing.SuspendedAtUtc = null;
+                existing.CancelledAtUtc = null;
+                existing.IsCurrent = true;
+                existing.UpdatedAtUtc = seedTimestampUtc;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             return;
         }
 
@@ -32,9 +47,9 @@ internal static class DevelopmentPilotSaasSubscriptionSeed
             CommercialPlanVersionId = DevelopmentPilotIds.SaasCommercialDevMonthlyVersionId,
             SubscriptionStatus = SaasSubscriptionStatuses.Active,
             BillingCadence = SaasCommercialBillingCadences.Monthly,
-            StartsAtUtc = DevPeriodStartUtc,
-            CurrentPeriodStartUtc = DevPeriodStartUtc,
-            CurrentPeriodEndUtc = DevPeriodEndUtc,
+            StartsAtUtc = periodStartUtc,
+            CurrentPeriodStartUtc = periodStartUtc,
+            CurrentPeriodEndUtc = periodEndUtc,
             TrialEndsAtUtc = null,
             GraceUntilUtc = null,
             SuspendedAtUtc = null,
