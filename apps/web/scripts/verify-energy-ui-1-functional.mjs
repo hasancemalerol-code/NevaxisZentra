@@ -1058,7 +1058,7 @@ try {
     });
     ownerPage.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-    await signInPersona(ownerPage, "tenant-owner@dev.local", ownerPassword, mfaSecret);
+    await signInPersona(ownerPage, "admin@demo.nevaxisfactos.local", ownerPassword, mfaSecret);
     await exerciseEnergyWorkspace(ownerPage, `owner-${viewport.label}`);
 
     if (viewport.label === "1600x1000") {

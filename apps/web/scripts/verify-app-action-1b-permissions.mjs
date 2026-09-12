@@ -117,7 +117,7 @@ async function signIn(email, password) {
 
 async function signInOwner() {
   const jar = await signIn(
-    "tenant-owner@dev.local",
+    "admin@demo.nevaxisfactos.local",
     requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   );
   const verify = await api("POST", "/api/identity/mfa/verify", {

@@ -108,7 +108,7 @@ async function signInPendingOwner() {
   const jar = new CookieJar();
   const result = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: "app-action-1a-mfa-exit",
   }, jar);

@@ -297,7 +297,7 @@ export function ShiftWorkforceView({
       case "risk":
         return "Kapsama gereksinimleri, onaylı atamalar ve personel sürekliliği risklerini deterministik olarak inceleyin.";
       default:
-        return "ERP/HR kaynaklı personel verilerini ve NevaxisFactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin.";
+        return "ERP/HR kaynaklı personel verilerini ve FactOS operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin.";
     }
   }, [activeTab]);
 

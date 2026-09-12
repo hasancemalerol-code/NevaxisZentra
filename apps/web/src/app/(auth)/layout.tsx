@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
+import { FactosAuthHero } from "@/components/brand/factos-auth-hero";
 import { getWebApplicationConfig } from "@/config";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
 
@@ -21,9 +22,10 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className="auth-layout">
-      <div className="auth-layout__frame">
+      <FactosAuthHero />
+      <div className="auth-layout__panel">
         <p className="visually-hidden">{config.applicationName}</p>
-        {children}
+        <div className="auth-layout__frame">{children}</div>
       </div>
     </div>
   );

@@ -170,7 +170,7 @@ async function signInOwnerJar(password, mfaSecret) {
   const jar = new CookieJar();
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password,
     deviceLabel: `${CLOSURE_PREFIX}-ui-owner`,
   }, jar);
@@ -309,7 +309,7 @@ async function runBrowserVerification({
 
       await signInThroughForm(ownerPage, {
         organization: ORGANIZATION,
-        email: "tenant-owner@dev.local",
+        email: "admin@demo.nevaxisfactos.local",
         password: ownerPassword,
       });
       await ownerPage.waitForURL("**/mfa-dogrula", { timeout: 30000 });
@@ -331,7 +331,7 @@ async function runBrowserVerification({
 
       await signInThroughForm(suspendedPage, {
         organization: ORGANIZATION,
-        email: "tenant-owner@dev.local",
+        email: "admin@demo.nevaxisfactos.local",
         password: ownerPassword,
       });
       await suspendedPage.waitForURL("**/mfa-dogrula", { timeout: 30000 });

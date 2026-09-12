@@ -341,7 +341,7 @@ const ownerContext = await browser.newContext({ deviceScaleFactor: 1 });
 const ownerPage = await ownerContext.newPage();
 
 try {
-  await signInPersona(ownerPage, "tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
+  await signInPersona(ownerPage, "admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
   ownerPage.on("console", (msg) => { if (msg.type() === "error") report.consoleErrors.push(msg.text()); });
   ownerPage.on("pageerror", (error) => report.consoleErrors.push(error.message));
   await waitForAuthenticatedWorkspace(ownerPage);

@@ -6,7 +6,7 @@ public sealed class DevelopmentSaasIdentityOptions
 
     public bool Enabled { get; set; }
 
-    public string TenantOwnerEmail { get; set; } = "tenant-owner@dev.local";
+    public string TenantOwnerEmail { get; set; } = "admin@demo.nevaxisfactos.local";
 
     public string TenantOwnerPassword { get; set; } = string.Empty;
 

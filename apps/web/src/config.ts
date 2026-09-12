@@ -1,4 +1,4 @@
-const DEFAULT_APPLICATION_NAME = "NEVAXIS FACTOS";
+const DEFAULT_APPLICATION_NAME = "FactOS";
 
 export type WebApplicationConfig = Readonly<{
   applicationName: string;

@@ -38,7 +38,7 @@ function assertNoSecrets(label, value) {
     MARKER_PASSWORD,
     process.env.DevelopmentSaasIdentity__ActiveUserPassword,
     process.env.DevelopmentSaasIdentity__TenantOwnerPassword,
-    "tenant-owner@dev.local",
+    "admin@demo.nevaxisfactos.local",
     "machine-responsible@dev.local",
   ].filter(Boolean);
   if (containsAny(value, secrets)) {
@@ -111,7 +111,7 @@ assert("normal-user lands on an app path", /\/(dashboard|mfa-dogrula)/.test(norm
 
 const owner = await postSignIn({
   organizationContext: ORGANIZATION,
-  email: "tenant-owner@dev.local",
+  email: "admin@demo.nevaxisfactos.local",
   password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
 });
 assert("admin password step reaches MFA", owner.status === 303 && owner.location.includes("/mfa-dogrula"));

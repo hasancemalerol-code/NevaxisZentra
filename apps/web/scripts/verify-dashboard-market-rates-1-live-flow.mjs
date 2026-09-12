@@ -8,7 +8,7 @@ import { join } from "node:path";
 const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
 const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
-const ACTOR_EMAIL = "tenant-owner@dev.local";
+const ACTOR_EMAIL = "admin@demo.nevaxisfactos.local";
 const SCREENSHOT_DIR = join(process.cwd(), ".cursor-screenshots");
 const PLACEMENT_SHOT = join(SCREENSHOT_DIR, "dashboard-market-rates-1-compact-placement-authenticated.png");
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";

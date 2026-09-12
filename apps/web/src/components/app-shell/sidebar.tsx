@@ -4,7 +4,9 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
+import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
 import { IconButton } from "@/components/ui/button";
+import { FACTOS_BRAND } from "@/lib/brand/factos-brand";
 import { resolveNavigationIcon } from "@/lib/navigation/navigation-icon-registry";
 import { isNavigationItemActive } from "@/lib/navigation/navigation-types";
 import type { SerializableNavigationGroup } from "@/lib/navigation/navigation-types";
@@ -31,21 +33,11 @@ export function Sidebar({
     >
       <div className="sidebar-brand">
         <Link
-          aria-label="NEVAXIS FACTOS ana çalışma alanı"
+          aria-label={`${FACTOS_BRAND.productName} ${FACTOS_BRAND.endorsement} ana çalışma alanı`}
           className="brand-link"
           href="/"
         >
-          <span
-            aria-hidden="true"
-            className="brand-mark"
-          >
-            NF
-          </span>
-
-          <span className="brand-copy">
-            <small>NEVAXIS</small>
-            <strong>FACTOS</strong>
-          </span>
+          <FactosBrandLockup className="brand-lockup" priority />
         </Link>
 
         <IconButton

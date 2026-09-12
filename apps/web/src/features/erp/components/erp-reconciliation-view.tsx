@@ -42,7 +42,7 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
     <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Eşleştirme"
-        description="Harici ERP müşteri ve ürün kayıtlarının NevaxisFactOS operasyonel referanslarıyla eşleştirilmesi. Otomatik onay yoktur."
+        description="Harici ERP müşteri ve ürün kayıtlarının FactOS operasyonel referanslarıyla eşleştirilmesi. Otomatik onay yoktur."
         notice={
           <ErpInfoBanner>
             Öneri durumunda: Öneri — kullanıcı onayı gerekli. AI eşleştirme kullanılmaz.

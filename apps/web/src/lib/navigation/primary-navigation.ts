@@ -33,7 +33,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
-        label: "NevaxisFactOS Teams",
+        label: "FactOS Teams",
         href: "/teams",
         iconKey: "messages-square",
       },

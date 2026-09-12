@@ -268,7 +268,7 @@ async function runBrowserVerification({
 
       await signInThroughForm(ownerPage, {
         organization: ORGANIZATION,
-        email: "tenant-owner@dev.local",
+        email: "admin@demo.nevaxisfactos.local",
         password: ownerPassword,
       });
       await ownerPage.waitForURL("**/mfa-dogrula", { timeout: 30000 });
@@ -339,7 +339,7 @@ const maintenancePassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassw
 void machinePassword();
 void maintenancePassword;
 
-const ownerJar = await signIn("tenant-owner@dev.local", ownerPassword, mfaSharedSecret);
+const ownerJar = await signIn("admin@demo.nevaxisfactos.local", ownerPassword, mfaSharedSecret);
 
 const activeRolesBefore = await api("GET", `/api/admin-access/members/${ACTIVE_MEMBER}/effective-access`, undefined, ownerJar);
 const rolesBeforeGrant = (activeRolesBefore.json?.roleReferences ?? []).filter((role) => role !== "tenant-admin");

@@ -121,7 +121,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwner() {
-  const jar = await signIn("tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const verify = await api("POST", "/api/identity/mfa/verify", { totpCode: generateTotp(requireEnv("DevelopmentSaasIdentity__MfaSharedSecret")) }, jar);
   if (verify.status !== 200) fail(`owner MFA failed: ${verify.status}`);
   return jar;

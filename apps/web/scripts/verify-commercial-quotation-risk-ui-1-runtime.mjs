@@ -276,7 +276,7 @@ try {
   page.on("console", (msg) => { if (msg.type() === "error") report.consoleErrors.push(msg.text()); });
   page.on("pageerror", (error) => report.consoleErrors.push(error.message));
 
-  await signInPersona(page, "tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
+  await signInPersona(page, "admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
 
   const workspaceApi = await apiJson(context, "GET", `/api/commercial-intelligence/quotation-risks/workspace?facilityId=${FACILITY}`);
   assert("workspace API 200", workspaceApi.status === 200, String(workspaceApi.status));

@@ -135,7 +135,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwner() {
-  const jar = await signIn("tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const verify = await api("POST", "/api/identity/mfa/verify", {
     totpCode: generateTotp(requireEnv("DevelopmentSaasIdentity__MfaSharedSecret")),
   }, jar);
@@ -197,7 +197,7 @@ async function assertOwnerEnergyPresentation() {
     const page = await context.newPage();
     await signInThroughForm(page, {
       organization: ORGANIZATION,
-      email: "tenant-owner@dev.local",
+      email: "admin@demo.nevaxisfactos.local",
       password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     });
     await completeOwnerMfa(page, requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));

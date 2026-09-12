@@ -18,11 +18,11 @@
   background: #fff;
 }
 
-.subscription-recovery-shell__brand {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0f172a;
+.subscription-recovery-shell__brand-lockup {
+  display: block;
+  width: auto;
+  max-width: 168px;
+  height: auto;
 }
 
 .subscription-recovery-shell__main {

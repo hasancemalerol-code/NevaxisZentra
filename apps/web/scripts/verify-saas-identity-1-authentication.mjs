@@ -530,7 +530,7 @@ const tenantOwnerPassword = process.env.DevelopmentSaasIdentity__TenantOwnerPass
 const pendingMfaLogin = await identityRequest(
   "POST",
   "/api/identity/sign-in",
-  signInBody("tenant-owner@dev.local", tenantOwnerPassword),
+  signInBody("admin@demo.nevaxisfactos.local", tenantOwnerPassword),
 );
 assert("tenant-owner login → 200", pendingMfaLogin.status === 200, `status=${pendingMfaLogin.status}`);
 assert("tenant-owner login requires MFA", pendingMfaLogin.json?.requiresMfa === true);
@@ -562,7 +562,7 @@ assert("completed MFA /me mfaPending false", completedMe.json?.mfaPending === fa
 const invalidTotpLogin = await identityRequest(
   "POST",
   "/api/identity/sign-in",
-  signInBody("tenant-owner@dev.local", tenantOwnerPassword),
+  signInBody("admin@demo.nevaxisfactos.local", tenantOwnerPassword),
 );
 assert("tenant-owner re-login for invalid TOTP → 200", invalidTotpLogin.status === 200);
 

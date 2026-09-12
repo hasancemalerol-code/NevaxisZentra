@@ -9,7 +9,7 @@ const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001")
 const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const FACILITY_CODE = "pilot-facility";
-const ACTOR_A_EMAIL = "tenant-owner@dev.local";
+const ACTOR_A_EMAIL = "admin@demo.nevaxisfactos.local";
 const ACTOR_B_BY_MEMBERSHIP = {
   "bb000002-0013-4000-8000-000000000013": {
     email: "active-user@dev.local",

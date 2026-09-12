@@ -15,7 +15,7 @@ const SESSION_COOKIE = "NevaxisFactOS.session";
 const CSRF_COOKIE = "NevaxisFactOS.csrf";
 const CSRF_HEADER = "X-NevaxisFactOS-Csrf";
 const ACTIVE_EMAIL = "active-user@dev.local";
-const TENANT_OWNER_EMAIL = "tenant-owner@dev.local";
+const TENANT_OWNER_EMAIL = "admin@demo.nevaxisfactos.local";
 function fail(message) {
   console.error(`SAAS-IDENTITY-1 session-security verification failed: ${message}`);
   process.exit(1);

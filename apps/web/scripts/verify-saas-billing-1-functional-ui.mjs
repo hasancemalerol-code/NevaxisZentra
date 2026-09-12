@@ -267,7 +267,7 @@ async function runBrowserVerification({ ownerPassword, mfaSharedSecret }) {
 
       await signInThroughForm(page, {
         organization: ORGANIZATION,
-        email: "tenant-owner@dev.local",
+        email: "admin@demo.nevaxisfactos.local",
         password: ownerPassword,
       });
       await page.waitForURL("**/mfa-dogrula", { timeout: 30000 });
@@ -297,7 +297,7 @@ const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 const ownerJar = new CookieJar();
 const signIn = await api("POST", "/api/identity/sign-in", {
   organizationContext: ORGANIZATION,
-  email: "tenant-owner@dev.local",
+  email: "admin@demo.nevaxisfactos.local",
   password: ownerPassword,
   deviceLabel: `${CLOSURE_PREFIX}-ui-setup`,
 }, ownerJar);

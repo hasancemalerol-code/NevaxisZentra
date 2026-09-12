@@ -1,25 +1,36 @@
 .auth-layout {
   display: grid;
   min-height: 100vh;
+  grid-template-columns: minmax(0, 1.55fr) minmax(360px, 1fr);
+  background: #f4f8fb;
+}
+
+.auth-layout__hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fbfd 0%, #eef4f8 100%);
+}
+
+.auth-layout__hero-image {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.auth-layout__panel {
+  display: grid;
   place-items: center;
-  padding: var(--space-8) var(--space-4);
-  background:
-    radial-gradient(circle at top, rgb(36 99 167 / 8%), transparent 42%),
-    var(--color-background);
+  padding: var(--space-8) var(--space-6);
+  background: #fff;
+  border-left: 1px solid rgb(36 99 167 / 12%);
 }
 
 .auth-layout__frame {
-  width: min(100%, 440px);
+  width: min(100%, 420px);
 }
 
 .auth-shell {
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-8);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
 .auth-shell__header {
@@ -27,19 +38,11 @@
   gap: var(--space-2);
 }
 
-.auth-shell__eyebrow {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .auth-shell__title {
   margin: 0;
   font-size: 28px;
   line-height: 1.2;
+  color: #0f2744;
 }
 
 .auth-shell__description {
@@ -79,6 +82,8 @@
 
 .auth-form__field input:focus-visible {
   border-color: var(--color-accent);
+  outline: 3px solid color-mix(in srgb, var(--color-focus-ring) 38%, transparent);
+  outline-offset: 1px;
 }
 
 .auth-form__submit {
@@ -222,4 +227,33 @@
   margin: 0;
   color: var(--color-danger);
   font-size: 12px;
+}
+
+@media (max-width: 960px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 34vh) auto;
+  }
+
+  .auth-layout__hero {
+    min-height: 220px;
+    max-height: 34vh;
+    border-bottom: 1px solid rgb(36 99 167 / 12%);
+  }
+
+  .auth-layout__panel {
+    border-left: none;
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-layout__hero {
+    min-height: 180px;
+    max-height: 28vh;
+  }
+
+  .auth-shell__title {
+    font-size: 24px;
+  }
 }

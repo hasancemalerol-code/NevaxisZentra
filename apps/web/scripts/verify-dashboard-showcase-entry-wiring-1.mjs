@@ -197,7 +197,7 @@ async function assertDashboardShowcaseEntry(page, label) {
   assert(`${label} keyboard focus visible`, focusVisible);
 
   const destination = await fetchWeb("/fabrika-vitrini", await signInThroughApi(
-    "tenant-owner@dev.local",
+    "admin@demo.nevaxisfactos.local",
     requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
   ));
@@ -210,7 +210,7 @@ const ownerPassword = requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword")
 const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 const activePassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassword");
 
-const ownerJar = await signInThroughApi("tenant-owner@dev.local", ownerPassword, mfaSharedSecret);
+const ownerJar = await signInThroughApi("admin@demo.nevaxisfactos.local", ownerPassword, mfaSharedSecret);
 const ownerDashboard = await fetchWeb("/dashboard", ownerJar);
 assert("tenant owner dashboard HTTP 200", ownerDashboard.status === 200, `status=${ownerDashboard.status}`);
 assert("tenant owner dashboard includes showcase link", ownerDashboard.html.includes('data-dashboard-showcase-tv-link="true"'));
@@ -284,7 +284,7 @@ try {
     page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
     await signInThroughForm(page, {
-      email: "tenant-owner@dev.local",
+      email: "admin@demo.nevaxisfactos.local",
       password: ownerPassword,
       mfaSecret: mfaSharedSecret,
     });

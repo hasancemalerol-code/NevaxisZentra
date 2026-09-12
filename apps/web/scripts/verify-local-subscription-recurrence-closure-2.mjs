@@ -125,7 +125,7 @@ async function signInOwner(jar) {
   const secret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password,
     deviceLabel: "LOCAL-SUBSCRIPTION-RECURRENCE-CLOSURE-2",
   }, jar);

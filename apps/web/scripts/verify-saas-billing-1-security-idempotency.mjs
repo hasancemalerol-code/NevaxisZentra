@@ -244,7 +244,7 @@ const restrictedDenied = await api("GET", "/api/saas-billing/workspace", undefin
 assert("unauthorized billing read → 403", restrictedDenied.status === 403, `status=${restrictedDenied.status}`);
 
 const owner = await signIn(
-  "tenant-owner@dev.local",
+  "admin@demo.nevaxisfactos.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );

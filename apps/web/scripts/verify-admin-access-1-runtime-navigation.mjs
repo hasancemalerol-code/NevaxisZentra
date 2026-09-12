@@ -103,7 +103,7 @@ async function signIn(email, password) {
 async function signInOwner() {
   const { createHmac } = await import("node:crypto");
   const secret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
-  const jar = await signIn("tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const counter = Math.floor(Date.now() / 1000 / 30);
   const normalized = secret.trim().replace(/=+$/, "").toUpperCase();

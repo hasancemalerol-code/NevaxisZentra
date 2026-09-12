@@ -254,7 +254,7 @@ try {
   console.log("PHASE 1 — establish real session");
   await signInThroughForm(page, {
     organization: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   });
   await completeMfa(page, requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));

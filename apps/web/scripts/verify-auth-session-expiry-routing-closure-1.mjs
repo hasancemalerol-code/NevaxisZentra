@@ -158,7 +158,7 @@ async function ownerApiSession() {
   const jar = new CookieJar();
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password,
     deviceLabel: "AUTH-SESSION-EXPIRY-ROUTING-setup",
   }, jar);
@@ -264,7 +264,7 @@ try {
   await proofPage.goto(`${WEB}/giris`, { waitUntil: "networkidle", timeout: 90000 });
   await signInThroughForm(proofPage, {
     organization: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   });
   await completeMfa(proofPage, requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));

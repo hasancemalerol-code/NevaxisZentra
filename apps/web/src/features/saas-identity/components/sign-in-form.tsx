@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DEVELOPMENT_DEMO_CREDENTIALS } from "@/lib/brand/factos-brand";
 import { signInSaasIdentityBrowser } from "../client/saas-identity-browser-client";
 import { stripSensitiveQueryParam } from "../lib/saas-identity-csrf";
 import { isSafeAppReturnUrl } from "../lib/saas-identity-return-url";
@@ -52,8 +53,16 @@ export function SignInForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const submittingRef = useRef(false);
-  const [organizationContext, setOrganizationContext] = useState("");
-  const [email, setEmail] = useState("");
+  const [organizationContext, setOrganizationContext] = useState(
+    process.env.NODE_ENV === "development"
+      ? DEVELOPMENT_DEMO_CREDENTIALS.organizationContext
+      : "",
+  );
+  const [email, setEmail] = useState(
+    process.env.NODE_ENV === "development"
+      ? DEVELOPMENT_DEMO_CREDENTIALS.email
+      : "",
+  );
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(initialError);

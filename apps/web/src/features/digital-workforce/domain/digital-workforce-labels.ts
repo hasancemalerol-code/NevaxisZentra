@@ -12,7 +12,7 @@ export const DIGITAL_WORKFORCE_TITLE = "Dijital İş Gücü Kontrol Merkezi";
 export const DIGITAL_WORKFORCE_SUBTITLE =
   "Fabrikanızdaki dijital çalışanları yönetin, yetkilendirin ve sonuçlarını izleyin.";
 export const DIGITAL_WORKFORCE_POSITIONING =
-  "NevaxisFactOS yalnızca fabrikayı analiz etmez. Belirlenen yetki sınırları içinde işi alır, yürütür, doğrular ve kapatır.";
+  "FactOS yalnızca fabrikayı analiz etmez. Belirlenen yetki sınırları içinde işi alır, yürütür, doğrular ve kapatır.";
 export const DIGITAL_WORKFORCE_SUMMARY =
   "7 Dijital Çalışan fabrikanın üretim, bakım, malzeme, kalite, tedarik ve kalıp operasyonlarında görev alır. Her çalışan yalnızca izin verilen sistemlere ve kaynaklara erişir. Çalışma seviyesi İzle'den Tam Otonom'a kadar ayrı ayrı ayarlanabilir. İşler sonuç doğrulanmadan kapatılmaz.";
 export const DIGITAL_WORKFORCE_FULL_NOTE =

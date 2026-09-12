@@ -249,7 +249,7 @@ try {
 
     await signInThroughForm(page, {
       organization: ORGANIZATION,
-      email: "tenant-owner@dev.local",
+      email: "admin@demo.nevaxisfactos.local",
       password: ownerPassword,
       mfaSecret: mfaSharedSecret,
     });

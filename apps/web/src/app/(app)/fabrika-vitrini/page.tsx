@@ -1,3 +1,4 @@
+import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
 import { FactoryShowcaseView } from "@/features/dashboard-showcase/components/factory-showcase-view";
 import "@/features/dashboard-showcase/components/factory-showcase.css";
 import { readDashboardShowcaseWorkspace } from "@/features/dashboard-showcase/server/dashboard-showcase-queries";
@@ -12,8 +13,7 @@ export default async function FabrikaVitriniPage() {
       <div className="factory-showcase factory-showcase--error">
         <header className="factory-showcase__header">
           <div className="factory-showcase__brand">
-            <span aria-hidden="true" className="factory-showcase__brand-mark">CF</span>
-            <strong>NevaxisFactOS</strong>
+            <FactosBrandLockup className="factory-showcase__brand-lockup" />
             <span aria-hidden="true" className="factory-showcase__brand-divider" />
             <span>Fabrika Operasyon Görünümü</span>
           </div>

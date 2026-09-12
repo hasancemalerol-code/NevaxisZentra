@@ -42,7 +42,7 @@ export default async function DashboardPage() {
       <header className="command-center__titlebar">
         <div className="command-center__titlebar-copy">
           <p className="command-center__eyebrow">
-            NEVAXIS FACTOS Operasyon Merkezi
+            FactOS Operasyon Merkezi
           </p>
 
           <h1>AI Görev Merkezi</h1>
@@ -247,7 +247,7 @@ export default async function DashboardPage() {
 
       <footer className="command-center__footer">
         <span>
-          NEVAXIS FACTOS · Human-in-the-Loop Factory Operating
+          FactOS · Human-in-the-Loop Factory Operating
           System
         </span>
 

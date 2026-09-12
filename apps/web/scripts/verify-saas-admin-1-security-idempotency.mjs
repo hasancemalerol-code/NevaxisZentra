@@ -199,12 +199,12 @@ const unauthorized = await api("GET", "/api/admin-access/workspace-summary", und
 assert("unauthorized 403", unauthorized.status === 403, `status=${unauthorized.status}`);
 
 const owner = await signIn(
-  "tenant-owner@dev.local",
+  "admin@demo.nevaxisfactos.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );
 
-const pending = await signIn("tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+const pending = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
 const mfaRequired = await api("POST", "/api/admin-access/invitations", {
   email: `${CLOSURE_PREFIX.toLowerCase()}-mfa@closure.dev.local`,
   idempotencyKey: `${CLOSURE_PREFIX}-mfa`,

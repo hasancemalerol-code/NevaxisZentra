@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { getWebApplicationConfig } from "@/config";
+import { buildFactosDocumentTitle } from "@/lib/brand/factos-brand";
 
 import "./styles.css";
 import "./globals.css";
@@ -11,12 +11,10 @@ import "./command-center.css";
 import "./production-execution.css";
 import "./export.css";
 
-const config = getWebApplicationConfig();
-
 export const metadata: Metadata = {
-  title: `${config.applicationName} — Factory Operations`,
+  title: buildFactosDocumentTitle(),
   description:
-    "NEVAXIS FACTOS desktop-first factory operations management platform.",
+    "FactOS by NEVAXIS — AI factory operations platform for real-time visibility, planning, quality, and human-in-the-loop execution.",
 };
 
 interface RootLayoutProps {

@@ -42,7 +42,7 @@ const DEV_ACCOUNT_IDS = [
   "bb000002-0031-4000-8000-000000000031",
 ];
 
-const TENANT_OWNER_EMAIL = "tenant-owner@dev.local";
+const TENANT_OWNER_EMAIL = "admin@demo.nevaxisfactos.local";
 const ACTIVE_USER_EMAIL = "active-user@dev.local";
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;

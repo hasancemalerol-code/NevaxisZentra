@@ -6,7 +6,7 @@ export type AiTaskTargetSystem =
 export const AI_TASK_TARGET_SYSTEM_LABELS: Readonly<
   Record<AiTaskTargetSystem, string>
 > = {
-  crevafactos: "NEVAXIS FACTOS",
+  crevafactos: "FactOS",
   erp: "ERP",
   mes: "MES",
   maintenance: "Bakım Yönetimi",
@@ -18,7 +18,7 @@ export const AI_TASK_TARGET_SYSTEM_DESCRIPTIONS: Readonly<
   Record<AiTaskTargetSystem, string>
 > = {
   crevafactos:
-    "İşlem NEVAXIS FACTOS içinde uygulanır veya takip edilir.",
+    "İşlem FactOS içinde uygulanır veya takip edilir.",
   erp:
     "Onaylanan işlem bağlı ERP sistemine aktarılır.",
   mes:
@@ -35,7 +35,7 @@ export function getAiTaskTargetSystemLabel(
   targetSystem: AiTaskRecommendation["targetSystem"],
 ): string {
   if (!targetSystem) {
-    return "NEVAXIS FACTOS";
+    return "FactOS";
   }
 
   return AI_TASK_TARGET_SYSTEM_LABELS[targetSystem];

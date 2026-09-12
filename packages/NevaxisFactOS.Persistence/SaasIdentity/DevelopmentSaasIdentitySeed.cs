@@ -152,6 +152,11 @@ internal static class DevelopmentSaasIdentitySeed
             };
             dbContext.SaasIdentityAccounts.Add(account);
         }
+        else if (!string.Equals(account.EmailNormalized, normalizedEmail, StringComparison.Ordinal))
+        {
+            account.EmailNormalized = normalizedEmail;
+            account.UpdatedAtUtc = seedTimestampUtc;
+        }
 
         await EnsurePasswordCredentialAsync(
             dbContext,

@@ -15,7 +15,7 @@ const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001")
 const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
 const CDP_PORT = Number(process.env.NEVAXIS_FACTOS_DESKTOP_CDP_PORT ?? "9233");
 const ORGANIZATION = "dev-pilot-tenant";
-const EMAIL = "tenant-owner@dev.local";
+const EMAIL = "admin@demo.nevaxisfactos.local";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const SCREENSHOT_DIR = process.env.NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_DIR
   ?? join(ROOT, ".cursor-screenshots/desktop-sales-demo-1");

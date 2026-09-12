@@ -19,7 +19,7 @@ const SCREENSHOT_DIR = process.env.NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_SCREENSHOT
 const RESULTS_JSON = join(SCREENSHOT_DIR, "validation-results.json");
 const MANIFEST_PATH = join(dirname(fileURLToPath(import.meta.url)), "desktop-all-modules-validation-manifest-1.json");
 const ORGANIZATION = "dev-pilot-tenant";
-const EMAIL = "tenant-owner@dev.local";
+const EMAIL = "admin@demo.nevaxisfactos.local";
 const REPRESENTATIVE_ONLY = process.env.NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY === "1";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 

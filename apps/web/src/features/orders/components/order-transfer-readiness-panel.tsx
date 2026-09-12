@@ -58,7 +58,7 @@ function getReadinessCheckPresentation(
           ? `Aktarım hedefi ${getOrderTargetSystemLabel(
               orderDraft.transfer.targetSystem,
             )} olarak belirlendi.`
-          : "ERP, MES veya NevaxisFactOS aktarım hedefi henüz belirlenmedi.",
+          : "ERP, MES veya FactOS aktarım hedefi henüz belirlenmedi.",
       };
 
     case "transfer-state":

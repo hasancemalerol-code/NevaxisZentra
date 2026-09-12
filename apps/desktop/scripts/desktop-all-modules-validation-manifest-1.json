@@ -97,7 +97,7 @@
     },
     {
       "route": "/teams",
-      "module": "NevaxisFactOS Teams",
+      "module": "FactOS Teams",
       "navigationGroup": "Çalışma alanı",
       "expectedVisible": true,
       "requiredPermission": null,

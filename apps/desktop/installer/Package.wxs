@@ -11,7 +11,7 @@
            Compressed="yes"
            Codepage="65001">
 
-    <MajorUpgrade DowngradeErrorMessage="NEVAXIS FACTOS'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
+    <MajorUpgrade DowngradeErrorMessage="FactOS'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
 
     <MediaTemplate EmbedCab="yes" />
 
@@ -30,7 +30,7 @@
 
     <ui:WixUI Id="WixUI_InstallDir" />
 
-    <Feature Id="MainFeature" Title="NEVAXIS FACTOS Desktop" Level="1">
+    <Feature Id="MainFeature" Title="FactOS Desktop" Level="1">
       <ComponentRef Id="MainExecutableComponent" />
       <ComponentRef Id="StartMenuCleanupComponent" />
       <ComponentGroupRef Id="PublishedApplicationSupportFiles" />

@@ -34,7 +34,7 @@ export function ErpProductionOrderDetailView({
         description="ERP kaynaklı salt okunur üretim projeksiyonu"
         notice={
           <ErpReadonlyNotice>
-            Bu ekran yalnızca ERP&apos;den senkronize edilen üretim verisini gösterir. NevaxisFactOS
+            Bu ekran yalnızca ERP&apos;den senkronize edilen üretim verisini gösterir. FactOS
             üretim kaydı oluşturulmaz veya güncellenmez.
           </ErpReadonlyNotice>
         }

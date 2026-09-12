@@ -142,7 +142,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwnerOrThrow() {
-  const jar = await signIn("tenant-owner@dev.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
   let verified = false;
   for (const counterOffset of [-1, 0, 1]) {

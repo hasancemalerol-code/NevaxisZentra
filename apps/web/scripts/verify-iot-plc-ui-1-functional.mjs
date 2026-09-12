@@ -625,7 +625,7 @@ try {
   });
   ownerPage.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-  await signInPersona(ownerPage, "tenant-owner@dev.local", ownerPassword, mfaSecret);
+  await signInPersona(ownerPage, "admin@demo.nevaxisfactos.local", ownerPassword, mfaSecret);
   const ownerResponse = await ownerPage.goto(`${WEB}/iot-plc`, { waitUntil: "networkidle", timeout: 90000 });
   assert("owner /iot-plc HTTP 200", ownerResponse?.status() === 200);
   await assertWorkspaceStructure(ownerPage, "owner", { expectManageControls: true });

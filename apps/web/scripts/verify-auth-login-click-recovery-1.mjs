@@ -71,7 +71,7 @@ function assertNoHardcodedCredentials(label, value) {
     MARKER_PASSWORD,
     process.env.DevelopmentSaasIdentity__ActiveUserPassword,
     process.env.DevelopmentSaasIdentity__TenantOwnerPassword,
-    "tenant-owner@dev.local",
+    "admin@demo.nevaxisfactos.local",
     "machine-responsible@dev.local",
     "DevOwner-",
     "DevActive-",
@@ -263,7 +263,7 @@ assert(
 
 const owner = await postSignIn({
   organizationContext: ORGANIZATION,
-  email: "tenant-owner@dev.local",
+  email: "admin@demo.nevaxisfactos.local",
   password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
 });
 assert("existing tenant-code owner password step is preserved", owner.status === 303 && owner.location.includes("/mfa-dogrula"));

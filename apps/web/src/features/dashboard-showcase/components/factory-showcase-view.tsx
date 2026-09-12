@@ -27,6 +27,7 @@ import {
   formatShowcasePercent,
   formatShowcaseRefreshLabel,
 } from "../domain/dashboard-showcase-labels";
+import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
 import { refreshDashboardShowcaseAction } from "../server/dashboard-showcase-actions";
 import "./factory-showcase.css";
 
@@ -521,8 +522,7 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
     <div className="factory-showcase" data-presentation-mode={viewModel.presentationMode}>
       <header className="factory-showcase__header">
         <div className="factory-showcase__brand">
-          <span aria-hidden="true" className="factory-showcase__brand-mark">CF</span>
-          <strong>NevaxisFactOS</strong>
+          <FactosBrandLockup className="factory-showcase__brand-lockup" />
           <span aria-hidden="true" className="factory-showcase__brand-divider" />
           <span>Fabrika Operasyon Görünümü</span>
         </div>

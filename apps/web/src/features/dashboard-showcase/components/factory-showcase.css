@@ -74,6 +74,14 @@
   text-overflow: ellipsis;
 }
 
+.factory-showcase__brand-lockup {
+  display: block;
+  width: auto;
+  max-width: 168px;
+  height: auto;
+  flex-shrink: 0;
+}
+
 .factory-showcase__brand-mark {
   display: inline-flex;
   flex-shrink: 0;

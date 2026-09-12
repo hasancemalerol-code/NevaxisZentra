@@ -288,7 +288,7 @@ assert("unauthorized subscription read → 403", restrictedDenied.status === 403
 const sales = await signIn("materials-sales@dev.local", salesPassword);
 
 const owner = await signIn(
-  "tenant-owner@dev.local",
+  "admin@demo.nevaxisfactos.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );

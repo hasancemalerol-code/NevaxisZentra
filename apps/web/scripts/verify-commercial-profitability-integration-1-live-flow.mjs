@@ -143,7 +143,7 @@ try {
   await ss("Runtime.evaluate", { expression: `(() => {
     const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
     const fill = (sel, val) => { const n = document.querySelector(sel); setter.call(n, val); n.dispatchEvent(new Event("input", { bubbles: true })); n.dispatchEvent(new Event("change", { bubbles: true })); };
-    fill("#sign-in-organization", "dev-pilot-tenant"); fill("#sign-in-email", "tenant-owner@dev.local"); fill("#sign-in-password", ${JSON.stringify(ownerPassword)});
+    fill("#sign-in-organization", "dev-pilot-tenant"); fill("#sign-in-email", "admin@demo.nevaxisfactos.local"); fill("#sign-in-password", ${JSON.stringify(ownerPassword)});
     document.querySelector("form.auth-form button")?.click();
   })()` });
   const mfa = await waitHref((href) => href.includes("/mfa-dogrula"), 20000);

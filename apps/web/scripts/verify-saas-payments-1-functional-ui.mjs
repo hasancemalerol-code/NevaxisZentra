@@ -175,7 +175,7 @@ async function runReturnPageValidation({ ownerPassword, mfaSecret, returnUrl }) 
     const page = await context.newPage();
     await signInThroughForm(page, {
       organization: ORGANIZATION,
-      email: "tenant-owner@dev.local",
+      email: "admin@demo.nevaxisfactos.local",
       password: ownerPassword,
       mfaSecret,
     });
@@ -215,7 +215,7 @@ async function runBrowserValidation({ mode, ownerPassword, mfaSecret, returnUrl 
 
       await signInThroughForm(page, {
         organization: ORGANIZATION,
-        email: "tenant-owner@dev.local",
+        email: "admin@demo.nevaxisfactos.local",
         password: ownerPassword,
         mfaSecret,
       });

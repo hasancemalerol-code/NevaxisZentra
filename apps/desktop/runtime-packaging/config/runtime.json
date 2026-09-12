@@ -1,6 +1,6 @@
 {
   "productName": "NevaxisFactOS",
-  "runtimeLabel": "NevaxisFactOS Sales Demo RC1",
+  "runtimeLabel": "FactOS Sales Demo RC1",
   "webPort": 3001,
   "apiPort": 5000,
   "databaseHost": "127.0.0.1",

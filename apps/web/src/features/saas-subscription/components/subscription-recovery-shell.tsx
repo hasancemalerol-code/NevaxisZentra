@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { AccountMenu } from "@/features/saas-identity/components/account-menu";
+import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
 
 import "./subscription-recovery-shell.css";
 
@@ -27,7 +28,7 @@ export function SubscriptionRecoveryShell({
         Ana içeriğe geç
       </a>
       <header className="subscription-recovery-shell__header">
-        <p className="subscription-recovery-shell__brand">NevaxisFactOS</p>
+        <FactosBrandLockup className="subscription-recovery-shell__brand-lockup" />
         <AccountMenu
           displayName={accountDisplayName?.trim() || "Hesap"}
           emailMasked={emailMasked}

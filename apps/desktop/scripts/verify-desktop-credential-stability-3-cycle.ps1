@@ -24,7 +24,7 @@ function Stop-NevaxisFactOSDesktopOnly {
 }
 
 function Get-PasswordHashFingerprint {
-    $sql = "SELECT substring(pc.password_hash from 1 for 16), pc.updated_at_utc FROM saas_identity_password_credentials pc JOIN saas_identity_accounts a ON a.id=pc.account_id WHERE a.email_normalized='tenant-owner@dev.local';"
+    $sql = "SELECT substring(pc.password_hash from 1 for 16), pc.updated_at_utc FROM saas_identity_password_credentials pc JOIN saas_identity_accounts a ON a.id=pc.account_id WHERE a.email_normalized='admin@demo.nevaxisfactos.local';"
     $out = docker exec NevaxisFactOS-local-postgres-1 psql -U NevaxisFactOS -d crevafactos_local -t -A -c $sql 2>$null
     if ($null -eq $out) { return "" }
     return $out.Trim()

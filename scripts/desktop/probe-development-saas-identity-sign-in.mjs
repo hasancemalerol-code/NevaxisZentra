@@ -22,7 +22,7 @@ const password = requireDevelopmentSaasIdentitySecret(
 
 const body = {
   organizationContext: "dev-pilot-tenant",
-  email: "tenant-owner@dev.local",
+  email: "admin@demo.nevaxisfactos.local",
   password,
   deviceLabel: "credential-readiness-probe",
 };

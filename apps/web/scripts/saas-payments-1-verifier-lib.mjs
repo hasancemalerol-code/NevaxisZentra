@@ -231,7 +231,7 @@ export async function signInOwner() {
   const jar = new CookieJar();
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "tenant-owner@dev.local",
+    email: "admin@demo.nevaxisfactos.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: `${CLOSURE_PREFIX}-owner`,
   }, jar);
