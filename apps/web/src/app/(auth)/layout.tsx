@@ -21,7 +21,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
   const config = getWebApplicationConfig();
 
   return (
-    <div className="auth-layout">
+    <div className="auth-page">
       <FactosAuthHero />
       <div className="auth-layout__panel">
         <p className="visually-hidden">{config.applicationName}</p>

@@ -15,7 +15,7 @@ export function FactosAuthHero() {
           className="auth-layout__hero-image"
           fill
           priority
-          sizes="(max-width: 960px) 0px, 70vw"
+          sizes="(max-width: 1100px) 0px, calc(100vw - 420px)"
           src={FACTOS_BRAND.heroImagePath}
         />
       </div>
