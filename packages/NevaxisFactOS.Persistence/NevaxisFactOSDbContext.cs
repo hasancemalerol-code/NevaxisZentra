@@ -41,6 +41,7 @@ using NevaxisFactOS.Persistence.ShiftHandover;
 using NevaxisFactOS.Persistence.ShiftOperations;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.ProductionManager;
+using NevaxisFactOS.Persistence.FactoryLearning;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -405,6 +406,16 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<FactoryDecisionOutcome> FactoryDecisionOutcomes => Set<FactoryDecisionOutcome>();
     public DbSet<FactoryDecisionMemory> FactoryDecisionMemories => Set<FactoryDecisionMemory>();
     public DbSet<ProductionManagerPolicy> ProductionManagerPolicies => Set<ProductionManagerPolicy>();
+
+    // Factory Learning (ULTRA-MEGA-6)
+    public DbSet<FactoryLoss> FactoryLosses => Set<FactoryLoss>();
+    public DbSet<FactoryLossPattern> FactoryLossPatterns => Set<FactoryLossPattern>();
+    public DbSet<ImprovementOpportunity> ImprovementOpportunities => Set<ImprovementOpportunity>();
+    public DbSet<FactoryExperiment> FactoryExperiments => Set<FactoryExperiment>();
+    public DbSet<FactoryExperimentMeasurement> FactoryExperimentMeasurements => Set<FactoryExperimentMeasurement>();
+    public DbSet<VerifiedImprovement> VerifiedImprovements => Set<VerifiedImprovement>();
+    public DbSet<FactoryLearningMemory> FactoryLearningMemories => Set<FactoryLearningMemory>();
+    public DbSet<FactoryRootCauseAnalysis> FactoryRootCauseAnalyses => Set<FactoryRootCauseAnalysis>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2116,6 +2127,54 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryLossEntityConfiguration());
+        modelBuilder.Entity<FactoryLoss>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryLossPatternEntityConfiguration());
+        modelBuilder.Entity<FactoryLossPattern>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ImprovementOpportunityEntityConfiguration());
+        modelBuilder.Entity<ImprovementOpportunity>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryExperimentEntityConfiguration());
+        modelBuilder.Entity<FactoryExperiment>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryExperimentMeasurementEntityConfiguration());
+        modelBuilder.Entity<FactoryExperimentMeasurement>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new VerifiedImprovementEntityConfiguration());
+        modelBuilder.Entity<VerifiedImprovement>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryLearningMemoryEntityConfiguration());
+        modelBuilder.Entity<FactoryLearningMemory>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryRootCauseAnalysisEntityConfiguration());
+        modelBuilder.Entity<FactoryRootCauseAnalysis>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

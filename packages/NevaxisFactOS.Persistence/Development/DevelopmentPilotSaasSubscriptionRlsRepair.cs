@@ -28,6 +28,14 @@ internal static class DevelopmentPilotSaasSubscriptionRlsRepair
         ("digital_workforce_runtime_states", "dwrs"),
         ("factory_case_dependencies", "fcd"),
         ("factory_event_correlations", "fec"),
+        ("factory_losses", "fl"),
+        ("factory_loss_patterns", "flp"),
+        ("improvement_opportunities", "io"),
+        ("factory_experiments", "fe"),
+        ("factory_experiment_measurements", "fem"),
+        ("verified_improvements", "vi"),
+        ("factory_learning_memories", "flm"),
+        ("factory_root_cause_analyses", "frca"),
     ];
 
     internal static async Task EnsureRuntimeReadAccessAsync(
@@ -75,6 +83,14 @@ internal static class DevelopmentPilotSaasSubscriptionRlsRepair
             GRANT SELECT, INSERT, UPDATE ON TABLE digital_workforce_runtime_states TO crevafactos_runtime;
             GRANT SELECT, INSERT, UPDATE ON TABLE factory_case_dependencies TO crevafactos_runtime;
             GRANT SELECT, INSERT, UPDATE ON TABLE factory_event_correlations TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_losses TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_loss_patterns TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE improvement_opportunities TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_experiments TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_experiment_measurements TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE verified_improvements TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_learning_memories TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_root_cause_analyses TO crevafactos_runtime;
             """;
 
         foreach (var (table, prefix) in TenantScopedTables)

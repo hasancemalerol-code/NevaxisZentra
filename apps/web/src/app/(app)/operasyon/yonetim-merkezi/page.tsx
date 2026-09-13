@@ -7,6 +7,9 @@ import {
 } from "@/features/operations-command-center/application/operations-command-center-filter";
 import { OPERATIONS_COMMAND_CENTER_SUBTITLE } from "@/features/operations-command-center/domain/operations-command-center-labels";
 import { readOperationsCommandCenterWorkspace } from "@/features/operations-command-center/server/operations-command-center-queries";
+import Link from "next/link";
+
+import { CONTINUOUS_IMPROVEMENT_SUBTITLE, CONTINUOUS_IMPROVEMENT_TITLE } from "@/features/factory-learning/domain/factory-learning-labels";
 import { ProductionManagerWorkspacePanel } from "@/features/production-manager/components/production-manager-workspace-panel";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
@@ -97,6 +100,18 @@ export default async function OperationsCommandCenterPage({
   return (
     <>
       <ProductionManagerWorkspacePanel />
+      <section className="commint-panel" data-testid="continuous-improvement-link-section">
+        <header className="commint-panel__header">
+          <div>
+            <p className="commint-executive__eyebrow">SÜREKLİ İYİLEŞTİRME</p>
+            <h2 className="commint-panel__title">{CONTINUOUS_IMPROVEMENT_TITLE}</h2>
+            <p className="commint-panel__subtitle">{CONTINUOUS_IMPROVEMENT_SUBTITLE}</p>
+          </div>
+        </header>
+        <Link className="shift-ops-cta" href="/operasyon/yonetim-merkezi/surekli-iyilestirme">
+          Sürekli İyileştirme Merkezini Aç
+        </Link>
+      </section>
       <OperationsCommandCenterView workspace={result.workspace} />
     </>
   );

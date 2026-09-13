@@ -476,6 +476,26 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureProductionManagerAutonomyManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousImprovementReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousImprovementReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousImprovementReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousImprovementManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousImprovementManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExperimentCreatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExperimentApprovePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExperimentStopPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureExperimentStopPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureImprovementStandardizePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureEdgeManagePermissionAssignmentAsync(
@@ -3089,6 +3109,60 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ProductionManagerPermissionKeys.AutonomyManage,
             DevelopmentPilotProductionManagerIds.AutonomyManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContinuousImprovementReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.Read,
+            DevelopmentPilotContinuousImprovementIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContinuousImprovementManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.Manage,
+            DevelopmentPilotContinuousImprovementIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExperimentCreatePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.ExperimentCreate,
+            DevelopmentPilotContinuousImprovementIds.ExperimentCreatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExperimentApprovePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.ExperimentApprove,
+            DevelopmentPilotContinuousImprovementIds.ExperimentApprovePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureExperimentStopPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.ExperimentStop,
+            DevelopmentPilotContinuousImprovementIds.ExperimentStopPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureImprovementStandardizePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousImprovementPermissionKeys.ImprovementStandardize,
+            DevelopmentPilotContinuousImprovementIds.ImprovementStandardizePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureEdgeReadPermissionAssignmentAsync(
