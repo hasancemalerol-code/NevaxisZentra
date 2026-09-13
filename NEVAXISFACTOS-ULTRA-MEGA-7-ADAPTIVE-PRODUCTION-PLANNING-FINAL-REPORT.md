@@ -9,9 +9,9 @@
 | Label | SHA |
 |---|---|
 | **BASELINE_SHA** | `7643c3692bd15792c7e628c281c8900fa600c537` |
-| **FEATURE_COMMIT_SHA** | _(set at commit)_ |
-| **FINAL_SHA** | _(set at push)_ |
-| **ORIGIN_MAIN_SHA** | _(set at push)_ |
+| **FEATURE_COMMIT_SHA** | `9f321007b7bfc322d93c1efb5074cb0e04181f75` |
+| **FINAL_SHA** | `9f321007b7bfc322d93c1efb5074cb0e04181f75` |
+| **ORIGIN_MAIN_SHA** | `9f321007b7bfc322d93c1efb5074cb0e04181f75` |
 
 ## Architecture Reuse
 
