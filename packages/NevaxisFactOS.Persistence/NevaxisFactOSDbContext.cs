@@ -42,6 +42,7 @@ using NevaxisFactOS.Persistence.ShiftOperations;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.ProductionManager;
 using NevaxisFactOS.Persistence.FactoryLearning;
+using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -416,6 +417,17 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<VerifiedImprovement> VerifiedImprovements => Set<VerifiedImprovement>();
     public DbSet<FactoryLearningMemory> FactoryLearningMemories => Set<FactoryLearningMemory>();
     public DbSet<FactoryRootCauseAnalysis> FactoryRootCauseAnalyses => Set<FactoryRootCauseAnalysis>();
+
+    // Adaptive Production Planning (ULTRA-MEGA-7)
+    public DbSet<ProductionPlanVersion> ProductionPlanVersions => Set<ProductionPlanVersion>();
+    public DbSet<ProductionPlanOperation> ProductionPlanOperations => Set<ProductionPlanOperation>();
+    public DbSet<PlanningConstraintSnapshot> PlanningConstraintSnapshots => Set<PlanningConstraintSnapshot>();
+    public DbSet<PlanningScenario> PlanningScenarios => Set<PlanningScenario>();
+    public DbSet<PlanningScenarioMetric> PlanningScenarioMetrics => Set<PlanningScenarioMetric>();
+    public DbSet<PlanDeviation> PlanDeviations => Set<PlanDeviation>();
+    public DbSet<PlanChange> PlanChanges => Set<PlanChange>();
+    public DbSet<AdaptivePlanningPolicy> AdaptivePlanningPolicies => Set<AdaptivePlanningPolicy>();
+    public DbSet<PlanActivityEvent> PlanActivityEvents => Set<PlanActivityEvent>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2175,6 +2187,60 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionPlanVersionEntityConfiguration());
+        modelBuilder.Entity<ProductionPlanVersion>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionPlanOperationEntityConfiguration());
+        modelBuilder.Entity<ProductionPlanOperation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanningConstraintSnapshotEntityConfiguration());
+        modelBuilder.Entity<PlanningConstraintSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanningScenarioEntityConfiguration());
+        modelBuilder.Entity<PlanningScenario>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanningScenarioMetricEntityConfiguration());
+        modelBuilder.Entity<PlanningScenarioMetric>().HasQueryFilter(m =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && m.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanDeviationEntityConfiguration());
+        modelBuilder.Entity<PlanDeviation>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanChangeEntityConfiguration());
+        modelBuilder.Entity<PlanChange>().HasQueryFilter(c =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && c.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new AdaptivePlanningPolicyEntityConfiguration());
+        modelBuilder.Entity<AdaptivePlanningPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new PlanActivityEventEntityConfiguration());
+        modelBuilder.Entity<PlanActivityEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

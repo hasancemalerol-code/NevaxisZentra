@@ -61,4 +61,8 @@ public sealed class ProductionPlan : ITenantScopedEntity
     public string SourceReferencesJson { get; set; } = "[]";
 
     public string HistoryJson { get; set; } = "[]";
+
+    public Guid? ActivePlanVersionId { get; set; }
+
+    public string? AdaptiveLifecycleStatus { get; set; }
 }

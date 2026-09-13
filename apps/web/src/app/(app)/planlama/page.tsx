@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import {
   calculateProductionPlanSummary,
 } from "@/features/production-planning/application/production-plan-query";
+import { AdaptivePlanningWorkspacePanel } from "@/features/adaptive-production-planning/components/adaptive-planning-workspace-panel";
 import { ProductionPlanFilteredWorkspace } from "@/features/production-planning/components/production-plan-filtered-workspace";
 import { ProductionPlanningLogisticsSection } from "@/features/production-planning/components/production-planning-logistics-section";
 import { deriveExportReadiness } from "@/features/production-planning/presentation/production-plan-logistics-formatters";
@@ -221,6 +222,8 @@ export default async function ProductionPlanningPage() {
           linkageStatus: evaluation.linkageStatus,
         }))}
       />
+
+      <AdaptivePlanningWorkspacePanel />
 
       <ProductionPlanFilteredWorkspace
         productionPlans={productionPlans}

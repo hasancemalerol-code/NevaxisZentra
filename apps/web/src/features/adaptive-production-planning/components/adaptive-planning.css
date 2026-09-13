@@ -1,0 +1,138 @@
+.adaptive-planning-workspace__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.adaptive-planning-workspace__tab {
+  border: 1px solid #dce5f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #52627a;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.adaptive-planning-workspace__tab--active {
+  border-color: #1769e0;
+  background: #edf4ff;
+  color: #10213d;
+}
+
+.adaptive-planning-workspace__section {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.adaptive-planning-workspace__message {
+  color: #08945f;
+  font-size: 0.85rem;
+}
+
+.adaptive-planning-workspace__error {
+  color: #dc3545;
+  font-size: 0.85rem;
+}
+
+.adaptive-planning-workspace__version-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.adaptive-planning-operation-list,
+.adaptive-planning-activity-feed {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adaptive-planning-operation-list li,
+.adaptive-planning-activity-feed li {
+  border: 1px solid #e7edf5;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  background: #fff;
+}
+
+.adaptive-planning-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.adaptive-planning-diff-table th,
+.adaptive-planning-diff-table td {
+  border-bottom: 1px solid #e7edf5;
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+}
+
+.adaptive-planning-workspace__action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.adaptive-planning-gantt {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.adaptive-planning-gantt__header {
+  color: #75839a;
+  font-size: 0.75rem;
+}
+
+.adaptive-planning-gantt__row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.adaptive-planning-gantt__label {
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #10213d;
+}
+
+.adaptive-planning-gantt__track {
+  position: relative;
+  min-height: 34px;
+  border-radius: 8px;
+  background: #f4f7fb;
+  border: 1px solid #e7edf5;
+}
+
+.adaptive-planning-gantt__bar {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1769e0, #3d8bfd);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  padding: 0 0.35rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.adaptive-planning-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.75rem;
+}

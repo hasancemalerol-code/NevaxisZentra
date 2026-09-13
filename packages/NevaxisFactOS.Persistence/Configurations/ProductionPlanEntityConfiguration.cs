@@ -109,6 +109,11 @@ internal sealed class ProductionPlanEntityConfiguration
         entity.Property(plan => plan.HistoryJson)
             .HasColumnName("history_json")
             .HasColumnType("jsonb");
+        entity.Property(plan => plan.ActivePlanVersionId)
+            .HasColumnName("active_plan_version_id");
+        entity.Property(plan => plan.AdaptiveLifecycleStatus)
+            .HasColumnName("adaptive_lifecycle_status")
+            .HasMaxLength(30);
         entity.HasIndex(plan => new { plan.TenantId, plan.FacilityId, plan.UpdatedAtUtc });
         entity.HasIndex(plan => new { plan.TenantId, plan.FacilityId, plan.ReferenceCode })
             .IsUnique();

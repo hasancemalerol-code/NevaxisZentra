@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { LoaderCircle, Search, Users, X } from "lucide-react";
 
@@ -58,6 +59,7 @@ type ShiftWorkforceViewProps = Readonly<{
   assignmentInitialSelection: ShiftAssignmentSelectionContext;
   riskCanRead: boolean;
   riskCanManage: boolean;
+  shiftBriefPanel?: ReactNode;
 }>;
 
 type CompetencyModalState =
@@ -97,6 +99,7 @@ export function ShiftWorkforceView({
   assignmentInitialSelection,
   riskCanRead,
   riskCanManage,
+  shiftBriefPanel,
 }: ShiftWorkforceViewProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTabId>("plan");
   const [persons, setPersons] = useState(initialPersons);
@@ -849,7 +852,10 @@ export function ShiftWorkforceView({
       ) : null}
 
       {activeTab === "plan" ? (
-        <ShiftPlanPanel contextOptions={assignmentContextOptions} />
+        <div className="shift-plan-tab">
+          {shiftBriefPanel}
+          <ShiftPlanPanel contextOptions={assignmentContextOptions} />
+        </div>
       ) : activeTab === "personnel" ? (
       <div
         className={`shift-workforce-workspace${detailOpen ? " shift-workforce-workspace--detail-open" : ""}`}

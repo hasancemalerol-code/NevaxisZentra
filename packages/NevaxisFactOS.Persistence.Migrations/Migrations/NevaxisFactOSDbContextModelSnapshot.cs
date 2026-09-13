@@ -22,6 +22,631 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.AdaptivePlanningPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AutonomyMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int>("FrozenWindowMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("frozen_window_minutes");
+
+                    b.Property<decimal>("MinBenefitThreshold")
+                        .HasColumnType("numeric")
+                        .HasColumnName("min_benefit_threshold");
+
+                    b.Property<int>("NervousnessCooldownMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("nervousness_cooldown_minutes");
+
+                    b.Property<string>("PolicyEnvelopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("policy_envelope_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId")
+                        .IsUnique();
+
+                    b.ToTable("adaptive_planning_policies", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanActivityEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ProductionPlanId", "OccurredAtUtc");
+
+                    b.ToTable("plan_activity_events", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("change_type");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DiffJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("diff_json");
+
+                    b.Property<string>("ExpectedBenefitJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_benefit_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid?>("FromVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_version_id");
+
+                    b.Property<string>("InitiatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("initiated_by_subject_id");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<string>("ReasonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TriggerType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("trigger_type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("plan_changes", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanDeviation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("DetectedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("detected_at_utc");
+
+                    b.Property<string>("DeviationType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("deviation_type");
+
+                    b.Property<string>("EvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid?>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severity");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("plan_deviations", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanningConstraintSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CapacityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("capacity_json");
+
+                    b.Property<DateTimeOffset>("CapturedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FreshnessJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("freshness_json");
+
+                    b.Property<string>("HardConstraintsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("hard_constraints_json");
+
+                    b.Property<string>("IncidentsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("incidents_json");
+
+                    b.Property<string>("MachinesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("machines_json");
+
+                    b.Property<string>("MaintenanceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("maintenance_json");
+
+                    b.Property<string>("MaterialsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("materials_json");
+
+                    b.Property<string>("MoldsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("molds_json");
+
+                    b.Property<string>("OrdersJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("orders_json");
+
+                    b.Property<string>("PlanningHorizon")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("planning_horizon");
+
+                    b.Property<string>("QualityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("quality_json");
+
+                    b.Property<string>("ShiftsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("shifts_json");
+
+                    b.Property<string>("SoftConstraintsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("soft_constraints_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("planning_constraint_snapshots", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanningScenario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ComparisonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("comparison_json");
+
+                    b.Property<Guid>("ConstraintSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("constraint_snapshot_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid?>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<string>("ScenarioCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("scenario_code");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric")
+                        .HasColumnName("score");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("TriggerType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("trigger_type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("planning_scenarios", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.PlanningScenarioMetric", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("data_classification");
+
+                    b.Property<string>("MetricKey")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("metric_key");
+
+                    b.Property<decimal>("MetricValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("metric_value");
+
+                    b.Property<Guid>("ScenarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scenario_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("planning_scenario_metrics", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.ProductionPlanOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EvidenceJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_json");
+
+                    b.Property<string>("LineId")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("line_id");
+
+                    b.Property<string>("MachineId")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("machine_id");
+
+                    b.Property<string>("MaterialReadinessState")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("material_readiness_state");
+
+                    b.Property<string>("MoldId")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("mold_id");
+
+                    b.Property<string>("OperationCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("operation_code");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("order_id");
+
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
+
+                    b.Property<DateTimeOffset>("PlannedEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_utc");
+
+                    b.Property<DateTimeOffset>("PlannedStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_start_utc");
+
+                    b.Property<int>("SequenceRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("sequence_rank");
+
+                    b.Property<decimal>("SetupMinutes")
+                        .HasColumnType("numeric")
+                        .HasColumnName("setup_minutes");
+
+                    b.Property<string>("ShiftId")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("shift_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PlanVersionId", "SequenceRank")
+                        .HasDatabaseName("ix_production_plan_operations_version_sequence");
+
+                    b.ToTable("production_plan_operations", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.AdaptiveProductionPlanning.ProductionPlanVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActualImpactJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actual_impact_json");
+
+                    b.Property<string>("ChangeSummaryJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("change_summary_json");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<decimal>("ConfidenceScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("confidence_score");
+
+                    b.Property<Guid?>("ConstraintSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("constraint_snapshot_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("created_by_subject_id");
+
+                    b.Property<Guid?>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<string>("ExpectedImpactJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_impact_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("LifecycleStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("lifecycle_status");
+
+                    b.Property<string>("ObjectiveProfileJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("objective_profile_json");
+
+                    b.Property<string>("PlanningHorizon")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("planning_horizon");
+
+                    b.Property<Guid?>("PreviousVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("previous_version_id");
+
+                    b.Property<Guid>("ProductionPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_plan_id");
+
+                    b.Property<DateTimeOffset?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at_utc");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric")
+                        .HasColumnName("score");
+
+                    b.Property<DateTimeOffset?>("SupersededAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("superseded_at_utc");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_number");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "ProductionPlanId", "VersionNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_production_plan_versions_plan_version");
+
+                    b.ToTable("production_plan_versions", (string)null);
+                });
+
             modelBuilder.Entity("NevaxisFactOS.Persistence.AdminAccess.AdminAccessIdempotencyRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -27823,6 +28448,15 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("ActivePlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("active_plan_version_id");
+
+                    b.Property<string>("AdaptiveLifecycleStatus")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("adaptive_lifecycle_status");
 
                     b.Property<string>("AiExplanation")
                         .HasMaxLength(4000)
