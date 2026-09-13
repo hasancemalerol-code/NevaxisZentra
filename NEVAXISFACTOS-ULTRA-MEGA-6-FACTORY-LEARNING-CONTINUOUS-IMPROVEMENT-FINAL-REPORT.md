@@ -5,9 +5,9 @@
 | Field | SHA |
 |---|---|
 | BASELINE_SHA | `704481c23c40abd87f4f5b305b1c4239f5ec83fb` |
-| FEATURE_COMMIT_SHA | *(pending commit — this report staged with UM-6 scope)* |
-| FINAL_SHA | *(pending push verification)* |
-| ORIGIN_MAIN_SHA | `704481c23c40abd87f4f5b305b1c4239f5ec83fb` |
+| FEATURE_COMMIT_SHA | `15aae56171835336f412a629a907d17d862d91e8` |
+| FINAL_SHA | `15aae56171835336f412a629a907d17d862d91e8` |
+| ORIGIN_MAIN_SHA | `15aae56171835336f412a629a907d17d862d91e8` |
 
 ## Mission
 
