@@ -15,6 +15,7 @@ import {
   calculateProductionPlanSummary,
 } from "@/features/production-planning/application/production-plan-query";
 import { AdaptivePlanningWorkspacePanel } from "@/features/adaptive-production-planning/components/adaptive-planning-workspace-panel";
+import { FactoryNetworkCrossLinkSection } from "@/features/factory-network/components/factory-network-workspace-panel";
 import { ProductionPlanFilteredWorkspace } from "@/features/production-planning/components/production-plan-filtered-workspace";
 import { ProductionPlanningLogisticsSection } from "@/features/production-planning/components/production-planning-logistics-section";
 import { deriveExportReadiness } from "@/features/production-planning/presentation/production-plan-logistics-formatters";
@@ -224,6 +225,8 @@ export default async function ProductionPlanningPage() {
       />
 
       <AdaptivePlanningWorkspacePanel />
+
+      <FactoryNetworkCrossLinkSection />
 
       <ProductionPlanFilteredWorkspace
         productionPlans={productionPlans}

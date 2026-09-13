@@ -18061,6 +18061,534 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
                     b.ToTable("verified_improvements", (string)null);
                 });
 
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.FacilityCapabilityProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CapacityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("capacity_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("LinesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lines_json");
+
+                    b.Property<string>("MachineFamiliesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("machine_families_json");
+
+                    b.Property<string>("MaterialsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("materials_json");
+
+                    b.Property<string>("MoldCompatibilityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mold_compatibility_json");
+
+                    b.Property<string>("QualityCertificationsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("quality_certifications_json");
+
+                    b.Property<string>("RiskJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("risk_json");
+
+                    b.Property<string>("ShiftsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("shifts_json");
+
+                    b.Property<string>("TechnologiesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("technologies_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_facility_capability_profiles_tenant_facility");
+
+                    b.ToTable("facility_capability_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.FactoryNetwork", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PlanningHorizon")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("planning_horizon");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TimezonePolicyJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("timezone_policy_json");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .HasDatabaseName("ix_factory_networks_tenant_name");
+
+                    b.ToTable("factory_networks", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.FactoryNetworkFacility", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("role");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NetworkId", "FacilityId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_factory_network_facilities_network_facility");
+
+                    b.ToTable("factory_network_facilities", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.FactoryNetworkPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AutonomyMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("autonomy_mode");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<string>("PolicyEnvelopeJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("policy_envelope_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NetworkId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_factory_network_policies_tenant_network");
+
+                    b.ToTable("factory_network_policies", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.NetworkActivityEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NetworkId", "OccurredAtUtc")
+                        .HasDatabaseName("ix_network_activity_events_network_occurred");
+
+                    b.ToTable("network_activity_events", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.NetworkAllocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("action_type");
+
+                    b.Property<string>("ActualImpactJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actual_impact_json");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("DestinationFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_facility_id");
+
+                    b.Property<string>("ExpectedImpactJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("expected_impact_json");
+
+                    b.Property<Guid?>("FactoryDecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("factory_decision_id");
+
+                    b.Property<string>("InitiatedBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("initiated_by_subject_id");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<DateTimeOffset?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at_utc");
+
+                    b.Property<string>("ReasonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_json");
+
+                    b.Property<Guid?>("SelectedScenarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("selected_scenario_id");
+
+                    b.Property<Guid>("SourceFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_facility_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TriggerType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("trigger_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<DateTimeOffset?>("VerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NetworkId", "Status")
+                        .HasDatabaseName("ix_network_allocations_tenant_network_status");
+
+                    b.ToTable("network_allocations", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.NetworkAllocationItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allocation_id");
+
+                    b.Property<Guid>("DestinationFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_facility_id");
+
+                    b.Property<Guid?>("DestinationPlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_plan_version_id");
+
+                    b.Property<decimal>("DestinationQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("destination_quantity");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("order_id");
+
+                    b.Property<Guid>("SourceFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_facility_id");
+
+                    b.Property<Guid?>("SourcePlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_plan_version_id");
+
+                    b.Property<decimal>("SourceQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("source_quantity");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("TotalQuantity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_quantity");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "AllocationId", "OrderId")
+                        .HasDatabaseName("ix_network_allocation_items_allocation_order");
+
+                    b.ToTable("network_allocation_items", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.NetworkCapacitySnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CapturedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at_utc");
+
+                    b.Property<string>("DemandJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("demand_json");
+
+                    b.Property<string>("FacilityCapacityJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("facility_capacity_json");
+
+                    b.Property<string>("FreshnessJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("freshness_json");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NetworkId", "CapturedAtUtc")
+                        .HasDatabaseName("ix_network_capacity_snapshots_network_captured");
+
+                    b.ToTable("network_capacity_snapshots", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryNetworkOptimization.NetworkScenario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("action_type");
+
+                    b.Property<Guid?>("AllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allocation_id");
+
+                    b.Property<string>("ComparisonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("comparison_json");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("DestinationFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_facility_id");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("network_id");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("ScenarioCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("scenario_code");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric")
+                        .HasColumnName("score");
+
+                    b.Property<Guid>("SourceFacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_facility_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("network_scenarios", (string)null);
+                });
+
             modelBuilder.Entity("NevaxisFactOS.Persistence.FactoryOrchestration.FactoryCaseDependency", b =>
                 {
                     b.Property<Guid>("Id")

@@ -10,6 +10,7 @@ import { readOperationsCommandCenterWorkspace } from "@/features/operations-comm
 import Link from "next/link";
 
 import { CONTINUOUS_IMPROVEMENT_SUBTITLE, CONTINUOUS_IMPROVEMENT_TITLE } from "@/features/factory-learning/domain/factory-learning-labels";
+import { FactoryNetworkCrossLinkSection } from "@/features/factory-network/components/factory-network-workspace-panel";
 import { ProductionManagerWorkspacePanel } from "@/features/production-manager/components/production-manager-workspace-panel";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
@@ -100,6 +101,7 @@ export default async function OperationsCommandCenterPage({
   return (
     <>
       <ProductionManagerWorkspacePanel />
+      <FactoryNetworkCrossLinkSection />
       <section className="commint-panel" data-testid="continuous-improvement-link-section">
         <header className="commint-panel__header">
           <div>

@@ -1,0 +1,219 @@
+.factory-network-workspace__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.factory-network-workspace__tab {
+  border: 1px solid #dce5f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #52627a;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.factory-network-workspace__tab--active {
+  border-color: #1769e0;
+  background: #edf4ff;
+  color: #10213d;
+}
+
+.factory-network-workspace__section {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.factory-network-workspace__message {
+  color: #08945f;
+  font-size: 0.85rem;
+}
+
+.factory-network-workspace__error {
+  color: #dc3545;
+  font-size: 0.85rem;
+}
+
+.factory-network-factory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.factory-network-factory-card {
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: #fff;
+}
+
+.factory-network-factory-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.factory-network-factory-card__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #10213d;
+}
+
+.factory-network-factory-card__meta {
+  font-size: 0.75rem;
+  color: #75839a;
+}
+
+.factory-network-capacity-bar {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.factory-network-capacity-bar__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #52627a;
+}
+
+.factory-network-capacity-bar__track {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f4f7fb;
+  border: 1px solid #e7edf5;
+}
+
+.factory-network-capacity-bar__segment {
+  height: 100%;
+}
+
+.factory-network-capacity-bar__segment--committed {
+  background: #1769e0;
+}
+
+.factory-network-capacity-bar__segment--at-risk {
+  background: #f59e0b;
+}
+
+.factory-network-capacity-bar__segment--overloaded {
+  background: #dc3545;
+}
+
+.factory-network-capacity-bar__segment--unused {
+  background: #d1dbe8;
+}
+
+.factory-network-allocation-list,
+.factory-network-opportunity-list,
+.factory-network-activity-feed {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.factory-network-allocation-list li,
+.factory-network-opportunity-list li,
+.factory-network-activity-feed li {
+  border: 1px solid #e7edf5;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  background: #fff;
+}
+
+.factory-network-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.factory-network-comparison-table th,
+.factory-network-comparison-table td {
+  border-bottom: 1px solid #e7edf5;
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+}
+
+.factory-network-comparison-table tr.factory-network-comparison-table__recommended {
+  background: #edf4ff;
+}
+
+.factory-network-explanation {
+  border-left: 3px solid #1769e0;
+  padding: 0.75rem 1rem;
+  background: #f8fbff;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.85rem;
+  color: #10213d;
+}
+
+.factory-network-simulator-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.factory-network-simulator-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.factory-network-simulator-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #52627a;
+}
+
+.factory-network-simulator-form select,
+.factory-network-simulator-form input {
+  border: 1px solid #dce5f0;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.factory-network-workspace__action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.factory-network-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.factory-network-cross-link {
+  border: 1px solid #dce5f0;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 100%);
+}
+
+.factory-network-cross-link__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  color: #52627a;
+}
+
+.factory-network-cross-link__stats strong {
+  color: #10213d;
+}

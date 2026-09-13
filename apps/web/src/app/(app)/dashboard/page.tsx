@@ -6,6 +6,7 @@ import { ActiveFactoryCasesDashboardPanel } from "@/components/dashboard/active-
 import { AiProductionManagerDashboardPanel } from "@/components/dashboard/ai-production-manager-panel";
 import { ContinuousImprovementDashboardPanel } from "@/components/dashboard/continuous-improvement-panel";
 import { AdaptivePlanningPanel } from "@/components/dashboard/adaptive-planning-panel";
+import { FactoryNetworkPanel } from "@/components/dashboard/factory-network-panel";
 import { ActiveShiftDashboardPanel } from "@/components/dashboard/active-shift-panel";
 import { DigitalWorkforceDashboardPanel } from "@/components/dashboard/digital-workforce-panel";
 import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics";
@@ -172,6 +173,7 @@ export default async function DashboardPage() {
       >
         <ActiveShiftDashboardPanel />
         <AdaptivePlanningPanel />
+        <FactoryNetworkPanel />
         <ActiveFactoryCasesDashboardPanel />
         <AiProductionManagerDashboardPanel />
         <ContinuousImprovementDashboardPanel />

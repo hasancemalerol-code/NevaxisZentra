@@ -43,6 +43,7 @@ using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.ProductionManager;
 using NevaxisFactOS.Persistence.FactoryLearning;
 using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
+using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -428,6 +429,17 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<PlanChange> PlanChanges => Set<PlanChange>();
     public DbSet<AdaptivePlanningPolicy> AdaptivePlanningPolicies => Set<AdaptivePlanningPolicy>();
     public DbSet<PlanActivityEvent> PlanActivityEvents => Set<PlanActivityEvent>();
+
+    // Factory Network Optimization (ULTRA-MEGA-8)
+    public DbSet<FactoryNetwork> FactoryNetworks => Set<FactoryNetwork>();
+    public DbSet<FactoryNetworkFacility> FactoryNetworkFacilities => Set<FactoryNetworkFacility>();
+    public DbSet<FacilityCapabilityProfile> FacilityCapabilityProfiles => Set<FacilityCapabilityProfile>();
+    public DbSet<NetworkCapacitySnapshot> NetworkCapacitySnapshots => Set<NetworkCapacitySnapshot>();
+    public DbSet<NetworkScenario> NetworkScenarios => Set<NetworkScenario>();
+    public DbSet<NetworkAllocation> NetworkAllocations => Set<NetworkAllocation>();
+    public DbSet<NetworkAllocationItem> NetworkAllocationItems => Set<NetworkAllocationItem>();
+    public DbSet<FactoryNetworkPolicy> FactoryNetworkPolicies => Set<FactoryNetworkPolicy>();
+    public DbSet<NetworkActivityEvent> NetworkActivityEvents => Set<NetworkActivityEvent>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2238,6 +2250,60 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new PlanActivityEventEntityConfiguration());
         modelBuilder.Entity<PlanActivityEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryNetworkEntityConfiguration());
+        modelBuilder.Entity<FactoryNetwork>().HasQueryFilter(n =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && n.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryNetworkFacilityEntityConfiguration());
+        modelBuilder.Entity<FactoryNetworkFacility>().HasQueryFilter(f =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && f.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FacilityCapabilityProfileEntityConfiguration());
+        modelBuilder.Entity<FacilityCapabilityProfile>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NetworkCapacitySnapshotEntityConfiguration());
+        modelBuilder.Entity<NetworkCapacitySnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NetworkScenarioEntityConfiguration());
+        modelBuilder.Entity<NetworkScenario>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NetworkAllocationEntityConfiguration());
+        modelBuilder.Entity<NetworkAllocation>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NetworkAllocationItemEntityConfiguration());
+        modelBuilder.Entity<NetworkAllocationItem>().HasQueryFilter(i =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryNetworkPolicyEntityConfiguration());
+        modelBuilder.Entity<FactoryNetworkPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NetworkActivityEventEntityConfiguration());
+        modelBuilder.Entity<NetworkActivityEvent>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

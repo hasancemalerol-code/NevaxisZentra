@@ -55,6 +55,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/planlama",
       },
       {
+        label: "Fabrika Ağı",
+        href: "/fabrika-agi",
+        iconKey: "factory",
+        permissionKey: "factory-network.read",
+        subscriptionModulePath: "/planlama",
+      },
+      {
         label: "Üretim",
         href: "/uretim",
         iconKey: "factory",

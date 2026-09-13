@@ -12,6 +12,7 @@ using NevaxisFactOS.Persistence.Audit;
 using NevaxisFactOS.Persistence.AiDecisions;
 using NevaxisFactOS.Persistence.Outbox;
 using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -128,6 +129,7 @@ public static class PersistenceServiceCollectionExtensions
                     npgsqlOptions.CommandTimeout(options.CommandTimeoutSeconds);
                 }));
         services.AddScoped<TenantDatabaseSession>();
+        services.AddNevaxisFactOSFactoryNetwork();
         services.AddScoped<IIdentitySubjectResolver, PostgreSqlIdentitySubjectResolver>();
         services.AddScoped<ITenantMembershipResolver, PostgreSqlTenantMembershipResolver>();
         services.AddScoped<IPermissionEvaluator, PostgreSqlPermissionEvaluator>();
