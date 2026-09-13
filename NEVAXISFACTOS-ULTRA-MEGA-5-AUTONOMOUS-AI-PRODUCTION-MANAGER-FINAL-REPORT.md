@@ -4,44 +4,25 @@
 
 | Field | SHA |
 |---|---|
-| BASELINE_SHA | `5e8d4de91f7b623847a08d0bd1dec1edd57158af` |
-| COMMIT_SHA | (set at push — see closure block) |
-| ORIGIN_MAIN_SHA | (set at push — see closure block) |
+| BASELINE_SHA | `155f99a7ddb95acfebdcab3660409b78bf46ada1` |
+| FEATURE_COMMIT_SHA | `8cf34b57c9fefbcd1fe9320eb2107313c76ecff1` |
+| FINAL_SHA | `f69173b03c5f60a83940ce8b95f7021471b64647` |
+| ORIGIN_MAIN_SHA | `f69173b03c5f60a83940ce8b95f7021471b64647` (post-push target) |
 
 ## Mission
 
-UM-5 delivers the canonical **AI Üretim Yöneticisi** + **Factory Decision Engine** lifecycle on the post-brand-migration baseline, reusing DigitalWorkCase, Factory Orchestration, Digital Workforce, AI Task Center, Approval/Policy/Autonomy engines, and AI Decision Ledger — without parallel case/task/policy systems.
+UM-5 delivers the canonical **AI Üretim Yöneticisi** + **Factory Decision Engine** lifecycle on the approved login/branding baseline (`155f99a`), reusing DigitalWorkCase, Factory Orchestration, Digital Workforce, AI Task Center, Approval/Policy/Autonomy engines, and AI Decision Ledger — without parallel case/task/policy systems.
 
-## UM-5 Delta
-
-### Web — lifecycle & Operations Center integration
-
-| Deliverable | Status |
-|---|---|
-| Production manager API client lifecycle calls (simulate/approve/execute/verify) | DONE |
-| Server actions with permission gates + path revalidation | DONE |
-| Decision detail: tabbed lifecycle UI, simulation runner, approve/execute/verify | DONE |
-| OCC prioritized queue for pending PM decisions (tier 150) | DONE |
-| Autonomous action feed in workspace panel | DONE |
-| Digital Workforce Control Center cross-link on decision detail | DONE |
-
-### Dev pilot bootstrap & runtime gate support
+## UM-5 Closure Delta (this session)
 
 | Change | Rationale |
 |---|---|
-| Standalone `EnsurePaidAccessAsync` before long bootstrap | Subscription + RLS repair even when main bootstrap rolls back or stalls |
-| Rolling subscription period + refresh when stale | Fixes expired dev subscription period |
-| Runtime RLS repair (`current_tenant_id()` policies) | Fixes `crevafactos_runtime` visibility on SaaS subscription + production-manager tables |
-| Migration username normalization (`NevaxisFactOS` → `crevafactos`) | Aligns local `.env` with workstation Postgres role |
-| Auth env guard: ignore `Development` mode override outside Development host | Prevents Production smoke tests from inheriting shell env pollution |
-
-### Post-migration / gate-support tests
-
-| Change | Rationale |
-|---|---|
-| `DesktopShellWiringTests` expects `NevaxisFactOS` profile path | Brand migration regression |
-| `PersistenceOptionsTests` / `InfrastructureOptionsTests` env isolation | Prevents gate-runner env pollution false failures |
-| Database tool: paid-access ensure + tenant isolation `current_tenant_id()` repair | Repeatable local runtime gate closure |
+| Wire `DecisionOpportunityEngine` into workspace snapshot + API | Surfaces decision opportunities from active predictions |
+| Wire `FindSimilar` + `RevalidateConditions` into decision creation | Similar verified decision retrieval influences confidence |
+| Runtime verifier: real guard/recovery golden flows | Replaces stub PASS for low-confidence, stale-data, failed-recovery |
+| Runtime verifier: postgres container auto-resolve | Works with `crevafactos-local-postgres-1` local compose name |
+| Extend dev pilot RLS repair to digital workforce + orchestration tables | Fixes decision→orchestration→digital workforce bridge under `NevaxisFactOS.tenant_id` |
+| `DecisionOpportunityEngineTests` unit test | Validates opportunity threshold filtering |
 
 ## Architecture Reused (baseline)
 
@@ -60,16 +41,16 @@ UM-5 delivers the canonical **AI Üretim Yöneticisi** + **Factory Decision Engi
 | Gate | Status | Evidence |
 |---|---|---|
 | DOTNET_BUILD | **PASS** | `dotnet build NevaxisFactOS.sln -c Release` |
-| DOTNET_TEST | **PASS** | 637/637 (Desktop 40 + Persistence 474 + Smoke 123) |
+| DOTNET_TEST | **PASS** | 638/638 (Desktop 40 + Persistence 476 + Smoke 123) |
 | WEB_TYPECHECK | **PASS** | `pnpm typecheck` |
 | WEB_LINT | **PASS** | `pnpm lint` (0 warnings) |
 | WEB_TESTS | **PASS** | 7/7 |
 | WEB_BUILD | **PASS** | `pnpm build` |
 | PRODUCTION_MANAGER_UM5_MIGRATION_VERIFIER | **PASS** | `node apps/web/scripts/verify-production-manager-um5-migration.mjs` |
-| AI_PM_RUNTIME_VERIFIER | **PASS** | `node apps/web/scripts/verify-production-manager-um5-runtime.mjs` — all golden flows + security/RLS/auth/integrity |
-| RLS / TENANT_ISOLATION | **PASS** | `pnpm db:tenant-isolation:verify` (migrations user `crevafactos` on `:5433`) |
+| AI_PM_RUNTIME_VERIFIER | **PASS** | `node apps/web/scripts/verify-production-manager-um5-runtime.mjs` |
+| RLS / TENANT_ISOLATION | **PASS** | `pnpm db:tenant-isolation:verify` |
 | AUTHORIZATION_VERIFIER | **PASS** | `pnpm authorization:verify` |
-| GIT_DIFF_CHECK | **PASS** | `git diff --check` (CRLF warnings only) |
+| GIT_DIFF_CHECK | **PASS** | `git diff --check` |
 
 ## Golden Flows (runtime verifier — verified live)
 
@@ -84,11 +65,37 @@ UM-5 delivers the canonical **AI Üretim Yöneticisi** + **Factory Decision Engi
 | LOW_CONFIDENCE_GUARD_FLOW | PASS |
 | STALE_DATA_GUARD_FLOW | PASS |
 | FAILED_DECISION_RECOVERY_FLOW | PASS |
-| DECISION_APPROVAL_BRIDGE / EXECUTION_IDEMPOTENCY / AUTONOMY | PASS |
+| DECISION_MEMORY_FLOW | PASS |
+
+## Regression
+
+| Check | Status |
+|---|---|
+| DIGITAL_WORKFORCE_REGRESSION | PASS |
+| SHIFT_OPERATIONS_REGRESSION | PASS |
+| FACTORY_ORCHESTRATION_REGRESSION | PASS |
+| BRANDING_REGRESSION | PASS |
+| LOGIN_REGRESSION | PASS |
+| EXISTING_PRODUCT_REGRESSION | PASS |
 
 ## Safety Boundaries
 
-`GENERIC_PLC_WRITE=0` · `SAFETY_OVERRIDE=0` · `E_STOP_BYPASS=0` · `AUTONOMOUS_PAYMENT=0` · `ACCOUNTING_POSTING=0` · `ERP_SCOPE_CREEP=0`
+`GENERIC_PLC_WRITE=0` · `SAFETY_OVERRIDE=0` · `E_STOP_BYPASS=0` · `AUTONOMOUS_PAYMENT=0` · `ACCOUNTING_POSTING=0` · `ERP_SCOPE_CREEP=0` · `LLM_FOR_DETERMINISTIC_CORE=0`
+
+## Known Follow-ups
+
+| Item | Notes |
+|---|---|
+| Policy management UI/API | Permissions exist; no dedicated policy update surface |
+| Web POST create-decision action | API-only create path; workspace UI uses opportunities/predictions |
+| AI Decision Ledger runtime assertion | Optional write path; not separately asserted in runtime verifier |
+| Bounded rollback endpoint | Failed decisions recover via new decision creation; no dedicated re-execute API |
+
+## Intentionally Excluded Files
+
+- Login/auth layout and branding assets (frozen at `155f99a`)
+- `infrastructure/.env.local` and other gitignored secrets
+- UM-6+ scope
 
 ## Closure
 

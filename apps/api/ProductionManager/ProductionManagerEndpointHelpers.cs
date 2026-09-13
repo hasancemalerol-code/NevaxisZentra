@@ -42,6 +42,15 @@ internal static class ProductionManagerEndpointHelpers
     {
         executive = workspace.Executive,
         predictions = workspace.Predictions.Select(MapPrediction).ToList(),
+        opportunities = workspace.Opportunities.Select(o => new
+        {
+            decisionType = o.DecisionType,
+            title = o.Title,
+            problemSummary = o.ProblemSummary,
+            correlationKey = o.CorrelationKey,
+            confidenceScore = o.ConfidenceScore,
+            confidenceBand = o.ConfidenceBand,
+        }).ToList(),
         pendingDecisions = workspace.PendingDecisions.Select(MapDecision).ToList(),
         recentDecisions = workspace.RecentDecisions.Select(MapDecision).ToList(),
         bottlenecks = workspace.Bottlenecks,

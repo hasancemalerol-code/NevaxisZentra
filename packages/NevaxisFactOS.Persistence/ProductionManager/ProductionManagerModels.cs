@@ -3,6 +3,7 @@ namespace NevaxisFactOS.Persistence.ProductionManager;
 public sealed record ProductionManagerWorkspaceSnapshot(
     FactoryStateSnapshot State,
     IReadOnlyList<FactoryPrediction> Predictions,
+    IReadOnlyList<DecisionOpportunity> Opportunities,
     IReadOnlyList<FactoryDecision> PendingDecisions,
     IReadOnlyList<FactoryDecision> RecentDecisions,
     IReadOnlyList<BottleneckSignal> Bottlenecks,

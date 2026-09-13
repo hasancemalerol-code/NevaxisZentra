@@ -101,6 +101,7 @@ public sealed class ProductionManagerService : IProductionManagerService
         }
 
         var allPredictions = existingPredictions.Concat(newPredictions).ToList();
+        var opportunities = DecisionOpportunityEngine.Evaluate(allPredictions);
         var pending = await repository.ListDecisionsAsync(
             facilityId, ProductionManagerDecisionStatuses.PendingApproval, 20, cancellationToken);
         var recent = await repository.ListDecisionsAsync(facilityId, null, 10, cancellationToken);
@@ -114,6 +115,7 @@ public sealed class ProductionManagerService : IProductionManagerService
         return new ProductionManagerWorkspaceSnapshot(
             state,
             allPredictions,
+            opportunities,
             pending,
             recent,
             bottlenecks,
@@ -135,7 +137,10 @@ public sealed class ProductionManagerService : IProductionManagerService
         var policy = await repository.GetOrCreatePolicyAsync(facilityId, cancellationToken);
         var state = await repository.CaptureStateAsync(facilityId, cancellationToken);
         var memories = await repository.ListMemoriesAsync(facilityId, decisionType, cancellationToken);
-        var (confidence, band) = DecisionConfidenceEngine.Evaluate(state, memories);
+        var similarMemories = DecisionMemoryEngine.FindSimilar(memories, decisionType, state.ProductionStateJson)
+            .Where(m => DecisionMemoryEngine.RevalidateConditions(m, state))
+            .ToList();
+        var (confidence, band) = DecisionConfidenceEngine.Evaluate(state, similarMemories);
 
         var optionDrafts = DecisionOptionGenerator.Generate(decisionType, state, policy);
         var ranked = DecisionScoringEngine.ScoreAndRank(optionDrafts, decisionType);

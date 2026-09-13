@@ -15,6 +15,19 @@ internal static class DevelopmentPilotSaasSubscriptionRlsRepair
         ("factory_simulations", "fsim"),
         ("factory_decision_outcomes", "fout"),
         ("factory_decision_memories", "fmem"),
+        ("digital_workers", "dw"),
+        ("digital_worker_policies", "dwp"),
+        ("digital_worker_budgets", "dwb"),
+        ("digital_work_cases", "dwc"),
+        ("digital_work_case_participants", "dwcp"),
+        ("digital_work_activities", "dwa"),
+        ("digital_work_verifications", "dwv"),
+        ("digital_work_approvals", "dwap"),
+        ("digital_work_handoffs", "dwh"),
+        ("digital_worker_usages", "dwu"),
+        ("digital_workforce_runtime_states", "dwrs"),
+        ("factory_case_dependencies", "fcd"),
+        ("factory_event_correlations", "fec"),
     ];
 
     internal static async Task EnsureRuntimeReadAccessAsync(
@@ -49,6 +62,19 @@ internal static class DevelopmentPilotSaasSubscriptionRlsRepair
             GRANT SELECT, INSERT, UPDATE ON TABLE factory_simulations TO crevafactos_runtime;
             GRANT SELECT, INSERT, UPDATE ON TABLE factory_decision_outcomes TO crevafactos_runtime;
             GRANT SELECT, INSERT, UPDATE ON TABLE factory_decision_memories TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_workers TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_worker_policies TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_worker_budgets TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_cases TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_case_participants TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_activities TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_verifications TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_approvals TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_work_handoffs TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_worker_usages TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE digital_workforce_runtime_states TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_case_dependencies TO crevafactos_runtime;
+            GRANT SELECT, INSERT, UPDATE ON TABLE factory_event_correlations TO crevafactos_runtime;
             """;
 
         foreach (var (table, prefix) in TenantScopedTables)

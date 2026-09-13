@@ -234,6 +234,42 @@ public sealed class DecisionMemoryEngineTests
     }
 }
 
+public sealed class DecisionOpportunityEngineTests
+{
+    [Fact]
+    public void EvaluateReturnsActivePredictionsAboveThreshold()
+    {
+        var predictions = new List<FactoryPrediction>
+        {
+            new()
+            {
+                IsActive = true,
+                PredictionType = ProductionManagerDecisionTypes.OrderDelay,
+                Title = "Order delay",
+                Summary = "Behind schedule",
+                CorrelationKey = "order:PO-1",
+                ConfidenceScore = 0.8m,
+                ConfidenceBand = ProductionManagerConfidenceBands.High,
+            },
+            new()
+            {
+                IsActive = true,
+                PredictionType = ProductionManagerDecisionTypes.MachineRisk,
+                Title = "Low confidence",
+                Summary = "Noise",
+                CorrelationKey = "machine:IM-01",
+                ConfidenceScore = 0.2m,
+                ConfidenceBand = ProductionManagerConfidenceBands.Low,
+            },
+        };
+
+        var opportunities = DecisionOpportunityEngine.Evaluate(predictions);
+
+        Assert.Single(opportunities);
+        Assert.Equal(ProductionManagerDecisionTypes.OrderDelay, opportunities[0].DecisionType);
+    }
+}
+
 public sealed class BottleneckDetectorTests
 {
     [Fact]
