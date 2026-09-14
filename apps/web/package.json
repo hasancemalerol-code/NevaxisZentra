@@ -11,7 +11,14 @@
     "test": "tsx --tsconfig tests/tsconfig.test.json --import ./tests/setup/register-next-mocks.mjs --test tests/page.test.tsx",
     "verify:production-planning": "node scripts/verify-production-planning-release.mjs && node scripts/verify-production-planning-maker-checker.mjs && node scripts/verify-production-planning-handoff.mjs && node scripts/verify-production-planning-final-hardening.mjs",
     "verify:factory-network-um8-migration": "node scripts/verify-factory-network-um8-migration.mjs",
-    "verify:factory-network-um8-runtime": "node scripts/verify-factory-network-um8-runtime.mjs"
+    "verify:factory-network-um8-runtime": "node scripts/verify-factory-network-um8-runtime.mjs",
+    "verify:enterprise-reliability-um9-migration": "node scripts/verify-enterprise-reliability-um9-migration.mjs",
+    "verify:enterprise-reliability-um9-runtime": "node scripts/verify-enterprise-reliability-um9-runtime.mjs",
+    "verify:enterprise-reliability-um9-security": "node scripts/verify-enterprise-reliability-um9-security.mjs",
+    "verify:enterprise-reliability-um9-data-integrity": "node scripts/verify-enterprise-reliability-um9-data-integrity.mjs",
+    "verify:enterprise-reliability-um9-failure-injection": "node scripts/verify-enterprise-reliability-um9-failure-injection.mjs",
+    "verify:enterprise-reliability-um9-performance": "node scripts/verify-enterprise-reliability-um9-performance.mjs",
+    "verify:database-restore-um9": "node ../../scripts/db/verify-restore-um9.mjs"
   },
   "dependencies": {
     "lucide-react": "1.27.0",

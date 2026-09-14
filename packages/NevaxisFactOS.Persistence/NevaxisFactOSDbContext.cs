@@ -44,6 +44,7 @@ using NevaxisFactOS.Persistence.ProductionManager;
 using NevaxisFactOS.Persistence.FactoryLearning;
 using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
 using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
+using NevaxisFactOS.Persistence.EnterpriseReliability;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -440,6 +441,17 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<NetworkAllocationItem> NetworkAllocationItems => Set<NetworkAllocationItem>();
     public DbSet<FactoryNetworkPolicy> FactoryNetworkPolicies => Set<FactoryNetworkPolicy>();
     public DbSet<NetworkActivityEvent> NetworkActivityEvents => Set<NetworkActivityEvent>();
+
+    // Enterprise Reliability (ULTRA-MEGA-9)
+    public DbSet<EnterpriseReliabilityPolicy> EnterpriseReliabilityPolicies => Set<EnterpriseReliabilityPolicy>();
+    public DbSet<SystemComponentHealthSnapshot> SystemComponentHealthSnapshots => Set<SystemComponentHealthSnapshot>();
+    public DbSet<IntegrationCircuitBreakerState> IntegrationCircuitBreakerStates => Set<IntegrationCircuitBreakerState>();
+    public DbSet<RecoveryReconciliationRun> RecoveryReconciliationRuns => Set<RecoveryReconciliationRun>();
+    public DbSet<BackgroundJobLease> BackgroundJobLeases => Set<BackgroundJobLease>();
+    public DbSet<TechnicalOperationalAlert> TechnicalOperationalAlerts => Set<TechnicalOperationalAlert>();
+    public DbSet<EdgeAgentRegistration> EdgeAgentRegistrations => Set<EdgeAgentRegistration>();
+    public DbSet<BackupVerificationRun> BackupVerificationRuns => Set<BackupVerificationRun>();
+    public DbSet<IntegrationQuarantineReplayAudit> IntegrationQuarantineReplayAudits => Set<IntegrationQuarantineReplayAudit>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2307,6 +2319,60 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EnterpriseReliabilityPolicyEntityConfiguration());
+        modelBuilder.Entity<EnterpriseReliabilityPolicy>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new SystemComponentHealthSnapshotEntityConfiguration());
+        modelBuilder.Entity<SystemComponentHealthSnapshot>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationCircuitBreakerStateEntityConfiguration());
+        modelBuilder.Entity<IntegrationCircuitBreakerState>().HasQueryFilter(s =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RecoveryReconciliationRunEntityConfiguration());
+        modelBuilder.Entity<RecoveryReconciliationRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BackgroundJobLeaseEntityConfiguration());
+        modelBuilder.Entity<BackgroundJobLease>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TechnicalOperationalAlertEntityConfiguration());
+        modelBuilder.Entity<TechnicalOperationalAlert>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new EdgeAgentRegistrationEntityConfiguration());
+        modelBuilder.Entity<EdgeAgentRegistration>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BackupVerificationRunEntityConfiguration());
+        modelBuilder.Entity<BackupVerificationRun>().HasQueryFilter(r =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && r.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntegrationQuarantineReplayAuditEntityConfiguration());
+        modelBuilder.Entity<IntegrationQuarantineReplayAudit>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

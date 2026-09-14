@@ -4,6 +4,7 @@ using NevaxisFactOS.Persistence.Integration.Erp;
 using NevaxisFactOS.Persistence.Integration.FileImport;
 using NevaxisFactOS.Persistence.Integration.FolderWatch;
 using NevaxisFactOS.Persistence.Integration.Rest;
+using NevaxisFactOS.Persistence.EnterpriseReliability;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +38,8 @@ public sealed class IntegrationConnectorSyncService(
     IIntegrationReadOnlyDatabaseFetcher databaseFetcher,
     IIntegrationFolderWatchScanner folderWatchScanner,
     IIntegrationErpRecordBridge erpRecordBridge,
-    IIntegrationRecordIngestionOrchestrator ingestionOrchestrator) : IIntegrationConnectorSyncService
+    IIntegrationRecordIngestionOrchestrator ingestionOrchestrator,
+    IEnterpriseReliabilityService enterpriseReliabilityService) : IIntegrationConnectorSyncService
 {
     public Task<IntegrationConnectorSyncResult> SyncAsync(
         IntegrationOperationContext context,
@@ -66,6 +68,29 @@ public sealed class IntegrationConnectorSyncService(
                 null,
                 IntegrationFailureCodes.NotFound,
                 "Connector not found.");
+        }
+
+        var breaker = await enterpriseReliabilityService.GetSystemStatusAsync(
+            context.TenantId,
+            context.FacilityId,
+            cancellationToken);
+        var connectorView = breaker.Integrations.FirstOrDefault(c => c.ConnectorId == request.ConnectorId);
+        if (connectorView?.CircuitState == CircuitBreakerStates.Open)
+        {
+            await enterpriseReliabilityService.RecordConnectorOutcomeAsync(
+                context.TenantId,
+                new RecordConnectorOutcomeRequest(
+                    request.ConnectorId,
+                    context.FacilityId,
+                    false,
+                    IntegrationRetryCategories.Transient),
+                cancellationToken);
+            return new IntegrationConnectorSyncResult(
+                false,
+                null,
+                null,
+                EnterpriseReliabilityFailureCodes.CircuitOpen,
+                "Connector circuit breaker is open.");
         }
 
         IntegrationFileTable? table = null;
@@ -189,12 +214,32 @@ public sealed class IntegrationConnectorSyncService(
 
         if (!ingestion.Success)
         {
+            await enterpriseReliabilityService.RecordConnectorOutcomeAsync(
+                context.TenantId,
+                new RecordConnectorOutcomeRequest(
+                    request.ConnectorId,
+                    context.FacilityId,
+                    false,
+                    ingestion.ErrorCode),
+                cancellationToken);
             return new IntegrationConnectorSyncResult(
                 false,
                 ingestion.SyncRunId,
                 ingestion.DryRun,
                 ingestion.ErrorCode,
                 ingestion.SafeMessage);
+        }
+
+        if (!request.DryRun)
+        {
+            await enterpriseReliabilityService.RecordConnectorOutcomeAsync(
+                context.TenantId,
+                new RecordConnectorOutcomeRequest(
+                    request.ConnectorId,
+                    context.FacilityId,
+                    true,
+                    null),
+                cancellationToken);
         }
 
         if (!request.DryRun && connector.ConnectorKind == IntegrationConnectorKinds.FolderWatch)

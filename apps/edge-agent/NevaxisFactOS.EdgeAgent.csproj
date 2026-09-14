@@ -7,5 +7,6 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\..\packages\NevaxisFactOS.Configuration\NevaxisFactOS.Configuration.csproj" />
+    <ProjectReference Include="..\..\packages\NevaxisFactOS.EdgeBuffer\NevaxisFactOS.EdgeBuffer.csproj" />
   </ItemGroup>
 </Project>

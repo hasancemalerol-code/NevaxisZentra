@@ -24,6 +24,7 @@ export const NAVIGATION_ICON_KEYS = [
   "users-round",
   "circle-gauge",
   "chart-no-axes-combined",
+  "activity",
   "settings",
 ] as const;
 

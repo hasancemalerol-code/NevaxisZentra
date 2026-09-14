@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Activity,
   BadgeDollarSign,
   Boxes,
   Cable,
@@ -57,6 +58,7 @@ export const navigationIconRegistry = {
   "users-round": UsersRound,
   "circle-gauge": CircleGauge,
   "chart-no-axes-combined": ChartNoAxesCombined,
+  activity: Activity,
   settings: Settings,
 } satisfies Record<NavigationIconKey, LucideIcon>;
 

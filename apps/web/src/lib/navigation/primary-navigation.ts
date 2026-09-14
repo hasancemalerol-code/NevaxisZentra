@@ -310,6 +310,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         permissionKey: "integration.read",
       },
       {
+        label: "Sistem Durumu",
+        href: "/ayarlar/sistem-durumu",
+        iconKey: "activity",
+        permissionKey: "operability.read",
+      },
+      {
         label: "Ayarlar",
         href: "/ayarlar",
         iconKey: "settings",
