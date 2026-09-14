@@ -869,6 +869,12 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 seedTimestampUtc,
                 cancellationToken);
+            await DevelopmentPilotGoldenDemoCustomsFileSeed.EnsureGoldenDemoCustomsFilePilotDataAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotWorkforceSeed.EnsureShiftWorkforcePilotRecordsAsync(
                 dbContext,
                 tenant.Id,

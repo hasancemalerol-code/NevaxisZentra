@@ -9,6 +9,7 @@ public static class DigitalWorkforceWorkerCodes
     public const string SupplierRecovery = "DW-FACT-005";
     public const string MoldLifecycle = "DW-FACT-006";
     public const string FactoryCoordinator = "DW-FACT-007";
+    public const string CustomsFileDigitalWorker = "DW-EXP-001";
 }
 
 public static class DigitalWorkforceAutonomyModes

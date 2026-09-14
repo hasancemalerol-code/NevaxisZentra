@@ -46,6 +46,7 @@ using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
 using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 using NevaxisFactOS.Persistence.EnterpriseReliability;
 using NevaxisFactOS.Persistence.GoldenDemoP1;
+using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -463,6 +464,17 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<GoldenDemoAgentFinding> GoldenDemoAgentFindings => Set<GoldenDemoAgentFinding>();
     public DbSet<GoldenDemoVerificationRun> GoldenDemoVerificationRuns => Set<GoldenDemoVerificationRun>();
     public DbSet<GoldenDemoDigitalWorkCaseLink> GoldenDemoDigitalWorkCaseLinks => Set<GoldenDemoDigitalWorkCaseLink>();
+
+    // Golden Demo Customs File — Digital Worker outcome
+    public DbSet<GoldenDemoCustomsFileOutcome> GoldenDemoCustomsFileOutcomes => Set<GoldenDemoCustomsFileOutcome>();
+    public DbSet<GoldenDemoCustomsFileDocument> GoldenDemoCustomsFileDocuments => Set<GoldenDemoCustomsFileDocument>();
+    public DbSet<GoldenDemoCustomsFileBlocker> GoldenDemoCustomsFileBlockers => Set<GoldenDemoCustomsFileBlocker>();
+    public DbSet<GoldenDemoCustomsFileCorrectiveWork> GoldenDemoCustomsFileCorrectiveWorks =>
+        Set<GoldenDemoCustomsFileCorrectiveWork>();
+    public DbSet<GoldenDemoCustomsFilePackage> GoldenDemoCustomsFilePackages => Set<GoldenDemoCustomsFilePackage>();
+    public DbSet<GoldenDemoCustomsFileVerificationRun> GoldenDemoCustomsFileVerificationRuns =>
+        Set<GoldenDemoCustomsFileVerificationRun>();
+    public DbSet<GoldenDemoCustomsFileActivity> GoldenDemoCustomsFileActivities => Set<GoldenDemoCustomsFileActivity>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2432,6 +2444,48 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && l.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileOutcomeEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileOutcome>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileDocumentEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileDocument>().HasQueryFilter(d =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && d.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileBlockerEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileBlocker>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileCorrectiveWorkEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileCorrectiveWork>().HasQueryFilter(w =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && w.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFilePackageEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFilePackage>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileVerificationRunEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileVerificationRun>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCustomsFileActivityEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCustomsFileActivity>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>
