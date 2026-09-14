@@ -45,6 +45,7 @@ using NevaxisFactOS.Persistence.FactoryLearning;
 using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
 using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 using NevaxisFactOS.Persistence.EnterpriseReliability;
+using NevaxisFactOS.Persistence.GoldenDemoP1;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 
@@ -452,6 +453,16 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<EdgeAgentRegistration> EdgeAgentRegistrations => Set<EdgeAgentRegistration>();
     public DbSet<BackupVerificationRun> BackupVerificationRuns => Set<BackupVerificationRun>();
     public DbSet<IntegrationQuarantineReplayAudit> IntegrationQuarantineReplayAudits => Set<IntegrationQuarantineReplayAudit>();
+
+    // Golden Demo P1 — Machine Intelligence + Production Recovery
+    public DbSet<GoldenDemoProductionEvent> GoldenDemoProductionEvents => Set<GoldenDemoProductionEvent>();
+    public DbSet<GoldenDemoCycleBaseline> GoldenDemoCycleBaselines => Set<GoldenDemoCycleBaseline>();
+    public DbSet<GoldenDemoCycleObservation> GoldenDemoCycleObservations => Set<GoldenDemoCycleObservation>();
+    public DbSet<GoldenDemoRecoveryPlan> GoldenDemoRecoveryPlans => Set<GoldenDemoRecoveryPlan>();
+    public DbSet<GoldenDemoRecoveryPlanAction> GoldenDemoRecoveryPlanActions => Set<GoldenDemoRecoveryPlanAction>();
+    public DbSet<GoldenDemoAgentFinding> GoldenDemoAgentFindings => Set<GoldenDemoAgentFinding>();
+    public DbSet<GoldenDemoVerificationRun> GoldenDemoVerificationRuns => Set<GoldenDemoVerificationRun>();
+    public DbSet<GoldenDemoDigitalWorkCaseLink> GoldenDemoDigitalWorkCaseLinks => Set<GoldenDemoDigitalWorkCaseLink>();
 
     public DbSet<MarketRateSnapshot> MarketRateSnapshots => Set<MarketRateSnapshot>();
     public DbSet<MarketRateQuoteLine> MarketRateQuoteLines => Set<MarketRateQuoteLine>();
@@ -2373,6 +2384,54 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoProductionEventEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoProductionEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCycleBaselineEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCycleBaseline>().HasQueryFilter(b =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && b.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoCycleObservationEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoCycleObservation>().HasQueryFilter(o =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && o.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoRecoveryPlanEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoRecoveryPlan>().HasQueryFilter(p =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && p.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoRecoveryPlanActionEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoRecoveryPlanAction>().HasQueryFilter(a =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && a.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoAgentFindingEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoAgentFinding>().HasQueryFilter(f =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && f.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoVerificationRunEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoVerificationRun>().HasQueryFilter(v =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && v.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new GoldenDemoDigitalWorkCaseLinkEntityConfiguration());
+        modelBuilder.Entity<GoldenDemoDigitalWorkCaseLink>().HasQueryFilter(l =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && l.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new MarketRateSnapshotEntityConfiguration());
         modelBuilder.Entity<MarketRateSnapshot>().HasQueryFilter(s =>

@@ -19257,6 +19257,544 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
                     b.ToTable("factory_event_correlations", (string)null);
                 });
 
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoAgentFinding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AgentCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("agent_code");
+
+                    b.Property<string>("DetailJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("detail_json");
+
+                    b.Property<string>("EvidenceClassification")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("evidence_classification");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("GeneratedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("generated_at_utc");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("WorkerCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("worker_code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId", "AgentCode");
+
+                    b.ToTable("golden_demo_agent_findings", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoCycleBaseline", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("PhaseDurationsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phase_durations_json");
+
+                    b.Property<string>("ProcessParametersJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("process_parameters_json");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<decimal?>("ReferenceKwhPerGoodPart")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reference_kwh_per_good_part");
+
+                    b.Property<string>("ReferenceSource")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("reference_source");
+
+                    b.Property<string>("ReferenceSourceLabel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("reference_source_label");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("TotalCycleSeconds")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_cycle_seconds");
+
+                    b.Property<DateTimeOffset>("ValidFromUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_from_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId")
+                        .IsUnique();
+
+                    b.ToTable("golden_demo_cycle_baselines", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoCycleObservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AvailabilityPercent")
+                        .HasColumnType("numeric")
+                        .HasColumnName("availability_percent");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<int>("GoodParts")
+                        .HasColumnType("integer")
+                        .HasColumnName("good_parts");
+
+                    b.Property<decimal?>("KwhPerGoodPart")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kwh_per_good_part");
+
+                    b.Property<string>("MachineState")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("machine_state");
+
+                    b.Property<int>("MicroStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("micro_stop_count");
+
+                    b.Property<decimal>("MicroStopDurationSeconds")
+                        .HasColumnType("numeric")
+                        .HasColumnName("micro_stop_duration_seconds");
+
+                    b.Property<string>("ObservationKind")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("observation_kind");
+
+                    b.Property<DateTimeOffset>("ObservedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("observed_at_utc");
+
+                    b.Property<string>("PhaseDurationsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phase_durations_json");
+
+                    b.Property<string>("ProcessParametersJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("process_parameters_json");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<int>("RejectParts")
+                        .HasColumnType("integer")
+                        .HasColumnName("reject_parts");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("TotalCycleSeconds")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_cycle_seconds");
+
+                    b.Property<decimal?>("TotalEnergyKwh")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_energy_kwh");
+
+                    b.Property<DateTimeOffset>("WindowEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end_utc");
+
+                    b.Property<DateTimeOffset>("WindowStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId", "ObservationKind");
+
+                    b.ToTable("golden_demo_cycle_observations", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoDigitalWorkCaseLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("DigitalWorkCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("digital_work_case_id");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<DateTimeOffset>("LinkedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("linked_at_utc");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("WorkerCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("worker_code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId", "WorkerCode")
+                        .IsUnique();
+
+                    b.ToTable("golden_demo_digital_work_case_links", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoProductionEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("MachineAssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_asset_id");
+
+                    b.Property<string>("MachineCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("machine_code");
+
+                    b.Property<string>("MoldReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("mold_reference");
+
+                    b.Property<string>("ProductReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("product_reference");
+
+                    b.Property<DateTimeOffset>("ShiftEndUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("shift_end_utc");
+
+                    b.Property<DateTimeOffset>("ShiftStartUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("shift_start_utc");
+
+                    b.Property<int>("ShiftTargetGoodParts")
+                        .HasColumnType("integer")
+                        .HasColumnName("shift_target_good_parts");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "MachineAssetId", "Status");
+
+                    b.ToTable("golden_demo_production_events", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoRecoveryPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at_utc");
+
+                    b.Property<string>("ApprovedBySubjectId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("approved_by_subject_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<string>("RecommendationSummary")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recommendation_summary");
+
+                    b.Property<string>("RecommendedScenarioCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("recommended_scenario_code");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId")
+                        .IsUnique();
+
+                    b.ToTable("golden_demo_recovery_plans", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoRecoveryPlanAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("action_code");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at_utc");
+
+                    b.Property<int>("EstimatedDowntimeMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimated_downtime_minutes");
+
+                    b.Property<string>("EvidenceRequired")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_required");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("RecoveryPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recovery_plan_id");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<string>("ResponsibleRole")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("responsible_role");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("ValidationCriteria")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("validation_criteria");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecoveryPlanId", "SortOrder");
+
+                    b.ToTable("golden_demo_recovery_plan_actions", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisFactOS.Persistence.GoldenDemoP1.GoldenDemoVerificationRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CriteriaJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("criteria_json");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("ProductionEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_event_id");
+
+                    b.Property<decimal>("RecoveredGoodPartsPerShift")
+                        .HasColumnType("numeric")
+                        .HasColumnName("recovered_good_parts_per_shift");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("result");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("summary");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("TriggeredBySubjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("triggered_by_subject_id");
+
+                    b.Property<DateTimeOffset>("VerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at_utc");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionEventId", "VerifiedAtUtc");
+
+                    b.ToTable("golden_demo_verification_runs", (string)null);
+                });
+
             modelBuilder.Entity("NevaxisFactOS.Persistence.Identity.IdentitySubject", b =>
                 {
                     b.Property<Guid>("Id")

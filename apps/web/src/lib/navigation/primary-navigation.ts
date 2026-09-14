@@ -33,6 +33,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
+        label: "Altın Demo — Üretim Kurtarma",
+        href: "/golden-demo/uretim-kurtarma",
+        iconKey: "gauge",
+        permissionKey: "golden-demo-p1.read",
+      },
+      {
         label: "FactOS Teams",
         href: "/teams",
         iconKey: "messages-square",

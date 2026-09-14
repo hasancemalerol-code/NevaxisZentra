@@ -14,6 +14,7 @@ using NevaxisFactOS.Persistence.Outbox;
 using NevaxisFactOS.Persistence.SaasIdentity;
 using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 using NevaxisFactOS.Persistence.EnterpriseReliability;
+using NevaxisFactOS.Persistence.GoldenDemoP1;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -132,6 +133,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<TenantDatabaseSession>();
         services.AddNevaxisFactOSFactoryNetwork();
         services.AddNevaxisFactOSEnterpriseReliability();
+        services.AddNevaxisFactOSGoldenDemoP1();
         services.AddScoped<IIdentitySubjectResolver, PostgreSqlIdentitySubjectResolver>();
         services.AddScoped<ITenantMembershipResolver, PostgreSqlTenantMembershipResolver>();
         services.AddScoped<IPermissionEvaluator, PostgreSqlPermissionEvaluator>();
