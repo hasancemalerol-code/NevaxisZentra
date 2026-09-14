@@ -9,10 +9,10 @@
 | Label | SHA |
 |---|---|
 | BASELINE_SHA | `88a83b52b9bebff790d61e4bcbca0757d7585470` |
-| FEATURE_COMMIT_SHA | *(pending commit — this report staged with UM-9 scope)* |
-| FINAL_SHA | *(pending push verification)* |
-| ORIGIN_MAIN_SHA | `88a83b52b9bebff790d61e4bcbca0757d7585470` (pending push) |
-| LOCAL_REMOTE_HEAD_MATCH | NO — push to origin/main requires approval |
+| FEATURE_COMMIT_SHA | `80c22e7985c9aaf71b5f833be07908fb33098ef9` |
+| FINAL_SHA | `80c22e7985c9aaf71b5f833be07908fb33098ef9` |
+| ORIGIN_MAIN_SHA | `80c22e7985c9aaf71b5f833be07908fb33098ef9` |
+| LOCAL_REMOTE_HEAD_MATCH | TRUE |
 
 ## Mission
 
