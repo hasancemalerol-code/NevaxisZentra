@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   formatGoldenDemoNumber,
   getGoldenDemoEventStatusLabel,
-  getGoldenDemoVerificationLabel,
   GOLDEN_DEMO_P1_SUBTITLE,
   GOLDEN_DEMO_P1_TITLE,
 } from "../domain/golden-demo-p1-labels";
@@ -16,6 +15,8 @@ import type { GoldenDemoP2PresentationStatusApi } from "@/features/golden-demo-p
 import { GoldenDemoP2PresentationPanel } from "@/features/golden-demo-p2/components/golden-demo-p2-presentation-panel";
 import type { GoldenDemoP2BDigitalFactoryTeamApi } from "@/features/golden-demo-p2b/server/golden-demo-p2b-api-client";
 import { GoldenDemoP2BDigitalFactoryPanel } from "@/features/golden-demo-p2b/components/golden-demo-p2b-digital-factory-panel";
+import type { GoldenDemoP3OutcomeApi } from "@/features/golden-demo-p3/server/golden-demo-p3-api-client";
+import { GoldenDemoP3OutcomePanel } from "@/features/golden-demo-p3/components/golden-demo-p3-outcome-panel";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 import {
   goldenDemoApprovePlanAction,
@@ -54,10 +55,12 @@ export function GoldenDemoP1WorkspaceView({
   workspace,
   presentation,
   digitalFactoryTeam,
+  outcome,
 }: Readonly<{
   workspace: GoldenDemoP1WorkspaceApi;
   presentation: GoldenDemoP2PresentationStatusApi | null;
   digitalFactoryTeam: GoldenDemoP2BDigitalFactoryTeamApi | null;
+  outcome: GoldenDemoP3OutcomeApi | null;
 }>) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -248,6 +251,29 @@ export function GoldenDemoP1WorkspaceView({
         </ul>
       </section>
 
+      <section className="commint-panel" data-testid="golden-demo-what-if">
+        <h2>What-If Senaryoları</h2>
+        <ul>
+          {workspace.whatIfScenarios.map((scenario) => (
+            <li key={scenario.scenarioCode}>
+              <strong>{scenario.title}</strong>
+              {scenario.isRecommended ? " — RECOMMENDED" : ""}
+              <p>Vardiya sonu projeksiyon: {scenario.projectedEndOfShiftGoodParts}</p>
+              <p>{scenario.riskExposure}</p>
+              {scenario.recommendationReason ? <p>{scenario.recommendationReason}</p> : null}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {digitalFactoryTeam ? (
+        <GoldenDemoP2BDigitalFactoryPanel
+          team={digitalFactoryTeam}
+          pending={pending}
+          onApprove={() => runAction(() => goldenDemoApprovePlanAction(eventId))}
+        />
+      ) : null}
+
       <section className="commint-panel" data-testid="golden-demo-recovery-plan">
         <h2>Önerilen Kurtarma Planı</h2>
         {workspace.plan ? <p>{workspace.plan.recommendationSummary}</p> : null}
@@ -283,66 +309,7 @@ export function GoldenDemoP1WorkspaceView({
         </div>
       </section>
 
-      {digitalFactoryTeam ? (
-        <GoldenDemoP2BDigitalFactoryPanel
-          team={digitalFactoryTeam}
-          pending={pending}
-          onApprove={() => runAction(() => goldenDemoApprovePlanAction(eventId))}
-        />
-      ) : null}
-
-      <section className="commint-panel" data-testid="golden-demo-what-if">
-        <h2>What-If Senaryoları</h2>
-        <ul>
-          {workspace.whatIfScenarios.map((scenario) => (
-            <li key={scenario.scenarioCode}>
-              <strong>{scenario.title}</strong>
-              {scenario.isRecommended ? " — RECOMMENDED" : ""}
-              <p>Vardiya sonu projeksiyon: {scenario.projectedEndOfShiftGoodParts}</p>
-              <p>{scenario.riskExposure}</p>
-              {scenario.recommendationReason ? <p>{scenario.recommendationReason}</p> : null}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {workspace.beforeAfter ? (
-        <section className="commint-panel" data-testid="golden-demo-before-after">
-          <h2>Önce / Sonra</h2>
-          <p>
-            Cycle: {formatGoldenDemoNumber(workspace.beforeAfter.beforeCycleSeconds, 1)} →{" "}
-            {formatGoldenDemoNumber(workspace.beforeAfter.afterCycleSeconds, 1)} sn
-          </p>
-          <p>
-            İyi parça/saat: {formatGoldenDemoNumber(workspace.beforeAfter.beforeGoodPartsPerHour, 1)} →{" "}
-            {formatGoldenDemoNumber(workspace.beforeAfter.afterGoodPartsPerHour, 1)}
-          </p>
-          <p data-testid="golden-demo-verified-recovery">
-            {workspace.beforeAfter.outcomeLabel} · +
-            {formatGoldenDemoNumber(workspace.beforeAfter.recoveredGoodPartsPerShift)} iyi parça / vardiya
-          </p>
-        </section>
-      ) : null}
-
-      {workspace.verification ? (
-        <section className="commint-panel" data-testid="golden-demo-verification">
-          <h2>Sonuç Doğrulama</h2>
-          <p>{getGoldenDemoVerificationLabel(workspace.verification.result)}</p>
-          <p>{workspace.verification.summary}</p>
-        </section>
-      ) : null}
-
-      <section className="commint-panel" data-testid="golden-demo-business-impact">
-        <h2>İkincil Etki</h2>
-        <p>Operasyonel: +{workspace.businessImpact.operationalGoodPartsPerShift} iyi parça / vardiya</p>
-        <p>Kapasite: {formatGoldenDemoNumber(workspace.businessImpact.capacityImpactPercent, 1)}%</p>
-        {workspace.businessImpact.estimatedBusinessImpactTry != null ? (
-          <p>Tahmini iş etkisi (ESTIMATED): ₺{formatGoldenDemoNumber(workspace.businessImpact.estimatedBusinessImpactTry)}</p>
-        ) : null}
-        {workspace.businessImpact.verifiedBusinessImpactTry != null ? (
-          <p>Doğrulanmış iş etkisi (VERIFIED): ₺{formatGoldenDemoNumber(workspace.businessImpact.verifiedBusinessImpactTry)}</p>
-        ) : null}
-      </section>
+      {outcome ? <GoldenDemoP3OutcomePanel outcome={outcome} /> : null}
     </main>
   );
 }
