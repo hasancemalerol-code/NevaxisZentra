@@ -30,6 +30,7 @@
     "verify:golden-demo-p3-live-flow": "node scripts/verify-golden-demo-p3-live-flow.mjs",
     "verify:golden-demo-sales-ready": "node scripts/verify-golden-demo-sales-ready.mjs",
     "verify:golden-demo-customs-file-runtime": "node scripts/verify-golden-demo-customs-file-runtime.mjs",
+    "verify:golden-demo-final-combined-freeze": "node scripts/verify-golden-demo-final-combined-freeze.mjs",
     "verify:database-restore-um9": "node ../../scripts/db/verify-restore-um9.mjs"
   },
   "dependencies": {

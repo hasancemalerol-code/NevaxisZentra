@@ -39,6 +39,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         permissionKey: "golden-demo-p1.read",
       },
       {
+        label: "Altın Demo — Gümrük Dosyası",
+        href: "/golden-demo/gumruk-dosyasi",
+        iconKey: "ship",
+        permissionKey: "golden-demo-customs-file.read",
+      },
+      {
         label: "FactOS Teams",
         href: "/teams",
         iconKey: "messages-square",

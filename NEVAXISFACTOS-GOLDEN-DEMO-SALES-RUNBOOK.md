@@ -1,242 +1,124 @@
 # Nevaxis FactOS — Golden Demo Sales Runbook
 
-Canonical Tuesday sales demo for production recovery on **INJ-001**.
+Combined sales demo: **Production Recovery** + **Customs File Digital Worker** on localhost Web + API.
 
-## A. STARTUP
+## A. PRE-DEMO STARTUP
 
 ### Prerequisites
 
-1. Local infrastructure running: `pnpm infra:start`
-2. Database migrated and verified: `pnpm db:migrations:apply` then `pnpm db:verify`
+1. Infrastructure: `pnpm infra:start`
+2. Database: `pnpm db:migrations:apply` then `pnpm db:verify`
 
-### Start backend/API
-
-```text
-pnpm dev:api
-```
-
-- URL: `http://localhost:5000`
-- Health: `GET /health/live` and `GET /health/ready`
-
-### Start Web
+### Start services
 
 ```text
-pnpm dev:web
+pnpm dev:api    → http://127.0.0.1:5000
+pnpm dev:web    → http://localhost:3000 (or 3001 for existing verifiers)
 ```
 
-- Default URL: `http://localhost:3000`
-- Health: `GET /health`
-- Golden Demo route: `http://localhost:3000/golden-demo/uretim-kurtarma`
+Health checks:
 
-If automated verifiers are used, set `NEVAXIS_FACTOS_WEB_BASE_URL=http://localhost:3000` (or run Web on port 3001 to match existing scripts).
+| Service | URL |
+|---------|-----|
+| API | `GET /health/live` |
+| Web | `GET /health` |
 
-### Optional worker (not required for Golden Demo)
+Set `NEVAXIS_FACTOS_WEB_BASE_URL` if Web runs on a non-default port.
+
+### Automated pre-check (recommended)
 
 ```text
-pnpm dev:worker
+pnpm --filter @nevaxisfactos/web verify:golden-demo-final-combined-freeze
 ```
 
-## B. PRE-DEMO CHECK
+### Reset both demos before presenting
 
-Run in order:
+| Demo | Route | Reset action |
+|------|-------|--------------|
+| Production | `/golden-demo/uretim-kurtarma` | **Altın Demo Sıfırla** → confirm |
+| Customs | `/golden-demo/gumruk-dosyasi` | **Gümrük Demo Sıfırla** → confirm |
 
-| Check | Command / Action | Expected |
-|-------|------------------|----------|
-| API healthy | Browser or curl `http://localhost:5000/health/live` | HTTP 200 |
-| Web healthy | Browser or curl `http://localhost:3000/health` | HTTP 200 |
-| Database healthy | `pnpm db:verify` | PASS |
-| Golden Demo reset | Open route → **Altın Demo Sıfırla** → confirm | “Altın Demo sıfırlandı…” |
-| Browser route | `/golden-demo/uretim-kurtarma` | Workspace loads |
-| Browser zoom | 100% (125% on small laptop if needed) | KPIs readable |
-| Clean worktree | `git status` | No uncommitted demo changes |
-| Starting state | After reset | Event **Aktif — hedef risk altında** |
+Navigation: **Çalışma alanı** → **Altın Demo — Üretim Kurtarma** / **Altın Demo — Gümrük Dosyası**
 
-Automated pre-check (API + Web must be running):
+## B. PART 1 — PRODUCTION GOLDEN DEMO
 
-```text
-pnpm --filter @nevaxisfactos/web verify:golden-demo-sales-ready
-```
+**Route:** `/golden-demo/uretim-kurtarma`
 
-## C. LIVE CLICK PATH
+| Step | Screen | Action | Say |
+|------|--------|--------|-----|
+| 1 | Command Center / KPI risk | Show hedef gerçekleşme | "Hedef altında üretim riski erken yakalanıyor." |
+| 2 | Machine Intelligence | Machine metrics | "Makine zekası runtime verisinden okuyor." |
+| 3 | Cycle Loss Decomposition | Lost seconds breakdown | "Kayıp saniyeler ayrıştırıldı." |
+| 4 | Recovery Opportunity | +X iyi parça / vardiya | "Kurtarılabilir kapasite hesaplandı." |
+| 5 | Digital Factory Team | Agent cards → evidence | "Her uzman aynı kanıtı analiz etti." |
+| 6 | Recovery Plan | Walk plan actions | "Önerilen plan operasyonel işe dönüştü." |
+| 7 | Human Approval | **Planı Onayla** (reviewer) | "Kritik adım yetkili onay ile ilerliyor." |
+| 8 | Technical Intervention | Başlat → Tamamla | "FactOS koordine ediyor; fiziksel iş ekip tarafından." |
+| 9 | Validation Run | Doğrulama koşusu | "Müdahale sonrası doğrulama penceresi açıldı." |
+| 10 | Before / After | Metric comparison | "Baseline ile doğrulama penceresi karşılaştırılıyor." |
+| 11 | Outcome Verification | **Sonucu Doğrula** (reviewer) | "FactOS sonucu kanıtla doğruluyor." |
+| 12 | **PRODUCTION RECOVERED** | Outcome hero | "Üretim kurtarıldı — kanıtla doğrulandı." |
+| 13 | **+X GOOD PARTS / SHIFT** | Hero KPI | Runtime hesabı — sabit demo sayısı değil |
+| 14 | Energy Impact | Secondary layer | ÖLÇÜLMÜŞ / HESAPLANMIŞ sınıflandırması |
+| 15 | Business Impact | Brief mention | TAHMİNİ — birincil kanıt üretim kurtarması |
 
-Open: **`/golden-demo/uretim-kurtarma`**
+**Transition sentence:**
 
-### STEP 01 — Production Target at Risk
+> "FactOS Dijital Çalışanları yalnızca üretim hattında çalışmıyor."
 
-| | |
-|---|---|
-| **SCREEN** | KPI grid: hedef gerçekleşme, vardiya hedefi, projeksiyon |
-| **ACTION** | Scroll to production target / risk evidence |
-| **WHAT TO SAY** | “Hedef altında üretim riski görünüyor; FactOS bunu erken yakalıyor.” |
-| **WHAT NOT TO SAY** | “Sistem otomatik durdurdu” / “PLC’ye komut gönderdik” |
+## C. PART 2 — CUSTOMS GOLDEN DEMO
 
-### STEP 02 — Machine Intelligence
+**Route:** `/golden-demo/gumruk-dosyasi`
 
-| | |
-|---|---|
-| **SCREEN** | Makine durumu, cycle, mikro-duruş, enerji yoğunluğu |
-| **ACTION** | Point to machine metrics panel |
-| **WHAT TO SAY** | “Makine zekası gerçek runtime verisinden okuyor.” |
-| **WHAT NOT TO SAY** | “Canlı fabrika bağlantısı” (unless actually connected) |
+| Step | Screen | Action | Say |
+|------|--------|--------|-----|
+| 16 | Outcome assignment | Assign: "Bu siparişin gümrük dosyasını hazırla." | "FactOS'a soru sormuyorsunuz; iş veriyorsunuz." |
+| 17 | Order / shipment context | Worker loads EXP-DEMO-DE-001 | "Sipariş ve sevkiyat bağlamı yüklendi." |
+| 18 | Documents prepared | Commercial Invoice + Packing List | "Operasyonel belgeler hazırlandı." |
+| 19 | Blocker detected | Packing List net weight mismatch | "Tutarsızlık deterministik kontrol ile bulundu." |
+| 20 | Corrective work | Worker creates task | "Dijital çalışan düzeltici iş oluşturdu." |
+| 21 | Correction completed | Complete corrective work | "Düzeltme uygulandı — kanıt henüz yeniden kontrol edilmedi." |
+| 22 | Evidence re-check | Re-check evidence | "Kanıt yeniden değerlendirildi." |
+| 23 | Packing List v2 | New valid version | "Güncel Packing List doğrulandı." |
+| 24 | Human approval | Approve customs package (reviewer) | "Gümrük paketi onaylandı." |
+| 25 | Package assembled | Customs Clearance Package | "Gümrük dosyası birleştirildi." |
+| 26 | **GÜMRÜK DOSYASI HAZIR** | VERIFIED READY hero | "Gümrük müşavirine gönderime hazır." |
 
-### STEP 03 — Cycle Loss Decomposition
+**Closing line:**
 
-| | |
-|---|---|
-| **SCREEN** | Cycle loss breakdown |
-| **ACTION** | Show lost seconds by category |
-| **WHAT TO SAY** | “Kayıp saniyeler ayrıştırıldı; nerede zaman kaybettiğimiz net.” |
-| **WHAT NOT TO SAY** | “Tahmini cycle” as measured fact |
+> "İş, gümrük müşavirine gönderime gerçekten hazır olduğunda kapanıyor."
 
-### STEP 04 — Production Recovery Opportunity
+## D. CLAIM BOUNDARIES
 
-| | |
-|---|---|
-| **SCREEN** | +X İYİ PARÇA / VARDİYA KPI |
-| **ACTION** | Highlight recovery opportunity card |
-| **WHAT TO SAY** | “Kurtarılabilir kapasite hesaplandı.” |
-| **WHAT NOT TO SAY** | Hard-coded recovery number |
+**Do say:**
 
-### STEP 05 — Digital Factory Team
+- Production recovered (after verification)
+- Customs clearance package prepared
+- Ready for customs broker handoff
 
-| | |
-|---|---|
-| **SCREEN** | Dijital Fabrika Ekibi — agent cards |
-| **ACTION** | Click one agent for evidence drawer |
-| **WHAT TO SAY** | “Her uzman aynı runtime verisini analiz etti.” |
-| **WHAT NOT TO SAY** | “AI fiziksel müdahale yaptı” |
+**Do not say:**
 
-### STEP 06 — Orchestrator Assessment
+- Direct PLC / machine control (unless real connector connected)
+- Customs cleared / declaration submitted / declaration registered
+- Government portal integration
+- Guaranteed ROI or audited financial realization
 
-| | |
-|---|---|
-| **SCREEN** | FactOS Orchestrator panel |
-| **ACTION** | Read what / why / next |
-| **WHAT TO SAY** | “Orchestrator tüm kanıtları birleştirip sonraki adımı tanımlıyor.” |
-| **WHAT NOT TO SAY** | “Otomatik onay” |
+## E. RECOVERY
 
-### STEP 07 — Recommended Recovery Plan
-
-| | |
-|---|---|
-| **SCREEN** | Önerilen Kurtarma Planı |
-| **ACTION** | Walk plan actions |
-| **WHAT TO SAY** | “Önerilen plan operasyonel işe dönüştü.” |
-| **WHAT NOT TO SAY** | “Plan henüz yok” (after reset) |
-
-### STEP 08 — Human Approval
-
-| | |
-|---|---|
-| **SCREEN** | Approval Required sheet |
-| **ACTION** | Click **Planı Onayla** (reviewer role) |
-| **WHAT TO SAY** | “Kritik adım yetkili insan onayı ile ilerliyor.” |
-| **WHAT NOT TO SAY** | “FactOS kendi kendine onayladı” |
-
-### STEP 09 — Technical Intervention
-
-| | |
-|---|---|
-| **SCREEN** | Intervention timeline + **Müdahaleyi Başlat** |
-| **ACTION** | Start → Complete intervention |
-| **WHAT TO SAY** | “FactOS koordine ediyor; fiziksel iş yetkili ekip tarafından uygulanıyor.” |
-| **WHAT NOT TO SAY** | “Uzaktan kalıbı değiştirdik” |
-
-### STEP 10 — Validation Run
-
-| | |
-|---|---|
-| **SCREEN** | Doğrulama Koşusu |
-| **ACTION** | Show validation window status |
-| **WHAT TO SAY** | “Müdahale sonrası doğrulama penceresi açıldı.” |
-| **WHAT NOT TO SAY** | “Sonuç garanti” |
-
-### STEP 11 — Before / After
-
-| | |
-|---|---|
-| **SCREEN** | Önce / Sonra comparison table |
-| **ACTION** | Cycle time, throughput, micro-stops |
-| **WHAT TO SAY** | “Baseline ile doğrulama penceresi karşılaştırılıyor.” |
-| **WHAT NOT TO SAY** | Raw enum values to customer |
-
-### STEP 12 — Outcome Verification
-
-| | |
-|---|---|
-| **SCREEN** | Sonuç Doğrulama + **Sonucu Doğrula** |
-| **ACTION** | Click verify (reviewer) |
-| **WHAT TO SAY** | “FactOS sonucu kanıtla doğruluyor.” |
-| **WHAT NOT TO SAY** | Success before verify completes |
-
-### STEP 13 — PRODUCTION RECOVERED
-
-| | |
-|---|---|
-| **SCREEN** | Outcome hero (only when verified) |
-| **ACTION** | Pause on headline |
-| **WHAT TO SAY** | “Üretim kurtarıldı — kanıtla doğrulandı.” |
-| **WHAT NOT TO SAY** | “PRODUCTION RECOVERED” if outcome is NOT_VERIFIED |
-
-### STEP 14 — +X GOOD PARTS / SHIFT
-
-| | |
-|---|---|
-| **SCREEN** | Hero KPI: +GOOD PARTS / SHIFT |
-| **ACTION** | Primary proof point |
-| **WHAT TO SAY** | “Vardiya başına kurtarılan iyi parça runtime hesabı.” |
-| **WHAT NOT TO SAY** | Fixed demo number |
-
-### STEP 15 — Energy Impact
-
-| | |
-|---|---|
-| **SCREEN** | Enerji Etkisi |
-| **ACTION** | Show classification (ÖLÇÜLMÜŞ / HESAPLANMIŞ) |
-| **WHAT TO SAY** | “Enerji etkisi iyi parça başına ve sınıflandırmasıyla gösteriliyor.” |
-| **WHAT NOT TO SAY** | Guaranteed savings |
-
-### STEP 16 — Estimated Business Impact
-
-| | |
-|---|---|
-| **SCREEN** | Tahmini İş Etkisi |
-| **ACTION** | Brief secondary mention |
-| **WHAT TO SAY** | “Ticari katman tahmini; birincil kanıt üretim kurtarması.” |
-| **WHAT NOT TO SAY** | Let finance dominate the story |
-
-## D. PRIMARY SALES STORY
-
-> FactOS does not only tell us that the machine is below target. It identifies where production time is being lost, calculates the recoverable production capacity, coordinates the technical intervention, and then verifies whether production actually improved.
-
-Turkish presenter variant:
-
-> FactOS bize sadece makinenin hedefin altında olduğunu söylemiyor. Üretim zamanının nerede kaybedildiğini buluyor, kurtarılabilir kapasiteyi hesaplıyor, teknik müdahaleyi koordine ediyor ve üretimin gerçekten iyileşip iyileşmediğini doğruluyor.
-
-## E. FINAL PROOF
-
-1. **PRODUCTION RECOVERED**
-2. **+X GOOD PARTS / SHIFT** (runtime-calculated, verification-gated hero)
-
-## F. IMPORTANT CLAIM BOUNDARIES
-
-- FactOS does **not** claim direct PLC control unless a real connector is connected.
-- Replay / pilot data is labeled as runtime-backed replay, not live MES unless connected.
-- Digital agents coordinate **workflow and evidence**, not physical machine motion.
-- Authorized humans execute physical maintenance / operator work.
-- Estimated financial impact is **TAHMİNİ / estimated**, not audited revenue.
-- Verification uses **actual available production evidence** in the validation window.
-- Classifications: **ÖLÇÜLMÜŞ**, **HESAPLANMIŞ**, **TAHMİNİ**, **DOĞRULANMIŞ**.
-
-## G. FAILURE RECOVERY
-
-| Symptom | Recovery |
-|---------|----------|
-| Stale UI after action | Browser refresh (F5) — state is server-backed |
-| Wrong demo stage | **Altın Demo Sıfırla** → confirm → refresh |
-| API error banner | Restart API: stop process, `pnpm dev:api` |
-| Web blank / 500 | Restart Web: `pnpm dev:web` |
+| Symptom | Action |
+|---------|--------|
+| Stale UI | Browser refresh (F5) — state is server-backed |
+| Wrong production stage | Production reset → refresh |
+| Wrong customs stage | Customs reset → refresh |
+| Cross-demo confusion | Reset **both** demos independently |
+| API error | Restart `pnpm dev:api` |
+| Web error | Restart `pnpm dev:web` |
 | Database error | `pnpm db:verify`; restart infra if needed |
-| Demo fallback | Re-run reset + smoke test; use backup recording clips if live demo fails |
 
-Reset control location: top of Golden Demo page — **Altın Demo Kontrolü** panel.
+**Do not:** use developer tools to manually edit API state during a live demo.
+
+## F. POST-DEMO
+
+1. Optional: reset both demos for next session
+2. Stop Web and API processes safely
+3. `git status` should remain clean (no demo edits committed during presentation)

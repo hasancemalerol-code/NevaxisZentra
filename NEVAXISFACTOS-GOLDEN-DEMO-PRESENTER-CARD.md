@@ -1,47 +1,50 @@
 # Nevaxis FactOS — Golden Demo Presenter Card
 
-**Route:** `/golden-demo/uretim-kurtarma` · **Pre-demo:** Altın Demo Sıfırla
+**Production:** `/golden-demo/uretim-kurtarma` · **Customs:** `/golden-demo/gumruk-dosyasi`
 
 ---
 
 ## OPENING
 
-ERP and MES record what happened in the factory.  
-FactOS understands what is happening, predicts what matters, coordinates the response, and verifies the operational result.
-
-*(TR: ERP ve MES fabrikada ne olduğunu kaydeder. FactOS ne olup bittiğini anlar, önemli olanı öngörür, yanıtı koordine eder ve operasyonel sonucu doğrular.)*
+ERP ve MES fabrikanın ne yaptığını kaydeder.  
+FactOS ne olduğunu anlar, ne olacağını öngörür ve ne yapılması gerektiğini harekete geçirir.
 
 ---
 
-## CHECKPOINTS
+## PART 1 — PRODUCTION (checkpoints)
 
-| # | Checkpoint | Action |
-|---|------------|--------|
-| 1 | **Target risk** | Show hedef gerçekleşme / risk KPI |
-| 2 | **Machine intelligence** | Machine metrics panel |
-| 3 | **Lost seconds** | Cycle loss decomposition |
-| 4 | **Recoverable production** | +X iyi parça / vardiya |
-| 5 | **Digital Factory Team** | Agent card → evidence |
-| 6 | **Intervention** | Onayla → Başlat → Tamamla |
-| 7 | **Validation** | Doğrulama koşusu → Sonucu Doğrula |
-| 8 | **Production recovered** | PRODUCTION RECOVERED hero |
+1. Target at risk → 2. Machine Intelligence → 3. Cycle loss → 4. +X iyi parça/vardiya  
+5. Digital Factory Team → 6. Onayla → 7. Müdahale → 8. Doğrula → **PRODUCTION RECOVERED**
+
+**Production close:** "FactOS yalnızca problemi göstermiyor; üretimin geri kazanıldığını doğruluyor."
 
 ---
 
-## MAIN CLOSING PROOF
+## TRANSITION
 
-**+X GOOD PARTS / SHIFT**
-
-*(Only after verification — runtime calculated, not hard-coded.)*
+"FactOS Dijital Çalışanları yalnızca üretim hattında çalışmıyor."
 
 ---
 
-## CLOSING LINE
+## PART 2 — CUSTOMS
 
-This is the difference between another factory dashboard and an intelligence-and-action operating layer.
+**Assignment:** "Bu siparişin gümrük dosyasını hazırla."
 
-*(TR: Bu, bir fabrika panosu ile zeka ve aksiyon işletim katmanı arasındaki farktır.)*
+Worker → documents → mismatch → corrective work → re-check → approval → package → **VERIFIED READY**
+
+**Customs close:** "İş, gümrük müşavirine gönderime gerçekten hazır olduğunda kapanıyor."
 
 ---
 
-**Do not say:** fake PLC control · guaranteed ROI · “AI fixed the machine” · success before verify
+## FINAL
+
+**FactOS — Factory Intelligence & Action OS.**
+
+---
+
+## CAUTIONS (do not claim)
+
+- No direct PLC control
+- No customs clearance / declaration submitted
+- No government submission
+- Estimated financial values are not verified financial realization
