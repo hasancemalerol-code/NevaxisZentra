@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 
 import {
   formatGoldenDemoNumber,
-  getGoldenDemoAgentLabel,
   getGoldenDemoEventStatusLabel,
   getGoldenDemoVerificationLabel,
   GOLDEN_DEMO_P1_SUBTITLE,
@@ -15,6 +14,9 @@ import {
 import type { GoldenDemoP1WorkspaceApi } from "../server/golden-demo-p1-api-client";
 import type { GoldenDemoP2PresentationStatusApi } from "@/features/golden-demo-p2/server/golden-demo-p2-api-client";
 import { GoldenDemoP2PresentationPanel } from "@/features/golden-demo-p2/components/golden-demo-p2-presentation-panel";
+import type { GoldenDemoP2BDigitalFactoryTeamApi } from "@/features/golden-demo-p2b/server/golden-demo-p2b-api-client";
+import { GoldenDemoP2BDigitalFactoryPanel } from "@/features/golden-demo-p2b/components/golden-demo-p2b-digital-factory-panel";
+import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 import {
   goldenDemoApprovePlanAction,
   goldenDemoCompleteInterventionAction,
@@ -51,9 +53,11 @@ function readMetrics(workspace: GoldenDemoP1WorkspaceApi): Metrics {
 export function GoldenDemoP1WorkspaceView({
   workspace,
   presentation,
+  digitalFactoryTeam,
 }: Readonly<{
   workspace: GoldenDemoP1WorkspaceApi;
   presentation: GoldenDemoP2PresentationStatusApi | null;
+  digitalFactoryTeam: GoldenDemoP2BDigitalFactoryTeamApi | null;
 }>) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -244,32 +248,6 @@ export function GoldenDemoP1WorkspaceView({
         </ul>
       </section>
 
-      <section className="commint-panel" data-testid="golden-demo-digital-factory-team">
-        <h2>Dijital Fabrika Ekibi</h2>
-        <ul>
-          {workspace.agentFindings.map((finding) => (
-            <li key={finding.agentCode}>
-              <strong>{getGoldenDemoAgentLabel(finding.agentCode)}</strong>: {finding.summary}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="commint-panel" data-testid="golden-demo-what-if">
-        <h2>What-If Senaryoları</h2>
-        <ul>
-          {workspace.whatIfScenarios.map((scenario) => (
-            <li key={scenario.scenarioCode}>
-              <strong>{scenario.title}</strong>
-              {scenario.isRecommended ? " — RECOMMENDED" : ""}
-              <p>Vardiya sonu projeksiyon: {scenario.projectedEndOfShiftGoodParts}</p>
-              <p>{scenario.riskExposure}</p>
-              {scenario.recommendationReason ? <p>{scenario.recommendationReason}</p> : null}
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <section className="commint-panel" data-testid="golden-demo-recovery-plan">
         <h2>Önerilen Kurtarma Planı</h2>
         {workspace.plan ? <p>{workspace.plan.recommendationSummary}</p> : null}
@@ -281,13 +259,6 @@ export function GoldenDemoP1WorkspaceView({
           ))}
         </ul>
         <div className="commint-action-row">
-          <button
-            type="button"
-            disabled={pending || workspace.plan?.approvedAtUtc != null}
-            onClick={() => runAction(() => goldenDemoApprovePlanAction(eventId))}
-          >
-            Planı Onayla
-          </button>
           <button
             type="button"
             disabled={pending || !workspace.plan?.approvedAtUtc}
@@ -310,6 +281,29 @@ export function GoldenDemoP1WorkspaceView({
             Sonucu Doğrula
           </button>
         </div>
+      </section>
+
+      {digitalFactoryTeam ? (
+        <GoldenDemoP2BDigitalFactoryPanel
+          team={digitalFactoryTeam}
+          pending={pending}
+          onApprove={() => runAction(() => goldenDemoApprovePlanAction(eventId))}
+        />
+      ) : null}
+
+      <section className="commint-panel" data-testid="golden-demo-what-if">
+        <h2>What-If Senaryoları</h2>
+        <ul>
+          {workspace.whatIfScenarios.map((scenario) => (
+            <li key={scenario.scenarioCode}>
+              <strong>{scenario.title}</strong>
+              {scenario.isRecommended ? " — RECOMMENDED" : ""}
+              <p>Vardiya sonu projeksiyon: {scenario.projectedEndOfShiftGoodParts}</p>
+              <p>{scenario.riskExposure}</p>
+              {scenario.recommendationReason ? <p>{scenario.recommendationReason}</p> : null}
+            </li>
+          ))}
+        </ul>
       </section>
 
       {workspace.beforeAfter ? (

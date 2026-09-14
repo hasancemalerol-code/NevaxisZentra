@@ -22,6 +22,8 @@
     "verify:golden-demo-p1-runtime": "node scripts/verify-golden-demo-p1-runtime.mjs",
     "verify:golden-demo-p2-migration": "node scripts/verify-golden-demo-p2-migration.mjs",
     "verify:golden-demo-p2-runtime": "node scripts/verify-golden-demo-p2-runtime.mjs",
+    "verify:golden-demo-p2b-runtime": "node scripts/verify-golden-demo-p2b-runtime.mjs",
+    "verify:golden-demo-p2b-live-flow": "node scripts/verify-golden-demo-p2b-live-flow.mjs",
     "verify:database-restore-um9": "node ../../scripts/db/verify-restore-um9.mjs"
   },
   "dependencies": {

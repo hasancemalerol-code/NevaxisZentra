@@ -16,6 +16,7 @@ using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
 using NevaxisFactOS.Persistence.EnterpriseReliability;
 using NevaxisFactOS.Persistence.GoldenDemoP1;
 using NevaxisFactOS.Persistence.GoldenDemoP2;
+using NevaxisFactOS.Persistence.GoldenDemoP2B;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -136,6 +137,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddNevaxisFactOSEnterpriseReliability();
         services.AddNevaxisFactOSGoldenDemoP1();
         services.AddNevaxisFactOSGoldenDemoP2();
+        services.AddNevaxisFactOSGoldenDemoP2B();
         services.AddScoped<IIdentitySubjectResolver, PostgreSqlIdentitySubjectResolver>();
         services.AddScoped<ITenantMembershipResolver, PostgreSqlTenantMembershipResolver>();
         services.AddScoped<IPermissionEvaluator, PostgreSqlPermissionEvaluator>();
