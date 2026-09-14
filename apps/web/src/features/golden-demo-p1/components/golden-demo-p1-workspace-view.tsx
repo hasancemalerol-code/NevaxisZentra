@@ -13,6 +13,8 @@ import {
   GOLDEN_DEMO_P1_TITLE,
 } from "../domain/golden-demo-p1-labels";
 import type { GoldenDemoP1WorkspaceApi } from "../server/golden-demo-p1-api-client";
+import type { GoldenDemoP2PresentationStatusApi } from "@/features/golden-demo-p2/server/golden-demo-p2-api-client";
+import { GoldenDemoP2PresentationPanel } from "@/features/golden-demo-p2/components/golden-demo-p2-presentation-panel";
 import {
   goldenDemoApprovePlanAction,
   goldenDemoCompleteInterventionAction,
@@ -48,7 +50,11 @@ function readMetrics(workspace: GoldenDemoP1WorkspaceApi): Metrics {
 
 export function GoldenDemoP1WorkspaceView({
   workspace,
-}: Readonly<{ workspace: GoldenDemoP1WorkspaceApi }>) {
+  presentation,
+}: Readonly<{
+  workspace: GoldenDemoP1WorkspaceApi;
+  presentation: GoldenDemoP2PresentationStatusApi | null;
+}>) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const metrics = readMetrics(workspace);
@@ -107,6 +113,10 @@ export function GoldenDemoP1WorkspaceView({
 
       <p className="commint-table__secondary">{workspace.recovery.safetyMessage}</p>
       {message ? <p role="status">{message}</p> : null}
+
+      {presentation ? (
+        <GoldenDemoP2PresentationPanel presentation={presentation} eventId={eventId} />
+      ) : null}
 
       <section className="commint-panel" data-testid="golden-demo-machine-intelligence">
         <h2>Makine Zekası — {workspace.event.machineCode}</h2>

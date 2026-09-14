@@ -20,6 +20,8 @@
     "verify:enterprise-reliability-um9-performance": "node scripts/verify-enterprise-reliability-um9-performance.mjs",
     "verify:golden-demo-p1-migration": "node scripts/verify-golden-demo-p1-migration.mjs",
     "verify:golden-demo-p1-runtime": "node scripts/verify-golden-demo-p1-runtime.mjs",
+    "verify:golden-demo-p2-migration": "node scripts/verify-golden-demo-p2-migration.mjs",
+    "verify:golden-demo-p2-runtime": "node scripts/verify-golden-demo-p2-runtime.mjs",
     "verify:database-restore-um9": "node ../../scripts/db/verify-restore-um9.mjs"
   },
   "dependencies": {

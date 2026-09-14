@@ -95,7 +95,16 @@ function runSql(sql) {
   return (result.stdout ?? "").trim();
 }
 
-function resetPilotEvent() {
+async function resetPilotEvent() {
+  let reset = await api("POST", `/api/golden-demo-p2/events/${EVENT_ID}/reset`);
+  if (!reset.ok) {
+    resetPilotEventSqlFallback();
+    return;
+  }
+  pass("PILOT_EVENT_RESET");
+}
+
+function resetPilotEventSqlFallback() {
   runSql(`DELETE FROM golden_demo_verification_runs WHERE production_event_id = '${EVENT_ID}';`);
   runSql(`DELETE FROM golden_demo_agent_findings WHERE production_event_id = '${EVENT_ID}';`);
   runSql(`DELETE FROM golden_demo_cycle_observations WHERE production_event_id = '${EVENT_ID}' AND observation_kind = 'post-intervention';`);

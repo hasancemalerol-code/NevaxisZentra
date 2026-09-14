@@ -11,6 +11,7 @@ import Link from "next/link";
 
 import { CONTINUOUS_IMPROVEMENT_SUBTITLE, CONTINUOUS_IMPROVEMENT_TITLE } from "@/features/factory-learning/domain/factory-learning-labels";
 import { GOLDEN_DEMO_P1_ROUTE, GOLDEN_DEMO_P1_SUBTITLE, GOLDEN_DEMO_P1_TITLE } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
+import { readGoldenDemoP2PresentationStatus } from "@/features/golden-demo-p2/server/golden-demo-p2-reader";
 import { FactoryNetworkCrossLinkSection } from "@/features/factory-network/components/factory-network-workspace-panel";
 import { ProductionManagerWorkspacePanel } from "@/features/production-manager/components/production-manager-workspace-panel";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
@@ -73,6 +74,7 @@ export default async function OperationsCommandCenterPage({
   const uiFilters = readOperationsCommandCenterFilters(filterParams);
 
   const result = await readOperationsCommandCenterWorkspace(uiFilters);
+  const presentationResult = await readGoldenDemoP2PresentationStatus();
 
   if (result.status === "failure") {
     return (
@@ -114,6 +116,12 @@ export default async function OperationsCommandCenterPage({
         <Link className="shift-ops-cta" href={GOLDEN_DEMO_P1_ROUTE}>
           INJ-001 Üretim Kurtarma Akışını Aç
         </Link>
+        {presentationResult.status === "success" ? (
+          <p data-testid="golden-demo-p2-occ-status">
+            Sunum adımı {presentationResult.presentation.stepNumber}/
+            {presentationResult.presentation.totalSteps}: {presentationResult.presentation.presentationStepLabel}
+          </p>
+        ) : null}
       </section>
       <section className="commint-panel" data-testid="continuous-improvement-link-section">
         <header className="commint-panel__header">

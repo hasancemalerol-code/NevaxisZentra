@@ -8,9 +8,13 @@ import {
   GOLDEN_DEMO_P1_TITLE,
 } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
 import { readGoldenDemoP1Workspace } from "@/features/golden-demo-p1/server/golden-demo-p1-reader";
+import { readGoldenDemoP2PresentationStatus } from "@/features/golden-demo-p2/server/golden-demo-p2-reader";
 
 export default async function GoldenDemoP1Page() {
-  const result = await readGoldenDemoP1Workspace();
+  const [result, presentationResult] = await Promise.all([
+    readGoldenDemoP1Workspace(),
+    readGoldenDemoP2PresentationStatus(),
+  ]);
 
   if (result.status === "failure") {
     return (
@@ -34,5 +38,10 @@ export default async function GoldenDemoP1Page() {
     );
   }
 
-  return <GoldenDemoP1WorkspaceView workspace={result.workspace} />;
+  return (
+    <GoldenDemoP1WorkspaceView
+      workspace={result.workspace}
+      presentation={presentationResult.status === "success" ? presentationResult.presentation : null}
+    />
+  );
 }
