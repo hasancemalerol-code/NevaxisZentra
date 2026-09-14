@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   formatGoldenDemoNumber,
   getGoldenDemoEventStatusLabel,
+  getGoldenDemoPlanActionStatusLabel,
   GOLDEN_DEMO_P1_SUBTITLE,
   GOLDEN_DEMO_P1_TITLE,
 } from "../domain/golden-demo-p1-labels";
@@ -64,8 +66,10 @@ export function GoldenDemoP1WorkspaceView({
 }>) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const metrics = readMetrics(workspace);
   const eventId = workspace.event.id;
+  const isApproved = workspace.plan?.approvedAtUtc != null;
 
   function runAction(action: () => Promise<{ status: string; message?: string }>) {
     setMessage(null);
@@ -75,6 +79,7 @@ export function GoldenDemoP1WorkspaceView({
         setMessage(result.message ?? "İşlem başarısız.");
       } else {
         setMessage("İşlem tamamlandı.");
+        router.refresh();
       }
     });
   }
@@ -120,6 +125,7 @@ export function GoldenDemoP1WorkspaceView({
 
       <p className="commint-table__secondary">{workspace.recovery.safetyMessage}</p>
       {message ? <p role="status">{message}</p> : null}
+      {pending ? <p role="status">İşlem devam ediyor…</p> : null}
 
       {presentation ? (
         <GoldenDemoP2PresentationPanel presentation={presentation} eventId={eventId} />
@@ -280,31 +286,32 @@ export function GoldenDemoP1WorkspaceView({
         <ul>
           {workspace.planActions.map((action) => (
             <li key={action.id}>
-              {action.sortOrder}. {action.title} — {action.responsibleRole} · {action.status}
+              {action.sortOrder}. {action.title} — {action.responsibleRole} ·{" "}
+              {getGoldenDemoPlanActionStatusLabel(action.status)}
             </li>
           ))}
         </ul>
         <div className="commint-action-row">
           <button
             type="button"
-            disabled={pending || !workspace.plan?.approvedAtUtc}
+            disabled={pending || !isApproved || workspace.event.status !== "active"}
             onClick={() => runAction(() => goldenDemoExecutePlanAction(eventId))}
           >
-            Müdahaleyi Başlat
+            {pending ? "Başlatılıyor…" : "Müdahaleyi Başlat"}
           </button>
           <button
             type="button"
             disabled={pending || workspace.event.status !== "intervention-in-progress"}
             onClick={() => runAction(() => goldenDemoCompleteInterventionAction(eventId))}
           >
-            Müdahaleyi Tamamla
+            {pending ? "Tamamlanıyor…" : "Müdahaleyi Tamamla"}
           </button>
           <button
             type="button"
             disabled={pending || workspace.event.status !== "validation-run"}
             onClick={() => runAction(() => goldenDemoVerifyOutcomeAction(eventId))}
           >
-            Sonucu Doğrula
+            {pending ? "Doğrulanıyor…" : "Sonucu Doğrula"}
           </button>
         </div>
       </section>

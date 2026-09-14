@@ -1,7 +1,12 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { formatGoldenDemoNumber } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
+import {
+  formatGoldenDemoNumber,
+  getGoldenDemoClassificationLabel,
+  getGoldenDemoEventStatusLabel,
+  getGoldenDemoVerificationLabel,
+} from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
 
 import type { GoldenDemoP3OutcomeApi } from "../server/golden-demo-p3-api-client";
 
@@ -22,44 +27,57 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
   return (
     <>
       <section className="commint-panel" data-testid="golden-demo-p3-validation-run">
-        <h2>Validation Run</h2>
+        <h2>Doğrulama Koşusu</h2>
         <p>{outcome.validationWindow.summary}</p>
         <div className="commint-kpi-grid">
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Status</p>
+            <p className="commint-kpi-card__label">Durum</p>
             <p className="commint-kpi-card__value">{outcome.validationWindow.statusLabel}</p>
           </article>
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Samples Collected</p>
+            <p className="commint-kpi-card__label">Toplanan Örnek</p>
             <p className="commint-kpi-card__value">
               {outcome.validationWindow.samplesCollected ?? "—"} / {outcome.validationWindow.minimumSamplesRequired ?? "—"}
             </p>
           </article>
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Evidence Completeness</p>
+            <p className="commint-kpi-card__label">Kanıt Tamlığı</p>
             <p className="commint-kpi-card__value">{outcome.validationWindow.evidenceCompleteness}</p>
           </article>
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Intervention vs Outcome</p>
+            <p className="commint-kpi-card__label">Müdahale / Sonuç</p>
             <p className="commint-kpi-card__value">
-              {outcome.interventionStatus} / {outcome.outcomeStatus}
+              {getGoldenDemoEventStatusLabel(outcome.interventionStatus)} /{" "}
+              {getGoldenDemoVerificationLabel(outcome.outcomeStatus)}
             </p>
           </article>
         </div>
         <p className="commint-table__secondary">
-          Validation started: {formatTimestamp(outcome.validationWindow.validationStartedAtUtc)}
+          Doğrulama başlangıcı: {formatTimestamp(outcome.validationWindow.validationStartedAtUtc)}
         </p>
       </section>
 
-      <section className={heroClass} data-testid="golden-demo-p3-outcome-hero">
+      <section
+        className={heroClass}
+        data-testid="golden-demo-p3-outcome-hero"
+        data-outcome-status={outcome.outcomeStatus}
+        data-verified={outcome.hero.showSuccessHero ? "true" : "false"}
+      >
         <h1>{outcome.hero.headline}</h1>
         <p>{outcome.hero.subheadline}</p>
-        <p className="commint-kpi-card__value" data-testid="golden-demo-p3-recovered-good-parts">
-          +{formatGoldenDemoNumber(outcome.hero.recoveredGoodPartsPerShift)} GOOD PARTS / SHIFT
-        </p>
+        {outcome.hero.showSuccessHero ? (
+          <p className="commint-kpi-card__value" data-testid="golden-demo-p3-recovered-good-parts">
+            +{formatGoldenDemoNumber(outcome.hero.recoveredGoodPartsPerShift)} GOOD PARTS / SHIFT
+          </p>
+        ) : (
+          <p className="commint-table__secondary">
+            Hesaplanan kurtarma fırsatı: +{formatGoldenDemoNumber(outcome.hero.recoveredGoodPartsPerShift)} iyi parça /
+            vardiya · {getGoldenDemoClassificationLabel(outcome.hero.recoveredGoodPartsClassification)}
+          </p>
+        )}
         <p className="commint-table__secondary">
-          {outcome.hero.recoveredGoodPartsClassification} · Verification: {outcome.hero.verificationResult} · Confidence:{" "}
-          {outcome.verificationConfidence}
+          {getGoldenDemoClassificationLabel(outcome.hero.recoveredGoodPartsClassification)} · Doğrulama:{" "}
+          {getGoldenDemoVerificationLabel(outcome.hero.verificationResult)} · Güven: {outcome.verificationConfidence}
         </p>
         {outcome.hero.highlights.length > 0 ? (
           <ul>
@@ -73,10 +91,10 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p3-before-after">
-        <h2>Before / After</h2>
+        <h2>Önce / Sonra</h2>
         <div className="commint-kpi-grid">
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Baseline Window</p>
+            <p className="commint-kpi-card__label">Baseline Penceresi</p>
             <p>{outcome.baselineWindow.sourceLabel}</p>
             <p className="commint-table__secondary">
               {formatTimestamp(outcome.baselineWindow.windowStartUtc)} → {formatTimestamp(outcome.baselineWindow.windowEndUtc)}
@@ -85,7 +103,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
           </article>
           {outcome.validationMeasurementWindow ? (
             <article className="commint-kpi-card">
-              <p className="commint-kpi-card__label">Validation Window</p>
+              <p className="commint-kpi-card__label">Doğrulama Penceresi</p>
               <p>{outcome.validationMeasurementWindow.sourceLabel}</p>
               <p className="commint-table__secondary">
                 {formatTimestamp(outcome.validationMeasurementWindow.windowStartUtc)} →{" "}
@@ -98,12 +116,12 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         <table>
           <thead>
             <tr>
-              <th>Metric</th>
-              <th>Before</th>
-              <th>After</th>
+              <th>Metrik</th>
+              <th>Önce</th>
+              <th>Sonra</th>
               <th>Delta</th>
-              <th>Status</th>
-              <th>Class</th>
+              <th>Durum</th>
+              <th>Sınıf</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +132,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
                 <td>{metric.afterValue ?? "—"}</td>
                 <td>{metric.deltaLabel ?? "—"}</td>
                 <td>{metric.status}</td>
-                <td>{metric.classification}</td>
+                <td>{getGoldenDemoClassificationLabel(metric.classification)}</td>
               </tr>
             ))}
           </tbody>
@@ -122,12 +140,12 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p3-outcome-verification">
-        <h2>Outcome Verification</h2>
+        <h2>Sonuç Doğrulama</h2>
         <ul>
           {outcome.verificationChecks.map((check) => (
             <li key={check.code}>
               <strong>{check.label}</strong> · {check.status}
-              <Badge>{check.classification}</Badge>
+              <Badge>{getGoldenDemoClassificationLabel(check.classification)}</Badge>
               <p>{check.explanation}</p>
             </li>
           ))}
@@ -142,61 +160,60 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p3-energy-impact">
-        <h2>Energy Impact</h2>
+        <h2>Enerji Etkisi</h2>
         <p>{outcome.energyImpact.summary}</p>
         <p className="commint-table__secondary">
-          {outcome.energyImpact.classification} · {outcome.energyImpact.relationshipNote}
+          {getGoldenDemoClassificationLabel(outcome.energyImpact.classification)} · {outcome.energyImpact.relationshipNote}
         </p>
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p3-business-impact">
-        <h2>Business Impact / Profit Leak Summary</h2>
+        <h2>Tahmini İş Etkisi</h2>
         <p>
-          Operational recovery: +{outcome.businessImpact.operationalGoodPartsPerShift} good parts / shift ·{" "}
-          {outcome.businessImpact.operationalClassification}
+          Operasyonel kurtarma: +{outcome.businessImpact.operationalGoodPartsPerShift} iyi parça / vardiya ·{" "}
+          {getGoldenDemoClassificationLabel(outcome.businessImpact.operationalClassification)}
         </p>
-        <p>Capacity impact: {formatGoldenDemoNumber(outcome.businessImpact.capacityImpactPercent, 1)}%</p>
+        <p>Kapasite etkisi: {formatGoldenDemoNumber(outcome.businessImpact.capacityImpactPercent, 1)}%</p>
         {outcome.businessImpact.estimatedBusinessImpactTry != null ? (
           <p>
-            Estimated business impact: ₺{formatGoldenDemoNumber(outcome.businessImpact.estimatedBusinessImpactTry)} / shift ·{" "}
-            {outcome.businessImpact.estimatedBusinessClassification}
+            Tahmini iş etkisi: ₺{formatGoldenDemoNumber(outcome.businessImpact.estimatedBusinessImpactTry)} / vardiya ·{" "}
+            {getGoldenDemoClassificationLabel(outcome.businessImpact.estimatedBusinessClassification)}
           </p>
         ) : null}
         {outcome.businessImpact.modeledVerifiedBusinessImpactTry != null ? (
           <p>
-            Modeled business impact from verified recovery: ₺
-            {formatGoldenDemoNumber(outcome.businessImpact.modeledVerifiedBusinessImpactTry)} / shift ·{" "}
-            {outcome.businessImpact.modeledVerifiedBusinessClassification}
+            Doğrulanmış kurtarmadan modellenen etki: ₺
+            {formatGoldenDemoNumber(outcome.businessImpact.modeledVerifiedBusinessImpactTry)} / vardiya ·{" "}
+            {getGoldenDemoClassificationLabel(outcome.businessImpact.modeledVerifiedBusinessClassification)}
           </p>
         ) : null}
         <ul>
           {outcome.businessImpact.categories.map((category) => (
             <li key={category.categoryCode}>
-              <strong>{category.label}</strong> · Before {category.beforeLabel} · After {category.afterLabel} ·{" "}
-              {category.protectedOrRecoveredLabel} · {category.classification}
+              <strong>{category.label}</strong> · Önce {category.beforeLabel} · Sonra {category.afterLabel} ·{" "}
+              {category.protectedOrRecoveredLabel} · {getGoldenDemoClassificationLabel(category.classification)}
             </li>
           ))}
         </ul>
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p3-traceability">
-        <h2>Outcome Traceability</h2>
+        <h2>İzlenebilirlik</h2>
         <p>{outcome.traceability.workflowSummary}</p>
         <ul>
           {outcome.traceability.planReferenceId ? <li>Plan: {outcome.traceability.planReferenceId}</li> : null}
           {outcome.traceability.verificationReferenceId ? (
-            <li>Verification: {outcome.traceability.verificationReferenceId}</li>
+            <li>Doğrulama: {outcome.traceability.verificationReferenceId}</li>
           ) : null}
           {outcome.traceability.interventionReferenceId ? (
-            <li>Intervention: {outcome.traceability.interventionReferenceId}</li>
+            <li>Müdahale: {outcome.traceability.interventionReferenceId}</li>
           ) : null}
           {outcome.traceability.sourceAgentReferences.map((reference) => (
             <li key={reference}>{reference}</li>
           ))}
         </ul>
         <p className="commint-table__secondary">
-          FactOS coordinated and verified the intervention. Authorized operator/maintenance role executed the physical
-          intervention.
+          FactOS müdahaleyi koordine etti ve doğruladı. Yetkili operatör/bakım rolü fiziksel müdahaleyi uyguladı.
         </p>
       </section>
     </>

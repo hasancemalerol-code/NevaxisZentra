@@ -257,7 +257,7 @@ export function GoldenDemoP2BDigitalFactoryPanel({
           </div>
         ) : sheet.isApprovalRequired ? (
           <button type="button" disabled={pending} data-testid="golden-demo-p2b-approve-button" onClick={onApprove}>
-            APPROVE
+            {pending ? "Onaylanıyor…" : "Planı Onayla"}
           </button>
         ) : (
           <p>Approval not required for this plan.</p>
