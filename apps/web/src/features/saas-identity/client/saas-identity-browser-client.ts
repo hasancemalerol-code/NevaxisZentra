@@ -53,6 +53,7 @@ async function browserIdentityFetch<T>(
     method?: "GET" | "POST";
     body?: unknown;
     mutation?: boolean;
+    credentials?: RequestCredentials;
   }>,
   parser: (payload: unknown) => T | null,
 ): Promise<SaasIdentityApiResult<T>> {
@@ -86,7 +87,7 @@ async function browserIdentityFetch<T>(
           options.body !== undefined
             ? JSON.stringify(options.body)
             : undefined,
-        credentials: "include",
+        credentials: options.credentials ?? "include",
         cache: "no-store",
       },
     );
@@ -203,7 +204,7 @@ export async function signInSaasIdentityBrowser(
 ): Promise<SaasIdentityApiResult<"authenticated" | "mfa_required">> {
   return browserIdentityFetch(
     "/sign-in",
-    { method: "POST", body: request, mutation: true },
+    { method: "POST", body: request, mutation: true, credentials: "omit" },
     parseSaasIdentitySignInResponse,
   );
 }
