@@ -31,9 +31,19 @@ export type FactoryDecisionCaseQueueItemApi = Readonly<{
   concurrencyToken: number;
 }>;
 
+export type FactoryDecisionCenterLiveQueuesApi = Readonly<{
+  criticalDecisions: readonly FactoryDecisionCaseQueueItemApi[];
+  activeRecoveryOperations: readonly FactoryDecisionCaseQueueItemApi[];
+  pendingHumanApproval: readonly FactoryDecisionCaseQueueItemApi[];
+  blockedOrEscalated: readonly FactoryDecisionCaseQueueItemApi[];
+  pendingVerification: readonly FactoryDecisionCaseQueueItemApi[];
+  verifiedClosedToday: readonly FactoryDecisionCaseQueueItemApi[];
+}>;
+
 export type FactoryDecisionCenterWorkspaceApi = Readonly<{
   summary: FactoryDecisionCenterSummaryApi;
   priorityQueue: readonly FactoryDecisionCaseQueueItemApi[];
+  liveQueues: FactoryDecisionCenterLiveQueuesApi;
   generatedAtUtc: string;
 }>;
 

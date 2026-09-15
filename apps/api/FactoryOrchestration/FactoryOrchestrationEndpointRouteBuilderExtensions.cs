@@ -1,6 +1,7 @@
 using NevaxisFactOS.Api.Facilities;
 using NevaxisFactOS.Persistence.Authorization;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,10 @@ public static class FactoryOrchestrationEndpointRouteBuilderExtensions
         services.AddScoped<IFactoryEventRouter, FactoryEventRouter>();
         services.AddScoped<IFactoryOrchestrationCoordinator, FactoryOrchestrationCoordinator>();
         services.AddScoped<IFactoryOrchestrationService, FactoryOrchestrationService>();
+        services.AddScoped<IFactoryOutcomeExecutionRepository, FactoryOutcomeExecutionRepository>();
+        services.AddScoped<IFactoryOutcomeExecutionService, FactoryOutcomeExecutionService>();
+        services.AddScoped<IFactoryOutcomeAiTaskSyncService, FactoryOutcomeAiTaskSyncService>();
+        services.AddScoped<IFactoryOutcomeLearningService, FactoryOutcomeLearningService>();
         return services;
     }
 

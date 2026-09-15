@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
 
@@ -118,8 +120,36 @@ public static class FactoryDecisionCenterProjectionEngine
 
     public static bool IsDecisionCenterCase(DigitalWorkCase caseRow) =>
         string.Equals(caseRow.Source, FactoryDecisionCenterConstants.SourceModule, StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(caseRow.Source, FactoryOutcomeExecutionConstants.SourceModule, StringComparison.OrdinalIgnoreCase) ||
         (!string.IsNullOrWhiteSpace(caseRow.CorrelationKey) &&
-         caseRow.CorrelationKey.Contains("ord-2026-0915-047", StringComparison.OrdinalIgnoreCase));
+         (caseRow.CorrelationKey.Contains("ord-2026-0915-047", StringComparison.OrdinalIgnoreCase) ||
+          caseRow.CorrelationKey.Contains("outcome:order:", StringComparison.OrdinalIgnoreCase)));
+
+    public static FactoryDecisionCenterLiveQueues BuildLiveQueues(
+        IReadOnlyList<DigitalWorkCase> rootCases,
+        Func<DigitalWorkCase, FactoryDecisionCaseQueueItem> projectItem)
+    {
+        var decisionCases = rootCases.Where(IsDecisionCenterCase).ToList();
+        var today = DateTimeOffset.UtcNow.Date;
+
+        return new FactoryDecisionCenterLiveQueues(
+            decisionCases.Where(c => c.Severity is "critical" or "high" && c.Status != DigitalWorkCaseStatuses.Closed)
+                .Select(projectItem).ToList(),
+            decisionCases.Where(c => c.Status is DigitalWorkCaseStatuses.Executing)
+                .Select(projectItem).ToList(),
+            decisionCases.Where(c => c.Status == DigitalWorkCaseStatuses.AwaitingApproval || c.RequiresApproval)
+                .Select(projectItem).ToList(),
+            decisionCases.Where(c => c.CurrentBlockerCode is FactoryCaseBlockerCodes.Deadlock or FactoryCaseBlockerCodes.WaitingHuman &&
+                                     c.Status != DigitalWorkCaseStatuses.Closed)
+                .Select(projectItem).ToList(),
+            decisionCases.Where(c => c.Status == DigitalWorkCaseStatuses.Verifying)
+                .Select(projectItem).ToList(),
+            decisionCases.Where(c =>
+                c.Status == DigitalWorkCaseStatuses.Closed &&
+                string.Equals(c.VerificationState, DigitalWorkVerificationResults.Passed, StringComparison.OrdinalIgnoreCase) &&
+                c.ClosedAtUtc?.Date == today)
+                .Select(projectItem).ToList());
+    }
 
     public static Dictionary<string, JsonElement> ParseMetadata(string? json)
     {

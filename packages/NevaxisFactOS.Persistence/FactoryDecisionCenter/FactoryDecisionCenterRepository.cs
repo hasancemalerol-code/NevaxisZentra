@@ -1,4 +1,5 @@
 using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -87,7 +88,10 @@ public sealed class FactoryDecisionCenterRepository : IFactoryDecisionCenterRepo
             .Where(c => c.FacilityId == facilityId &&
                         c.ParentCaseId == null &&
                         (c.Source == FactoryDecisionCenterConstants.SourceModule ||
-                         (c.CorrelationKey != null && c.CorrelationKey.Contains("ord-2026-0915-047"))))
+                         c.Source == FactoryOutcomeExecutionConstants.SourceModule ||
+                         (c.CorrelationKey != null &&
+                          (c.CorrelationKey.Contains("ord-2026-0915-047") ||
+                           c.CorrelationKey.Contains("outcome:order:")))))
             .OrderByDescending(c => c.Severity == "critical")
             .ThenByDescending(c => c.Severity == "high")
             .ThenByDescending(c => c.UpdatedAtUtc)

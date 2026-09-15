@@ -159,20 +159,77 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
         })}
       </section>
 
-      <section className="commint-panel" style={{ marginTop: "1.5rem" }}>
-        <div className="commint-panel__header">
-          <h2>ÖNCELİKLİ KARARLAR</h2>
-        </div>
-        {workspace.priorityQueue.length === 0 ? (
-          <p className="commint-kpi-card__detail">Aktif kritik karar bulunmuyor.</p>
-        ) : (
-          <div style={{ display: "grid", gap: "1rem" }}>
-            {workspace.priorityQueue.map((item) => (
-              <DecisionCard key={item.caseId} item={item} />
-            ))}
-          </div>
-        )}
-      </section>
+      <LiveQueueSection
+        title="KRİTİK KARARLAR"
+        testId="factory-decision-queue-critical"
+        items={workspace.liveQueues.criticalDecisions}
+        emptyMessage="Kritik karar kuyruğu boş."
+      />
+
+      <LiveQueueSection
+        title="AKTİF KURTARMA OPERASYONLARI"
+        testId="factory-decision-queue-recovery"
+        items={workspace.liveQueues.activeRecoveryOperations}
+        emptyMessage="Aktif kurtarma operasyonu bulunmuyor."
+      />
+
+      <LiveQueueSection
+        title="İNSAN ONAYI BEKLEYENLER"
+        testId="factory-decision-queue-approval"
+        items={workspace.liveQueues.pendingHumanApproval}
+        emptyMessage="Bekleyen insan onayı yok."
+      />
+
+      <LiveQueueSection
+        title="BLOCKED / ESCALATED"
+        testId="factory-decision-queue-blocked"
+        items={workspace.liveQueues.blockedOrEscalated}
+        emptyMessage="Engellenmiş veya yükseltilmiş vaka yok."
+      />
+
+      <LiveQueueSection
+        title="DOĞRULAMA BEKLEYENLER"
+        testId="factory-decision-queue-verification"
+        items={workspace.liveQueues.pendingVerification}
+        emptyMessage="Doğrulama bekleyen vaka yok."
+      />
+
+      <LiveQueueSection
+        title="BUGÜN VERIFIED KAPANANLAR"
+        testId="factory-decision-queue-verified-today"
+        items={workspace.liveQueues.verifiedClosedToday}
+        emptyMessage="Bugün doğrulanmış kapanış yok."
+      />
     </main>
+  );
+}
+
+function LiveQueueSection({
+  title,
+  testId,
+  items,
+  emptyMessage,
+}: Readonly<{
+  title: string;
+  testId: string;
+  items: readonly FactoryDecisionCaseQueueItemApi[];
+  emptyMessage: string;
+}>) {
+  return (
+    <section className="commint-panel" style={{ marginTop: "1.5rem" }} data-testid={testId}>
+      <div className="commint-panel__header">
+        <h2>{title}</h2>
+        <span className="commint-kpi-card__badge">{items.length}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="commint-kpi-card__detail">{emptyMessage}</p>
+      ) : (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          {items.map((item) => (
+            <DecisionCard key={`${testId}-${item.caseId}`} item={item} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

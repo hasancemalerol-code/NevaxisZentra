@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using NevaxisFactOS.Persistence.Development;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
@@ -30,6 +31,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
     private readonly NevaxisFactOSDbContext dbContext;
     private readonly TenantDatabaseSession tenantDatabaseSession;
     private readonly IHostEnvironment environment;
+    private readonly IFactoryOutcomeExecutionService outcomeExecution;
 
     public FactoryDecisionCenterService(
         IFactoryDecisionCenterRepository repository,
@@ -37,7 +39,8 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         IDigitalWorkforceRuntimeService runtime,
         NevaxisFactOSDbContext dbContext,
         TenantDatabaseSession tenantDatabaseSession,
-        IHostEnvironment environment)
+        IHostEnvironment environment,
+        IFactoryOutcomeExecutionService outcomeExecution)
     {
         this.repository = repository;
         this.aiTaskSync = aiTaskSync;
@@ -45,6 +48,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         this.dbContext = dbContext;
         this.tenantDatabaseSession = tenantDatabaseSession;
         this.environment = environment;
+        this.outcomeExecution = outcomeExecution;
     }
 
     public Task<FactoryDecisionCenterWorkspaceSnapshot> GetWorkspaceAsync(
@@ -101,16 +105,23 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
     {
         var cases = await repository.ListDecisionCasesAsync(facilityId, cancellationToken);
         var queue = new List<FactoryDecisionCaseQueueItem>();
+        var childrenByRoot = new Dictionary<Guid, IReadOnlyList<DigitalWorkCase>>();
 
         foreach (var rootCase in cases)
         {
             var children = await repository.ListChildCasesAsync(rootCase.Id, cancellationToken);
+            childrenByRoot[rootCase.Id] = children;
             queue.Add(FactoryDecisionCenterProjectionEngine.ProjectQueueItem(rootCase, children));
         }
 
         return new FactoryDecisionCenterWorkspaceSnapshot(
             FactoryDecisionCenterProjectionEngine.BuildSummary(cases),
             queue,
+            FactoryDecisionCenterProjectionEngine.BuildLiveQueues(
+                cases,
+                rootCase => FactoryDecisionCenterProjectionEngine.ProjectQueueItem(
+                    rootCase,
+                    childrenByRoot.GetValueOrDefault(rootCase.Id, []))),
             DateTimeOffset.UtcNow);
     }
 
@@ -203,6 +214,12 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
                 "Kurtarma planı onaylanmadan yürütme başlatılamaz.");
         }
 
+        if (IsOutcomeExecutionCase(rootCase))
+        {
+            await outcomeExecution.ExecutePendingActionsAsync(caseId, subjectId, cancellationToken);
+            return await GetCaseDetailCoreAsync(caseId, cancellationToken);
+        }
+
         var children = await dbContext.DigitalWorkCases
             .Include(c => c.PrimaryWorker)
             .Where(c => c.OrchestrationRootCaseId == caseId && c.Id != caseId)
@@ -273,6 +290,28 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
                 "Tüm kurtarma görevleri tamamlanmadan sonuç doğrulanamaz.");
         }
 
+        if (IsOutcomeExecutionCase(rootCase))
+        {
+            try
+            {
+                await outcomeExecution.VerifyAndCloseAsync(
+                    caseId,
+                    request.VerifiedProjection,
+                    request.ConcurrencyToken,
+                    subjectId,
+                    cancellationToken);
+            }
+            catch (FactoryOutcomeExecutionException ex) when (
+                ex.FailureCode == FactoryOutcomeExecutionFailureCodes.VerificationFailed)
+            {
+                throw new FactoryDecisionCenterException(
+                    FactoryDecisionCenterFailureCodes.OutcomeNotVerified,
+                    ex.Message);
+            }
+
+            return await GetCaseDetailCoreAsync(caseId, cancellationToken);
+        }
+
         var metadata = FactoryDecisionCenterProjectionEngine.ParseMetadata(rootCase.MetadataJson);
         var required = metadata.TryGetValue(FactoryDecisionCenterMetadataKeys.RequiredQuantity, out var requiredValue) &&
                        requiredValue.TryGetInt32(out var requiredQty)
@@ -316,6 +355,9 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
 
         return await GetCaseDetailCoreAsync(caseId, cancellationToken);
     }
+
+    private static bool IsOutcomeExecutionCase(DigitalWorkCase rootCase) =>
+        string.Equals(rootCase.Source, FactoryOutcomeExecutionConstants.SourceModule, StringComparison.OrdinalIgnoreCase);
 
     private static string ResolveVerificationType(string? workerCode) => workerCode switch
     {

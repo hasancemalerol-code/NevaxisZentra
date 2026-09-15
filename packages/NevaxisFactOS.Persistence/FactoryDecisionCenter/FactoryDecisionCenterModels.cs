@@ -27,9 +27,18 @@ public sealed record FactoryDecisionCaseQueueItem(
     DateTimeOffset UpdatedAtUtc,
     long ConcurrencyToken);
 
+public sealed record FactoryDecisionCenterLiveQueues(
+    IReadOnlyList<FactoryDecisionCaseQueueItem> CriticalDecisions,
+    IReadOnlyList<FactoryDecisionCaseQueueItem> ActiveRecoveryOperations,
+    IReadOnlyList<FactoryDecisionCaseQueueItem> PendingHumanApproval,
+    IReadOnlyList<FactoryDecisionCaseQueueItem> BlockedOrEscalated,
+    IReadOnlyList<FactoryDecisionCaseQueueItem> PendingVerification,
+    IReadOnlyList<FactoryDecisionCaseQueueItem> VerifiedClosedToday);
+
 public sealed record FactoryDecisionCenterWorkspaceSnapshot(
     FactoryDecisionCenterExecutiveSummary Summary,
     IReadOnlyList<FactoryDecisionCaseQueueItem> PriorityQueue,
+    FactoryDecisionCenterLiveQueues LiveQueues,
     DateTimeOffset GeneratedAtUtc);
 
 public sealed record FactoryDecisionRecoveryStep(
@@ -118,7 +127,8 @@ public sealed record FactoryDecisionCenterApprovalRequest(
     long ConcurrencyToken);
 
 public sealed record FactoryDecisionCenterVerifyRequest(
-    long ConcurrencyToken);
+    long ConcurrencyToken,
+    int? VerifiedProjection = null);
 
 public sealed class FactoryDecisionCenterException : Exception
 {

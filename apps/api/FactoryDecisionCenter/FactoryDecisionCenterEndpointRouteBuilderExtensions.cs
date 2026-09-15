@@ -2,6 +2,7 @@ using NevaxisFactOS.Api.Facilities;
 using NevaxisFactOS.Persistence.Authorization;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryDecisionCenter;
+using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,10 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         services.AddScoped<IFactoryDecisionCenterRepository, FactoryDecisionCenterRepository>();
         services.AddScoped<IFactoryDecisionCenterAiTaskSyncService, FactoryDecisionCenterAiTaskSyncService>();
         services.AddScoped<IFactoryDecisionCenterService, FactoryDecisionCenterService>();
+        services.AddScoped<IFactoryOutcomeExecutionRepository, FactoryOutcomeExecutionRepository>();
+        services.AddScoped<IFactoryOutcomeExecutionService, FactoryOutcomeExecutionService>();
+        services.AddScoped<IFactoryOutcomeAiTaskSyncService, FactoryOutcomeAiTaskSyncService>();
+        services.AddScoped<IFactoryOutcomeLearningService, FactoryOutcomeLearningService>();
         return services;
     }
 

@@ -52,6 +52,15 @@ internal static class FactoryDecisionCenterEndpointHelpers
             pendingVerification = workspace.Summary.PendingVerification,
         },
         priorityQueue = workspace.PriorityQueue.Select(MapQueueItem).ToList(),
+        liveQueues = new
+        {
+            criticalDecisions = workspace.LiveQueues.CriticalDecisions.Select(MapQueueItem).ToList(),
+            activeRecoveryOperations = workspace.LiveQueues.ActiveRecoveryOperations.Select(MapQueueItem).ToList(),
+            pendingHumanApproval = workspace.LiveQueues.PendingHumanApproval.Select(MapQueueItem).ToList(),
+            blockedOrEscalated = workspace.LiveQueues.BlockedOrEscalated.Select(MapQueueItem).ToList(),
+            pendingVerification = workspace.LiveQueues.PendingVerification.Select(MapQueueItem).ToList(),
+            verifiedClosedToday = workspace.LiveQueues.VerifiedClosedToday.Select(MapQueueItem).ToList(),
+        },
         generatedAtUtc = workspace.GeneratedAtUtc,
     };
 
