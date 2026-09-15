@@ -1,24 +1,24 @@
 export const GOLDEN_DEMO_CUSTOMS_FILE_ROUTE = "/golden-demo/gumruk-dosyasi";
-export const GOLDEN_DEMO_CUSTOMS_FILE_TITLE = "Gümrük Dosyası — Altın Demo";
+export const GOLDEN_DEMO_CUSTOMS_FILE_TITLE = "Gümrük Dosyası Hazırlama";
 export const GOLDEN_DEMO_CUSTOMS_FILE_SUBTITLE =
-  "Dijital çalışan gümrük dosyasını hazırlar, tutarsızlığı bulur, düzeltir ve müşavir devir teslimine hazırlar";
+  "Gümrük Dosyası Dijital Çalışanı belgeleri toplar, tutarsızlıkları kontrol eder ve müşavir devrine hazırlar";
 
 export const GOLDEN_DEMO_CUSTOMS_FILE_OUTCOME_ID = "cc000001-0010-4000-8000-000000000001";
 
 export function getCustomsDocumentLabel(documentType: string): string {
   switch (documentType) {
     case "commercial-invoice":
-      return "Commercial Invoice";
+      return "Ticari Fatura";
     case "packing-list":
-      return "Packing List";
+      return "Çeki Listesi";
     case "atr-status":
-      return "A.TR Status";
+      return "A.TR Durumu";
     case "eur1-status":
-      return "EUR.1 Status";
+      return "EUR.1 Durumu";
     case "certificate-of-origin-status":
-      return "Certificate of Origin Status";
+      return "Menşe Belgesi Durumu";
     default:
-      return documentType;
+      return documentType.replace(/-/g, " ");
   }
 }
 

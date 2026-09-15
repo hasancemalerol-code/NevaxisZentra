@@ -1,0 +1,136 @@
+.golden-demo-customs-page {
+  gap: 0.42rem;
+  padding-bottom: 0.5rem;
+}
+
+.golden-demo-customs-hero__outcome {
+  margin: 0;
+  font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #155eef;
+}
+
+.golden-demo-customs-hero__outcome--success {
+  color: #166534;
+}
+
+.golden-demo-customs-checklist {
+  display: grid;
+  gap: 0.22rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.golden-demo-customs-checklist__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.32rem 0.42rem;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.72rem;
+}
+
+.golden-demo-customs-checklist__icon {
+  font-weight: 700;
+  width: 1rem;
+  text-align: center;
+}
+
+.golden-demo-customs-checklist__item--ready .golden-demo-customs-checklist__icon {
+  color: #166534;
+}
+
+.golden-demo-customs-checklist__item--review .golden-demo-customs-checklist__icon {
+  color: #b45309;
+}
+
+.golden-demo-customs-checklist__item--pending .golden-demo-customs-checklist__icon {
+  color: #64748b;
+}
+
+.golden-demo-customs-blocker-list {
+  display: grid;
+  gap: 0.28rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.golden-demo-customs-blocker {
+  padding: 0.38rem 0.48rem;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  font-size: 0.72rem;
+  color: #991b1b;
+}
+
+.golden-demo-customs-blocker strong {
+  display: block;
+  margin-bottom: 0.12rem;
+  color: #7f1d1d;
+}
+
+.golden-demo-customs-control-panel {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.48rem 0.58rem;
+  border: 1px solid var(--commint-border);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.golden-demo-customs-control-panel h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--commint-navy);
+}
+
+.golden-demo-customs-activity {
+  display: grid;
+  gap: 0.22rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.golden-demo-customs-activity li {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.32rem 0.42rem;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.68rem;
+  color: #475569;
+}
+
+.golden-demo-customs-activity strong {
+  font-size: 0.72rem;
+  color: var(--commint-navy);
+}
+
+.golden-demo-customs-package {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.golden-demo-customs-package__label {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--commint-navy);
+}
+
+.golden-demo-customs-package ul {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.68rem;
+  color: #475569;
+}

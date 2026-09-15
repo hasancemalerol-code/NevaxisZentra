@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 
-import { getGoldenDemoEventStatusLabel } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
 import type { GoldenDemoP2PresentationStatusApi } from "../server/golden-demo-p2-api-client";
 import { goldenDemoResetPilotEventAction } from "../server/golden-demo-p2-actions";
 
@@ -30,7 +29,7 @@ export function GoldenDemoP2PresentationPanel({
     startTransition(async () => {
       const result = await goldenDemoResetPilotEventAction(eventId);
       if (result.status === "success") {
-        setMessage("Altın Demo sıfırlandı. Sunuma başlayabilirsiniz.");
+        setMessage("Senaryo sıfırlandı.");
         router.refresh();
       } else {
         setMessage(result.message ?? "Sıfırlama başarısız.");
@@ -38,37 +37,35 @@ export function GoldenDemoP2PresentationPanel({
     });
   }
 
-  const isReadyToStart = presentation.eventStatus === "active";
-
   return (
-    <section className="commint-panel" data-testid="golden-demo-sales-control">
-      <h2>Altın Demo Kontrolü</h2>
-      <p data-testid="golden-demo-p2-step">
-        Adım {presentation.stepNumber}/{presentation.totalSteps}: {presentation.presentationStepLabel}
-      </p>
-      <p>
-        Durum: {getGoldenDemoEventStatusLabel(presentation.eventStatus)}
-        {isReadyToStart ? " · Sunum başlangıç noktası hazır" : null}
-      </p>
-      <p>+{presentation.productionRecoveryGoodParts} iyi parça / vardiya fırsatı</p>
-      <div className="commint-action-row">
+    <header className="golden-demo-status-bar" data-testid="golden-demo-sales-control">
+      <div className="golden-demo-status-bar__intro">
+        <p className="commint-executive__eyebrow">ÜRETİM KURTARMA · ALTIN DEMO</p>
+        <p className="golden-demo-status-bar__step" data-testid="golden-demo-p2-step">
+          Adım {presentation.stepNumber} / {presentation.totalSteps}
+        </p>
+        <span className="golden-demo-status-bar__active">Aktif</span>
+      </div>
+      <div className="golden-demo-status-bar__actions">
         <button
           type="button"
+          className="commint-button"
           disabled={pending}
           data-testid="golden-demo-p2-reset"
           onClick={resetDemo}
         >
-          {pending ? "Sıfırlanıyor…" : "Altın Demo Sıfırla"}
+          {pending ? "Sıfırlanıyor…" : "Senaryoyu Sıfırla"}
         </button>
       </div>
       {message ? (
-        <p role="status" data-testid="golden-demo-reset-status">
+        <p
+          role="status"
+          className={`golden-demo-feedback ${message.includes("başarısız") ? "golden-demo-feedback--error" : "golden-demo-feedback--success"}`}
+          data-testid="golden-demo-reset-status"
+        >
           {message}
         </p>
       ) : null}
-      <p className="commint-table__secondary">
-        Sunumdan önce bu sayfayı açın: /golden-demo/uretim-kurtarma
-      </p>
-    </section>
+    </header>
   );
 }

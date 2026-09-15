@@ -1,6 +1,6 @@
 export const GOLDEN_DEMO_P1_TITLE = "Üretim Kurtarma — Altın Demo";
 export const GOLDEN_DEMO_P1_SUBTITLE =
-  "Makine zekası, cycle loss ayrıştırma, kurtarma fırsatı ve doğrulama akışı";
+  "Makine zekâsı, çevrim kaybı ayrıştırma, kurtarma fırsatı ve doğrulama akışı";
 
 export const GOLDEN_DEMO_P1_ROUTE = "/golden-demo/uretim-kurtarma";
 
@@ -24,17 +24,17 @@ export function getGoldenDemoEventStatusLabel(status: string): string {
 export function getGoldenDemoAgentLabel(agentCode: string): string {
   switch (agentCode) {
     case "production-performance":
-      return "Üretim Performans Ajanı";
+      return "Üretim Performansı Dijital Çalışanı";
     case "machine-performance":
-      return "Makine Performans Ajanı";
+      return "Makine Performansı Dijital Çalışanı";
     case "process-optimization":
-      return "Proses Optimizasyon Ajanı";
+      return "Proses Optimizasyonu Dijital Çalışanı";
     case "mold-health":
-      return "Kalıp Sağlık Ajanı";
+      return "Kalıp Sağlığı Dijital Çalışanı";
     case "maintenance":
-      return "Bakım Ajanı";
+      return "Bakım Dijital Çalışanı";
     case "energy":
-      return "Enerji Ajanı";
+      return "Enerji Dijital Çalışanı";
     case "orchestrator":
       return "FactOS Orchestrator";
     default:

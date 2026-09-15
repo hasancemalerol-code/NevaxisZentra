@@ -7,6 +7,7 @@ import {
   getGoldenDemoEventStatusLabel,
   getGoldenDemoVerificationLabel,
 } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
+import { translateGoldenDemoApiText } from "@/features/golden-demo-p1/domain/golden-demo-presentation-copy";
 
 import type { GoldenDemoP3OutcomeApi } from "../server/golden-demo-p3-api-client";
 
@@ -23,16 +24,19 @@ function formatTimestamp(value?: string | null) {
 
 export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: GoldenDemoP3OutcomeApi }>) {
   const heroClass = outcome.hero.showSuccessHero ? "commint-kpi-card" : "commint-panel";
+  const recoveryGoodParts = outcome.hero.recoveredGoodPartsPerShift;
 
   return (
     <>
       <section className="commint-panel" data-testid="golden-demo-p3-validation-run">
         <h2>Doğrulama Koşusu</h2>
-        <p>{outcome.validationWindow.summary}</p>
+        <p>{translateGoldenDemoApiText(outcome.validationWindow.summary, recoveryGoodParts)}</p>
         <div className="commint-kpi-grid">
           <article className="commint-kpi-card">
             <p className="commint-kpi-card__label">Durum</p>
-            <p className="commint-kpi-card__value">{outcome.validationWindow.statusLabel}</p>
+            <p className="commint-kpi-card__value">
+              {translateGoldenDemoApiText(outcome.validationWindow.statusLabel)}
+            </p>
           </article>
           <article className="commint-kpi-card">
             <p className="commint-kpi-card__label">Toplanan Örnek</p>
@@ -42,7 +46,9 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
           </article>
           <article className="commint-kpi-card">
             <p className="commint-kpi-card__label">Kanıt Tamlığı</p>
-            <p className="commint-kpi-card__value">{outcome.validationWindow.evidenceCompleteness}</p>
+            <p className="commint-kpi-card__value">
+              {translateGoldenDemoApiText(outcome.validationWindow.evidenceCompleteness)}
+            </p>
           </article>
           <article className="commint-kpi-card">
             <p className="commint-kpi-card__label">Müdahale / Sonuç</p>
@@ -63,11 +69,11 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         data-outcome-status={outcome.outcomeStatus}
         data-verified={outcome.hero.showSuccessHero ? "true" : "false"}
       >
-        <h1>{outcome.hero.headline}</h1>
-        <p>{outcome.hero.subheadline}</p>
+        <h1>{translateGoldenDemoApiText(outcome.hero.headline, recoveryGoodParts)}</h1>
+        <p>{translateGoldenDemoApiText(outcome.hero.subheadline, recoveryGoodParts)}</p>
         {outcome.hero.showSuccessHero ? (
           <p className="commint-kpi-card__value" data-testid="golden-demo-p3-recovered-good-parts">
-            +{formatGoldenDemoNumber(outcome.hero.recoveredGoodPartsPerShift)} GOOD PARTS / SHIFT
+            +{formatGoldenDemoNumber(outcome.hero.recoveredGoodPartsPerShift)} iyi parça / vardiya
           </p>
         ) : (
           <p className="commint-table__secondary">
@@ -77,13 +83,15 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         )}
         <p className="commint-table__secondary">
           {getGoldenDemoClassificationLabel(outcome.hero.recoveredGoodPartsClassification)} · Doğrulama:{" "}
-          {getGoldenDemoVerificationLabel(outcome.hero.verificationResult)} · Güven: {outcome.verificationConfidence}
+          {getGoldenDemoVerificationLabel(outcome.hero.verificationResult)} · Güven:{" "}
+          {translateGoldenDemoApiText(outcome.verificationConfidence)}
         </p>
         {outcome.hero.highlights.length > 0 ? (
           <ul>
             {outcome.hero.highlights.map((item) => (
               <li key={item.label}>
-                <strong>{item.label}</strong>: {item.beforeValue} → {item.afterValue} · {item.deltaLabel}
+                <strong>{translateGoldenDemoApiText(item.label)}</strong>: {item.beforeValue} → {item.afterValue} ·{" "}
+                {translateGoldenDemoApiText(item.deltaLabel)}
               </li>
             ))}
           </ul>
@@ -94,22 +102,22 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         <h2>Önce / Sonra</h2>
         <div className="commint-kpi-grid">
           <article className="commint-kpi-card">
-            <p className="commint-kpi-card__label">Baseline Penceresi</p>
-            <p>{outcome.baselineWindow.sourceLabel}</p>
+            <p className="commint-kpi-card__label">Referans Penceresi</p>
+            <p>{translateGoldenDemoApiText(outcome.baselineWindow.sourceLabel)}</p>
             <p className="commint-table__secondary">
               {formatTimestamp(outcome.baselineWindow.windowStartUtc)} → {formatTimestamp(outcome.baselineWindow.windowEndUtc)}
             </p>
-            <p>{outcome.baselineWindow.productionContext}</p>
+            <p>{translateGoldenDemoApiText(outcome.baselineWindow.productionContext)}</p>
           </article>
           {outcome.validationMeasurementWindow ? (
             <article className="commint-kpi-card">
               <p className="commint-kpi-card__label">Doğrulama Penceresi</p>
-              <p>{outcome.validationMeasurementWindow.sourceLabel}</p>
+              <p>{translateGoldenDemoApiText(outcome.validationMeasurementWindow.sourceLabel)}</p>
               <p className="commint-table__secondary">
                 {formatTimestamp(outcome.validationMeasurementWindow.windowStartUtc)} →{" "}
                 {formatTimestamp(outcome.validationMeasurementWindow.windowEndUtc)}
               </p>
-              <p>{outcome.validationMeasurementWindow.productionContext}</p>
+              <p>{translateGoldenDemoApiText(outcome.validationMeasurementWindow.productionContext)}</p>
             </article>
           ) : null}
         </div>
@@ -119,7 +127,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
               <th>Metrik</th>
               <th>Önce</th>
               <th>Sonra</th>
-              <th>Delta</th>
+              <th>Değişim</th>
               <th>Durum</th>
               <th>Sınıf</th>
             </tr>
@@ -127,11 +135,11 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
           <tbody>
             {outcome.metricComparisons.map((metric) => (
               <tr key={metric.metricCode}>
-                <td>{metric.label}</td>
+                <td>{translateGoldenDemoApiText(metric.label)}</td>
                 <td>{metric.beforeValue ?? "—"}</td>
                 <td>{metric.afterValue ?? "—"}</td>
-                <td>{metric.deltaLabel ?? "—"}</td>
-                <td>{metric.status}</td>
+                <td>{metric.deltaLabel ? translateGoldenDemoApiText(metric.deltaLabel) : "—"}</td>
+                <td>{translateGoldenDemoApiText(metric.status)}</td>
                 <td>{getGoldenDemoClassificationLabel(metric.classification)}</td>
               </tr>
             ))}
@@ -144,16 +152,16 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         <ul>
           {outcome.verificationChecks.map((check) => (
             <li key={check.code}>
-              <strong>{check.label}</strong> · {check.status}
+              <strong>{translateGoldenDemoApiText(check.label)}</strong> · {translateGoldenDemoApiText(check.status)}
               <Badge>{getGoldenDemoClassificationLabel(check.classification)}</Badge>
-              <p>{check.explanation}</p>
+              <p>{translateGoldenDemoApiText(check.explanation, recoveryGoodParts)}</p>
             </li>
           ))}
         </ul>
         {outcome.insufficientEvidenceReasons.length > 0 ? (
           <ul data-testid="golden-demo-p3-insufficient-evidence">
             {outcome.insufficientEvidenceReasons.map((reason) => (
-              <li key={reason}>{reason}</li>
+              <li key={reason}>{translateGoldenDemoApiText(reason, recoveryGoodParts)}</li>
             ))}
           </ul>
         ) : null}
@@ -161,9 +169,10 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
 
       <section className="commint-panel" data-testid="golden-demo-p3-energy-impact">
         <h2>Enerji Etkisi</h2>
-        <p>{outcome.energyImpact.summary}</p>
+        <p>{translateGoldenDemoApiText(outcome.energyImpact.summary, recoveryGoodParts)}</p>
         <p className="commint-table__secondary">
-          {getGoldenDemoClassificationLabel(outcome.energyImpact.classification)} · {outcome.energyImpact.relationshipNote}
+          {getGoldenDemoClassificationLabel(outcome.energyImpact.classification)} ·{" "}
+          {translateGoldenDemoApiText(outcome.energyImpact.relationshipNote, recoveryGoodParts)}
         </p>
       </section>
 
@@ -190,8 +199,9 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
         <ul>
           {outcome.businessImpact.categories.map((category) => (
             <li key={category.categoryCode}>
-              <strong>{category.label}</strong> · Önce {category.beforeLabel} · Sonra {category.afterLabel} ·{" "}
-              {category.protectedOrRecoveredLabel} · {getGoldenDemoClassificationLabel(category.classification)}
+              <strong>{translateGoldenDemoApiText(category.label)}</strong> · Önce {category.beforeLabel} · Sonra{" "}
+              {category.afterLabel} · {translateGoldenDemoApiText(category.protectedOrRecoveredLabel)} ·{" "}
+              {getGoldenDemoClassificationLabel(category.classification)}
             </li>
           ))}
         </ul>
@@ -199,7 +209,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
 
       <section className="commint-panel" data-testid="golden-demo-p3-traceability">
         <h2>İzlenebilirlik</h2>
-        <p>{outcome.traceability.workflowSummary}</p>
+        <p>{translateGoldenDemoApiText(outcome.traceability.workflowSummary, recoveryGoodParts)}</p>
         <ul>
           {outcome.traceability.planReferenceId ? <li>Plan: {outcome.traceability.planReferenceId}</li> : null}
           {outcome.traceability.verificationReferenceId ? (
@@ -209,7 +219,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
             <li>Müdahale: {outcome.traceability.interventionReferenceId}</li>
           ) : null}
           {outcome.traceability.sourceAgentReferences.map((reference) => (
-            <li key={reference}>{reference}</li>
+            <li key={reference}>{translateGoldenDemoApiText(reference)}</li>
           ))}
         </ul>
         <p className="commint-table__secondary">
