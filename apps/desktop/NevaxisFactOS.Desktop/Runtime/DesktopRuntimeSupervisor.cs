@@ -28,6 +28,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
     private readonly List<string> _diagnostics = [];
     private string? _runtimeRoot;
     private PackagedRuntimeBundle? _packagedBundle;
+    private EmbeddedPostgreSqlRuntime? _embeddedPostgres;
 
     public event Action<string>? StatusChanged;
 
@@ -48,6 +49,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
         {
             ImportPackagedConfiguration(_packagedBundle);
+            PackagedFirstRunInitializer.EnsureMachineSecrets(_packagedBundle, _diagnostics);
         }
         else
         {
@@ -183,7 +185,12 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         _ownedProcesses.Clear();
-        await Task.CompletedTask.ConfigureAwait(false);
+
+        if (_embeddedPostgres is not null)
+        {
+            await _embeddedPostgres.DisposeAsync().ConfigureAwait(false);
+            _embeddedPostgres = null;
+        }
     }
 
     private async Task EnsurePostgresInfrastructureAsync(
@@ -200,6 +207,16 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 cancellationToken).ConfigureAwait(false))
         {
             _diagnostics.Add("postgres=attached-existing");
+            await ValidateSchemaVersionIfRequiredAsync(options, postgresHost, postgresPort, cancellationToken)
+                .ConfigureAwait(false);
+            return;
+        }
+
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null &&
+            UsesEmbeddedPostgres(_packagedBundle))
+        {
+            _embeddedPostgres = new EmbeddedPostgreSqlRuntime(_packagedBundle, _diagnostics);
+            await _embeddedPostgres.EnsureReadyAsync(postgresPort, cancellationToken).ConfigureAwait(false);
             await ValidateSchemaVersionIfRequiredAsync(options, postgresHost, postgresPort, cancellationToken)
                 .ConfigureAwait(false);
             return;
@@ -708,8 +725,13 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
     }
 
-    private static string ResolveNodeExecutable()
+    private string ResolveNodeExecutable()
     {
+        if (_packagedBundle is not null && File.Exists(_packagedBundle.NodeExecutablePath))
+        {
+            return _packagedBundle.NodeExecutablePath;
+        }
+
         var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         foreach (var segment in path.Split(';', StringSplitOptions.RemoveEmptyEntries))
         {
@@ -721,6 +743,20 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         throw new InvalidOperationException("node.exe bulunamadı. Node.js kurulu olmalıdır.");
+    }
+
+    private static bool UsesEmbeddedPostgres(PackagedRuntimeBundle bundle)
+    {
+        var manifest = bundle.TryReadManifest();
+        if (manifest?.DatabaseArchitecture is not null)
+        {
+            return string.Equals(
+                manifest.DatabaseArchitecture,
+                "EMBEDDED_LOCAL",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        return Directory.Exists(bundle.PostgresBinDirectory);
     }
 
     private static void ImportPackagedConfiguration(PackagedRuntimeBundle bundle)
@@ -766,14 +802,28 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         var query =
             "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\" DESC LIMIT 1;";
-        var actual = await QueryPostgresScalarAsync(
-            postgresHost,
-            postgresPort,
-            database,
-            username,
-            password,
-            query,
-            cancellationToken).ConfigureAwait(false);
+        string? actual;
+        if (_embeddedPostgres is not null)
+        {
+            actual = await _embeddedPostgres.QueryScalarAsync(
+                postgresPort,
+                database,
+                username,
+                password,
+                query,
+                cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            actual = await QueryPostgresScalarAsync(
+                postgresHost,
+                postgresPort,
+                database,
+                username,
+                password,
+                query,
+                cancellationToken).ConfigureAwait(false);
+        }
 
         if (string.IsNullOrWhiteSpace(actual))
         {

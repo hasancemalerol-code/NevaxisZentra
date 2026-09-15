@@ -93,3 +93,17 @@ generated/
 # Desktop distribution packaging (local caches and generated binaries)
 .wix/
 apps/desktop/installer/.cache/
+*.wixpdb
+
+# Windows release packaging staging (postgres/web/desktop bundles; not source)
+release/staging/
+
+# Local dev runtime state (API probe output, start locks)
+.local/
+
+# Generated freeze/release checkpoint reports at repo root
+FACTOS-FULL-CURRENT-WINDOWS-RELEASE-WIP-CHECKPOINT.md
+NEVAXISFACTOS-GOLDEN-DEMO-RECOVERY-FINAL-REPORT.md
+
+# Packaged demo secrets (use runtime.example.env / local override instead)
+apps/desktop/runtime-packaging/config/release-demo-secrets.env

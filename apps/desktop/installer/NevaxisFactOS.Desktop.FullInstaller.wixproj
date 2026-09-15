@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <Platform>x64</Platform>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <OutputName>Nevaxis-FactOS-Setup</OutputName>
+    <SuppressValidation>true</SuppressValidation>
+    <StagingRoot Condition="'$(StagingRoot)' == ''">..\..\..\release\staging</StagingRoot>
+    <WebView2BootstrapperPath Condition="'$(WebView2BootstrapPath)' == ''">.cache\webview2\MicrosoftEdgeWebview2Setup.exe</WebView2BootstrapperPath>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">2026.9.14.0</ProductVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <PackageReference Include="WixToolset.Bal.wixext" Version="5.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="License.rtf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Package-FullProduct.wxs" />
+  </ItemGroup>
+</Project>

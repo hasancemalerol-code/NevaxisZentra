@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="Nevaxis FactOS"
+           Manufacturer="Nevaxis"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+           Scope="perMachine"
+           Compressed="yes"
+           Codepage="65001">
+
+    <MajorUpgrade DowngradeErrorMessage="Nevaxis FactOS'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <ui:WixUI Id="WixUI_InstallDir" />
+
+    <Property Id="WEBVIEW2RUNTIMEINSTALLED" Secure="yes">
+      <RegistrySearch Id="WebView2RuntimeSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                      Name="pv"
+                      Type="raw" />
+    </Property>
+
+    <Feature Id="MainFeature" Title="Nevaxis FactOS" Level="1">
+      <ComponentGroupRef Id="RuntimePayload" />
+      <ComponentRef Id="MainExecutableComponent" />
+      <ComponentRef Id="StartMenuCleanupComponent" />
+      <ComponentRef Id="WebView2BootstrapperComponent" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Nevaxis FactOS" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Nevaxis FactOS" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <ComponentGroup Id="RuntimePayload" Directory="INSTALLFOLDER">
+      <Files Include="$(var.StagingRoot)\**">
+        <Exclude Files="$(var.StagingRoot)\logs\**" />
+        <Exclude Files="$(var.StagingRoot)\desktop\NevaxisFactOS.exe" />
+      </Files>
+    </ComponentGroup>
+
+    <Component Id="MainExecutableComponent" Directory="INSTALLFOLDER" Guid="*">
+      <File Id="NevaxisFactOSDesktopExe"
+            Source="$(var.StagingRoot)\desktop\NevaxisFactOS.exe"
+            KeyPath="yes">
+        <Shortcut Id="StartMenuShortcut"
+                  Directory="ApplicationProgramsFolder"
+                  Name="Nevaxis FactOS"
+                  Description="Nevaxis FactOS — Factory Intelligence and Action OS"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <Shortcut Id="DesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Nevaxis FactOS"
+                  Description="Nevaxis FactOS — Factory Intelligence and Action OS"
+                  WorkingDirectory="INSTALLFOLDER" />
+      </File>
+    </Component>
+
+    <Component Id="StartMenuCleanupComponent" Directory="INSTALLFOLDER" Guid="C1D2E3F4-A5B6-7890-CDEF-1234567890AB">
+      <RegistryValue Root="HKLM"
+                     Key="Software\Nevaxis\FactOS"
+                     Name="Installed"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+    </Component>
+
+    <Component Id="WebView2BootstrapperComponent" Directory="INSTALLFOLDER" Guid="*">
+      <File Id="WebView2Bootstrapper"
+            Source="$(var.WebView2BootstrapperPath)"
+            KeyPath="yes" />
+    </Component>
+
+    <CustomAction Id="SetInstallWebView2Command"
+                  Property="WixQuietExecCmdLine"
+                  Value="&quot;[#WebView2Bootstrapper]&quot; /silent /install"
+                  Execute="immediate" />
+
+    <CustomAction Id="InstallWebView2Runtime"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixQuietExec"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SetInstallWebView2Command" Before="InstallWebView2Runtime" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
+      <Custom Action="InstallWebView2Runtime" After="InstallFiles" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
+    </InstallExecuteSequence>
+
+    <util:CloseApplication Id="CloseNevaxisFactOSDesktop"
+                           Target="NevaxisFactOS.exe"
+                           Description="Nevaxis FactOS calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
+                           CloseMessage="yes"
+                           RebootPrompt="no"
+                           TerminateProcess="0"
+                           PromptToContinue="yes" />
+  </Package>
+</Wix>

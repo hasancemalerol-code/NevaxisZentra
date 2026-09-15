@@ -29,6 +29,22 @@ public sealed class PackagedRuntimeBundle
 
     public required string LogsDirectory { get; init; }
 
+    public string PostgresBinDirectory => Path.Combine(BundleRoot, "postgres", "bin");
+
+    public string PostgresTemplateDirectory => Path.Combine(BundleRoot, "postgres", "template");
+
+    public string NodeDirectory => Path.Combine(BundleRoot, "node");
+
+    public string NodeExecutablePath => Path.Combine(NodeDirectory, "node.exe");
+
+    public string ToolsDirectory => Path.Combine(BundleRoot, "tools");
+
+    public static string GetPersistentDataRoot() =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Nevaxis",
+            "FactOS");
+
     public string ManifestPath => Path.Combine(ManifestsDirectory, "runtime-manifest.json");
 
     public string RuntimeConfigPath => Path.Combine(ConfigDirectory, "runtime.json");
@@ -150,6 +166,8 @@ public sealed class RuntimeManifestDocument
     public string? DatabaseName { get; init; }
 
     public string? ExpectedSchemaVersion { get; init; }
+
+    public string? DatabaseArchitecture { get; init; }
 
     public int CanonicalRouteCount { get; init; } = 46;
 }
