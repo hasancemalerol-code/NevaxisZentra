@@ -37,6 +37,7 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
         AiTaskPermissionKeys.Acknowledge,
         AiTaskPermissionKeys.Assign,
         DigitalWorkforcePermissionKeys.Read,
+        FactoryOrchestrationPermissionKeys.Read,
         GoldenDemoP1PermissionKeys.Read,
         GoldenDemoCustomsFilePermissionKeys.Read,
         OperationalRiskPermissionKeys.Read,

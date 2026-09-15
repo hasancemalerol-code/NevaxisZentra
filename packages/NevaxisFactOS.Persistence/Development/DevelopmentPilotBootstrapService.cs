@@ -1032,6 +1032,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 tenant.Id,
                 facility.Id,
                 cancellationToken);
+            await NevaxisFactOS.Persistence.FactoryDecisionCenter.DevelopmentPilotFactoryDecisionCenterSeed.EnsureCriticalOrderRecoveryAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                seedTimestampUtc,
+                cancellationToken);
             await DevelopmentPilotShiftOperationsSeed.EnsureShiftOperationsPilotDataAsync(
                 dbContext,
                 bootstrapContext.TenantContextAccessor,
