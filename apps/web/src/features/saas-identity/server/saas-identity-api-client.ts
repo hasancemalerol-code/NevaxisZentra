@@ -106,6 +106,27 @@ async function serverIdentityFetch<T>(
     const response = fetchResult.response;
 
     if (response.status === 401) {
+      let payload: unknown = null;
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        try {
+          payload = await response.json();
+        } catch {
+          payload = null;
+        }
+      }
+
+      const record =
+        payload && typeof payload === "object"
+          ? (payload as Record<string, unknown>)
+          : null;
+      if (record?.title === "Authentication could not be resolved.") {
+        return createFailure(
+          "mfa-required",
+          "Multi-factor authentication is required.",
+        );
+      }
+
       return createFailure(
         "unauthenticated",
         "Authentication required.",

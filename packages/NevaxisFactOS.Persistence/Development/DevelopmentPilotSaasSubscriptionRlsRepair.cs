@@ -52,7 +52,8 @@ internal static class DevelopmentPilotSaasSubscriptionRlsRepair
                 SELECT NULLIF(
                     COALESCE(
                         NULLIF(current_setting('NevaxisFactOS.tenant_id', true), ''),
-                        NULLIF(current_setting('CrevaFactOS.tenant_id', true), '')),
+                        NULLIF(current_setting('CrevaFactOS.tenant_id', true), ''),
+                        NULLIF(current_setting('crevafactos.tenant_id', true), '')),
                     '')::uuid
             $function$;
 

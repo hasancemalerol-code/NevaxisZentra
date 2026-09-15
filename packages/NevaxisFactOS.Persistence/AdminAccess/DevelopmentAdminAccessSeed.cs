@@ -81,6 +81,164 @@ internal static class DevelopmentAdminAccessSeed
             cancellationToken);
     }
 
+    internal static async Task EnsureDevelopmentLoginAuthorizationAsync(
+        NevaxisFactOSDbContext dbContext,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        await BackfillPermissionMetadataAsync(dbContext, cancellationToken);
+        await EnsureAdminAccessPermissionsAsync(dbContext, seedTimestampUtc, cancellationToken);
+        await BackfillMembershipReferencesAsync(dbContext, cancellationToken);
+
+        foreach (var template in AdminAccessRoleTemplates.DevelopmentTemplates)
+        {
+            await EnsureTemplateRoleAsync(dbContext, template, seedTimestampUtc, cancellationToken);
+        }
+
+        await EnsureMembershipRoleAsync(
+            dbContext,
+            DevelopmentSaasIdentityIds.TenantOwnerMembershipId,
+            DevelopmentAdminAccessIds.TenantOwnerRoleId,
+            seedTimestampUtc,
+            cancellationToken);
+
+        await EnsureGoldenDemoCustomsFilePermissionDefinitionsAsync(
+            dbContext,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsureTenantOwnerGoldenDemoCustomsFilePermissionsAsync(
+            dbContext,
+            cancellationToken);
+    }
+
+    internal static Task EnsureDevelopmentTenantOwnerFacilityMembershipAsync(
+        NevaxisFactOSDbContext dbContext,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken) =>
+        EnsureTenantOwnerFacilityMembershipAsync(dbContext, seedTimestampUtc, cancellationToken);
+
+    private static async Task EnsureGoldenDemoCustomsFilePermissionDefinitionsAsync(
+        NevaxisFactOSDbContext dbContext,
+        DateTimeOffset seedTimestampUtc,
+        CancellationToken cancellationToken)
+    {
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f7d"),
+            GoldenDemoCustomsFilePermissionKeys.Read,
+            "Gümrük dosyası altın demo oku",
+            "golden-demo-customs-file",
+            AdminAccessActions.View,
+            AdminAccessSensitivity.Standard,
+            false,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f7e"),
+            GoldenDemoCustomsFilePermissionKeys.Manage,
+            "Gümrük dosyası işi ata",
+            "golden-demo-customs-file",
+            AdminAccessActions.ManageSettings,
+            AdminAccessSensitivity.Standard,
+            false,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f7f"),
+            GoldenDemoCustomsFilePermissionKeys.Approve,
+            "Gümrük paketini onayla",
+            "golden-demo-customs-file",
+            AdminAccessActions.ManageSettings,
+            AdminAccessSensitivity.Sensitive,
+            true,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f80"),
+            GoldenDemoCustomsFilePermissionKeys.Execute,
+            "Gümrük dosyası dijital çalışanı uygula",
+            "golden-demo-customs-file",
+            AdminAccessActions.ManageSettings,
+            AdminAccessSensitivity.Standard,
+            false,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f81"),
+            GoldenDemoCustomsFilePermissionKeys.Verify,
+            "Gümrük paketi hazırlığını doğrula",
+            "golden-demo-customs-file",
+            AdminAccessActions.ManageSettings,
+            AdminAccessSensitivity.Sensitive,
+            true,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+        await EnsurePermissionAsync(
+            dbContext,
+            Guid.Parse("10000000-0000-4000-8000-000000000f82"),
+            GoldenDemoCustomsFilePermissionKeys.Reset,
+            "Gümrük dosyası altın demo sıfırla",
+            "golden-demo-customs-file",
+            AdminAccessActions.ManageSettings,
+            AdminAccessSensitivity.Sensitive,
+            true,
+            AdminAccessRecordScopes.Tenant,
+            seedTimestampUtc,
+            cancellationToken);
+    }
+
+    private static async Task EnsureTenantOwnerGoldenDemoCustomsFilePermissionsAsync(
+        NevaxisFactOSDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = DevelopmentPilotIds.TenantId;
+        var roleId = DevelopmentAdminAccessIds.TenantOwnerRoleId;
+        foreach (var permissionKey in new[]
+                 {
+                     GoldenDemoCustomsFilePermissionKeys.Read,
+                     GoldenDemoCustomsFilePermissionKeys.Manage,
+                     GoldenDemoCustomsFilePermissionKeys.Approve,
+                     GoldenDemoCustomsFilePermissionKeys.Execute,
+                     GoldenDemoCustomsFilePermissionKeys.Verify,
+                     GoldenDemoCustomsFilePermissionKeys.Reset,
+                 })
+        {
+            var permission = await dbContext.PermissionDefinitions
+                .SingleOrDefaultAsync(p => p.Key == permissionKey, cancellationToken);
+            if (permission is null)
+            {
+                continue;
+            }
+
+            var exists = await dbContext.TenantRolePermissions.IgnoreQueryFilters()
+                .AnyAsync(
+                    assignment => assignment.TenantId == tenantId
+                        && assignment.TenantRoleId == roleId
+                        && assignment.PermissionDefinitionId == permission.Id,
+                    cancellationToken);
+            if (exists)
+            {
+                continue;
+            }
+
+            dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
+            {
+                TenantId = tenantId,
+                TenantRoleId = roleId,
+                PermissionDefinitionId = permission.Id,
+            });
+        }
+    }
+
     private static async Task BackfillPermissionMetadataAsync(
         NevaxisFactOSDbContext dbContext,
         CancellationToken cancellationToken)

@@ -109,8 +109,32 @@ export function SignInForm({
         }
 
         if (result.value === "mfa_required") {
-          router.push("/mfa-dogrula");
-          router.refresh();
+          // Client sign-in uses credentials:"omit" so HttpOnly session cookies
+          // are not stored. Re-post via the server route to set cookies and redirect.
+          const fallbackForm = document.createElement("form");
+          fallbackForm.method = "post";
+          fallbackForm.action = "/giris/oturum";
+          const fields: Record<string, string> = {
+            organizationContext: credentials.organizationContext,
+            email: credentials.email,
+            password: credentials.password,
+          };
+          const requestedReturnUrl =
+            typeof window !== "undefined"
+              ? new URLSearchParams(window.location.search).get("returnUrl")
+              : returnUrl;
+          if (isSafeAppReturnUrl(requestedReturnUrl)) {
+            fields.returnUrl = requestedReturnUrl;
+          }
+          for (const [name, value] of Object.entries(fields)) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            fallbackForm.appendChild(input);
+          }
+          document.body.appendChild(fallbackForm);
+          fallbackForm.submit();
           return;
         }
 

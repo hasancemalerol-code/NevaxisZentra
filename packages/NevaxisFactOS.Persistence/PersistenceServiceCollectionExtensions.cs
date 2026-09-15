@@ -76,6 +76,11 @@ public static class PersistenceServiceCollectionExtensions
                 options.MfaSharedSecret = GetSaasIdentityEnvironmentValue(
                     nameof(DevelopmentSaasIdentityOptions.MfaSharedSecret),
                     options.MfaSharedSecret);
+
+                if (!string.IsNullOrWhiteSpace(options.TenantOwnerPassword))
+                {
+                    options.Enabled = true;
+                }
             });
 
         if (environment?.IsDevelopment() == true)

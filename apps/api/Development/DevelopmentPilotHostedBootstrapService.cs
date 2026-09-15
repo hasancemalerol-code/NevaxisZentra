@@ -43,6 +43,26 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
         try
         {
+            await bootstrapService.EnsureSaasIdentityFixturesAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine(
+                $"Development pilot SaaS identity ensure failed: {exception.Message}");
+        }
+
+        try
+        {
+            await bootstrapService.EnsureAdminAccessFixturesAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine(
+                $"Development pilot admin access ensure failed: {exception.Message}");
+        }
+
+        try
+        {
             _ = await bootstrapService.BootstrapAsync(cancellationToken);
         }
         catch (Exception)

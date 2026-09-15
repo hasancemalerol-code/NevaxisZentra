@@ -5,8 +5,8 @@ using NevaxisFactOS.Persistence.Tenancy;
 namespace NevaxisFactOS.Persistence.Development;
 
 /// <summary>
-/// Ensures dev-pilot SaaS commercial catalog and active subscription exist even when the
-/// main bootstrap transaction rolls back on re-seed conflicts.
+/// Ensures dev-pilot SaaS commercial catalog, active subscription, and operator presentation
+/// permissions exist even when the main bootstrap transaction rolls back on re-seed conflicts.
 /// </summary>
 internal static class DevelopmentPilotAccessEnsureService
 {
@@ -65,6 +65,12 @@ internal static class DevelopmentPilotAccessEnsureService
             cancellationToken);
         await DevelopmentPilotSaasSubscriptionRlsRepair.EnsureRuntimeReadAccessAsync(
             dbContext,
+            cancellationToken);
+        await DevelopmentPilotOperatorPresentationAccessSeed.EnsureOperatorPresentationAccessAsync(
+            dbContext,
+            pilot,
+            tenant.Id,
+            seedTimestampUtc,
             cancellationToken);
     }
 }

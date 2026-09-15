@@ -3201,16 +3201,24 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
     internal void SetTenantSessionContext(Guid tenantId)
     {
+        var tenantIdText = tenantId.ToString();
         Database.ExecuteSqlInterpolated(
-            $"SELECT set_config('NevaxisFactOS.tenant_id', {tenantId.ToString()}, true)");
+            $"""
+            SELECT set_config('NevaxisFactOS.tenant_id', {tenantIdText}, true);
+            SELECT set_config('crevafactos.tenant_id', {tenantIdText}, true);
+            """);
     }
 
     internal Task SetTenantSessionContextAsync(
         Guid tenantId,
         CancellationToken cancellationToken = default)
     {
+        var tenantIdText = tenantId.ToString();
         return Database.ExecuteSqlInterpolatedAsync(
-            $"SELECT set_config('NevaxisFactOS.tenant_id', {tenantId.ToString()}, true)",
+            $"""
+            SELECT set_config('NevaxisFactOS.tenant_id', {tenantIdText}, true);
+            SELECT set_config('crevafactos.tenant_id', {tenantIdText}, true);
+            """,
             cancellationToken);
     }
 

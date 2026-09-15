@@ -1067,6 +1067,89 @@ internal sealed class DevelopmentPilotBootstrapService(
             options,
             cancellationToken);
 
+    public async Task EnsureSaasIdentityFixturesAsync(CancellationToken cancellationToken = default)
+    {
+        if (!options.Value.Enabled || !saasIdentityOptions.Value.Enabled
+            || string.IsNullOrWhiteSpace(saasIdentityOptions.Value.TenantOwnerPassword))
+        {
+            return;
+        }
+
+        var bootstrapContext = DevelopmentPilotBootstrapDbContextFactory.Create(persistenceOptions.Value);
+        await using var dbContext = bootstrapContext.DbContext;
+        var seedTimestampUtc = DateTimeOffset.UtcNow;
+        var tenant = await dbContext.Tenants
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                candidate => candidate.Id == DevelopmentPilotIds.TenantId
+                    || candidate.TenantKey == options.Value.TenantKey.Trim(),
+                cancellationToken);
+
+        if (tenant is null)
+        {
+            return;
+        }
+
+        bootstrapContext.TenantContextAccessor.Set(
+            new TenantContext(
+                tenant.Id,
+                tenant.TenantKey,
+                DevelopmentPilotIds.TenantMembershipId));
+
+        await DevelopmentSaasIdentitySeed.EnsureDevelopmentSaasIdentityFixturesAsync(
+            dbContext,
+            mfaSecretProtector,
+            saasIdentityOptions,
+            seedTimestampUtc,
+            cancellationToken);
+    }
+
+    public async Task EnsureAdminAccessFixturesAsync(CancellationToken cancellationToken = default)
+    {
+        if (!options.Value.Enabled || !saasIdentityOptions.Value.Enabled
+            || string.IsNullOrWhiteSpace(saasIdentityOptions.Value.TenantOwnerPassword))
+        {
+            return;
+        }
+
+        var bootstrapContext = DevelopmentPilotBootstrapDbContextFactory.Create(persistenceOptions.Value);
+        await using var dbContext = bootstrapContext.DbContext;
+        var seedTimestampUtc = DateTimeOffset.UtcNow;
+        var tenant = await dbContext.Tenants
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(
+                candidate => candidate.Id == DevelopmentPilotIds.TenantId
+                    || candidate.TenantKey == options.Value.TenantKey.Trim(),
+                cancellationToken);
+
+        if (tenant is null)
+        {
+            return;
+        }
+
+        bootstrapContext.TenantContextAccessor.Set(
+            new TenantContext(
+                tenant.Id,
+                tenant.TenantKey,
+                DevelopmentSaasIdentityIds.TenantOwnerMembershipId));
+
+        await DevelopmentAdminAccessSeed.EnsureDevelopmentLoginAuthorizationAsync(
+            dbContext,
+            seedTimestampUtc,
+            cancellationToken);
+        _ = await EnsureFacilityAsync(
+            dbContext,
+            tenant.Id,
+            options.Value,
+            seedTimestampUtc,
+            cancellationToken);
+        await DevelopmentAdminAccessSeed.EnsureDevelopmentTenantOwnerFacilityMembershipAsync(
+            dbContext,
+            seedTimestampUtc,
+            cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static async Task<Tenant> EnsureTenantAsync(
         NevaxisFactOSDbContext dbContext,
         DevelopmentPilotOptions pilotOptions,
