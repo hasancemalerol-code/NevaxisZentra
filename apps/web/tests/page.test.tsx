@@ -51,7 +51,12 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
       .replaceAll("&", "&amp;");
     assert.match(markup, new RegExp(escapedLabel));
   }
-  assert.equal(navigationItems.length, 47);
+  assert.equal(navigationItems.length, 50);
+  assert.ok(
+    navigationItems.some(
+      (item) => item.label === "Fabrika Karar Merkezi" && item.href === "/fabrika-karar-merkezi",
+    ),
+  );
   assert.ok(
     navigationItems.some(
       (item) => item.label === "Fabrika Ağı" && item.href === "/fabrika-agi",

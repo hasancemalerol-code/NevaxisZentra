@@ -33,6 +33,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
+        label: "Fabrika Karar Merkezi",
+        href: "/fabrika-karar-merkezi",
+        iconKey: "gauge",
+        permissionKey: "factory-case.read",
+        subscriptionModulePath: "/operasyon/yonetim-merkezi",
+      },
+      {
         label: "Altın Demo — Üretim Kurtarma",
         href: "/golden-demo/uretim-kurtarma",
         iconKey: "gauge",
