@@ -40,16 +40,10 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
-        label: "Altın Demo — Üretim Kurtarma",
-        href: "/golden-demo/uretim-kurtarma",
-        iconKey: "gauge",
-        permissionKey: "golden-demo-p1.read",
-      },
-      {
-        label: "Altın Demo — Gümrük Dosyası",
-        href: "/golden-demo/gumruk-dosyasi",
-        iconKey: "ship",
-        permissionKey: "golden-demo-customs-file.read",
+        label: "Sunum Modu",
+        href: "/sunum-modu",
+        iconKey: "activity",
+        permissionKey: "presentation-mode.access",
       },
       {
         label: "FactOS Teams",

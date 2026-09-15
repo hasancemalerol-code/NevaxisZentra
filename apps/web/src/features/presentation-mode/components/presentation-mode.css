@@ -1,0 +1,143 @@
+.presentation-mode-return-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  color: var(--commint-accent, #0f766e);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.presentation-mode-return-link:hover {
+  text-decoration: underline;
+}
+
+.presentation-mode-status-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.presentation-mode-status-panel__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+
+.presentation-mode-status-panel__metric strong {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.presentation-mode-scenario-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.presentation-mode-scenario-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  min-height: 100%;
+}
+
+.presentation-mode-scenario-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.presentation-mode-scenario-card__outcome {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.presentation-mode-scenario-card__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.presentation-mode-scenario-card__status--neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+.presentation-mode-scenario-card__status--active {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0369a1;
+}
+
+.presentation-mode-scenario-card__status--warning {
+  background: rgba(234, 179, 8, 0.14);
+  color: #a16207;
+}
+
+.presentation-mode-scenario-card__status--success {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+}
+
+.presentation-mode-scenario-card__capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.presentation-mode-scenario-card__capability {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 0.72rem;
+  color: #334155;
+}
+
+.presentation-mode-narrative {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.presentation-mode-narrative__arrow {
+  color: #94a3b8;
+}
+
+.presentation-mode-scenario-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: auto;
+}
+
+.presentation-mode-factory-link {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}

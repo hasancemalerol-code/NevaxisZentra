@@ -1,4 +1,5 @@
 using NevaxisFactOS.Api.Facilities;
+using NevaxisFactOS.Api.PresentationMode;
 using NevaxisFactOS.Persistence.Authorization;
 using NevaxisFactOS.Persistence.GoldenDemoP1;
 using NevaxisFactOS.Persistence.GoldenDemoP3;
@@ -16,6 +17,13 @@ internal static class GoldenDemoP3EndpointHelpers
         if (facilityId is null || facilityId == Guid.Empty)
         {
             return (null, TypedResults.BadRequest(new { code = "facility-missing", message = "Tesis tanımlayıcısı zorunludur." }));
+        }
+
+        var presentationFailure = await PresentationModeEndpointHelpers.ResolvePresentationAccessFailureAsync(
+            facilityId, facilityAccessResolver, cancellationToken);
+        if (presentationFailure is not null)
+        {
+            return (null, presentationFailure);
         }
 
         var accessResult = await facilityAccessResolver.ResolveAsync(

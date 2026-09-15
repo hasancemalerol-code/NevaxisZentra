@@ -20,6 +20,7 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
 {
     internal static readonly string[] PresentationPermissionKeys =
     [
+        PresentationModePermissionKeys.Access,
         ProductionExecutionPermissionKeys.Read,
         ProductionPlanningPermissionKeys.Read,
         EdgePermissionKeys.Read,
@@ -38,8 +39,22 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
         AiTaskPermissionKeys.Assign,
         DigitalWorkforcePermissionKeys.Read,
         FactoryOrchestrationPermissionKeys.Read,
+        FactoryOrchestrationPermissionKeys.Manage,
+        FactoryOrchestrationPermissionKeys.Verify,
+        DigitalWorkforcePermissionKeys.ApprovalDecide,
         GoldenDemoP1PermissionKeys.Read,
+        GoldenDemoP1PermissionKeys.Manage,
+        GoldenDemoP1PermissionKeys.Approve,
+        GoldenDemoP1PermissionKeys.Execute,
+        GoldenDemoP1PermissionKeys.Verify,
+        GoldenDemoP2PermissionKeys.Read,
+        GoldenDemoP2PermissionKeys.Reset,
         GoldenDemoCustomsFilePermissionKeys.Read,
+        GoldenDemoCustomsFilePermissionKeys.Manage,
+        GoldenDemoCustomsFilePermissionKeys.Execute,
+        GoldenDemoCustomsFilePermissionKeys.Approve,
+        GoldenDemoCustomsFilePermissionKeys.Verify,
+        GoldenDemoCustomsFilePermissionKeys.Reset,
         OperationalRiskPermissionKeys.Read,
     ];
 

@@ -5,6 +5,7 @@ import { useTransition, useState } from "react";
 
 import "@/features/golden-demo-p1/components/golden-demo-p1-workspace.css";
 
+import { PresentationModeReturnLink } from "@/features/presentation-mode/components/presentation-mode-return-link";
 import {
   formatCustomsNumber,
   GOLDEN_DEMO_CUSTOMS_FILE_SUBTITLE,
@@ -86,6 +87,7 @@ export function GoldenDemoCustomsFileWorkspaceView({
 
   return (
     <main className="commint-page golden-demo-p1-page golden-demo-customs-page" data-testid="golden-demo-customs-file-workspace">
+      <PresentationModeReturnLink />
       <header className="golden-demo-status-bar" data-testid="golden-demo-customs-file-control">
         <div className="golden-demo-status-bar__intro">
           <p className="commint-executive__eyebrow">GÜMRÜK DOSYASI · ALTIN DEMO</p>

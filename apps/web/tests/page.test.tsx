@@ -51,11 +51,22 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
       .replaceAll("&", "&amp;");
     assert.match(markup, new RegExp(escapedLabel));
   }
-  assert.equal(navigationItems.length, 50);
+  assert.equal(navigationItems.length, 49);
   assert.ok(
     navigationItems.some(
       (item) => item.label === "Fabrika Karar Merkezi" && item.href === "/fabrika-karar-merkezi",
     ),
+  );
+  assert.ok(
+    navigationItems.some(
+      (item) =>
+        item.label === "Sunum Modu"
+        && item.href === "/sunum-modu"
+        && item.permissionKey === "presentation-mode.access",
+    ),
+  );
+  assert.ok(
+    !navigationItems.some((item) => item.label.startsWith("Altın Demo")),
   );
   assert.ok(
     navigationItems.some(

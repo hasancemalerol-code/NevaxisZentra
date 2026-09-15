@@ -24,6 +24,7 @@ public sealed class DevelopmentPilotOperatorPresentationAccessSeedTests
         Assert.Contains(IotPlcPermissionKeys.Read, keys);
         Assert.Contains(ProductionExecutionPermissionKeys.Read, keys);
         Assert.Contains(ExportPermissionKeys.Read, keys);
+        Assert.Contains(PresentationModePermissionKeys.Access, keys);
         Assert.Contains(GoldenDemoP1PermissionKeys.Read, keys);
         Assert.Contains(GoldenDemoCustomsFilePermissionKeys.Read, keys);
     }

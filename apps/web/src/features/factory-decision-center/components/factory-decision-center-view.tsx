@@ -15,6 +15,8 @@ import type {
   FactoryDecisionCaseQueueItemApi,
   FactoryDecisionCenterWorkspaceApi,
 } from "../server/factory-decision-center-api-client";
+import { PresentationModeReturnLink } from "@/features/presentation-mode/components/presentation-mode-return-link";
+
 import { factoryDecisionResetAction } from "../server/factory-decision-center-actions";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
@@ -115,6 +117,7 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
 
   return (
     <main className="commint-page" data-testid="factory-decision-center-view">
+      <PresentationModeReturnLink />
       <header className="commint-executive">
         <div className="commint-executive__intro">
           <p className="commint-executive__eyebrow">OPERASYONEL KARAR KATMANI</p>

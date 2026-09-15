@@ -23,6 +23,7 @@ import {
   type GoldenDemoAgentPresentationContext,
 } from "../domain/golden-demo-presentation-copy";
 import type { GoldenDemoP1WorkspaceApi } from "../server/golden-demo-p1-api-client";
+import { PresentationModeReturnLink } from "@/features/presentation-mode/components/presentation-mode-return-link";
 import {
   goldenDemoApprovePlanAction,
   goldenDemoCompleteInterventionAction,
@@ -140,6 +141,7 @@ export function GoldenDemoP1WorkspaceView({
 
   return (
     <main className="commint-page golden-demo-p1-page" data-testid="golden-demo-p1-workspace">
+      <PresentationModeReturnLink />
       {presentation ? (
         <GoldenDemoP2PresentationPanel presentation={presentation} eventId={eventId} />
       ) : null}

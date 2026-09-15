@@ -1,10 +1,20 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { denyUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
 import { getGoldenDemoP2PresentationStatus } from "./golden-demo-p2-api-client";
 
 async function resolveAuthorizedContext(permission = "golden-demo-p2.read") {
+  const presentation = await denyUnlessPresentationModeAccess();
+  if (presentation.status === "failure") {
+    return {
+      status: "failure" as const,
+      code: "permission-denied",
+      message: "Sunum modu erişimi reddedildi.",
+    };
+  }
+
   const authorization = await denyUnlessGranted(permission);
   if (authorization.status === "failure") {
     return {

@@ -8,8 +8,11 @@ import {
   GOLDEN_DEMO_CUSTOMS_FILE_TITLE,
 } from "@/features/golden-demo-customs-file/domain/golden-demo-customs-file-labels";
 import { readGoldenDemoCustomsFileWorkspace } from "@/features/golden-demo-customs-file/server/golden-demo-customs-file-reader";
+import { forbidUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
 
 export default async function GoldenDemoCustomsFilePage() {
+  await forbidUnlessPresentationModeAccess();
+
   const result = await readGoldenDemoCustomsFileWorkspace();
 
   if (result.status === "failure") {
