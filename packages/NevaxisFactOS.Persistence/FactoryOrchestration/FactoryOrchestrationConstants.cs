@@ -61,6 +61,7 @@ public static class FactoryOrchestrationFailureCodes
     public const string DeadlockDetected = "factory-orchestration.deadlock-detected";
     public const string OutcomeNotVerified = "factory-orchestration.outcome-not-verified";
     public const string DuplicateEvent = "factory-orchestration.duplicate-event";
+    public const string EventNotQualified = "factory-orchestration.event-not-qualified";
     public const string ConflictUnresolved = "factory-orchestration.conflict-unresolved";
 }
 

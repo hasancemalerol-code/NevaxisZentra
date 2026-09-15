@@ -402,6 +402,14 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<FactoryCaseDependency> FactoryCaseDependencies => Set<FactoryCaseDependency>();
     public DbSet<FactoryEventCorrelation> FactoryEventCorrelations => Set<FactoryEventCorrelation>();
 
+    // Factory outcome execution
+    public DbSet<FactoryOutcomeExecution.FactoryOutcomeExecutionAction> FactoryOutcomeExecutionActions =>
+        Set<FactoryOutcomeExecution.FactoryOutcomeExecutionAction>();
+    public DbSet<FactoryOutcomeExecution.FactoryOutcomeEventReceipt> FactoryOutcomeEventReceipts =>
+        Set<FactoryOutcomeExecution.FactoryOutcomeEventReceipt>();
+    public DbSet<FactoryOutcomeExecution.FactoryOutcomeLearningRecord> FactoryOutcomeLearningRecords =>
+        Set<FactoryOutcomeExecution.FactoryOutcomeLearningRecord>();
+
     // Production Manager (ULTRA-MEGA-5)
     public DbSet<FactoryStateSnapshot> FactoryStateSnapshots => Set<FactoryStateSnapshot>();
     public DbSet<FactoryPrediction> FactoryPredictions => Set<FactoryPrediction>();
@@ -2134,6 +2142,9 @@ public sealed class NevaxisFactOSDbContext : DbContext
             && d.TenantId == tenantContextAccessor.Current!.TenantId);
 
         modelBuilder.ApplyConfiguration(new FactoryEventCorrelationEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new FactoryOutcomeExecution.FactoryOutcomeExecutionActionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new FactoryOutcomeExecution.FactoryOutcomeEventReceiptEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new FactoryOutcomeExecution.FactoryOutcomeLearningRecordEntityConfiguration());
         modelBuilder.Entity<FactoryEventCorrelation>().HasQueryFilter(c =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable

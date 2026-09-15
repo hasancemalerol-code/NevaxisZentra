@@ -8,17 +8,18 @@ public static class FactoryCaseCorrelationEngine
     public static string BuildCorrelationKey(FactoryDomainEvent eventData)
     {
         var parts = new List<string> { eventData.FacilityId.ToString("N") };
+
+        if (!string.IsNullOrWhiteSpace(eventData.OrderId))
+        {
+            parts.Add($"outcome:order:{eventData.OrderId.ToLowerInvariant()}");
+            return string.Join('|', parts).ToLowerInvariant();
+        }
+
         var hasEntitySignal = false;
 
         if (!string.IsNullOrWhiteSpace(eventData.MachineId))
         {
-            parts.Add($"machine:{eventData.MachineId}");
-            hasEntitySignal = true;
-        }
-
-        if (!string.IsNullOrWhiteSpace(eventData.OrderId))
-        {
-            parts.Add($"order:{eventData.OrderId}");
+            parts.Add($"machine:{eventData.MachineId.ToLowerInvariant()}");
             hasEntitySignal = true;
         }
 
@@ -91,10 +92,26 @@ public static class FactoryCaseCorrelationEngine
         return domains.ToList();
     }
 
-    public static bool ShouldCorrelate(DigitalWorkCase existing, FactoryDomainEvent incoming) =>
-        existing.Status != DigitalWorkCaseStatuses.Closed &&
-        !existing.AdministrativelyClosed &&
-        (string.Equals(existing.CorrelationKey, BuildCorrelationKey(incoming), StringComparison.OrdinalIgnoreCase) ||
-         (!string.IsNullOrWhiteSpace(incoming.MachineId) &&
-          existing.MetadataJson.Contains(incoming.MachineId, StringComparison.OrdinalIgnoreCase)));
+    public static bool ShouldCorrelate(DigitalWorkCase existing, FactoryDomainEvent incoming)
+    {
+        if (existing.Status == DigitalWorkCaseStatuses.Closed || existing.AdministrativelyClosed)
+        {
+            return false;
+        }
+
+        var incomingKey = BuildCorrelationKey(incoming);
+        if (string.Equals(existing.CorrelationKey, incomingKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(incoming.OrderId) &&
+            existing.CorrelationKey?.Contains($"outcome:order:{incoming.OrderId}", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(incoming.MachineId) &&
+               existing.MetadataJson.Contains(incoming.MachineId, StringComparison.OrdinalIgnoreCase);
+    }
 }

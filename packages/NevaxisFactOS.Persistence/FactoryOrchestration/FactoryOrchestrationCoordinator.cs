@@ -40,8 +40,20 @@ public sealed class FactoryOrchestrationCoordinator : IFactoryOrchestrationCoord
 
         var newDependencies = new List<FactoryCaseDependency>();
 
+        var existingChildren = await dbContext.DigitalWorkCases
+            .Include(c => c.PrimaryWorker)
+            .Where(c => c.OrchestrationRootCaseId == rootCase.Id && c.Id != rootCase.Id)
+            .ToListAsync(cancellationToken);
+
         foreach (var specialist in specialistEvents)
         {
+            var workerId = DigitalWorkforceEventDispatcher.ResolveWorkerId(specialist.EventType);
+            if (existingChildren.Any(c => c.PrimaryWorkerId == workerId) ||
+                childCases.Any(c => c.PrimaryWorkerId == workerId))
+            {
+                continue;
+            }
+
             var child = await runtime.TriggerCaseAsync(
                 new TriggerWorkCaseRequest(
                     specialist.Title,
@@ -49,7 +61,7 @@ public sealed class FactoryOrchestrationCoordinator : IFactoryOrchestrationCoord
                     specialist.EventType,
                     triggerEvent.SourceClassification,
                     triggerEvent.Severity,
-                    DigitalWorkforceEventDispatcher.ResolveWorkerId(specialist.EventType),
+                    workerId,
                     triggerEvent.FacilityId,
                     specialist.MetadataJson),
                 subjectId,
