@@ -1000,6 +1000,13 @@ internal sealed class DevelopmentPilotBootstrapService(
                 facility.Id,
                 operatorIdentity.Id.ToString(),
                 cancellationToken);
+            await DevelopmentPilotAiTaskPresentationSeed.EnsurePresentationDemoTasksAsync(
+                dbContext,
+                tenant.Id,
+                facility.Id,
+                operatorIdentity.Id.ToString(),
+                DevelopmentPilotIds.PresentationDemoAiTaskSeedTimeUtc,
+                cancellationToken);
             await DevelopmentPilotSaasBillingSeed.EnsureDevelopmentBillingAsync(
                 dbContext,
                 tenant.Id,

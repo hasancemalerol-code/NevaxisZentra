@@ -38,11 +38,16 @@ public interface IGoldenDemoP1Service
 public sealed class GoldenDemoP1Service : IGoldenDemoP1Service
 {
     private readonly IGoldenDemoP1Repository repository;
+    private readonly IGoldenDemoPresentationAiTaskSyncService presentationAiTaskSyncService;
     private readonly NevaxisFactOSDbContext dbContext;
 
-    public GoldenDemoP1Service(IGoldenDemoP1Repository repository, NevaxisFactOSDbContext dbContext)
+    public GoldenDemoP1Service(
+        IGoldenDemoP1Repository repository,
+        IGoldenDemoPresentationAiTaskSyncService presentationAiTaskSyncService,
+        NevaxisFactOSDbContext dbContext)
     {
         this.repository = repository;
+        this.presentationAiTaskSyncService = presentationAiTaskSyncService;
         this.dbContext = dbContext;
     }
 
@@ -88,6 +93,16 @@ public sealed class GoldenDemoP1Service : IGoldenDemoP1Service
         plan.ApprovedAtUtc = DateTimeOffset.UtcNow;
         plan.Status = GoldenDemoPlanActionStatuses.InProgress;
         await repository.UpdatePlanAsync(plan, cancellationToken);
+
+        var productionEvent = await repository.GetEventAsync(eventId, cancellationToken);
+        if (productionEvent is not null)
+        {
+            await presentationAiTaskSyncService.SyncAfterPlanApprovedAsync(
+                productionEvent,
+                subjectId,
+                cancellationToken);
+        }
+
         return plan;
     }
 
@@ -114,6 +129,7 @@ public sealed class GoldenDemoP1Service : IGoldenDemoP1Service
         evt.Status = GoldenDemoP1EventStatuses.InterventionInProgress;
         await repository.UpdateEventAsync(evt, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await presentationAiTaskSyncService.SyncAfterPlanExecutedAsync(evt, subjectId, cancellationToken);
         return evt;
     }
 
@@ -173,6 +189,10 @@ public sealed class GoldenDemoP1Service : IGoldenDemoP1Service
 
         evt.Status = GoldenDemoP1EventStatuses.ValidationRun;
         await repository.UpdateEventAsync(evt, cancellationToken);
+        await presentationAiTaskSyncService.SyncAfterInterventionCompletedAsync(
+            evt,
+            subjectId,
+            cancellationToken);
         return evt;
     }
 
@@ -211,6 +231,11 @@ public sealed class GoldenDemoP1Service : IGoldenDemoP1Service
             ? GoldenDemoP1EventStatuses.Verified
             : GoldenDemoP1EventStatuses.ValidationRun;
         await repository.UpdateEventAsync(evt, cancellationToken);
+        await presentationAiTaskSyncService.SyncAfterOutcomeVerifiedAsync(
+            evt,
+            run,
+            subjectId,
+            cancellationToken);
         return run;
     }
 

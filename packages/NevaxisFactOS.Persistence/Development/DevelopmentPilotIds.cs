@@ -2045,4 +2045,26 @@ public static class DevelopmentPilotIds
 
     public static readonly DateTimeOffset TeamsPilotSeedTimeUtc =
         new(2026, 8, 30, 9, 0, 0, TimeSpan.Zero);
+
+    // AI Görev Merkezi presentation demo fixtures (03d8–03dd)
+    public static readonly Guid PresentationDemoAiTaskCycleDeviationId =
+        Guid.Parse("bb000001-03d8-4000-8000-0000000003d8");
+
+    public static readonly Guid PresentationDemoAiTaskMicroStopId =
+        Guid.Parse("bb000001-03d9-4000-8000-0000000003d9");
+
+    public static readonly Guid PresentationDemoAiTaskCoolingApprovalId =
+        Guid.Parse("bb000001-03da-4000-8000-0000000003da");
+
+    public static readonly Guid PresentationDemoAiTaskGainVerificationId =
+        Guid.Parse("bb000001-03db-4000-8000-0000000003db");
+
+    public static readonly Guid PresentationDemoAiTaskMoldRiskId =
+        Guid.Parse("bb000001-03dc-4000-8000-0000000003dc");
+
+    public static readonly Guid PresentationDemoAiTaskMaterialLevelId =
+        Guid.Parse("bb000001-03dd-4000-8000-0000000003dd");
+
+    public static readonly DateTimeOffset PresentationDemoAiTaskSeedTimeUtc =
+        new(2026, 9, 15, 6, 0, 0, TimeSpan.Zero);
 }

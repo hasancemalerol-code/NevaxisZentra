@@ -22,11 +22,16 @@ public sealed class GoldenDemoP2Service : IGoldenDemoP2Service
 {
     private readonly IGoldenDemoP1Repository p1Repository;
     private readonly IGoldenDemoP2Repository p2Repository;
+    private readonly IGoldenDemoPresentationAiTaskSyncService presentationAiTaskSyncService;
 
-    public GoldenDemoP2Service(IGoldenDemoP1Repository p1Repository, IGoldenDemoP2Repository p2Repository)
+    public GoldenDemoP2Service(
+        IGoldenDemoP1Repository p1Repository,
+        IGoldenDemoP2Repository p2Repository,
+        IGoldenDemoPresentationAiTaskSyncService presentationAiTaskSyncService)
     {
         this.p1Repository = p1Repository;
         this.p2Repository = p2Repository;
+        this.presentationAiTaskSyncService = presentationAiTaskSyncService;
     }
 
     public async Task<GoldenDemoResetResult> ResetPilotEventAsync(
@@ -49,6 +54,10 @@ public sealed class GoldenDemoP2Service : IGoldenDemoP2Service
 
         var previousStatus = evt.Status;
         await p2Repository.ResetPilotEventAsync(productionEventId, cancellationToken);
+        await presentationAiTaskSyncService.ResetLinkedPresentationTasksAsync(
+            evt,
+            subjectId,
+            cancellationToken);
         return new GoldenDemoResetResult(
             productionEventId,
             evt.MachineCode,
