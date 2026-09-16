@@ -26,6 +26,7 @@ export type DigitalWorkerApiSummary = Readonly<{
   lastActivityAt: string | null;
   aiCostToday: number;
   permissionStatus: string;
+  healthState: string | null;
   concurrencyToken: number;
 }>;
 
@@ -39,6 +40,10 @@ export type DigitalWorkforceControlCenterSnapshot = Readonly<{
   verificationRate: number;
   totalAiCostToday: number;
   totalAiCostMonth: number;
+  queuedExecutions: number;
+  runningExecutions: number;
+  failedExecutions: number;
+  blockedExecutions: number;
 }>;
 
 export type DigitalWorkCaseApiSummary = Readonly<{
