@@ -47,3 +47,60 @@ export async function listIntegrationConnectors(
   }
   return (await response.json()) as IntegrationConnectorSummary[];
 }
+
+export type FactoryConnectorOperationsSnapshot = Readonly<{
+  connectorId: string;
+  name: string;
+  connectorKind: string;
+  healthState: string;
+  healthSummary: string | null;
+  lastSuccessfulSyncAtUtc: string | null;
+  lastEventReceivedAtUtc: string | null;
+  processedToday: number;
+  quarantinedToday: number;
+  failedToday: number;
+  checkpointSummary: string | null;
+  lastError: string | null;
+}>;
+
+export type FactoryLiveEventMonitorItem = Readonly<{
+  canonicalEventId: string;
+  inboundEventId: string | null;
+  sourceSystem: string;
+  eventType: string;
+  machineId: string | null;
+  orderId: string | null;
+  occurredAtUtc: string;
+  receivedAtUtc: string;
+  processingState: string;
+  routedCorrelationKey: string | null;
+  routedCaseId: string | null;
+}>;
+
+export async function getConnectorOperations(
+  context: ProductionOrderRequestContext,
+  connectorId: string,
+): Promise<FactoryConnectorOperationsSnapshot> {
+  const response = await fetch(
+    buildUrl(context, `/api/integration/event-spine/connectors/${connectorId}/operations`),
+    { headers: context.requestHeaders, cache: "no-store" },
+  );
+  if (!response.ok) {
+    throw new Error("Bağlantı operasyon verisi yüklenemedi.");
+  }
+  return (await response.json()) as FactoryConnectorOperationsSnapshot;
+}
+
+export async function listFactoryLiveEvents(
+  context: ProductionOrderRequestContext,
+  limit = 50,
+): Promise<FactoryLiveEventMonitorItem[]> {
+  const response = await fetch(
+    buildUrl(context, "/api/integration/event-spine/events", { limit: String(limit) }),
+    { headers: context.requestHeaders, cache: "no-store" },
+  );
+  if (!response.ok) {
+    throw new Error("Canlı olay listesi yüklenemedi.");
+  }
+  return (await response.json()) as FactoryLiveEventMonitorItem[];
+}

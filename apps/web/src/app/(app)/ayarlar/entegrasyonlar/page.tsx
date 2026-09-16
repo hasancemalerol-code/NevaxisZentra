@@ -24,6 +24,10 @@ export default async function EntegrasyonlarPage() {
       <header className="production-execution-header">
         <p>AYARLAR</p>
         <h1>Entegrasyonlar</h1>
+        <p>
+          <Link href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</Link>
+          {" — canlı olay akışı, sağlık ve karantina görünümü"}
+        </p>
       </header>
 
       <section className="state-panel">
