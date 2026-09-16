@@ -17,21 +17,45 @@ public sealed class RuntimeProcess : IDisposable
         StreamWriter? stdoutWriter,
         StreamWriter? stderrWriter,
         bool isOwned,
-        int? processId)
+        int? processId,
+        string name)
     {
         _process = process;
         _stdoutWriter = stdoutWriter;
         _stderrWriter = stderrWriter;
         IsOwned = isOwned;
         ProcessId = processId ?? process?.Id;
+        Name = name;
     }
 
     public int? ProcessId { get; }
 
     public bool IsOwned { get; }
 
-    public static RuntimeProcess AttachExisting(int processId) =>
-        new(null, null, null, isOwned: false, processId);
+    public string Name { get; }
+
+    public bool HasExited => _process?.HasExited ?? !IsProcessAlive(ProcessId);
+
+    private static bool IsProcessAlive(int? processId)
+    {
+        if (processId is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            var process = Process.GetProcessById(processId.Value);
+            return !process.HasExited;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static RuntimeProcess AttachExisting(int processId, string name = "attached") =>
+        new(null, null, null, isOwned: false, processId, name);
 
     public static RuntimeProcess StartHidden(
         string fileName,
@@ -39,7 +63,8 @@ public sealed class RuntimeProcess : IDisposable
         string workingDirectory,
         IReadOnlyDictionary<string, string>? environment,
         string stdoutLogFilePath,
-        string? stderrLogFilePath = null)
+        string? stderrLogFilePath = null,
+        string? processName = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(stdoutLogFilePath)!);
         var stdoutWriter = CreateLogWriter(stdoutLogFilePath);
@@ -119,7 +144,13 @@ public sealed class RuntimeProcess : IDisposable
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
 
-        return new RuntimeProcess(process, stdoutWriter, stderrWriter, isOwned: true, process?.Id);
+        return new RuntimeProcess(
+            process,
+            stdoutWriter,
+            stderrWriter,
+            isOwned: true,
+            process?.Id,
+            processName ?? Path.GetFileNameWithoutExtension(fileName));
     }
 
     private static StreamWriter CreateLogWriter(string logFilePath) =>

@@ -4,8 +4,8 @@
         Title="FactOS"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Width="560"
-        Height="420"
+        Width="600"
+        Height="480"
         Background="{StaticResource BrandBackgroundBrush}">
     <Border Padding="36">
         <StackPanel>
@@ -19,23 +19,23 @@
                        Foreground="{StaticResource BrandMutedBrush}"
                        HorizontalAlignment="Center"
                        Margin="0,6,0,0" />
-            <TextBlock Text="FactOS başlatılamadı."
+            <TextBlock x:Name="SummaryText"
+                       Text="FactOS başlatılamadı."
                        FontSize="20"
                        FontWeight="SemiBold"
                        Foreground="{StaticResource BrandForegroundBrush}"
                        HorizontalAlignment="Center"
-                       Margin="0,24,0,12"
+                       Margin="0,24,0,8"
                        TextWrapping="Wrap"
                        TextAlignment="Center" />
-            <TextBlock x:Name="SummaryText"
-                       Text="Yerel çalışma zamanı hazırlanırken bir sorun oluştu."
-                       FontSize="14"
+            <TextBlock x:Name="ErrorCodeText"
+                       FontFamily="Consolas"
+                       FontSize="12"
                        Foreground="{StaticResource BrandMutedBrush}"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"
-                       Margin="0,0,0,16" />
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,12" />
             <Expander Header="Teknik Ayrıntılar"
-                      Margin="0,0,0,20">
+                      Margin="0,0,0,12">
                 <ScrollViewer MaxHeight="120">
                     <TextBlock x:Name="DiagnosticsText"
                                FontFamily="Consolas"
@@ -44,6 +44,11 @@
                                TextWrapping="Wrap" />
                 </ScrollViewer>
             </Expander>
+            <TextBlock x:Name="DiagnosticsBundleText"
+                       FontSize="12"
+                       Foreground="{StaticResource BrandMutedBrush}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,12" />
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         Margin="0,8,0,0">
@@ -55,6 +60,11 @@
                         Foreground="White"
                         BorderThickness="0"
                         Click="RetryButton_Click" />
+                <Button Content="Tanılama Paketi"
+                        Width="150"
+                        Height="36"
+                        Margin="0,0,12,0"
+                        Click="DiagnosticsButton_Click" />
                 <Button Content="Kapat"
                         Width="120"
                         Height="36"

@@ -10,11 +10,17 @@ public static class DesktopLifecycleLogger
     private static readonly object Sync = new();
     private static string? _primaryLogPath;
     private static string? _artifactLogPath;
+    private static string? _programDataLogPath;
+    private static string? _startupLogPath;
 
     public static void Initialize()
     {
         lock (Sync)
         {
+            PackagedRuntimePaths.EnsureCustomerDirectories();
+            var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+            _programDataLogPath = Path.Combine(PackagedRuntimePaths.LogsDirectory, $"desktop-{timestamp}.log");
+            _startupLogPath = Path.Combine(PackagedRuntimePaths.LogsDirectory, "startup.log");
             _primaryLogPath = RuntimePaths.CreateLogFilePath("desktop-lifecycle");
             try
             {
@@ -29,7 +35,6 @@ public static class DesktopLifecycleLogger
                         "runtime",
                         "logs");
                     Directory.CreateDirectory(artifactLogDir);
-                    var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
                     _artifactLogPath = Path.Combine(artifactLogDir, $"desktop-lifecycle-{timestamp}.log");
                 }
             }
@@ -51,8 +56,13 @@ public static class DesktopLifecycleLogger
         {
             AppendLine(_primaryLogPath, line);
             AppendLine(_artifactLogPath, line);
+            AppendLine(_programDataLogPath, line);
+            AppendLine(_startupLogPath, line);
         }
     }
+
+    public static void WriteSession(string sessionId, string message) =>
+        Write($"session={sessionId} {message}");
 
     public static void WriteException(string context, Exception exception)
     {

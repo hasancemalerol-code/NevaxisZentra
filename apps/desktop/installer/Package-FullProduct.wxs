@@ -35,7 +35,9 @@
     </Feature>
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Nevaxis FactOS" />
+      <Directory Id="INSTALLFOLDER" Name="Nevaxis FactOS">
+        <Directory Id="DesktopAppFolder" Name="desktop" />
+      </Directory>
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
@@ -51,7 +53,7 @@
       </Files>
     </ComponentGroup>
 
-    <Component Id="MainExecutableComponent" Directory="INSTALLFOLDER" Guid="*">
+    <Component Id="MainExecutableComponent" Directory="DesktopAppFolder" Guid="*">
       <File Id="NevaxisFactOSDesktopExe"
             Source="$(var.StagingRoot)\desktop\NevaxisFactOS.exe"
             KeyPath="yes">
@@ -59,12 +61,12 @@
                   Directory="ApplicationProgramsFolder"
                   Name="Nevaxis FactOS"
                   Description="Nevaxis FactOS — Factory Intelligence and Action OS"
-                  WorkingDirectory="INSTALLFOLDER" />
+                  WorkingDirectory="DesktopAppFolder" />
         <Shortcut Id="DesktopShortcut"
                   Directory="DesktopFolder"
                   Name="Nevaxis FactOS"
                   Description="Nevaxis FactOS — Factory Intelligence and Action OS"
-                  WorkingDirectory="INSTALLFOLDER" />
+                  WorkingDirectory="DesktopAppFolder" />
       </File>
     </Component>
 

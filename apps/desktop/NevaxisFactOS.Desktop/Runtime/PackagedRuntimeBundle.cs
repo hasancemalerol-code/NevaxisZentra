@@ -39,11 +39,19 @@ public sealed class PackagedRuntimeBundle
 
     public string ToolsDirectory => Path.Combine(BundleRoot, "tools");
 
-    public static string GetPersistentDataRoot() =>
-        Path.Combine(
+    public static string GetPersistentDataRoot()
+    {
+        var testRoot = Environment.GetEnvironmentVariable("FACTOS_TEST_DATA_ROOT");
+        if (!string.IsNullOrWhiteSpace(testRoot))
+        {
+            return Path.GetFullPath(testRoot);
+        }
+
+        return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "Nevaxis",
             "FactOS");
+    }
 
     public string ManifestPath => Path.Combine(ManifestsDirectory, "runtime-manifest.json");
 
@@ -70,22 +78,56 @@ public sealed class PackagedRuntimeBundle
 
     public static PackagedRuntimeBundle? TryResolveFromDesktopExecutable(string? desktopExecutableDirectory = null)
     {
-        var desktopDirectory = NormalizeDirectoryPath(
+        var executableDirectory = NormalizeDirectoryPath(
             desktopExecutableDirectory ?? ResolveDesktopExecutableDirectory());
 
-        var bundleRoot = Directory.GetParent(desktopDirectory)?.FullName;
-        if (string.IsNullOrWhiteSpace(bundleRoot))
+        foreach (var candidate in EnumerateBundleCandidates(executableDirectory))
         {
-            return null;
+            if (File.Exists(Path.Combine(candidate.BundleRoot, "manifests", "runtime-manifest.json")))
+            {
+                return Create(candidate.BundleRoot, candidate.DesktopDirectory);
+            }
         }
 
-        var manifestPath = Path.Combine(bundleRoot, "manifests", "runtime-manifest.json");
-        if (!File.Exists(manifestPath))
+        return null;
+    }
+
+    private static IEnumerable<(string BundleRoot, string DesktopDirectory)> EnumerateBundleCandidates(
+        string executableDirectory)
+    {
+        yield return ResolveCanonicalDesktopLayout(executableDirectory);
+
+        if (File.Exists(Path.Combine(executableDirectory, "manifests", "runtime-manifest.json")))
         {
-            return null;
+            var desktopDirectory = Directory.Exists(Path.Combine(executableDirectory, "desktop"))
+                ? Path.Combine(executableDirectory, "desktop")
+                : executableDirectory;
+            yield return (executableDirectory, desktopDirectory);
         }
 
-        return Create(bundleRoot, desktopDirectory);
+        var parentDirectory = Directory.GetParent(executableDirectory)?.FullName;
+        if (!string.IsNullOrWhiteSpace(parentDirectory))
+        {
+            yield return ResolveCanonicalDesktopLayout(parentDirectory);
+        }
+    }
+
+    private static (string BundleRoot, string DesktopDirectory) ResolveCanonicalDesktopLayout(string directory)
+    {
+        var desktopDirectoryName = Path.GetFileName(directory);
+        if (string.Equals(desktopDirectoryName, "desktop", StringComparison.OrdinalIgnoreCase))
+        {
+            var bundleRoot = Directory.GetParent(directory)?.FullName ?? directory;
+            return (bundleRoot, directory);
+        }
+
+        var nestedDesktopDirectory = Path.Combine(directory, "desktop");
+        if (Directory.Exists(nestedDesktopDirectory))
+        {
+            return (directory, nestedDesktopDirectory);
+        }
+
+        return (Directory.GetParent(directory)?.FullName ?? directory, directory);
     }
 
     public static string ResolveDesktopExecutableDirectory()

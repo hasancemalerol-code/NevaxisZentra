@@ -94,15 +94,23 @@ public partial class App : Application, IAsyncDisposable
                 DesktopLifecycleLogger.WriteException("startup-failed", ex);
                 startupWindow.Hide();
 
+                var errorCode = FactOsStartupErrorCodes.MapException(ex);
                 var diagnostics = new List<string>(_runtimeSupervisor?.Diagnostics ?? [])
                 {
                     ex.GetType().Name,
                     ex.Message,
                 };
 
+                if (ex is StartupPreflightException preflight)
+                {
+                    diagnostics.AddRange(preflight.Checks);
+                }
+
                 var failureWindow = new StartupFailureWindow(
-                    "NevaxisFactOS başlatılamadı.",
-                    diagnostics);
+                    FactOsStartupErrorCodes.ToCustomerMessage(errorCode),
+                    diagnostics,
+                    errorCode,
+                    _runtimeSupervisor?.Session);
                 var retryRequested = false;
                 failureWindow.RetryRequested += (_, _) => retryRequested = true;
                 failureWindow.ShowDialog();
@@ -125,9 +133,11 @@ public partial class App : Application, IAsyncDisposable
     {
         try
         {
+            var errorCode = FactOsStartupErrorCodes.MapException(exception);
             var failureWindow = new StartupFailureWindow(
-                summary,
-                [exception.GetType().Name, exception.Message]);
+                FactOsStartupErrorCodes.ToCustomerMessage(errorCode),
+                [exception.GetType().Name, exception.Message],
+                errorCode);
             failureWindow.ShowDialog();
         }
         catch (Exception dialogException)

@@ -29,16 +29,36 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
     private string? _runtimeRoot;
     private PackagedRuntimeBundle? _packagedBundle;
     private EmbeddedPostgreSqlRuntime? _embeddedPostgres;
+    private RuntimeWatchdog? _watchdog;
+    private StartupSession? _session;
 
     public event Action<string>? StatusChanged;
 
     public IReadOnlyList<string> Diagnostics => _diagnostics;
 
+    public StartupSession? Session => _session;
+
+    public string? LastErrorCode { get; private set; }
+
     public async Task<RuntimeStartupResult> StartAsync(
         Configuration.DesktopRuntimeOptions options,
         CancellationToken cancellationToken = default)
     {
+        _session = new StartupSession();
+        _diagnostics.Add($"startup-session={_session.SessionId}");
+        _session.SetStage("desktop-start");
+
         _packagedBundle = PackagedRuntimeBundle.TryResolveFromDesktopExecutable();
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is null)
+        {
+            LastErrorCode = FactOsStartupErrorCodes.BundleMissing;
+            throw new StartupPreflightException(
+                LastErrorCode,
+                FactOsStartupErrorCodes.ToCustomerMessage(LastErrorCode),
+                ["FAIL bundle=runtime-manifest.json not found"]);
+        }
+
+        StartupPreflightValidator.Validate(_session, _packagedBundle);
         _runtimeRoot = _packagedBundle?.BundleRoot ?? RuntimePaths.ResolveRepositoryRoot();
         _diagnostics.Add($"mode={options.Mode}");
         _diagnostics.Add($"desktop-directory={PackagedRuntimeBundle.ResolveDesktopExecutableDirectory()}");
@@ -59,14 +79,18 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         if (options.ManageInfrastructure)
         {
+            _session?.SetStage("database-start");
             ReportStatus("Veritabanı kontrol ediliyor");
             await EnsurePostgresInfrastructureAsync(options, cancellationToken).ConfigureAwait(false);
+            _session?.SetStage("database-health");
         }
 
         if (options.ManageApi)
         {
+            _session?.SetStage("api-start");
             ReportStatus("API hazırlanıyor");
             await EnsureApiReadyAsync(options, cancellationToken).ConfigureAwait(false);
+            _session?.SetStage("api-health");
         }
         else
         {
@@ -82,11 +106,13 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         if (options.ManageWeb)
         {
+            _session?.SetStage("web-start");
             ReportStatus("Uygulama hazırlanıyor");
             var webOptions = options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null
                 ? await ResolvePackagedWebOptionsAsync(options, cancellationToken).ConfigureAwait(false)
                 : options;
             await EnsureWebReadyAsync(webOptions, cancellationToken).ConfigureAwait(false);
+            _session?.SetStage("web-health");
             options = webOptions;
         }
         else
@@ -101,6 +127,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             }
         }
 
+        _session?.SetStage("ready");
+        _watchdog = new RuntimeWatchdog(_ownedProcesses, _diagnostics);
         ReportStatus("Uygulama hazırlanıyor");
 
         return new RuntimeStartupResult
@@ -179,6 +207,9 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _watchdog?.Dispose();
+        _watchdog = null;
+
         foreach (var process in _ownedProcesses)
         {
             process.Dispose();
