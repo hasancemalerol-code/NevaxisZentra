@@ -2477,6 +2477,7 @@ internal sealed class DevelopmentPilotBootstrapService(
         }
 
         var exists = await dbContext.TenantRolePermissions
+            .AsNoTracking()
             .IgnoreQueryFilters()
             .AnyAsync(
                 a =>
@@ -2486,6 +2487,16 @@ internal sealed class DevelopmentPilotBootstrapService(
                 cancellationToken);
 
         if (exists)
+        {
+            return;
+        }
+
+        var tracked = dbContext.TenantRolePermissions.Local.FirstOrDefault(
+            assignment =>
+                assignment.TenantId == tenantId
+                && assignment.TenantRoleId == tenantRoleId
+                && assignment.PermissionDefinitionId == permissionDefinition.Id);
+        if (tracked is not null)
         {
             return;
         }

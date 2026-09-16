@@ -220,19 +220,24 @@ async function signIn(ss, evalSnap, ownerPassword, mfaSecret) {
   await new Promise((r) => setTimeout(r, 2000));
 }
 
-async function seedMixLine(ss) {
-  const result = await ss("Runtime.evaluate", {
-    awaitPromise: true,
-    returnByValue: true,
-    expression: `(async () => {
-      const res = await fetch(${JSON.stringify(`${API}/api/mixed-production/dev/seed-mix-line-01?facilityId=${FACILITY_ID}`)}, {
-        method: "POST", credentials: "include", headers: { Accept: "application/json" }
-      });
-      const body = await res.json().catch(() => ({}));
-      return { status: res.status, body };
-    })()`,
-  });
-  return result.result?.value;
+async function seedMixLineFromNode() {
+  const devIssuer = process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER ?? "crevafactos-dev";
+  const devSubject = process.env.NEVAXIS_FACTOS_DEV_AUTH_SUBJECT ?? "production-pilot-operator";
+  const devTenantKey = process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY ?? "dev-pilot-tenant";
+  const response = await fetch(
+    `${API}/api/mixed-production/dev/seed-mix-line-01?facilityId=${FACILITY_ID}`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "X-crevafactos-dev-Issuer": devIssuer,
+        "X-crevafactos-dev-Subject": devSubject,
+        "X-NevaxisFactOS-Tenant": devTenantKey,
+      },
+    },
+  );
+  const body = await response.json().catch(() => ({}));
+  return { status: response.status, body };
 }
 
 async function captureRoute(ss, evalSnap, route, viewport, lineDetailPath) {
@@ -253,7 +258,9 @@ async function captureRoute(ss, evalSnap, route, viewport, lineDetailPath) {
       const horizontalOverflow = document.documentElement.scrollWidth > document.documentElement.clientWidth + 2;
       const onLogin = location.pathname.includes("/giris") || location.pathname.includes("/mfa-dogrula");
       const hasShell = Boolean(document.querySelector(".app-shell, .fact-workspace, main"));
-      const testId = ${JSON.stringify(route.testId)};
+      const testId = ${JSON.stringify(path)}.includes("/hatlar/") && ${JSON.stringify(path)} !== "/uretim/hatlar"
+        ? "mixed-production-line-detail-view"
+        : ${JSON.stringify(route.testId)};
       const hasExpected = testId ? Boolean(document.querySelector('[data-testid="' + testId + '"]')) : hasShell;
       const bodyText = document.body?.innerText ?? "";
       return {
@@ -298,18 +305,10 @@ async function main() {
   const report = [];
   let lineDetailPath = null;
 
-  {
-    const { ss, evalSnap, dispose } = await createCdpSession(VIEWPORTS[0]);
-    try {
-      await signIn(ss, evalSnap, ownerPassword, mfaSecret);
-      const seed = await seedMixLine(ss);
-      if (seed?.status === 200 && seed.body?.lineId) {
-        lineDetailPath = `/uretim/hatlar/${seed.body.lineId}`;
-        console.log(`✓ MIX-LINE-01 seeded → ${lineDetailPath}`);
-      }
-    } finally {
-      dispose();
-    }
+  const seed = await seedMixLineFromNode();
+  if (seed?.status === 200 && seed.body?.lineId) {
+    lineDetailPath = `/uretim/hatlar/${seed.body.lineId}`;
+    console.log(`✓ MIX-LINE-01 seeded → ${lineDetailPath}`);
   }
 
   for (const viewport of VIEWPORTS) {
@@ -330,11 +329,15 @@ async function main() {
 
   writeFileSync(join(OUT_DIR, "visual-qa-report.json"), JSON.stringify(report, null, 2));
   const coreCaptures = report.filter((e) => e.name !== "mixed-production-line-detail");
-  const failures = report.filter((e) => !e.pass);
+  const lineDetailCaptures = report.filter((e) => e.name === "mixed-production-line-detail");
+  const coreFailures = coreCaptures.filter((e) => !e.pass);
+  const lineDetailFailures = lineDetailCaptures.filter((e) => !e.pass);
   console.log(`\nCore captures: ${coreCaptures.length} (expected 33)`);
-  console.log(`Supplemental line-detail: ${report.length - coreCaptures.length}`);
+  console.log(`Supplemental line-detail: ${lineDetailCaptures.length} (expected 3)`);
   if (coreCaptures.length !== 33) fail(`Expected 33 core screenshots, got ${coreCaptures.length}`);
-  if (failures.length > 0) fail(`${failures.length} failed — see visual-qa-report.json`);
+  if (lineDetailCaptures.length !== 3) fail(`Expected 3 line-detail screenshots, got ${lineDetailCaptures.length}`);
+  if (coreFailures.length > 0) fail(`${coreFailures.length} core captures failed — see visual-qa-report.json`);
+  if (lineDetailFailures.length > 0) fail(`${lineDetailFailures.length} line-detail captures failed — see visual-qa-report.json`);
   console.log(`Output: ${OUT_DIR}`);
   console.log("Visual QA capture PASS");
 }

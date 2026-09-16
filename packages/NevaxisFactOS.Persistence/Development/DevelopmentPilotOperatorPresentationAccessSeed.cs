@@ -4,10 +4,13 @@ using NevaxisFactOS.Persistence.Authorization;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.Energy;
 using NevaxisFactOS.Persistence.Export;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.Facilities;
 using NevaxisFactOS.Persistence.Identity;
+using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.IotPlc;
 using NevaxisFactOS.Persistence.OperationalRisk;
+using NevaxisFactOS.Persistence.ShiftWorkforce;
 using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.Development;
@@ -56,6 +59,14 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
         GoldenDemoCustomsFilePermissionKeys.Verify,
         GoldenDemoCustomsFilePermissionKeys.Reset,
         OperationalRiskPermissionKeys.Read,
+        FactoryIntelligencePermissionKeys.Read,
+        MixedProductionPermissionKeys.Read,
+        MixedProductionPermissionKeys.Manage,
+        MixedProductionPermissionKeys.Operate,
+        ShiftWorkforcePermissionKeys.Read,
+        ShiftWorkforcePermissionKeys.Manage,
+        ShiftOperationsPermissionKeys.Read,
+        ShiftOperationsPermissionKeys.Manage,
     ];
 
     internal static async Task EnsureOperatorPresentationAccessAsync(

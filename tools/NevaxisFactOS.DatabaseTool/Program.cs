@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.DataProtection;
 using NevaxisFactOS.Persistence;
 using NevaxisFactOS.DatabaseTool;
 using NevaxisFactOS.Persistence.Development;
+using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Net.Sockets;
 
 var operation = args.FirstOrDefault()?.ToLowerInvariant() ?? "verify";
-var options = operation is "state" or "development-pilot-paid-access-ensure"
+var options = operation is "state" or "development-pilot-paid-access-ensure" or "development-pilot-operator-access-ensure" or "development-pilot-bootstrap" or "development-pilot-migration-prerequisites"
     ? DatabaseConfiguration.LoadMigrations()
     : DatabaseConfiguration.LoadRuntime();
 
@@ -151,6 +154,60 @@ try
             $"Runtime-role user={runtimeReader.GetString(0)} tenant setting={runtimeReader.GetString(1)} visible current subscriptions={runtimeReader.GetInt64(2)}.");
         await runtimeReader.CloseAsync();
         await runtimeTransaction.CommitAsync();
+        return 0;
+    }
+
+    if (operation == "development-pilot-migration-prerequisites")
+    {
+        await DevelopmentPilotMigrationPrerequisiteSeeder.EnsureAsync();
+        return 0;
+    }
+
+    if (operation == "development-pilot-operator-access-ensure")
+    {
+        await DevelopmentPilotMixedProductionPermissionSeeder.EnsureAsync();
+        var persistenceOptions = DatabaseConfiguration.LoadMigrations();
+        var pilotOptions = new DevelopmentPilotOptions { Enabled = true };
+        var bootstrapContext = DevelopmentPilotBootstrapDbContextFactory.Create(persistenceOptions);
+        await using (bootstrapContext.DbContext)
+        {
+            bootstrapContext.TenantContextAccessor.Set(
+                new TenantContext(
+                    DevelopmentPilotIds.TenantId,
+                    pilotOptions.TenantKey.Trim(),
+                    DevelopmentPilotIds.TenantMembershipId));
+            await DevelopmentPilotSalesDemoAccessSeed.EnsureSalesDemoFullAccessAsync(
+                bootstrapContext.DbContext,
+                DateTimeOffset.UtcNow,
+                CancellationToken.None);
+        }
+
+        await DevelopmentPilotAccessEnsureService.EnsurePaidAccessAsync(
+            Options.Create(persistenceOptions),
+            Options.Create(pilotOptions));
+        Console.WriteLine("Development pilot operator presentation access ensured.");
+        return 0;
+    }
+
+    if (operation == "development-pilot-bootstrap")
+    {
+        var persistenceOptions = DatabaseConfiguration.LoadMigrations();
+        var saasIdentityOptions = new DevelopmentSaasIdentityOptions
+        {
+            Enabled = true,
+            TenantOwnerPassword = Environment.GetEnvironmentVariable("DevelopmentSaasIdentity__TenantOwnerPassword") ?? string.Empty,
+            MfaSharedSecret = Environment.GetEnvironmentVariable("DevelopmentSaasIdentity__MfaSharedSecret") ?? string.Empty,
+        };
+
+        var bootstrapService = new DevelopmentPilotBootstrapService(
+            Options.Create(new DevelopmentPilotOptions { Enabled = true }),
+            Options.Create(persistenceOptions),
+            Options.Create(saasIdentityOptions),
+            new SaasIdentityMfaSecretProtector(DataProtectionProvider.Create("NevaxisFactOS.DatabaseTool")));
+
+        var result = await bootstrapService.BootstrapAsync();
+        Console.WriteLine(
+            $"Development pilot bootstrap executed={result.Executed} tenant={result.TenantId:D} facility={result.FacilityId:D} plans={result.ProductionPlanCount}.");
         return 0;
     }
 

@@ -36,24 +36,31 @@ export async function readShiftOperationsWorkspace() {
   }
 
   const current = await fetchCurrentShift(resolved.context);
-  if (current.status === "failure") {
+  if (
+    current.status === "failure"
+    && current.code !== "shift-not-found"
+    && current.code !== "http-404"
+  ) {
     return { status: "failure" as const, message: current.message, code: current.code };
   }
 
-  const [history, openItems, metrics, preview] = await Promise.all([
-    fetchShiftHistory(resolved.context),
-    fetchShiftOpenItems(resolved.context, current.value.id),
-    fetchShiftMetrics(resolved.context, current.value.id),
-    fetchShiftClosingPreview(resolved.context, current.value.id),
-  ]);
+  const currentShift = current.status === "success" ? current.value : null;
+  const [history, openItems, metrics, preview] = currentShift
+    ? await Promise.all([
+        fetchShiftHistory(resolved.context),
+        fetchShiftOpenItems(resolved.context, currentShift.id),
+        fetchShiftMetrics(resolved.context, currentShift.id),
+        fetchShiftClosingPreview(resolved.context, currentShift.id),
+      ])
+    : [await fetchShiftHistory(resolved.context), null, null, null];
 
   return {
     status: "success" as const,
-    currentShift: current.value,
+    currentShift,
     history: history.status === "success" ? history.value.items : [],
-    openItems: openItems.status === "success" ? openItems.value.items : [],
-    metrics: metrics.status === "success" ? metrics.value : null,
-    preview: preview.status === "success" ? preview.value : null,
+    openItems: openItems?.status === "success" ? openItems.value.items : [],
+    metrics: metrics?.status === "success" ? metrics.value : null,
+    preview: preview?.status === "success" ? preview.value : null,
   };
 }
 

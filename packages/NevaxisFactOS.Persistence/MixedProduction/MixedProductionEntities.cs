@@ -1,6 +1,6 @@
 namespace NevaxisFactOS.Persistence.MixedProduction;
 
-public sealed class ManufacturingArea
+public sealed class ManufacturingArea : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -12,7 +12,7 @@ public sealed class ManufacturingArea
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class ProductionLine
+public sealed class ProductionLine : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -28,7 +28,7 @@ public sealed class ProductionLine
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class ProductionStation
+public sealed class ProductionStation : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -43,7 +43,7 @@ public sealed class ProductionStation
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class ManufacturingResource
+public sealed class ManufacturingResource : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -59,7 +59,7 @@ public sealed class ManufacturingResource
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class ProductRouting
+public sealed class ProductRouting : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -73,7 +73,7 @@ public sealed class ProductRouting
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class RoutingOperation
+public sealed class RoutingOperation : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -87,7 +87,7 @@ public sealed class RoutingOperation
     public DateTimeOffset CreatedAtUtc { get; set; }
 }
 
-public sealed class BufferResourceState
+public sealed class BufferResourceState : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -100,7 +100,7 @@ public sealed class BufferResourceState
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class CanonicalProductionEvent
+public sealed class CanonicalProductionEvent : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -130,7 +130,7 @@ public sealed class CanonicalProductionEvent
     public DateTimeOffset ReceivedAtUtc { get; set; }
 }
 
-public sealed class OperatorStationSession
+public sealed class OperatorStationSession : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -151,7 +151,7 @@ public sealed class OperatorStationSession
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class DigitalWorkInstruction
+public sealed class DigitalWorkInstruction : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
@@ -170,7 +170,7 @@ public sealed class DigitalWorkInstruction
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
-public sealed class ConnectorResourceMapping
+public sealed class ConnectorResourceMapping : IMixedProductionTenantFacilityEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }

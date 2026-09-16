@@ -43,6 +43,7 @@ internal static class DevelopmentPilotSalesDemoAccessSeed
     {
         await EnsureSalesDemoModuleEntitlementsAsync(dbContext, seedTimestampUtc, cancellationToken);
         await EnsureTenantOwnerSalesDemoPermissionsAsync(dbContext, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task EnsureSalesDemoModuleEntitlementsAsync(

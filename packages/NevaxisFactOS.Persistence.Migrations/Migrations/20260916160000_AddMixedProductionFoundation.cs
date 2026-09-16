@@ -165,19 +165,19 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
 
             migrationBuilder.Sql(
                 """
-                INSERT INTO permission_definitions
-                    (id, permission_key, name, description, display_name, module, action,
-                     sensitivity_classification, requires_recent_auth, supported_record_scopes, status, created_at_utc)
+                INSERT INTO permission_definitions (
+                    id, key, normalized_key, description, turkish_label, module_resource_code, action_code,
+                    sensitivity_classification, requires_recent_auth, supported_record_scopes, status, created_at_utc)
                 VALUES
-                    ('10000000-0000-4000-8000-000000000f20', 'mixed-production.read', 'mixed-production.read',
+                    ('10000000-0000-4000-8000-000000000f84', 'mixed-production.read', 'mixed-production.read',
                      'Read mixed production lines, timeline, and connected operations.',
                      'Karma üretim okuma', 'mixed-production', 'read',
                      'standard', FALSE, 'facility', 'Active', TIMESTAMPTZ '2026-09-16 16:00:00+00'),
-                    ('10000000-0000-4000-8000-000000000f21', 'mixed-production.manage', 'mixed-production.manage',
+                    ('10000000-0000-4000-8000-000000000f85', 'mixed-production.manage', 'mixed-production.manage',
                      'Manage mixed production routing, resources, and configuration.',
                      'Karma üretim yönetimi', 'mixed-production', 'manage',
                      'sensitive', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-16 16:00:00+00'),
-                    ('10000000-0000-4000-8000-000000000f22', 'mixed-production.operate', 'mixed-production.operate',
+                    ('10000000-0000-4000-8000-000000000f86', 'mixed-production.operate', 'mixed-production.operate',
                      'Operate human stations and record production events.',
                      'Karma üretim operasyon', 'mixed-production', 'operate',
                      'standard', FALSE, 'facility', 'Active', TIMESTAMPTZ '2026-09-16 16:00:00+00')

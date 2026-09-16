@@ -201,9 +201,9 @@ namespace NevaxisFactOS.Persistence.Migrations.Migrations
 
             migrationBuilder.Sql(
                 """
-                INSERT INTO permission_definitions
-                    (id, permission_key, name, description, display_name, module, action,
-                     sensitivity_classification, requires_recent_auth, supported_record_scopes, status, created_at_utc)
+                INSERT INTO permission_definitions (
+                    id, key, normalized_key, description, turkish_label, module_resource_code, action_code,
+                    sensitivity_classification, requires_recent_auth, supported_record_scopes, status, created_at_utc)
                 VALUES
                     ('10000000-0000-4000-8000-000000000f17', 'factory-intelligence.read', 'factory-intelligence.read',
                      'Read predictive factory intelligence and early warning risks.',

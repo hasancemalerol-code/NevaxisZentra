@@ -11,6 +11,8 @@ using NevaxisFactOS.Persistence.SaasSubscription;
 using NevaxisFactOS.Persistence.ShiftAssignment;
 using NevaxisFactOS.Persistence.ShiftRisk;
 using NevaxisFactOS.Persistence.ShiftWorkforce;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
+using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Teams;
 
@@ -178,7 +180,10 @@ internal static class CustomerCatalogKeys
         AdminAccessPermissionKeys.Read,
         MaterialPermissionKeys.Read, MoldPermissionKeys.Read, MaintenancePermissionKeys.Read,
         EdgePermissionKeys.Read, ProcessOeePermissionKeys.Read, ShiftWorkforcePermissionKeys.Read,
+        ShiftOperationsPermissionKeys.Read,
         ShiftAssignmentPermissionKeys.Read, ShiftRiskPermissionKeys.Read,
+        FactoryIntelligencePermissionKeys.Read,
+        MixedProductionPermissionKeys.Read,
         ProductionPlanningPermissionKeys.Read, ProductionExecutionPermissionKeys.Read,
         QualityPermissionKeys.Read, ExportPermissionKeys.Read, ErpPermissionKeys.Read,
         EnergyPermissionKeys.Read,
@@ -200,6 +205,10 @@ internal static class CustomerCatalogKeys
         EdgePermissionKeys.Read, EdgePermissionKeys.Manage, EdgePermissionKeys.Ingest,
         ProcessOeePermissionKeys.Read, ProcessOeePermissionKeys.Manage,
         ShiftWorkforcePermissionKeys.Read, ShiftWorkforcePermissionKeys.Manage,
+        ShiftOperationsPermissionKeys.Read, ShiftOperationsPermissionKeys.Manage,
+        ShiftOperationsPermissionKeys.Start, ShiftOperationsPermissionKeys.Close,
+        ShiftOperationsPermissionKeys.HandoverPrepare, ShiftOperationsPermissionKeys.HandoverSubmit,
+        ShiftOperationsPermissionKeys.HandoverAccept, ShiftOperationsPermissionKeys.OpenItemManage,
         ShiftAssignmentPermissionKeys.Read, ShiftAssignmentPermissionKeys.Manage,
         ShiftRiskPermissionKeys.Read, ShiftRiskPermissionKeys.Manage,
         ProductionPlanningPermissionKeys.Read, ProductionPlanningPermissionKeys.Write,
@@ -243,5 +252,9 @@ internal static class CustomerCatalogKeys
         SaasCommercialPermissionKeys.Read,
         SaasSubscriptionPermissionKeys.Read, SaasSubscriptionPermissionKeys.Manage,
         SaasBillingPermissionKeys.Read, SaasBillingPermissionKeys.Manage,
+        FactoryIntelligencePermissionKeys.Read, FactoryIntelligencePermissionKeys.Manage,
+        FactoryIntelligencePermissionKeys.Calibration,
+        MixedProductionPermissionKeys.Read, MixedProductionPermissionKeys.Manage,
+        MixedProductionPermissionKeys.Operate,
     ];
 }
