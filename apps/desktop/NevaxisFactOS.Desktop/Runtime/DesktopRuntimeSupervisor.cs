@@ -591,20 +591,37 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         return environment;
     }
 
+    private static string ResolveAspNetCoreEnvironment(PackagedRuntimeBundle? packagedBundle)
+    {
+        if (packagedBundle is null)
+        {
+            return "Development";
+        }
+
+        var manifest = packagedBundle.TryReadManifest();
+        return manifest?.IsDemoChannel == true ? "Development" : "Production";
+    }
+
     private static Dictionary<string, string> BuildApiEnvironment(
         Configuration.DesktopRuntimeOptions options,
         string? runtimeRoot,
         PackagedRuntimeBundle? packagedBundle)
     {
+        var aspnetEnvironment = ResolveAspNetCoreEnvironment(packagedBundle);
         var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["ASPNETCORE_ENVIRONMENT"] = "Development",
+            ["ASPNETCORE_ENVIRONMENT"] = aspnetEnvironment,
             ["NEVAXIS_FACTOS__AUTHENTICATION__MODE"] = "SessionCookie",
         };
 
         if (packagedBundle is not null)
         {
             RuntimePaths.MergePackagedConfiguration(environment, packagedBundle, overwrite: true);
+            var manifest = packagedBundle.TryReadManifest();
+            if (manifest?.DeploymentChannel is not null)
+            {
+                environment["NEVAXIS_FACTOS_DEPLOYMENT_CHANNEL"] = manifest.DeploymentChannel;
+            }
         }
         else if (!string.IsNullOrWhiteSpace(runtimeRoot))
         {

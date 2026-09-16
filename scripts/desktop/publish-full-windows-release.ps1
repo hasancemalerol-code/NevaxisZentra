@@ -4,7 +4,9 @@
 [CmdletBinding()]
 param(
     [string]$RepositoryRoot = "",
-    [string]$ReleaseVersion = "2026.09-sales-freeze",
+    [string]$ReleaseVersion = "2026.09.16-production",
+    [ValidateSet("DEMO", "PRESENTATION", "PRODUCTION")]
+    [string]$DeploymentChannel = "DEMO",
     [string]$ExpectedFreezeSha = "fc8919b91d4ce47c352d22ae675b63925b4b72c8",
     [string]$OutputRoot = "",
     [switch]$SkipWebBuild,
@@ -198,6 +200,7 @@ $runtimeManifest = [ordered]@{
     databasePort = $postgresPort
     databaseName = "crevafactos_local"
     databaseArchitecture = "EMBEDDED_LOCAL"
+    deploymentChannel = $DeploymentChannel
     expectedSchemaVersion = $latestMigration
 }
 $runtimeManifest | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $stagingRoot "manifests\runtime-manifest.json") -Encoding UTF8

@@ -39,9 +39,11 @@ elseif ($Version -match '^(\d+)\.(\d+)') {
     $msiProductVersion = "$($Matches[1]).$($Matches[2]).0.0"
 }
 else {
-    $msiProductVersion = "2026.9.14.0"
+    $msiProductVersion = "2026.9.16.0"
 }
+$versionSlug = ($Version -replace '[^\d\.A-Za-z\-]', '-')
 $setupMsiName = "Nevaxis-FactOS-Setup.msi"
+$versionedMsiName = "Nevaxis-FactOS-Setup-$versionSlug.msi"
 $setupExeName = "Nevaxis-FactOS-Setup.exe"
 $setupMsiPath = Join-Path $ArtifactRoot $setupMsiName
 $setupExePath = Join-Path $ArtifactRoot $setupExeName
@@ -82,7 +84,11 @@ if (-not (Test-Path $setupMsiPath)) {
     throw "Installer MSI not produced: $setupMsiPath"
 }
 
+$versionedMsiPath = Join-Path $ArtifactRoot $versionedMsiName
+Copy-Item -Path $setupMsiPath -Destination $versionedMsiPath -Force
+
 $setupHash = Get-Sha256Hex $setupMsiPath
+$versionedHash = Get-Sha256Hex $versionedMsiPath
 $setupSize = (Get-Item $setupMsiPath).Length
 
 $readmePath = Join-Path $ArtifactRoot "README-DEMO.txt"
@@ -112,12 +118,13 @@ RECOVERY
 
 $checksumPath = Join-Path $ArtifactRoot "SHA256SUMS.txt"
 @(
-    "$setupHash  $setupMsiName"
+    "$setupHash  $setupMsiName",
+    "$versionedHash  $versionedMsiName"
 ) | Set-Content -Path $checksumPath -Encoding ASCII
 
-$zipPath = Join-Path $ArtifactRoot "Nevaxis-FactOS-Demo.zip"
+$zipPath = Join-Path $ArtifactRoot "Nevaxis-FactOS-Release-$versionSlug.zip"
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
-Compress-Archive -Path $setupMsiPath, $readmePath, $checksumPath -DestinationPath $zipPath -Force
+Compress-Archive -Path $versionedMsiPath, $readmePath, $checksumPath -DestinationPath $zipPath -Force
 $zipHash = Get-Sha256Hex $zipPath
 Add-Content -Path $checksumPath -Value "$zipHash  Nevaxis-FactOS-Demo.zip" -Encoding ASCII
 
@@ -131,10 +138,12 @@ Write-Utf8NoBomFile -Path $manifestPath -Content @"
 - Source freeze: $SourceCommit
 - Freeze tag: factos-final-sales-freeze-2026-09
 - Installer: $setupMsiName
+- Versioned installer: $versionedMsiName
 - Installer size bytes: $setupSize
 - Installer size MB: $([math]::Round($setupSize / 1MB, 2))
 - Installer SHA-256: $setupHash
-- ZIP: Nevaxis-FactOS-Demo.zip
+- Versioned installer SHA-256: $versionedHash
+- ZIP: Nevaxis-FactOS-Release-$versionSlug.zip
 - ZIP size bytes: $((Get-Item $zipPath).Length)
 - ZIP SHA-256: $zipHash
 - Database strategy: EMBEDDED_LOCAL PostgreSQL

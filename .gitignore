@@ -97,6 +97,7 @@ apps/desktop/installer/.cache/
 
 # Windows release packaging staging (postgres/web/desktop bundles; not source)
 release/staging/
+release/staging-*/
 
 # Local dev runtime state (API probe output, start locks)
 .local/

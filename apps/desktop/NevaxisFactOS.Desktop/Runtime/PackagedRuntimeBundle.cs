@@ -211,5 +211,11 @@ public sealed class RuntimeManifestDocument
 
     public string? DatabaseArchitecture { get; init; }
 
+    public string? DeploymentChannel { get; init; }
+
     public int CanonicalRouteCount { get; init; } = 46;
+
+    public bool IsDemoChannel =>
+        string.Equals(DeploymentChannel, "DEMO", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(DeploymentChannel, "PRESENTATION", StringComparison.OrdinalIgnoreCase);
 }

@@ -65,6 +65,101 @@ public sealed class PackagedRuntimeBundleLayoutTests
     }
 }
 
+public sealed class DeploymentChannelTests
+{
+    [Fact]
+    public void DemoChannelEnablesDemoIdentitySecrets()
+    {
+        var bundleRoot = Path.Combine(Path.GetTempPath(), $"factos-channel-{Guid.NewGuid():N}");
+        var configDir = Path.Combine(bundleRoot, "config");
+        Directory.CreateDirectory(configDir);
+        var manifestsDir = Path.Combine(bundleRoot, "manifests");
+        Directory.CreateDirectory(manifestsDir);
+        File.WriteAllText(
+            Path.Combine(manifestsDir, "runtime-manifest.json"),
+            """{"deploymentChannel":"DEMO"}""");
+        var bundle = PackagedRuntimeBundle.Create(bundleRoot);
+        var diagnostics = new List<string>();
+        var secretsPath = PackagedRuntimeBundle.GetMachineLocalSecretsPath();
+        var backup = secretsPath + ".bak";
+        if (File.Exists(secretsPath))
+        {
+            File.Copy(secretsPath, backup, overwrite: true);
+            File.Delete(secretsPath);
+        }
+
+        try
+        {
+            PackagedFirstRunInitializer.EnsureMachineSecrets(bundle, diagnostics);
+            var content = File.ReadAllText(secretsPath);
+            Assert.Contains("DevelopmentSaasIdentity__Enabled=true", content, StringComparison.Ordinal);
+            Assert.Contains(PackagedFirstRunInitializer.ReleaseDemoOwnerPassword, content, StringComparison.Ordinal);
+        }
+        finally
+        {
+            if (File.Exists(secretsPath))
+            {
+                File.Delete(secretsPath);
+            }
+
+            if (File.Exists(backup))
+            {
+                File.Move(backup, secretsPath, overwrite: true);
+            }
+
+            if (Directory.Exists(bundleRoot))
+            {
+                Directory.Delete(bundleRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ProductionChannelOmitsDemoCredentials()
+    {
+        var bundleRoot = Path.Combine(Path.GetTempPath(), $"factos-channel-{Guid.NewGuid():N}");
+        var manifestsDir = Path.Combine(bundleRoot, "manifests");
+        Directory.CreateDirectory(manifestsDir);
+        File.WriteAllText(
+            Path.Combine(manifestsDir, "runtime-manifest.json"),
+            """{"deploymentChannel":"PRODUCTION"}""");
+        var bundle = PackagedRuntimeBundle.Create(bundleRoot);
+        var diagnostics = new List<string>();
+        var secretsPath = PackagedRuntimeBundle.GetMachineLocalSecretsPath();
+        var backup = secretsPath + ".bak";
+        if (File.Exists(secretsPath))
+        {
+            File.Copy(secretsPath, backup, overwrite: true);
+            File.Delete(secretsPath);
+        }
+
+        try
+        {
+            PackagedFirstRunInitializer.EnsureMachineSecrets(bundle, diagnostics);
+            var content = File.ReadAllText(secretsPath);
+            Assert.Contains("DevelopmentSaasIdentity__Enabled=false", content, StringComparison.Ordinal);
+            Assert.DoesNotContain(PackagedFirstRunInitializer.ReleaseDemoOwnerPassword, content, StringComparison.Ordinal);
+        }
+        finally
+        {
+            if (File.Exists(secretsPath))
+            {
+                File.Delete(secretsPath);
+            }
+
+            if (File.Exists(backup))
+            {
+                File.Move(backup, secretsPath, overwrite: true);
+            }
+
+            if (Directory.Exists(bundleRoot))
+            {
+                Directory.Delete(bundleRoot, recursive: true);
+            }
+        }
+    }
+}
+
 public sealed class FactOsStartupErrorCodeTests
 {
     [Fact]
