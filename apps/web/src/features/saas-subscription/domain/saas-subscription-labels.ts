@@ -82,6 +82,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/operasyonel-riskler", code: "module.operational-risk" },
   { prefix: "/operasyon/yonetim-merkezi", code: "module.production" },
   { prefix: "/fabrika-karar-merkezi", code: "module.production" },
+  { prefix: "/yonetici-komuta-merkezi", code: "module.production" },
   { prefix: "/riskler", code: "module.operational-risk" },
   { prefix: "/ai-gorevleri", code: "module.ai-task-center" },
 ];

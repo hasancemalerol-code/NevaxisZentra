@@ -40,6 +40,13 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
+        label: "Yönetici Komuta Merkezi",
+        href: "/yonetici-komuta-merkezi",
+        iconKey: "gauge",
+        permissionKey: "factory-case.read",
+        subscriptionModulePath: "/operasyon/yonetim-merkezi",
+      },
+      {
         label: "Sunum Modu",
         href: "/sunum-modu",
         iconKey: "activity",
