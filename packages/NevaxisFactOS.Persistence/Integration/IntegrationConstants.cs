@@ -90,6 +90,7 @@ public static class IntegrationMappingVersionStatuses
 public static class IntegrationCanonicalProjectionTypes
 {
     public const string Material = "material";
+    public const string FactoryOperationalEvent = "factory-operational-event";
 }
 
 public static class IntegrationFileKinds

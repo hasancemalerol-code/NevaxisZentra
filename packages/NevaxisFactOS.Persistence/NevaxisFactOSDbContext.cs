@@ -582,6 +582,14 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<IntegrationSyncRun> IntegrationSyncRuns => Set<IntegrationSyncRun>();
     public DbSet<IntegrationIngestionQuarantine> IntegrationIngestionQuarantine => Set<IntegrationIngestionQuarantine>();
     public DbSet<IntegrationSourceIdentity> IntegrationSourceIdentities => Set<IntegrationSourceIdentity>();
+    public DbSet<Integration.FactoryEventSpine.IntegrationInboundFactoryEvent> IntegrationInboundFactoryEvents =>
+        Set<Integration.FactoryEventSpine.IntegrationInboundFactoryEvent>();
+    public DbSet<Integration.FactoryEventSpine.IntegrationCanonicalFactoryEvent> IntegrationCanonicalFactoryEvents =>
+        Set<Integration.FactoryEventSpine.IntegrationCanonicalFactoryEvent>();
+    public DbSet<Integration.FactoryEventSpine.IntegrationEventConsumerReceipt> IntegrationEventConsumerReceipts =>
+        Set<Integration.FactoryEventSpine.IntegrationEventConsumerReceipt>();
+    public DbSet<Integration.FactoryEventSpine.IntegrationEventDispatchOutbox> IntegrationEventDispatchOutbox =>
+        Set<Integration.FactoryEventSpine.IntegrationEventDispatchOutbox>();
 
     // Export
     public DbSet<ExportCase> ExportCases => Set<ExportCase>();
@@ -2847,6 +2855,30 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && i.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new Integration.FactoryEventSpine.IntegrationInboundFactoryEventEntityConfiguration());
+        modelBuilder.Entity<Integration.FactoryEventSpine.IntegrationInboundFactoryEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new Integration.FactoryEventSpine.IntegrationCanonicalFactoryEventEntityConfiguration());
+        modelBuilder.Entity<Integration.FactoryEventSpine.IntegrationCanonicalFactoryEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new Integration.FactoryEventSpine.IntegrationEventConsumerReceiptEntityConfiguration());
+        modelBuilder.Entity<Integration.FactoryEventSpine.IntegrationEventConsumerReceipt>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new Integration.FactoryEventSpine.IntegrationEventDispatchOutboxEntityConfiguration());
+        modelBuilder.Entity<Integration.FactoryEventSpine.IntegrationEventDispatchOutbox>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
         // Export
         modelBuilder.ApplyConfiguration(new ExportCaseEntityConfiguration());

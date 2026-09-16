@@ -406,6 +406,10 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureIntegrationSecretConfigurePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationReprocessPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureIntegrationEventReplayPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureDigitalWorkforceReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureDigitalWorkforceReadPermissionAssignmentAsync(
@@ -2993,6 +2997,24 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             IntegrationPermissionKeys.SecretConfigure,
             DevelopmentPilotIds.IntegrationSecretConfigurePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationReprocessPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.Reprocess,
+            DevelopmentPilotIds.IntegrationReprocessPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureIntegrationEventReplayPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            IntegrationPermissionKeys.EventReplay,
+            DevelopmentPilotIds.IntegrationEventReplayPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureDigitalWorkforceReadPermissionAssignmentAsync(

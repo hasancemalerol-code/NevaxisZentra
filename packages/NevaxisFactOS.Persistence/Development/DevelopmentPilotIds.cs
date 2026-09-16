@@ -350,6 +350,12 @@ public static class DevelopmentPilotIds
     public static readonly Guid IntegrationSecretConfigurePermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000f06");
 
+    public static readonly Guid IntegrationReprocessPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f07");
+
+    public static readonly Guid IntegrationEventReplayPermissionDefinitionId =
+        Guid.Parse("10000000-0000-4000-8000-000000000f08");
+
     // ERP pilot fixture
     public static readonly Guid ErpPilotSimulatorConnectionId =
         Guid.Parse("bb000001-0090-4000-8000-000000000090");
