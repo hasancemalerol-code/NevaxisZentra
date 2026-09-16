@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisFactOS.Persistence.ThroughputIntelligence;
 
 namespace NevaxisFactOS.Persistence.MixedProduction;
 
@@ -17,7 +19,10 @@ public static class MixedProductionFixtureSeeder
 
         if (existing is not null)
         {
-            return new MixedProductionSeedResult(
+            await ThroughputIntelligenceFixtureSeeder.SeedMixLine01Mp2ExtensionAsync(
+                db, tenantId, facilityId, cancellationToken);
+
+            var existingResult = new MixedProductionSeedResult(
                 existing.Id,
                 existing.Code,
                 await db.ProductionStations.CountAsync(s => s.LineId == existing.Id, cancellationToken),
@@ -28,6 +33,7 @@ public static class MixedProductionFixtureSeeder
                     e => e.TenantId == tenantId && e.FacilityId == facilityId && e.LineId == existing.Id,
                     cancellationToken),
                 "MIX-LINE-01 already seeded.");
+            return existingResult;
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -200,6 +206,9 @@ public static class MixedProductionFixtureSeeder
         var acceptanceEvents = await RunAcceptanceSequenceAsync(
             db, tenantId, facilityId, lineId, stations, correlation, cancellationToken);
 
+        await ThroughputIntelligenceFixtureSeeder.SeedMixLine01Mp2ExtensionAsync(
+            db, tenantId, facilityId, cancellationToken);
+
         return new MixedProductionSeedResult(
             lineId,
             MixedProductionFixtureCodes.LineCode,
@@ -218,7 +227,7 @@ public static class MixedProductionFixtureSeeder
         string correlation,
         CancellationToken cancellationToken)
     {
-        var service = new MixedProductionService(db);
+        var service = CreateFixtureService(db, tenantId);
         var baseTime = DateTimeOffset.UtcNow.AddMinutes(-30);
         var eventCount = 0;
 
@@ -286,5 +295,12 @@ public static class MixedProductionFixtureSeeder
         eventCount++;
 
         return eventCount;
+    }
+
+    private static MixedProductionService CreateFixtureService(NevaxisFactOSDbContext db, Guid tenantId)
+    {
+        var accessor = new TenantContextAccessor();
+        accessor.Set(new TenantContext(tenantId, "fixture", Guid.Empty));
+        return new MixedProductionService(db, new TenantDatabaseSession(db, accessor));
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.MixedProduction;
 
@@ -20,14 +21,24 @@ public interface IMixedProductionService
 public sealed class MixedProductionService : IMixedProductionService
 {
     private readonly NevaxisFactOSDbContext db;
+    private readonly TenantDatabaseSession tenantDatabaseSession;
 
-    public MixedProductionService(NevaxisFactOSDbContext db)
+    public MixedProductionService(
+        NevaxisFactOSDbContext db,
+        TenantDatabaseSession tenantDatabaseSession)
     {
         this.db = db;
+        this.tenantDatabaseSession = tenantDatabaseSession;
     }
 
-    public async Task<IReadOnlyList<MixedProductionLineSummary>> ListLinesAsync(
-        Guid facilityId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<MixedProductionLineSummary>> ListLinesAsync(
+        Guid facilityId, CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => ListLinesCoreAsync(facilityId, ct),
+            cancellationToken);
+
+    private async Task<IReadOnlyList<MixedProductionLineSummary>> ListLinesCoreAsync(
+        Guid facilityId, CancellationToken cancellationToken)
     {
         var lines = await db.ProductionLines
             .Where(l => l.FacilityId == facilityId && l.IsActive)
@@ -59,8 +70,14 @@ public sealed class MixedProductionService : IMixedProductionService
         return summaries;
     }
 
-    public async Task<MixedProductionLineDetailSnapshot> GetLineDetailAsync(
-        Guid facilityId, Guid lineId, CancellationToken cancellationToken = default)
+    public Task<MixedProductionLineDetailSnapshot> GetLineDetailAsync(
+        Guid facilityId, Guid lineId, CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => GetLineDetailCoreAsync(facilityId, lineId, ct),
+            cancellationToken);
+
+    private async Task<MixedProductionLineDetailSnapshot> GetLineDetailCoreAsync(
+        Guid facilityId, Guid lineId, CancellationToken cancellationToken)
     {
         var line = await db.ProductionLines.FirstOrDefaultAsync(
             l => l.FacilityId == facilityId && l.Id == lineId, cancellationToken)
@@ -146,12 +163,22 @@ public sealed class MixedProductionService : IMixedProductionService
             playbackWindowLabel);
     }
 
-    public async Task<IReadOnlyList<MixedProductionTimelineEntry>> GetTimelineAsync(
+    public Task<IReadOnlyList<MixedProductionTimelineEntry>> GetTimelineAsync(
         Guid facilityId,
         Guid lineId,
         DateTimeOffset? fromUtc,
         DateTimeOffset? toUtc,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => GetTimelineCoreAsync(facilityId, lineId, fromUtc, toUtc, ct),
+            cancellationToken);
+
+    private async Task<IReadOnlyList<MixedProductionTimelineEntry>> GetTimelineCoreAsync(
+        Guid facilityId,
+        Guid lineId,
+        DateTimeOffset? fromUtc,
+        DateTimeOffset? toUtc,
+        CancellationToken cancellationToken)
     {
         var query = db.CanonicalProductionEvents.Where(e => e.FacilityId == facilityId && e.LineId == lineId);
         if (fromUtc.HasValue) query = query.Where(e => e.OccurredAtUtc >= fromUtc.Value);
@@ -169,12 +196,22 @@ public sealed class MixedProductionService : IMixedProductionService
             resources.ToDictionary(r => r.Id));
     }
 
-    public async Task<MixedProductionPlaybackSnapshot> GetPlaybackAsync(
+    public Task<MixedProductionPlaybackSnapshot> GetPlaybackAsync(
         Guid facilityId,
         Guid lineId,
         DateTimeOffset fromUtc,
         DateTimeOffset toUtc,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => GetPlaybackCoreAsync(facilityId, lineId, fromUtc, toUtc, ct),
+            cancellationToken);
+
+    private async Task<MixedProductionPlaybackSnapshot> GetPlaybackCoreAsync(
+        Guid facilityId,
+        Guid lineId,
+        DateTimeOffset fromUtc,
+        DateTimeOffset toUtc,
+        CancellationToken cancellationToken)
     {
         var line = await db.ProductionLines.FirstOrDefaultAsync(
             l => l.FacilityId == facilityId && l.Id == lineId, cancellationToken)
@@ -200,10 +237,18 @@ public sealed class MixedProductionService : IMixedProductionService
             resources.GroupBy(r => r.StationId).ToDictionary(g => g.Key, g => g.First()));
     }
 
-    public async Task<CanonicalProductionEvent> RecordEventAsync(
+    public Task<CanonicalProductionEvent> RecordEventAsync(
         RecordProductionEventRequest request,
         Guid tenantId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => RecordEventCoreAsync(request, tenantId, ct),
+            cancellationToken);
+
+    private async Task<CanonicalProductionEvent> RecordEventCoreAsync(
+        RecordProductionEventRequest request,
+        Guid tenantId,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.IdempotencyKey))
         {
@@ -261,10 +306,18 @@ public sealed class MixedProductionService : IMixedProductionService
         return eventRow;
     }
 
-    public async Task<OperatorStationSession> PerformOperatorActionAsync(
+    public Task<OperatorStationSession> PerformOperatorActionAsync(
         OperatorActionRequest request,
         Guid tenantId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => PerformOperatorActionCoreAsync(request, tenantId, ct),
+            cancellationToken);
+
+    private async Task<OperatorStationSession> PerformOperatorActionCoreAsync(
+        OperatorActionRequest request,
+        Guid tenantId,
+        CancellationToken cancellationToken)
     {
         var station = await db.ProductionStations.FirstOrDefaultAsync(
             s => s.FacilityId == request.FacilityId && s.Id == request.StationId, cancellationToken)
@@ -302,7 +355,7 @@ public sealed class MixedProductionService : IMixedProductionService
             };
             db.OperatorStationSessions.Add(session);
 
-            await RecordEventAsync(new RecordProductionEventRequest(
+            await RecordEventCoreAsync(new RecordProductionEventRequest(
                 request.FacilityId,
                 station.LineId,
                 station.Id,
@@ -342,7 +395,7 @@ public sealed class MixedProductionService : IMixedProductionService
                 _ => MixedProductionEventTypes.Good,
             };
 
-            await RecordEventAsync(new RecordProductionEventRequest(
+            await RecordEventCoreAsync(new RecordProductionEventRequest(
                 request.FacilityId,
                 station.LineId,
                 station.Id,
@@ -364,7 +417,7 @@ public sealed class MixedProductionService : IMixedProductionService
 
             if (outcomeEvent != MixedProductionEventTypes.OperatorComplete)
             {
-                await RecordEventAsync(new RecordProductionEventRequest(
+                await RecordEventCoreAsync(new RecordProductionEventRequest(
                     request.FacilityId,
                     station.LineId,
                     station.Id,
@@ -396,7 +449,9 @@ public sealed class MixedProductionService : IMixedProductionService
 
     public Task<MixedProductionSeedResult> SeedMixLine01Async(
         Guid facilityId, Guid tenantId, CancellationToken cancellationToken = default) =>
-        MixedProductionFixtureSeeder.SeedMixLine01Async(db, tenantId, facilityId, cancellationToken);
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => MixedProductionFixtureSeeder.SeedMixLine01Async(db, tenantId, facilityId, ct),
+            cancellationToken);
 
     private async Task ApplyBufferSideEffectsAsync(
         CanonicalProductionEvent eventRow,

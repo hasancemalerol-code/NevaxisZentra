@@ -24,6 +24,7 @@ using NevaxisFactOS.Persistence.Integration;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
+using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -449,6 +450,16 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureMixedProductionManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureMixedProductionOperatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputIntelligenceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputIntelligenceSimulatePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3165,6 +3176,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             MixedProductionPermissionKeys.Operate,
             DevelopmentPilotMixedProductionIds.OperatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputIntelligenceReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputIntelligencePermissionKeys.Read,
+            DevelopmentPilotThroughputIntelligenceIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputIntelligenceManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputIntelligencePermissionKeys.Manage,
+            DevelopmentPilotThroughputIntelligenceIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputIntelligenceSimulatePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputIntelligencePermissionKeys.Simulate,
+            DevelopmentPilotThroughputIntelligenceIds.SimulatePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

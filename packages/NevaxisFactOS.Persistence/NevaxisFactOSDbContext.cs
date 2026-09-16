@@ -51,6 +51,7 @@ using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
+using NevaxisFactOS.Persistence.ThroughputIntelligence;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -408,6 +409,12 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<OperatorStationSession> OperatorStationSessions => Set<OperatorStationSession>();
     public DbSet<DigitalWorkInstruction> DigitalWorkInstructions => Set<DigitalWorkInstruction>();
     public DbSet<ConnectorResourceMapping> ConnectorResourceMappings => Set<ConnectorResourceMapping>();
+
+    public DbSet<LineThroughputTarget> LineThroughputTargets => Set<LineThroughputTarget>();
+    public DbSet<OperatorSkillProfile> OperatorSkillProfiles => Set<OperatorSkillProfile>();
+    public DbSet<OperatorStationQualification> OperatorStationQualifications => Set<OperatorStationQualification>();
+    public DbSet<ThroughputScenarioDefinition> ThroughputScenarioDefinitions => Set<ThroughputScenarioDefinition>();
+    public DbSet<ThroughputScenarioResult> ThroughputScenarioResults => Set<ThroughputScenarioResult>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3303,6 +3310,31 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ConnectorResourceMappingConfiguration());
         modelBuilder.Entity<ConnectorResourceMapping>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new LineThroughputTargetConfiguration());
+        modelBuilder.Entity<LineThroughputTarget>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperatorSkillProfileConfiguration());
+        modelBuilder.Entity<OperatorSkillProfile>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperatorStationQualificationConfiguration());
+        modelBuilder.Entity<OperatorStationQualification>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ThroughputScenarioDefinitionConfiguration());
+        modelBuilder.Entity<ThroughputScenarioDefinition>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ThroughputScenarioResultConfiguration());
+        modelBuilder.Entity<ThroughputScenarioResult>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }

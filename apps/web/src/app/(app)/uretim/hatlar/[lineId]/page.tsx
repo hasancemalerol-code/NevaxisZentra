@@ -1,5 +1,6 @@
 import { MixedProductionLineDetailView } from "@/features/mixed-production/components/mixed-production-line-detail-view";
 import { loadMixedProductionLineWorkspace } from "@/features/mixed-production/server/mixed-production-reader";
+import { loadThroughputIntelligenceWorkspace } from "@/features/throughput-intelligence/server/throughput-intelligence-reader";
 
 type MixedProductionLineDetailPageProps = Readonly<{
   params: Promise<{ lineId: string }>;
@@ -8,6 +9,7 @@ type MixedProductionLineDetailPageProps = Readonly<{
 export default async function MixedProductionLineDetailPage({ params }: MixedProductionLineDetailPageProps) {
   const { lineId } = await params;
   const result = await loadMixedProductionLineWorkspace(lineId);
+  const throughputResult = await loadThroughputIntelligenceWorkspace(lineId);
 
   if (result.status === "failure") {
     return (
@@ -20,5 +22,15 @@ export default async function MixedProductionLineDetailPage({ params }: MixedPro
     );
   }
 
-  return <MixedProductionLineDetailView detail={result.detail} playback={result.playback} />;
+  return (
+    <MixedProductionLineDetailView
+      detail={result.detail}
+      playback={result.playback}
+      throughput={
+        throughputResult.status === "success"
+          ? { overview: throughputResult.overview, comparison: throughputResult.comparison }
+          : null
+      }
+    />
+  );
 }

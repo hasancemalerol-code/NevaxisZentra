@@ -11,6 +11,12 @@ import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/o
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 
+import { ThroughputIntelligencePanel } from "@/features/throughput-intelligence/components/throughput-intelligence-panel";
+import type {
+  ScenarioComparisonRowApi,
+  ThroughputIntelligenceOverviewApi,
+} from "@/features/throughput-intelligence/server/throughput-intelligence-api-client";
+
 import type {
   MixedProductionLineDetailApi,
   MixedProductionPlaybackApi,
@@ -20,6 +26,10 @@ import type {
 type MixedProductionLineDetailViewProps = Readonly<{
   detail: MixedProductionLineDetailApi;
   playback: MixedProductionPlaybackApi | null;
+  throughput?: {
+    overview: ThroughputIntelligenceOverviewApi;
+    comparison: readonly ScenarioComparisonRowApi[];
+  } | null;
 }>;
 
 function buildContextRows(station: MixedProductionStationSnapshotApi | undefined) {
@@ -38,7 +48,7 @@ function buildContextRows(station: MixedProductionStationSnapshotApi | undefined
   ];
 }
 
-export function MixedProductionLineDetailView({ detail, playback }: MixedProductionLineDetailViewProps) {
+export function MixedProductionLineDetailView({ detail, playback, throughput }: MixedProductionLineDetailViewProps) {
   const { line, stations, timeline } = detail;
   const [selectedStationId, setSelectedStationId] = useState<string | null>(stations[0]?.stationId ?? null);
   const selectedStation = stations.find((s) => s.stationId === selectedStationId);
@@ -152,6 +162,10 @@ export function MixedProductionLineDetailView({ detail, playback }: MixedProduct
           ) : null}
         </div>
       </section>
+
+      {throughput ? (
+        <ThroughputIntelligencePanel overview={throughput.overview} comparison={throughput.comparison} />
+      ) : null}
     </main>
   );
 }
