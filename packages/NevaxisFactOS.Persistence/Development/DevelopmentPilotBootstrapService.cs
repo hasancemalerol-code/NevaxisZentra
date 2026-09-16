@@ -23,6 +23,7 @@ using NevaxisFactOS.Persistence.AdminAccess;
 using NevaxisFactOS.Persistence.Integration;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
+using NevaxisFactOS.Persistence.MixedProduction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -438,6 +439,16 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureFactoryIntelligenceManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureFactoryIntelligenceCalibrationPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMixedProductionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMixedProductionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMixedProductionReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMixedProductionManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureMixedProductionOperatePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3116,6 +3127,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             FactoryIntelligencePermissionKeys.Calibration,
             DevelopmentPilotFactoryIntelligenceIds.CalibrationPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMixedProductionReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MixedProductionPermissionKeys.Read,
+            DevelopmentPilotMixedProductionIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMixedProductionManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MixedProductionPermissionKeys.Manage,
+            DevelopmentPilotMixedProductionIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureMixedProductionOperatePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            MixedProductionPermissionKeys.Operate,
+            DevelopmentPilotMixedProductionIds.OperatePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

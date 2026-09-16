@@ -69,6 +69,11 @@ export default async function ProductionExecutionPage() {
           operasyonel ilerlemeyi yönetin.
         </span>
 
+        <Link href="/uretim/hatlar" className="production-execution-header__link">
+          <Factory aria-hidden="true" />
+          Üretim Hatları
+        </Link>
+
         <Link href="/uretim/raporlama" className="production-execution-header__link">
           <BarChart3 aria-hidden="true" />
           Operasyonel Raporlama

@@ -50,6 +50,7 @@ using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
+using NevaxisFactOS.Persistence.MixedProduction;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -395,6 +396,18 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<FactoryOperationalBaseline> FactoryOperationalBaselines => Set<FactoryOperationalBaseline>();
     public DbSet<FactoryPredictedRisk> FactoryPredictedRisks => Set<FactoryPredictedRisk>();
     public DbSet<FactoryPredictionEvaluation> FactoryPredictionEvaluations => Set<FactoryPredictionEvaluation>();
+
+    public DbSet<ManufacturingArea> ManufacturingAreas => Set<ManufacturingArea>();
+    public DbSet<ProductionLine> ProductionLines => Set<ProductionLine>();
+    public DbSet<ProductionStation> ProductionStations => Set<ProductionStation>();
+    public DbSet<ManufacturingResource> ManufacturingResources => Set<ManufacturingResource>();
+    public DbSet<ProductRouting> ProductRoutings => Set<ProductRouting>();
+    public DbSet<RoutingOperation> RoutingOperations => Set<RoutingOperation>();
+    public DbSet<BufferResourceState> BufferResourceStates => Set<BufferResourceState>();
+    public DbSet<CanonicalProductionEvent> CanonicalProductionEvents => Set<CanonicalProductionEvent>();
+    public DbSet<OperatorStationSession> OperatorStationSessions => Set<OperatorStationSession>();
+    public DbSet<DigitalWorkInstruction> DigitalWorkInstructions => Set<DigitalWorkInstruction>();
+    public DbSet<ConnectorResourceMapping> ConnectorResourceMappings => Set<ConnectorResourceMapping>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3236,6 +3249,61 @@ public sealed class NevaxisFactOSDbContext : DbContext
         modelBuilder.Entity<FactoryPredictionEvaluation>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ManufacturingAreaConfiguration());
+        modelBuilder.Entity<ManufacturingArea>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionLineConfiguration());
+        modelBuilder.Entity<ProductionLine>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductionStationConfiguration());
+        modelBuilder.Entity<ProductionStation>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ManufacturingResourceConfiguration());
+        modelBuilder.Entity<ManufacturingResource>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProductRoutingConfiguration());
+        modelBuilder.Entity<ProductRouting>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RoutingOperationConfiguration());
+        modelBuilder.Entity<RoutingOperation>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BufferResourceStateConfiguration());
+        modelBuilder.Entity<BufferResourceState>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalProductionEventConfiguration());
+        modelBuilder.Entity<CanonicalProductionEvent>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperatorStationSessionConfiguration());
+        modelBuilder.Entity<OperatorStationSession>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkInstructionConfiguration());
+        modelBuilder.Entity<DigitalWorkInstruction>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ConnectorResourceMappingConfiguration());
+        modelBuilder.Entity<ConnectorResourceMapping>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 

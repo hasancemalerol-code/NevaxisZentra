@@ -68,7 +68,7 @@ Kapsam:
 
 - Kabul kriterleri
 
-- Roadmap
+- Roadmap ([Manufacturing Roadmap — MP1/MP2/MP3](product/manufacturing-roadmap.md))
 
 - PRD belgeleri
 
