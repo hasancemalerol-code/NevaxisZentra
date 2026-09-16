@@ -1,6 +1,7 @@
 using System.Text.Json;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ public sealed class FactoryEventRouter : IFactoryEventRouter
     private readonly IFactoryOrchestrationCoordinator coordinator;
     private readonly IFactoryOutcomeExecutionService outcomeExecution;
     private readonly IFactoryOutcomeAiTaskSyncService outcomeAiTaskSync;
+    private readonly IFactoryRecoveryIntelligenceService recoveryIntelligence;
     private readonly ITenantContextAccessor tenantContextAccessor;
 
     public FactoryEventRouter(
@@ -28,6 +30,7 @@ public sealed class FactoryEventRouter : IFactoryEventRouter
         IFactoryOrchestrationCoordinator coordinator,
         IFactoryOutcomeExecutionService outcomeExecution,
         IFactoryOutcomeAiTaskSyncService outcomeAiTaskSync,
+        IFactoryRecoveryIntelligenceService recoveryIntelligence,
         ITenantContextAccessor tenantContextAccessor)
     {
         this.dbContext = dbContext;
@@ -36,6 +39,7 @@ public sealed class FactoryEventRouter : IFactoryEventRouter
         this.coordinator = coordinator;
         this.outcomeExecution = outcomeExecution;
         this.outcomeAiTaskSync = outcomeAiTaskSync;
+        this.recoveryIntelligence = recoveryIntelligence;
         this.tenantContextAccessor = tenantContextAccessor;
     }
 
@@ -191,7 +195,8 @@ public sealed class FactoryEventRouter : IFactoryEventRouter
             .ToListAsync(cancellationToken);
 
         var recoveryPlan = FactoryOutcomeRecoveryPlanEngine.Build(workCase, impact, childCases);
-        workCase.RecoveryPlanJson = FactoryOutcomeRecoveryPlanEngine.ToJson(recoveryPlan);
+        var intelligence = await recoveryIntelligence.BuildForCaseAsync(workCase, childCases, cancellationToken);
+        workCase.RecoveryPlanJson = FactoryOutcomeRecoveryPlanEngine.ToJson(recoveryPlan, intelligence);
         workCase.ClosureContractKey = DigitalWorkforceClosureContracts.Coordinator;
 
         await dbContext.SaveChangesAsync(cancellationToken);

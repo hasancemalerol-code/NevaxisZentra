@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryDecisionCenter;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.FactoryOutcomeExecution;
@@ -324,6 +325,12 @@ public sealed class FactoryOutcomeExecutionService : IFactoryOutcomeExecutionSer
             rootCase.UpdatedAtUtc = DateTimeOffset.UtcNow;
             rootCase.ConcurrencyToken++;
             await dbContext.SaveChangesAsync(cancellationToken);
+            await learningService.RecordFailureIntelligenceAsync(
+                rootCase,
+                children,
+                FactoryRecoveryLearningDisposition.VerificationFailed,
+                snapshot.Summary,
+                cancellationToken);
             throw new FactoryOutcomeExecutionException(
                 FactoryOutcomeExecutionFailureCodes.VerificationFailed,
                 snapshot.Summary);

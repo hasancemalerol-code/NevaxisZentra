@@ -70,6 +70,27 @@ internal sealed class FactoryOutcomeLearningRecordEntityConfiguration : IEntityT
         entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         entity.Property(e => e.FacilityId).HasColumnName("facility_id");
         entity.Property(e => e.SourceCaseId).HasColumnName("source_case_id");
+        entity.Property(e => e.RecordVersion).HasColumnName("record_version");
+        entity.Property(e => e.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(200);
+        entity.Property(e => e.LogicVersion).HasColumnName("logic_version").HasMaxLength(40);
+        entity.Property(e => e.LearningDisposition).HasColumnName("learning_disposition").HasMaxLength(40);
+        entity.Property(e => e.OutcomeType).HasColumnName("outcome_type").HasMaxLength(80);
+        entity.Property(e => e.EventCategory).HasColumnName("event_category").HasMaxLength(120);
+        entity.Property(e => e.MachineCode).HasColumnName("machine_code").HasMaxLength(60);
+        entity.Property(e => e.OrderReference).HasColumnName("order_reference").HasMaxLength(80);
+        entity.Property(e => e.MaterialCode).HasColumnName("material_code").HasMaxLength(80);
+        entity.Property(e => e.MoldCode).HasColumnName("mold_code").HasMaxLength(80);
+        entity.Property(e => e.Severity).HasColumnName("severity").HasMaxLength(20);
+        entity.Property(e => e.PatternKey).HasColumnName("pattern_key").HasMaxLength(240);
+        entity.Property(e => e.PatternJson).HasColumnName("pattern_json");
+        entity.Property(e => e.WorkersJson).HasColumnName("workers_json");
+        entity.Property(e => e.BlockersJson).HasColumnName("blockers_json");
+        entity.Property(e => e.FailureModesJson).HasColumnName("failure_modes_json");
+        entity.Property(e => e.ImpactBeforeJson).HasColumnName("impact_before_json");
+        entity.Property(e => e.TimeToFirstActionMinutes).HasColumnName("time_to_first_action_minutes");
+        entity.Property(e => e.TimeToVerifiedMinutes).HasColumnName("time_to_verified_minutes");
+        entity.Property(e => e.DeliveryProtected).HasColumnName("delivery_protected");
+        entity.Property(e => e.EvidenceStrength).HasColumnName("evidence_strength").HasMaxLength(40);
         entity.Property(e => e.ProblemPattern).HasColumnName("problem_pattern").HasMaxLength(240);
         entity.Property(e => e.CausePattern).HasColumnName("cause_pattern").HasMaxLength(240);
         entity.Property(e => e.SelectedStrategyKey).HasColumnName("selected_strategy_key").HasMaxLength(80);
@@ -83,5 +104,15 @@ internal sealed class FactoryOutcomeLearningRecordEntityConfiguration : IEntityT
         entity.Property(e => e.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.ProblemPattern })
             .HasDatabaseName("ix_factory_outcome_learning_records_problem");
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.PatternKey })
+            .HasDatabaseName("ix_factory_outcome_learning_records_pattern");
+        entity.HasIndex(e => new { e.TenantId, e.FacilityId, e.OutcomeType, e.EventCategory })
+            .HasDatabaseName("ix_factory_outcome_learning_records_outcome_event");
+        entity.HasIndex(e => new { e.TenantId, e.IdempotencyKey })
+            .IsUnique()
+            .HasDatabaseName("ux_factory_outcome_learning_records_idempotency");
+        entity.HasIndex(e => new { e.TenantId, e.SourceCaseId, e.RecordVersion })
+            .IsUnique()
+            .HasDatabaseName("ux_factory_outcome_learning_records_source_version");
     }
 }

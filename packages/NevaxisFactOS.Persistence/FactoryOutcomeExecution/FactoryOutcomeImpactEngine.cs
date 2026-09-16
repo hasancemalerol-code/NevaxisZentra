@@ -46,6 +46,35 @@ public static class FactoryOutcomeImpactEngine
             domainImpacts);
     }
 
+    public static FactoryOutcomeImpactSnapshot? FromJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            return new FactoryOutcomeImpactSnapshot(
+                root.TryGetProperty("outcomeAtRisk", out var outcome) ? outcome.GetString() ?? string.Empty : string.Empty,
+                root.TryGetProperty("quantityAtRisk", out var qty) && qty.TryGetInt32(out var qtyVal) ? qtyVal : null,
+                root.TryGetProperty("projectedGap", out var gap) && gap.TryGetInt32(out var gapVal) ? gapVal : null,
+                root.TryGetProperty("orderReference", out var order) ? order.GetString() : null,
+                root.TryGetProperty("machineCode", out var machine) ? machine.GetString() : null,
+                root.TryGetProperty("materialCode", out var material) ? material.GetString() : null,
+                root.TryGetProperty("timeToBreachLabel", out var breach) ? breach.GetString() : null,
+                root.TryGetProperty("confidence", out var confidence) && confidence.TryGetDecimal(out var confVal) ? confVal : 0.7m,
+                root.TryGetProperty("financialImpactTry", out var financial) ? financial.GetString() : null,
+                []);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
     public static string ToJson(FactoryOutcomeImpactSnapshot snapshot) =>
         JsonSerializer.Serialize(new
         {

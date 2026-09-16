@@ -1,6 +1,7 @@
 using System.Text.Json;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 
 namespace NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 
@@ -48,7 +49,9 @@ public static class FactoryOutcomeRecoveryPlanEngine
             ]);
     }
 
-    public static string ToJson(FactoryOutcomeRecoveryPlanDocument document)
+    public static string ToJson(
+        FactoryOutcomeRecoveryPlanDocument document,
+        FactoryRecoveryIntelligenceSnapshot? intelligence = null)
     {
         var selected = ResolveSelectedPlan(document);
 
@@ -57,6 +60,23 @@ public static class FactoryOutcomeRecoveryPlanEngine
             objective = document.Objective,
             selectedPlanKey = document.SelectedPlanKey,
             verificationCriteria = document.VerificationCriteria,
+            recoveryIntelligence = intelligence is null ? null : new
+            {
+                similarVerifiedCaseCount = intelligence.SimilarVerifiedCaseCount,
+                evidenceStrength = intelligence.EvidenceStrength,
+                expectedRecoveryMinutesMedian = intelligence.ExpectedRecoveryMinutesMedian,
+                knownFailureModes = intelligence.KnownFailureModes,
+                planEvidence = intelligence.PlanEvidence.Select(plan => new
+                {
+                    planKey = plan.PlanKey,
+                    similarVerifiedCaseCount = plan.SimilarVerifiedCaseCount,
+                    verifiedSuccesses = plan.VerifiedSuccesses,
+                    medianRecoveryMinutes = plan.MedianRecoveryMinutes,
+                    sampleConfidence = plan.SampleConfidence,
+                    knownRisks = plan.KnownRisks,
+                    knownFailureModes = plan.KnownFailureModes,
+                }),
+            },
             plans = document.Plans.Select(plan => new
             {
                 planKey = plan.PlanKey,
