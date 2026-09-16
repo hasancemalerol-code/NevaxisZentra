@@ -688,10 +688,11 @@
 }
 
 .dwf-table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  max-width: 100%;
   margin-top: 0.7rem;
   border: 1px solid var(--dwf-border);
-  border-radius: 12px;
+  border-radius: var(--fact-radius-md, 6px);
 }
 
 .dwf-table {

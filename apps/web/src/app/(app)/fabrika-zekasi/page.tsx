@@ -6,8 +6,14 @@ export default async function FactoryIntelligencePage() {
 
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
-        <div className="commint-error-banner">{result.message}</div>
+      <main className="fact-workspace" data-testid="factory-intelligence-view">
+        <header className="fact-workspace__header">
+          <div>
+            <p className="fact-workspace__context">FABRİKA · ZEKÂ</p>
+            <h1 className="fact-workspace__title">Fabrika Zekâsı</h1>
+          </div>
+        </header>
+        <div role="alert" className="state-panel error-state">{result.message}</div>
       </main>
     );
   }

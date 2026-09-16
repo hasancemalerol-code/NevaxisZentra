@@ -178,7 +178,14 @@ async function request(
   });
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `İstek başarısız (${response.status})`);
+    let message = `İstek başarısız (${response.status})`;
+    try {
+      const body = JSON.parse(text) as { message?: string; title?: string };
+      message = body.message ?? body.title ?? message;
+    } catch {
+      // Never surface raw HTML or stack traces in operational UI.
+    }
+    throw new Error(message);
   }
   return response;
 }
