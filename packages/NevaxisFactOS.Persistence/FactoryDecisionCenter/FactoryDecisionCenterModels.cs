@@ -37,10 +37,35 @@ public sealed record FactoryDecisionCenterLiveQueues(
     IReadOnlyList<FactoryDecisionCaseQueueItem> PendingVerification,
     IReadOnlyList<FactoryDecisionCaseQueueItem> VerifiedClosedToday);
 
+public sealed record FactoryDecisionEarlyWarningCard(
+    Guid RiskId,
+    Guid? CaseId,
+    string RiskType,
+    string RiskState,
+    string MachineCode,
+    string? OrderReference,
+    string ObservedSummary,
+    string PredictedSummary,
+    string TimeToImpactLabel,
+    string ConfidenceBand,
+    string Horizon,
+    IReadOnlyList<string> Evidence,
+    IReadOnlyList<string> RecommendedActions,
+    string DataQuality,
+    DateTimeOffset GeneratedAtUtc);
+
+public sealed record FactoryDecisionEarlyWarningQueues(
+    IReadOnlyList<FactoryDecisionEarlyWarningCard> CriticalPredictedRisks,
+    IReadOnlyList<FactoryDecisionEarlyWarningCard> DeliveryRisks,
+    IReadOnlyList<FactoryDecisionEarlyWarningCard> MachineDegradationTrends,
+    IReadOnlyList<FactoryDecisionEarlyWarningCard> MaterialDepletionRisks,
+    IReadOnlyList<FactoryDecisionEarlyWarningCard> QualityDeteriorationTrends);
+
 public sealed record FactoryDecisionCenterWorkspaceSnapshot(
     FactoryDecisionCenterExecutiveSummary Summary,
     IReadOnlyList<FactoryDecisionCaseQueueItem> PriorityQueue,
     FactoryDecisionCenterLiveQueues LiveQueues,
+    FactoryDecisionEarlyWarningQueues EarlyWarnings,
     DateTimeOffset GeneratedAtUtc);
 
 public sealed record FactoryDecisionRecoveryStep(

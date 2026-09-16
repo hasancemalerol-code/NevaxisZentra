@@ -49,6 +49,7 @@ using NevaxisFactOS.Persistence.GoldenDemoP1;
 using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
 using NevaxisFactOS.Persistence.MarketRates;
 using NevaxisFactOS.Persistence.Configurations;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -389,6 +390,11 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<DigitalWorkerBudget> DigitalWorkerBudgets => Set<DigitalWorkerBudget>();
     public DbSet<DigitalWorkforceRuntimeState> DigitalWorkforceRuntimeStates => Set<DigitalWorkforceRuntimeState>();
     public DbSet<DigitalWorkExecution> DigitalWorkExecutions => Set<DigitalWorkExecution>();
+
+    public DbSet<FactoryPredictiveSignal> FactoryPredictiveSignals => Set<FactoryPredictiveSignal>();
+    public DbSet<FactoryOperationalBaseline> FactoryOperationalBaselines => Set<FactoryOperationalBaseline>();
+    public DbSet<FactoryPredictedRisk> FactoryPredictedRisks => Set<FactoryPredictedRisk>();
+    public DbSet<FactoryPredictionEvaluation> FactoryPredictionEvaluations => Set<FactoryPredictionEvaluation>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3204,6 +3210,30 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new DigitalWorkExecutionEntityConfiguration());
         modelBuilder.Entity<DigitalWorkExecution>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryPredictiveSignalConfiguration());
+        modelBuilder.Entity<FactoryPredictiveSignal>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryOperationalBaselineConfiguration());
+        modelBuilder.Entity<FactoryOperationalBaseline>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryPredictedRiskConfiguration());
+        modelBuilder.Entity<FactoryPredictedRisk>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryPredictionEvaluationConfiguration());
+        modelBuilder.Entity<FactoryPredictionEvaluation>().HasQueryFilter(e =>
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);

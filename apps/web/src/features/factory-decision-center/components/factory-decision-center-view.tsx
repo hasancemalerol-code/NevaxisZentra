@@ -13,6 +13,7 @@ import {
 } from "../domain/factory-decision-center-labels";
 import type {
   FactoryDecisionCaseQueueItemApi,
+  FactoryDecisionEarlyWarningCardApi,
   FactoryDecisionCenterWorkspaceApi,
 } from "../server/factory-decision-center-api-client";
 import { PresentationModeReturnLink } from "@/features/presentation-mode/components/presentation-mode-return-link";
@@ -159,6 +160,12 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
         })}
       </section>
 
+      <EarlyWarningSection
+        title="ERKEN UYARI / ÖNGÖRÜLEN RİSKLER"
+        testId="factory-decision-early-warnings"
+        queues={workspace.earlyWarnings}
+      />
+
       <LiveQueueSection
         title="KRİTİK KARARLAR"
         testId="factory-decision-queue-critical"
@@ -201,6 +208,86 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
         emptyMessage="Bugün doğrulanmış kapanış yok."
       />
     </main>
+  );
+}
+
+function EarlyWarningCard({ item }: Readonly<{ item: FactoryDecisionEarlyWarningCardApi }>) {
+  return (
+    <article className="commint-panel" data-testid={`factory-early-warning-${item.riskId}`}>
+      <div className="commint-panel__header">
+        <div>
+          <p className="commint-executive__eyebrow">{item.riskState.toUpperCase()} · {item.confidenceBand.toUpperCase()}</p>
+          <h3>{item.machineCode} {item.orderReference ? `· ${item.orderReference}` : ""}</h3>
+        </div>
+        <span className="commint-kpi-card__badge">{item.horizon}</span>
+      </div>
+      <div className="commint-kpi-grid" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <div>
+          <p className="commint-kpi-card__label">Mevcut durum</p>
+          <p className="commint-kpi-card__detail">{item.observedSummary}</p>
+        </div>
+        <div>
+          <p className="commint-kpi-card__label">Öngörü</p>
+          <p className="commint-kpi-card__detail">{item.predictedSummary}</p>
+        </div>
+        <div>
+          <p className="commint-kpi-card__label">Etki süresi</p>
+          <p className="commint-kpi-card__detail">{item.timeToImpactLabel}</p>
+        </div>
+        <div>
+          <p className="commint-kpi-card__label">Veri kalitesi</p>
+          <p className="commint-kpi-card__detail">{item.dataQuality}</p>
+        </div>
+      </div>
+      <div style={{ marginTop: "1rem" }}>
+        <p className="commint-kpi-card__label">Önerilen önlem</p>
+        <p className="commint-kpi-card__detail">{item.recommendedActions.join(" · ")}</p>
+      </div>
+      {item.caseId ? (
+        <div className="commint-executive__actions" style={{ marginTop: "1rem" }}>
+          <Link href={`/fabrika-karar-merkezi/vakalar/${item.caseId}`} className="commint-button">
+            Erken uyarı vakasını aç
+            <ArrowUpRight aria-hidden="true" size={16} />
+          </Link>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function EarlyWarningSection({
+  title,
+  testId,
+  queues,
+}: Readonly<{
+  title: string;
+  testId: string;
+  queues: FactoryDecisionCenterWorkspaceApi["earlyWarnings"];
+}>) {
+  const items = [
+    ...queues.criticalPredictedRisks,
+    ...queues.deliveryRisks,
+    ...queues.machineDegradationTrends,
+    ...queues.materialDepletionRisks,
+    ...queues.qualityDeteriorationTrends,
+  ];
+
+  return (
+    <section className="commint-panel" style={{ marginTop: "1.5rem" }} data-testid={testId}>
+      <div className="commint-panel__header">
+        <h2>{title}</h2>
+        <span className="commint-kpi-card__badge">{items.length}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="commint-kpi-card__detail">Aktif öngörülen risk bulunmuyor.</p>
+      ) : (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          {items.map((item) => (
+            <EarlyWarningCard key={item.riskId} item={item} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

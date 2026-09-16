@@ -22,6 +22,7 @@ using NevaxisFactOS.Persistence.SaasIdentity;
 using NevaxisFactOS.Persistence.AdminAccess;
 using NevaxisFactOS.Persistence.Integration;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -428,6 +429,16 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureDigitalWorkforceCostReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryIntelligenceReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryIntelligenceManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureFactoryIntelligenceCalibrationPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
@@ -3078,6 +3089,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             DigitalWorkforcePermissionKeys.CostRead,
             DevelopmentPilotDigitalWorkforceIds.CostReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryIntelligenceReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryIntelligencePermissionKeys.Read,
+            DevelopmentPilotFactoryIntelligenceIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryIntelligenceManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryIntelligencePermissionKeys.Manage,
+            DevelopmentPilotFactoryIntelligenceIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureFactoryIntelligenceCalibrationPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            FactoryIntelligencePermissionKeys.Calibration,
+            DevelopmentPilotFactoryIntelligenceIds.CalibrationPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

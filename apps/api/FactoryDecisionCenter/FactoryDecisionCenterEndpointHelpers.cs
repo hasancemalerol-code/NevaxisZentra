@@ -62,7 +62,34 @@ internal static class FactoryDecisionCenterEndpointHelpers
             pendingVerification = workspace.LiveQueues.PendingVerification.Select(MapQueueItem).ToList(),
             verifiedClosedToday = workspace.LiveQueues.VerifiedClosedToday.Select(MapQueueItem).ToList(),
         },
+        earlyWarnings = new
+        {
+            criticalPredictedRisks = workspace.EarlyWarnings.CriticalPredictedRisks.Select(MapEarlyWarningCard).ToList(),
+            deliveryRisks = workspace.EarlyWarnings.DeliveryRisks.Select(MapEarlyWarningCard).ToList(),
+            machineDegradationTrends = workspace.EarlyWarnings.MachineDegradationTrends.Select(MapEarlyWarningCard).ToList(),
+            materialDepletionRisks = workspace.EarlyWarnings.MaterialDepletionRisks.Select(MapEarlyWarningCard).ToList(),
+            qualityDeteriorationTrends = workspace.EarlyWarnings.QualityDeteriorationTrends.Select(MapEarlyWarningCard).ToList(),
+        },
         generatedAtUtc = workspace.GeneratedAtUtc,
+    };
+
+    private static object MapEarlyWarningCard(FactoryDecisionEarlyWarningCard card) => new
+    {
+        riskId = card.RiskId,
+        caseId = card.CaseId,
+        riskType = card.RiskType,
+        riskState = card.RiskState,
+        machineCode = card.MachineCode,
+        orderReference = card.OrderReference,
+        observedSummary = card.ObservedSummary,
+        predictedSummary = card.PredictedSummary,
+        timeToImpactLabel = card.TimeToImpactLabel,
+        confidenceBand = card.ConfidenceBand,
+        horizon = card.Horizon,
+        evidence = card.Evidence,
+        recommendedActions = card.RecommendedActions,
+        dataQuality = card.DataQuality,
+        generatedAtUtc = card.GeneratedAtUtc,
     };
 
     internal static object MapCaseDetail(FactoryDecisionCaseDetailSnapshot detail) => new

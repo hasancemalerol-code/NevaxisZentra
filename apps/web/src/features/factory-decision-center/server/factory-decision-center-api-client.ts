@@ -40,10 +40,37 @@ export type FactoryDecisionCenterLiveQueuesApi = Readonly<{
   verifiedClosedToday: readonly FactoryDecisionCaseQueueItemApi[];
 }>;
 
+export type FactoryDecisionEarlyWarningCardApi = Readonly<{
+  riskId: string;
+  caseId?: string;
+  riskType: string;
+  riskState: string;
+  machineCode: string;
+  orderReference?: string;
+  observedSummary: string;
+  predictedSummary: string;
+  timeToImpactLabel: string;
+  confidenceBand: string;
+  horizon: string;
+  evidence: readonly string[];
+  recommendedActions: readonly string[];
+  dataQuality: string;
+  generatedAtUtc: string;
+}>;
+
+export type FactoryDecisionEarlyWarningQueuesApi = Readonly<{
+  criticalPredictedRisks: readonly FactoryDecisionEarlyWarningCardApi[];
+  deliveryRisks: readonly FactoryDecisionEarlyWarningCardApi[];
+  machineDegradationTrends: readonly FactoryDecisionEarlyWarningCardApi[];
+  materialDepletionRisks: readonly FactoryDecisionEarlyWarningCardApi[];
+  qualityDeteriorationTrends: readonly FactoryDecisionEarlyWarningCardApi[];
+}>;
+
 export type FactoryDecisionCenterWorkspaceApi = Readonly<{
   summary: FactoryDecisionCenterSummaryApi;
   priorityQueue: readonly FactoryDecisionCaseQueueItemApi[];
   liveQueues: FactoryDecisionCenterLiveQueuesApi;
+  earlyWarnings: FactoryDecisionEarlyWarningQueuesApi;
   generatedAtUtc: string;
 }>;
 

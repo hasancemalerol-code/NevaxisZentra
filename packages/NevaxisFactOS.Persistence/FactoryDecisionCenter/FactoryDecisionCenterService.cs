@@ -7,6 +7,7 @@ using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
 using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
@@ -38,6 +39,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
     private readonly IHostEnvironment environment;
     private readonly IFactoryOutcomeExecutionService outcomeExecution;
     private readonly IFactoryRecoveryIntelligenceService recoveryIntelligence;
+    private readonly IFactoryIntelligenceService factoryIntelligence;
 
     public FactoryDecisionCenterService(
         IFactoryDecisionCenterRepository repository,
@@ -47,7 +49,8 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         TenantDatabaseSession tenantDatabaseSession,
         IHostEnvironment environment,
         IFactoryOutcomeExecutionService outcomeExecution,
-        IFactoryRecoveryIntelligenceService recoveryIntelligence)
+        IFactoryRecoveryIntelligenceService recoveryIntelligence,
+        IFactoryIntelligenceService factoryIntelligence)
     {
         this.repository = repository;
         this.aiTaskSync = aiTaskSync;
@@ -57,6 +60,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         this.environment = environment;
         this.outcomeExecution = outcomeExecution;
         this.recoveryIntelligence = recoveryIntelligence;
+        this.factoryIntelligence = factoryIntelligence;
     }
 
     public Task<FactoryDecisionCenterWorkspaceSnapshot> GetWorkspaceAsync(
@@ -122,6 +126,8 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
             queue.Add(FactoryDecisionCenterProjectionEngine.ProjectQueueItem(rootCase, children));
         }
 
+        var earlyWarningCards = await factoryIntelligence.GetEarlyWarningCardsAsync(facilityId, cancellationToken);
+
         return new FactoryDecisionCenterWorkspaceSnapshot(
             FactoryDecisionCenterProjectionEngine.BuildSummary(cases),
             queue,
@@ -130,6 +136,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
                 rootCase => FactoryDecisionCenterProjectionEngine.ProjectQueueItem(
                     rootCase,
                     childrenByRoot.GetValueOrDefault(rootCase.Id, []))),
+            FactoryIntelligenceDecisionCenterProjection.MapQueues(earlyWarningCards),
             DateTimeOffset.UtcNow);
     }
 
