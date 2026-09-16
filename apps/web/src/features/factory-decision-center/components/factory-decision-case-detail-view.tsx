@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ArrowLeft, CheckCircle2, ShieldAlert } from "lucide-react";
 
+import { ContextKnowledgePanel } from "@/features/context-knowledge/components/context-knowledge-panel";
+import type { WorkerContextPackageApi } from "@/features/context-knowledge/server/context-knowledge-api-client";
+
 import {
   getFactoryDecisionSeverityLabel,
   getFactoryDecisionStatusLabel,
@@ -19,9 +22,10 @@ import "@/features/commercial-intelligence/components/commercial-intelligence-wo
 
 type FactoryDecisionCaseDetailViewProps = Readonly<{
   detail: FactoryDecisionCaseDetailApi;
+  contextPackage?: WorkerContextPackageApi | null;
 }>;
 
-export function FactoryDecisionCaseDetailView({ detail: initialDetail }: FactoryDecisionCaseDetailViewProps) {
+export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPackage = null }: FactoryDecisionCaseDetailViewProps) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [message, setMessage] = useState<string | null>(null);
@@ -308,6 +312,15 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail }: Factory
           </div>
         ) : null}
       </section>
+
+      {contextPackage ? (
+        <section className="commint-panel" data-testid="factory-decision-context-knowledge">
+          <div className="commint-panel__header">
+            <h2>Worker Bağlamı</h2>
+          </div>
+          <ContextKnowledgePanel package={contextPackage} />
+        </section>
+      ) : null}
     </main>
   );
 }

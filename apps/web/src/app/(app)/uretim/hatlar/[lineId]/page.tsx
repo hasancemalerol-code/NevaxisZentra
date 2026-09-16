@@ -1,5 +1,6 @@
 import { MixedProductionLineDetailView } from "@/features/mixed-production/components/mixed-production-line-detail-view";
 import { loadMixedProductionLineWorkspace } from "@/features/mixed-production/server/mixed-production-reader";
+import { loadWorkerContextForLine } from "@/features/context-knowledge/server/context-knowledge-reader";
 import { loadThroughputIntelligenceWorkspace } from "@/features/throughput-intelligence/server/throughput-intelligence-reader";
 
 type MixedProductionLineDetailPageProps = Readonly<{
@@ -10,6 +11,7 @@ export default async function MixedProductionLineDetailPage({ params }: MixedPro
   const { lineId } = await params;
   const result = await loadMixedProductionLineWorkspace(lineId);
   const throughputResult = await loadThroughputIntelligenceWorkspace(lineId);
+  const contextResult = await loadWorkerContextForLine(lineId);
 
   if (result.status === "failure") {
     return (
@@ -31,6 +33,7 @@ export default async function MixedProductionLineDetailPage({ params }: MixedPro
           ? { overview: throughputResult.overview, comparison: throughputResult.comparison }
           : null
       }
+      contextPackage={contextResult.status === "success" ? contextResult.package : null}
     />
   );
 }

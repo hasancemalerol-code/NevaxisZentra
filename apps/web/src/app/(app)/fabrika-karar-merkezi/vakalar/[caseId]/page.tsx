@@ -1,4 +1,5 @@
 import { FactoryDecisionCaseDetailView } from "@/features/factory-decision-center/components/factory-decision-case-detail-view";
+import { loadWorkerContextForCase } from "@/features/context-knowledge/server/context-knowledge-reader";
 import { loadFactoryDecisionCaseDetail } from "@/features/factory-decision-center/server/factory-decision-center-reader";
 
 type PageProps = Readonly<{
@@ -8,6 +9,7 @@ type PageProps = Readonly<{
 export default async function FactoryDecisionCaseDetailPage({ params }: PageProps) {
   const { caseId } = await params;
   const result = await loadFactoryDecisionCaseDetail(caseId);
+  const contextResult = await loadWorkerContextForCase(caseId);
 
   if (result.status === "failure") {
     return (
@@ -17,5 +19,10 @@ export default async function FactoryDecisionCaseDetailPage({ params }: PageProp
     );
   }
 
-  return <FactoryDecisionCaseDetailView detail={result.detail} />;
+  return (
+    <FactoryDecisionCaseDetailView
+      detail={result.detail}
+      contextPackage={contextResult.status === "success" ? contextResult.package : null}
+    />
+  );
 }

@@ -25,6 +25,7 @@ using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
+using NevaxisFactOS.Persistence.ContextKnowledge;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -460,6 +461,16 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureThroughputIntelligenceManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureThroughputIntelligenceSimulatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContextKnowledgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContextKnowledgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContextKnowledgeReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContextKnowledgeManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContextKnowledgePromotePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3203,6 +3214,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ThroughputIntelligencePermissionKeys.Simulate,
             DevelopmentPilotThroughputIntelligenceIds.SimulatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContextKnowledgeReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContextKnowledgePermissionKeys.Read,
+            DevelopmentPilotContextKnowledgeIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContextKnowledgeManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContextKnowledgePermissionKeys.Manage,
+            DevelopmentPilotContextKnowledgeIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContextKnowledgePromotePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContextKnowledgePermissionKeys.Promote,
+            DevelopmentPilotContextKnowledgeIds.PromotePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

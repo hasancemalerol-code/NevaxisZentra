@@ -52,6 +52,7 @@ using NevaxisFactOS.Persistence.Configurations;
 using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
+using NevaxisFactOS.Persistence.ContextKnowledge;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -415,6 +416,12 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<OperatorStationQualification> OperatorStationQualifications => Set<OperatorStationQualification>();
     public DbSet<ThroughputScenarioDefinition> ThroughputScenarioDefinitions => Set<ThroughputScenarioDefinition>();
     public DbSet<ThroughputScenarioResult> ThroughputScenarioResults => Set<ThroughputScenarioResult>();
+
+    public DbSet<CanonicalOperationalStateRecord> CanonicalOperationalStateRecords => Set<CanonicalOperationalStateRecord>();
+    public DbSet<FactoryKnowledgeRecord> FactoryKnowledgeRecords => Set<FactoryKnowledgeRecord>();
+    public DbSet<ContextSnapshotRecord> ContextSnapshotRecords => Set<ContextSnapshotRecord>();
+    public DbSet<DataLifecyclePolicyRecord> DataLifecyclePolicyRecords => Set<DataLifecyclePolicyRecord>();
+    public DbSet<TelemetryAggregateRecord> TelemetryAggregateRecords => Set<TelemetryAggregateRecord>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3335,6 +3342,31 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ThroughputScenarioResultConfiguration());
         modelBuilder.Entity<ThroughputScenarioResult>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new CanonicalOperationalStateRecordConfiguration());
+        modelBuilder.Entity<CanonicalOperationalStateRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryKnowledgeRecordConfiguration());
+        modelBuilder.Entity<FactoryKnowledgeRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ContextSnapshotRecordConfiguration());
+        modelBuilder.Entity<ContextSnapshotRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DataLifecyclePolicyRecordConfiguration());
+        modelBuilder.Entity<DataLifecyclePolicyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TelemetryAggregateRecordConfiguration());
+        modelBuilder.Entity<TelemetryAggregateRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }
