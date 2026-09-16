@@ -71,7 +71,15 @@ $latestMigration = Get-LatestMigrationId
 $buildTimestampUtc = (Get-Date).ToUniversalTime().ToString("o")
 
 Write-Step "Recreate release staging"
-if (Test-Path $stagingRoot) { Remove-Item -Recurse -Force $stagingRoot }
+if (Test-Path $stagingRoot) {
+    try {
+        Remove-Item -Recurse -Force $stagingRoot -ErrorAction Stop
+    }
+    catch {
+        Write-Warning "Existing staging root is locked ($stagingRoot). Using versioned staging root."
+        $stagingRoot = Join-Path $OutputRoot ("staging-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+    }
+}
 $dirs = @(
     (Join-Path $stagingRoot "desktop"),
     (Join-Path $stagingRoot "api"),

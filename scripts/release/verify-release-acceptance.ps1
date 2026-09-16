@@ -84,6 +84,7 @@ if (-not $SkipMsiBuild) {
     $msiStage = New-Stage "msi-build"
     try {
         & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "scripts\desktop\publish-full-windows-release.ps1") -RepositoryRoot $RepositoryRoot | Out-Host
+        if ($LASTEXITCODE -ne 0) { throw "publish-full-windows-release.ps1 exited with code $LASTEXITCODE" }
         Complete-Stage $msiStage "PASS" @("publish-full-windows-release")
     }
     catch {
