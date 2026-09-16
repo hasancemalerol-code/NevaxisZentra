@@ -3,8 +3,11 @@ using NevaxisFactOS.Persistence.Authorization;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryDecisionCenter;
 using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using NevaxisFactOS.Persistence;
 
 namespace NevaxisFactOS.Api.FactoryDecisionCenter;
 
@@ -20,6 +23,9 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         group.MapPost("/cases/{caseId:guid}/execute", ExecuteRecoveryAsync);
         group.MapPost("/cases/{caseId:guid}/verify", VerifyOutcomeAsync);
         group.MapPost("/reset", ResetScenarioAsync);
+        group.MapGet("/learning/{learningRecordId:guid}", GetHistoricalLearningCaseAsync);
+        group.MapGet("/learning/search", SearchHistoricalLearningCasesAsync);
+        group.MapPost("/learning/dev-fixtures/seed", SeedDevelopmentLearningFixturesAsync);
 
         return endpoints;
     }
@@ -33,6 +39,8 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         services.AddScoped<IFactoryOutcomeExecutionService, FactoryOutcomeExecutionService>();
         services.AddScoped<IFactoryOutcomeAiTaskSyncService, FactoryOutcomeAiTaskSyncService>();
         services.AddScoped<IFactoryOutcomeLearningService, FactoryOutcomeLearningService>();
+        services.AddScoped<IFactoryRecoveryLearningRepository, FactoryRecoveryLearningRepository>();
+        services.AddScoped<IFactoryRecoveryIntelligenceService, FactoryRecoveryIntelligenceService>();
         return services;
     }
 
@@ -149,6 +157,73 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         {
             return FactoryDecisionCenterEndpointHelpers.MapException(ex);
         }
+    }
+
+    private static async Task<IResult> GetHistoricalLearningCaseAsync(
+        Guid learningRecordId,
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IFactoryDecisionCenterService service,
+        CancellationToken cancellationToken)
+    {
+        var (access, failure) = await FactoryDecisionCenterEndpointHelpers.ResolveAccessAsync(
+            facilityId, FactoryOrchestrationPermissionKeys.Read, facilityAccessResolver, cancellationToken);
+        if (access is null) return failure!;
+
+        try
+        {
+            var detail = await service.GetHistoricalLearningCaseAsync(learningRecordId, cancellationToken);
+            return TypedResults.Ok(FactoryDecisionCenterEndpointHelpers.MapHistoricalLearningCase(detail));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return TypedResults.NotFound(new { code = "not-found", message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> SearchHistoricalLearningCasesAsync(
+        [FromQuery] Guid? facilityId,
+        [FromQuery] string? outcomeType,
+        [FromQuery] string? machineCode,
+        [FromQuery] string? orderReference,
+        [FromQuery] string? eventCategory,
+        [FromQuery] string? strategyKey,
+        IFacilityAccessResolver facilityAccessResolver,
+        IFactoryDecisionCenterService service,
+        CancellationToken cancellationToken)
+    {
+        var (access, failure) = await FactoryDecisionCenterEndpointHelpers.ResolveAccessAsync(
+            facilityId, FactoryOrchestrationPermissionKeys.Read, facilityAccessResolver, cancellationToken);
+        if (access is null) return failure!;
+
+        var results = await service.SearchHistoricalLearningCasesAsync(
+            access.FacilityId,
+            new FactoryRecoveryLearningSearchFilters(
+                outcomeType, machineCode, orderReference, null, eventCategory, strategyKey, null, null, 20),
+            cancellationToken);
+        return TypedResults.Ok(results.Select(FactoryDecisionCenterEndpointHelpers.MapHistoricalLearningCase).ToList());
+    }
+
+    private static async Task<IResult> SeedDevelopmentLearningFixturesAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IAuthorizationContext authorizationContext,
+        NevaxisFactOSDbContext dbContext,
+        IHostEnvironment environment,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.Forbid();
+        }
+
+        var (access, failure) = await FactoryDecisionCenterEndpointHelpers.ResolveAccessAsync(
+            facilityId, FactoryOrchestrationPermissionKeys.Manage, facilityAccessResolver, cancellationToken);
+        if (access is null) return failure!;
+
+        await DevelopmentFactoryRecoveryLearningFixtureSeeder.SeedAsync(
+            dbContext, access.TenantId, access.FacilityId, cancellationToken);
+        return TypedResults.Ok(new { seeded = true });
     }
 
     private static async Task<IResult> ResetScenarioAsync(

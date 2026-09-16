@@ -101,6 +101,78 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail }: Factory
         </ul>
       </section>
 
+      {detail.recoveryIntelligence ? (
+        <section className="commint-panel" data-testid="factory-decision-recovery-intelligence">
+          <div className="commint-panel__header"><h2>KURTARMA ZEKÂSI</h2></div>
+          <div className="commint-kpi-grid" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+            <div>
+              <p className="commint-kpi-card__label">Benzer Doğrulanmış Vakalar</p>
+              <p className="commint-kpi-card__value">{detail.recoveryIntelligence.similarVerifiedCaseCount}</p>
+            </div>
+            <div>
+              <p className="commint-kpi-card__label">Tahmini Kurtarma Süresi</p>
+              <p className="commint-kpi-card__value">
+                {detail.recoveryIntelligence.expectedRecoveryMinutesMedian
+                  ? `${detail.recoveryIntelligence.expectedRecoveryMinutesMedian} dk`
+                  : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="commint-kpi-card__label">Kanıt Gücü</p>
+              <p className="commint-kpi-card__value" style={{ fontSize: "1rem" }}>
+                {formatEvidenceStrength(detail.recoveryIntelligence.evidenceStrength)}
+              </p>
+            </div>
+            <div>
+              <p className="commint-kpi-card__label">Bilinen Başarısızlık Modları</p>
+              <p className="commint-kpi-card__value">{detail.recoveryIntelligence.knownFailureModes.length}</p>
+            </div>
+          </div>
+
+          {detail.recoveryIntelligence.similarCases.length > 0 ? (
+            <div style={{ marginTop: "1rem" }}>
+              <p className="commint-kpi-card__label">Benzer Doğrulanmış Vakalar</p>
+              {detail.recoveryIntelligence.similarCases.slice(0, 3).map((item) => (
+                <article key={item.learningRecordId} className="commint-kpi-card" style={{ marginTop: "0.75rem" }}>
+                  <p className="commint-kpi-card__label">
+                    %{item.similarityPercent} BENZER · {item.machineCode} / {item.orderReference}
+                  </p>
+                  <p className="commint-kpi-card__detail">{item.problemSummary}</p>
+                  <p className="commint-kpi-card__detail">
+                    Uygulanan strateji: {item.appliedStrategy} · Sonuç: {item.outcomeSummary}
+                    {item.recoveryMinutes ? ` · ${item.recoveryMinutes} dk` : ""}
+                  </p>
+                  <p className="commint-kpi-card__detail">
+                    Neden: {item.similarityReasons.join(" · ")}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : null}
+
+          {detail.recoveryIntelligence.planEvidence.length > 0 ? (
+            <div style={{ marginTop: "1rem" }}>
+              <p className="commint-kpi-card__label">Geçmiş Performans (Plan Karşılaştırması)</p>
+              <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.5rem" }}>
+                {detail.recoveryIntelligence.planEvidence.map((plan) => (
+                  <div key={plan.planKey} className="commint-kpi-card">
+                    <p className="commint-kpi-card__label">PLAN {plan.planKey.toUpperCase()}</p>
+                    <p className="commint-kpi-card__detail">
+                      {plan.verifiedSuccesses}/{plan.similarVerifiedCaseCount} doğrulanmış başarı
+                      {plan.medianRecoveryMinutes ? ` · Medyan ${plan.medianRecoveryMinutes} dk` : ""}
+                      {` · Örnek güveni: ${plan.sampleConfidence}`}
+                    </p>
+                    {plan.knownRisks.length > 0 ? (
+                      <p className="commint-kpi-card__detail">Bilinen risk: {plan.knownRisks.join(" · ")}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="commint-panel" data-testid="factory-decision-recovery-plan">
         <div className="commint-panel__header"><h2>3. KURTARMA PLANI</h2></div>
         <ol style={{ display: "grid", gap: "0.75rem", paddingLeft: "1.25rem" }}>
@@ -238,4 +310,17 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail }: Factory
       </section>
     </main>
   );
+}
+
+function formatEvidenceStrength(strength: string): string {
+  switch (strength) {
+    case "GUC_LU_KANIT":
+      return "GÜÇLÜ KANIT";
+    case "ORTA_KANIT":
+      return "ORTA KANIT";
+    case "DUSUK_KANIT":
+      return "DÜŞÜK KANIT";
+    default:
+      return strength;
+  }
 }

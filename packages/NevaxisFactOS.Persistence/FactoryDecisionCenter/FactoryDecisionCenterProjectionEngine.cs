@@ -3,6 +3,7 @@ using System.Text.Json;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
 
@@ -68,7 +69,8 @@ public static class FactoryDecisionCenterProjectionEngine
         IReadOnlyList<DigitalWorkCase> childCases,
         IReadOnlyList<DigitalWorkVerification> verifications,
         DigitalWorkApproval? pendingApproval,
-        string facilityLabel)
+        string facilityLabel,
+        FactoryRecoveryIntelligenceSnapshot? recoveryIntelligence = null)
     {
         var metadata = ParseMetadata(rootCase.MetadataJson);
         var recoveryPlan = FactoryRecoveryPlanProjection.FromJson(rootCase.RecoveryPlanJson);
@@ -115,6 +117,7 @@ public static class FactoryDecisionCenterProjectionEngine
                     a.Description,
                     a.CreatedAtUtc))
                 .ToList(),
+            recoveryIntelligence,
             rootCase.ConcurrencyToken);
     }
 

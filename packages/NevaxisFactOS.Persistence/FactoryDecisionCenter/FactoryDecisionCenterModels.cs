@@ -1,3 +1,5 @@
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
+
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
 
 public sealed record FactoryDecisionCenterExecutiveSummary(
@@ -114,6 +116,7 @@ public sealed record FactoryDecisionCaseDetailSnapshot(
     IReadOnlyList<FactoryDecisionEvidenceItem> Evidence,
     FactoryDecisionVerifiedOutcome VerifiedOutcome,
     IReadOnlyList<FactoryDecisionTimelineEntry> Timeline,
+    FactoryRecoveryIntelligenceSnapshot? RecoveryIntelligence,
     long ConcurrencyToken);
 
 public sealed record FactoryDecisionTimelineEntry(

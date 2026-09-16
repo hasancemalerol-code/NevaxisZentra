@@ -1,5 +1,6 @@
 using NevaxisFactOS.Api.Facilities;
 using NevaxisFactOS.Persistence.FactoryDecisionCenter;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 
 namespace NevaxisFactOS.Api.FactoryDecisionCenter;
 
@@ -88,7 +89,83 @@ internal static class FactoryDecisionCenterEndpointHelpers
         evidence = detail.Evidence,
         verifiedOutcome = detail.VerifiedOutcome,
         timeline = detail.Timeline,
+        recoveryIntelligence = detail.RecoveryIntelligence is null ? null : new
+        {
+            similarVerifiedCaseCount = detail.RecoveryIntelligence.SimilarVerifiedCaseCount,
+            evidenceStrength = detail.RecoveryIntelligence.EvidenceStrength,
+            expectedRecoveryMinutesMedian = detail.RecoveryIntelligence.ExpectedRecoveryMinutesMedian,
+            knownFailureModes = detail.RecoveryIntelligence.KnownFailureModes,
+            similarCases = detail.RecoveryIntelligence.SimilarCases.Select(MapSimilarCase).ToList(),
+            strategyPerformance = detail.RecoveryIntelligence.StrategyPerformance.Select(MapStrategyPerformance).ToList(),
+            planEvidence = detail.RecoveryIntelligence.PlanEvidence.Select(plan => new
+            {
+                planKey = plan.PlanKey,
+                similarVerifiedCaseCount = plan.SimilarVerifiedCaseCount,
+                verifiedSuccesses = plan.VerifiedSuccesses,
+                medianRecoveryMinutes = plan.MedianRecoveryMinutes,
+                sampleConfidence = plan.SampleConfidence,
+                knownRisks = plan.KnownRisks,
+                knownFailureModes = plan.KnownFailureModes,
+            }).ToList(),
+        },
         concurrencyToken = detail.ConcurrencyToken,
+    };
+
+    internal static object MapHistoricalLearningCase(FactoryRecoveryHistoricalCaseDetail detail) => new
+    {
+        learningRecordId = detail.LearningRecordId,
+        sourceCaseId = detail.SourceCaseId,
+        outcomeType = detail.OutcomeType,
+        eventCategory = detail.EventCategory,
+        orderReference = detail.OrderReference,
+        machineCode = detail.MachineCode,
+        materialCode = detail.MaterialCode,
+        moldCode = detail.MoldCode,
+        severity = detail.Severity,
+        problemSummary = detail.ProblemSummary,
+        causeSummary = detail.CauseSummary,
+        appliedStrategy = detail.AppliedStrategy,
+        alternativeStrategy = detail.AlternativeStrategy,
+        participatingWorkers = detail.ParticipatingWorkers,
+        actionsExecuted = detail.ActionsExecuted,
+        blockers = detail.Blockers,
+        failureModes = detail.FailureModes,
+        deliveryProtected = detail.DeliveryProtected,
+        recoveredQuantity = detail.RecoveredQuantity,
+        recoveryMinutes = detail.RecoveryMinutes,
+        timeToFirstActionMinutes = detail.TimeToFirstActionMinutes,
+        evidenceStrength = detail.EvidenceStrength,
+        learningDisposition = detail.LearningDisposition,
+        verifiedAtUtc = detail.VerifiedAtUtc,
+    };
+
+    private static object MapSimilarCase(FactoryRecoverySimilarCaseMatch match) => new
+    {
+        learningRecordId = match.LearningRecordId,
+        sourceCaseId = match.SourceCaseId,
+        similarityPercent = match.SimilarityPercent,
+        similarityReasons = match.SimilarityReasons,
+        orderReference = match.OrderReference,
+        machineCode = match.MachineCode,
+        problemSummary = match.ProblemSummary,
+        appliedStrategy = match.AppliedStrategy,
+        outcomeSummary = match.OutcomeSummary,
+        recoveryMinutes = match.RecoveryMinutes,
+        deliveryProtected = match.DeliveryProtected,
+        verifiedAtUtc = match.VerifiedAtUtc,
+    };
+
+    private static object MapStrategyPerformance(FactoryRecoveryStrategyPerformance performance) => new
+    {
+        strategyKey = performance.StrategyKey,
+        verifiedUses = performance.VerifiedUses,
+        verifiedSuccesses = performance.VerifiedSuccesses,
+        medianRecoveryMinutes = performance.MedianRecoveryMinutes,
+        deliveryProtectedCount = performance.DeliveryProtectedCount,
+        deliveryRelevantCases = performance.DeliveryRelevantCases,
+        sampleConfidence = performance.SampleConfidence,
+        commonBlockers = performance.CommonBlockers,
+        failureModeCount = performance.FailureModeCount,
     };
 
     private static object MapQueueItem(FactoryDecisionCaseQueueItem item) => new

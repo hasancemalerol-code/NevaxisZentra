@@ -6,6 +6,7 @@ using NevaxisFactOS.Persistence.Development;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.FactoryOrchestration;
 using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
+using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 
 namespace NevaxisFactOS.Persistence.FactoryDecisionCenter;
@@ -21,6 +22,10 @@ public interface IFactoryDecisionCenterService
     Task<FactoryDecisionCaseDetailSnapshot> VerifyOutcomeAsync(
         Guid caseId, FactoryDecisionCenterVerifyRequest request, string subjectId, CancellationToken cancellationToken);
     Task ResetScenarioAsync(Guid facilityId, string subjectId, CancellationToken cancellationToken);
+    Task<FactoryRecoveryHistoricalCaseDetail> GetHistoricalLearningCaseAsync(
+        Guid learningRecordId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<FactoryRecoveryHistoricalCaseDetail>> SearchHistoricalLearningCasesAsync(
+        Guid facilityId, FactoryRecoveryLearningSearchFilters filters, CancellationToken cancellationToken);
 }
 
 public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
@@ -32,6 +37,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
     private readonly TenantDatabaseSession tenantDatabaseSession;
     private readonly IHostEnvironment environment;
     private readonly IFactoryOutcomeExecutionService outcomeExecution;
+    private readonly IFactoryRecoveryIntelligenceService recoveryIntelligence;
 
     public FactoryDecisionCenterService(
         IFactoryDecisionCenterRepository repository,
@@ -40,7 +46,8 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         NevaxisFactOSDbContext dbContext,
         TenantDatabaseSession tenantDatabaseSession,
         IHostEnvironment environment,
-        IFactoryOutcomeExecutionService outcomeExecution)
+        IFactoryOutcomeExecutionService outcomeExecution,
+        IFactoryRecoveryIntelligenceService recoveryIntelligence)
     {
         this.repository = repository;
         this.aiTaskSync = aiTaskSync;
@@ -49,6 +56,7 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         this.tenantDatabaseSession = tenantDatabaseSession;
         this.environment = environment;
         this.outcomeExecution = outcomeExecution;
+        this.recoveryIntelligence = recoveryIntelligence;
     }
 
     public Task<FactoryDecisionCenterWorkspaceSnapshot> GetWorkspaceAsync(
@@ -142,9 +150,23 @@ public sealed class FactoryDecisionCenterService : IFactoryDecisionCenterService
         var facilityLabel = await repository.GetFacilityLabelAsync(rootCase.FacilityId ?? DevelopmentPilotIds.FacilityId, cancellationToken)
             ?? "Pilot Tesis";
 
+        var intelligence = await recoveryIntelligence.BuildForCaseAsync(rootCase, children, cancellationToken);
+
         return FactoryDecisionCenterProjectionEngine.ProjectDetail(
-            rootCase, children, verifications, pendingApproval, facilityLabel);
+            rootCase, children, verifications, pendingApproval, facilityLabel, intelligence);
     }
+
+    public Task<FactoryRecoveryHistoricalCaseDetail> GetHistoricalLearningCaseAsync(
+        Guid learningRecordId, CancellationToken cancellationToken) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => recoveryIntelligence.GetHistoricalCaseAsync(learningRecordId, ct),
+            cancellationToken);
+
+    public Task<IReadOnlyList<FactoryRecoveryHistoricalCaseDetail>> SearchHistoricalLearningCasesAsync(
+        Guid facilityId, FactoryRecoveryLearningSearchFilters filters, CancellationToken cancellationToken) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => recoveryIntelligence.SearchHistoricalCasesAsync(facilityId, filters, ct),
+            cancellationToken);
 
     private async Task<FactoryDecisionCaseDetailSnapshot> DecideApprovalCoreAsync(
         Guid caseId, Guid approvalId, FactoryDecisionCenterApprovalRequest request, string subjectId, CancellationToken cancellationToken)

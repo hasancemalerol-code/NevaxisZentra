@@ -121,7 +121,55 @@ export type FactoryDecisionCaseDetailApi = Readonly<{
     verifiedAtUtc?: string;
   }>;
   timeline: readonly Readonly<{ label: string; description: string; occurredAtUtc: string }>[];
+  recoveryIntelligence?: FactoryDecisionRecoveryIntelligenceApi;
   concurrencyToken: number;
+}>;
+
+export type FactoryDecisionRecoveryIntelligenceApi = Readonly<{
+  similarVerifiedCaseCount: number;
+  evidenceStrength: string;
+  expectedRecoveryMinutesMedian?: number;
+  knownFailureModes: readonly string[];
+  similarCases: readonly FactoryDecisionSimilarVerifiedCaseApi[];
+  strategyPerformance: readonly FactoryDecisionStrategyPerformanceApi[];
+  planEvidence: readonly FactoryDecisionPlanEvidenceApi[];
+}>;
+
+export type FactoryDecisionSimilarVerifiedCaseApi = Readonly<{
+  learningRecordId: string;
+  sourceCaseId: string;
+  similarityPercent: number;
+  similarityReasons: readonly string[];
+  orderReference: string;
+  machineCode: string;
+  problemSummary: string;
+  appliedStrategy: string;
+  outcomeSummary: string;
+  recoveryMinutes?: number;
+  deliveryProtected?: boolean;
+  verifiedAtUtc: string;
+}>;
+
+export type FactoryDecisionStrategyPerformanceApi = Readonly<{
+  strategyKey: string;
+  verifiedUses: number;
+  verifiedSuccesses: number;
+  medianRecoveryMinutes?: number;
+  deliveryProtectedCount?: number;
+  deliveryRelevantCases?: number;
+  sampleConfidence: string;
+  commonBlockers: readonly string[];
+  failureModeCount: number;
+}>;
+
+export type FactoryDecisionPlanEvidenceApi = Readonly<{
+  planKey: string;
+  similarVerifiedCaseCount: number;
+  verifiedSuccesses: number;
+  medianRecoveryMinutes?: number;
+  sampleConfidence: string;
+  knownRisks: readonly string[];
+  knownFailureModes: readonly string[];
 }>;
 
 async function factoryDecisionCenterFetch<T>(
