@@ -192,6 +192,7 @@ app.MapIntegrationEndpoints();
 app.MapIntegrationWebhookEndpoints();
 app.MapFactoryEventSpineEndpoints();
 app.MapDigitalWorkforceEndpoints();
+app.MapDigitalWorkforceExecutionEndpoints();
 app.MapProcurementEndpoints();
 app.MapEdgeEndpoints();
 app.MapIotPlcEndpoints();

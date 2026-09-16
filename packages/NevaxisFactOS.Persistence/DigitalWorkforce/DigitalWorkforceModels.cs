@@ -22,6 +22,7 @@ public sealed record DigitalWorkerSummary(
     string? LastActivityAt,
     decimal AiCostToday,
     string PermissionStatus,
+    string? HealthState,
     long ConcurrencyToken);
 
 public sealed record DigitalWorkforceControlCenterSnapshot(
@@ -33,7 +34,11 @@ public sealed record DigitalWorkforceControlCenterSnapshot(
     int PendingApprovals,
     decimal VerificationRate,
     decimal TotalAiCostToday,
-    decimal TotalAiCostMonth);
+    decimal TotalAiCostMonth,
+    int QueuedExecutions = 0,
+    int RunningExecutions = 0,
+    int FailedExecutions = 0,
+    int BlockedExecutions = 0);
 
 public sealed record DigitalWorkCaseSummary(
     Guid Id,

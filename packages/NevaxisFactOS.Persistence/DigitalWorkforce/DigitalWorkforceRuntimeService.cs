@@ -38,17 +38,20 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
 {
     private readonly NevaxisFactOSDbContext dbContext;
     private readonly IDigitalWorkforceRepository repository;
+    private readonly IDigitalWorkforceExecutionRuntimeService executionRuntime;
     private readonly IAuditWriter auditWriter;
     private readonly TenantDatabaseSession tenantDatabaseSession;
 
     public DigitalWorkforceRuntimeService(
         NevaxisFactOSDbContext dbContext,
         IDigitalWorkforceRepository repository,
+        IDigitalWorkforceExecutionRuntimeService executionRuntime,
         IAuditWriter auditWriter,
         TenantDatabaseSession tenantDatabaseSession)
     {
         this.dbContext = dbContext;
         this.repository = repository;
+        this.executionRuntime = executionRuntime;
         this.auditWriter = auditWriter;
         this.tenantDatabaseSession = tenantDatabaseSession;
     }
@@ -120,6 +123,7 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
         worker.Status = DigitalWorkforceWorkerStatuses.Paused;
         worker.UpdatedAtUtc = DateTimeOffset.UtcNow;
         worker.ConcurrencyToken++;
+        await executionRuntime.PauseWorkerExecutionsAsync(workerId, cancellationToken);
         await WriteAuditAsync("digital-workforce.worker.paused", "pause", "digital-worker",
             workerId.ToString(), cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
@@ -160,6 +164,7 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
         worker.ConcurrencyToken++;
 
         await EscalateActiveCasesForWorkerAsync(worker, subjectId, cancellationToken);
+        await executionRuntime.CancelWorkerExecutionsAsync(workerId, "worker-killed", cancellationToken);
         await WriteAuditAsync("digital-workforce.worker.killed", "kill", "digital-worker",
             workerId.ToString(), cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
@@ -478,6 +483,30 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
             workCase.Id.ToString(), cancellationToken);
 
         await repository.SaveChangesAsync(cancellationToken);
+
+        if (string.Equals(request.TargetStatus, DigitalWorkCaseStatuses.Executing, StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(request.Action))
+        {
+            await executionRuntime.EnqueueAsync(
+                new EnqueueDigitalWorkExecutionRequest(
+                    workCase.Id,
+                    worker.Id,
+                    request.Action!,
+                    request.Tool,
+                    JsonSerializer.Serialize(new
+                    {
+                        caseId = workCase.Id,
+                        action = request.Action,
+                        tool = request.Tool,
+                        amount = request.Amount,
+                        riskLevel = request.RiskLevel,
+                    }),
+                    request.Amount,
+                    request.RiskLevel),
+                subjectId,
+                cancellationToken);
+        }
+
         return workCase;
     }
 
@@ -517,6 +546,19 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
             ?? throw new DigitalWorkforceException(DigitalWorkforceFailureCodes.NotFound, "Approval not found.");
 
         EnsureConcurrency(approval.ConcurrencyToken, request.ConcurrencyToken);
+        var now = DateTimeOffset.UtcNow;
+
+        if (approval.Case is not null &&
+            (DigitalWorkforceApprovalGuard.IsExpired(approval, now) ||
+             DigitalWorkforceApprovalGuard.IsStale(approval, approval.Case)))
+        {
+            approval.Status = DigitalWorkApprovalStatuses.Expired;
+            approval.ConcurrencyToken++;
+            await repository.SaveChangesAsync(cancellationToken);
+            throw new DigitalWorkforceException(
+                DigitalWorkforceFailureCodes.ExecutionStaleApproval,
+                "Onay süresi doldu veya vaka bağlamı değişti.");
+        }
 
         approval.Status = request.Decision switch
         {
@@ -541,6 +583,12 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
         await WriteAuditAsync("digital-workforce.approval.decided", request.Decision, "digital-work-approval",
             approval.Id.ToString(), cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
+
+        if (approval.Status == DigitalWorkApprovalStatuses.Approved && approval.ExecutionId.HasValue)
+        {
+            await executionRuntime.ResumeAfterApprovalAsync(approval.Id, cancellationToken);
+        }
+
         return approval;
     }
 
@@ -748,7 +796,8 @@ public sealed class DigitalWorkforceRuntimeService : IDigitalWorkforceRuntimeSer
             Amount = request.Amount,
             Status = DigitalWorkApprovalStatuses.Pending,
             CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = DateTimeOffset.UtcNow.AddHours(24),
+            ExpiresAtUtc = DigitalWorkforceApprovalGuard.ResolveExpiresAt(DateTimeOffset.UtcNow),
+            CaseConcurrencyTokenAtRequest = workCase.ConcurrencyToken,
             ConcurrencyToken = 1,
         });
         workCase.RequiresApproval = true;

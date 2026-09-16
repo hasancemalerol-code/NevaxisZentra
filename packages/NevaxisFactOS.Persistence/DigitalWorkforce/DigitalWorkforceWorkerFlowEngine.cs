@@ -83,7 +83,13 @@ public sealed class DigitalWorkforceWorkerFlowEngine : IDigitalWorkforceWorkerFl
             }
         }
 
-        await StepAsync(caseId, DigitalWorkCaseStatuses.Executing, "execute", null, subjectId, cancellationToken);
+        await StepAsync(
+            caseId,
+            DigitalWorkCaseStatuses.Executing,
+            "execute",
+            ResolveExecuteTool(worker.Code),
+            subjectId,
+            cancellationToken);
         await RecordVerificationForWorkerAsync(caseId, worker.Code, subjectId, cancellationToken);
         await StepAsync(caseId, DigitalWorkCaseStatuses.Verifying, "verify", null, subjectId, cancellationToken);
         if (string.Equals(worker.Code, DigitalWorkforceWorkerCodes.FactoryCoordinator, StringComparison.OrdinalIgnoreCase))

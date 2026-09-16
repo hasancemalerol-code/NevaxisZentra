@@ -170,6 +170,7 @@ public sealed class DigitalWorkApproval
     public Guid TenantId { get; set; }
     public Guid CaseId { get; set; }
     public Guid WorkerId { get; set; }
+    public Guid? ExecutionId { get; set; }
     public string Action { get; set; } = string.Empty;
     public string BusinessReason { get; set; } = string.Empty;
     public string Impact { get; set; } = string.Empty;
@@ -182,7 +183,51 @@ public sealed class DigitalWorkApproval
     public DateTimeOffset? DecidedAtUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset? ExpiresAtUtc { get; set; }
+    public long CaseConcurrencyTokenAtRequest { get; set; }
     public long ConcurrencyToken { get; set; }
+
+    public DigitalWorkCase? Case { get; set; }
+    public DigitalWorker? Worker { get; set; }
+}
+
+public sealed class DigitalWorkExecution
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid? FacilityId { get; set; }
+    public Guid CaseId { get; set; }
+    public Guid WorkerId { get; set; }
+    public string ActionType { get; set; } = string.Empty;
+    public string ActionClassification { get; set; } = DigitalWorkActionClassifications.Read;
+    public string? Tool { get; set; }
+    public string InputContractJson { get; set; } = "{}";
+    public string Status { get; set; } = DigitalWorkExecutionStatuses.Queued;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string? PolicyResultJson { get; set; }
+    public Guid? ApprovalId { get; set; }
+    public long CaseConcurrencyTokenAtEnqueue { get; set; }
+    public string? ClaimOwner { get; set; }
+    public string? ClaimToken { get; set; }
+    public DateTimeOffset? ClaimedAtUtc { get; set; }
+    public DateTimeOffset? LeaseExpiresAtUtc { get; set; }
+    public DateTimeOffset? LastHeartbeatUtc { get; set; }
+    public int AttemptCount { get; set; }
+    public int MaxAttempts { get; set; } = 3;
+    public DateTimeOffset? FirstAttemptAtUtc { get; set; }
+    public DateTimeOffset? LastAttemptAtUtc { get; set; }
+    public DateTimeOffset? NextRetryAtUtc { get; set; }
+    public string? ErrorClassification { get; set; }
+    public string? LastError { get; set; }
+    public string ExternalActionStatus { get; set; } = DigitalWorkExternalActionStatuses.Requested;
+    public string? ExternalReferenceId { get; set; }
+    public string? CompensationActionJson { get; set; }
+    public bool IsIrreversible { get; set; }
+    public string? EvidenceReference { get; set; }
+    public string? ResultJson { get; set; }
+    public string? CurrentBlocker { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+    public DateTimeOffset? CompletedAtUtc { get; set; }
 
     public DigitalWorkCase? Case { get; set; }
     public DigitalWorker? Worker { get; set; }

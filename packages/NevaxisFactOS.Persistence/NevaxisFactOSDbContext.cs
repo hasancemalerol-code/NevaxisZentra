@@ -388,6 +388,7 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<DigitalWorkerUsage> DigitalWorkerUsages => Set<DigitalWorkerUsage>();
     public DbSet<DigitalWorkerBudget> DigitalWorkerBudgets => Set<DigitalWorkerBudget>();
     public DbSet<DigitalWorkforceRuntimeState> DigitalWorkforceRuntimeStates => Set<DigitalWorkforceRuntimeState>();
+    public DbSet<DigitalWorkExecution> DigitalWorkExecutions => Set<DigitalWorkExecution>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3200,6 +3201,12 @@ public sealed class NevaxisFactOSDbContext : DbContext
             tenantContextAccessor != null
             && tenantContextAccessor.IsAvailable
             && s.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new DigitalWorkExecutionEntityConfiguration());
+        modelBuilder.Entity<DigitalWorkExecution>().HasQueryFilter(e =>
+            tenantContextAccessor != null
+            && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

@@ -107,6 +107,62 @@ public static class DigitalWorkforceHandoffStatuses
     public const string Rejected = "rejected";
 }
 
+public static class DigitalWorkExecutionStatuses
+{
+    public const string Queued = "queued";
+    public const string Claimed = "claimed";
+    public const string Running = "running";
+    public const string WaitingApproval = "waiting-approval";
+    public const string RetryWait = "retry-wait";
+    public const string Paused = "paused";
+    public const string Completed = "completed";
+    public const string Failed = "failed";
+    public const string Cancelled = "cancelled";
+    public const string Verified = "verified";
+}
+
+public static class DigitalWorkActionClassifications
+{
+    public const string Read = "read";
+    public const string Analyze = "analyze";
+    public const string Prepare = "prepare";
+    public const string WriteInternal = "write-internal";
+    public const string WriteExternal = "write-external";
+    public const string ChangeOperation = "change-operation";
+    public const string Financial = "financial";
+    public const string SafetyCritical = "safety-critical";
+}
+
+public static class DigitalWorkExecutionErrorClassifications
+{
+    public const string Transient = "transient";
+    public const string Permanent = "permanent";
+    public const string Policy = "policy";
+    public const string Approval = "approval";
+    public const string Configuration = "configuration";
+    public const string ExternalUnknown = "external-unknown";
+}
+
+public static class DigitalWorkExternalActionStatuses
+{
+    public const string Requested = "requested";
+    public const string Sent = "sent";
+    public const string Acknowledged = "acknowledged";
+    public const string Failed = "failed";
+    public const string Unknown = "unknown";
+}
+
+public static class DigitalWorkerHealthStates
+{
+    public const string Healthy = "healthy";
+    public const string Busy = "busy";
+    public const string WaitingApproval = "waiting-approval";
+    public const string Blocked = "blocked";
+    public const string Degraded = "degraded";
+    public const string Paused = "paused";
+    public const string Offline = "offline";
+}
+
 public static class DigitalWorkforceFailureCodes
 {
     public const string NotFound = "digital-workforce.not-found";
@@ -122,4 +178,9 @@ public static class DigitalWorkforceFailureCodes
     public const string BudgetExceeded = "digital-workforce.budget-exceeded";
     public const string ScopeViolation = "digital-workforce.scope-violation";
     public const string ConcurrencyConflict = "digital-workforce.concurrency-conflict";
+    public const string ExecutionLeaseLost = "digital-workforce.execution-lease-lost";
+    public const string ExecutionStaleApproval = "digital-workforce.execution-stale-approval";
+    public const string ExecutionBudgetExceeded = "digital-workforce.execution-budget-exceeded";
+    public const string ExecutionConflict = "digital-workforce.execution-conflict";
+    public const string ExecutionDuplicate = "digital-workforce.execution-duplicate";
 }

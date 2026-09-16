@@ -50,6 +50,7 @@ public static class DigitalWorkforceEndpointRouteBuilderExtensions
         services.AddScoped<IDigitalWorkforceWorkerFlowEngine, DigitalWorkforceWorkerFlowEngine>();
         services.AddScoped<IDigitalWorkforceEventDispatcher, DigitalWorkforceEventDispatcher>();
         services.AddScoped<DigitalWorkforceModelRouterUsage>();
+        services.AddNevaxisFactOSDigitalWorkforceExecutionRuntime();
         return services;
     }
 

@@ -179,6 +179,24 @@ public sealed class DigitalWorkforceRepository : IDigitalWorkforceRepository
                 .Where(u => u.WorkerId == worker.Id && u.CreatedAtUtc >= today)
                 .SumAsync(u => (decimal?)u.EstimatedCost, cancellationToken) ?? 0m;
 
+            var queuedExecutions = await dbContext.DigitalWorkExecutions.CountAsync(
+                e => e.WorkerId == worker.Id && e.Status == DigitalWorkExecutionStatuses.Queued, cancellationToken);
+            var runningExecutions = await dbContext.DigitalWorkExecutions.CountAsync(
+                e => e.WorkerId == worker.Id &&
+                     (e.Status == DigitalWorkExecutionStatuses.Running ||
+                      e.Status == DigitalWorkExecutionStatuses.Claimed),
+                cancellationToken);
+            var failedExecutions = await dbContext.DigitalWorkExecutions.CountAsync(
+                e => e.WorkerId == worker.Id && e.Status == DigitalWorkExecutionStatuses.Failed, cancellationToken);
+            var blocker = await dbContext.DigitalWorkExecutions
+                .Where(e => e.WorkerId == worker.Id && e.CurrentBlocker != null)
+                .OrderByDescending(e => e.UpdatedAtUtc)
+                .Select(e => e.CurrentBlocker)
+                .FirstOrDefaultAsync(cancellationToken);
+            var health = DigitalWorkforceWorkerHealthEngine.Evaluate(
+                worker, queuedExecutions, runningExecutions, failedExecutions, pendingApprovals, blocker,
+                lastActivity, runtime.GlobalKillActive, runtime.GlobalPauseActive);
+
             workerSummaries.Add(new DigitalWorkerSummary(
                 worker.Id, worker.Code, worker.Name, worker.Description, worker.Mission,
                 worker.Status, worker.AutonomyMode, worker.Enabled, worker.IsPaused, worker.IsKilled,
@@ -186,6 +204,7 @@ public sealed class DigitalWorkforceRepository : IDigitalWorkforceRepository
                 activeCases, queueCases, completedToday, completedMonth, verified, pendingApprovals,
                 lastActivity?.ToString("O"), aiCostToday,
                 worker.IsKilled ? "Acil Durdur" : worker.IsPaused || runtime.GlobalPauseActive ? "Duraklatıldı" : "Aktif",
+                health.HealthState,
                 worker.ConcurrencyToken));
         }
 
@@ -205,6 +224,16 @@ public sealed class DigitalWorkforceRepository : IDigitalWorkforceRepository
         var pendingTotal = await dbContext.DigitalWorkApprovals.CountAsync(
             a => a.Status == DigitalWorkApprovalStatuses.Pending, cancellationToken);
 
+        var queuedTotal = await dbContext.DigitalWorkExecutions.CountAsync(
+            e => e.Status == DigitalWorkExecutionStatuses.Queued, cancellationToken);
+        var runningTotal = await dbContext.DigitalWorkExecutions.CountAsync(
+            e => e.Status == DigitalWorkExecutionStatuses.Running ||
+                 e.Status == DigitalWorkExecutionStatuses.Claimed, cancellationToken);
+        var failedTotal = await dbContext.DigitalWorkExecutions.CountAsync(
+            e => e.Status == DigitalWorkExecutionStatuses.Failed, cancellationToken);
+        var blockedTotal = await dbContext.DigitalWorkExecutions.CountAsync(
+            e => e.CurrentBlocker != null && e.Status != DigitalWorkExecutionStatuses.Completed, cancellationToken);
+
         return new DigitalWorkforceControlCenterSnapshot(
             workerSummaries,
             runtime.GlobalPauseActive,
@@ -214,7 +243,11 @@ public sealed class DigitalWorkforceRepository : IDigitalWorkforceRepository
             pendingTotal,
             verificationRate,
             totalAiToday,
-            totalAiMonth);
+            totalAiMonth,
+            queuedTotal,
+            runningTotal,
+            failedTotal,
+            blockedTotal);
     }
 
     public Task<DigitalWorker?> GetWorkerAsync(Guid workerId, CancellationToken cancellationToken) =>

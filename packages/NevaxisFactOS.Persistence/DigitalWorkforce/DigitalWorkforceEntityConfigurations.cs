@@ -214,9 +214,61 @@ internal sealed class DigitalWorkApprovalEntityConfiguration : IEntityTypeConfig
         entity.Property(a => a.DecidedAtUtc).HasColumnName("decided_at_utc");
         entity.Property(a => a.CreatedAtUtc).HasColumnName("created_at_utc");
         entity.Property(a => a.ExpiresAtUtc).HasColumnName("expires_at_utc");
+        entity.Property(a => a.ExecutionId).HasColumnName("execution_id");
+        entity.Property(a => a.CaseConcurrencyTokenAtRequest).HasColumnName("case_concurrency_token_at_request");
         entity.Property(a => a.ConcurrencyToken).HasColumnName("concurrency_token").IsConcurrencyToken();
         entity.HasOne(a => a.Case).WithMany(c => c.Approvals).HasForeignKey(a => a.CaseId);
         entity.HasIndex(a => new { a.TenantId, a.Status }).HasDatabaseName("ix_digital_work_approvals_tenant_status");
+    }
+}
+
+internal sealed class DigitalWorkExecutionEntityConfiguration : IEntityTypeConfiguration<DigitalWorkExecution>
+{
+    public void Configure(EntityTypeBuilder<DigitalWorkExecution> entity)
+    {
+        entity.ToTable("digital_work_executions");
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+        entity.Property(e => e.FacilityId).HasColumnName("facility_id");
+        entity.Property(e => e.CaseId).HasColumnName("case_id");
+        entity.Property(e => e.WorkerId).HasColumnName("worker_id");
+        entity.Property(e => e.ActionType).HasColumnName("action_type").HasMaxLength(120);
+        entity.Property(e => e.ActionClassification).HasColumnName("action_classification").HasMaxLength(40);
+        entity.Property(e => e.Tool).HasColumnName("tool").HasMaxLength(80);
+        entity.Property(e => e.InputContractJson).HasColumnName("input_contract_json");
+        entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30);
+        entity.Property(e => e.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(240);
+        entity.Property(e => e.PolicyResultJson).HasColumnName("policy_result_json");
+        entity.Property(e => e.ApprovalId).HasColumnName("approval_id");
+        entity.Property(e => e.CaseConcurrencyTokenAtEnqueue).HasColumnName("case_concurrency_token_at_enqueue");
+        entity.Property(e => e.ClaimOwner).HasColumnName("claim_owner").HasMaxLength(200);
+        entity.Property(e => e.ClaimToken).HasColumnName("claim_token").HasMaxLength(64);
+        entity.Property(e => e.ClaimedAtUtc).HasColumnName("claimed_at_utc");
+        entity.Property(e => e.LeaseExpiresAtUtc).HasColumnName("lease_expires_at_utc");
+        entity.Property(e => e.LastHeartbeatUtc).HasColumnName("last_heartbeat_utc");
+        entity.Property(e => e.AttemptCount).HasColumnName("attempt_count");
+        entity.Property(e => e.MaxAttempts).HasColumnName("max_attempts");
+        entity.Property(e => e.FirstAttemptAtUtc).HasColumnName("first_attempt_at_utc");
+        entity.Property(e => e.LastAttemptAtUtc).HasColumnName("last_attempt_at_utc");
+        entity.Property(e => e.NextRetryAtUtc).HasColumnName("next_retry_at_utc");
+        entity.Property(e => e.ErrorClassification).HasColumnName("error_classification").HasMaxLength(40);
+        entity.Property(e => e.LastError).HasColumnName("last_error");
+        entity.Property(e => e.ExternalActionStatus).HasColumnName("external_action_status").HasMaxLength(30);
+        entity.Property(e => e.ExternalReferenceId).HasColumnName("external_reference_id").HasMaxLength(200);
+        entity.Property(e => e.CompensationActionJson).HasColumnName("compensation_action_json");
+        entity.Property(e => e.IsIrreversible).HasColumnName("is_irreversible");
+        entity.Property(e => e.EvidenceReference).HasColumnName("evidence_reference").HasMaxLength(200);
+        entity.Property(e => e.ResultJson).HasColumnName("result_json");
+        entity.Property(e => e.CurrentBlocker).HasColumnName("current_blocker").HasMaxLength(200);
+        entity.Property(e => e.CreatedAtUtc).HasColumnName("created_at_utc");
+        entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+        entity.Property(e => e.CompletedAtUtc).HasColumnName("completed_at_utc");
+        entity.HasOne(e => e.Case).WithMany().HasForeignKey(e => e.CaseId);
+        entity.HasOne(e => e.Worker).WithMany().HasForeignKey(e => e.WorkerId);
+        entity.HasIndex(e => new { e.TenantId, e.IdempotencyKey }).IsUnique().HasDatabaseName("ux_digital_work_executions_idempotency");
+        entity.HasIndex(e => new { e.TenantId, e.Status, e.CreatedAtUtc }).HasDatabaseName("ix_digital_work_executions_status");
+        entity.HasIndex(e => new { e.TenantId, e.WorkerId, e.Status }).HasDatabaseName("ix_digital_work_executions_worker_status");
     }
 }
 
