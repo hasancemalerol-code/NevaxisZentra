@@ -1,0 +1,469 @@
+/*
+ * FactOS Industrial Operational Foundation
+ * Shared primitives for production, maintenance, quality, mixed lines, workforce.
+ */
+
+@import "./tokens.css";
+
+/* ─── Workspace shell ─── */
+
+.fact-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fact-density-section-gap);
+  padding: var(--fact-density-page-padding);
+  min-width: 0;
+  color: var(--color-text-primary);
+  background: var(--fact-surface-page);
+}
+
+.fact-workspace__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--fact-border);
+}
+
+.fact-workspace__breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fact-text-meta);
+  color: var(--color-text-muted);
+}
+
+.fact-workspace__context {
+  margin: 0;
+  font-size: var(--fact-text-meta);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.fact-workspace__title {
+  margin: 0;
+  font-size: var(--fact-text-page-title);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+.fact-workspace__meta {
+  margin: 0;
+  font-size: var(--fact-text-meta);
+  color: var(--color-text-secondary);
+  font-family: var(--fact-text-mono);
+}
+
+/* ─── Command bar ─── */
+
+.fact-command-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: var(--fact-density-row-height);
+  padding: 6px 10px;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.fact-command-bar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Status strip (compact KPIs) ─── */
+
+.fact-status-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  overflow: hidden;
+  background: var(--fact-border);
+}
+
+.fact-status-strip__item {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--fact-surface-panel);
+}
+
+.fact-status-strip__label {
+  font-size: var(--fact-text-meta);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fact-status-strip__value {
+  font-size: var(--fact-text-metric);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+/* ─── Master / detail ─── */
+
+.fact-master-detail {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: 10px;
+  min-height: 320px;
+}
+
+.fact-master-detail__master {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+  overflow: auto;
+}
+
+.fact-master-detail__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .fact-master-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Context panel ─── */
+
+.fact-context-panel {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.fact-context-panel__header {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fact-border);
+  font-size: var(--fact-text-section-title);
+  font-weight: 650;
+}
+
+.fact-context-panel__body {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.fact-context-panel__row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  font-size: var(--fact-text-object);
+}
+
+.fact-context-panel__row dt {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fact-text-meta);
+}
+
+.fact-context-panel__row dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Line topology ─── */
+
+.fact-line-topology {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.fact-station-row {
+  flex: 1 1 140px;
+  min-width: 130px;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--fact-border);
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.fact-station-row:last-child {
+  border-right: 0;
+}
+
+.fact-station-row:hover {
+  background: var(--fact-surface-muted);
+}
+
+.fact-station-row[data-selected="true"] {
+  background: var(--fact-surface-inset);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.fact-station-row__code {
+  display: block;
+  padding: 6px 8px 2px;
+  font-size: var(--fact-text-meta);
+  font-family: var(--fact-text-mono);
+  color: var(--color-text-muted);
+}
+
+.fact-station-row__name {
+  display: block;
+  padding: 0 8px;
+  font-size: var(--fact-text-object);
+  font-weight: 650;
+}
+
+.fact-station-row__status {
+  display: block;
+  padding: 4px 8px 8px;
+  font-size: var(--fact-text-meta);
+  font-weight: 600;
+}
+
+/* ─── Operational data grid ─── */
+
+.fact-data-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fact-text-object);
+}
+
+.fact-data-grid th,
+.fact-data-grid td {
+  padding: var(--fact-density-table-cell-y) var(--fact-density-table-cell-x);
+  border-bottom: 1px solid var(--fact-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.fact-data-grid th {
+  font-size: var(--fact-text-meta);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  background: var(--fact-surface-muted);
+}
+
+.fact-data-grid tbody tr:hover {
+  background: var(--fact-surface-muted);
+}
+
+.fact-data-grid .fact-numeric {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--fact-text-mono);
+}
+
+/* ─── Event timeline ─── */
+
+.fact-event-timeline {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+  overflow: hidden;
+}
+
+.fact-event-row {
+  display: grid;
+  grid-template-columns: 88px 72px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--fact-border);
+  font-size: var(--fact-text-object);
+}
+
+.fact-event-row:last-child {
+  border-bottom: 0;
+}
+
+.fact-event-row__time {
+  font-family: var(--fact-text-mono);
+  font-size: var(--fact-text-meta);
+  color: var(--color-text-muted);
+}
+
+.fact-event-row__category {
+  font-size: var(--fact-text-meta);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.fact-event-row__summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Exception queue ─── */
+
+.fact-exception-queue {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.fact-exception-queue__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fact-border);
+}
+
+.fact-exception-queue__item:last-child {
+  border-bottom: 0;
+}
+
+/* ─── Approval / verification panels ─── */
+
+.fact-approval-panel,
+.fact-verification-panel {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.fact-approval-panel__header,
+.fact-verification-panel__header {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fact-border);
+  font-size: var(--fact-text-section-title);
+  font-weight: 650;
+}
+
+/* ─── Constraint / scenario foundations (MP2 structural) ─── */
+
+.fact-constraint-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-sm);
+  font-size: var(--fact-text-meta);
+  background: var(--fact-surface-muted);
+}
+
+.fact-scenario-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.fact-scenario-compare__column {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  padding: 8px 10px;
+  background: var(--fact-surface-panel);
+}
+
+/* ─── Operational status badge ─── */
+
+.fact-operational-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: var(--fact-radius-xs);
+  border: 1px solid transparent;
+  font-size: var(--fact-text-meta);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.fact-operational-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.fact-operational-badge--running { color: var(--fact-status-running); background: var(--fact-status-running-bg); border-color: color-mix(in srgb, var(--fact-status-running) 20%, transparent); }
+.fact-operational-badge--warning { color: var(--fact-status-warning); background: var(--fact-status-warning-bg); border-color: color-mix(in srgb, var(--fact-status-warning) 20%, transparent); }
+.fact-operational-badge--blocked { color: var(--fact-status-blocked); background: var(--fact-status-blocked-bg); border-color: color-mix(in srgb, var(--fact-status-blocked) 20%, transparent); }
+.fact-operational-badge--starved { color: var(--fact-status-starved); background: var(--fact-status-starved-bg); border-color: color-mix(in srgb, var(--fact-status-starved) 20%, transparent); }
+.fact-operational-badge--fault { color: var(--fact-status-fault); background: var(--fact-status-fault-bg); border-color: color-mix(in srgb, var(--fact-status-fault) 20%, transparent); }
+.fact-operational-badge--idle { color: var(--fact-status-idle); background: var(--fact-status-idle-bg); border-color: var(--fact-border); }
+.fact-operational-badge--pending { color: var(--fact-status-pending); background: var(--fact-status-pending-bg); border-color: color-mix(in srgb, var(--fact-status-pending) 20%, transparent); }
+.fact-operational-badge--verified { color: var(--fact-status-verified); background: var(--fact-status-verified-bg); border-color: color-mix(in srgb, var(--fact-status-verified) 20%, transparent); }
+.fact-operational-badge--closed { color: var(--fact-status-closed); background: var(--fact-status-closed-bg); border-color: var(--fact-border); }
+
+/* ─── Section panel (container of last resort) ─── */
+
+.fact-section {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+  box-shadow: var(--fact-shadow-panel);
+}
+
+.fact-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fact-border);
+}
+
+.fact-section__title {
+  margin: 0;
+  font-size: var(--fact-text-section-title);
+  font-weight: 650;
+}
+
+.fact-section__body {
+  padding: 8px 10px;
+}
+
+/* ─── Production board row ─── */
+
+.fact-production-board {
+  display: grid;
+  gap: 8px;
+}
+
+.fact-production-board__row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}

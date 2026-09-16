@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, PlayCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+
+import { ContextPanel } from "@/components/workspace/context-panel";
+import { EventTimeline } from "@/components/workspace/event-timeline";
+import { LineTopology } from "@/components/workspace/line-topology";
+import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/operational-status";
+import { StatusStrip } from "@/components/workspace/status-strip";
+import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 
 import type {
   MixedProductionLineDetailApi,
   MixedProductionPlaybackApi,
+  MixedProductionStationSnapshotApi,
 } from "../server/mixed-production-api-client";
 
 type MixedProductionLineDetailViewProps = Readonly<{
@@ -13,145 +22,135 @@ type MixedProductionLineDetailViewProps = Readonly<{
   playback: MixedProductionPlaybackApi | null;
 }>;
 
-function stateTone(state: string): string {
-  if (state === "RUNNING") return "information";
-  if (state === "FAULTED" || state === "BLOCKED") return "danger";
-  if (state === "STARVED") return "warning";
-  return "neutral";
+function buildContextRows(station: MixedProductionStationSnapshotApi | undefined) {
+  if (!station) {
+    return [];
+  }
+
+  return [
+    { label: "Durum", value: station.state },
+    { label: "Kaynak", value: station.resourceCode ? `${station.resourceCode} (${station.resourceType ?? "—"})` : "—" },
+    { label: "Operasyon", value: station.operationCode },
+    { label: "Operatör", value: station.operatorCode },
+    { label: "WIP", value: station.bufferQuantity != null ? `${station.bufferQuantity}/${station.bufferCapacity ?? "—"}` : null },
+    { label: "GOOD", value: station.goodCount },
+    { label: "REJECT", value: station.rejectCount },
+  ];
 }
 
 export function MixedProductionLineDetailView({ detail, playback }: MixedProductionLineDetailViewProps) {
   const { line, stations, timeline } = detail;
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(stations[0]?.stationId ?? null);
+  const selectedStation = stations.find((s) => s.stationId === selectedStationId);
   const latestPlaybackFrame = playback?.frames[playback.frames.length - 1] ?? null;
 
+  const timelineEntries = useMemo(
+    () =>
+      timeline.map((entry) => ({
+        id: entry.eventId,
+        occurredAtUtc: entry.occurredAtUtc,
+        category: entry.sourceCategory,
+        eventType: entry.eventType,
+        summary: entry.summary,
+        quantity: entry.quantity,
+      })),
+    [timeline],
+  );
+
   return (
-    <main className="production-execution-page" data-testid="mixed-production-line-detail-view">
-      <header className="production-execution-header">
-        <Link href="/uretim/hatlar" className="production-execution-header__link">
-          <ArrowLeft aria-hidden="true" size={16} />
-          Hatlar
-        </Link>
-        <p>ÜRETİM · HAT OPERASYONU</p>
-        <h1>{line.name}</h1>
-        <span>
-          {line.code} · {line.currentProductCode ?? "—"} · {line.currentOrderReference ?? "—"} · Vardiya {line.currentShiftCode ?? "—"}
-        </span>
-      </header>
+    <main className="fact-workspace" data-testid="mixed-production-line-detail-view">
+      <WorkspaceHeader
+        context="ÜRETİM · HAT OPERASYONU"
+        title={line.name}
+        meta={`${line.code} · ${line.currentProductCode ?? "—"} · ${line.currentOrderReference ?? "—"} · Vardiya ${line.currentShiftCode ?? "—"}`}
+        breadcrumb={
+          <Link href="/uretim/hatlar">
+            <ArrowLeft aria-hidden="true" size={14} />
+            Hatlar
+          </Link>
+        }
+      />
 
-      <section className="production-execution-kpis" aria-label="Hat özet">
-        <article className="production-execution-kpis__item--total">
-          <div>
-            <span>Hat Durumu</span>
-            <strong>{line.lineState}</strong>
-          </div>
-        </article>
-        <article className="production-execution-kpis__item--completed">
-          <div>
-            <span>GOOD (bugün)</span>
-            <strong>{line.goodOutputToday}</strong>
-          </div>
-        </article>
-        <article className="production-execution-kpis__item--paused">
-          <div>
-            <span>REJECT (bugün)</span>
-            <strong>{line.rejectOutputToday}</strong>
-          </div>
-        </article>
-      </section>
+      <StatusStrip
+        aria-label="Hat özet"
+        items={[
+          { label: "Hat durumu", value: line.lineState },
+          { label: "GOOD (bugün)", value: line.goodOutputToday },
+          { label: "REJECT (bugün)", value: line.rejectOutputToday },
+          { label: "İstasyon", value: stations.length },
+          { label: "Olay", value: timeline.length },
+        ]}
+      />
 
-      <section className="production-execution-workspace" aria-label="Hat akış görünümü">
-        <div className="production-execution-workspace__heading">
-          <div>
-            <p>AKIŞ GÖRÜNÜMÜ</p>
-            <h2>İstasyon durumu</h2>
-          </div>
-        </div>
-
-        <div
-          style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
-          data-testid="mixed-line-flow-view"
-        >
-          {stations.map((station) => (
-            <article key={station.stationId} className="production-order-card">
-              <div className="production-order-card__header">
-                <div>
-                  <p>{station.code}</p>
-                  <h2>{station.name}</h2>
-                </div>
-                <span className={`production-order-card__status production-order-card__status--${stateTone(station.state)}`}>
-                  {station.state}
-                </span>
-              </div>
-              <div className="production-order-card__meta">
-                <span>Kaynak: {station.resourceCode ?? "—"} ({station.resourceType ?? "—"})</span>
-                <span>Operasyon: {station.operationCode ?? "—"}</span>
-                {station.operatorCode ? <span>Operatör: {station.operatorCode}</span> : null}
-                {station.bufferQuantity != null ? (
-                  <span>WIP: {station.bufferQuantity}/{station.bufferCapacity ?? "—"}</span>
-                ) : null}
-                <span>GOOD: {station.goodCount} · REJECT: {station.rejectCount}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="production-execution-workspace" style={{ marginTop: "1.5rem" }} aria-label="Üretim zaman çizelgesi">
-        <div className="production-execution-workspace__heading">
-          <div>
-            <p>ÜRETİM ZAMAN ÇİZELGESİ</p>
-            <h2>Korelasyonlu olaylar</h2>
-            <span>Makine, operatör, buffer, kalite ve üretim olayları tek zaman çizelgesinde.</span>
-          </div>
-        </div>
-
-        {timeline.length === 0 ? (
-          <p className="production-execution-empty__desc">Henüz olay kaydı yok.</p>
-        ) : (
-          <div style={{ display: "grid", gap: "0.5rem" }} data-testid="mixed-line-timeline">
-            {timeline.map((entry) => (
-              <article key={entry.eventId} className="production-order-card">
-                <div className="production-order-card__meta">
-                  <span>{new Date(entry.occurredAtUtc).toLocaleString("tr-TR")}</span>
-                  <span>{entry.sourceCategory}</span>
-                  <span>{entry.eventType}</span>
-                  <span>{entry.summary}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="production-execution-workspace" style={{ marginTop: "1.5rem" }} aria-label="Hat playback">
-        <div className="production-execution-workspace__heading">
-          <div>
-            <p>PLAYBACK</p>
-            <h2>Geçmiş pencere yeniden oluşturma</h2>
-            <span>{detail.playbackWindowLabel}</span>
-          </div>
-          <PlayCircle aria-hidden="true" />
-        </div>
-
-        {!latestPlaybackFrame ? (
-          <p className="production-execution-empty__desc">Playback için yeterli olay yok.</p>
-        ) : (
-          <div data-testid="mixed-line-playback">
-            <p>
-              Son kare: {new Date(latestPlaybackFrame.timestampUtc).toLocaleString("tr-TR")} · {latestPlaybackFrame.lineState}
-            </p>
-            <div style={{ display: "grid", gap: "0.5rem", marginTop: "0.75rem" }}>
-              {latestPlaybackFrame.stations.map((station) => (
-                <div key={station.stationCode} className="production-order-card__meta">
-                  <span>{station.stationCode}</span>
-                  <span>{station.state}</span>
-                  {station.bufferQuantity != null ? <span>WIP: {station.bufferQuantity}</span> : null}
-                  {station.operatorCode ? <span>Operatör: {station.operatorCode}</span> : null}
-                </div>
-              ))}
+      <section className="fact-master-detail" aria-label="Hat topolojisi ve istasyon detayı">
+        <div className="fact-master-detail__detail" style={{ display: "grid", gap: "10px" }}>
+          <section className="fact-section">
+            <header className="fact-section__header">
+              <h2 className="fact-section__title">Hat topolojisi</h2>
+              <OperationalBadge status={mapOperationalStatus(line.lineState)} label={line.lineState} />
+            </header>
+            <div className="fact-section__body">
+              <LineTopology
+                stations={stations.map((s) => ({
+                  id: s.stationId,
+                  code: s.code,
+                  name: s.name,
+                  state: s.state,
+                }))}
+                selectedStationId={selectedStationId}
+                onSelectStation={setSelectedStationId}
+              />
             </div>
-          </div>
-        )}
+          </section>
+
+          <section className="fact-section" data-testid="mixed-line-timeline">
+            <header className="fact-section__header">
+              <h2 className="fact-section__title">Üretim zaman çizelgesi</h2>
+              <span className="fact-workspace__meta">{detail.playbackWindowLabel}</span>
+            </header>
+            <div className="fact-section__body">
+              <EventTimeline entries={timelineEntries} />
+            </div>
+          </section>
+        </div>
+
+        <div className="fact-master-detail__master">
+          <ContextPanel title={selectedStation ? `${selectedStation.code} · ${selectedStation.name}` : "İstasyon seçin"} rows={buildContextRows(selectedStation)} />
+
+          {latestPlaybackFrame ? (
+            <section className="fact-section" style={{ marginTop: "8px" }} data-testid="mixed-line-playback">
+              <header className="fact-section__header">
+                <h2 className="fact-section__title">Playback</h2>
+                <OperationalBadge status={mapOperationalStatus(latestPlaybackFrame.lineState)} label={latestPlaybackFrame.lineState} />
+              </header>
+              <div className="fact-section__body">
+                <p className="fact-workspace__meta">
+                  {new Date(latestPlaybackFrame.timestampUtc).toLocaleString("tr-TR")}
+                </p>
+                <table className="fact-data-grid">
+                  <thead>
+                    <tr>
+                      <th>İstasyon</th>
+                      <th>Durum</th>
+                      <th>WIP</th>
+                      <th>Operatör</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {latestPlaybackFrame.stations.map((station) => (
+                      <tr key={station.stationCode}>
+                        <td className="fact-numeric">{station.stationCode}</td>
+                        <td>{station.state}</td>
+                        <td className="fact-numeric">{station.bufferQuantity ?? "—"}</td>
+                        <td>{station.operatorCode ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+        </div>
       </section>
     </main>
   );

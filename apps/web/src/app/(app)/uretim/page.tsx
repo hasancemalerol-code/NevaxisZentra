@@ -27,7 +27,7 @@ export default async function ProductionExecutionPage() {
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
+      <main className="fact-workspace production-execution-page">
         <header className="production-execution-header">
           <p>ÜRETİM YÖNETİMİ</p>
           <h1>Üretim Emirleri</h1>
@@ -58,7 +58,7 @@ export default async function ProductionExecutionPage() {
   const completedCount = countByStatus(orders, "completed");
 
   return (
-    <main className="production-execution-page">
+    <main className="fact-workspace production-execution-page">
       <header className="production-execution-header">
         <p>ÜRETİM YÖNETİMİ</p>
 

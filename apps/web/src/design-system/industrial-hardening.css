@@ -1,0 +1,133 @@
+/*
+ * Global industrial hardening overrides
+ * Tones down generic SaaS/AI visual patterns without breaking class contracts.
+ */
+
+/* Shell density */
+.app-sidebar {
+  background: #e8edf3;
+  border-right-color: var(--fact-border-strong);
+}
+
+.top-bar {
+  min-height: 56px;
+  border-bottom: 1px solid var(--fact-border);
+  box-shadow: none;
+  background: var(--fact-surface-panel);
+}
+
+:root {
+  --top-bar-height: 56px;
+  --radius-small: var(--fact-radius-sm);
+  --radius-medium: var(--fact-radius-md);
+  --radius-large: var(--fact-radius-lg);
+  --shadow-card: var(--fact-shadow-panel);
+}
+
+/* Card primitives — flatter */
+.card,
+.kpi-card,
+.production-order-card {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: var(--fact-shadow-panel) !important;
+  background: var(--fact-surface-panel) !important;
+}
+
+/* Remove gradient KPI bands in production execution */
+.production-execution-kpis__item--total,
+.production-execution-kpis__item--in-progress,
+.production-execution-kpis__item--ready,
+.production-execution-kpis__item--paused,
+.production-execution-kpis__item--completed {
+  background: var(--fact-surface-panel) !important;
+  border: 1px solid var(--fact-border) !important;
+  box-shadow: none !important;
+}
+
+.production-execution-safety {
+  background: var(--fact-surface-muted) !important;
+  border: 1px solid var(--fact-border) !important;
+  box-shadow: none !important;
+}
+
+.production-execution-header {
+  border-bottom: 1px solid var(--fact-border);
+  padding-bottom: 10px;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.production-execution-header h1 {
+  font-size: var(--fact-text-page-title) !important;
+}
+
+.production-execution-page {
+  gap: var(--fact-density-section-gap) !important;
+  padding: var(--fact-density-page-padding) !important;
+}
+
+/* Commint executive — industrial tone */
+.commint-executive {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: var(--fact-shadow-panel) !important;
+  background: var(--fact-surface-panel) !important;
+}
+
+.commint-kpi-grid {
+  gap: 1px !important;
+  background: var(--fact-border) !important;
+  border: 1px solid var(--fact-border) !important;
+  border-radius: var(--fact-radius-md) !important;
+  overflow: hidden;
+}
+
+.commint-kpi-card {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 8px 10px !important;
+}
+
+.commint-kpi-card::before {
+  display: none !important;
+}
+
+.commint-kpi-card__value {
+  font-size: 1rem !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.commint-panel {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: var(--fact-shadow-panel) !important;
+}
+
+.commint-executive__eyebrow {
+  color: var(--color-text-muted) !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* Digital workforce — operational not chatbot */
+.dwf-hero,
+.dwf-kpi-grid .dwf-kpi-card {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: var(--fact-shadow-panel) !important;
+}
+
+.dwf-hero {
+  background: var(--fact-surface-panel) !important;
+  border: 1px solid var(--fact-border) !important;
+}
+
+/* Command center dashboard panels */
+.dashboard-panel,
+.command-center .dashboard-metric-card {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: var(--fact-shadow-panel) !important;
+}
+
+/* Prohibit decorative glow on focus within operational workspaces */
+.fact-workspace .input:focus,
+.production-execution-page .input:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 25%, transparent) !important;
+}

@@ -69,6 +69,7 @@ Kapsam:
 - Kabul kriterleri
 
 - Roadmap ([Manufacturing Roadmap — MP1/MP2/MP3](product/manufacturing-roadmap.md))
+- Industrial UI design system ([Surface Matrix](product/industrial-ui-hardening-surface-matrix.md))
 
 - PRD belgeleri
 

@@ -102,28 +102,23 @@ export function DigitalWorkforceControlCenterView() {
 
   return (
     <>
-      <header className="dwf-hero">
+      <header className="fact-workspace__header">
         <div>
-          <p className="dwf-hero__eyebrow">DİJİTAL İŞ GÜCÜ</p>
-          <h1>{DIGITAL_WORKFORCE_TITLE}</h1>
-          <p>{DIGITAL_WORKFORCE_SUBTITLE}</p>
-          <p>{DIGITAL_WORKFORCE_POSITIONING}</p>
-          <p>{DIGITAL_WORKFORCE_SUMMARY}</p>
+          <p className="fact-workspace__context">DİJİTAL İŞ GÜCÜ · OPERASYON KONTROL</p>
+          <h1 className="fact-workspace__title">{DIGITAL_WORKFORCE_TITLE}</h1>
+          <p className="fact-workspace__meta">{DIGITAL_WORKFORCE_SUBTITLE}</p>
         </div>
-        <div className="dwf-hero__count">
-          <strong>7</strong>
-          <span>Dijital Çalışan</span>
+        <div className="fact-status-strip__item" style={{ minWidth: "96px" }}>
+          <span className="fact-status-strip__label">Aktif çalışan</span>
+          <strong className="fact-status-strip__value">7</strong>
         </div>
       </header>
 
-      <section aria-label="Özet göstergeler" className="dwf-kpi-grid">
+      <section aria-label="Özet göstergeler" className="fact-status-strip">
         {kpiItems.map(([label, value]) => (
-          <article className="dwf-kpi" key={label}>
-            <span>{label}</span>
-            <strong>{value}</strong>
-            {label.includes("Tahmini") || label.includes("Maliyet") || label.includes("Riski") ? (
-              <span>{DIGITAL_WORKFORCE_COST_NOTE}</span>
-            ) : null}
+          <article className="fact-status-strip__item" key={label}>
+            <span className="fact-status-strip__label">{label}</span>
+            <strong className="fact-status-strip__value">{value}</strong>
           </article>
         ))}
       </section>

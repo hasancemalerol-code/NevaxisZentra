@@ -16,10 +16,11 @@ import type {
   FactoryDecisionEarlyWarningCardApi,
   FactoryDecisionCenterWorkspaceApi,
 } from "../server/factory-decision-center-api-client";
+import { StatusStrip } from "@/components/workspace/status-strip";
+import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { PresentationModeReturnLink } from "@/features/presentation-mode/components/presentation-mode-return-link";
 
 import { factoryDecisionResetAction } from "../server/factory-decision-center-actions";
-import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 
 type FactoryDecisionCenterViewProps = Readonly<{
   workspace: FactoryDecisionCenterWorkspaceApi;
@@ -117,18 +118,16 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
   }
 
   return (
-    <main className="commint-page" data-testid="factory-decision-center-view">
+    <main className="fact-workspace" data-testid="factory-decision-center-view">
       <PresentationModeReturnLink />
-      <header className="commint-executive">
-        <div className="commint-executive__intro">
-          <p className="commint-executive__eyebrow">OPERASYONEL KARAR KATMANI</p>
-          <h1>{FACTORY_DECISION_CENTER_TITLE}</h1>
-          <p className="commint-executive__subtitle">{FACTORY_DECISION_CENTER_SUBTITLE}</p>
-        </div>
-        <div className="commint-executive__actions">
+      <WorkspaceHeader
+        context="OPERASYONEL KARAR KATMANI"
+        title={FACTORY_DECISION_CENTER_TITLE}
+        meta={FACTORY_DECISION_CENTER_SUBTITLE}
+        actions={
           <button
             type="button"
-            className="commint-button commint-button--ghost"
+            className="button button-secondary button-medium"
             disabled={isPending}
             onClick={handleReset}
             data-testid="factory-decision-center-reset"
@@ -136,29 +135,18 @@ export function FactoryDecisionCenterView({ workspace: initialWorkspace }: Facto
             <RefreshCw aria-hidden="true" size={16} />
             Senaryoyu Sıfırla
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {message ? <div className="commint-error-banner">{message}</div> : null}
 
-      <section className="commint-kpi-grid" data-testid="factory-decision-center-summary">
-        {KPI_CONFIG.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <article
-              key={kpi.key}
-              className={`commint-kpi-card commint-kpi-card__tone--${kpi.tone}`}
-              data-testid={`factory-decision-kpi-${kpi.key}`}
-            >
-              <div className="commint-kpi-card__header">
-                <p className="commint-kpi-card__label">{kpi.label}</p>
-                <Icon aria-hidden="true" size={16} />
-              </div>
-              <p className="commint-kpi-card__value">{workspace.summary[kpi.key]}</p>
-            </article>
-          );
-        })}
-      </section>
+      <StatusStrip
+        aria-label="Karar merkezi özet"
+        items={KPI_CONFIG.map((kpi) => ({
+          label: kpi.label,
+          value: workspace.summary[kpi.key],
+        }))}
+      />
 
       <EarlyWarningSection
         title="ERKEN UYARI / ÖNGÖRÜLEN RİSKLER"

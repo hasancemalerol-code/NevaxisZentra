@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { ArrowRight, Factory } from "lucide-react";
 
+import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/operational-status";
+import { WorkspaceHeader } from "@/components/workspace/workspace-header";
+
 import type { MixedProductionLineSummaryApi } from "../server/mixed-production-api-client";
 
 type MixedProductionLinesViewProps = Readonly<{
@@ -11,17 +14,17 @@ type MixedProductionLinesViewProps = Readonly<{
 
 export function MixedProductionLinesView({ lines }: MixedProductionLinesViewProps) {
   return (
-    <main className="production-execution-page" data-testid="mixed-production-lines-view">
-      <header className="production-execution-header">
-        <p>ÜRETİM · KARMA HATLAR</p>
-        <h1>Üretim Hatları</h1>
-        <span>
-          Otomatik, yarı otomatik ve insan operasyonlu istasyonları tek kanonik üretim akışında izleyin.
-        </span>
-        <Link href="/uretim" className="production-execution-header__link">
-          Üretim Emirleri
-        </Link>
-      </header>
+    <main className="fact-workspace" data-testid="mixed-production-lines-view">
+      <WorkspaceHeader
+        context="ÜRETİM · KARMA HATLAR"
+        title="Üretim Hatları"
+        meta="Otomatik, yarı otomatik ve insan operasyonlu istasyonlar — tek kanonik akış"
+        actions={
+          <Link href="/uretim" className="button button-secondary button-medium">
+            Üretim Emirleri
+          </Link>
+        }
+      />
 
       {lines.length === 0 ? (
         <div className="production-execution-empty" role="status">
@@ -37,29 +40,26 @@ export function MixedProductionLinesView({ lines }: MixedProductionLinesViewProp
           </p>
         </div>
       ) : (
-        <section className="production-execution-workspace__list" aria-label="Üretim hatları">
+        <section className="fact-production-board" aria-label="Üretim hatları">
           {lines.map((line) => (
             <Link
               key={line.lineId}
               href={`/uretim/hatlar/${line.lineId}`}
-              className="production-order-card"
+              className="fact-production-board__row"
               data-testid={`mixed-line-card-${line.code}`}
             >
-              <div className="production-order-card__header">
-                <div>
-                  <p>{line.code}</p>
-                  <h2>{line.name}</h2>
-                </div>
-                <span className="production-order-card__status">{line.lineState}</span>
+              <div>
+                <p className="fact-workspace__meta">{line.code}</p>
+                <strong className="fact-workspace__title" style={{ fontSize: "var(--fact-text-object)" }}>{line.name}</strong>
               </div>
-              <div className="production-order-card__meta">
+              <div className="fact-workspace__meta">
                 <span>Ürün: {line.currentProductCode ?? "—"}</span>
-                <span>Emir: {line.currentOrderReference ?? "—"}</span>
-                <span>GOOD: {line.goodOutputToday}</span>
-                <span>REJECT: {line.rejectOutputToday}</span>
+                <span> · Emir: {line.currentOrderReference ?? "—"}</span>
+                <span> · GOOD: {line.goodOutputToday}</span>
+                <span> · REJECT: {line.rejectOutputToday}</span>
               </div>
-              <div className="production-order-card__footer">
-                Hat detayı
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <OperationalBadge status={mapOperationalStatus(line.lineState)} label={line.lineState} />
                 <ArrowRight aria-hidden="true" size={16} />
               </div>
             </Link>
