@@ -55,6 +55,7 @@ using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using NevaxisFactOS.Persistence.ContextKnowledge;
 using NevaxisFactOS.Persistence.ModelGateway;
 using NevaxisFactOS.Persistence.ThroughputOptimizer;
+using NevaxisFactOS.Persistence.RealFactoryPilot;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -431,6 +432,15 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<ThroughputOptimizerRunRecord> ThroughputOptimizerRunRecords => Set<ThroughputOptimizerRunRecord>();
     public DbSet<VerifiedImprovementRecord> VerifiedImprovementRecords => Set<VerifiedImprovementRecord>();
     public DbSet<VerifiedTrainingDatasetCandidateRecord> VerifiedTrainingDatasetCandidateRecords => Set<VerifiedTrainingDatasetCandidateRecord>();
+
+    public DbSet<RealFactoryPilotRunRecord> RealFactoryPilotRunRecords => Set<RealFactoryPilotRunRecord>();
+    public DbSet<RealFactoryFieldMappingRecord> RealFactoryFieldMappingRecords => Set<RealFactoryFieldMappingRecord>();
+    public DbSet<RealFactoryDiscoveryRecord> RealFactoryDiscoveryRecords => Set<RealFactoryDiscoveryRecord>();
+    public DbSet<RealFactoryShadowSessionRecord> RealFactoryShadowSessionRecords => Set<RealFactoryShadowSessionRecord>();
+    public DbSet<RealFactoryDataQualityRecord> RealFactoryDataQualityRecords => Set<RealFactoryDataQualityRecord>();
+    public DbSet<RealFactoryShadowAccuracyRecord> RealFactoryShadowAccuracyRecords => Set<RealFactoryShadowAccuracyRecord>();
+    public DbSet<Mp2CalibrationVersionRecord> Mp2CalibrationVersionRecords => Set<Mp2CalibrationVersionRecord>();
+    public DbSet<RealFactoryPilotEvidencePackRecord> RealFactoryPilotEvidencePackRecords => Set<RealFactoryPilotEvidencePackRecord>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3406,6 +3416,46 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new VerifiedTrainingDatasetCandidateRecordConfiguration());
         modelBuilder.Entity<VerifiedTrainingDatasetCandidateRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryPilotRunRecordConfiguration());
+        modelBuilder.Entity<RealFactoryPilotRunRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryFieldMappingRecordConfiguration());
+        modelBuilder.Entity<RealFactoryFieldMappingRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryDiscoveryRecordConfiguration());
+        modelBuilder.Entity<RealFactoryDiscoveryRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryShadowSessionRecordConfiguration());
+        modelBuilder.Entity<RealFactoryShadowSessionRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryDataQualityRecordConfiguration());
+        modelBuilder.Entity<RealFactoryDataQualityRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryShadowAccuracyRecordConfiguration());
+        modelBuilder.Entity<RealFactoryShadowAccuracyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new Mp2CalibrationVersionRecordConfiguration());
+        modelBuilder.Entity<Mp2CalibrationVersionRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new RealFactoryPilotEvidencePackRecordConfiguration());
+        modelBuilder.Entity<RealFactoryPilotEvidencePackRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }

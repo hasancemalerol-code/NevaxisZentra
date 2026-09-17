@@ -72,7 +72,7 @@ public sealed class ModelGatewayService : IModelGatewayService
         }
 
         var now = DateTimeOffset.UtcNow;
-        var dayStart = now.Date;
+        var dayStart = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
         var monthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
         var dailySpend = await SumCostAsync(facilityId, dayStart, cancellationToken);
         var monthlySpend = await SumCostAsync(facilityId, monthStart, cancellationToken);

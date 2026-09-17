@@ -17,6 +17,7 @@ public static class ThroughputOptimizerFailureCodes
     public const string ApprovalDenied = "throughput-optimizer.approval-denied";
     public const string ObservationIncomplete = "throughput-optimizer.observation-incomplete";
     public const string VerificationFailed = "throughput-optimizer.verification-failed";
+    public const string PolicyDenied = "throughput-optimizer.policy-denied";
 }
 
 public static class ThroughputOptimizerPhases

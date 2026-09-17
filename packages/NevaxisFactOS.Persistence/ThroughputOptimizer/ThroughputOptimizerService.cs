@@ -4,6 +4,7 @@ using NevaxisFactOS.Persistence.ContextKnowledge;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
 using NevaxisFactOS.Persistence.ModelGateway;
 using NevaxisFactOS.Persistence.MixedProduction;
+using NevaxisFactOS.Persistence.RealFactoryPilot;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using NevaxisFactOS.Persistence.Tenancy;
 
@@ -220,6 +221,13 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
             }
 
             case ThroughputOptimizerPhases.Execute:
+                if (await RealFactoryShadowGuard.BlocksPhysicalActionsAsync(db, run.LineId, cancellationToken))
+                {
+                    throw new ThroughputOptimizerException(
+                        ThroughputOptimizerFailureCodes.PolicyDenied,
+                        "Shadow mode blocks physical/process-changing actions.");
+                }
+
                 await AdvanceCase(workCase, DigitalWorkCaseStatuses.Executing, subjectId, cancellationToken);
                 run.ActionPlanJson = run.SelectionJson;
                 run.CurrentPhase = ThroughputOptimizerPhases.ObserveResult;

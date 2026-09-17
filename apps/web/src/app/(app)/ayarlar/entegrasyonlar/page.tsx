@@ -27,6 +27,8 @@ export default async function EntegrasyonlarPage() {
         <p>
           <Link href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</Link>
           {" — canlı olay akışı, sağlık ve karantina görünümü"}
+          {" · "}
+          <Link href="/ayarlar/entegrasyonlar/gercek-fabrika">Gerçek Fabrika Pilot</Link>
         </p>
       </header>
 
