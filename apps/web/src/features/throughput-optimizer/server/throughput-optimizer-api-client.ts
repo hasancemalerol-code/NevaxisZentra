@@ -2,6 +2,32 @@ import "server-only";
 
 import type { ProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
+export type ThroughputOptimizerExecutiveCaseApi = Readonly<{
+  caseId: string;
+  lineId: string;
+  lineCode: string;
+  currentPhase: string;
+  caseStatus: string;
+  currentConstraintStationCode?: string;
+  currentConstraintType?: string;
+  selectedInterventionTitle?: string;
+  selectedInterventionType?: string;
+  hasPendingApproval: boolean;
+  observationState: string;
+  verificationOutcome?: string;
+  verifiedThroughputGainPerHour?: number;
+  isVerifiedClosed: boolean;
+  updatedAtUtc: string;
+}>;
+
+export type ThroughputOptimizerExecutiveSummaryApi = Readonly<{
+  activeCaseCount: number;
+  pendingApprovalCount: number;
+  verifiedImprovementTodayCount: number;
+  activeCases: readonly ThroughputOptimizerExecutiveCaseApi[];
+  verifiedToday: readonly ThroughputOptimizerExecutiveCaseApi[];
+}>;
+
 export type ThroughputOptimizerWorkspaceApi = Readonly<{
   caseId: string;
   lineId: string;
@@ -86,6 +112,17 @@ export async function readThroughputOptimizerWorkspace(
   return throughputOptimizerFetch<ThroughputOptimizerWorkspaceApi>(
     context,
     `/api/throughput-optimizer/cases/${caseId}/workspace`,
+  );
+}
+
+export async function readThroughputOptimizerExecutiveSummary(
+  context: ProductionOrderRequestContext,
+): Promise<
+  { status: "success"; value: ThroughputOptimizerExecutiveSummaryApi } | { status: "failure"; code: string; message: string }
+> {
+  return throughputOptimizerFetch<ThroughputOptimizerExecutiveSummaryApi>(
+    context,
+    "/api/throughput-optimizer/executive-summary",
   );
 }
 

@@ -92,3 +92,27 @@ public sealed record ThroughputOptimizerGoldenDemoResult(
     string VerificationOutcome,
     bool KnowledgeCandidateCreated,
     string Message);
+
+public sealed record ThroughputOptimizerExecutiveCaseItem(
+    Guid CaseId,
+    Guid LineId,
+    string LineCode,
+    string CurrentPhase,
+    string CaseStatus,
+    string? CurrentConstraintStationCode,
+    string? CurrentConstraintType,
+    string? SelectedInterventionTitle,
+    string? SelectedInterventionType,
+    bool HasPendingApproval,
+    string ObservationState,
+    string? VerificationOutcome,
+    decimal? VerifiedThroughputGainPerHour,
+    bool IsVerifiedClosed,
+    DateTimeOffset UpdatedAtUtc);
+
+public sealed record ThroughputOptimizerExecutiveSummary(
+    int ActiveCaseCount,
+    int PendingApprovalCount,
+    int VerifiedImprovementTodayCount,
+    IReadOnlyList<ThroughputOptimizerExecutiveCaseItem> ActiveCases,
+    IReadOnlyList<ThroughputOptimizerExecutiveCaseItem> VerifiedToday);

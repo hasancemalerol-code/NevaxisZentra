@@ -14,6 +14,9 @@ export const EXECUTIVE_COMMAND_CENTER_EMPTY_APPROVALS =
 export const EXECUTIVE_COMMAND_CENTER_EMPTY_VERIFIED =
   "Bugün henüz doğrulanmış kapanış yok.";
 
+export const EXECUTIVE_COMMAND_CENTER_EMPTY_THROUGHPUT =
+  "Aktif throughput optimizasyon vakası bulunmuyor.";
+
 export const EXECUTIVE_COMMAND_CENTER_PARTIAL_NOTE =
   "Bazı kaynaklar yetki veya abonelik nedeniyle kısmi görünüyor.";
 
@@ -24,3 +27,17 @@ export const EXECUTIVE_PRIORITY_SECTION_LABELS: Record<string, string> = {
   "pending-verification": "DOĞRULAMA BEKLEYEN",
   "verified-today": "BUGÜN VERIFIED",
 };
+
+export const EXECUTIVE_COMMAND_CENTER_FILTER_SEVERITY_OPTIONS = [
+  { value: "", label: "Tümü" },
+  { value: "critical", label: "Kritik" },
+  { value: "high", label: "Yüksek" },
+  { value: "medium", label: "Orta" },
+  { value: "low", label: "Düşük" },
+] as const;
+
+export const EXECUTIVE_COMMAND_CENTER_FILTER_TIME_SCOPE_OPTIONS = [
+  { value: "today", label: "Bugün" },
+  { value: "shift", label: "Vardiya" },
+  { value: "recent", label: "Son dönem" },
+] as const;

@@ -1,3 +1,21 @@
+.executive-filter-rail {
+  margin-top: 1rem;
+}
+
+.executive-filter-rail--active {
+  border-left: 3px solid #2563eb;
+  padding-left: 0.75rem;
+}
+
+.executive-filter-rail__active-note {
+  font-size: 0.72rem;
+  color: #2563eb;
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  grid-column: 1 / -1;
+}
+
 .executive-command-grid {
   display: grid;
   gap: 1rem;

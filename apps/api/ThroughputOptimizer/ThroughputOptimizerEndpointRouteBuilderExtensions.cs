@@ -11,6 +11,7 @@ public static class ThroughputOptimizerEndpointRouteBuilderExtensions
         var group = endpoints.MapGroup("/api/throughput-optimizer").RequireAuthorization();
 
         group.MapPost("/lines/{lineId:guid}/observe", ObserveAsync);
+        group.MapGet("/executive-summary", GetExecutiveSummaryAsync);
         group.MapGet("/cases/{caseId:guid}/workspace", GetWorkspaceAsync);
         group.MapPost("/cases/{caseId:guid}/advance", AdvanceAsync);
         group.MapPost("/dev/golden-demo", RunGoldenDemoAsync);
@@ -45,6 +46,20 @@ public static class ThroughputOptimizerEndpointRouteBuilderExtensions
         {
             return MapException(ex);
         }
+    }
+
+    private static async Task<IResult> GetExecutiveSummaryAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IThroughputOptimizerService service,
+        CancellationToken cancellationToken)
+    {
+        var (access, failure) = await ResolveAccessAsync(
+            facilityId, ThroughputOptimizerPermissionKeys.Read, facilityAccessResolver, cancellationToken);
+        if (access is null) return failure!;
+
+        var summary = await service.GetExecutiveSummaryAsync(access.FacilityId, cancellationToken);
+        return TypedResults.Ok(summary);
     }
 
     private static async Task<IResult> GetWorkspaceAsync(

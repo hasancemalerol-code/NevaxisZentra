@@ -11,6 +11,7 @@ import {
   fetchDigitalWorkforceControlCenter,
 } from "@/features/digital-workforce/server/digital-workforce-api-client";
 import { readFactoryDecisionCenterWorkspace } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
+import { readThroughputOptimizerExecutiveSummary } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -23,6 +24,7 @@ const EXECUTIVE_READ_PERMISSIONS = [
   "digital-workforce.read",
   "ai-task.read",
   "factory-intelligence.read",
+  "throughput-optimizer.read",
 ] as const;
 
 export type ExecutiveCommandCenterResult =
@@ -96,13 +98,18 @@ export async function readExecutiveCommandCenterWorkspace(
     ? listAiTasks(context, { page: 1, pageSize: 100 })
     : Promise.resolve({ status: "failure" as const, code: "permission-denied", message: "ai-task.read", retryable: false });
 
-  const [decisionCenterResult, workforceResult, approvalsResult, activityResult, aiTasksResult] =
+  const throughputPromise = hasGrantedPermission(access, "throughput-optimizer.read")
+    ? readThroughputOptimizerExecutiveSummary(context)
+    : Promise.resolve({ status: "failure" as const, code: "permission-denied", message: "throughput-optimizer.read" });
+
+  const [decisionCenterResult, workforceResult, approvalsResult, activityResult, aiTasksResult, throughputResult] =
     await Promise.all([
       decisionCenterPromise,
       workforcePromise,
       approvalsPromise,
       activityPromise,
       aiTasksPromise,
+      throughputPromise,
     ]);
 
   if (decisionCenterResult.status === "failure") {
@@ -120,6 +127,9 @@ export async function readExecutiveCommandCenterWorkspace(
   if (aiTasksResult.status === "failure") {
     unavailableSources.push("ai-task-center");
   }
+  if (throughputResult.status === "failure") {
+    unavailableSources.push("throughput-optimizer");
+  }
 
   if (decisionCenterResult.status === "failure" && workforceResult.status === "failure") {
     return {
@@ -134,6 +144,7 @@ export async function readExecutiveCommandCenterWorkspace(
     workforceApprovals: approvalsResult.status === "success" ? approvalsResult.value : undefined,
     workforceActivity: activityResult.status === "success" ? activityResult.value : undefined,
     aiTasks: aiTasksResult.status === "success" ? aiTasksResult.value.items : undefined,
+    throughputSummary: throughputResult.status === "success" ? throughputResult.value : undefined,
     generatedAtUtc: new Date().toISOString(),
     filters,
     unavailableSources,

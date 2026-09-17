@@ -3,6 +3,8 @@ import type {
   ExecutiveCommandCenterTimeScope,
 } from "../types/executive-command-center-types";
 
+const EXECUTIVE_FILTER_KEYS = ["severity", "timeScope", "outcomeType"] as const;
+
 export function readExecutiveCommandCenterFilters(
   searchParams: URLSearchParams,
 ): ExecutiveCommandCenterFilters {
@@ -18,6 +20,40 @@ export function readExecutiveCommandCenterFilters(
 }
 
 export function buildExecutiveCommandCenterFilterParams(
+  searchParams: URLSearchParams,
+  updates: Partial<Record<"severity" | "timeScope" | "outcomeType", string>>,
+): URLSearchParams {
+  const params = new URLSearchParams(searchParams.toString());
+  for (const [key, value] of Object.entries(updates)) {
+    if (!value || (key === "timeScope" && value === "today")) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+  }
+  return params;
+}
+
+export function clearExecutiveCommandCenterFilterParams(
+  searchParams: URLSearchParams,
+): URLSearchParams {
+  const params = new URLSearchParams(searchParams.toString());
+  for (const key of EXECUTIVE_FILTER_KEYS) {
+    if (key === "outcomeType") {
+      continue;
+    }
+    params.delete(key);
+  }
+  return params;
+}
+
+export function hasActiveExecutiveCommandCenterFilters(
+  filters: ExecutiveCommandCenterFilters,
+): boolean {
+  return Boolean(filters.severity) || filters.timeScope !== "today";
+}
+
+export function serializeExecutiveCommandCenterFilters(
   filters: ExecutiveCommandCenterFilters,
 ): URLSearchParams {
   const params = new URLSearchParams();

@@ -7,12 +7,21 @@ import {
   buildExecutiveNarrative,
   buildExecutivePredictiveRisks,
   buildExecutivePriorityStack,
+  buildExecutiveThroughputSummary,
+  buildExecutiveTimeline,
   buildExecutiveVerifiedValue,
   countOpenAiTasks,
   getExecutiveEmptyStateMessage,
 } from "../src/features/executive-command-center/application/executive-command-center-builder";
 import type { FactoryDecisionCenterWorkspaceApi } from "../src/features/factory-decision-center/server/factory-decision-center-api-client";
+import type { ThroughputOptimizerExecutiveSummaryApi } from "../src/features/throughput-optimizer/server/throughput-optimizer-api-client";
 import { EXECUTIVE_COMMAND_CENTER_ROUTE_PATH } from "../src/features/executive-command-center/domain/executive-command-center-labels";
+import {
+  buildExecutiveCommandCenterFilterParams,
+  clearExecutiveCommandCenterFilterParams,
+  hasActiveExecutiveCommandCenterFilters,
+  readExecutiveCommandCenterFilters,
+} from "../src/features/executive-command-center/application/executive-command-center-filter";
 import { navigationItems } from "../src/lib/navigation/primary-navigation";
 
 function createQueueItem(overrides: Partial<FactoryDecisionCenterWorkspaceApi["priorityQueue"][number]> = {}) {
@@ -35,6 +44,53 @@ function createQueueItem(overrides: Partial<FactoryDecisionCenterWorkspaceApi["p
     verificationState: "pending",
     updatedAtUtc: "2026-09-16T09:12:00.000Z",
     concurrencyToken: 1,
+    ...overrides,
+  };
+}
+
+function createThroughputSummary(
+  overrides: Partial<ThroughputOptimizerExecutiveSummaryApi> = {},
+): ThroughputOptimizerExecutiveSummaryApi {
+  return {
+    activeCaseCount: 1,
+    pendingApprovalCount: 0,
+    verifiedImprovementTodayCount: 1,
+    activeCases: [
+      {
+        caseId: "throughput-active",
+        lineId: "line-1",
+        lineCode: "MIX-01",
+        currentPhase: "EXECUTE",
+        caseStatus: "executing",
+        currentConstraintStationCode: "ST-30",
+        currentConstraintType: "operator",
+        selectedInterventionTitle: "Add operator to constraint station",
+        selectedInterventionType: "ADD_OPERATOR",
+        hasPendingApproval: false,
+        observationState: "Müdahale uygulanıyor",
+        updatedAtUtc: "2026-09-16T09:30:00.000Z",
+        isVerifiedClosed: false,
+      },
+    ],
+    verifiedToday: [
+      {
+        caseId: "throughput-verified",
+        lineId: "line-1",
+        lineCode: "MIX-01",
+        currentPhase: "CLOSED",
+        caseStatus: "closed",
+        currentConstraintStationCode: "ST-30",
+        currentConstraintType: "operator",
+        selectedInterventionTitle: "Add operator to constraint station",
+        selectedInterventionType: "ADD_OPERATOR",
+        hasPendingApproval: false,
+        observationState: "Kapatıldı",
+        verificationOutcome: "VERIFIED_IMPROVEMENT",
+        verifiedThroughputGainPerHour: 42,
+        updatedAtUtc: "2026-09-16T09:45:00.000Z",
+        isVerifiedClosed: true,
+      },
+    ],
     ...overrides,
   };
 }
@@ -141,6 +197,66 @@ test("verified value counts only passed verification state", () => {
 
   assert.equal(verified.length, 1);
   assert.equal(verified[0]?.orderReference, "ORD-A");
+});
+
+test("executive narrative includes throughput optimizer context", () => {
+  const narrative = buildExecutiveNarrative(createWorkspace(), undefined, createThroughputSummary());
+  assert.match(narrative, /MIX-01/);
+  assert.match(narrative, /VERIFIED iyileşme/i);
+});
+
+test("verified value includes only passed decision and throughput improvements", () => {
+  const verified = buildExecutiveVerifiedValue(createWorkspace(), createThroughputSummary());
+  assert.equal(verified.length, 2);
+  assert.ok(verified.some((item) => item.id === "case-verified"));
+  assert.ok(verified.some((item) => item.id === "throughput-throughput-verified"));
+});
+
+test("throughput summary maps drill-down to production line detail", () => {
+  const summary = buildExecutiveThroughputSummary(createThroughputSummary());
+  assert.equal(summary.activeCaseCount, 1);
+  assert.equal(summary.verifiedImprovementTodayCount, 1);
+  assert.equal(summary.activeCases[0]?.drillDownHref, "/uretim/hatlar/line-1");
+});
+
+test("timeline orders entries chronologically by occurredAtUtc", () => {
+  const timeline = buildExecutiveTimeline(
+    createWorkspace(),
+    [
+      {
+        id: "a1",
+        caseId: "case-1",
+        workerId: "w1",
+        workerCode: "worker",
+        actionType: "Worker action started",
+        description: "Late activity",
+        result: "ok",
+        sourceClassification: "real",
+        createdAtUtc: "2026-09-16T09:44:00.000Z",
+      },
+    ],
+    createThroughputSummary(),
+  );
+
+  assert.ok(timeline.length >= 2);
+  for (let index = 1; index < timeline.length; index += 1) {
+    const previous = new Date(timeline[index - 1]!.occurredAtUtc).getTime();
+    const current = new Date(timeline[index]!.occurredAtUtc).getTime();
+    assert.ok(current >= previous);
+  }
+});
+
+test("workspace builder exposes throughput optimizer section", () => {
+  const workspace = buildExecutiveCommandCenterWorkspace({
+    decisionCenter: createWorkspace(),
+    throughputSummary: createThroughputSummary(),
+    generatedAtUtc: "2026-09-16T10:00:00.000Z",
+    filters: { timeScope: "today" },
+    unavailableSources: [],
+  });
+
+  assert.equal(workspace.throughputOptimizer.activeCaseCount, 1);
+  assert.equal(workspace.throughputOptimizer.verifiedImprovementTodayCount, 1);
 });
 
 test("predictive risks filter out non-material watch signals", () => {
@@ -275,4 +391,49 @@ test("open ai task count excludes final statuses", () => {
   ]);
 
   assert.equal(count, 1);
+});
+
+test("executive filter params preserve existing query keys and deep-link behavior", () => {
+  const base = new URLSearchParams("outcomeType=delivery&severity=high&timeScope=shift");
+  const updated = buildExecutiveCommandCenterFilterParams(base, { severity: "critical", timeScope: "today" });
+
+  assert.equal(updated.get("severity"), "critical");
+  assert.equal(updated.get("timeScope"), null);
+  assert.equal(updated.get("outcomeType"), "delivery");
+});
+
+test("executive clear filters resets severity and timeScope only", () => {
+  const cleared = clearExecutiveCommandCenterFilterParams(
+    new URLSearchParams("severity=critical&timeScope=shift&outcomeType=delivery"),
+  );
+
+  assert.equal(cleared.get("severity"), null);
+  assert.equal(cleared.get("timeScope"), null);
+  assert.equal(cleared.get("outcomeType"), "delivery");
+});
+
+test("executive active filter detection uses defaults", () => {
+  assert.equal(hasActiveExecutiveCommandCenterFilters(readExecutiveCommandCenterFilters(new URLSearchParams())), false);
+  assert.equal(
+    hasActiveExecutiveCommandCenterFilters(readExecutiveCommandCenterFilters(new URLSearchParams("severity=critical"))),
+    true,
+  );
+  assert.equal(
+    hasActiveExecutiveCommandCenterFilters(readExecutiveCommandCenterFilters(new URLSearchParams("timeScope=shift"))),
+    true,
+  );
+});
+
+test("priority stack respects severity filter from URL params", () => {
+  const workspace = createWorkspace({
+    liveQueues: {
+      ...createWorkspace().liveQueues,
+      pendingHumanApproval: [createQueueItem({ caseId: "case-approval", severity: "low" })],
+    },
+  });
+  const stack = buildExecutivePriorityStack(workspace, {
+    timeScope: "today",
+    severity: "critical",
+  });
+  assert.ok(!stack.some((item) => item.id.includes("case-approval")));
 });

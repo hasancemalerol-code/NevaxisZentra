@@ -36,6 +36,10 @@ public interface IThroughputOptimizerService
         Guid tenantId,
         string subjectId,
         CancellationToken cancellationToken = default);
+
+    Task<ThroughputOptimizerExecutiveSummary> GetExecutiveSummaryAsync(
+        Guid facilityId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class ThroughputOptimizerService : IThroughputOptimizerService
@@ -89,6 +93,147 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
         tenantDatabaseSession.ExecuteWriteAsync(
             ct => RunGoldenDemoCoreAsync(facilityId, tenantId, subjectId, ct),
             cancellationToken);
+
+    public Task<ThroughputOptimizerExecutiveSummary> GetExecutiveSummaryAsync(
+        Guid facilityId, CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            ct => GetExecutiveSummaryCoreAsync(facilityId, ct),
+            cancellationToken);
+
+    private async Task<ThroughputOptimizerExecutiveSummary> GetExecutiveSummaryCoreAsync(
+        Guid facilityId, CancellationToken cancellationToken)
+    {
+        var todayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
+
+        var runRows = await (
+            from run in db.ThroughputOptimizerRunRecords.AsNoTracking()
+            join workCase in db.DigitalWorkCases.AsNoTracking() on run.DigitalWorkCaseId equals workCase.Id
+            where run.FacilityId == facilityId
+            orderby run.UpdatedAtUtc descending
+            select new { run, workCase }
+        ).ToListAsync(cancellationToken);
+
+        var caseIds = runRows.Select(row => row.run.DigitalWorkCaseId).Distinct().ToList();
+        var improvements = await db.VerifiedImprovementRecords.AsNoTracking()
+            .Where(r => caseIds.Contains(r.DigitalWorkCaseId))
+            .ToDictionaryAsync(r => r.DigitalWorkCaseId, cancellationToken);
+
+        var pendingApprovalCaseIds = await db.DigitalWorkApprovals.AsNoTracking()
+            .Where(a => a.Status == DigitalWorkApprovalStatuses.Pending && caseIds.Contains(a.CaseId))
+            .Select(a => a.CaseId)
+            .ToHashSetAsync(cancellationToken);
+
+        var activeCases = new List<ThroughputOptimizerExecutiveCaseItem>();
+        var verifiedToday = new List<ThroughputOptimizerExecutiveCaseItem>();
+
+        foreach (var row in runRows)
+        {
+            improvements.TryGetValue(row.run.DigitalWorkCaseId, out var improvement);
+            var item = MapExecutiveCaseItem(
+                row.run,
+                row.workCase,
+                improvement,
+                pendingApprovalCaseIds.Contains(row.run.DigitalWorkCaseId));
+
+            if (row.workCase.Status != DigitalWorkCaseStatuses.Closed)
+            {
+                if (activeCases.All(existing => existing.CaseId != item.CaseId))
+                {
+                    activeCases.Add(item);
+                }
+
+                continue;
+            }
+
+            if (row.workCase.VerificationState != DigitalWorkVerificationResults.Passed)
+            {
+                continue;
+            }
+
+            var closedAt = row.workCase.ClosedAtUtc ?? improvement?.VerifiedAtUtc;
+            if (closedAt is null || closedAt < todayStart)
+            {
+                continue;
+            }
+
+            if (verifiedToday.All(existing => existing.CaseId != item.CaseId))
+            {
+                verifiedToday.Add(item);
+            }
+        }
+
+        var pendingApprovalCount = await db.DigitalWorkApprovals.AsNoTracking()
+            .Where(a => a.Status == DigitalWorkApprovalStatuses.Pending)
+            .Join(
+                db.DigitalWorkCases.AsNoTracking().Where(c => c.FacilityId == facilityId && c.PrimaryDomain == "throughput"),
+                approval => approval.CaseId,
+                workCase => workCase.Id,
+                (approval, _) => approval)
+            .CountAsync(cancellationToken);
+
+        return new ThroughputOptimizerExecutiveSummary(
+            activeCases.Count,
+            pendingApprovalCount,
+            verifiedToday.Count,
+            activeCases.Take(8).ToList(),
+            verifiedToday.Take(8).ToList());
+    }
+
+    private static ThroughputOptimizerExecutiveCaseItem MapExecutiveCaseItem(
+        ThroughputOptimizerRunRecord run,
+        DigitalWorkCase workCase,
+        VerifiedImprovementRecord? improvement,
+        bool hasPendingApproval)
+    {
+        var observation = JsonSerializer.Deserialize<ThroughputGapObservation>(run.ObservationJson);
+        var diagnosis = string.IsNullOrWhiteSpace(run.DiagnosisJson) || run.DiagnosisJson == "{}"
+            ? null
+            : JsonSerializer.Deserialize<ThroughputDiagnosisResult>(run.DiagnosisJson);
+        var selection = string.IsNullOrWhiteSpace(run.SelectionJson) || run.SelectionJson == "{}"
+            ? null
+            : JsonSerializer.Deserialize<ThroughputInterventionSelection>(run.SelectionJson);
+
+        decimal? verifiedGain = null;
+        var verificationOutcome = improvement?.VerificationOutcome;
+        if (improvement is not null
+            && improvement.VerificationOutcome == ThroughputOptimizerVerificationOutcomes.VerifiedImprovement
+            && improvement.ActualJson != "{}")
+        {
+            var baseline = JsonSerializer.Deserialize<VerifiedImprovementBaseline>(improvement.BaselineJson)!;
+            var actual = JsonSerializer.Deserialize<VerifiedImprovementActual>(improvement.ActualJson)!;
+            verifiedGain = actual.GoodThroughputPerHour - baseline.GoodThroughputPerHour;
+        }
+
+        return new ThroughputOptimizerExecutiveCaseItem(
+            run.DigitalWorkCaseId,
+            run.LineId,
+            observation?.LineCode ?? "—",
+            run.CurrentPhase,
+            workCase.Status,
+            diagnosis?.CurrentConstraintStationCode ?? observation?.CurrentConstraintStationCode,
+            diagnosis?.ConstraintType ?? observation?.CurrentConstraintType,
+            selection?.Selected.Title,
+            selection?.Selected.InterventionType,
+            hasPendingApproval,
+            DescribeObservationState(run.CurrentPhase),
+            verificationOutcome,
+            verifiedGain,
+            workCase.Status == DigitalWorkCaseStatuses.Closed
+                && workCase.VerificationState == DigitalWorkVerificationResults.Passed,
+            run.UpdatedAtUtc);
+    }
+
+    private static string DescribeObservationState(string phase) =>
+        phase switch
+        {
+            ThroughputOptimizerPhases.Observe => "Gap gözlemi",
+            ThroughputOptimizerPhases.ObserveResult => "Sonuç gözlemi",
+            ThroughputOptimizerPhases.Approval => "Onay bekliyor",
+            ThroughputOptimizerPhases.Execute => "Müdahale uygulanıyor",
+            ThroughputOptimizerPhases.Verify => "Doğrulama",
+            ThroughputOptimizerPhases.Closed => "Kapatıldı",
+            _ => phase,
+        };
 
     private async Task<ThroughputOptimizerWorkspace> ObserveLineCoreAsync(
         Guid facilityId, Guid tenantId, Guid lineId, string subjectId, CancellationToken cancellationToken,

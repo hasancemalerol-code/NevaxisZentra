@@ -2,6 +2,7 @@ import type { DigitalWorkActivityApiSummary, DigitalWorkApprovalApiSummary, Digi
 import type { FactoryDecisionCaseQueueItemApi, FactoryDecisionCenterWorkspaceApi, FactoryDecisionEarlyWarningCardApi } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import type { RawAiTaskSummary } from "@/features/ai-task-center/server/ai-task-api-client";
 import { isAiTaskFinalStatus, type AiTaskStatus } from "@/features/ai-task-center/domain/ai-task";
+import type { ThroughputOptimizerExecutiveSummaryApi } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
 
 import {
   EXECUTIVE_COMMAND_CENTER_EMPTY_APPROVALS,
@@ -18,6 +19,8 @@ import type {
   ExecutivePredictiveRisk,
   ExecutivePriorityItem,
   ExecutiveScopeState,
+  ExecutiveThroughputCaseItem,
+  ExecutiveThroughputSummary,
   ExecutiveTimelineEntry,
   ExecutiveVerifiedValueItem,
 } from "../types/executive-command-center-types";
@@ -28,6 +31,7 @@ export type ExecutiveCommandCenterSourceData = Readonly<{
   workforceApprovals?: readonly DigitalWorkApprovalApiSummary[];
   workforceActivity?: readonly DigitalWorkActivityApiSummary[];
   aiTasks?: readonly RawAiTaskSummary[];
+  throughputSummary?: ThroughputOptimizerExecutiveSummaryApi;
   generatedAtUtc: string;
   filters: ExecutiveCommandCenterFilters;
   unavailableSources: readonly string[];
@@ -40,6 +44,10 @@ const WORKFORCE_PATH = "/dijital-is-gucu";
 const WORKFORCE_APPROVALS_PATH = "/dijital-is-gucu/onaylar";
 const AI_TASKS_PATH = "/";
 const PRODUCTION_PATH = "/uretim";
+
+function throughputLineDrillDown(lineId: string): string {
+  return `${PRODUCTION_PATH}/hatlar/${lineId}`;
+}
 
 function formatTimeLabel(iso: string): string {
   const date = new Date(iso);
@@ -63,6 +71,7 @@ function isVerifiedCase(item: FactoryDecisionCaseQueueItemApi): boolean {
 export function buildExecutiveNarrative(
   decisionCenter: FactoryDecisionCenterWorkspaceApi | undefined,
   digitalWorkforce: DigitalWorkforceControlCenterSnapshot | undefined,
+  throughputSummary?: ThroughputOptimizerExecutiveSummaryApi,
 ): string {
   if (!decisionCenter) {
     return "Karar merkezi verisi yüklenemedi.";
@@ -83,15 +92,33 @@ export function buildExecutiveNarrative(
     );
   }
 
+  const throughputActive = throughputSummary?.activeCases[0];
+  if (throughputActive) {
+    sentences.push(
+      `${throughputActive.lineCode} hattında throughput optimizasyonu (${throughputActive.observationState.toLowerCase()}) yürütülüyor.`,
+    );
+  }
+
   const verified = liveQueues.verifiedClosedToday[0];
   if (verified) {
     sentences.push(`${verified.orderReference} doğrulama sonrası kapatıldı.`);
+  }
+
+  const throughputVerified = throughputSummary?.verifiedToday.find(
+    (item) => item.verificationOutcome === "VERIFIED_IMPROVEMENT",
+  );
+  if (throughputVerified?.verifiedThroughputGainPerHour) {
+    sentences.push(
+      `${throughputVerified.lineCode} hattında +${throughputVerified.verifiedThroughputGainPerHour.toFixed(0)} GOOD/s VERIFIED iyileşme.`,
+    );
   }
 
   if (summary.pendingHumanApproval > 0) {
     sentences.push(`${summary.pendingHumanApproval} insan kararı bekliyor.`);
   } else if (digitalWorkforce && digitalWorkforce.pendingApprovals > 0) {
     sentences.push(`${digitalWorkforce.pendingApprovals} dijital iş gücü onayı bekliyor.`);
+  } else if (throughputSummary && throughputSummary.pendingApprovalCount > 0) {
+    sentences.push(`${throughputSummary.pendingApprovalCount} throughput müdahale onayı bekliyor.`);
   }
 
   if (sentences.length === 0) {
@@ -350,19 +377,88 @@ export function buildExecutiveDigitalWorkforceStatus(
 
 export function buildExecutiveVerifiedValue(
   decisionCenter: FactoryDecisionCenterWorkspaceApi | undefined,
+  throughputSummary?: ThroughputOptimizerExecutiveSummaryApi,
 ): readonly ExecutiveVerifiedValueItem[] {
-  if (!decisionCenter) return [];
+  const items: ExecutiveVerifiedValueItem[] = [];
 
-  return decisionCenter.liveQueues.verifiedClosedToday
-    .filter(isVerifiedCase)
-    .map((item) => ({
-      id: item.caseId,
-      outcomeLabel: item.gapQuantity <= 0 ? "Teslimat taahhüdü korundu" : "Üretim kurtarıldı",
-      orderReference: item.orderReference,
-      summary: `${item.title} · ${item.projectedQuantity}/${item.requiredQuantity} iyi parça`,
-      verifiedAtLabel: formatTimeLabel(item.updatedAtUtc),
-      drillDownHref: caseDrillDown(item.caseId),
-    }));
+  if (decisionCenter) {
+    for (const item of decisionCenter.liveQueues.verifiedClosedToday.filter(isVerifiedCase)) {
+      items.push({
+        id: item.caseId,
+        outcomeLabel: item.gapQuantity <= 0 ? "Teslimat taahhüdü korundu" : "Üretim kurtarıldı",
+        orderReference: item.orderReference,
+        summary: `${item.title} · ${item.projectedQuantity}/${item.requiredQuantity} iyi parça`,
+        verifiedAtLabel: formatTimeLabel(item.updatedAtUtc),
+        drillDownHref: caseDrillDown(item.caseId),
+      });
+    }
+  }
+
+  if (throughputSummary) {
+    for (const item of throughputSummary.verifiedToday) {
+      if (item.verificationOutcome !== "VERIFIED_IMPROVEMENT" || !item.verifiedThroughputGainPerHour) {
+        continue;
+      }
+
+      items.push({
+        id: `throughput-${item.caseId}`,
+        outcomeLabel: "VERIFIED throughput iyileşmesi",
+        orderReference: item.lineCode,
+        summary: `${item.selectedInterventionTitle ?? "Müdahale"} · +${item.verifiedThroughputGainPerHour.toFixed(0)} GOOD/s`,
+        verifiedAtLabel: formatTimeLabel(item.updatedAtUtc),
+        drillDownHref: throughputLineDrillDown(item.lineId),
+      });
+    }
+  }
+
+  return items;
+}
+
+function mapThroughputExecutiveCase(
+  item: ThroughputOptimizerExecutiveSummaryApi["activeCases"][number],
+): ExecutiveThroughputCaseItem {
+  const constraintLabel = item.currentConstraintStationCode
+    ? `${item.currentConstraintStationCode}${item.currentConstraintType ? ` · ${item.currentConstraintType}` : ""}`
+    : "Kısıt tespit edilmedi";
+
+  return {
+    id: item.caseId,
+    lineCode: item.lineCode,
+    lineId: item.lineId,
+    currentPhase: item.currentPhase,
+    caseStatus: item.caseStatus,
+    constraintLabel,
+    selectedIntervention: item.selectedInterventionTitle,
+    approvalState: item.hasPendingApproval ? "Onay bekliyor" : "Onay gerekmiyor",
+    observationState: item.observationState,
+    verifiedGainPerHour: item.verifiedThroughputGainPerHour,
+    verificationOutcome: item.verificationOutcome,
+    drillDownHref: throughputLineDrillDown(item.lineId),
+  };
+}
+
+export function buildExecutiveThroughputSummary(
+  throughputSummary: ThroughputOptimizerExecutiveSummaryApi | undefined,
+): ExecutiveThroughputSummary {
+  if (!throughputSummary) {
+    return {
+      activeCaseCount: 0,
+      pendingApprovalCount: 0,
+      verifiedImprovementTodayCount: 0,
+      activeCases: [],
+      verifiedToday: [],
+      drillDownHref: PRODUCTION_PATH,
+    };
+  }
+
+  return {
+    activeCaseCount: throughputSummary.activeCaseCount,
+    pendingApprovalCount: throughputSummary.pendingApprovalCount,
+    verifiedImprovementTodayCount: throughputSummary.verifiedImprovementTodayCount,
+    activeCases: throughputSummary.activeCases.map(mapThroughputExecutiveCase),
+    verifiedToday: throughputSummary.verifiedToday.map(mapThroughputExecutiveCase),
+    drillDownHref: PRODUCTION_PATH,
+  };
 }
 
 export function buildExecutiveOperationalExposure(
@@ -412,6 +508,7 @@ export function buildExecutiveOperationalExposure(
 export function buildExecutiveTimeline(
   decisionCenter: FactoryDecisionCenterWorkspaceApi | undefined,
   activity: readonly DigitalWorkActivityApiSummary[] | undefined,
+  throughputSummary?: ThroughputOptimizerExecutiveSummaryApi,
 ): readonly ExecutiveTimelineEntry[] {
   const entries: ExecutiveTimelineEntry[] = [];
 
@@ -420,6 +517,7 @@ export function buildExecutiveTimeline(
       entries.push({
         id: `activity-${row.id}`,
         timeLabel: formatTimeLabel(row.createdAtUtc),
+        occurredAtUtc: row.createdAtUtc,
         label: row.actionType,
         description: row.description,
         drillDownHref: `${WORKFORCE_PATH}?caseId=${row.caseId}`,
@@ -432,6 +530,7 @@ export function buildExecutiveTimeline(
       entries.push({
         id: `case-${item.caseId}`,
         timeLabel: formatTimeLabel(item.updatedAtUtc),
+        occurredAtUtc: item.updatedAtUtc,
         label: item.status,
         description: `${item.orderReference} · ${item.title}`,
         drillDownHref: caseDrillDown(item.caseId),
@@ -439,8 +538,24 @@ export function buildExecutiveTimeline(
     }
   }
 
+  if (throughputSummary) {
+    for (const item of [...throughputSummary.activeCases, ...throughputSummary.verifiedToday].slice(0, 4)) {
+      entries.push({
+        id: `throughput-${item.caseId}-${item.currentPhase}`,
+        timeLabel: formatTimeLabel(item.updatedAtUtc),
+        occurredAtUtc: item.updatedAtUtc,
+        label: item.currentPhase,
+        description: `${item.lineCode} · ${item.observationState}${item.selectedInterventionTitle ? ` · ${item.selectedInterventionTitle}` : ""}`,
+        drillDownHref: throughputLineDrillDown(item.lineId),
+      });
+    }
+  }
+
   return entries
-    .sort((left, right) => left.timeLabel.localeCompare(right.timeLabel))
+    .sort(
+      (left, right) =>
+        new Date(left.occurredAtUtc).getTime() - new Date(right.occurredAtUtc).getTime(),
+    )
     .slice(0, 12);
 }
 
@@ -456,8 +571,13 @@ export function buildExecutiveCommandCenterWorkspace(
   const scopeState: ExecutiveScopeState =
     source.unavailableSources.length === 0 ? "full" : "partial";
 
-  const narrative = buildExecutiveNarrative(source.decisionCenter, source.digitalWorkforce);
-  const verifiedValue = buildExecutiveVerifiedValue(source.decisionCenter);
+  const throughputOptimizer = buildExecutiveThroughputSummary(source.throughputSummary);
+  const narrative = buildExecutiveNarrative(
+    source.decisionCenter,
+    source.digitalWorkforce,
+    source.throughputSummary,
+  );
+  const verifiedValue = buildExecutiveVerifiedValue(source.decisionCenter, source.throughputSummary);
   const approvals = buildExecutiveApprovals(source.decisionCenter, source.workforceApprovals);
 
   return {
@@ -465,7 +585,8 @@ export function buildExecutiveCommandCenterWorkspace(
     narrative:
       narrative === EXECUTIVE_COMMAND_CENTER_EMPTY_RISKS &&
       approvals.length === 0 &&
-      verifiedValue.length === 0
+      verifiedValue.length === 0 &&
+      throughputOptimizer.activeCaseCount === 0
         ? EXECUTIVE_COMMAND_CENTER_EMPTY_RISKS
         : narrative,
     outcomeCards: buildExecutiveOutcomeCards(
@@ -478,8 +599,13 @@ export function buildExecutiveCommandCenterWorkspace(
     approvals,
     digitalWorkforce: buildExecutiveDigitalWorkforceStatus(source.digitalWorkforce),
     verifiedValue,
+    throughputOptimizer,
     operationalExposure: buildExecutiveOperationalExposure(source.decisionCenter),
-    timeline: buildExecutiveTimeline(source.decisionCenter, source.workforceActivity),
+    timeline: buildExecutiveTimeline(
+      source.decisionCenter,
+      source.workforceActivity,
+      source.throughputSummary,
+    ),
     scopeState,
     unavailableSources: source.unavailableSources,
     filters: source.filters,

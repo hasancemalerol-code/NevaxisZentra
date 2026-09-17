@@ -103,9 +103,34 @@ export type ExecutiveOperationalExposure = Readonly<{
 export type ExecutiveTimelineEntry = Readonly<{
   id: string;
   timeLabel: string;
+  occurredAtUtc: string;
   label: string;
   description: string;
   drillDownHref?: string;
+}>;
+
+export type ExecutiveThroughputCaseItem = Readonly<{
+  id: string;
+  lineCode: string;
+  lineId: string;
+  currentPhase: string;
+  caseStatus: string;
+  constraintLabel: string;
+  selectedIntervention?: string;
+  approvalState: string;
+  observationState: string;
+  verifiedGainPerHour?: number;
+  verificationOutcome?: string;
+  drillDownHref: string;
+}>;
+
+export type ExecutiveThroughputSummary = Readonly<{
+  activeCaseCount: number;
+  pendingApprovalCount: number;
+  verifiedImprovementTodayCount: number;
+  activeCases: readonly ExecutiveThroughputCaseItem[];
+  verifiedToday: readonly ExecutiveThroughputCaseItem[];
+  drillDownHref: string;
 }>;
 
 export type ExecutiveCommandCenterWorkspacePayload = Readonly<{
@@ -117,6 +142,7 @@ export type ExecutiveCommandCenterWorkspacePayload = Readonly<{
   approvals: readonly ExecutiveApprovalItem[];
   digitalWorkforce: ExecutiveDigitalWorkforceStatus;
   verifiedValue: readonly ExecutiveVerifiedValueItem[];
+  throughputOptimizer: ExecutiveThroughputSummary;
   operationalExposure: readonly ExecutiveOperationalExposure[];
   timeline: readonly ExecutiveTimelineEntry[];
   scopeState: ExecutiveScopeState;
