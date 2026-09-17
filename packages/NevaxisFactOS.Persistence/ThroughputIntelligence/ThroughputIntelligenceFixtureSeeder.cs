@@ -83,6 +83,66 @@ public static class ThroughputIntelligenceFixtureSeeder
                 : $"MP2 throughput fixture seeded with {eventsSeeded} events.");
     }
 
+    public static async Task<int> EnsureMixLine01Mp2EventHistoryAsync(
+        NevaxisFactOSDbContext db,
+        Guid tenantId,
+        Guid facilityId,
+        Guid lineId,
+        CancellationToken cancellationToken = default)
+    {
+        var existingCount = await db.CanonicalProductionEvents.CountAsync(
+            e => e.LineId == lineId && e.Source == "mp2-throughput-fixture",
+            cancellationToken);
+
+        if (existingCount == 0)
+        {
+            var stations = await db.ProductionStations
+                .Where(s => s.LineId == lineId)
+                .OrderBy(s => s.SequenceOrder)
+                .ToListAsync(cancellationToken);
+
+            var resources = await db.ManufacturingResources
+                .Where(r => stations.Select(s => s.Id).Contains(r.StationId))
+                .ToListAsync(cancellationToken);
+
+            var stationPairs = stations
+                .Select(s => (s, resources.First(r => r.StationId == s.Id)))
+                .ToList();
+
+            await SeedThroughputEventHistoryAsync(
+                db, tenantId, facilityId, lineId, stationPairs, cancellationToken);
+        }
+
+        return await RefreshMixLine01Mp2EventTimestampsAsync(db, lineId, cancellationToken);
+    }
+
+    public static async Task<int> RefreshMixLine01Mp2EventTimestampsAsync(
+        NevaxisFactOSDbContext db,
+        Guid lineId,
+        CancellationToken cancellationToken = default)
+    {
+        var events = await db.CanonicalProductionEvents
+            .Where(e => e.LineId == lineId && e.Source == "mp2-throughput-fixture")
+            .OrderBy(e => e.OccurredAtUtc)
+            .ToListAsync(cancellationToken);
+
+        if (events.Count == 0)
+        {
+            return 0;
+        }
+
+        var baseTime = DateTimeOffset.UtcNow.AddMinutes(-55);
+        for (var i = 0; i < events.Count; i++)
+        {
+            var timestamp = baseTime.AddSeconds(i * 5.5);
+            events[i].OccurredAtUtc = timestamp;
+            events[i].ReceivedAtUtc = timestamp;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        return events.Count;
+    }
+
     private static async Task<(int Skills, int Qualifications)> SeedOperatorSkillsAsync(
         NevaxisFactOSDbContext db,
         Guid tenantId,

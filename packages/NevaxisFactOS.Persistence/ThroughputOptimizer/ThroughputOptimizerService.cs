@@ -91,15 +91,18 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
             cancellationToken);
 
     private async Task<ThroughputOptimizerWorkspace> ObserveLineCoreAsync(
-        Guid facilityId, Guid tenantId, Guid lineId, string subjectId, CancellationToken cancellationToken)
+        Guid facilityId, Guid tenantId, Guid lineId, string subjectId, CancellationToken cancellationToken,
+        string? correlationKeyOverride = null)
     {
         var overview = await throughputIntelligence.GetLineOverviewAsync(facilityId, lineId, "recent", null, null, cancellationToken);
         var observation = ThroughputObserveEngine.Observe(overview)
             ?? throw new ThroughputOptimizerException(ThroughputOptimizerFailureCodes.GapNotDetected, "No meaningful throughput gap detected.");
 
-        var correlationKey = ThroughputObserveEngine.BuildCorrelationKey(lineId);
+        var correlationKey = correlationKeyOverride ?? ThroughputObserveEngine.BuildCorrelationKey(lineId);
         var existingRun = await db.ThroughputOptimizerRunRecords
-            .FirstOrDefaultAsync(r => r.FacilityId == facilityId && r.CorrelationKey == correlationKey, cancellationToken);
+            .Where(r => r.FacilityId == facilityId && r.CorrelationKey == correlationKey)
+            .OrderByDescending(r => r.UpdatedAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
 
         DigitalWorkCase workCase;
         ThroughputOptimizerRunRecord run;
@@ -338,6 +341,10 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
     {
         var baseline = VerifiedImprovementEngine.FromOverview(overview);
         var selection = JsonSerializer.Deserialize<ThroughputInterventionSelection>(run.SelectionJson)!;
+        var observation = JsonSerializer.Deserialize<ThroughputGapObservation>(run.ObservationJson)!;
+        var targetImprovement = Math.Min(
+            selection.Selected.DeltaGoodThroughputPerHour,
+            Math.Max(20m, observation.GapPerHour * 0.25m));
 
         if (!await db.VerifiedImprovementRecords.AnyAsync(r => r.DigitalWorkCaseId == run.DigitalWorkCaseId, cancellationToken))
         {
@@ -349,7 +356,7 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
                 DigitalWorkCaseId = run.DigitalWorkCaseId,
                 ThroughputOptimizerRunId = run.Id,
                 BaselineJson = JsonSerializer.Serialize(baseline),
-                TargetImprovementPerHour = selection.Selected.DeltaGoodThroughputPerHour,
+                TargetImprovementPerHour = targetImprovement,
                 InterventionSummary = selection.Selected.Title,
                 ObservationStartUtc = now,
                 QualityGuardPassed = true,
@@ -399,6 +406,11 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
                     : DigitalWorkVerificationResults.Failed),
             subjectId,
             cancellationToken);
+
+        if (workCase.Status == DigitalWorkCaseStatuses.Executing)
+        {
+            await AdvanceCase(workCase, DigitalWorkCaseStatuses.Verifying, subjectId, cancellationToken);
+        }
 
         if (outcome == ThroughputOptimizerVerificationOutcomes.VerifiedImprovement)
         {
@@ -454,7 +466,13 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
         var line = await db.ProductionLines.AsNoTracking()
             .FirstAsync(l => l.FacilityId == facilityId && l.Code == MixedProductionFixtureCodes.LineCode, cancellationToken);
 
-        var workspace = await ObserveLineCoreAsync(facilityId, tenantId, line.Id, subjectId, cancellationToken);
+        await ThroughputIntelligenceFixtureSeeder.EnsureMixLine01Mp2EventHistoryAsync(
+            db, tenantId, facilityId, line.Id, cancellationToken);
+        await ThroughputOptimizerFixtureSeeder.RetirePostInterventionEventsAsync(db, line.Id, cancellationToken);
+
+        var demoCorrelationKey = $"{ThroughputObserveEngine.BuildCorrelationKey(line.Id)}:golden-demo:{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
+        var workspace = await ObserveLineCoreAsync(
+            facilityId, tenantId, line.Id, subjectId, cancellationToken, demoCorrelationKey);
 
         while (workspace.CurrentPhase != ThroughputOptimizerPhases.Closed)
         {

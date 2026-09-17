@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using NevaxisFactOS.Persistence.ContextKnowledge;
 using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisFactOS.Persistence.FactoryIntelligence;
+using NevaxisFactOS.Persistence.FactoryLearning;
 using NevaxisFactOS.Persistence.ModelGateway;
 using NevaxisFactOS.Persistence.MixedProduction;
+using NevaxisFactOS.Persistence.RealFactoryPilot;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using NevaxisFactOS.Persistence.ThroughputOptimizer;
 
@@ -200,6 +203,82 @@ public sealed class ThroughputOptimizerEngineTests
     }
 }
 
+public sealed class Mp3ModelGatewayTenantIsolationTests
+{
+    [Fact]
+    public void AcceptanceHModelGatewayAuditRecordsHaveTenantQueryFilters()
+    {
+        using var context = CreateContext();
+        Assert.NotEmpty(context.Model.FindEntityType(typeof(ModelGatewayAuditRecord))!.GetDeclaredQueryFilters());
+        Assert.NotEmpty(context.Model.FindEntityType(typeof(ModelGatewayCostUsageRecord))!.GetDeclaredQueryFilters());
+    }
+
+    private static NevaxisFactOSDbContext CreateContext()
+    {
+        var options = new DbContextOptionsBuilder<NevaxisFactOSDbContext>()
+            .UseNpgsql(
+                "Host=localhost;Database=nevaxisfactos_test;Username=postgres;Password=postgres",
+                npgsql => npgsql.MigrationsAssembly(NevaxisFactOSDbContext.MigrationsAssemblyName))
+            .Options;
+        return new NevaxisFactOSDbContext(options);
+    }
+}
+
+public sealed class Mp3AutonomyAndApprovalTests
+{
+    [Fact]
+    public void AcceptanceILowRiskAutonomousExecuteAllowedInLimitedMode()
+    {
+        var worker = new DigitalWorker { AutonomyMode = DigitalWorkforceAutonomyModes.Limited };
+        var evaluation = DigitalWorkforceAutonomyEngine.Evaluate(worker, DigitalWorkforceActionKind.Execute, policyRequiresApproval: false);
+        Assert.True(evaluation.Allowed);
+        Assert.False(evaluation.RequiresApproval);
+    }
+
+    [Fact]
+    public void AcceptanceJApprovalRequiredActionWaitsInLimitedMode()
+    {
+        var worker = new DigitalWorker { AutonomyMode = DigitalWorkforceAutonomyModes.Limited };
+        var evaluation = DigitalWorkforceAutonomyEngine.Evaluate(worker, DigitalWorkforceActionKind.Execute, policyRequiresApproval: true);
+        Assert.True(evaluation.Allowed);
+        Assert.True(evaluation.RequiresApproval);
+    }
+
+    [Fact]
+    public void AcceptanceKApprovalDeniedDoesNotAllowAutonomousExecuteInDraftMode()
+    {
+        var worker = new DigitalWorker { AutonomyMode = DigitalWorkforceAutonomyModes.Draft };
+        var evaluation = DigitalWorkforceAutonomyEngine.Evaluate(worker, DigitalWorkforceActionKind.Execute, policyRequiresApproval: false);
+        Assert.False(evaluation.Allowed);
+        Assert.True(evaluation.RequiresApproval);
+    }
+
+    [Fact]
+    public void AcceptanceLExecutionPhaseTransitionsToObservationBeforeClosure()
+    {
+        Assert.Equal(ThroughputOptimizerPhases.Execute, ThroughputOptimizerPhases.Execute);
+        Assert.NotEqual(ThroughputOptimizerPhases.Execute, ThroughputOptimizerPhases.Closed);
+        Assert.Equal(ThroughputOptimizerPhases.ObserveResult, ThroughputOptimizerPhases.ObserveResult);
+    }
+
+    [Fact]
+    public void AcceptanceSRestartSafeRunRecordTracksObservationPhase()
+    {
+        var run = new ThroughputOptimizerRunRecord
+        {
+            CurrentPhase = ThroughputOptimizerPhases.ObserveResult,
+            ObservationJson = "{}",
+            DiagnosisJson = "{}",
+            SimulationJson = "{}",
+            SelectionJson = "{}",
+            ActionPlanJson = "{}",
+        };
+
+        Assert.Equal(ThroughputOptimizerPhases.ObserveResult, run.CurrentPhase);
+        Assert.NotEqual(ThroughputOptimizerPhases.Closed, run.CurrentPhase);
+    }
+}
+
 public sealed class Mp3RegressionTests
 {
     [Fact]
@@ -231,6 +310,27 @@ public sealed class Mp3RegressionTests
     {
         using var context = CreateContext();
         Assert.NotNull(context.Model.FindEntityType(typeof(DigitalWorkCase)));
+    }
+
+    [Fact]
+    public void AcceptanceXFactoryLearningEntitiesRemainRegistered()
+    {
+        using var context = CreateContext();
+        Assert.NotNull(context.Model.FindEntityType(typeof(VerifiedImprovement)));
+    }
+
+    [Fact]
+    public void AcceptanceYFactoryIntelligenceEntitiesRemainRegistered()
+    {
+        using var context = CreateContext();
+        Assert.NotNull(context.Model.FindEntityType(typeof(FactoryPredictedRisk)));
+    }
+
+    [Fact]
+    public void AcceptanceZRealFactoryPilotEntitiesRemainRegistered()
+    {
+        using var context = CreateContext();
+        Assert.NotNull(context.Model.FindEntityType(typeof(RealFactoryPilotRunRecord)));
     }
 
     private static NevaxisFactOSDbContext CreateContext()

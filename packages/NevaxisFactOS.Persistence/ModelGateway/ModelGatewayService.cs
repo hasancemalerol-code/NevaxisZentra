@@ -131,24 +131,47 @@ public sealed class ModelGatewayService : IModelGatewayService
 
         if (invokeResult.EstimatedCost > 0)
         {
-            db.ModelGatewayCostUsageRecords.Add(new ModelGatewayCostUsageRecord
+            var existingUsage = await db.ModelGatewayCostUsageRecords
+                .FirstOrDefaultAsync(
+                    r => r.TenantId == tenantId
+                        && r.FacilityId == facilityId
+                        && r.WorkerId == request.WorkerId
+                        && r.WindowStartUtc == dayStart
+                        && r.BudgetWindow == "daily",
+                    cancellationToken);
+
+            if (existingUsage is null)
             {
-                Id = Guid.NewGuid(),
-                TenantId = tenantId,
-                FacilityId = facilityId,
-                WorkerId = request.WorkerId,
-                DigitalWorkCaseId = request.DigitalWorkCaseId,
-                ProviderId = routing.ProviderId,
-                ModelName = routing.ModelName,
-                RequestClassification = request.RequestClassification,
-                RequestCount = 1,
-                InputTokens = invokeResult.InputTokens,
-                OutputTokens = invokeResult.OutputTokens,
-                EstimatedCost = invokeResult.EstimatedCost,
-                BudgetWindow = "daily",
-                WindowStartUtc = dayStart,
-                CreatedAtUtc = now,
-            });
+                db.ModelGatewayCostUsageRecords.Add(new ModelGatewayCostUsageRecord
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = tenantId,
+                    FacilityId = facilityId,
+                    WorkerId = request.WorkerId,
+                    DigitalWorkCaseId = request.DigitalWorkCaseId,
+                    ProviderId = routing.ProviderId,
+                    ModelName = routing.ModelName,
+                    RequestClassification = request.RequestClassification,
+                    RequestCount = 1,
+                    InputTokens = invokeResult.InputTokens,
+                    OutputTokens = invokeResult.OutputTokens,
+                    EstimatedCost = invokeResult.EstimatedCost,
+                    BudgetWindow = "daily",
+                    WindowStartUtc = dayStart,
+                    CreatedAtUtc = now,
+                });
+            }
+            else
+            {
+                existingUsage.RequestCount += 1;
+                existingUsage.InputTokens += invokeResult.InputTokens;
+                existingUsage.OutputTokens += invokeResult.OutputTokens;
+                existingUsage.EstimatedCost += invokeResult.EstimatedCost;
+                existingUsage.DigitalWorkCaseId = request.DigitalWorkCaseId ?? existingUsage.DigitalWorkCaseId;
+                existingUsage.ProviderId = routing.ProviderId;
+                existingUsage.ModelName = routing.ModelName;
+                existingUsage.RequestClassification = request.RequestClassification;
+            }
         }
 
         await db.SaveChangesAsync(cancellationToken);

@@ -6,6 +6,30 @@ namespace NevaxisFactOS.Persistence.ThroughputOptimizer;
 
 public static class ThroughputOptimizerFixtureSeeder
 {
+    public static async Task RetirePostInterventionEventsAsync(
+        NevaxisFactOSDbContext db,
+        Guid lineId,
+        CancellationToken cancellationToken = default)
+    {
+        var existing = await db.CanonicalProductionEvents
+            .Where(e => e.LineId == lineId && e.Source == "mp3-post-intervention")
+            .ToListAsync(cancellationToken);
+
+        if (existing.Count == 0)
+        {
+            return;
+        }
+
+        var retireTime = DateTimeOffset.UtcNow.AddDays(-2);
+        foreach (var productionEvent in existing)
+        {
+            productionEvent.OccurredAtUtc = retireTime;
+            productionEvent.ReceivedAtUtc = retireTime;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
     public static async Task<int> SeedPostInterventionEventsAsync(
         NevaxisFactOSDbContext db,
         Guid tenantId,
@@ -25,9 +49,9 @@ public static class ThroughputOptimizerFixtureSeeder
 
         var now = DateTimeOffset.UtcNow;
         var events = new List<CanonicalProductionEvent>();
-        for (var i = 0; i < 40; i++)
+        for (var i = 0; i < 180; i++)
         {
-            var station = i % 3 == 0 ? welding : assembly;
+            var station = i % 4 == 0 ? welding : assembly;
             events.Add(new CanonicalProductionEvent
             {
                 Id = Guid.NewGuid(),
@@ -37,17 +61,10 @@ public static class ThroughputOptimizerFixtureSeeder
                 StationId = station.Id,
                 EventType = MixedProductionEventTypes.Good,
                 Source = "mp3-post-intervention",
-                IdempotencyKey = $"mp3-post:{lineId:N}:{i}:{now:yyyyMMdd}",
-                OccurredAtUtc = now.AddMinutes(-30 + i),
-                ReceivedAtUtc = now.AddMinutes(-30 + i),
+                IdempotencyKey = $"mp3-post:{lineId:N}:{now:yyyyMMddHHmmss}:{i}",
+                OccurredAtUtc = now.AddMinutes(-25 + (i * 0.12)),
+                ReceivedAtUtc = now.AddMinutes(-25 + (i * 0.12)),
             });
-        }
-
-        var markerExists = await db.CanonicalProductionEvents.AnyAsync(
-            e => e.LineId == lineId && e.Source == "mp3-post-intervention", cancellationToken);
-        if (markerExists)
-        {
-            return 0;
         }
 
         db.CanonicalProductionEvents.AddRange(events);
