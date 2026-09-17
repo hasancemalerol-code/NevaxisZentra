@@ -19,6 +19,9 @@ public static class DigitalWorkforceToolCapabilities
     public const string EmailDraft = "email.draft";
     public const string WhatsappDraft = "whatsapp.draft";
     public const string IntegrationRead = "integration.read";
+    public const string ThroughputRead = "throughput-intelligence.read";
+    public const string ThroughputSimulate = "throughput-simulation.run";
+    public const string ContextKnowledgeRead = "context-knowledge.read";
 
     public static readonly string[] MachineSafetyProhibitedActions =
     [
@@ -35,5 +38,6 @@ public static class DigitalWorkforceToolCapabilities
         MaterialRead, ProcurementDraft, QualityRead, QualityManage,
         MoldRead, MoldManage, IotRead, TaskCenterCreate, TaskCenterUpdate,
         TeamsSend, EmailDraft, WhatsappDraft, IntegrationRead,
+        ThroughputRead, ThroughputSimulate, ContextKnowledgeRead,
     ];
 }

@@ -60,6 +60,14 @@ public static class DigitalWorkforceCanonicalWorkers
             "Çapraz alan operasyon olaylarını çözümlenmiş ve doğrulanmış şekilde kapatmak.",
             DigitalWorkforceAutonomyModes.Full,
             ["production.read", "maintenance.read", "material.read", "quality.read", "taskcenter.create", "teams.send"]),
+        new(
+            DevelopmentPilotDigitalWorkforceIds.WorkerThroughputOptimizer,
+            DigitalWorkforceWorkerCodes.ThroughputOptimizer,
+            "Verim Optimizasyon Dijital Çalışanı",
+            "GOOD verim açığını tespit eder, kısıtı teşhis eder, senaryo simüle eder ve doğrulanmış iyileştirme uygular.",
+            "Doğrulanmış GOOD verimini maksimize etmek.",
+            DigitalWorkforceAutonomyModes.Limited,
+            ["production.read", "production.plan", "throughput-intelligence.read", "throughput-simulation.run", "context-knowledge.read", "taskcenter.create"]),
     ];
 }
 
@@ -88,6 +96,8 @@ public static class DevelopmentPilotDigitalWorkforceIds
         Guid.Parse("bb000001-00d6-4000-8000-000000000006");
     public static readonly Guid WorkerFactoryCoordinator =
         Guid.Parse("bb000001-00d7-4000-8000-000000000007");
+    public static readonly Guid WorkerThroughputOptimizer =
+        Guid.Parse("bb000001-00d8-4000-8000-000000000008");
 
     public static readonly Guid ReadPermissionDefinitionId =
         Guid.Parse("10000000-0000-4000-8000-000000000f10");

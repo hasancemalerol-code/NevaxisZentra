@@ -54,6 +54,7 @@ public sealed class DigitalWorkforceWorkerFlowEngine : IDigitalWorkforceWorkerFl
             DigitalWorkforceWorkerCodes.MoldLifecycle => DigitalWorkforceToolCapabilities.MoldManage,
             DigitalWorkforceWorkerCodes.SupplierRecovery => DigitalWorkforceToolCapabilities.ProcurementDraft,
             DigitalWorkforceWorkerCodes.FactoryCoordinator => null,
+            DigitalWorkforceWorkerCodes.ThroughputOptimizer => DigitalWorkforceToolCapabilities.ThroughputSimulate,
             _ => DigitalWorkforceToolCapabilities.ProductionPlan,
         }, subjectId, cancellationToken);
 
@@ -116,6 +117,7 @@ public sealed class DigitalWorkforceWorkerFlowEngine : IDigitalWorkforceWorkerFl
         DigitalWorkforceWorkerCodes.MaterialShortage => DigitalWorkforceToolCapabilities.ProcurementDraft,
         DigitalWorkforceWorkerCodes.QualityNcr => DigitalWorkforceToolCapabilities.QualityManage,
         DigitalWorkforceWorkerCodes.MoldLifecycle => DigitalWorkforceToolCapabilities.MoldManage,
+        DigitalWorkforceWorkerCodes.ThroughputOptimizer => DigitalWorkforceToolCapabilities.ThroughputSimulate,
         _ => DigitalWorkforceToolCapabilities.ProductionPlan,
     };
 
@@ -131,6 +133,7 @@ public sealed class DigitalWorkforceWorkerFlowEngine : IDigitalWorkforceWorkerFl
             DigitalWorkforceWorkerCodes.SupplierRecovery => "supply-risk-resolved",
             DigitalWorkforceWorkerCodes.MoldLifecycle => "mold-production-ready",
             DigitalWorkforceWorkerCodes.FactoryCoordinator => "coordinator-subcases-resolved",
+            DigitalWorkforceWorkerCodes.ThroughputOptimizer => "throughput-target-met",
             _ => "outcome-verified",
         };
 

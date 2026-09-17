@@ -13,6 +13,8 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 
 import { ContextKnowledgePanel } from "@/features/context-knowledge/components/context-knowledge-panel";
 import type { WorkerContextPackageApi } from "@/features/context-knowledge/server/context-knowledge-api-client";
+import { ThroughputOptimizerPanel } from "@/features/throughput-optimizer/components/throughput-optimizer-panel";
+import type { ThroughputOptimizerWorkspaceApi } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
 import { ThroughputIntelligencePanel } from "@/features/throughput-intelligence/components/throughput-intelligence-panel";
 import type {
   ScenarioComparisonRowApi,
@@ -33,6 +35,7 @@ type MixedProductionLineDetailViewProps = Readonly<{
     comparison: readonly ScenarioComparisonRowApi[];
   } | null;
   contextPackage?: WorkerContextPackageApi | null;
+  optimizerWorkspace?: ThroughputOptimizerWorkspaceApi | null;
 }>;
 
 function buildContextRows(station: MixedProductionStationSnapshotApi | undefined) {
@@ -51,7 +54,7 @@ function buildContextRows(station: MixedProductionStationSnapshotApi | undefined
   ];
 }
 
-export function MixedProductionLineDetailView({ detail, playback, throughput, contextPackage }: MixedProductionLineDetailViewProps) {
+export function MixedProductionLineDetailView({ detail, playback, throughput, contextPackage, optimizerWorkspace }: MixedProductionLineDetailViewProps) {
   const { line, stations, timeline } = detail;
   const [selectedStationId, setSelectedStationId] = useState<string | null>(stations[0]?.stationId ?? null);
   const selectedStation = stations.find((s) => s.stationId === selectedStationId);
@@ -171,6 +174,8 @@ export function MixedProductionLineDetailView({ detail, playback, throughput, co
       ) : null}
 
       {contextPackage ? <ContextKnowledgePanel package={contextPackage} /> : null}
+
+      {optimizerWorkspace ? <ThroughputOptimizerPanel workspace={optimizerWorkspace} /> : null}
     </main>
   );
 }

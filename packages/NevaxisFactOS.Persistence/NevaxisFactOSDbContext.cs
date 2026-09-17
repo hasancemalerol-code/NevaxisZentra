@@ -53,6 +53,8 @@ using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using NevaxisFactOS.Persistence.ContextKnowledge;
+using NevaxisFactOS.Persistence.ModelGateway;
+using NevaxisFactOS.Persistence.ThroughputOptimizer;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -422,6 +424,13 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<ContextSnapshotRecord> ContextSnapshotRecords => Set<ContextSnapshotRecord>();
     public DbSet<DataLifecyclePolicyRecord> DataLifecyclePolicyRecords => Set<DataLifecyclePolicyRecord>();
     public DbSet<TelemetryAggregateRecord> TelemetryAggregateRecords => Set<TelemetryAggregateRecord>();
+
+    public DbSet<ModelGatewayAuditRecord> ModelGatewayAuditRecords => Set<ModelGatewayAuditRecord>();
+    public DbSet<ModelGatewayCostUsageRecord> ModelGatewayCostUsageRecords => Set<ModelGatewayCostUsageRecord>();
+    public DbSet<ModelGatewayBudgetPolicyRecord> ModelGatewayBudgetPolicyRecords => Set<ModelGatewayBudgetPolicyRecord>();
+    public DbSet<ThroughputOptimizerRunRecord> ThroughputOptimizerRunRecords => Set<ThroughputOptimizerRunRecord>();
+    public DbSet<VerifiedImprovementRecord> VerifiedImprovementRecords => Set<VerifiedImprovementRecord>();
+    public DbSet<VerifiedTrainingDatasetCandidateRecord> VerifiedTrainingDatasetCandidateRecords => Set<VerifiedTrainingDatasetCandidateRecord>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3367,6 +3376,36 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new TelemetryAggregateRecordConfiguration());
         modelBuilder.Entity<TelemetryAggregateRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ModelGatewayAuditRecordConfiguration());
+        modelBuilder.Entity<ModelGatewayAuditRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ModelGatewayCostUsageRecordConfiguration());
+        modelBuilder.Entity<ModelGatewayCostUsageRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ModelGatewayBudgetPolicyRecordConfiguration());
+        modelBuilder.Entity<ModelGatewayBudgetPolicyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ThroughputOptimizerRunRecordConfiguration());
+        modelBuilder.Entity<ThroughputOptimizerRunRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new VerifiedImprovementRecordConfiguration());
+        modelBuilder.Entity<VerifiedImprovementRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new VerifiedTrainingDatasetCandidateRecordConfiguration());
+        modelBuilder.Entity<VerifiedTrainingDatasetCandidateRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }

@@ -66,6 +66,8 @@ public sealed class DigitalWorkforceEventDispatcher : IDigitalWorkforceEventDisp
             DevelopmentPilotDigitalWorkforceIds.WorkerSupplierRecovery,
         var e when e.StartsWith("mold.", StringComparison.OrdinalIgnoreCase) =>
             DevelopmentPilotDigitalWorkforceIds.WorkerMoldLifecycle,
+        var e when e.StartsWith("throughput.", StringComparison.OrdinalIgnoreCase) =>
+            DevelopmentPilotDigitalWorkforceIds.WorkerThroughputOptimizer,
         var e when e.StartsWith("coordinator.", StringComparison.OrdinalIgnoreCase) =>
             DevelopmentPilotDigitalWorkforceIds.WorkerFactoryCoordinator,
         _ => DevelopmentPilotDigitalWorkforceIds.WorkerFactoryCoordinator,

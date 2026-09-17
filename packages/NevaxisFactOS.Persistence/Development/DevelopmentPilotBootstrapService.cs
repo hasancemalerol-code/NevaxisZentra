@@ -26,6 +26,8 @@ using NevaxisFactOS.Persistence.FactoryIntelligence;
 using NevaxisFactOS.Persistence.MixedProduction;
 using NevaxisFactOS.Persistence.ThroughputIntelligence;
 using NevaxisFactOS.Persistence.ContextKnowledge;
+using NevaxisFactOS.Persistence.ModelGateway;
+using NevaxisFactOS.Persistence.ThroughputOptimizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -471,6 +473,24 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureContextKnowledgeManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureContextKnowledgePromotePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureModelGatewayReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureModelGatewayReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureModelGatewayReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureModelGatewayRoutePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputOptimizerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputOptimizerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputOptimizerReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputOptimizerManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureThroughputOptimizerRunPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3241,6 +3261,51 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             ContextKnowledgePermissionKeys.Promote,
             DevelopmentPilotContextKnowledgeIds.PromotePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureModelGatewayReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ModelGatewayPermissionKeys.Read,
+            DevelopmentPilotMp3Ids.ModelGatewayReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureModelGatewayRoutePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ModelGatewayPermissionKeys.Route,
+            DevelopmentPilotMp3Ids.ModelGatewayRoutePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputOptimizerReadPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputOptimizerPermissionKeys.Read,
+            DevelopmentPilotMp3Ids.ThroughputOptimizerReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputOptimizerManagePermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputOptimizerPermissionKeys.Manage,
+            DevelopmentPilotMp3Ids.ThroughputOptimizerManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureThroughputOptimizerRunPermissionAssignmentAsync(
+        NevaxisFactOSDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ThroughputOptimizerPermissionKeys.Run,
+            DevelopmentPilotMp3Ids.ThroughputOptimizerRunPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

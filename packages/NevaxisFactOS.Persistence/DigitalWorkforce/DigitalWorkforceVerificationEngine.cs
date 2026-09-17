@@ -9,6 +9,7 @@ public static class DigitalWorkforceClosureContracts
     public const string SupplierRecovery = "dw-fact-005-supplier-recovery";
     public const string MoldLifecycle = "dw-fact-006-mold-lifecycle";
     public const string Coordinator = "dw-fact-007-coordinator";
+    public const string ThroughputOptimizer = "dw-fact-008-throughput-optimizer";
 }
 
 public static class DigitalWorkforceVerificationEngine
@@ -22,6 +23,7 @@ public static class DigitalWorkforceVerificationEngine
         DigitalWorkforceWorkerCodes.SupplierRecovery => DigitalWorkforceClosureContracts.SupplierRecovery,
         DigitalWorkforceWorkerCodes.MoldLifecycle => DigitalWorkforceClosureContracts.MoldLifecycle,
         DigitalWorkforceWorkerCodes.FactoryCoordinator => DigitalWorkforceClosureContracts.Coordinator,
+        DigitalWorkforceWorkerCodes.ThroughputOptimizer => DigitalWorkforceClosureContracts.ThroughputOptimizer,
         _ => "unknown",
     };
 
@@ -58,6 +60,7 @@ public static class DigitalWorkforceVerificationEngine
         DigitalWorkforceClosureContracts.SupplierRecovery => ["supply-risk-resolved"],
         DigitalWorkforceClosureContracts.MoldLifecycle => ["mold-production-ready"],
         DigitalWorkforceClosureContracts.Coordinator => ["coordinator-subcases-resolved"],
+        DigitalWorkforceClosureContracts.ThroughputOptimizer => ["throughput-target-met"],
         _ => ["outcome-verified"],
     };
 

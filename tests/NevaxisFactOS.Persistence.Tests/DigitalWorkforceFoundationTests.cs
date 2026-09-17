@@ -20,10 +20,10 @@ public sealed class DigitalWorkforcePermissionKeyTests
 public sealed class DigitalWorkforceCanonicalWorkerTests
 {
     [Fact]
-    public void RegistryDefinesExactlySevenWorkers()
+    public void RegistryDefinesExactlyEightWorkers()
     {
-        Assert.Equal(7, DigitalWorkforceCanonicalWorkers.Definitions.Count);
-        Assert.Equal(7, DigitalWorkforceCanonicalWorkers.Definitions.Select(d => d.Code).Distinct().Count());
+        Assert.Equal(8, DigitalWorkforceCanonicalWorkers.Definitions.Count);
+        Assert.Equal(8, DigitalWorkforceCanonicalWorkers.Definitions.Select(d => d.Code).Distinct().Count());
     }
 
     [Fact]
@@ -32,6 +32,7 @@ public sealed class DigitalWorkforceCanonicalWorkerTests
         var codes = DigitalWorkforceCanonicalWorkers.Definitions.Select(d => d.Code).ToArray();
         Assert.Contains(DigitalWorkforceWorkerCodes.ProductionRecovery, codes);
         Assert.Contains(DigitalWorkforceWorkerCodes.FactoryCoordinator, codes);
+        Assert.Contains(DigitalWorkforceWorkerCodes.ThroughputOptimizer, codes);
     }
 }
 
