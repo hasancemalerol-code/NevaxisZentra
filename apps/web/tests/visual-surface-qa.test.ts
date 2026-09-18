@@ -244,7 +244,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
         createElement(
           "div",
           { className: "command-center__titlebar-copy" },
-          createElement("p", { className: "command-center__eyebrow" }, "FactOS Operasyon Merkezi"),
+          createElement("p", { className: "command-center__eyebrow" }, "Zentra Operasyon Merkezi"),
           createElement("h1", null, "Operasyon Merkezi"),
           createElement(
             "p",
