@@ -1,5 +1,7 @@
 import "./production-plan-server-boundary";
 
+import { readZentraEnv } from "@/lib/config/zentra-env";
+
 export type ProductionPlanRuntimeMode =
   | "api"
   | "development-preview"
@@ -147,8 +149,7 @@ export function parseProductionPlanRuntimeConfig(): ProductionPlanRuntimeConfigR
   const isProduction =
     isProductionEnvironment();
   const configuredMode = normalizeEnvValue(
-    process.env
-      .NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE,
+    readZentraEnv("PRODUCTION_PLANNING_RUNTIME_MODE"),
   );
 
   if (!configuredMode) {
