@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: NevaxisFactOS Product & Development
+- Decision owners: NevaxisZentra Product & Development
 - Scope: Mobile field experience
 
 ## Context
@@ -11,12 +11,12 @@ Factory managers, supervisors, operators, maintenance teams, quality teams, and 
 
 ## Decision
 
-NevaxisFactOS mobile applications use Flutter in `apps/mobile`.
+NevaxisZentra mobile applications use Flutter in `apps/mobile`.
 
 Mobile scope may include:
 
 - AI Task Center task interaction and approval viewing
-- Shift communication through NevaxisFactOS Teams
+- Shift communication through NevaxisZentra Teams
 - Production-plan and work-context viewing
 - Machine and mold operational status
 - Barcode and QR verification

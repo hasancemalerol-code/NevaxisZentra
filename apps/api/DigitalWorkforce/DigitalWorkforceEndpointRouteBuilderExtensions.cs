@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.DigitalWorkforce;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.DigitalWorkforce;
+namespace NevaxisZentra.Api.DigitalWorkforce;
 
 public static class DigitalWorkforceEndpointRouteBuilderExtensions
 {
@@ -42,7 +42,7 @@ public static class DigitalWorkforceEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSDigitalWorkforce(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraDigitalWorkforce(this IServiceCollection services)
     {
         services.AddScoped<IDigitalWorkforceRepository, DigitalWorkforceRepository>();
         services.AddScoped<IDigitalWorkforceRuntimeService, DigitalWorkforceRuntimeService>();
@@ -50,7 +50,7 @@ public static class DigitalWorkforceEndpointRouteBuilderExtensions
         services.AddScoped<IDigitalWorkforceWorkerFlowEngine, DigitalWorkforceWorkerFlowEngine>();
         services.AddScoped<IDigitalWorkforceEventDispatcher, DigitalWorkforceEventDispatcher>();
         services.AddScoped<DigitalWorkforceModelRouterUsage>();
-        services.AddNevaxisFactOSDigitalWorkforceExecutionRuntime();
+        services.AddNevaxisZentraDigitalWorkforceExecutionRuntime();
         return services;
     }
 

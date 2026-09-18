@@ -48,7 +48,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -74,9 +74,9 @@ console.log("Running ERP-2L security verifier.");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809210000_AddErpOrderInboundAndReconciliation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809210000_AddErpOrderInboundAndReconciliation.cs",
 );
-const mappingRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpMappingRepository.cs");
+const mappingRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpMappingRepository.cs");
 
 requireText(endpoints, "ErpPermissionKeys.Sync", "order sync permission");
 requireText(endpoints, "ErpPermissionKeys.Manage", "mapping manage permission");
@@ -108,7 +108,7 @@ try {
   const crossTenant = await fetch(`${BASE}/api/erp/orders?facilityId=${FACILITY}`, {
     headers: {
       ...headers(OPERATOR),
-      "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
+      "X-NevaxisZentra-Tenant": "other-tenant-not-pilot",
     },
   });
   if (crossTenant.status !== 403) {

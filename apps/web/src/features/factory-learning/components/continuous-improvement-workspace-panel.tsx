@@ -220,7 +220,7 @@ export async function ContinuousImprovementWorkspacePanel() {
       </div>
 
       <section data-testid="continuous-improvement-learning">
-        <h3>FactOS Ne Öğrendi?</h3>
+        <h3>Zentra Ne Öğrendi?</h3>
         {workspace.insights.length === 0 && workspace.learningMemories.length === 0 ? (
           <p className="commint-table__secondary">Henüz doğrulanmış öğrenme kaydı yok.</p>
         ) : (

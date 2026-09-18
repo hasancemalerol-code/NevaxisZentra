@@ -14,7 +14,7 @@ const forbiddenPatterns = [
   /\.map$/i,
   /\\node_modules\\\.cache\\/i,
   /\\tests\\/i,
-  /NEVAXISFACTOS-.*FINAL-REPORT\.md$/i,
+  /NEVAXISZENTRA-.*FINAL-REPORT\.md$/i,
 ];
 
 const forbiddenSecretPatterns = [
@@ -47,8 +47,8 @@ function assert(name, pass, detail = "") {
 
 try {
   assert("staging exists", existsSync(stagingRoot));
-  assert("desktop exe exists", existsSync(join(stagingRoot, "desktop", "NevaxisFactOS.exe")));
-  assert("api exe exists", existsSync(join(stagingRoot, "api", "NevaxisFactOS.Api.exe")));
+  assert("desktop exe exists", existsSync(join(stagingRoot, "desktop", "NevaxisZentra.exe")));
+  assert("api exe exists", existsSync(join(stagingRoot, "api", "NevaxisZentra.Api.exe")));
   assert("web server exists", existsSync(join(stagingRoot, "web", "apps", "web", "server.js")));
   assert("bundled node exists", existsSync(join(stagingRoot, "node", "node.exe")));
   assert("postgres initdb exists", existsSync(join(stagingRoot, "postgres", "bin", "initdb.exe")));
@@ -82,7 +82,7 @@ try {
   const zip = join(releaseRoot, "Nevaxis-FactOS-Demo.zip");
   const readme = join(releaseRoot, "README-DEMO.txt");
   const checksums = join(releaseRoot, "SHA256SUMS.txt");
-  const releaseManifest = join(releaseRoot, "NEVAXISFACTOS-WINDOWS-RELEASE-MANIFEST.md");
+  const releaseManifest = join(releaseRoot, "NEVAXISZENTRA-WINDOWS-RELEASE-MANIFEST.md");
 
   if (existsSync(releaseRoot)) {
     assert("installer msi exists", existsSync(setupMsi));

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.CommercialIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.CommercialIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NevaxisFactOS.Api.CommercialIntelligence;
+namespace NevaxisZentra.Api.CommercialIntelligence;
 
 internal static class CommercialProfitabilityEndpointRouteBuilderExtensions
 {
@@ -676,11 +676,11 @@ internal sealed record EvaluateCommercialProfitabilityComparisonRequest(
 
 public static class CommercialProfitabilityServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSCommercialProfitability(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraCommercialProfitability(this IServiceCollection services)
     {
         services.AddScoped<ICommercialProfitabilityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialProfitabilityRepository()
                 : new CommercialProfitabilityRepository(

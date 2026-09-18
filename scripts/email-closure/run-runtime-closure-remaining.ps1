@@ -113,7 +113,7 @@ if ($LASTEXITCODE -ne 0) { throw "web typecheck failed" }
 npm run build
 if ($LASTEXITCODE -ne 0) { throw "web build failed" }
 Pop-Location
-dotnet test tests/NevaxisFactOS.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test tests/NevaxisZentra.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "tests failed" }
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract failed" }
@@ -133,7 +133,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $EmailClosureMigrationUser
 $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
 $env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
 $env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
-dotnet tool run dotnet-ef -- database update --project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --startup-project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --startup-project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --context NevaxisZentraDbContext
 if ($LASTEXITCODE -ne 0) { Stop-ClosureRuntime; throw "pristine migration failed" }
 
 Stop-ClosureRuntime

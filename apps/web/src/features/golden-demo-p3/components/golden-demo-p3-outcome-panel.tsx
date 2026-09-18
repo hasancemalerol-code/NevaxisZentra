@@ -223,7 +223,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
           ))}
         </ul>
         <p className="commint-table__secondary">
-          FactOS müdahaleyi koordine etti ve doğruladı. Yetkili operatör/bakım rolü fiziksel müdahaleyi uyguladı.
+          Zentra müdahaleyi koordine etti ve doğruladı. Yetkili operatör/bakım rolü fiziksel müdahaleyi uyguladı.
         </p>
       </section>
     </>

@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Teams;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Teams;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Teams;
+namespace NevaxisZentra.Api.Teams;
 
 public static class TeamsApprovalEndpointRouteBuilderExtensions
 {

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.FactoryOrchestration;
-using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
-using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.FactoryOrchestration;
+using NevaxisZentra.Persistence.FactoryOutcomeExecution;
+using NevaxisZentra.Persistence.FactoryRecoveryIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.FactoryOrchestration;
+namespace NevaxisZentra.Api.FactoryOrchestration;
 
 public static class FactoryOrchestrationEndpointRouteBuilderExtensions
 {
@@ -24,7 +24,7 @@ public static class FactoryOrchestrationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSFactoryOrchestration(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraFactoryOrchestration(this IServiceCollection services)
     {
         services.AddScoped<IFactoryOrchestrationRepository, FactoryOrchestrationRepository>();
         services.AddScoped<IFactoryEventRouter, FactoryEventRouter>();

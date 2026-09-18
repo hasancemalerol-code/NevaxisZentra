@@ -1,4 +1,4 @@
-# NevaxisFactOS İsimlendirme Standartları
+# NevaxisZentra İsimlendirme Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS repository'sinde kullanılan klasör, dosya, proje, namespace, sınıf, değişken, API, veritabanı, mesaj, event ve AI tool isimlendirme kurallarını tanımlar.
+Bu belge NevaxisZentra repository'sinde kullanılan klasör, dosya, proje, namespace, sınıf, değişken, API, veritabanı, mesaj, event ve AI tool isimlendirme kurallarını tanımlar.
 
 
 
@@ -96,7 +96,7 @@ doWork
 
 ```
 
-Use domain-specific names that expose ownership and intent. External projections include an `External`, `Source`, or `Projection` qualifier where omission could imply NevaxisFactOS ownership.
+Use domain-specific names that expose ownership and intent. External projections include an `External`, `Source`, or `Projection` qualifier where omission could imply NevaxisZentra ownership.
 
 Commands use imperative names, events use past tense, permissions use stable resource/action names, and integration messages include schema versions. Avoid names such as `Manager`, `Helper`, `Common`, or `Utils` unless their narrow responsibility is explicit.
 

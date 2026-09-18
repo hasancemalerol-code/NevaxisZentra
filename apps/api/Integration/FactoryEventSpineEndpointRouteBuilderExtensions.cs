@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AiTasks.Delivery;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Integration;
-using NevaxisFactOS.Persistence.Integration.FactoryEventSpine;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AiTasks.Delivery;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Integration;
+using NevaxisZentra.Persistence.Integration.FactoryEventSpine;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.Integration;
+namespace NevaxisZentra.Api.Integration;
 
 public static class FactoryEventSpineEndpointRouteBuilderExtensions
 {
@@ -28,7 +28,7 @@ public static class FactoryEventSpineEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSFactoryEventSpine(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraFactoryEventSpine(this IServiceCollection services)
     {
         services.AddScoped<IFactoryEventSpineService, FactoryEventSpineService>();
         services.Configure<FactoryEventSpineOptions>(options =>
@@ -294,7 +294,7 @@ internal sealed class FactoryEventSpineBackgroundService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetService<NevaxisFactOSDbContext>();
+                var db = scope.ServiceProvider.GetService<NevaxisZentraDbContext>();
                 if (db is null)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);

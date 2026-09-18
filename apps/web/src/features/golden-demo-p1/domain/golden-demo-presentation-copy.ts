@@ -54,7 +54,7 @@ export function getGoldenDemoDigitalWorkerLabel(agentCode: string): string {
     case "energy":
       return "Enerji Dijital Çalışanı";
     case "orchestrator":
-      return "FactOS Orchestrator";
+      return "Zentra Orchestrator";
     default:
       return agentCode.replace(/-/g, " ");
   }
@@ -170,7 +170,7 @@ export function translateGoldenDemoApiText(text: string, recoveryGoodParts?: num
     "Human approval required before intervention execution.":
       "Müdahale yürütülmeden önce insan onayı gerekli.",
     "FactOS coordinated the technical intervention; authorized role executes physical work.":
-      "FactOS teknik müdahaleyi koordine etti; yetkili rol fiziksel işi uygular.",
+      "Zentra teknik müdahaleyi koordine etti; yetkili rol fiziksel işi uygular.",
     "Post-intervention observation window recorded.":
       "Müdahale sonrası gözlem penceresi kaydedildi.",
     "Production gap calculated": "Üretim açığı hesaplandı",
@@ -212,7 +212,7 @@ export function translateGoldenDemoApiText(text: string, recoveryGoodParts?: num
     passed: "Geçti",
     failed: "Başarısız",
     partial: "Kısmi",
-    "FactOS Digital Factory Team": "FactOS Dijital Çalışan Ekibi",
+    "FactOS Digital Factory Team": "Zentra Dijital Çalışan Ekibi",
     "planning-pilot-reviewer / production-manager":
       "planlama pilot inceleyici / üretim yöneticisi",
     "production-manager / planning-pilot-reviewer":
@@ -277,7 +277,7 @@ export function translateGoldenDemoApiText(text: string, recoveryGoodParts?: num
     "Expected production recovery not fully verified.":
       "Beklenen üretim kurtarması tam olarak doğrulanmadı.",
     "FactOS compared pre-intervention baseline against post-intervention validation evidence.":
-      "FactOS, müdahale öncesi referansı müdahale sonrası doğrulama kanıtlarıyla karşılaştırdı.",
+      "Zentra, müdahale öncesi referansı müdahale sonrası doğrulama kanıtlarıyla karşılaştırdı.",
     "Measurable improvement exists, but not all verification checks passed.":
       "Ölçülebilir iyileşme var, ancak tüm doğrulama kontrolleri geçmedi.",
     "Intervention completed, but production recovery was not verified.":
@@ -285,9 +285,9 @@ export function translateGoldenDemoApiText(text: string, recoveryGoodParts?: num
     "Validation evidence is not yet sufficient for outcome verification.":
       "Sonuç doğrulaması için doğrulama kanıtı henüz yeterli değil.",
     "FactOS is waiting for intervention completion before validating post-intervention production evidence.":
-      "FactOS, müdahale sonrası üretim kanıtlarını doğrulamadan önce müdahalenin tamamlanmasını bekliyor.",
+      "Zentra, müdahale sonrası üretim kanıtlarını doğrulamadan önce müdahalenin tamamlanmasını bekliyor.",
     "FactOS is validating the intervention against post-intervention production evidence.":
-      "FactOS müdahaleyi müdahale sonrası üretim kanıtlarına karşı doğruluyor.",
+      "Zentra müdahaleyi müdahale sonrası üretim kanıtlarına karşı doğruluyor.",
     "Validation window recorded. Outcome verification can be executed against measured post-intervention data.":
       "Doğrulama penceresi kaydedildi. Sonuç doğrulaması ölçülen müdahale sonrası veriye karşı yürütülebilir.",
     "Production recovery verified against validation window evidence.":

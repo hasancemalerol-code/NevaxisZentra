@@ -1,24 +1,24 @@
-using NevaxisFactOS.Api.Facilities;
+using NevaxisZentra.Api.Facilities;
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Integration;
-using NevaxisFactOS.Persistence.Integration.FileImport;
-using NevaxisFactOS.Persistence.Integration.Mapping;
-using NevaxisFactOS.Persistence.Integration.Connectors;
-using NevaxisFactOS.Persistence.Integration.Database;
-using NevaxisFactOS.Persistence.Integration.Erp;
-using NevaxisFactOS.Persistence.Integration.FolderWatch;
-using NevaxisFactOS.Persistence.Integration.Projections;
-using NevaxisFactOS.Persistence.Integration.Rest;
-using NevaxisFactOS.Persistence.Integration.Sync;
-using NevaxisFactOS.Persistence.Integration.Webhook;
-using NevaxisFactOS.Persistence.Material;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Integration;
+using NevaxisZentra.Persistence.Integration.FileImport;
+using NevaxisZentra.Persistence.Integration.Mapping;
+using NevaxisZentra.Persistence.Integration.Connectors;
+using NevaxisZentra.Persistence.Integration.Database;
+using NevaxisZentra.Persistence.Integration.Erp;
+using NevaxisZentra.Persistence.Integration.FolderWatch;
+using NevaxisZentra.Persistence.Integration.Projections;
+using NevaxisZentra.Persistence.Integration.Rest;
+using NevaxisZentra.Persistence.Integration.Sync;
+using NevaxisZentra.Persistence.Integration.Webhook;
+using NevaxisZentra.Persistence.Material;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
-namespace NevaxisFactOS.Api.Integration;
+namespace NevaxisZentra.Api.Integration;
 
 public static class IntegrationEndpointRouteBuilderExtensions
 {
@@ -49,7 +49,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSIntegration(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraIntegration(this IServiceCollection services)
     {
         services.AddHttpClient("integration-rest");
         services.AddSingleton<IIntegrationConnectorImplementation, SimulatedIntegrationConnectorImplementation>();
@@ -72,7 +72,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
 
         services.AddScoped<IIntegrationMappingRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableIntegrationMappingRepository()
                 : new IntegrationMappingRepository(
@@ -82,7 +82,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
 
         services.AddScoped<IIntegrationConnectorRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableIntegrationConnectorRepository()
                 : new IntegrationConnectorRepository(
@@ -588,7 +588,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
         CancellationToken cancellationToken)
     {
         var tenantDatabaseSession = services.GetRequiredService<TenantDatabaseSession>();
-        var dbContext = services.GetRequiredService<NevaxisFactOSDbContext>();
+        var dbContext = services.GetRequiredService<NevaxisZentraDbContext>();
         var (context, failResult) = await IntegrationEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, cancellationToken);
         if (context is null)
@@ -632,7 +632,7 @@ public static class IntegrationEndpointRouteBuilderExtensions
         CancellationToken cancellationToken)
     {
         var tenantDatabaseSession = services.GetRequiredService<TenantDatabaseSession>();
-        var dbContext = services.GetRequiredService<NevaxisFactOSDbContext>();
+        var dbContext = services.GetRequiredService<NevaxisZentraDbContext>();
         var (context, failResult) = await IntegrationEndpointHelpers.ResolveReadAccessAsync(
             facilityId, facilityAccessResolver, cancellationToken);
         if (context is null)

@@ -21,7 +21,7 @@ function headers() {
   return {
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": "production-pilot-operator",
-    "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+    "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
   };
 }
 
@@ -33,7 +33,7 @@ async function list(query) {
 
 console.log("Running MOLD-1 pagination/ordering live verifier.");
 
-const repo = readFileSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/Mold/MoldRepository.cs"), "utf8").replaceAll("\r\n", "\n");
+const repo = readFileSync(resolve(ROOT, "packages/NevaxisZentra.Persistence/Mold/MoldRepository.cs"), "utf8").replaceAll("\r\n", "\n");
 assert("ordering documented in repository", repo.includes(".OrderBy(m => m.CodeNormalized)") && repo.includes(".ThenBy(m => m.Name)"));
 
 const defaultPage = await list("page=1");

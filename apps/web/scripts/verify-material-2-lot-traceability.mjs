@@ -56,14 +56,14 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -174,9 +174,9 @@ function assertClosureCleanupComplete() {
 
 console.log("Running MATERIAL-2 lot/traceability verifier.");
 
-const stateMachine = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotLifecycleStateMachine.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotRepository.cs");
-const validator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLotValidator.cs");
+const stateMachine = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialLotLifecycleStateMachine.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialLotRepository.cs");
+const validator = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialLotValidator.cs");
 
 assert("lot state machine present", stateMachine.includes("MaterialLotStatus.Closed"));
 assert("lot repository idempotency", repository.includes("CreateIdempotencyKey"));

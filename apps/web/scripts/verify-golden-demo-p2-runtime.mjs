@@ -14,7 +14,7 @@ function requireText(file, text, label) {
 
 requireText("apps/api/GoldenDemoP2/GoldenDemoP2EndpointRouteBuilderExtensions.cs", 'MapGet("/presentation-status"', "P2 presentation endpoint");
 requireText("apps/api/GoldenDemoP2/GoldenDemoP2EndpointRouteBuilderExtensions.cs", 'MapPost("/events/{eventId:guid}/reset"', "P2 reset endpoint");
-requireText("packages/NevaxisFactOS.Persistence/GoldenDemoP2/GoldenDemoP2Service.cs", "ResetPilotEventAsync", "P2 reset service");
+requireText("packages/NevaxisZentra.Persistence/GoldenDemoP2/GoldenDemoP2Service.cs", "ResetPilotEventAsync", "P2 reset service");
 requireText("apps/web/src/features/golden-demo-p2/components/golden-demo-p2-presentation-panel.tsx", "golden-demo-p2-reset", "P2 reset UI");
 
 console.log("GOLDEN_DEMO_P2_RUNTIME_VERIFIER = PASS");

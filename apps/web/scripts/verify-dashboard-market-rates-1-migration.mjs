@@ -21,8 +21,8 @@ function read(rel) {
 
 console.log("Running DASHBOARD-MARKET-RATES-1 migration verifier.");
 
-const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260830163108_AddMarketRatesFoundation.cs");
-const dbContext = read("packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs");
+const migration = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260830163108_AddMarketRatesFoundation.cs");
+const dbContext = read("packages/NevaxisZentra.Persistence/NevaxisZentraDbContext.cs");
 
 assert("snapshot table", migration.includes("market_rate_snapshots"));
 assert("quote lines table", migration.includes("market_rate_quote_lines"));

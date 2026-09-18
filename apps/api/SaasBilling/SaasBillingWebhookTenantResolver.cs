@@ -1,10 +1,10 @@
 using System.Text.Json;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Development;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Development;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
-namespace NevaxisFactOS.Api.SaasBilling;
+namespace NevaxisZentra.Api.SaasBilling;
 
 internal static class SaasBillingWebhookTenantResolver
 {
@@ -47,7 +47,7 @@ internal static class SaasBillingWebhookTenantResolver
     public static async Task<bool> TryEstablishWebhookTenantContextAsync(
         string rawBody,
         TenantContextAccessor tenantContextAccessor,
-        NevaxisFactOSDbContext dbContext,
+        NevaxisZentraDbContext dbContext,
         CancellationToken cancellationToken)
     {
         if (tenantContextAccessor.IsAvailable)
@@ -62,7 +62,7 @@ internal static class SaasBillingWebhookTenantResolver
         }
 
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
-            $"SELECT set_config('NevaxisFactOS.tenant_id', {tenantId.ToString()}, false)",
+            $"SELECT set_config('NevaxisZentra.tenant_id', {tenantId.ToString()}, false)",
             cancellationToken);
 
         var tenant = await dbContext.Tenants.AsNoTracking()

@@ -46,7 +46,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8", maxBuffer: 20 * 1024 * 1024 },
   );
   if (result.status !== 0) {
@@ -60,7 +60,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -213,11 +213,11 @@ function countByPrefix(table, column, prefixes) {
 
 console.log("Running PROCESS-OEE pilot machine data verifier.");
 
-const edgeSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
-const oeeSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcessOeeSeed.cs");
-const hygiene = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcessOeeFixtureHygiene.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
+const edgeSeed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
+const oeeSeed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotProcessOeeSeed.cs");
+const hygiene = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotProcessOeeFixtureHygiene.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeCalculator.cs");
 
 assert("injection machine seed INJ-001", edgeSeed.includes('"INJ-001"') && edgeSeed.includes("Plastik Enjeksiyon Makinesi 001"));
 assert("injection machine seed INJ-002", edgeSeed.includes('"INJ-002"') && edgeSeed.includes("Plastik Enjeksiyon Makinesi 002"));

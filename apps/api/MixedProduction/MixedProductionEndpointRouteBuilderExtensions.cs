@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.MixedProduction;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.MixedProduction;
 
-namespace NevaxisFactOS.Api.MixedProduction;
+namespace NevaxisZentra.Api.MixedProduction;
 
 public static class MixedProductionEndpointRouteBuilderExtensions
 {
@@ -22,7 +22,7 @@ public static class MixedProductionEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSMixedProduction(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraMixedProduction(this IServiceCollection services)
     {
         services.AddScoped<IMixedProductionService, MixedProductionService>();
         return services;

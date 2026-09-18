@@ -7,7 +7,7 @@ import { join } from "node:path";
 
 const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
 const ORGANIZATION = "dev-pilot-tenant";
-const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-energy-ui-1-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisZentra-energy-ui-1-screenshots");
 const OWNER_SCREENSHOTS = [
   { width: 1600, height: 1000, filename: "energy-ui-1-donut-final-owner-1600x1000.png" },
   { width: 1600, height: 1000, filename: "energy-ui-1-lower-final-owner-1600x1000.png", scrollToLower: true },
@@ -1004,7 +1004,7 @@ const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -1058,7 +1058,7 @@ try {
     });
     ownerPage.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-    await signInPersona(ownerPage, "admin@demo.nevaxisfactos.local", ownerPassword, mfaSecret);
+    await signInPersona(ownerPage, "admin@demo.nevaxiszentra.local", ownerPassword, mfaSecret);
     await exerciseEnergyWorkspace(ownerPage, `owner-${viewport.label}`);
 
     if (viewport.label === "1600x1000") {

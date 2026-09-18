@@ -34,7 +34,7 @@ function headers(subject = OPERATOR, tenant = TENANT) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
@@ -69,9 +69,9 @@ console.log("Running INTEGRATION-WAVE-B security verifier.");
 
 const endpoints = readRequired("apps/api/Integration/IntegrationEndpointRouteBuilderExtensions.cs");
 const endpointHelpers = readRequired("apps/api/Integration/IntegrationEndpointHelpers.cs");
-const orchestrator = readRequired("packages/NevaxisFactOS.Persistence/Integration/FileImport/IntegrationFileImportOrchestrator.cs");
+const orchestrator = readRequired("packages/NevaxisZentra.Persistence/Integration/FileImport/IntegrationFileImportOrchestrator.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260910101730_AddIntegrationSpineFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260910101730_AddIntegrationSpineFoundation.cs",
 );
 
 assert("integration.read used", endpointHelpers.includes("IntegrationPermissionKeys.Read"));

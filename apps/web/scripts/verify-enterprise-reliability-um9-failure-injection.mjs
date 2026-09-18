@@ -23,42 +23,42 @@ function requireText(source, text, label) {
 const BOUNDED_SCENARIOS = [
   {
     name: "CONNECTOR_CIRCUIT_OPEN",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
     markers: ["integration.circuit-open", "DefaultFailureThreshold = 5", "DefaultCooldown"],
   },
   {
     name: "RETRY_EXHAUSTION",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
     markers: ["MaxAttempts = 5", "retry.exhausted", "retry.non-retriable"],
   },
   {
     name: "DATABASE_DEGRADED_READ_ONLY",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
     markers: ["DegradedReadOnly", "BlocksUnsafeMutation"],
   },
   {
     name: "EDGE_BUFFER_CAPACITY",
-    file: "packages/NevaxisFactOS.EdgeBuffer/EdgeBufferStore.cs",
+    file: "packages/NevaxisZentra.EdgeBuffer/EdgeBufferStore.cs",
     markers: ["CapacityExceeded", "GetEffectiveMaxBufferedEvents"],
   },
   {
     name: "EDGE_CRITICAL_DROP_BLOCKED",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
     markers: ["AllowsSilentDrop", "EdgeEventClassifications.Critical", "EdgeEventClassifications.Disposable"],
   },
   {
     name: "RECONCILIATION_CONFLICT",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs",
     markers: ["Reconciliation conflict guard blocked", "EnterpriseReliabilityFailureCodes.Conflict"],
   },
   {
     name: "AI_PROVIDER_DEGRADATION",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityConstants.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityConstants.cs",
     markers: ["AiProvider", "SystemComponentKinds"],
   },
   {
     name: "EDGE_OFFLINE_BUFFERING",
-    file: "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
+    file: "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs",
     markers: ["DegradedBuffering", "SystemComponentKinds.EdgeAgent"],
   },
 ];
@@ -72,7 +72,7 @@ function runStaticFailureInjection() {
     checks.push(`${scenario.name} = PASS (static)`);
   }
 
-  const edgeScenarios = readRequired("packages/NevaxisFactOS.EdgeBuffer/EdgeReliabilityScenarios.cs");
+  const edgeScenarios = readRequired("packages/NevaxisZentra.EdgeBuffer/EdgeReliabilityScenarios.cs");
   requireText(edgeScenarios, "BuildOfflineBufferEvents", "offline buffer scenario");
   requireText(edgeScenarios, "CreatePoisonEvent", "poison event scenario");
   requireText(edgeScenarios, "BuildPartialFailureBatch", "partial failure scenario");

@@ -21,7 +21,7 @@ const requestContext = {
   requestHeaders: {
     "X-crevafactos-dev-Issuer": "issuer",
     "X-crevafactos-dev-Subject": "subject",
-    "X-NevaxisFactOS-Tenant": "tenant",
+    "X-NevaxisZentra-Tenant": "tenant",
   },
 };
 

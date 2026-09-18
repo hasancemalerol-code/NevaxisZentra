@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.Production;
+namespace NevaxisZentra.Api.Production;
 
 public static class ProductionExecutionApiFailureCodes
 {

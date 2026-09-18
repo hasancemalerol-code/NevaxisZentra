@@ -28,8 +28,8 @@ if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) {
 
 $ArtifactRoot = (Resolve-Path $ArtifactRoot).Path
 $artifactDir = Join-Path $ArtifactRoot $Version
-$msiPath = Join-Path $artifactDir "NevaxisFactOS-Desktop-Setup-$Version-x64.msi"
-$profilePath = Join-Path $env:LOCALAPPDATA "NevaxisFactOS\Desktop\WebView2"
+$msiPath = Join-Path $artifactDir "NevaxisZentra-Desktop-Setup-$Version-x64.msi"
+$profilePath = Join-Path $env:LOCALAPPDATA "NevaxisZentra\Desktop\WebView2"
 $results = [ordered]@{}
 
 function Record([string]$Name, [bool]$Success, [string]$Detail = "") {
@@ -43,7 +43,7 @@ function Record([string]$Name, [bool]$Success, [string]$Detail = "") {
 }
 
 function Stop-DesktopApp {
-    Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
 }
 
@@ -61,11 +61,11 @@ function Get-ArpEntry {
     return Get-ChildItem $uninstallKey -ErrorAction SilentlyContinue | ForEach-Object {
         Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
     } | Where-Object {
-        $null -ne $_ -and $_.PSObject.Properties.Name -contains "DisplayName" -and $_.DisplayName -eq "NevaxisFactOS"
+        $null -ne $_ -and $_.PSObject.Properties.Name -contains "DisplayName" -and $_.DisplayName -eq "NevaxisZentra"
     } | Select-Object -First 1
 }
 
-function Uninstall-NevaxisFactOSDesktop {
+function Uninstall-NevaxisZentraDesktop {
     $entry = Get-ArpEntry
     if ($entry -and $entry.PSChildName) {
         $null = Invoke-Msi @("/x", $entry.PSChildName, "/qn", "/norestart")
@@ -77,12 +77,12 @@ if (-not (Test-Path $msiPath)) {
     throw "MSI not found: $msiPath"
 }
 
-Uninstall-NevaxisFactOSDesktop
+Uninstall-NevaxisZentraDesktop
 Stop-DesktopApp
 
-$programFilesExe = Join-Path ${env:ProgramFiles} "NevaxisFactOS\Desktop\NevaxisFactOS.Desktop.exe"
-$startMenuShortcut = Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\NevaxisFactOS\NevaxisFactOS.lnk"
-$desktopShortcut = Join-Path $env:Public "Desktop\NevaxisFactOS.lnk"
+$programFilesExe = Join-Path ${env:ProgramFiles} "NevaxisZentra\Desktop\NevaxisZentra.Desktop.exe"
+$startMenuShortcut = Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\NevaxisZentra\NevaxisZentra.lnk"
+$desktopShortcut = Join-Path $env:Public "Desktop\NevaxisZentra.lnk"
 $logFile = Join-Path $artifactDir "install-smoke.log"
 $profileMarker = Join-Path $profilePath "distribution-smoke-profile.txt"
 New-Item -ItemType Directory -Force -Path $profilePath | Out-Null
@@ -102,7 +102,7 @@ $arpEntry = Get-ArpEntry
 Record "Add/Remove Programs entry exists" ($null -ne $arpEntry)
 if ($arpEntry) {
     Record "Installed product version shown" ($arpEntry.DisplayVersion -like "$Version*") $arpEntry.DisplayVersion
-    Record "Publisher shown" ($arpEntry.Publisher -eq "NevaxisFactOS") $arpEntry.Publisher
+    Record "Publisher shown" ($arpEntry.Publisher -eq "NevaxisZentra") $arpEntry.Publisher
 }
 
 Stop-DesktopApp
@@ -110,7 +110,7 @@ $proc = Start-Process -FilePath $programFilesExe -PassThru
 Start-Sleep -Seconds 4
 Record "Application launches" (-not $proc.HasExited)
 Stop-DesktopApp
-Record "Application closes cleanly" (-not (Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue))
+Record "Application closes cleanly" (-not (Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue))
 
 if ($arpEntry -and $arpEntry.PSChildName) {
     $repairExit = Invoke-Msi @("/fa", $arpEntry.PSChildName, "/qn", "/norestart")
@@ -130,7 +130,7 @@ if (-not $SkipUpgradeValidation) {
         $UpgradeVersion = if ($Version -eq "1.0.0") { "1.0.1" } else { "$Version.1" }
     }
 
-    $upgradeMsiPath = Join-Path (Join-Path $ArtifactRoot $UpgradeVersion) "NevaxisFactOS-Desktop-Setup-$UpgradeVersion-x64.msi"
+    $upgradeMsiPath = Join-Path (Join-Path $ArtifactRoot $UpgradeVersion) "NevaxisZentra-Desktop-Setup-$UpgradeVersion-x64.msi"
     if (-not (Test-Path $upgradeMsiPath)) {
         Write-Host "Building upgrade MSI $UpgradeVersion..."
         & (Join-Path $PSScriptRoot "publish-desktop-distribution.ps1") -Version $UpgradeVersion -AllowDevelopmentDistribution | Out-Host
@@ -168,7 +168,7 @@ Record "WebView2 profile preserved after uninstall" (Test-Path $profileMarker)
 Record "Program files removed after uninstall" (-not (Test-Path $programFilesExe))
 Record "Start Menu shortcut removed" (-not (Test-Path $startMenuShortcut))
 Record "Desktop shortcut removed" (-not (Test-Path $desktopShortcut))
-Record "No orphan desktop process" (-not (Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue))
+Record "No orphan desktop process" (-not (Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue))
 
 $reinstallAfterExit = Invoke-Msi @(
     "/i", $msiPath,
@@ -176,7 +176,7 @@ $reinstallAfterExit = Invoke-Msi @(
 )
 Record "Reinstall after uninstall works" ($reinstallAfterExit -eq 0) "exit=$reinstallAfterExit"
 if ($reinstallAfterExit -eq 0) {
-    Uninstall-NevaxisFactOSDesktop
+    Uninstall-NevaxisZentraDesktop
 }
 
 $reportPath = Join-Path $artifactDir "install-smoke-report.json"

@@ -51,7 +51,7 @@ function requireEnv(name) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -130,8 +130,8 @@ class CookieJar {
 async function api(method, path, body, jar) {
   const headers = { "Content-Type": "application/json", Accept: "application/json" };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -267,7 +267,7 @@ async function runBrowserVerification({ ownerPassword, mfaSharedSecret }) {
 
       await signInThroughForm(page, {
         organization: ORGANIZATION,
-        email: "admin@demo.nevaxisfactos.local",
+        email: "admin@demo.nevaxiszentra.local",
         password: ownerPassword,
       });
       await page.waitForURL("**/mfa-dogrula", { timeout: 30000 });
@@ -297,7 +297,7 @@ const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 const ownerJar = new CookieJar();
 const signIn = await api("POST", "/api/identity/sign-in", {
   organizationContext: ORGANIZATION,
-  email: "admin@demo.nevaxisfactos.local",
+  email: "admin@demo.nevaxiszentra.local",
   password: ownerPassword,
   deviceLabel: `${CLOSURE_PREFIX}-ui-setup`,
 }, ownerJar);

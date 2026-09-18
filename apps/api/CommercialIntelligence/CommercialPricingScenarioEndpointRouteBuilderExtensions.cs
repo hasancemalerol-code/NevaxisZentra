@@ -1,14 +1,14 @@
-using NevaxisFactOS.Api.AiTasks;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.CommercialIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.AiTasks;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.CommercialIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NevaxisFactOS.Api.CommercialIntelligence;
+namespace NevaxisZentra.Api.CommercialIntelligence;
 
 internal static class CommercialPricingScenarioEndpointRouteBuilderExtensions
 {
@@ -561,11 +561,11 @@ public sealed record TransitionCommercialPricingScenarioRequest(
 
 public static class CommercialPricingScenarioServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSCommercialPricingScenarios(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraCommercialPricingScenarios(this IServiceCollection services)
     {
         services.AddScoped<ICommercialPricingScenarioRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialPricingScenarioRepository()
                 : new CommercialPricingScenarioRepository(

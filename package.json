@@ -1,5 +1,5 @@
 {
-  "name": "nevaxisfactos",
+  "name": "nevaxiszentra",
   "version": "0.0.0",
   "private": true,
   "description": "AI Factory Operations Assistant and AI Production Manager monorepo.",
@@ -10,10 +10,10 @@
     "pnpm": "11.20.0"
   },
   "scripts": {
-    "dev:web": "pnpm --filter @nevaxisfactos/web dev",
+    "dev:web": "pnpm --filter @nevaxiszentra/web dev",
     "dev:api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/runtime/start-dev-api.ps1",
-    "dev:worker": "dotnet run --project apps/worker/NevaxisFactOS.Worker.csproj",
-    "dev:edge-agent": "dotnet run --project apps/edge-agent/NevaxisFactOS.EdgeAgent.csproj",
+    "dev:worker": "dotnet run --project apps/worker/NevaxisZentra.Worker.csproj",
+    "dev:edge-agent": "dotnet run --project apps/edge-agent/NevaxisZentra.EdgeAgent.csproj",
     "infra:config": "docker compose -f infrastructure/compose.yaml config",
     "infra:start": "docker compose -f infrastructure/compose.yaml up -d",
     "infra:stop": "docker compose -f infrastructure/compose.yaml stop",
@@ -37,13 +37,13 @@
     "db:migrations:apply": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-apply",
     "db:migrations:rollback": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-rollback",
     "db:migrations:script": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/database/database.ps1 migrations-script",
-    "build:web": "pnpm --filter @nevaxisfactos/web build",
-    "build:dotnet": "dotnet build NevaxisFactOS.sln",
+    "build:web": "pnpm --filter @nevaxiszentra/web build",
+    "build:dotnet": "dotnet build NevaxisZentra.sln",
     "build": "pnpm run build:web && pnpm run build:dotnet",
-    "lint": "pnpm --filter @nevaxisfactos/web lint",
-    "typecheck": "pnpm --filter @nevaxisfactos/web typecheck",
-    "test:web": "pnpm --filter @nevaxisfactos/web test",
-    "test:dotnet": "dotnet test NevaxisFactOS.sln",
+    "lint": "pnpm --filter @nevaxiszentra/web lint",
+    "typecheck": "pnpm --filter @nevaxiszentra/web typecheck",
+    "test:web": "pnpm --filter @nevaxiszentra/web test",
+    "test:dotnet": "dotnet test NevaxisZentra.sln",
     "test": "pnpm run test:web && pnpm run test:dotnet",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   }

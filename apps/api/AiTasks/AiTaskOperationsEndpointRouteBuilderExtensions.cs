@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Audit;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Audit;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.AiTasks;
+namespace NevaxisZentra.Api.AiTasks;
 
 public static class AiTaskOperationsEndpointRouteBuilderExtensions
 {

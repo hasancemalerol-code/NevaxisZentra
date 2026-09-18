@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Authentication;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Authentication;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.Facilities;
+namespace NevaxisZentra.Api.Facilities;
 
 public sealed class FacilityAccessResolver(
     ICurrentIdentityAccessor identityAccessor,

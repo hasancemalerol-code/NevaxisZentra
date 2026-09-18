@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.IotPlc;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.IotPlc;
 
-namespace NevaxisFactOS.Api.IotPlc;
+namespace NevaxisZentra.Api.IotPlc;
 
 internal static class IotPlcEndpointHelpers
 {

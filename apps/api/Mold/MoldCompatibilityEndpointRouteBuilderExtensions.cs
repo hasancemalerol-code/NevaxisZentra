@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Mold;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Mold;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Mold;
+namespace NevaxisZentra.Api.Mold;
 
 public static class MoldCompatibilityEndpointRouteBuilderExtensions
 {

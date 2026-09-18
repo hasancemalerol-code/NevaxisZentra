@@ -1,13 +1,13 @@
-# NevaxisFactOS-DESKTOP-SHELL-SALES-DEMO-1 verification
+# NevaxisZentra-DESKTOP-SHELL-SALES-DEMO-1 verification
 # Captures screenshots and validates desktop shell acceptance flow.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\bin\Release\net10.0-windows\win-x64\NevaxisFactOS.exe"
+$desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\bin\Release\net10.0-windows\win-x64\NevaxisZentra.exe"
 if (-not (Test-Path $desktopExe)) {
-    $desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\win-x64\NevaxisFactOS.exe"
+    $desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\bin\Debug\net10.0-windows\win-x64\NevaxisZentra.exe"
 }
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
 $results = [ordered]@{}
@@ -40,7 +40,7 @@ public static class DesktopSalesDemoCapture
         var deadline = Environment.TickCount + timeoutMs;
         while (Environment.TickCount < deadline)
         {
-            foreach (var processName in new[] { "crevafactos", "NevaxisFactOS.Desktop" })
+            foreach (var processName in new[] { "crevafactos", "NevaxisZentra.Desktop" })
             {
                 foreach (var process in Process.GetProcessesByName(processName))
                 {
@@ -77,8 +77,8 @@ public static class DesktopSalesDemoCapture
 }
 "@
 
-function Get-NevaxisFactOSProcessCount {
-    $names = @("crevafactos", "NevaxisFactOS.Desktop")
+function Get-NevaxisZentraProcessCount {
+    $names = @("crevafactos", "NevaxisZentra.Desktop")
     $count = 0
     foreach ($name in $names) {
         $count += @(Get-Process -Name $name -ErrorAction SilentlyContinue).Count
@@ -86,14 +86,14 @@ function Get-NevaxisFactOSProcessCount {
     return $count
 }
 
-function Stop-NevaxisFactOSDesktop {
-    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisZentraDesktop {
+    Get-Process -Name "crevafactos", "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
 
 function Ensure-DesktopBuilt {
-    Stop-NevaxisFactOSDesktop
-    & dotnet build (Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj") -c Release -p:DesktopDevelopmentDistribution=true
+    Stop-NevaxisZentraDesktop
+    & dotnet build (Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj") -c Release -p:DesktopDevelopmentDistribution=true
     if ($LASTEXITCODE -ne 0) { throw "Desktop build failed." }
     if (-not (Test-Path $desktopExe)) { throw "Desktop executable missing after build: $desktopExe" }
 }
@@ -122,7 +122,7 @@ function Wait-ForWebViewScreenshot([string]$ShotPath, [int]$TimeoutSeconds = 180
 }
 
 function Capture-RouteScreenshot([string]$EntryPath, [string]$ShotName, [int]$TimeoutSeconds = 180) {
-    Stop-NevaxisFactOSDesktop
+    Stop-NevaxisZentraDesktop
     $shot = Join-Path $screenshotDir $ShotName
     Remove-Item $shot, "$shot.ready", "$shot.configured", "$shot.error" -Force -ErrorAction SilentlyContinue
     $proc = Start-DesktopRoute $EntryPath $shot
@@ -138,7 +138,7 @@ function Capture-RouteScreenshot([string]$EntryPath, [string]$ShotName, [int]$Ti
     }
     finally {
         Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_PATH -ErrorAction SilentlyContinue
-        Stop-NevaxisFactOSDesktop
+        Stop-NevaxisZentraDesktop
     }
     return $captured
 }
@@ -149,29 +149,29 @@ Ensure-DesktopBuilt
 Assert-Check "desktop build" (Test-Path $desktopExe) $desktopExe
 Assert-RuntimeRootEnvironmentClean -Context "sales-demo-start"
 
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 
-Write-Host "Launching NevaxisFactOS desktop shell (startup)..."
+Write-Host "Launching NevaxisZentra desktop shell (startup)..."
 $dashboardShot = Join-Path $screenshotDir "02-main-window-dashboard.png"
 Remove-Item $dashboardShot, "$dashboardShot.ready" -Force -ErrorAction SilentlyContinue
 $env:NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_PATH = $dashboardShot
 $process = Start-DesktopRoute "/dashboard" $dashboardShot
 try {
     Start-Sleep -Seconds 2
-    $startupHandle = [DesktopSalesDemoCapture]::WaitForWindow({ param($p) $p.MainWindowTitle -like "*NevaxisFactOS*" }, 20000)
+    $startupHandle = [DesktopSalesDemoCapture]::WaitForWindow({ param($p) $p.MainWindowTitle -like "*NevaxisZentra*" }, 20000)
     $startupShot = Join-Path $screenshotDir "01-startup.png"
     [DesktopSalesDemoCapture]::Capture($startupHandle, $startupShot)
     Assert-Check "startup screenshot" (Test-Path $startupShot)
 
     $mainHandle = [DesktopSalesDemoCapture]::WaitForWindow({ param($p) $p.MainWindowHandle -ne [IntPtr]::Zero }, 180000)
 
-    $beforeCount = Get-NevaxisFactOSProcessCount
+    $beforeCount = Get-NevaxisZentraProcessCount
     if ($beforeCount -lt 1 -and $process -and -not $process.HasExited) {
         $beforeCount = 1
     }
     Start-Process -FilePath $desktopExe -WorkingDirectory (Split-Path $desktopExe -Parent) | Out-Null
     Start-Sleep -Seconds 4
-    $afterCount = Get-NevaxisFactOSProcessCount
+    $afterCount = Get-NevaxisZentraProcessCount
     Assert-Check "single instance" ($beforeCount -ge 1 -and $afterCount -eq $beforeCount) "before=$beforeCount after=$afterCount"
 
     $dashboardCaptured = Wait-ForWebViewScreenshot $dashboardShot 180
@@ -193,7 +193,7 @@ try {
     Assert-Check "web readiness" $webReady "http://127.0.0.1:3001/giris 2xx"
 }
 finally {
-    Stop-NevaxisFactOSDesktop
+    Stop-NevaxisZentraDesktop
 }
 
 Assert-Check "ai task center route" (Capture-RouteScreenshot "/" "03-ai-task-center.png")
@@ -201,7 +201,7 @@ Assert-Check "production route" (Capture-RouteScreenshot "/uretim" "04-productio
 Assert-Check "playbooks route" (Capture-RouteScreenshot "/ai-gorevleri/playbooklar" "05-playbooks.png")
 Assert-Check "playbook run detail route" (Capture-RouteScreenshot "/ai-gorevleri/playbooklar?gorunum=calisan" "06-playbook-run-detail.png")
 
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 Start-Sleep -Seconds 3
 $restartOk = Capture-RouteScreenshot "/dashboard" "02-main-window-dashboard.png" 180
 Assert-Check "restart" $restartOk
@@ -212,17 +212,17 @@ $authCdpScript = Join-Path $PSScriptRoot "verify-desktop-authentication-live-1-c
 Assert-Check "authenticated desktop session" ($LASTEXITCODE -eq 0) "verify-desktop-authentication-live-1-cdp.mjs"
 Assert-Check "authenticated dashboard screenshot" (Test-Path (Join-Path $screenshotDir "20-desktop-authenticated-dashboard.png"))
 
-$invalidRoot = Join-Path $env:TEMP "NevaxisFactOS-invalid-runtime-root"
+$invalidRoot = Join-Path $env:TEMP "NevaxisZentra-invalid-runtime-root"
 Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_ENTRY_PATH -ErrorAction SilentlyContinue
 $failShot = Join-Path $screenshotDir "07-startup-failure.png"
 $null = Invoke-NegativeRuntimeRootTest -ArtifactExe $desktopExe -ArtifactDir (Split-Path $desktopExe -Parent) -InvalidRoot $invalidRoot -OnFailureWindow {
     param($Process, $TimeoutSeconds)
     Start-Sleep -Seconds 4
-    $failHandle = [DesktopSalesDemoCapture]::WaitForWindow({ param($p) $p.MainWindowTitle -like "*NevaxisFactOS*" }, 20000)
+    $failHandle = [DesktopSalesDemoCapture]::WaitForWindow({ param($p) $p.MainWindowTitle -like "*NevaxisZentra*" }, 20000)
     [DesktopSalesDemoCapture]::Capture($failHandle, $failShot)
     Assert-Check "startup failure screenshot" (Test-Path $failShot)
 }
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 Assert-RepositoryRootValid -RepositoryRoot $repoRoot -Context "sales-demo-final"
 Assert-RuntimeRootEnvironmentClean -Context "sales-demo-final"
 Clear-KnownDesktopVerifierEnvironmentLeaks

@@ -47,7 +47,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -80,11 +80,11 @@ console.log("Running ERP-3L security verifier.");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
 );
-const inventoryRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpInventoryRepository.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const inventoryRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpInventoryRepository.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
 
 requireText(endpoints, "ErpPermissionKeys.Sync", "inventory sync permission");
 requireText(endpoints, "ResolveReadAccessAsync", "inventory read permission");
@@ -132,7 +132,7 @@ try {
   const crossTenant = await fetch(`${BASE}/api/erp/inventory/availability?facilityId=${FACILITY}`, {
     headers: {
       ...headers(OPERATOR),
-      "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
+      "X-NevaxisZentra-Tenant": "other-tenant-not-pilot",
     },
   });
   if (crossTenant.status !== 403) {

@@ -1,4 +1,4 @@
-# NevaxisFactOS Test Stratejisi
+# NevaxisZentra Test Stratejisi
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS platformunda uygulanacak test yaklaşımını, test katmanlarını, kapsam kurallarını, ortamları ve kalite kapılarını tanımlar.
+Bu belge NevaxisZentra platformunda uygulanacak test yaklaşımını, test katmanlarını, kapsam kurallarını, ortamları ve kalite kapılarını tanımlar.
 
 
 
@@ -64,7 +64,7 @@ Her test:
 
 
 
-NevaxisFactOS aşağıdaki test dağılımını hedefler:
+NevaxisZentra aşağıdaki test dağılımını hedefler:
 
 
 

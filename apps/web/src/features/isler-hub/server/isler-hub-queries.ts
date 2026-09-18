@@ -79,7 +79,7 @@ export async function readIslerHubWorkspace(): Promise<IslerHubWorkspace> {
   }
 
   entries.push({
-    label: "FactOS Teams",
+    label: "Zentra Teams",
     description: "Ekip mesajları ve işbirliği",
     href: "/teams",
     metric: "İşbirliği",

@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.Maintenance;
+using NevaxisZentra.Persistence.Maintenance;
 
-namespace NevaxisFactOS.Api.Maintenance;
+namespace NevaxisZentra.Api.Maintenance;
 
 internal static class MaintenanceApiMapper
 {

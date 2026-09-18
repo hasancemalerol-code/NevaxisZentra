@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ModelGateway;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ModelGateway;
 
-namespace NevaxisFactOS.Api.ModelGateway;
+namespace NevaxisZentra.Api.ModelGateway;
 
 public static class ModelGatewayEndpointRouteBuilderExtensions
 {
@@ -16,7 +16,7 @@ public static class ModelGatewayEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSModelGateway(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraModelGateway(this IServiceCollection services)
     {
         services.AddScoped<IModelProvider, DeterministicEngineProvider>();
         services.AddScoped<IModelProvider, LocalModelProvider>();

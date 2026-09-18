@@ -31,7 +31,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -51,9 +51,9 @@ console.log("Running TEAMS-TASK-COLLABORATION-1 security/idempotency verifier.")
 
 const endpoints = readRequired("apps/api/Teams/TeamsEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsMessageTaskPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsMessageTaskPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsConstants.cs");
 
 assert("task draft endpoint", endpoints.includes("/task-draft"));
 assert("message source context endpoint", endpoints.includes("/source-context"));

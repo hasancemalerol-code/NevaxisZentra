@@ -1,4 +1,4 @@
-# NevaxisFactOS Bağımlılık Kuralları
+# NevaxisZentra Bağımlılık Kuralları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS içindeki uygulamalar, backend modülleri, katmanlar, ortak paketler ve harici sistemler arasındaki bağımlılık kurallarını tanımlar.
+Bu belge NevaxisZentra içindeki uygulamalar, backend modülleri, katmanlar, ortak paketler ve harici sistemler arasındaki bağımlılık kurallarını tanımlar.
 
 
 

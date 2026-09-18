@@ -31,7 +31,7 @@ const apiClient = read("apps/web/src/features/teams/server/teams-api-client.ts")
 const actions = read("apps/web/src/features/teams/server/teams-actions.ts");
 const constants = read("apps/web/src/features/teams/domain/teams-constants.ts");
 const endpoints = read("apps/api/Teams/TeamsNotificationEndpointRouteBuilderExtensions.cs");
-const repository = read("packages/NevaxisFactOS.Persistence/Teams/TeamsNotificationRepository.cs");
+const repository = read("packages/NevaxisZentra.Persistence/Teams/TeamsNotificationRepository.cs");
 
 assert("turkish route page", page.includes("Bildirim merkezi"));
 assert("notifications.read gate", page.includes('forbidUnlessGranted("teams.notifications.read")'));

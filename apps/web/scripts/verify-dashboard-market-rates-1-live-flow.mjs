@@ -8,7 +8,7 @@ import { join } from "node:path";
 const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
 const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
-const ACTOR_EMAIL = "admin@demo.nevaxisfactos.local";
+const ACTOR_EMAIL = "admin@demo.nevaxiszentra.local";
 const SCREENSHOT_DIR = join(process.cwd(), ".cursor-screenshots");
 const PLACEMENT_SHOT = join(SCREENSHOT_DIR, "dashboard-market-rates-1-compact-placement-authenticated.png");
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -37,7 +37,7 @@ function bootstrapSecrets() {
   ];
   let text = "";
   for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts", id, `${id}.jsonl`);
+    const p = join(home, ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts", id, `${id}.jsonl`);
     if (existsSync(p)) text += readFileSync(p, "utf8");
   }
   for (const key of [
@@ -95,7 +95,7 @@ const apiSummary = await fetch(`${API}/api/dashboard/market-rates?facilityId=${F
   headers: {
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": "planning-pilot-user",
-    "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+    "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
   },
 });
 assert("API market-rates route live", apiSummary.status === 200, `status=${apiSummary.status}`);
@@ -184,8 +184,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisZentra-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
         return { status: res.status };
       })()`,
     });

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Persistence.MarketRates;
+using NevaxisZentra.Persistence.MarketRates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NevaxisFactOS.Api.MarketRates;
+namespace NevaxisZentra.Api.MarketRates;
 
 public static class MarketRatesServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSMarketRates(
+    public static IServiceCollection AddNevaxisZentraMarketRates(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -32,12 +32,12 @@ public static class MarketRatesServiceCollectionExtensions
         services.AddScoped<MarketRateSourceSynchronizer>();
         services.AddScoped<IMarketRateRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableMarketRateRepository()
                 : new MarketRateRepository(
                     dbContext,
-                    serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.Tenancy.TenantDatabaseSession>(),
+                    serviceProvider.GetRequiredService<NevaxisZentra.Persistence.Tenancy.TenantDatabaseSession>(),
                     serviceProvider.GetRequiredService<MarketRateSourceSynchronizer>(),
                     serviceProvider.GetRequiredService<IExchangeRateProvider>());
         });
@@ -69,7 +69,7 @@ public static class MarketRatesServiceCollectionExtensions
         IConfiguration configuration,
         string fallback) =>
         Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__MARKET_RATES__{suffix}")
-        ?? configuration[$"NevaxisFactOS:MARKET_RATES:{suffix}"]
+        ?? configuration[$"NevaxisZentra:MARKET_RATES:{suffix}"]
         ?? configuration[$"NEVAXIS_FACTOS__MARKET_RATES__{suffix}"]
         ?? configuration[$"{ExchangeRateProviderOptions.SectionName}:{MapConfigKey(suffix)}"]
         ?? fallback;

@@ -1,4 +1,4 @@
-# NevaxisFactOS Dashboard Lock
+# NevaxisZentra Dashboard Lock
 
 - Status: Locked
 - Date: 2026-08-04
@@ -13,7 +13,7 @@ This document locks the primary dashboard’s information architecture, visual l
 
 The dashboard is the daily factory-operations view for the AI Production Manager and AI Task Center. It is not an accounting, finance, payroll, official inventory, or general purchasing ERP screen.
 
-AI Task Center data shown on the dashboard is authoritative for tasks and approvals. NevaxisFactOS Teams and Web reference the same records.
+AI Task Center data shown on the dashboard is authoritative for tasks and approvals. NevaxisZentra Teams and Web reference the same records.
 
 ## Locked Visual Language
 

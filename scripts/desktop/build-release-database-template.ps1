@@ -78,7 +78,7 @@ function Resolve-SourceCredential([switch]$RequireDumpPrivileges) {
         @{ User = $env:NEVAXIS_FACTOS_POSTGRES_USERNAME; Password = $env:NEVAXIS_FACTOS_POSTGRES_PASSWORD },
         @{ User = $migrationUser; Password = $migrationPassword },
         @{ User = "crevafactos"; Password = "local_dev_only_change_me" },
-        @{ User = "NevaxisFactOS"; Password = "local_dev_only_change_me" },
+        @{ User = "NevaxisZentra"; Password = "local_dev_only_change_me" },
         @{ User = $persistenceUser; Password = $persistencePassword }
     )
     foreach ($candidate in $candidates) {
@@ -132,7 +132,7 @@ if ([string]::IsNullOrWhiteSpace($runtimePassword) -or [string]::IsNullOrWhiteSp
 }
 
 Write-Host "Building Windows PostgreSQL template cluster..."
-$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisFactOS-release-db-" + [Guid]::NewGuid().ToString("N"))
+$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-release-db-" + [Guid]::NewGuid().ToString("N"))
 $dataDir = Join-Path $tempRoot "data"
 $logDir = Join-Path $tempRoot "logs"
 New-Item -ItemType Directory -Force -Path $dataDir, $logDir, $TemplateOutputDirectory | Out-Null
@@ -163,8 +163,8 @@ $logFile = Join-Path $logDir "postgresql.log"
 if ($LASTEXITCODE -ne 0) { throw "pg_ctl start failed." }
 
 function Get-PsqlRoleName([string]$User) {
-    if ($User -eq "NevaxisFactOS") {
-        return "nevaxisfactos"
+    if ($User -eq "NevaxisZentra") {
+        return "nevaxiszentra"
     }
     return $User
 }
@@ -210,10 +210,10 @@ function Invoke-PsqlFile([string]$User, [string]$Database, [string]$FilePath) {
 }
 
 try {
-    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE ROLE NevaxisFactOS LOGIN SUPERUSER PASSWORD '$migrationPassword';"
+    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE ROLE NevaxisZentra LOGIN SUPERUSER PASSWORD '$migrationPassword';"
     Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';"
-    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE DATABASE crevafactos_local OWNER NevaxisFactOS;"
-    Invoke-PsqlFile -User "NevaxisFactOS" -Database "crevafactos_local" -FilePath $seedSqlPath
+    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE DATABASE crevafactos_local OWNER NevaxisZentra;"
+    Invoke-PsqlFile -User "NevaxisZentra" -Database "crevafactos_local" -FilePath $seedSqlPath
 
     $productionHba = @(
         "# TYPE  DATABASE        USER            ADDRESS                 METHOD",

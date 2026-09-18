@@ -38,7 +38,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -97,7 +97,7 @@ try {
   const unauthFacility = await statusFor("POST", `/api/maintenance/assets/${ASSET}/ai-drafts/generate?facilityId=${UNAUTH_FACILITY}`, OPERATOR);
   assert("unauthorized facility POST generate → 403", unauthFacility === 403, `got ${unauthFacility}`);
 
-  const crossTenant = await statusFor("POST", generatePath, OPERATOR, undefined, { "X-NevaxisFactOS-Tenant": OTHER_TENANT });
+  const crossTenant = await statusFor("POST", generatePath, OPERATOR, undefined, { "X-NevaxisZentra-Tenant": OTHER_TENANT });
   assert("cross-tenant POST generate → 403", crossTenant === 403, `got ${crossTenant}`);
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

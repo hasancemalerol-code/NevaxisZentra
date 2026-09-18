@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Energy;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Energy;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Energy;
+namespace NevaxisZentra.Api.Energy;
 
 public static class EnergyEndpointRouteBuilderExtensions
 {
@@ -298,11 +298,11 @@ public static class EnergyEndpointRouteBuilderExtensions
         calculatedAtUtc = allocation.CalculatedAtUtc,
     };
 
-    public static IServiceCollection AddNevaxisFactOSEnergy(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraEnergy(this IServiceCollection services)
     {
         services.AddScoped<IEnergyRepository>(sp =>
         {
-            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableEnergyRepository()
                 : new EnergyRepository(dbContext, sp.GetRequiredService<TenantDatabaseSession>());

@@ -1,13 +1,13 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AiUsage;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Export;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AiUsage;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Export;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Export;
+namespace NevaxisZentra.Api.Export;
 
 public static class Export4LEndpointRouteBuilderExtensions
 {

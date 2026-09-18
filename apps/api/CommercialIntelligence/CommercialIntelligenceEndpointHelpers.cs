@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.CommercialIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.CommercialIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.CommercialIntelligence;
+namespace NevaxisZentra.Api.CommercialIntelligence;
 
 internal static class CommercialIntelligenceEndpointHelpers
 {

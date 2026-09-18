@@ -86,7 +86,7 @@ export function getErpNetsisTransportLabel(connectionMode: string, hasTestFixtur
 }
 
 export function getErpNetsisSetupGuidance(): string {
-  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında FactOS Netsis Bridge yapılandırılmalıdır.";
+  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında Zentra Netsis Bridge yapılandırılmalıdır.";
 }
 
 export function getErpMikroConnectionStateLabel(input: {
@@ -139,7 +139,7 @@ export function getErpMikroTransportLabel(connectionMode: string, hasTestFixture
 }
 
 export function getErpMikroSetupGuidance(): string {
-  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında FactOS Mikro Bridge yapılandırılmalıdır.";
+  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında Zentra Mikro Bridge yapılandırılmalıdır.";
 }
 
 export function getErpLogoConnectionStateLabel(input: {
@@ -192,7 +192,7 @@ export function getErpLogoTransportLabel(connectionMode: string, hasTestFixtureC
 }
 
 export function getErpLogoSetupGuidance(): string {
-  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında FactOS Logo Bridge yapılandırılmalıdır.";
+  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında Zentra Logo Bridge yapılandırılmalıdır.";
 }
 
 export function getErpConnectionStatusLabel(status: ErpConnectionStatus | string): string {

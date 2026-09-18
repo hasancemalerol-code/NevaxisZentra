@@ -1,4 +1,4 @@
-# NevaxisFactOS Web UI Foundation
+# NevaxisZentra Web UI Foundation
 
 The Web application is a browser-based, desktop-first factory-operations workspace. UI-01 establishes the shell and reusable visual language only; the locked dashboard data regions and product workflows remain deferred to UI-02 and later packages.
 
@@ -29,7 +29,7 @@ The shell includes semantic landmarks, `aria-current`, a skip link, native links
 
 ## Locked navigation
 
-AI Görev Merkezi, Dashboard / Operasyon Merkezi, Üretim, Planlama, Vardiyalar, Makineler, Kalıplar, Bakım, Kalite, Malzeme Riskleri, Sipariş Operasyonları, NevaxisFactOS Teams, Raporlar, Entegrasyonlar, and Ayarlar.
+AI Görev Merkezi, Dashboard / Operasyon Merkezi, Üretim, Planlama, Vardiyalar, Makineler, Kalıplar, Bakım, Kalite, Malzeme Riskleri, Sipariş Operasyonları, NevaxisZentra Teams, Raporlar, Entegrasyonlar, and Ayarlar.
 
 There are no native accounting, finance, receivables/payables, payroll, official stock-ledger, general purchasing ERP, CRM, HR, WMS, banking, or invoicing routes.
 
@@ -67,7 +67,7 @@ NEVAXIS_FACTOS_DEV_FACILITY_ID=bb000001-0005-4000-8000-000000000005
 Start the web app:
 
 ```bash
-pnpm --filter @nevaxisfactos/web dev
+pnpm --filter @nevaxiszentra/web dev
 ```
 
 ### URLs

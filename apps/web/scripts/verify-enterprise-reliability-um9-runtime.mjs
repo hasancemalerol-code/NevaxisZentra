@@ -50,7 +50,7 @@ function headers(subject = OPERATOR, tenant = TENANT, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
     ...extra,
   };
   if (process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER) {
@@ -81,7 +81,7 @@ async function request(method, path, body, subject = OPERATOR, tenant = TENANT, 
 }
 
 function runStaticInventory() {
-  const engines = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
+  const engines = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
   requireText(engines, "IntegrationCircuitBreakerEngine", "engines");
   requireText(engines, "BoundedRetryPolicyEngine", "engines");
   requireText(engines, "DegradedModeEngine", "engines");
@@ -92,7 +92,7 @@ function runStaticInventory() {
   requireText(engines, "MaxAttempts = 5", "bounded retry");
   checks.push("STATIC_ENTERPRISE_RELIABILITY_ENGINES = PASS");
 
-  const edgeBuffer = readRequired("packages/NevaxisFactOS.EdgeBuffer/EdgeBufferStore.cs");
+  const edgeBuffer = readRequired("packages/NevaxisZentra.EdgeBuffer/EdgeBufferStore.cs");
   requireText(edgeBuffer, "IdempotencyKey", "edge buffer idempotency");
   requireText(edgeBuffer, "EdgeDeliveryStatuses", "edge buffer delivery");
   requireText(edgeBuffer, "CapacityExceeded", "edge buffer capacity guard");
@@ -140,8 +140,8 @@ async function probeApiHealth() {
 }
 
 function staticGoldenProof(flow) {
-  const engines = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
-  const service = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
+  const engines = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
+  const service = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
   const endpoints = readRequired("apps/api/EnterpriseReliability/EnterpriseReliabilityEndpointRouteBuilderExtensions.cs");
 
   switch (flow) {
@@ -173,7 +173,7 @@ function staticGoldenProof(flow) {
       requireText(endpoints, 'MapPost("/backup/verify"', flow);
       return true;
     case "AI_OUTAGE_GOLDEN_FLOW": {
-      const constants = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityConstants.cs");
+      const constants = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityConstants.cs");
       requireText(constants, "AiProvider", flow);
       requireText(service, "AiProvider", flow);
       return true;
@@ -238,14 +238,14 @@ async function runLiveGoldenFlow(flow) {
         replayIdempotencyKey: key,
       };
       const first = await request("POST", "/api/system-status/quarantine/replay", body, OPERATOR, TENANT, {
-        "X-NevaxisFactOS-Correlation-Id": correlationId,
+        "X-NevaxisZentra-Correlation-Id": correlationId,
       });
       if (first.status === 409 || first.status === 422) {
         assert(staticGoldenProof(flow), "idempotency static proof failed");
         return;
       }
       const second = await request("POST", "/api/system-status/quarantine/replay", body, OPERATOR, TENANT, {
-        "X-NevaxisFactOS-Correlation-Id": correlationId,
+        "X-NevaxisZentra-Correlation-Id": correlationId,
       });
       assert(second.status === 200, `replay idempotency failed: ${second.status}`);
       if (first.json?.id && second.json?.id) {
@@ -289,7 +289,7 @@ async function runLiveGoldenFlow(flow) {
         },
         OPERATOR,
         TENANT,
-        { "X-NevaxisFactOS-Correlation-Id": correlationId },
+        { "X-NevaxisZentra-Correlation-Id": correlationId },
       );
       assert(reconcile.status === 200, `reconcile failed: ${reconcile.status}`);
       assert(reconcile.json?.status === "completed", "reconcile must complete");
@@ -345,7 +345,7 @@ async function main() {
   }
 
   const migration = readRequired(
-    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
+    "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
   );
   requireText(migration, PILOT_EDGE_AGENT_ID, "pilot edge agent seed");
   requireText(migration, TENANT_ID, "pilot tenant seed");

@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ProductionPlanning;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ProductionPlanning;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ProductionPlanning;
+namespace NevaxisZentra.Api.ProductionPlanning;
 
 public static class PlanningLogisticsEndpointRouteBuilderExtensions
 {

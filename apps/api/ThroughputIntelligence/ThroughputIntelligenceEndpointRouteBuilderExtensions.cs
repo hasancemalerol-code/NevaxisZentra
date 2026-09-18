@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ThroughputIntelligence;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ThroughputIntelligence;
 
-namespace NevaxisFactOS.Api.ThroughputIntelligence;
+namespace NevaxisZentra.Api.ThroughputIntelligence;
 
 public static class ThroughputIntelligenceEndpointRouteBuilderExtensions
 {
@@ -18,7 +18,7 @@ public static class ThroughputIntelligenceEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSThroughputIntelligence(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraThroughputIntelligence(this IServiceCollection services)
     {
         services.AddScoped<IThroughputIntelligenceService, ThroughputIntelligenceService>();
         return services;

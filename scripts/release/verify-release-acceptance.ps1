@@ -1,4 +1,4 @@
-# Nevaxis FactOS release acceptance harness (engineering gate).
+# Nevaxis Zentra release acceptance harness (engineering gate).
 # Produces machine-readable evidence for stages executable in the current environment.
 
 [CmdletBinding()]
@@ -33,7 +33,7 @@ function New-Stage([string]$Name) {
 }
 
 $report = [ordered]@{
-    product = "Nevaxis FactOS"
+    product = "Nevaxis Zentra"
     generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     sourceCommit = (git -C $RepositoryRoot rev-parse HEAD)
     stages = @()
@@ -49,9 +49,9 @@ function Complete-Stage($stage, [string]$status, [string[]]$details) {
 
 $buildStage = New-Stage "solution-build"
 try {
-    & dotnet build (Join-Path $RepositoryRoot "NevaxisFactOS.sln") -c Release | Out-Null
+    & dotnet build (Join-Path $RepositoryRoot "NevaxisZentra.sln") -c Release | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
-    Complete-Stage $buildStage "PASS" @("NevaxisFactOS.sln Release build")
+    Complete-Stage $buildStage "PASS" @("NevaxisZentra.sln Release build")
 }
 catch {
     Complete-Stage $buildStage "FAIL" @($_.Exception.Message)
@@ -60,9 +60,9 @@ $report.stages += $buildStage
 
 $testsStage = New-Stage "persistence-tests"
 try {
-    & dotnet test (Join-Path $RepositoryRoot "tests\NevaxisFactOS.Persistence.Tests\NevaxisFactOS.Persistence.Tests.csproj") -c Release --no-build | Out-Null
+    & dotnet test (Join-Path $RepositoryRoot "tests\NevaxisZentra.Persistence.Tests\NevaxisZentra.Persistence.Tests.csproj") -c Release --no-build | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "persistence tests failed" }
-    Complete-Stage $testsStage "PASS" @("NevaxisFactOS.Persistence.Tests")
+    Complete-Stage $testsStage "PASS" @("NevaxisZentra.Persistence.Tests")
 }
 catch {
     Complete-Stage $testsStage "FAIL" @($_.Exception.Message)
@@ -71,9 +71,9 @@ $report.stages += $testsStage
 
 $desktopTestsStage = New-Stage "desktop-tests"
 try {
-    & dotnet test (Join-Path $RepositoryRoot "tests\NevaxisFactOS.Desktop.Tests\NevaxisFactOS.Desktop.Tests.csproj") -c Release | Out-Null
+    & dotnet test (Join-Path $RepositoryRoot "tests\NevaxisZentra.Desktop.Tests\NevaxisZentra.Desktop.Tests.csproj") -c Release | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "desktop tests failed" }
-    Complete-Stage $desktopTestsStage "PASS" @("NevaxisFactOS.Desktop.Tests")
+    Complete-Stage $desktopTestsStage "PASS" @("NevaxisZentra.Desktop.Tests")
 }
 catch {
     Complete-Stage $desktopTestsStage "FAIL" @($_.Exception.Message)

@@ -29,7 +29,7 @@ function headers(subject = OPERATOR, tenant = TENANT) {
     Accept: "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 

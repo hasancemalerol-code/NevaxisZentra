@@ -123,7 +123,7 @@ export function resolveProductionPlanRequestContext(
             developmentAuth.issuer,
           "X-crevafactos-dev-Subject":
             developmentAuth.subject,
-          "X-NevaxisFactOS-Tenant":
+          "X-NevaxisZentra-Tenant":
             developmentAuth.tenantKey,
         },
       },

@@ -42,7 +42,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -54,7 +54,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -116,9 +116,9 @@ console.log("Running AI-TASK-CENTER-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/AiTasks/AiTaskEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/AiTasks/AiTaskEndpointHelpers.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskPermissionKeys.cs");
-const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskLifecycle.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/AiTasks/AiTaskPermissionKeys.cs");
+const lifecycle = readRequired("packages/NevaxisZentra.Persistence/AiTasks/AiTaskLifecycle.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", helpers.includes("ResolveReadAccessAsync"));

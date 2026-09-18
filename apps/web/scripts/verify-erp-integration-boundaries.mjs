@@ -46,7 +46,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -71,25 +71,25 @@ async function api(method, path, body) {
 
 console.log("Running ERP integration boundaries verifier.");
 
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
-const inventoryRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpInventoryRepository.cs");
-const productionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpProductionRepository.cs");
-const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const mappingRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpMappingRepository.cs");
-const adapterContract = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpAdapter.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const syncRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpSyncRepository.cs");
+const inventoryRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpInventoryRepository.cs");
+const productionRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpProductionRepository.cs");
+const writebackRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpWritebackRepository.cs");
+const mappingRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpMappingRepository.cs");
+const adapterContract = readRequired("packages/NevaxisZentra.Persistence/Erp/IErpAdapter.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const workflowRepo = readRequired("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs");
-const writePlanRepo = readRequired("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs");
+const workflowRepo = readRequired("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs");
+const writePlanRepo = readRequired("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs");
 const globals = readRequired("apps/web/src/app/globals.css");
 const sidebar = readRequired("apps/web/src/lib/navigation/primary-navigation.ts");
 const productionView = readRequired("apps/web/src/features/erp/components/erp-production-view.tsx");
 const inventoryView = readRequired("apps/web/src/features/erp/components/erp-inventory-view.tsx");
 const purchasingView = readRequired("apps/web/src/features/erp/components/erp-purchasing-view.tsx");
 const writebackActions = readRequired("apps/web/src/features/erp/components/erp-writeback-approval-actions.tsx");
-const qualityContext = readRequired("packages/NevaxisFactOS.Persistence/Quality/ProductionOrderContextReader.cs");
-const maintenanceWorkOrder = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const qualityContext = readRequired("packages/NevaxisZentra.Persistence/Quality/ProductionOrderContextReader.cs");
+const maintenanceWorkOrder = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
 
 requireText(entities, "External ERP remains system of record", "ERP SoR boundary");
 requireText(entities, "Does not create or mutate internal Production orders", "production projection boundary");
@@ -124,13 +124,13 @@ for (const repo of [syncRepo, inventoryRepo, productionRepo, mappingRepo, writeb
   forbidText(repo, "Netsis.", "no Netsis leakage outside adapter");
 }
 
-const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroErpAdapter.cs");
 requireText(mikroAdapter, "class MikroErpAdapter", "Mikro adapter");
 forbidText(adapters, "class MikroErpAdapterPlaceholder", "Mikro placeholder removed");
-const netsisAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+const netsisAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
 requireText(netsisAdapter, "class NetsisErpAdapter", "Netsis adapter implemented");
 forbidText(adapters, "class NetsisErpAdapterPlaceholder", "Netsis placeholder removed");
-const logoAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+const logoAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "Logo adapter");
 forbidText(adapters, "fallback to simulator", "no simulator fallback");
 forbidText(writebackRepo, "Resolve(profile.Provider) ?? Resolve(\"simulator\")", "no simulator fallback");

@@ -45,7 +45,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -68,14 +68,14 @@ async function api(method, path, body) {
 
 console.log("Running ERP-LOGO-1 adapter verifier.");
 
-const logoAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
-const logoTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/ILogoReadTransport.cs");
-const logoFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoReadTransportTestFixture.cs");
-const logoMapper = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoSourceRecords.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
-const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
+const logoAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoErpAdapter.cs");
+const logoTransport = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/ILogoReadTransport.cs");
+const logoFixture = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoReadTransportTestFixture.cs");
+const logoMapper = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoSourceRecords.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
+const syncRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpSyncRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
 
 requireText(logoAdapter, "class LogoErpAdapter", "LogoErpAdapter");
 forbidText(adapters, "class LogoErpAdapterPlaceholder", "placeholder removed");
@@ -91,7 +91,7 @@ requireText(logoMapper, "LogoProductMapper", "product mapping");
 requireText(logoMapper, "ErpExternalCustomerRecord", "canonical customer mapping");
 requireText(logoMapper, "ErpExternalProductRecord", "canonical product mapping");
 requireText(logoTransport, "LogoReadPageRequest", "pagination request");
-const logoReadPage = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoReadPage.cs");
+const logoReadPage = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoReadPage.cs");
 requireText(logoReadPage, "ContinuationToken", "pagination cursor");
 requireText(logoAdapter, "CancelAfter", "timeout support");
 requireText(logoAdapter, "CancellationToken", "cancellation support");

@@ -1,13 +1,13 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Edge;
-using NevaxisFactOS.Persistence.Maintenance;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Edge;
+using NevaxisZentra.Persistence.Maintenance;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Maintenance;
+namespace NevaxisZentra.Api.Maintenance;
 
 public static class MaintenanceConditionEndpointRouteBuilderExtensions
 {
@@ -242,13 +242,13 @@ public static class MaintenanceConditionEndpointRouteBuilderExtensions
             : TypedResults.Ok(new { evaluated = false });
     }
 
-    public static IServiceCollection AddNevaxisFactOSMaintenanceCondition(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraMaintenanceCondition(this IServiceCollection services)
     {
         services.AddScoped<IConditionEvaluationService, ConditionEvaluationService>();
         services.AddScoped<IPredictiveRiskEvaluationService, PredictiveRiskEvaluationService>();
         services.AddScoped<IMaintenanceConditionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableMaintenanceConditionRepository();
@@ -262,7 +262,7 @@ public static class MaintenanceConditionEndpointRouteBuilderExtensions
 
         services.AddScoped<IMaintenancePredictiveRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableMaintenancePredictiveRiskRepository();

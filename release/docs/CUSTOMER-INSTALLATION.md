@@ -1,4 +1,4 @@
-# Nevaxis FactOS — Müşteri Kurulum Kılavuzu
+# Nevaxis Zentra — Müşteri Kurulum Kılavuzu
 
 ## Desteklenen sistem
 
@@ -12,7 +12,7 @@
 1. `Nevaxis-FactOS-Setup.msi` dosyasını indirin.
 2. Kurulum sihirbazını yönetici olarak çalıştırın.
 3. Lisansı onaylayın ve kurulumu tamamlayın.
-4. Başlat menüsünden veya masaüstü kısayolundan **Nevaxis FactOS** uygulamasını açın.
+4. Başlat menüsünden veya masaüstü kısayolundan **Nevaxis Zentra** uygulamasını açın.
 
 Kurulum sırasında Microsoft Edge WebView2 Runtime eksikse otomatik olarak yüklenir.
 

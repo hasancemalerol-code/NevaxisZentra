@@ -82,8 +82,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
+  if (jar?.cookies.get("NevaxisZentra.session") && jar.cookies.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.cookies.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -107,7 +107,7 @@ async function signInOwner() {
   const jar = new CookieJar();
   const signInResult = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "admin@demo.nevaxisfactos.local",
+    email: "admin@demo.nevaxiszentra.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: "app-action-1b-orders",
   }, jar);

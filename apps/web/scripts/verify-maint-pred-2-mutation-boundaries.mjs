@@ -19,7 +19,7 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const repository = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
+const repository = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
 const endpoints = read("apps/api/Maintenance/MaintenanceConditionEndpointRouteBuilderExtensions.cs");
 const security = read("apps/web/scripts/verify-maint-pred-1-security-boundaries.mjs");
 

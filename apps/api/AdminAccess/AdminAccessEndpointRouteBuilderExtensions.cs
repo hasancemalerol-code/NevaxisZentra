@@ -1,15 +1,15 @@
-using NevaxisFactOS.Api.Authentication;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AdminAccess;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.SaasIdentity;
-using NevaxisFactOS.Persistence.SaasSubscription;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Authentication;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AdminAccess;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.SaasIdentity;
+using NevaxisZentra.Persistence.SaasSubscription;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.AdminAccess;
+namespace NevaxisZentra.Api.AdminAccess;
 
 public static class AdminAccessEndpointRouteBuilderExtensions
 {
@@ -557,11 +557,11 @@ public static class AdminAccessEndpointRouteBuilderExtensions
 
 public static class AdminAccessServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSAdminAccess(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraAdminAccess(this IServiceCollection services)
     {
         services.AddScoped<IAdminAccessRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableAdminAccessRepository()
                 : new AdminAccessRepository(

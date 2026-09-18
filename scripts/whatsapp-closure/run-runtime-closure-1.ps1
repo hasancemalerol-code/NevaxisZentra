@@ -46,7 +46,7 @@ Write-Host "=== CHANNEL READINESS ==="
 $channels = Invoke-RestMethod -Uri "$apiBase/api/ai-task-delivery/channels?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
     "X-crevafactos-dev-Issuer" = "crevafactos-dev"
     "X-crevafactos-dev-Subject" = "planning-pilot-user"
-    "X-NevaxisFactOS-Tenant" = "omnichannel-closure-tenant-a"
+    "X-NevaxisZentra-Tenant" = "omnichannel-closure-tenant-a"
 }
 $wa = $channels.channels | Where-Object { $_.channelKey -eq "whatsapp" } | Select-Object -First 1
 if (-not $wa -or -not $wa.available) { throw "WHATSAPP_CHANNEL_READINESS failed: $($wa | ConvertTo-Json -Compress)" }
@@ -72,10 +72,10 @@ $failDouble = Start-Process node -ArgumentList "scripts/meta-whatsapp-provider-t
 Start-Sleep -Seconds 2
 $failKey = "whatsapp-failure-proof-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
 $issue = Invoke-RestMethod -Method POST -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/secure-access?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
-    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"
+    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisZentra-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"
 } -Body '{"ttlPolicy":"24h","scope":"read-only"}'
 $failEnqueue = Invoke-RestMethod -Method POST -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/deliveries?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
-    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"; "Idempotency-Key"=$failKey
+    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisZentra-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"; "Idempotency-Key"=$failKey
 } -Body (@{
     channel="whatsapp"; recipientKind="external"; maskedRecipient="+90 5** *** ** 99"; recipientE164="+905551112234"
     consentStatus="known"; secureAccessGrantId=$issue.grant.id; secureTaskUrl="$webBase/gorev#access=opaque"
@@ -135,7 +135,7 @@ Write-Host "=== REGRESSION ==="
 Push-Location $root
 dotnet build -v q
 if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
-dotnet test tests/NevaxisFactOS.Persistence.Tests --filter "FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test tests/NevaxisZentra.Persistence.Tests --filter "FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "tests failed" }
 node apps/web/scripts/verify-ai-task-whatsapp-business-adapter-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract failed" }
@@ -155,7 +155,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $WhatsAppClosureMigrationUser
 $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
 $env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
 Push-Location $root
-dotnet tool run dotnet-ef -- database update --project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --startup-project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --startup-project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --context NevaxisZentraDbContext
 if ($LASTEXITCODE -ne 0) { throw "pristine migration failed" }
 Pop-Location
 Write-Host "PRISTINE_DATABASE_MIGRATION=PASS"

@@ -22,7 +22,7 @@ function resolvePostgresContainer() {
   if (process.env.NEVAXIS_FACTOS_POSTGRES_CONTAINER) {
     return process.env.NEVAXIS_FACTOS_POSTGRES_CONTAINER;
   }
-  for (const name of ["NevaxisFactOS-local-postgres-1", "crevafactos-local-postgres-1", "nevaxisfactos-local-postgres-1"]) {
+  for (const name of ["NevaxisZentra-local-postgres-1", "crevafactos-local-postgres-1", "nevaxiszentra-local-postgres-1"]) {
     const result = spawnSync("docker", ["ps", "--filter", `name=${name}`, "--format", "{{.Names}}"], { encoding: "utf8" });
     const match = (result.stdout ?? "").trim().split(/\r?\n/).find(Boolean);
     if (match) return match;
@@ -44,7 +44,7 @@ function runDockerSql(container, sql, database = "postgres") {
 
 function runStaticRestoreProof() {
   const migration = readFileSync(
-    resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs"),
+    resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs"),
     "utf8",
   );
   assert(migration.includes("backup_verification_runs"), "backup verification table missing");
@@ -52,7 +52,7 @@ function runStaticRestoreProof() {
   checks.push("STATIC_RESTORE_SCHEMA_PROOF = PASS");
 
   const service = readFileSync(
-    resolve(ROOT, "packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs"),
+    resolve(ROOT, "packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs"),
     "utf8",
   );
   assert(service.includes("VerifyBackupAsync"), "backup verify service missing");

@@ -77,8 +77,8 @@ class CookieJar {
 async function api(method, path, body, jar) {
   const headers = { "Content-Type": "application/json", Accept: "application/json" };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -268,7 +268,7 @@ async function runBrowserVerification({
 
       await signInThroughForm(ownerPage, {
         organization: ORGANIZATION,
-        email: "admin@demo.nevaxisfactos.local",
+        email: "admin@demo.nevaxiszentra.local",
         password: ownerPassword,
       });
       await ownerPage.waitForURL("**/mfa-dogrula", { timeout: 30000 });
@@ -339,7 +339,7 @@ const maintenancePassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassw
 void machinePassword();
 void maintenancePassword;
 
-const ownerJar = await signIn("admin@demo.nevaxisfactos.local", ownerPassword, mfaSharedSecret);
+const ownerJar = await signIn("admin@demo.nevaxiszentra.local", ownerPassword, mfaSharedSecret);
 
 const activeRolesBefore = await api("GET", `/api/admin-access/members/${ACTIVE_MEMBER}/effective-access`, undefined, ownerJar);
 const rolesBeforeGrant = (activeRolesBefore.json?.roleReferences ?? []).filter((role) => role !== "tenant-admin");

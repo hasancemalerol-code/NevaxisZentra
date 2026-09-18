@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.AiTasks;
+namespace NevaxisZentra.Api.AiTasks;
 
 internal static class AiTaskEndpointHelpers
 {

@@ -22,15 +22,15 @@ const MANAGER = {
 };
 
 const PROFITABILITY_SOURCE_FILES = [
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityEvaluator.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityCostEvidenceReader.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityRepository.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityModels.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityEntities.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityEntityConfigurations.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityIdempotencyFingerprint.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityContracts.cs",
-  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityEvaluator.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityCostEvidenceReader.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityRepository.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityModels.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityEntities.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityEntityConfigurations.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityIdempotencyFingerprint.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityContracts.cs",
+  "packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs",
   "apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -192,7 +192,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -204,7 +204,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -415,10 +415,10 @@ function insertBoundaryCostBundle({
 
 console.log("Running COMMERCIAL-PROFITABILITY-1 domain-assessment verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityEvaluator.cs");
-const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialProfitabilityCostEvidenceReader.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityEvaluator.cs");
+const reader = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialProfitabilityCostEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
 
 assert("total included cost helper present", evaluator.includes("ComputeTotalIncludedUnitCost"));
 assert("unit contribution helper present", evaluator.includes("ComputeUnitContribution"));

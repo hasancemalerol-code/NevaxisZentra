@@ -83,7 +83,7 @@ async function ensureWebDevServer() {
 
   const child = spawn(
     "pnpm",
-    ["--filter", "@nevaxisfactos/web", "dev", "--", "-p", String(WEB_PORT)],
+    ["--filter", "@nevaxiszentra/web", "dev", "--", "-p", String(WEB_PORT)],
     {
       cwd: ROOT,
       env: { ...process.env, ...SSR_RUNTIME_ENV },
@@ -211,18 +211,18 @@ async function signIn(ss, ownerPassword, mfaSecret) {
     awaitPromise: true,
     returnByValue: true,
     expression: `(async () => {
-      const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+      const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
       const res = await fetch("/api/identity/sign-in", {
         method: "POST",
         credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-NevaxisFactOS-Csrf": csrf,
+          "X-NevaxisZentra-Csrf": csrf,
         },
         body: JSON.stringify({
           organizationContext: "dev-pilot-tenant",
-          email: "admin@demo.nevaxisfactos.local",
+          email: "admin@demo.nevaxiszentra.local",
           password: ${JSON.stringify(ownerPassword)},
         }),
       });
@@ -242,14 +242,14 @@ async function signIn(ss, ownerPassword, mfaSecret) {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
         const res = await fetch("/api/identity/mfa/verify", {
           method: "POST",
           credentials: "include",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
-            "X-NevaxisFactOS-Csrf": csrf,
+            "X-NevaxisZentra-Csrf": csrf,
           },
           body: JSON.stringify({ totpCode: ${JSON.stringify(code)} }),
         });
@@ -278,7 +278,7 @@ async function seedMixLineFromApi() {
         Accept: "application/json",
         "X-crevafactos-dev-Issuer": process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER,
         "X-crevafactos-dev-Subject": "production-pilot-operator",
-        "X-NevaxisFactOS-Tenant": process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY,
+        "X-NevaxisZentra-Tenant": process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY,
       },
     },
   );

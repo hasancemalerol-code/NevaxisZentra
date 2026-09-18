@@ -56,7 +56,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -160,12 +160,12 @@ async function identityRequest(method, path, body, jar = new CookieJar()) {
   if (cookieHeader) headers.Cookie = cookieHeader;
 
   if (
-    jar.get("NevaxisFactOS.session")
-    && jar.get("NevaxisFactOS.csrf")
+    jar.get("NevaxisZentra.session")
+    && jar.get("NevaxisZentra.csrf")
     && method !== "GET"
     && !["/api/identity/sign-in", "/api/identity/password/forgot", "/api/identity/password/reset", "/api/identity/email/verify", "/api/identity/invitations/accept"].includes(path)
   ) {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
 
   const response = await fetch(`${BASE}${path}`, {
@@ -266,7 +266,7 @@ function insertClosureAccountFixture(fixture, displayName, lifecycleStatus, incl
     INSERT INTO identity_subjects (id, external_issuer, external_subject, status, created_at_utc)
     VALUES (
       '${fixture.identitySubjectId}',
-      'NevaxisFactOS-saas',
+      'NevaxisZentra-saas',
       '${fixture.accountId}',
       'Active',
       '${now}'
@@ -403,9 +403,9 @@ function assertAuditPayloadsExcludeSecrets() {
 
 console.log("Running SAAS-IDENTITY-1 authentication verifier.");
 
-const constants = readRequired("packages/NevaxisFactOS.Persistence/SaasIdentity/SaasIdentityConstants.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/SaasIdentity/SaasIdentityConstants.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260814055239_AddSaasIdentityAccountAndSessionFoundation.cs",
 );
 
 assert("MaxFailedSignInAttempts = 5", constants.includes("public const int MaxFailedSignInAttempts = 5;"));
@@ -450,8 +450,8 @@ const validLogin = await identityRequest(
 );
 assert("valid normalized active-user login → 200", validLogin.status === 200, `status=${validLogin.status}`);
 assert("valid login does not require MFA", validLogin.json?.requiresMfa === false);
-assert("session cookie issued", Boolean(validLogin.jar.get("NevaxisFactOS.session")));
-assert("csrf cookie issued", Boolean(validLogin.jar.get("NevaxisFactOS.csrf")));
+assert("session cookie issued", Boolean(validLogin.jar.get("NevaxisZentra.session")));
+assert("csrf cookie issued", Boolean(validLogin.jar.get("NevaxisZentra.csrf")));
 
 const validMe = await identityRequest("GET", "/api/identity/me", null, validLogin.jar);
 assert("valid login /me → 200", validMe.status === 200, `status=${validMe.status}`);
@@ -530,7 +530,7 @@ const tenantOwnerPassword = process.env.DevelopmentSaasIdentity__TenantOwnerPass
 const pendingMfaLogin = await identityRequest(
   "POST",
   "/api/identity/sign-in",
-  signInBody("admin@demo.nevaxisfactos.local", tenantOwnerPassword),
+  signInBody("admin@demo.nevaxiszentra.local", tenantOwnerPassword),
 );
 assert("tenant-owner login → 200", pendingMfaLogin.status === 200, `status=${pendingMfaLogin.status}`);
 assert("tenant-owner login requires MFA", pendingMfaLogin.json?.requiresMfa === true);
@@ -562,7 +562,7 @@ assert("completed MFA /me mfaPending false", completedMe.json?.mfaPending === fa
 const invalidTotpLogin = await identityRequest(
   "POST",
   "/api/identity/sign-in",
-  signInBody("admin@demo.nevaxisfactos.local", tenantOwnerPassword),
+  signInBody("admin@demo.nevaxiszentra.local", tenantOwnerPassword),
 );
 assert("tenant-owner re-login for invalid TOTP → 200", invalidTotpLogin.status === 200);
 

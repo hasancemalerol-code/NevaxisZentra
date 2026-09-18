@@ -50,8 +50,8 @@ function Reclaim-ProjectPort([int]$Port, [string]$Kind) {
     $cmd = ""
     try { $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId=$ownerPid").CommandLine } catch {}
     $ok = $false
-    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $path -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
-    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
+    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisZentra.Api" -and $path -like "*\Projects\NevaxisZentra\*") { $ok = $true }
+    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisZentra\*") { $ok = $true }
     if ($Kind -eq "double" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*meta-whatsapp-provider-test-double*") { $ok = $true }
     if ($ok) {
         Write-Host "Reclaiming $Kind port $Port PID $ownerPid"

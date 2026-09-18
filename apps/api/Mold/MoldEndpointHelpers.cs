@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Mold;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Mold;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.Mold;
+namespace NevaxisZentra.Api.Mold;
 
 internal static class MoldEndpointHelpers
 {

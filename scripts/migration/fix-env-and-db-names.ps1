@@ -1,4 +1,4 @@
-# Fix incorrect CrevaFactOS -> NevaxisFactOS replacements in env keys and DB infrastructure names.
+# Fix incorrect CrevaFactOS -> NevaxisZentra replacements in env keys and DB infrastructure names.
 # CREVAFACTOS/crevafactos were corrupted because CrevaFactOS is a case-insensitive substring.
 
 [CmdletBinding()]

@@ -1,7 +1,7 @@
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.SaasIdentity;
 
-namespace NevaxisFactOS.Api.SaasIdentity;
+namespace NevaxisZentra.Api.SaasIdentity;
 
 internal static class SaasIdentityEndpointHelpers
 {

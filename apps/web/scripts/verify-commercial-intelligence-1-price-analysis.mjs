@@ -45,7 +45,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -57,7 +57,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -217,11 +217,11 @@ function insertBoundarySpreadObservations() {
 
 console.log("Running COMMERCIAL-INTELLIGENCE-1 price-analysis verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePurchasePriceEvaluator.cs");
-const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePriceEvidenceReader.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceSeed.cs");
-const ratioMigration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260824134830_RelaxCommercialPurchasePriceRatioUpperBounds.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligencePurchasePriceEvaluator.cs");
+const reader = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligencePriceEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialIntelligenceSeed.cs");
+const ratioMigration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260824134830_RelaxCommercialPurchasePriceRatioUpperBounds.cs");
 
 assert("median helper present", evaluator.includes("ComputeMedian"));
 assert("signed variance helper present", evaluator.includes("ComputeSignedVarianceRatio"));

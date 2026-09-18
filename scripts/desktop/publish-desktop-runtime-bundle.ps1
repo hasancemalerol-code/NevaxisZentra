@@ -1,10 +1,10 @@
-# NevaxisFactOS-DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1
-# Deterministic publisher for the NevaxisFactOS packaged sales-demo runtime bundle.
+# NevaxisZentra-DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1
+# Deterministic publisher for the NevaxisZentra packaged sales-demo runtime bundle.
 
 [CmdletBinding()]
 param(
     [string]$RepositoryRoot = "",
-    [string]$BundleName = "NevaxisFactOS-RC1",
+    [string]$BundleName = "NevaxisZentra-RC1",
     [string]$BundleRoot = "",
     [string]$PackagingWorkRoot = "",
     [switch]$SkipWebBuild,
@@ -25,12 +25,12 @@ $bundleRoot = if (-not [string]::IsNullOrWhiteSpace($BundleRoot)) {
 } else {
     Join-Path $RepositoryRoot "artifacts\desktop-runtime\$BundleName"
 }
-$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
-$apiProject = Join-Path $RepositoryRoot "apps\api\NevaxisFactOS.Api.csproj"
+$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj"
+$apiProject = Join-Path $RepositoryRoot "apps\api\NevaxisZentra.Api.csproj"
 $webDir = Join-Path $RepositoryRoot "apps\web"
 $packagingConfig = Join-Path $RepositoryRoot "apps\desktop\runtime-packaging\config"
-$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-NevaxisFactOS-app-icon.py"
-$migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisFactOS.Persistence.Migrations\Migrations"
+$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-NevaxisZentra-app-icon.py"
+$migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.Migrations\Migrations"
 $verifier = Join-Path $RepositoryRoot "apps\desktop\scripts\verify-desktop-runtime-packaging-and-sync-1.ps1"
 
 function Write-Step([string]$Message) {
@@ -94,9 +94,9 @@ if (-not $SkipWebBuild) {
     Write-Step "Web production build"
     Push-Location $RepositoryRoot
     try {
-        & pnpm --filter @nevaxisfactos/web typecheck
+        & pnpm --filter @nevaxiszentra/web typecheck
         if ($LASTEXITCODE -ne 0) { throw "Web typecheck failed." }
-        & pnpm --filter @nevaxisfactos/web build
+        & pnpm --filter @nevaxiszentra/web build
         if ($LASTEXITCODE -ne 0) { throw "Web build failed." }
     }
     finally {
@@ -138,12 +138,12 @@ if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 Write-Step "Copy config and migrations metadata"
 Copy-Item -Path (Join-Path $packagingConfig "*") -Destination (Join-Path $bundleRoot "config") -Force
 Set-Content -Path (Join-Path $bundleRoot "migrations\expected-schema-version.txt") -Value $latestMigration -Encoding UTF8
-Copy-Item -Path (Join-Path $RepositoryRoot "artifacts\database\NevaxisFactOS.idempotent.sql") -Destination (Join-Path $bundleRoot "migrations\NevaxisFactOS.idempotent.sql") -ErrorAction SilentlyContinue
+Copy-Item -Path (Join-Path $RepositoryRoot "artifacts\database\NevaxisZentra.idempotent.sql") -Destination (Join-Path $bundleRoot "migrations\NevaxisZentra.idempotent.sql") -ErrorAction SilentlyContinue
 
 $runtimeManifest = [ordered]@{
     productName = "crevafactos"
     runtimeVersion = $runtimeVersion
-    runtimeLabel = "NevaxisFactOS Sales Demo RC1"
+    runtimeLabel = "NevaxisZentra Sales Demo RC1"
     sourceCommit = $sourceCommit
     sourceBranch = $sourceBranch
     sourceDirty = $sourceDirty
@@ -171,7 +171,7 @@ $sourceManifest = [ordered]@{
     sourceDirty = $sourceDirty
     classifiedChanges = @{
         packagingRequired = @(
-            "apps/desktop/NevaxisFactOS.Desktop/Runtime/* packaged mode",
+            "apps/desktop/NevaxisZentra.Desktop/Runtime/* packaged mode",
             "scripts/desktop/publish-desktop-runtime-bundle.ps1",
             "apps/desktop/scripts/verify-desktop-runtime-packaging-and-sync-1.ps1"
         )
@@ -185,7 +185,7 @@ $sourceManifest = [ordered]@{
 $sourceManifest | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $bundleRoot "manifests\source-manifest.json") -Encoding UTF8
 
 $buildInfo = [ordered]@{
-    product = "NevaxisFactOS Sales Demo RC1"
+    product = "NevaxisZentra Sales Demo RC1"
     build = $runtimeVersion
     commit = $sourceCommit
     commitShort = $sourceCommit.Substring(0, 7)
@@ -216,16 +216,16 @@ Get-ChildItem $normalizedBundleRoot -Recurse -File |
 Set-Content -Path $checksumPath -Value $hashLines -Encoding UTF8
 
 Write-Step "Update packaged desktop shortcut"
-$desktopExe = Join-Path $bundleRoot "desktop\NevaxisFactOS.exe"
+$desktopExe = Join-Path $bundleRoot "desktop\NevaxisZentra.exe"
 if (-not (Test-Path $desktopExe)) {
     throw "Packaged desktop executable missing: $desktopExe"
 }
 $shell = New-Object -ComObject WScript.Shell
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisZentra.lnk"
 $shortcut = $shell.CreateShortcut($shortcutPath)
 $shortcut.TargetPath = $desktopExe
 $shortcut.WorkingDirectory = Split-Path $desktopExe -Parent
-$shortcut.Description = "NevaxisFactOS AI Factory Operations OS"
+$shortcut.Description = "NevaxisZentra AI Factory Operations OS"
 $shortcut.IconLocation = "$desktopExe,0"
 $shortcut.Save()
 $shortcut = $shell.CreateShortcut($shortcutPath)

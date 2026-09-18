@@ -9,8 +9,8 @@ const requiredPaths = [
   "apps/web/src/features/golden-demo-p2b/components/golden-demo-p2b-digital-factory-panel.tsx",
   "apps/web/src/features/golden-demo-p2b/server/golden-demo-p2b-api-client.ts",
   "apps/api/GoldenDemoP2B/GoldenDemoP2BEndpointRouteBuilderExtensions.cs",
-  "packages/NevaxisFactOS.Persistence/GoldenDemoP2B/GoldenDemoP2BEngines.cs",
-  "tests/NevaxisFactOS.Persistence.Tests/GoldenDemoP2BFoundationTests.cs",
+  "packages/NevaxisZentra.Persistence/GoldenDemoP2B/GoldenDemoP2BEngines.cs",
+  "tests/NevaxisZentra.Persistence.Tests/GoldenDemoP2BFoundationTests.cs",
 ];
 
 for (const relativePath of requiredPaths) {
@@ -29,7 +29,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 

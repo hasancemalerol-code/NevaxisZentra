@@ -1,14 +1,14 @@
-using NevaxisFactOS.Api.AiTasks;
-using NevaxisFactOS.Api.Erp;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Erp;
-using NevaxisFactOS.Persistence.Procurement;
+using NevaxisZentra.Api.AiTasks;
+using NevaxisZentra.Api.Erp;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Erp;
+using NevaxisZentra.Persistence.Procurement;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Procurement;
+namespace NevaxisZentra.Api.Procurement;
 
 internal static class ProcurementDeliveryRiskFollowUpEndpointRouteBuilderExtensions
 {

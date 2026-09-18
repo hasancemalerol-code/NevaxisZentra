@@ -36,65 +36,65 @@ console.log("Running production integration gate verifier.");
 
 // PRODUCTION-1L foundation
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionOrder.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/ProductionOrder.cs"),
   "TenantId",
   "PRODUCTION-1L order",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionOrderReadRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionOrderReadRepository.cs"),
   "ListAsync",
   "PRODUCTION-1L read repository",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionOrderWriteRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionOrderWriteRepository.cs"),
   "StartAsync",
   "PRODUCTION-1L write repository",
 );
 
 // PRODUCTION-2L quantities / scrap / operator
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionExecutionEntryRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionExecutionEntryRepository.cs"),
   "RecordGoodAsync",
   "PRODUCTION-2L quantities",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionOperatorRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionOperatorRepository.cs"),
   "AssignOperatorAsync",
   "PRODUCTION-2L operator",
 );
 
 // PRODUCTION-3L downtime / setup / cycles
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionOperationsRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionOperationsRepository.cs"),
   "StartDowntimeAsync",
   "PRODUCTION-3L downtime",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionCycleEntry.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/ProductionCycleEntry.cs"),
   "CycleDurationMilliseconds",
   "PRODUCTION-3L cycles",
 );
 
 // PRODUCTION-4L hardening
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/ProductionOrderWriteRepository.cs"),
   "ConcurrencyConflict",
   "PRODUCTION-4L concurrency",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionExceptionRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionExceptionRepository.cs"),
   "RaiseExceptionAsync",
   "PRODUCTION-4L exceptions",
 );
 
 // PRODUCTION-5L shift / resource / operator / handover
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionShiftRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionShiftRepository.cs"),
   "AssignShiftAsync",
   "PRODUCTION-5L shift",
 );
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Production/IProductionHandoverRepository.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Production/IProductionHandoverRepository.cs"),
   "CreateHandoverAsync",
   "PRODUCTION-5L handover",
 );

@@ -1,6 +1,6 @@
 # RPO / RTO — Enterprise Reliability (UM-9)
 
-Recovery objectives for NevaxisFactOS enterprise reliability capabilities.
+Recovery objectives for NevaxisZentra enterprise reliability capabilities.
 
 ## Definitions
 

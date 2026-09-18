@@ -1,4 +1,4 @@
-# Nevaxis FactOS — Manufacturing Roadmap (Current)
+# Nevaxis Zentra — Manufacturing Roadmap (Current)
 
 > **Status:** CURRENT ROADMAP  
 > **Effective:** 2026-09-16  
@@ -12,7 +12,7 @@ This document is the **canonical current roadmap** for manufacturing platform ph
 
 ## Product Direction
 
-Nevaxis FactOS is **not** an injection-only factory OS.
+Nevaxis Zentra is **not** an injection-only factory OS.
 
 ```
 GENERIC MANUFACTURING CORE

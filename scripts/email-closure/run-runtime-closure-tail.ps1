@@ -104,7 +104,7 @@ Get-Content (Join-Path $PSScriptRoot "seed-email-channel-config.sql") | docker e
 
 node (Join-Path $root "apps/web/scripts/verify-ai-task-email-delivery-adapter-1-runtime-flows.mjs") --phase=security-scan
 Push-Location $root
-dotnet test tests/NevaxisFactOS.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test tests/NevaxisZentra.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-contract.mjs
 $env:NEVAXIS_FACTOS_EMAIL_MIGRATION_VERIFY_DB = $EmailClosureDatabaseName
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-migration.mjs
@@ -118,7 +118,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $EmailClosureMigrationUser
 $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
 $env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
 $env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
-dotnet tool run dotnet-ef -- database update --project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --startup-project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --startup-project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --context NevaxisZentraDbContext
 Pop-Location
 Stop-ClosureRuntime
 Write-Host "EMAIL_RUNTIME_CLOSURE_TAIL=PASS"

@@ -37,7 +37,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -60,7 +60,7 @@ async function request(method, path, body, actor = ACTOR) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -124,7 +124,7 @@ function cleanupClosureFixtures() {
 console.log("Running MATERIAL-3 requirement/consumption verifier.");
 
 const ready = await fetch(`${BASE}/health/ready`);
-if (!ready.ok) fail("API not ready — start NevaxisFactOS.Api first");
+if (!ready.ok) fail("API not ready — start NevaxisZentra.Api first");
 assert("API ready", ready.ok);
 
 // Complete theoretical requirement via pilot PP profile

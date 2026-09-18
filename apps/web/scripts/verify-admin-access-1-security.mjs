@@ -35,7 +35,7 @@ function requireEnv(name) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -100,8 +100,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -169,12 +169,12 @@ const unauthorized = await api("GET", "/api/admin-access/roles", undefined, acti
 assert("unauthorized 403", unauthorized.status === 403, `status=${unauthorized.status}`);
 
 const owner = await signIn(
-  "admin@demo.nevaxisfactos.local",
+  "admin@demo.nevaxiszentra.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );
 
-const pending = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+const pending = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
 const mfaRequired = await api("POST", "/api/admin-access/roles", {
   roleKey: "adminaccess1-closure-mfa",
   displayName: "MFA blocked",
@@ -190,7 +190,7 @@ const untrustedTenantHeader = await api(
   "/api/admin-access/roles",
   undefined,
   owner.jar,
-  { "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot" },
+  { "X-NevaxisZentra-Tenant": "other-tenant-not-pilot" },
 );
 assert("untrusted tenant header rejected", untrustedTenantHeader.status === 403, `status=${untrustedTenantHeader.status}`);
 

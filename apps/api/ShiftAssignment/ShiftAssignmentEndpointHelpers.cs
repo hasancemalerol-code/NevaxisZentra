@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.ShiftAssignment;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.ShiftAssignment;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.ShiftAssignment;
+namespace NevaxisZentra.Api.ShiftAssignment;
 
 internal static class ShiftAssignmentEndpointHelpers
 {

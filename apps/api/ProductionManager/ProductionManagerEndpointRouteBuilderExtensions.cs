@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ProductionManager;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ProductionManager;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ProductionManager;
+namespace NevaxisZentra.Api.ProductionManager;
 
 public static class ProductionManagerEndpointRouteBuilderExtensions
 {
@@ -23,7 +23,7 @@ public static class ProductionManagerEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSProductionManager(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraProductionManager(this IServiceCollection services)
     {
         services.AddScoped<IProductionManagerRepository, ProductionManagerRepository>();
         services.AddScoped<IProductionManagerService, ProductionManagerService>();

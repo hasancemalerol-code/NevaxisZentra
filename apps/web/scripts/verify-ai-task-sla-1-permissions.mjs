@@ -33,7 +33,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -84,9 +84,9 @@ function sampleCreateBody(overrides = {}) {
 console.log("Running AI-TASK-SLA-1 permissions verifier.");
 
 const operationsEndpoints = readRequired("apps/api/AiTasks/AiTaskOperationsEndpointRouteBuilderExtensions.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/AiTasks/AiTaskPermissionKeys.cs");
 const actions = readRequired("apps/web/src/features/ai-task-center/server/ai-task-actions.ts");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260902125759_AddAiTaskSlaAssignmentEscalationFoundation.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260902125759_AddAiTaskSlaAssignmentEscalationFoundation.cs");
 
 assert("assign permission key", permissions.includes("ai-task.assign"));
 assert("acknowledge permission key", permissions.includes("ai-task.acknowledge"));

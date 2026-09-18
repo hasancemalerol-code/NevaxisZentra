@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ContextKnowledge;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ContextKnowledge;
 
-namespace NevaxisFactOS.Api.ContextKnowledge;
+namespace NevaxisZentra.Api.ContextKnowledge;
 
 public static class ContextKnowledgeEndpointRouteBuilderExtensions
 {
@@ -22,7 +22,7 @@ public static class ContextKnowledgeEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSContextKnowledge(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraContextKnowledge(this IServiceCollection services)
     {
         services.AddScoped<IContextKnowledgeService, ContextKnowledgeService>();
         return services;

@@ -75,7 +75,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           organizationContext,
           email,
           password,
-          deviceLabel: "NevaxisFactOS-web",
+          deviceLabel: "NevaxisZentra-web",
         }),
         cache: "no-store",
       },

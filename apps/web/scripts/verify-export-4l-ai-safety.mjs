@@ -62,7 +62,7 @@ const FORBIDDEN_ACTIONS = [
 
 const enums = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/Export4LEnums.cs",
+  "packages/NevaxisZentra.Persistence/Export/Export4LEnums.cs",
 );
 requireText(enums, "ExportAiProposedActionType", "Export4LEnums");
 requireText(enums, "RequestHumanReview", "Export4LEnums");
@@ -73,7 +73,7 @@ for (const forbidden of FORBIDDEN_ACTIONS) {
 
 const actionConfig = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Configurations/ExportAiRecommendationEntityConfiguration.cs",
+  "packages/NevaxisZentra.Persistence/Configurations/ExportAiRecommendationEntityConfiguration.cs",
 );
 for (const forbidden of FORBIDDEN_ACTIONS) {
   forbidText(actionConfig, forbidden, "ExportAiRecommendationEntityConfiguration");
@@ -91,7 +91,7 @@ forbidText(endpoints, "ShipmentManage", "Export 4L endpoints");
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportAiWriteRepository.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportAiWriteRepository.cs",
 );
 forbidText(writeRepo, "ExportComplianceWriteRepository", "ExportAiWriteRepository");
 forbidText(writeRepo, "ExportShipmentWriteRepository", "ExportAiWriteRepository");
@@ -104,7 +104,7 @@ requireText(writeRepo, "HumanReviewRequired", "ExportAiWriteRepository");
 
 const provider = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/DeterministicExportAiProvider.cs",
+  "packages/NevaxisZentra.Persistence/Export/DeterministicExportAiProvider.cs",
 );
 requireText(provider, "RequestHumanReview", "DeterministicExportAiProvider");
 requireText(provider, "true, true", "DeterministicExportAiProvider");
@@ -117,7 +117,7 @@ forbidText(provider, "ErpWriteback", "DeterministicExportAiProvider");
 
 const providerInterface = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/IExportAiProvider.cs",
+  "packages/NevaxisZentra.Persistence/Export/IExportAiProvider.cs",
 );
 requireText(providerInterface, "AnalyzeExportCaseAsync", "IExportAiProvider");
 requireText(providerInterface, "ExplainComplianceAsync", "IExportAiProvider");

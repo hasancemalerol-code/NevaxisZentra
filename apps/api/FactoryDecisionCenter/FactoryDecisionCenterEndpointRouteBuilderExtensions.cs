@@ -1,15 +1,15 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.DigitalWorkforce;
-using NevaxisFactOS.Persistence.FactoryDecisionCenter;
-using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
-using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.DigitalWorkforce;
+using NevaxisZentra.Persistence.FactoryDecisionCenter;
+using NevaxisZentra.Persistence.FactoryOutcomeExecution;
+using NevaxisZentra.Persistence.FactoryRecoveryIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-using NevaxisFactOS.Persistence;
+using NevaxisZentra.Persistence;
 
-namespace NevaxisFactOS.Api.FactoryDecisionCenter;
+namespace NevaxisZentra.Api.FactoryDecisionCenter;
 
 public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
 {
@@ -30,7 +30,7 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSFactoryDecisionCenter(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraFactoryDecisionCenter(this IServiceCollection services)
     {
         services.AddScoped<IFactoryDecisionCenterRepository, FactoryDecisionCenterRepository>();
         services.AddScoped<IFactoryDecisionCenterAiTaskSyncService, FactoryDecisionCenterAiTaskSyncService>();
@@ -208,7 +208,7 @@ public static class FactoryDecisionCenterEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IAuthorizationContext authorizationContext,
-        NevaxisFactOSDbContext dbContext,
+        NevaxisZentraDbContext dbContext,
         IHostEnvironment environment,
         CancellationToken cancellationToken)
     {

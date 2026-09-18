@@ -34,7 +34,7 @@ function New-DesktopProductCode {
 
     $md5 = [System.Security.Cryptography.MD5]::Create()
     try {
-        $hash = $md5.ComputeHash([System.Text.Encoding]::UTF8.GetBytes("NevaxisFactOS-Desktop-$Version"))
+        $hash = $md5.ComputeHash([System.Text.Encoding]::UTF8.GetBytes("NevaxisZentra-Desktop-$Version"))
     }
     finally {
         $md5.Dispose()

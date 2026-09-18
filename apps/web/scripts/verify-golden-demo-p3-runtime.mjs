@@ -11,10 +11,10 @@ const OPERATOR = "production-pilot-operator";
 const TENANT = "dev-pilot-tenant";
 
 for (const relativePath of [
-  "packages/NevaxisFactOS.Persistence/GoldenDemoP3/GoldenDemoP3Engines.cs",
+  "packages/NevaxisZentra.Persistence/GoldenDemoP3/GoldenDemoP3Engines.cs",
   "apps/api/GoldenDemoP3/GoldenDemoP3EndpointRouteBuilderExtensions.cs",
   "apps/web/src/features/golden-demo-p3/components/golden-demo-p3-outcome-panel.tsx",
-  "tests/NevaxisFactOS.Persistence.Tests/GoldenDemoP3FoundationTests.cs",
+  "tests/NevaxisZentra.Persistence.Tests/GoldenDemoP3FoundationTests.cs",
 ]) {
   readFileSync(resolve(ROOT, relativePath), "utf8");
 }
@@ -25,7 +25,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 

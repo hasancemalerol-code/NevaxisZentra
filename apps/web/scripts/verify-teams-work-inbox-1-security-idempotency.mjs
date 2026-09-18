@@ -32,7 +32,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -51,9 +51,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(OWNER)) {
 console.log("Running TEAMS-WORK-INBOX-1 security verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsWorkInboxEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsWorkInboxRepository.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsConstants.cs");
 
 assert("inbox route", endpoints.includes("/api/teams/work-inbox"));
 assert("read resolver", endpoints.includes("ResolveReadAccessAsync"));

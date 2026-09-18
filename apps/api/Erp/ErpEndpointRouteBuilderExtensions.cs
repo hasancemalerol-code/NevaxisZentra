@@ -1,14 +1,14 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Erp;
-using NevaxisFactOS.Persistence.Erp.Logo;
-using NevaxisFactOS.Persistence.Erp.Mikro;
-using NevaxisFactOS.Persistence.Erp.Netsis;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Erp;
+using NevaxisZentra.Persistence.Erp.Logo;
+using NevaxisZentra.Persistence.Erp.Mikro;
+using NevaxisZentra.Persistence.Erp.Netsis;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.Erp;
+namespace NevaxisZentra.Api.Erp;
 
 public static class ErpEndpointRouteBuilderExtensions
 {
@@ -72,7 +72,7 @@ public static class ErpEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSErp(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraErp(this IServiceCollection services)
     {
         services.AddSingleton<LogoReadTransportOptions>();
         services.AddSingleton<LogoReadTransportTestFixture>();
@@ -103,7 +103,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpConnectionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpConnectionRepository()
                 : new ErpConnectionRepository(
@@ -114,7 +114,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpInventoryRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpInventoryRepository()
                 : new ErpInventoryRepository(
@@ -125,7 +125,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpSyncRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpSyncRepository()
                 : new ErpSyncRepository(
@@ -136,7 +136,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpMappingRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpMappingRepository()
                 : new ErpMappingRepository(
@@ -146,7 +146,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpProductionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpProductionRepository()
                 : new ErpProductionRepository(
@@ -157,7 +157,7 @@ public static class ErpEndpointRouteBuilderExtensions
 
         services.AddScoped<IErpWritebackRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableErpWritebackRepository()
                 : new ErpWritebackRepository(

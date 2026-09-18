@@ -1,8 +1,8 @@
 <Project>
   <!-- Canonical desktop distribution identity. UpgradeCode must remain stable across releases. -->
   <PropertyGroup>
-    <DesktopDistributionProductName>NevaxisFactOS</DesktopDistributionProductName>
-    <DesktopDistributionPublisher>NevaxisFactOS</DesktopDistributionPublisher>
+    <DesktopDistributionProductName>Nevaxis Zentra</DesktopDistributionProductName>
+    <DesktopDistributionPublisher>Nevaxis</DesktopDistributionPublisher>
     <DesktopDistributionUpgradeCode>{8C4E2F91-6D3A-4B17-9E2C-1A5F00000001}</DesktopDistributionUpgradeCode>
     <DesktopDistributionArchitecture>x64</DesktopDistributionArchitecture>
     <DesktopDistributionTargetFramework>net10.0-windows</DesktopDistributionTargetFramework>

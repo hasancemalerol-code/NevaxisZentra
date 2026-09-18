@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.RealFactoryPilot;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.RealFactoryPilot;
 
-namespace NevaxisFactOS.Api.RealFactoryPilot;
+namespace NevaxisZentra.Api.RealFactoryPilot;
 
 public static class RealFactoryPilotEndpointRouteBuilderExtensions
 {
@@ -17,7 +17,7 @@ public static class RealFactoryPilotEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSRealFactoryPilot(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraRealFactoryPilot(this IServiceCollection services)
     {
         services.AddScoped<IRealFactoryPilotService, RealFactoryPilotService>();
         return services;

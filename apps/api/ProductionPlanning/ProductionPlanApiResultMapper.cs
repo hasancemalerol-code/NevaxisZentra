@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ProductionPlanning;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ProductionPlanning;
 
-namespace NevaxisFactOS.Api.ProductionPlanning;
+namespace NevaxisZentra.Api.ProductionPlanning;
 
 public static class ProductionPlanApiResultMapper
 {

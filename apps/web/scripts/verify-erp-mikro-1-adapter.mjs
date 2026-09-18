@@ -45,7 +45,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -68,14 +68,14 @@ async function api(method, path, body) {
 
 console.log("Running ERP-MIKRO-1 adapter verifier.");
 
-const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
-const mikroTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/IMikroReadTransport.cs");
-const mikroFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
-const mikroMapper = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroSourceRecords.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
-const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
+const mikroAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroTransport = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/IMikroReadTransport.cs");
+const mikroFixture = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroReadTransportTestFixture.cs");
+const mikroMapper = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroSourceRecords.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
+const syncRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpSyncRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
 
 requireText(mikroAdapter, "class MikroErpAdapter", "MikroErpAdapter");
 forbidText(adapters, "class MikroErpAdapterPlaceholder", "placeholder removed");
@@ -91,7 +91,7 @@ requireText(mikroMapper, "MikroProductMapper", "product mapping");
 requireText(mikroMapper, "ErpExternalCustomerRecord", "canonical customer mapping");
 requireText(mikroMapper, "ErpExternalProductRecord", "canonical product mapping");
 requireText(mikroTransport, "MikroReadPageRequest", "pagination request");
-const mikroReadPage = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroReadPage.cs");
+const mikroReadPage = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroReadPage.cs");
 requireText(mikroReadPage, "ContinuationToken", "pagination cursor");
 requireText(mikroAdapter, "CancelAfter", "timeout support");
 requireText(mikroAdapter, "CancellationToken", "cancellation support");

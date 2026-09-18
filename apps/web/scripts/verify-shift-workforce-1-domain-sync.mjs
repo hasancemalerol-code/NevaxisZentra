@@ -38,7 +38,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -50,7 +50,7 @@ function headers(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -146,9 +146,9 @@ function competencyBody(idempotencyKey, overrides = {}) {
 
 console.log("Running SHIFT-WORKFORCE-1 domain/sync verifier.");
 
-const synchronizer = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/ShiftWorkforceSourceSynchronizer.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/ShiftWorkforceRepository.cs");
-const provider = readRequired("packages/NevaxisFactOS.Persistence/ShiftWorkforce/LocalDevelopmentWorkforceSourceProvider.cs");
+const synchronizer = readRequired("packages/NevaxisZentra.Persistence/ShiftWorkforce/ShiftWorkforceSourceSynchronizer.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/ShiftWorkforce/ShiftWorkforceRepository.cs");
+const provider = readRequired("packages/NevaxisZentra.Persistence/ShiftWorkforce/LocalDevelopmentWorkforceSourceProvider.cs");
 
 assert("source synchronizer ApplyErpOwnedFields", synchronizer.includes("ApplyErpOwnedFields"));
 assert("sync preserves competencies comment", synchronizer.includes("SourceFingerprint"));

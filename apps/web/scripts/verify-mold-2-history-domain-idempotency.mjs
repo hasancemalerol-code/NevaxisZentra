@@ -25,7 +25,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -144,7 +144,7 @@ const closureMoldId = await createMold(closureCode);
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -258,7 +258,7 @@ const negativeTrial = await request("POST", `/api/molds/${closureMoldId}/trial-h
 assert("negative trial numeric rejected", negativeTrial.status === 400, String(negativeTrial.status));
 
 const repoSource = readFileSync(
-  resolve(ROOT, "packages/NevaxisFactOS.Persistence/Mold/MoldHistoryRepository.cs"),
+  resolve(ROOT, "packages/NevaxisZentra.Persistence/Mold/MoldHistoryRepository.cs"),
   "utf8",
 );
 assert("bounded pagination clamp contract", repoSource.includes("Math.Clamp(filters.PageSize, 1, 100)"));

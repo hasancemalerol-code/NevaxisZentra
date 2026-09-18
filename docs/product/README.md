@@ -1,8 +1,8 @@
-# NevaxisFactOS Product Documentation
+# NevaxisZentra Product Documentation
 
-This directory contains the locked product boundary for NevaxisFactOS, an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing.
+This directory contains the locked product boundary for NevaxisZentra, an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing.
 
-NevaxisFactOS is not a replacement ERP. Existing ERP and related systems remain authoritative for classic enterprise records; NevaxisFactOS converts permitted data into operational plans, risks, tasks, approvals, and audited actions.
+NevaxisZentra is not a replacement ERP. Existing ERP and related systems remain authoritative for classic enterprise records; NevaxisZentra converts permitted data into operational plans, risks, tasks, approvals, and audited actions.
 
 ## Authoritative Documents
 
@@ -19,10 +19,10 @@ ADR-011 defines the corresponding architecture-level product boundary and data-o
 
 ## Locked Principles
 
-- Production planning and shift planning are native NevaxisFactOS capabilities.
+- Production planning and shift planning are native NevaxisZentra capabilities.
 - Machine intelligence, mold lifecycle, maintenance, quality, and operational risk remain native.
 - AI Task Center is authoritative for tasks and approvals.
-- NevaxisFactOS Teams is the internal communication and routing application; it uses the same authoritative records as Web.
+- NevaxisZentra Teams is the internal communication and routing application; it uses the same authoritative records as Web.
 - Critical actions require Human-in-the-Loop approval.
 - ERP access is read-only-first; write-back is permission-bound, approval-bound, revalidated, idempotent, and audited.
 - Machine safety remains local and unrestricted machine writes are prohibited.

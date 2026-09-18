@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.CommercialIntelligence;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.CommercialIntelligence;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.CommercialIntelligence;
+namespace NevaxisZentra.Api.CommercialIntelligence;
 
 internal static class CommercialIntelligenceEndpointRouteBuilderExtensions
 {
@@ -471,11 +471,11 @@ public sealed record EvaluateCommercialPurchasePriceComparisonRequest(
 
 public static class CommercialIntelligenceServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSCommercialIntelligence(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraCommercialIntelligence(this IServiceCollection services)
     {
         services.AddScoped<ICommercialIntelligenceRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableCommercialIntelligenceRepository()
                 : new CommercialIntelligenceRepository(

@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Api.PresentationMode;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Api.PresentationMode;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoCustomsFile;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.GoldenDemoCustomsFile;
+namespace NevaxisZentra.Api.GoldenDemoCustomsFile;
 
 internal static class GoldenDemoCustomsFileEndpointHelpers
 {

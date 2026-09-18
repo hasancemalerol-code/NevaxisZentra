@@ -154,7 +154,7 @@ export function GoldenDemoP1WorkspaceView({
             {workspace.event.machineCode} · Aktif Vardiya
           </p>
           <p className="golden-demo-hero__copy">
-            FactOS mevcut üretim davranışını analiz ederek vardiya hedefinin üzerinde doğrulanabilir
+            Zentra mevcut üretim davranışını analiz ederek vardiya hedefinin üzerinde doğrulanabilir
             üretim fırsatı tespit etti.
           </p>
         </div>

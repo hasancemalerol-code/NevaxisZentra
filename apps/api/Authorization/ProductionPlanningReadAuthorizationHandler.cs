@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
-namespace NevaxisFactOS.Api.Authorization;
+namespace NevaxisZentra.Api.Authorization;
 
 public sealed class ProductionPlanningReadAuthorizationHandler(
     IFacilityAccessResolver facilityAccessResolver)

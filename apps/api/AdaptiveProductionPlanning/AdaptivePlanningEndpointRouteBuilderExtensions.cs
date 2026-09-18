@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
-using NevaxisFactOS.Persistence.Authorization;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AdaptiveProductionPlanning;
+using NevaxisZentra.Persistence.Authorization;
 
-namespace NevaxisFactOS.Api.AdaptiveProductionPlanning;
+namespace NevaxisZentra.Api.AdaptiveProductionPlanning;
 
 public static class AdaptivePlanningEndpointRouteBuilderExtensions
 {
@@ -24,7 +24,7 @@ public static class AdaptivePlanningEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSAdaptivePlanning(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraAdaptivePlanning(this IServiceCollection services)
     {
         services.AddScoped<IAdaptivePlanningRepository, AdaptivePlanningRepository>();
         services.AddScoped<IAdaptivePlanningService, AdaptivePlanningService>();

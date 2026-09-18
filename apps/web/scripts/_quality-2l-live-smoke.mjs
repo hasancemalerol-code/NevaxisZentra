@@ -30,7 +30,7 @@ const h = (subject = OPERATOR, extra = {}) => ({
   "Content-Type": "application/json",
   "X-crevafactos-dev-Issuer": ISSUER,
   "X-crevafactos-dev-Subject": subject,
-  "X-NevaxisFactOS-Tenant": TENANT,
+  "X-NevaxisZentra-Tenant": TENANT,
   ...extra,
 });
 const q = (path, facility = FACILITY) =>

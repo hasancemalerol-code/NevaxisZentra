@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.FactoryDecisionCenter;
-using NevaxisFactOS.Persistence.FactoryRecoveryIntelligence;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.FactoryDecisionCenter;
+using NevaxisZentra.Persistence.FactoryRecoveryIntelligence;
 
-namespace NevaxisFactOS.Api.FactoryDecisionCenter;
+namespace NevaxisZentra.Api.FactoryDecisionCenter;
 
 internal static class FactoryDecisionCenterEndpointHelpers
 {

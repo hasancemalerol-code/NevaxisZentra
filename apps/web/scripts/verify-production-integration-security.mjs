@@ -41,7 +41,7 @@ const reportingEndpoints = readRequired(
   "apps/api/Production/ProductionReportingEndpointRouteBuilderExtensions.cs",
 );
 const writeRepository = readRequired(
-  "packages/NevaxisFactOS.Persistence/Production/ProductionOrderWriteRepository.cs",
+  "packages/NevaxisZentra.Persistence/Production/ProductionOrderWriteRepository.cs",
 );
 
 // Authorization on all Production routes

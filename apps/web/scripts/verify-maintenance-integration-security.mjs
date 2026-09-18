@@ -47,7 +47,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -72,15 +72,15 @@ const reportingEndpoints = readRequired(
 );
 const helpers = readRequired("apps/api/Maintenance/MaintenanceEndpointHelpers.cs");
 const migrationCore = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809170000_AddMaintenanceWorkOrderCore.cs",
 );
 const migrationExec = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
 );
-const auditConstants = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAuditConstants.cs");
-const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
-const workOrderRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
-const executionRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
+const auditConstants = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAuditConstants.cs");
+const requestRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const workOrderRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const executionRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
 
 requireText(endpoints, "RequireAuthorization", "maintenance endpoints");
 requireText(helpers, "MaintenancePermissionKeys.Read", "helpers");
@@ -172,7 +172,7 @@ try {
     `/api/maintenance/requests?facilityId=${AUTHORIZED_FACILITY}`,
     undefined,
     OPERATOR,
-    { "X-NevaxisFactOS-Tenant": "other-tenant" },
+    { "X-NevaxisZentra-Tenant": "other-tenant" },
   );
   if (crossTenantRequest !== 403) {
     fail(`cross-tenant request read must return HTTP 403, got ${crossTenantRequest}.`);
@@ -183,7 +183,7 @@ try {
     `/api/maintenance/reporting/overview?facilityId=${AUTHORIZED_FACILITY}`,
     undefined,
     OPERATOR,
-    { "X-NevaxisFactOS-Tenant": "other-tenant" },
+    { "X-NevaxisZentra-Tenant": "other-tenant" },
   );
   if (crossTenantReporting !== 403) {
     fail(`cross-tenant reporting read must return HTTP 403, got ${crossTenantReporting}.`);

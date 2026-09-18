@@ -46,7 +46,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -104,11 +104,11 @@ function expectedSimulatorReceipt(writebackId) {
 
 console.log("Running ERP-4L writeback HITL verifier.");
 
-const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const writebackAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpWritebackAdapter.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const writebackRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpWritebackRepository.cs");
+const writebackAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/IErpWritebackAdapter.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
 
 requireText(writebackRepo, "ResolveExecutionBlock", "writeback execution guard");
 requireText(writebackRepo, "WritebackNotApproved", "writeback not-approved guard");

@@ -1,4 +1,4 @@
-# NevaxisFactOS Logging ve Gözlemlenebilirlik Standartları
+# NevaxisZentra Logging ve Gözlemlenebilirlik Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS uygulamalarında loglama, metrik, tracing, health check, alarm ve operasyonel gözlemlenebilirlik standartlarını tanımlar.
+Bu belge NevaxisZentra uygulamalarında loglama, metrik, tracing, health check, alarm ve operasyonel gözlemlenebilirlik standartlarını tanımlar.
 
 
 

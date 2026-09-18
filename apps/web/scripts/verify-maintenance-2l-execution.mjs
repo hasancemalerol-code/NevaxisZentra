@@ -38,16 +38,16 @@ const executionEndpoints = readRequired(
   "apps/api/Maintenance/MaintenanceExecutionEndpointRouteBuilderExtensions.cs",
 );
 const executionRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceExecutionRepository.cs",
 );
 const dueCalculator = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceDueDateCalculator.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceDueDateCalculator.cs",
 );
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809180000_AddMaintenanceExecutionAndPreventiveScheduling.cs",
 );
 const workOrderRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs",
 );
 const executionPanels = readRequired(
   "apps/web/src/features/maintenance/components/maintenance-work-order-execution-panels.tsx",

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ThroughputOptimizer;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ThroughputOptimizer;
 
-namespace NevaxisFactOS.Api.ThroughputOptimizer;
+namespace NevaxisZentra.Api.ThroughputOptimizer;
 
 public static class ThroughputOptimizerEndpointRouteBuilderExtensions
 {
@@ -19,7 +19,7 @@ public static class ThroughputOptimizerEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSThroughputOptimizer(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraThroughputOptimizer(this IServiceCollection services)
     {
         services.AddScoped<IThroughputOptimizerService, ThroughputOptimizerService>();
         return services;

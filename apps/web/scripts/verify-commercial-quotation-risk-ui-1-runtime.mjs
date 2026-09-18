@@ -60,12 +60,12 @@ function applyDevelopmentIdentityEnvFromText(text, key) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__COMMQUOTE_UI1_RUNTIME_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -113,7 +113,7 @@ function resolveChromiumExecutable() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }
@@ -167,8 +167,8 @@ async function authHeaders(context) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
   if (cookieHeader) headers.Cookie = cookieHeader;
-  const csrf = cookies.find((cookie) => cookie.name === "NevaxisFactOS.csrf");
-  if (csrf?.value) headers["X-NevaxisFactOS-Csrf"] = csrf.value;
+  const csrf = cookies.find((cookie) => cookie.name === "NevaxisZentra.csrf");
+  if (csrf?.value) headers["X-NevaxisZentra-Csrf"] = csrf.value;
   return headers;
 }
 
@@ -276,7 +276,7 @@ try {
   page.on("console", (msg) => { if (msg.type() === "error") report.consoleErrors.push(msg.text()); });
   page.on("pageerror", (error) => report.consoleErrors.push(error.message));
 
-  await signInPersona(page, "admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
+  await signInPersona(page, "admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
 
   const workspaceApi = await apiJson(context, "GET", `/api/commercial-intelligence/quotation-risks/workspace?facilityId=${FACILITY}`);
   assert("workspace API 200", workspaceApi.status === 200, String(workspaceApi.status));

@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Authentication;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.SaasCommercial;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Authentication;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.SaasCommercial;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.SaasCommercial;
+namespace NevaxisZentra.Api.SaasCommercial;
 
 internal static class SaasCommercialEndpointHelpers
 {

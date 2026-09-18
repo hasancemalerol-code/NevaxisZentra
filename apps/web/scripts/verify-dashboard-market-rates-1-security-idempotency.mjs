@@ -28,7 +28,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -48,8 +48,8 @@ console.log("Running DASHBOARD-MARKET-RATES-1 security verifier.");
 
 const endpoints = readRequired("apps/api/MarketRates/MarketRatesEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/MarketRates/MarketRatesEndpointHelpers.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260830163108_AddMarketRatesFoundation.cs");
-const synchronizer = readRequired("packages/NevaxisFactOS.Persistence/MarketRates/MarketRateSourceSynchronizer.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260830163108_AddMarketRatesFoundation.cs");
+const synchronizer = readRequired("packages/NevaxisZentra.Persistence/MarketRates/MarketRateSourceSynchronizer.cs");
 const openProvider = readRequired("apps/api/MarketRates/OpenExchangeRatesExchangeRateProvider.cs");
 
 assert("market rates route family", endpoints.includes("/api/dashboard/market-rates"));

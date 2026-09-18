@@ -40,7 +40,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -52,7 +52,7 @@ function actorHeaders(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -77,9 +77,9 @@ function removeClosureFixtures() {
 
 console.log("Running IOT-PLC-1 domain/ingestion verifier.");
 
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIotPlcSeed.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcConstants.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcRepository.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIotPlcSeed.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/IotPlc/IotPlcConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/IotPlc/IotPlcRepository.cs");
 const endpoints = readRequired("apps/api/IotPlc/IotPlcEndpointRouteBuilderExtensions.cs");
 
 assert("seed references INJ-001 machine", seed.includes("EdgePilotPressMachineId"));

@@ -1,4 +1,4 @@
-# NevaxisFactOS Core Product Capabilities
+# NevaxisZentra Core Product Capabilities
 
 - Status: Locked
 - Date: 2026-08-04
@@ -7,13 +7,13 @@
 
 ## Product Boundary
 
-NevaxisFactOS consumes permitted data from existing ERP, HR, communication, machine, and factory systems and turns it into operational plans, risks, tasks, approvals, and audited actions.
+NevaxisZentra consumes permitted data from existing ERP, HR, communication, machine, and factory systems and turns it into operational plans, risks, tasks, approvals, and audited actions.
 
 It does not own accounting, finance, receivables/payables, official stock ledger, invoicing, payroll, classic purchasing records, or official customer, supplier, and personnel master records where another system is authoritative.
 
 ## 1. Omnichannel Order Intake and AI Drafts
 
-NevaxisFactOS can ingest requests from email, WhatsApp Business Platform, Web forms, customer portals, sales messages, Excel/CSV, PDF, images, scanned documents, and entered call notes.
+NevaxisZentra can ingest requests from email, WhatsApp Business Platform, Web forms, customer portals, sales messages, Excel/CSV, PDF, images, scanned documents, and entered call notes.
 
 AI extracts customer reference, product, quantity, due date, material, color, mold, packaging, technical requirements, attachments, and uncertainty. The result is an approval-ready draft, never an automatically final official order. Missing information is explicit and external records remain linked by source identity.
 
@@ -29,7 +29,7 @@ The summary combines planned versus actual production, delayed work, critical ma
 
 ## 4. Production Planning
 
-Production planning is a native NevaxisFactOS capability. It evaluates demand priority and due date, machine/mold compatibility, cavity and cycle data, setup and changeover, material availability, maintenance, shift capacity, operator skills, quality risk, and external operations.
+Production planning is a native NevaxisZentra capability. It evaluates demand priority and due date, machine/mold compatibility, cavity and cycle data, setup and changeover, material availability, maintenance, shift capacity, operator skills, quality risk, and external operations.
 
 Plans may present alternatives such as lowest delay, setup, energy, mold changes, overtime, or risk. Each version records assumptions, evidence, freshness, constraints, expected effect, confidence, and approval state.
 
@@ -41,11 +41,11 @@ Reliability reflects source freshness, machine and mold availability, material s
 
 Shift planning is a native locked capability. It combines production plans with availability, skills, certificates, absence, facility scope, maintenance and quality duties, workload, and overtime risk.
 
-NevaxisFactOS owns operational shift scenarios and approved shift plans. HR/ERP remains authoritative for official personnel, payroll, and leave-accounting records. Publishing a shift plan follows Human-in-the-Loop rules.
+NevaxisZentra owns operational shift scenarios and approved shift plans. HR/ERP remains authoritative for official personnel, payroll, and leave-accounting records. Publishing a shift plan follows Human-in-the-Loop rules.
 
 ## 7. Machine Intelligence
 
-Edge Agent and supported integrations provide operational status, counters, cycle times, alarms, downtime, temperature, pressure, energy, and process deviations. NevaxisFactOS analyzes performance, capacity, anomaly, and maintenance impact while local machine control and safety remain authoritative.
+Edge Agent and supported integrations provide operational status, counters, cycle times, alarms, downtime, temperature, pressure, energy, and process deviations. NevaxisZentra analyzes performance, capacity, anomaly, and maintenance impact while local machine control and safety remain authoritative.
 
 ## 8. Machine–Mold Compatibility
 
@@ -53,7 +53,7 @@ Compatibility evaluates tonnage, mold dimensions and weight, tie-bar spacing, in
 
 ## 9. Mold Lifecycle and Maintenance Optimization
 
-NevaxisFactOS owns the operational mold card, location, cavity data, status, shot count, production history, maintenance, failures, quality relationships, trials, revisions, and technical documents.
+NevaxisZentra owns the operational mold card, location, cavity data, status, shot count, production history, maintenance, failures, quality relationships, trials, revisions, and technical documents.
 
 Maintenance optimization combines usage, failure history, quality signals, planned demand, and previous work to recommend a low-impact maintenance window and create a maintenance-task draft.
 
@@ -67,7 +67,7 @@ Analysis correlates product, machine, mold, cavity, material lot, operator, shif
 
 ## 12. Material and Supplier Risk
 
-NevaxisFactOS reads stock, reservations, safety stock, open purchasing, lots, and expected delivery from authoritative ERP/WMS/purchasing sources. It calculates shortages, depletion, production-blocking material, supplier delay, and alternatives.
+NevaxisZentra reads stock, reservations, safety stock, open purchasing, lots, and expected delivery from authoritative ERP/WMS/purchasing sources. It calculates shortages, depletion, production-blocking material, supplier delay, and alternatives.
 
 It does not maintain the official inventory ledger or classic purchasing records. Approved purchasing drafts are written to the authoritative system through controlled integration.
 
@@ -75,11 +75,11 @@ It does not maintain the official inventory ledger or classic purchasing records
 
 Risk analysis combines capacity, mold availability, maintenance, materials, staffing, setup, quality, downtime, outside operations, and shipment readiness to explain likely delay and recommended mitigation.
 
-## 14. AI Task Center and NevaxisFactOS Teams
+## 14. AI Task Center and NevaxisZentra Teams
 
 AI Task Center is authoritative for task, assignment, approval, delegation, expiry, evidence, execution, and result state.
 
-NevaxisFactOS Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. Teams and Web use the same task and approval records; neither creates an independent workflow truth.
+NevaxisZentra Teams provides internal messaging, routing, task interaction, approval viewing, and shift communication. Teams and Web use the same task and approval records; neither creates an independent workflow truth.
 
 Tasks can route to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management units. Routing does not grant permission or change data ownership.
 

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Quality;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Quality;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Quality;
+namespace NevaxisZentra.Api.Quality;
 
 public static class QualityEndpointRouteBuilderExtensions
 {
@@ -683,11 +683,11 @@ internal sealed record QualityWriteSuccessDto(Guid Id, uint Version);
 
 public static class QualityServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSQuality(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraQuality(this IServiceCollection services)
     {
         services.AddScoped<IProductionOrderContextReader>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionOrderContextReader()
                 : new ProductionOrderContextReader(dbContext);
@@ -695,7 +695,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityControlPlanRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityControlPlanRepository()
                 : new QualityControlPlanRepository(
@@ -705,7 +705,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityReleaseGuard>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityReleaseGuard()
                 : new QualityReleaseGuard(
@@ -715,7 +715,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IProductionQualitySignalReader>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionQualitySignalReader()
                 : new ProductionQualitySignalReader(
@@ -725,7 +725,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityNonconformanceRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityNonconformanceRepository()
                 : new QualityNonconformanceRepository(
@@ -736,7 +736,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityInspectionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityInspectionRepository()
                 : new QualityInspectionRepository(
@@ -748,7 +748,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityReportingRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityReportingRepository()
                 : new QualityReportingRepository(
@@ -758,7 +758,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityTraceabilityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityTraceabilityRepository()
                 : new QualityTraceabilityRepository(
@@ -769,7 +769,7 @@ public static class QualityServiceCollectionExtensions
 
         services.AddScoped<IQualityReleaseIntelligenceReader>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableQualityReleaseIntelligenceReader()
                 : new QualityReleaseIntelligenceReader(

@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const MIGRATIONS = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
+const MIGRATIONS = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations");
 
 function fail(message) {
   console.error(`TEAMS-SHIFT-HANDOVER-1 migration verification failed: ${message}`);
@@ -26,11 +26,11 @@ assert("generated migration present", Boolean(migrationFile), files.join(", "));
 const designerFile = files.find((name) => name.includes("AddTeamsShiftHandovers.Designer.cs"));
 assert("designer present", Boolean(designerFile));
 
-const migration = read(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationFile}`);
-const designer = read(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${designerFile}`);
-const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
-const entityConfig = read("packages/NevaxisFactOS.Persistence/Teams/TeamsEntityConfigurations.cs");
-const entities = read("packages/NevaxisFactOS.Persistence/Teams/TeamsEntities.cs");
+const migration = read(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${migrationFile}`);
+const designer = read(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${designerFile}`);
+const snapshot = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisZentra.Persistence/Teams/TeamsEntityConfigurations.cs");
+const entities = read("packages/NevaxisZentra.Persistence/Teams/TeamsEntities.cs");
 
 assert("handovers table", migration.includes('name: "teams_shift_handovers"'));
 assert("items table", migration.includes('name: "teams_shift_handover_items"'));

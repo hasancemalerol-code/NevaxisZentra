@@ -34,7 +34,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -46,7 +46,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -163,9 +163,9 @@ function readFailureCode(json) {
 
 console.log("Running PROCESS-OEE-1 calculation verifier.");
 
-const constants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeCalculator.cs");
-const operating = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeOperatingTimeCalculator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeCalculator.cs");
+const operating = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeOperatingTimeCalculator.cs");
 assert("rule-set PROCESS-OEE-V1", constants.includes("PROCESS-OEE-V1"));
 assert("availability formula", calculator.includes("OperatingSeconds") && calculator.includes("PlannedProductionSeconds"));
 assert("performance raw warning", calculator.includes("performance-above-100"));

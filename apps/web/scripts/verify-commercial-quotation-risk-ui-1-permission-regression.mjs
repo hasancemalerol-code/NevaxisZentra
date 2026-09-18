@@ -66,12 +66,12 @@ function applyDevelopmentIdentityEnvFromText(text, key) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__COMMQUOTE_UI1_PERM_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/f170800e-80eb-42f9-b69a-a0770e665e7a/f170800e-80eb-42f9-b69a-a0770e665e7a.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -123,8 +123,8 @@ async function api(method, path, body, jar, headers = {}) {
   const requestHeaders = { Accept: "application/json", ...headers };
   if (body) requestHeaders["Content-Type"] = "application/json";
   if (jar?.header()) requestHeaders.Cookie = jar.header();
-  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
-    requestHeaders["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
+  if (jar?.cookies.get("NevaxisZentra.session") && jar.cookies.get("NevaxisZentra.csrf") && method !== "GET") {
+    requestHeaders["X-NevaxisZentra-Csrf"] = jar.cookies.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, { method, headers: requestHeaders, body: body ? JSON.stringify(body) : undefined });
   jar?.ingest(response);
@@ -142,7 +142,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwner() {
-  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
   let verified = false;
   for (const counterOffset of [-1, 0, 1]) {
@@ -170,7 +170,7 @@ function countSidebarLinks(html, route) {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }

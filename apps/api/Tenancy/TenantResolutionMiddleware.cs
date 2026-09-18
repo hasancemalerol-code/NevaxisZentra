@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.SaasIdentity;
-using NevaxisFactOS.Persistence.SaasIdentity;
-using NevaxisFactOS.Persistence.Tenancy;
-using NevaxisFactOS.Persistence.Identity;
+using NevaxisZentra.Api.SaasIdentity;
+using NevaxisZentra.Persistence.SaasIdentity;
+using NevaxisZentra.Persistence.Tenancy;
+using NevaxisZentra.Persistence.Identity;
 
-namespace NevaxisFactOS.Api.Tenancy;
+namespace NevaxisZentra.Api.Tenancy;
 
 public sealed class TenantResolutionMiddleware(
     RequestDelegate next,
@@ -15,7 +15,7 @@ public sealed class TenantResolutionMiddleware(
             new EventId(1001, nameof(TenantResolutionFailed)),
             "Tenant resolution failed without exposing tenant or connection details.");
 
-    public const string HeaderName = "X-NevaxisFactOS-Tenant";
+    public const string HeaderName = "X-NevaxisZentra-Tenant";
     public const string LegacyHeaderName = "X-CrevaFactOS-Tenant";
 
     public async Task InvokeAsync(

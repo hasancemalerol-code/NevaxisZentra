@@ -45,7 +45,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -57,7 +57,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -161,7 +161,7 @@ const crossTenant = await liveRequest(
   null,
   {
     ...actorHeaders(MANAGER),
-    "X-NevaxisFactOS-Tenant": "other-tenant",
+    "X-NevaxisZentra-Tenant": "other-tenant",
   },
 );
 assert("cross-tenant denied", crossTenant.status === 401 || crossTenant.status === 403);

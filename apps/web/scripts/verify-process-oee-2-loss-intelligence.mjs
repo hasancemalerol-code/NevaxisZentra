@@ -47,7 +47,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8", maxBuffer: 20 * 1024 * 1024 },
   );
   if (result.status !== 0) {
@@ -61,7 +61,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -418,10 +418,10 @@ async function boundedEvaluate(windowStartIso, windowEndIso, idempotencyKey, ove
 
 console.log("Running PROCESS-OEE-2 loss intelligence verifier.");
 
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeLossCalculator.cs");
-const lossConstants = readRequired("packages/NevaxisFactOS.Persistence/ProcessOee/ProcessOeeLossConstants.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812185022_AddProcessOeeLossDrivers.cs");
-const entityConfig = readRequired("packages/NevaxisFactOS.Persistence/Configurations/ProcessOeeEntityConfigurations.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeLossCalculator.cs");
+const lossConstants = readRequired("packages/NevaxisZentra.Persistence/ProcessOee/ProcessOeeLossConstants.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260812185022_AddProcessOeeLossDrivers.cs");
+const entityConfig = readRequired("packages/NevaxisZentra.Persistence/Configurations/ProcessOeeEntityConfigurations.cs");
 
 assert("calculator uses loss rule set constant", calculator.includes("ProcessOeeLossConstants.RuleSetVersion"));
 assert("calculator uses leading loss method constant", calculator.includes("ProcessOeeLossConstants.LeadingLossMethod"));

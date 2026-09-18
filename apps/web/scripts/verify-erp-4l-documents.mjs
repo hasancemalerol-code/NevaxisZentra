@@ -45,7 +45,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -79,13 +79,13 @@ function assertNoSecrets(payload, label) {
 
 console.log("Running ERP-4L documents verifier.");
 
-const adapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpAdapter.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const productionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpProductionRepository.cs");
+const adapter = readRequired("packages/NevaxisZentra.Persistence/Erp/IErpAdapter.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const productionRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpProductionRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
 );
 
 requireText(adapter, "ReadDocumentsAsync", "IErpAdapter");

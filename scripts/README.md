@@ -1,8 +1,8 @@
-# NevaxisFactOS Scripts
+# NevaxisZentra Scripts
 
 
 
-Bu klasör, NevaxisFactOS geliştirme, doğrulama, bakım ve operasyon süreçlerinde kullanılan kontrollü yardımcı scriptleri içerir.
+Bu klasör, NevaxisZentra geliştirme, doğrulama, bakım ve operasyon süreçlerinde kullanılan kontrollü yardımcı scriptleri içerir.
 
 
 

@@ -198,7 +198,7 @@ npm run build
 if ($LASTEXITCODE -ne 0) { throw "web build failed" }
 Pop-Location
 Pop-Location
-dotnet test tests/NevaxisFactOS.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test tests/NevaxisZentra.Persistence.Tests --filter "FullyQualifiedName~Email|FullyQualifiedName~WhatsApp|FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "tests failed" }
 node apps/web/scripts/verify-ai-task-email-delivery-adapter-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract failed" }
@@ -218,7 +218,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = $EmailClosureMigrationUser
 $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = "local_dev_only_change_me"
 $env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
 Push-Location $root
-dotnet tool run dotnet-ef -- database update --project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --startup-project packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --startup-project packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj --context NevaxisZentraDbContext
 if ($LASTEXITCODE -ne 0) { throw "pristine migration failed" }
 $emailMigration = docker exec $EmailClosurePostgresContainer psql -U $EmailClosureMigrationUser -d $pristine -t -A -c "SELECT COUNT(*) FROM \"__EFMigrationsHistory\" WHERE \"MigrationId\" = '20260908120000_AddAiTaskEmailDeliveryAdapterFoundation'"
 if (($emailMigration | Out-String).Trim() -ne "1") { throw "Email migration not applied to pristine DB" }

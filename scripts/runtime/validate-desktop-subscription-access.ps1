@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
-$desktopExe = 'C:\Projects\NevaxisFactOS\apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe'
+$desktopExe = 'C:\Projects\NevaxisZentra\apps\desktop\NevaxisZentra.Desktop\bin\Debug\net10.0-windows\NevaxisZentra.Desktop.exe'
 $webUrl = 'http://127.0.0.1:3001/dashboard'
 
 function Stop-DesktopProcesses {
-    Get-Process -Name 'NevaxisFactOS.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name 'NevaxisZentra.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 1
 }
 

@@ -45,7 +45,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -53,11 +53,11 @@ function headers(subject = OPERATOR, extra = {}) {
 console.log("Running maintenance 3L reliability verifier.");
 
 const reliabilityRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
 );
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceEntities.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceEntities.cs");
 const seed = readRequired(
-  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotMaintenanceReliabilitySeed.cs",
+  "packages/NevaxisZentra.Persistence/Development/DevelopmentPilotMaintenanceReliabilitySeed.cs",
 );
 
 requireText(entities, "MaintenanceFailureCategory", "failure category enum");

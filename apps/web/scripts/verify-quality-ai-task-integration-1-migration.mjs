@@ -22,13 +22,13 @@ function read(rel) {
 console.log("Running QUALITY-AI-TASK-INTEGRATION-1 migration verifier.");
 
 const migration = read(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829133201_AddQualityNcrFollowUpTaskIntegration.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260829133201_AddQualityNcrFollowUpTaskIntegration.cs",
 );
 const grants = read(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829133827_AddQualityNcrFollowUpAuditGrants.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260829133827_AddQualityNcrFollowUpAuditGrants.cs",
 );
-const entityConfig = read("packages/NevaxisFactOS.Persistence/Configurations/QualityEntityConfigurations.cs");
-const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisZentra.Persistence/Configurations/QualityEntityConfigurations.cs");
+const snapshot = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
 
 assert("follow_up_status column", migration.includes("follow_up_status"));
 assert("linked_ai_task_id column", migration.includes("linked_ai_task_id"));

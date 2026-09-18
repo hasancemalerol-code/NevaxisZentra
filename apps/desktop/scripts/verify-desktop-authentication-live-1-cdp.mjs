@@ -15,7 +15,7 @@ const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://127.0.0.1:3001")
 const API = (process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000").replace(/\/$/, "");
 const CDP_PORT = Number(process.env.NEVAXIS_FACTOS_DESKTOP_CDP_PORT ?? "9233");
 const ORGANIZATION = "dev-pilot-tenant";
-const EMAIL = "admin@demo.nevaxisfactos.local";
+const EMAIL = "admin@demo.nevaxiszentra.local";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const SCREENSHOT_DIR = process.env.NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_DIR
   ?? join(ROOT, ".cursor-screenshots/desktop-sales-demo-1");
@@ -335,14 +335,14 @@ async function main() {
       const mfaResult = await evaluate(
         send,
         `(() => {
-          const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+          const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
           return fetch("/api/identity/mfa/verify", {
             method: "POST",
             credentials: "include",
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
-              "X-NevaxisFactOS-Csrf": csrf,
+              "X-NevaxisZentra-Csrf": csrf,
             },
             body: JSON.stringify({ totpCode: ${JSON.stringify(totp)} }),
           }).then(async (response) => ({

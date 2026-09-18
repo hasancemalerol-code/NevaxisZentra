@@ -239,7 +239,7 @@ export function ExportShipmentPanel({
           <h2>Sevkiyat / lojistik paketi</h2>
           <span>
             Pickup, kalkış ve hedef bilgileri fabrika handoff paketinin parçasıdır.
-            Taşıyıcı operasyonu FactOS dışında yürütülür.
+            Taşıyıcı operasyonu Zentra dışında yürütülür.
           </span>
         </div>
       </div>

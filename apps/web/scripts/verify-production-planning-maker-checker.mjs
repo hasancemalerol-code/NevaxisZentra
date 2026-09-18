@@ -53,19 +53,19 @@ console.log("Running production planning maker-checker verifier.");
 
 // Backend: ProductionPlan entity
 const productionPlan = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlan.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlan.cs"),
   "ProductionPlan.cs",
 );
 const workflowRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs"),
   "ProductionPlanWorkflowRepository.cs",
 );
 const writeRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs"),
   "ProductionPlanWriteRepository.cs",
 );
 const workflowModels = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowModels.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWorkflowModels.cs"),
   "ProductionPlanWorkflowModels.cs",
 );
 const apiResultMapper = readRequiredFile(
@@ -73,11 +73,11 @@ const apiResultMapper = readRequiredFile(
   "ProductionPlanApiResultMapper.cs",
 );
 const developmentPilotIds = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIds.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIds.cs"),
   "DevelopmentPilotIds.cs",
 );
 const bootstrapService = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs"),
   "DevelopmentPilotBootstrapService.cs",
 );
 

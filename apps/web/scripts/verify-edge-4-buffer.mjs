@@ -41,11 +41,11 @@ function assertNotContains(label, content, text) {
 }
 
 console.log("\n[1] Buffer implementation files");
-const store = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
-const worker = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
-const statuses = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs");
-const program = readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs");
-const csproj = readFile("tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj");
+const store = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
+const worker = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
+const statuses = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeDeliveryStatuses.cs");
+const program = readFile("tools/NevaxisZentra.MachineSimulator/Program.cs");
+const csproj = readFile("tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj");
 
 assertContains("EdgeBufferStore exists", store, "class EdgeBufferStore");
 assertContains("JSON file persistence", store, "JsonSerializer");
@@ -63,7 +63,7 @@ assertContains("No silent drop on full", store, "CapacityExceeded");
 console.log("\n[2] Storage path — not in repo root");
 assertContains("LocalApplicationData path", store, "LocalApplicationData");
 assertContains("edge-buffer subfolder", store, "edge-buffer");
-assertNotContains("repo root buffer path", store, "NevaxisFactOS/NevaxisFactOS");
+assertNotContains("repo root buffer path", store, "NevaxisZentra/NevaxisZentra");
 assertContains("gitignore covers *.db", readFile(".gitignore"), "*.db");
 
 console.log("\n[3] Security — no secrets in buffer");
@@ -132,7 +132,7 @@ if (!liveOk) {
 
   const build = spawnSync(
     "dotnet",
-    ["build", "tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj", "--no-restore"],
+    ["build", "tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj", "--no-restore"],
     { cwd: ROOT, encoding: "utf8", shell: true },
   );
   assert("simulator builds for restart test", build.status === 0);

@@ -49,7 +49,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -122,7 +122,7 @@ console.log("Running maintenance integration gate verifier.");
 
 // Package wiring — 1L + 2L + 3L + UI-1
 requireText(readRequired("apps/api/Program.cs"), "MapMaintenanceEndpoints", "Program.cs");
-requireText(readRequired("apps/api/Program.cs"), "AddNevaxisFactOSMaintenance", "Program.cs");
+requireText(readRequired("apps/api/Program.cs"), "AddNevaxisZentraMaintenance", "Program.cs");
 requireText(
   readRequired("apps/api/Maintenance/MaintenanceEndpointRouteBuilderExtensions.cs"),
   "/requests/{requestId:guid}/convert-to-work-order",
@@ -451,7 +451,7 @@ try {
   stopPid(canonicalPidBefore, "canonical API on 5000");
   const restarted = spawn(
     process.platform === "win32" ? "dotnet.exe" : "dotnet",
-    ["run", "--project", "apps/api/NevaxisFactOS.Api.csproj", "--no-launch-profile"],
+    ["run", "--project", "apps/api/NevaxisZentra.Api.csproj", "--no-launch-profile"],
     {
       cwd: projectRoot,
       detached: true,

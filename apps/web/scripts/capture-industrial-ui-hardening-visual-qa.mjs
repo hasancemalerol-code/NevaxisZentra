@@ -158,18 +158,18 @@ async function signIn(ss, evalSnap, ownerPassword, mfaSecret) {
     awaitPromise: true,
     returnByValue: true,
     expression: `(async () => {
-      const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+      const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
       const res = await fetch("/api/identity/sign-in", {
         method: "POST",
         credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-NevaxisFactOS-Csrf": csrf,
+          "X-NevaxisZentra-Csrf": csrf,
         },
         body: JSON.stringify({
           organizationContext: "dev-pilot-tenant",
-          email: "admin@demo.nevaxisfactos.local",
+          email: "admin@demo.nevaxiszentra.local",
           password: ${JSON.stringify(ownerPassword)},
         }),
       });
@@ -191,14 +191,14 @@ async function signIn(ss, evalSnap, ownerPassword, mfaSecret) {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
         const res = await fetch("/api/identity/mfa/verify", {
           method: "POST",
           credentials: "include",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
-            "X-NevaxisFactOS-Csrf": csrf,
+            "X-NevaxisZentra-Csrf": csrf,
           },
           body: JSON.stringify({ totpCode: ${JSON.stringify(code)} }),
         });
@@ -232,7 +232,7 @@ async function seedMixLineFromNode() {
         Accept: "application/json",
         "X-crevafactos-dev-Issuer": devIssuer,
         "X-crevafactos-dev-Subject": devSubject,
-        "X-NevaxisFactOS-Tenant": devTenantKey,
+        "X-NevaxisZentra-Tenant": devTenantKey,
       },
     },
   );

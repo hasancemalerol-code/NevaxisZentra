@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.DigitalWorkforce;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.DigitalWorkforce;
 
-namespace NevaxisFactOS.Api.DigitalWorkforce;
+namespace NevaxisZentra.Api.DigitalWorkforce;
 
 internal static class DigitalWorkforceEndpointHelpers
 {

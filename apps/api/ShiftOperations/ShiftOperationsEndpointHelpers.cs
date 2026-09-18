@@ -1,7 +1,7 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ShiftOperations;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ShiftOperations;
 
-namespace NevaxisFactOS.Api.ShiftOperations;
+namespace NevaxisZentra.Api.ShiftOperations;
 
 internal static class ShiftOperationsEndpointHelpers
 {

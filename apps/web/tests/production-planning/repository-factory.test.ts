@@ -9,13 +9,13 @@ test("development-preview mode returns preview repository contract", () => {
       runtimeConfig: {
         mode: "development-preview",
         previewTenantId:
-          "tenant-NevaxisFactOS",
+          "tenant-NevaxisZentra",
         previewFacilityId:
           "facility-istanbul",
       },
       requestContext: null,
       scope: {
-        tenantId: "tenant-NevaxisFactOS",
+        tenantId: "tenant-NevaxisZentra",
         facilityId: "facility-istanbul",
         source:
           "development-preview-config",

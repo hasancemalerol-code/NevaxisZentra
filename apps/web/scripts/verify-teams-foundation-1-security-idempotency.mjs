@@ -32,7 +32,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -51,8 +51,8 @@ async function liveRequest(method, path, body, headers = actorHeaders(OWNER)) {
 console.log("Running TEAMS-FOUNDATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsRepository.cs");
-const fingerprint = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsIdempotencyFingerprint.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsRepository.cs");
+const fingerprint = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsIdempotencyFingerprint.cs");
 
 assert("channels list endpoint", endpoints.includes('MapGet("/", ListChannelsAsync)'));
 assert("post message endpoint", endpoints.includes("/messages"));

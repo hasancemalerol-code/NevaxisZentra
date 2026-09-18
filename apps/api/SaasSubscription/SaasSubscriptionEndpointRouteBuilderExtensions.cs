@@ -1,13 +1,13 @@
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.SaasCommercial;
-using NevaxisFactOS.Persistence.SaasSubscription;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.SaasCommercial;
+using NevaxisZentra.Persistence.SaasSubscription;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.SaasSubscription;
+namespace NevaxisZentra.Api.SaasSubscription;
 
 public static class SaasSubscriptionEndpointRouteBuilderExtensions
 {
@@ -265,9 +265,9 @@ public static class SaasSubscriptionEndpointRouteBuilderExtensions
 
 public static class SaasSubscriptionApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSSaasSubscriptionApi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraSaasSubscriptionApi(this IServiceCollection services)
     {
-        services.AddNevaxisFactOSSaasSubscription();
+        services.AddNevaxisZentraSaasSubscription();
         return services;
     }
 }

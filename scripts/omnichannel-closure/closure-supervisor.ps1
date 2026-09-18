@@ -1,4 +1,4 @@
-# NevaxisFactOS omnichannel closure runtime supervisor.
+# NevaxisZentra omnichannel closure runtime supervisor.
 # Starts API + Web, waits for readiness, records PIDs/logs, stops only owned processes.
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/closure-constants.ps1"
@@ -45,7 +45,7 @@ if (-not (Test-PortFree $apiPort)) {
     $ownerPid = $listener.OwningProcess
     $owner = Get-Process -Id $ownerPid -ErrorAction SilentlyContinue
     $ownerPath = if ($owner) { $owner.Path } else { "" }
-    if ($owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $ownerPath -like "*\Projects\NevaxisFactOS\*") {
+    if ($owner -and $owner.ProcessName -eq "NevaxisZentra.Api" -and $ownerPath -like "*\Projects\NevaxisZentra\*") {
         Write-Host "Reclaiming stale closure API on port $apiPort (PID $ownerPid)"
         Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
@@ -74,7 +74,7 @@ if (-not (Test-PortFree $webPort)) {
             }
         } catch {}
     }
-    if (-not $reclaimed -and $owner -and $owner.ProcessName -eq "node" -and $ownerCmd -like "*\Projects\NevaxisFactOS\*") {
+    if (-not $reclaimed -and $owner -and $owner.ProcessName -eq "node" -and $ownerCmd -like "*\Projects\NevaxisZentra\*") {
         Write-Host "Reclaiming stale closure web on port $webPort (PID $ownerPid)"
         Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2

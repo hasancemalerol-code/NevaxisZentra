@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: NevaxisFactOS Product & Development
+- Decision owners: NevaxisZentra Product & Development
 - Scope: Web application technology and frontend boundary
 
 ## Context
 
-NevaxisFactOS needs a desktop-first operational interface for production planning, shift planning, AI tasks and approvals, machines, molds, maintenance, quality, material risk, and delivery risk.
+NevaxisZentra needs a desktop-first operational interface for production planning, shift planning, AI tasks and approvals, machines, molds, maintenance, quality, material risk, and delivery risk.
 
 The Web application is not a classic ERP interface and must preserve the locked dashboard structure.
 
@@ -28,7 +28,7 @@ The Web application uses Next.js, React, and TypeScript in `apps/web` with:
 
 ## Authoritative Workflow Boundary
 
-Web presents AI Task Center tasks and approvals from the same authoritative records used by NevaxisFactOS Teams. It must not maintain browser-only or Web-only approval state.
+Web presents AI Task Center tasks and approvals from the same authoritative records used by NevaxisZentra Teams. It must not maintain browser-only or Web-only approval state.
 
 Client-side hiding is not authorization. The API revalidates tenant, permission, approval scope, delegation, expiry, and current state for every protected action.
 

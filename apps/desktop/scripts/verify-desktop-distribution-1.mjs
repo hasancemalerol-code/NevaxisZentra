@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * verify-desktop-distribution-1.mjs
- * NevaxisFactOS-DESKTOP-DISTRIBUTION-1 permanent verifiers.
+ * NevaxisZentra-DESKTOP-DISTRIBUTION-1 permanent verifiers.
  */
 
 import { createHash } from "node:crypto";
@@ -138,7 +138,7 @@ assert("MajorUpgrade/downgrade prevention exists", packageWxs.includes("MajorUpg
 assert("UpgradeCode referenced", packageWxs.includes("UpgradeCode"));
 assert("Start Menu shortcut exists", packageWxs.includes("StartMenuShortcut"));
 assert("Desktop shortcut exists", packageWxs.includes("DesktopShortcut"));
-assert("No cosmetic desktop shortcut checkbox property", !packageWxs.includes("NevaxisFactOSDESKTOPDESKTOPSHORTCUT"));
+assert("No cosmetic desktop shortcut checkbox property", !packageWxs.includes("NevaxisZentraDESKTOPDESKTOPSHORTCUT"));
 assert("No WixUI exit optional checkbox", !packageWxs.includes("WIXUI_EXITDIALOGOPTIONALCHECKBOX"));
 assert("WebView2 prerequisite handling exists", packageWxs.includes("WEBVIEW2RUNTIMEINSTALLED"));
 assert("Turkish downgrade message exists", packageWxs.includes("daha yeni bir sürümü"));
@@ -146,7 +146,7 @@ assert("Close running app prompt exists", packageWxs.includes("CloseApplication"
 assert("Uninstall does not remove WebView2 profile", !packageWxs.includes("WebView2") || !packageWxs.includes("LocalApplicationData"));
 
 console.log("\n[4] Self-contained publish settings");
-const csproj = read("apps/desktop/NevaxisFactOS.Desktop/NevaxisFactOS.Desktop.csproj");
+const csproj = read("apps/desktop/NevaxisZentra.Desktop/NevaxisZentra.Desktop.csproj");
 assert("Targets win-x64", csproj.includes("win-x64"));
 assert("Trimming not forced on", !csproj.includes("<PublishTrimmed>true</PublishTrimmed>"));
 assert("Single-file not forced on", !csproj.includes("<PublishSingleFile>true</PublishSingleFile>"));

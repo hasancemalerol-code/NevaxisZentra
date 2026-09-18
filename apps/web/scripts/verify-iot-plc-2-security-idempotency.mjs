@@ -30,7 +30,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -42,7 +42,7 @@ function actorHeaders(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -66,7 +66,7 @@ function countAssessments(prefix) {
 
 console.log("Running IOT-PLC-2 security/idempotency verifier.");
 
-const permissionKeys = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcPermissionKeys.cs");
+const permissionKeys = readRequired("packages/NevaxisZentra.Persistence/IotPlc/IotPlcPermissionKeys.cs");
 assert("no new permission keys", !permissionKeys.includes("iot-plc.intelligence"));
 assert("reuses read key", permissionKeys.includes("iot-plc.read"));
 assert("reuses manage key", permissionKeys.includes("iot-plc.manage"));

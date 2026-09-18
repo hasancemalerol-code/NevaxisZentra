@@ -3,10 +3,10 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using NevaxisFactOS.Persistence.SaasBilling.Payments;
+using NevaxisZentra.Persistence.SaasBilling.Payments;
 using Microsoft.Extensions.Options;
 
-namespace NevaxisFactOS.Api.SaasBilling.Payments.Iyzico;
+namespace NevaxisZentra.Api.SaasBilling.Payments.Iyzico;
 
 public sealed class IyzicoSaasPaymentProvider(
     IOptions<SaasPaymentProviderOptions> optionsAccessor,

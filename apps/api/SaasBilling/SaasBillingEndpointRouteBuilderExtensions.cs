@@ -1,13 +1,13 @@
-using NevaxisFactOS.Api.SaasBilling.Payments;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.SaasBilling;
-using NevaxisFactOS.Persistence.SaasBilling.Payments;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.SaasBilling.Payments;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.SaasBilling;
+using NevaxisZentra.Persistence.SaasBilling.Payments;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.SaasBilling;
+namespace NevaxisZentra.Api.SaasBilling;
 
 public static class SaasBillingEndpointRouteBuilderExtensions
 {
@@ -413,10 +413,10 @@ public static class SaasBillingEndpointRouteBuilderExtensions
 
 public static class SaasBillingApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSSaasBillingApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddNevaxisZentraSaasBillingApi(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddNevaxisFactOSSaasBilling();
-        services.AddNevaxisFactOSSaasPayments(configuration);
+        services.AddNevaxisZentraSaasBilling();
+        services.AddNevaxisZentraSaasPayments(configuration);
         return services;
     }
 }

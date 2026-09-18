@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.EnterpriseReliability;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.EnterpriseReliability;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.EnterpriseReliability;
+namespace NevaxisZentra.Api.EnterpriseReliability;
 
 public static class EnterpriseReliabilityEndpointRouteBuilderExtensions
 {
@@ -22,7 +22,7 @@ public static class EnterpriseReliabilityEndpointRouteBuilderExtensions
 
         endpoints.MapGet("/api/system-status/version", (IConfiguration configuration) => TypedResults.Ok(new
         {
-            application = configuration["Application:Name"] ?? "NevaxisFactOS API",
+            application = configuration["Application:Name"] ?? "NevaxisZentra API",
             version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "unknown",
             buildSha = configuration["Application:BuildSha"]
                 ?? Environment.GetEnvironmentVariable("NEVAXIS_FACTOS_BUILD_SHA")
@@ -34,9 +34,9 @@ public static class EnterpriseReliabilityEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSEnterpriseReliabilityApi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraEnterpriseReliabilityApi(this IServiceCollection services)
     {
-        services.AddNevaxisFactOSEnterpriseReliability();
+        services.AddNevaxisZentraEnterpriseReliability();
         return services;
     }
 
@@ -153,7 +153,7 @@ public static class EnterpriseReliabilityEndpointRouteBuilderExtensions
         try
         {
             var subject = httpContext.User.Identity?.Name ?? "system";
-            var correlationHeader = httpContext.Request.Headers["X-NevaxisFactOS-Correlation-Id"].FirstOrDefault();
+            var correlationHeader = httpContext.Request.Headers["X-NevaxisZentra-Correlation-Id"].FirstOrDefault();
             Guid? correlationId = Guid.TryParse(correlationHeader, out var parsed) ? parsed : null;
             var run = await tenantDatabaseSession.ExecuteWriteAsync(
                 ct => service.ReconcileAsync(
@@ -187,7 +187,7 @@ public static class EnterpriseReliabilityEndpointRouteBuilderExtensions
         try
         {
             var subject = httpContext.User.Identity?.Name ?? "system";
-            var correlationHeader = httpContext.Request.Headers["X-NevaxisFactOS-Correlation-Id"].FirstOrDefault();
+            var correlationHeader = httpContext.Request.Headers["X-NevaxisZentra-Correlation-Id"].FirstOrDefault();
             Guid? correlationId = Guid.TryParse(correlationHeader, out var parsed) ? parsed : null;
             var audit = await tenantDatabaseSession.ExecuteWriteAsync(
                 ct => service.ReplayQuarantineAsync(

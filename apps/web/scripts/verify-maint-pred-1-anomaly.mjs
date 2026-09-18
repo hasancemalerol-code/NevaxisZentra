@@ -19,9 +19,9 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const engine = read("packages/NevaxisFactOS.Persistence/Maintenance/ConditionEvaluationService.cs");
-const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceConditionRepository.cs");
-const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceConditionEntities.cs");
+const engine = read("packages/NevaxisZentra.Persistence/Maintenance/ConditionEvaluationService.cs");
+const repo = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceConditionRepository.cs");
+const entities = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceConditionEntities.cs");
 
 assert("anomaly entity", entities.includes("MaintenanceConditionAnomaly"));
 assert("evaluation identity", entities.includes("EvaluationIdentity"));

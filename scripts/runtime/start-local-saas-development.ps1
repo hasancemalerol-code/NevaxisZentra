@@ -1,5 +1,5 @@
-# Canonical local NevaxisFactOS SaaS development runtime (API 5000 + web 3001).
-# No secrets. Refuses duplicate NevaxisFactOS listeners on the target ports.
+# Canonical local NevaxisZentra SaaS development runtime (API 5000 + web 3001).
+# No secrets. Refuses duplicate NevaxisZentra listeners on the target ports.
 
 [CmdletBinding()]
 param(
@@ -9,13 +9,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisZentra.Api.csproj'
 $apiPort = 5000
 $webPort = 3001
 $apiBaseUrl = "http://127.0.0.1:$apiPort"
 $webBaseUrl = "http://127.0.0.1:$webPort"
 
-function Test-NevaxisFactOSListener {
+function Test-NevaxisZentraListener {
     param(
         [int]$Port,
         [string]$ExpectedPathFragment
@@ -34,7 +34,7 @@ function Test-NevaxisFactOSListener {
 
     $path = $process.Path
     if ($ExpectedPathFragment -and $path -and ($path -notlike "*$ExpectedPathFragment*")) {
-        throw "Port $Port is owned by a non-NevaxisFactOS process: $($process.ProcessName) ($path)."
+        throw "Port $Port is owned by a non-NevaxisZentra process: $($process.ProcessName) ($path)."
     }
 
     return [PSCustomObject]@{
@@ -71,18 +71,18 @@ function Wait-HttpStatus {
     throw "Timed out waiting for $Url to return HTTP $ExpectedStatus."
 }
 
-Write-Host "NevaxisFactOS local SaaS development launcher"
+Write-Host "NevaxisZentra local SaaS development launcher"
 Write-Host "Repository: $repositoryRoot"
 
-$existingApi = Test-NevaxisFactOSListener -Port $apiPort -ExpectedPathFragment 'NevaxisFactOS.Api'
-$existingWeb = Test-NevaxisFactOSListener -Port $webPort -ExpectedPathFragment 'node'
+$existingApi = Test-NevaxisZentraListener -Port $apiPort -ExpectedPathFragment 'NevaxisZentra.Api'
+$existingWeb = Test-NevaxisZentraListener -Port $webPort -ExpectedPathFragment 'node'
 
 if ($existingApi -and -not $SkipApi) {
-    throw "NevaxisFactOS API already listening on port $apiPort (PID $($existingApi.ProcessId)). Stop it before launching a duplicate."
+    throw "NevaxisZentra API already listening on port $apiPort (PID $($existingApi.ProcessId)). Stop it before launching a duplicate."
 }
 
 if ($existingWeb -and -not $SkipWeb) {
-    throw "NevaxisFactOS web already listening on port $webPort (PID $($existingWeb.ProcessId)). Stop it before launching a duplicate."
+    throw "NevaxisZentra web already listening on port $webPort (PID $($existingWeb.ProcessId)). Stop it before launching a duplicate."
 }
 
 if (-not $SkipApi) {
@@ -108,7 +108,7 @@ if (-not $SkipApi) {
 if (-not $SkipWeb) {
     $webCommand = @(
         "`$env:NEVAXIS_FACTOS_API_BASE_URL='$apiBaseUrl';",
-        "pnpm --filter @nevaxisfactos/web dev -- -p $webPort"
+        "pnpm --filter @nevaxiszentra/web dev -- -p $webPort"
     ) -join ' '
 
     Write-Host "Starting web on $webBaseUrl with NEVAXIS_FACTOS_API_BASE_URL=$apiBaseUrl..."

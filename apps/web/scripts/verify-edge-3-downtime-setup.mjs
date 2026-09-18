@@ -44,7 +44,7 @@ function assertNotContains(label, content, text) {
 // 1. Downtime / setup entities
 // ---------------------------------------------------------------------------
 console.log("\n[1] MachineDowntimeEpisode / MachineDowntimeObservation entities");
-const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
 
 assertContains("MachineDowntimeEpisode class", entities, "class MachineDowntimeEpisode");
 assertContains("MachineDowntimeObservation class", entities, "class MachineDowntimeObservation");
@@ -87,8 +87,8 @@ assertContains("reason other", entities, 'Other = "other"');
 // 4. Ingestion services
 // ---------------------------------------------------------------------------
 console.log("\n[4] EdgeDowntimeIngestionService / EdgeSetupIngestionService");
-const downtimeSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeDowntimeIngestionService.cs");
-const setupSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeSetupIngestionService.cs");
+const downtimeSvc = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeDowntimeIngestionService.cs");
+const setupSvc = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeSetupIngestionService.cs");
 
 assertContains("EdgeDowntimeIngestionService class", downtimeSvc, "class EdgeDowntimeIngestionService");
 assertContains("IEdgeDowntimeIngestionService interface", downtimeSvc, "interface IEdgeDowntimeIngestionService");
@@ -137,7 +137,7 @@ assertContains("setup no Production note", setupSvc, "No Production");
 // ---------------------------------------------------------------------------
 console.log("\n[7] Migration 20260810200000_AddEdgeOperationalObservations");
 const migration = readFile(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
 );
 
 assertContains("machine_downtime_episodes table", migration, "machine_downtime_episodes");
@@ -167,7 +167,7 @@ assertContains("dev guard (Development env only)", api, "env.IsDevelopment()");
 // 9. Simulator scenarios
 // ---------------------------------------------------------------------------
 console.log("\n[9] Simulator downtime/setup scenarios");
-const sim = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const sim = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 assertContains("GetDowntimeScenario", sim, "GetDowntimeScenario");
 assertContains("GetMicroStopScenario", sim, "GetMicroStopScenario");
 assertContains("GetSetupScenario", sim, "GetSetupScenario");

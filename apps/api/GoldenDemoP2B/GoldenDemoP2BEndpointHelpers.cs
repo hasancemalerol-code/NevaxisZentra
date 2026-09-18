@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Api.PresentationMode;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoP1;
-using NevaxisFactOS.Persistence.GoldenDemoP2B;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Api.PresentationMode;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoP1;
+using NevaxisZentra.Persistence.GoldenDemoP2B;
 
-namespace NevaxisFactOS.Api.GoldenDemoP2B;
+namespace NevaxisZentra.Api.GoldenDemoP2B;
 
 internal static class GoldenDemoP2BEndpointHelpers
 {

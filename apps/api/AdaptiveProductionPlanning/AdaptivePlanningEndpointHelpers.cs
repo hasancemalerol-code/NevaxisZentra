@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AdaptiveProductionPlanning;
-using NevaxisFactOS.Persistence.Authorization;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AdaptiveProductionPlanning;
+using NevaxisZentra.Persistence.Authorization;
 
-namespace NevaxisFactOS.Api.AdaptiveProductionPlanning;
+namespace NevaxisZentra.Api.AdaptiveProductionPlanning;
 
 internal static class AdaptivePlanningEndpointHelpers
 {

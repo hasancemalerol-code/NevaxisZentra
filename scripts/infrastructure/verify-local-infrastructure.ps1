@@ -164,4 +164,4 @@ if ($response.status -ne 'ok') {
 }
 
 Write-Host "[reachable] RabbitMQ management API at $managementUri"
-Write-Host '[ready] NevaxisFactOS local infrastructure is healthy.'
+Write-Host '[ready] NevaxisZentra local infrastructure is healthy.'

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Options;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AiTasks.Delivery;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.DigitalWorkforce;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AiTasks.Delivery;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.DigitalWorkforce;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.DigitalWorkforce;
+namespace NevaxisZentra.Api.DigitalWorkforce;
 
 public static class DigitalWorkforceExecutionEndpointRouteBuilderExtensions
 {
@@ -23,7 +23,7 @@ public static class DigitalWorkforceExecutionEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSDigitalWorkforceExecutionRuntime(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraDigitalWorkforceExecutionRuntime(this IServiceCollection services)
     {
         services.AddScoped<IDigitalWorkforceExecutionRuntimeService, DigitalWorkforceExecutionRuntimeService>();
         services.AddScoped<IDigitalWorkforceCoordinatorRuntime, DigitalWorkforceCoordinatorRuntime>();
@@ -197,7 +197,7 @@ internal sealed class DigitalWorkforceExecutionBackgroundService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+                var db = scope.ServiceProvider.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
                 if (db is null)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);

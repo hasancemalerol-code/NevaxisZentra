@@ -107,8 +107,8 @@ class CookieJar {
 async function api(method, path, body, jar) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar?.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar?.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -197,7 +197,7 @@ async function assertDashboardShowcaseEntry(page, label) {
   assert(`${label} keyboard focus visible`, focusVisible);
 
   const destination = await fetchWeb("/fabrika-vitrini", await signInThroughApi(
-    "admin@demo.nevaxisfactos.local",
+    "admin@demo.nevaxiszentra.local",
     requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
   ));
@@ -210,7 +210,7 @@ const ownerPassword = requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword")
 const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 const activePassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassword");
 
-const ownerJar = await signInThroughApi("admin@demo.nevaxisfactos.local", ownerPassword, mfaSharedSecret);
+const ownerJar = await signInThroughApi("admin@demo.nevaxiszentra.local", ownerPassword, mfaSharedSecret);
 const ownerDashboard = await fetchWeb("/dashboard", ownerJar);
 assert("tenant owner dashboard HTTP 200", ownerDashboard.status === 200, `status=${ownerDashboard.status}`);
 assert("tenant owner dashboard includes showcase link", ownerDashboard.html.includes('data-dashboard-showcase-tv-link="true"'));
@@ -284,7 +284,7 @@ try {
     page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
     await signInThroughForm(page, {
-      email: "admin@demo.nevaxisfactos.local",
+      email: "admin@demo.nevaxiszentra.local",
       password: ownerPassword,
       mfaSecret: mfaSharedSecret,
     });

@@ -1,7 +1,7 @@
-using NevaxisFactOS.Persistence.SaasSubscription;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence.SaasSubscription;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.SaasSubscription;
+namespace NevaxisZentra.Api.SaasSubscription;
 
 public sealed class TenantSubscriptionAccessMiddleware(RequestDelegate next)
 {

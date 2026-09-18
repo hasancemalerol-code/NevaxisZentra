@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>NevaxisZentra.Api</RootNamespace>
+    <AssemblyName>NevaxisZentra.Api</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <ProjectReference Include="..\..\packages\NevaxisZentra.Configuration\NevaxisZentra.Configuration.csproj" />
+    <ProjectReference Include="..\..\packages\NevaxisZentra.Persistence\NevaxisZentra.Persistence.csproj" />
+  </ItemGroup>
+</Project>

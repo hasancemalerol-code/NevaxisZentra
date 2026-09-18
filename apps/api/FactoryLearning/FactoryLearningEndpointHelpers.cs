@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.FactoryLearning;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.FactoryLearning;
 
-namespace NevaxisFactOS.Api.FactoryLearning;
+namespace NevaxisZentra.Api.FactoryLearning;
 
 internal static class FactoryLearningEndpointHelpers
 {

@@ -26,7 +26,7 @@ export const AI_TASK_SOURCE_TYPE_DESCRIPTIONS: Readonly<
   maintenance: "Bakım geçmişi, arıza veya servis kaydı",
   energy: "Enerji tüketimi veya enerji izleme verisi",
   manual: "Kullanıcı tarafından girilen doğrulanmış kayıt",
-  calculated: "FactOS tarafından diğer kaynaklardan hesaplanan sonuç",
+  calculated: "Zentra tarafından diğer kaynaklardan hesaplanan sonuç",
 };
 
 export function getAiTaskSourceTypeLabel(

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Maintenance;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Maintenance;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Maintenance;
+namespace NevaxisZentra.Api.Maintenance;
 
 public static class MaintenanceReportingEndpointRouteBuilderExtensions
 {
@@ -231,12 +231,12 @@ public static class MaintenanceReportingEndpointRouteBuilderExtensions
         return (context, null, new MaintenanceReportingPeriod(dateFrom.Value, dateTo.Value));
     }
 
-    public static IServiceCollection AddNevaxisFactOSMaintenanceReporting(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraMaintenanceReporting(this IServiceCollection services)
     {
         services.AddScoped<IMaintenanceOperatingTimeSource, UnavailableMaintenanceOperatingTimeSource>();
         services.AddScoped<IMaintenanceReliabilityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableMaintenanceReliabilityRepository()
                 : new MaintenanceReliabilityRepository(

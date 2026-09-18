@@ -42,7 +42,7 @@ function machinePassword() {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -107,8 +107,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -184,7 +184,7 @@ removeClosureFixtures();
 const now = new Date().toISOString();
 db(`
   INSERT INTO identity_subjects (id, external_issuer, external_subject, status, created_at_utc)
-  VALUES ('${CLOSURE_IDENTITY_ID}', 'NevaxisFactOS-saas', '${CLOSURE_IDENTITY_ID}', 'Active', '${now}')
+  VALUES ('${CLOSURE_IDENTITY_ID}', 'NevaxisZentra-saas', '${CLOSURE_IDENTITY_ID}', 'Active', '${now}')
   ON CONFLICT (id) DO NOTHING;
   INSERT INTO tenant_memberships (id, tenant_id, identity_subject_id, membership_reference, status, authorization_version, created_at_utc)
   VALUES ('${CLOSURE_MEMBERSHIP_ID}', '${TENANT_ID}', '${CLOSURE_IDENTITY_ID}', '${CLOSURE_MEMBER}', 'Active', 1, '${now}')
@@ -199,12 +199,12 @@ const unauthorized = await api("GET", "/api/admin-access/workspace-summary", und
 assert("unauthorized 403", unauthorized.status === 403, `status=${unauthorized.status}`);
 
 const owner = await signIn(
-  "admin@demo.nevaxisfactos.local",
+  "admin@demo.nevaxiszentra.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );
 
-const pending = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+const pending = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
 const mfaRequired = await api("POST", "/api/admin-access/invitations", {
   email: `${CLOSURE_PREFIX.toLowerCase()}-mfa@closure.dev.local`,
   idempotencyKey: `${CLOSURE_PREFIX}-mfa`,
@@ -219,7 +219,7 @@ const untrustedTenantHeader = await api(
   "/api/admin-access/members",
   undefined,
   owner.jar,
-  { "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot" },
+  { "X-NevaxisZentra-Tenant": "other-tenant-not-pilot" },
 );
 assert("untrusted tenant header rejected", untrustedTenantHeader.status === 403, `status=${untrustedTenantHeader.status}`);
 

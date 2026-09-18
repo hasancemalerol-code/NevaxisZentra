@@ -6,9 +6,9 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const SNAPSHOT = resolve(
   ROOT,
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs",
 );
-const CONFIG = resolve(ROOT, "packages/NevaxisFactOS.Persistence/Configurations/MoldEntityConfigurations.cs");
+const CONFIG = resolve(ROOT, "packages/NevaxisZentra.Persistence/Configurations/MoldEntityConfigurations.cs");
 
 function fail(message) {
   console.error(`MOLD-2 model snapshot verifier failed: ${message}`);
@@ -32,9 +32,9 @@ const snapshot = readFileSync(SNAPSHOT, "utf8");
 const config = readFileSync(CONFIG, "utf8");
 
 const entities = [
-  "NevaxisFactOS.Persistence.Mold.MoldMaintenanceRecord",
-  "NevaxisFactOS.Persistence.Mold.MoldRevisionRecord",
-  "NevaxisFactOS.Persistence.Mold.MoldTrialRecord",
+  "NevaxisZentra.Persistence.Mold.MoldMaintenanceRecord",
+  "NevaxisZentra.Persistence.Mold.MoldRevisionRecord",
+  "NevaxisZentra.Persistence.Mold.MoldTrialRecord",
 ];
 
 for (const entity of entities) {
@@ -87,7 +87,7 @@ requireAll(snapshot, "trial unique indexes", [
 ]);
 
 requireAll(snapshot, "maintenance foreign keys", [
-  'Entity("NevaxisFactOS.Persistence.Mold.MoldMaintenanceRecord", b =>',
+  'Entity("NevaxisZentra.Persistence.Mold.MoldMaintenanceRecord", b =>',
   'HasForeignKey("MoldId")',
   'HasForeignKey("TenantId")',
   'HasForeignKey("TenantId", "FacilityId")',

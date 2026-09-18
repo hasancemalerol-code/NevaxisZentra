@@ -34,7 +34,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": MANAGER.issuer,
     "X-crevafactos-dev-Subject": MANAGER.subject,
-    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
+    "X-NevaxisZentra-Tenant": MANAGER.tenant,
   };
 }
 
@@ -56,10 +56,10 @@ function isNullishQuantity(value) {
 
 console.log("Running PROCUREMENT-RISK-FOUNDATION-1 domain assessment verifier.");
 
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotProcurementDeliveryRiskSeed.cs");
-const poSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotErpPurchaseOrderSeed.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotProcurementDeliveryRiskSeed.cs");
+const poSeed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotErpPurchaseOrderSeed.cs");
 
 assert("calculator assess method", calculator.includes("AssessLine"));
 assert("calculator overdue branch", calculator.includes("ProcurementDeliveryRiskStatuses.Overdue"));

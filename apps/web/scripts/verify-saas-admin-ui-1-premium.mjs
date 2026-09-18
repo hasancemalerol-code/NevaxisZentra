@@ -14,7 +14,7 @@ const VIEWPORTS = [
   { width: 1600, height: 1000, label: "1600x1000" },
   { width: 1024, height: 900, label: "1024x900" },
 ];
-const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-saas-admin-ui-1-premium");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisZentra-saas-admin-ui-1-premium");
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
 const CLOSURE_PATTERN = /SAAS-ADMIN-1-CLOSURE/i;
@@ -38,7 +38,7 @@ function requireEnv(name) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -235,7 +235,7 @@ try {
 
     await signInThroughForm(page, {
       organization: ORGANIZATION,
-      email: "admin@demo.nevaxisfactos.local",
+      email: "admin@demo.nevaxiszentra.local",
       password: ownerPassword,
     });
     await page.waitForURL("**/mfa-dogrula", { timeout: 30000 });

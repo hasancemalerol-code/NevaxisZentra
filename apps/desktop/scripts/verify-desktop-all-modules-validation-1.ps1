@@ -1,4 +1,4 @@
-# NevaxisFactOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1
+# NevaxisZentra-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1
 # Cold-starts real Desktop Shell shortcut and validates all 46 canonical sales-demo routes in WebView2.
 
 $ErrorActionPreference = "Stop"
@@ -6,9 +6,9 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
 
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisZentra.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-all-modules-validation-1"
-$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj"
 $manifestScript = Join-Path $PSScriptRoot "generate-desktop-all-modules-validation-manifest-1.mjs"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-all-modules-validation-1-cdp.mjs"
 $ensureSecrets = Join-Path $repoRoot "scripts\desktop\ensure-development-saas-identity-secrets.ps1"
@@ -20,8 +20,8 @@ function Assert-Check([string]$Name, [bool]$Ok, [string]$Detail = "") {
     if (-not $Ok) { throw "$Name failed$(if ($Detail) { ": $Detail" } else { '' })" }
 }
 
-function Stop-NevaxisFactOSDesktopOnly {
-    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisZentraDesktopOnly {
+    Get-Process -Name "crevafactos", "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 4
 }
 
@@ -68,9 +68,9 @@ if ($LASTEXITCODE -ne 0) { throw "Manifest generation failed." }
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
 
 Write-Host "Publishing desktop artifact (if not locked)..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS") 2>&1 | Out-Null
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisZentra") 2>&1 | Out-Null
 
-Stop-NevaxisFactOSDesktopOnly
+Stop-NevaxisZentraDesktopOnly
 Write-Host "Cold-starting Desktop Shell from shortcut..."
 $launch = Start-Process -FilePath $shortcutPath -PassThru
 Assert-Check "desktop web ready after cold start" (Wait-DesktopWebReady 480)
@@ -88,7 +88,7 @@ Assert-Check "all routes pass" ($fullPayload.passCount -eq 46 -and $fullPayload.
 Assert-Check "user-facing console errors" ($fullPayload.userFacingConsoleErrors -eq 0) "errors=$($fullPayload.userFacingConsoleErrors)"
 
 # Final cold restart representative check
-Stop-NevaxisFactOSDesktopOnly
+Stop-NevaxisZentraDesktopOnly
 $relaunch = Start-Process -FilePath $shortcutPath -PassThru
 Assert-Check "cold restart web ready" (Wait-DesktopWebReady 360)
 $env:NEVAXIS_FACTOS_DESKTOP_ALL_MODULES_REPRESENTATIVE_ONLY = "1"
@@ -107,6 +107,6 @@ $results["passCount"] = $fullPayload.passCount
 $results["failCount"] = $fullPayload.failCount
 $results | ConvertTo-Json | Set-Content -Path (Join-Path $screenshotDir "validation-run-summary.json") -Encoding UTF8
 
-Stop-NevaxisFactOSDesktopOnly
+Stop-NevaxisZentraDesktopOnly
 Clear-KnownDesktopVerifierEnvironmentLeaks
 Write-Host "DESKTOP-ALL-MODULES-VALIDATION-1: PASS"

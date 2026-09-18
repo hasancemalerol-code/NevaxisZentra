@@ -1,8 +1,8 @@
-# NevaxisFactOS Integration Priorities
+# NevaxisZentra Integration Priorities
 
 - Status: Locked
 - Date: 2026-08-04
-- Product: NevaxisFactOS
+- Product: NevaxisZentra
 - Category: AI Factory Operations Assistant
 
 ## Purpose
@@ -20,7 +20,7 @@ This document defines the order in which integration capabilities are introduced
 7. Read-only database connector
 8. ERP-specific adapters
 9. WhatsApp Business Platform
-10. NevaxisFactOS Teams routing
+10. NevaxisZentra Teams routing
 11. Edge Agent
 12. Machine/PLC telemetry
 13. Approved ERP write-back
@@ -43,7 +43,7 @@ Every connector must define:
 - Permission requirements and supported read/write operations
 - Data retention and sensitive-data controls
 
-Integration sync state is owned by NevaxisFactOS. Business records imported from an ERP remain projections when the ERP is their system of record.
+Integration sync state is owned by NevaxisZentra. Business records imported from an ERP remain projections when the ERP is their system of record.
 
 ## Read-Only-First Policy
 
@@ -64,11 +64,11 @@ ERP write-back is the thirteenth priority and is not enabled merely because read
 - An immutable audit and AI Decision Ledger record
 - A verified success, partial-success, or failure outcome
 
-Retries must not duplicate orders, purchasing drafts, or other external records. Financial postings are not autonomous NevaxisFactOS write-back operations.
+Retries must not duplicate orders, purchasing drafts, or other external records. Financial postings are not autonomous NevaxisZentra write-back operations.
 
 ## Teams Routing
 
-NevaxisFactOS Teams routes messages, tasks, alerts, reviews, approvals, and shift communication to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management units.
+NevaxisZentra Teams routes messages, tasks, alerts, reviews, approvals, and shift communication to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, and management units.
 
 Teams and Web reference the same authoritative AI Task Center task and approval records. Teams is not a second workflow store and cannot bypass assignment, permission, delegation, expiry, or approval checks.
 

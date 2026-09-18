@@ -47,7 +47,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -173,9 +173,9 @@ function assertExecuteBlocked(result, label) {
 
 console.log("Running ERP integration gate verifier.");
 
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const adapterContract = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpAdapter.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const adapterContract = readRequired("packages/NevaxisZentra.Persistence/Erp/IErpAdapter.cs");
 
 for (const [label, key] of [
   ["simulator", "Simulator = \"simulator\""],
@@ -195,14 +195,14 @@ requireText(entities, "ProductionRead = \"production.read\"", "production.read")
 requireText(entities, "DocumentsRead = \"documents.read\"", "documents.read");
 requireText(entities, "SalesOrdersWriteDraft = \"sales-orders.write-draft\"", "simulator writeback capability");
 requireText(adapters, "class SimulatorErpAdapter", "simulator adapter");
-const logoAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Logo/LogoErpAdapter.cs");
+const logoAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Logo/LogoErpAdapter.cs");
 requireText(logoAdapter, "class LogoErpAdapter", "logo adapter");
-const mikroAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Mikro/MikroErpAdapter.cs");
+const mikroAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Mikro/MikroErpAdapter.cs");
 requireText(mikroAdapter, "class MikroErpAdapter", "mikro adapter");
 forbidText(adapters, "class MikroErpAdapterPlaceholder", "mikro placeholder removed");
 requireText(adapters, "class NetsisErpAdapterPlaceholder", "netsis placeholder");
 requireText(adapterContract, "interface IErpAdapter", "IErpAdapter");
-requireText(readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpWritebackAdapter.cs"), "interface IErpWritebackAdapter", "writeback adapter contract");
+requireText(readRequired("packages/NevaxisZentra.Persistence/Erp/IErpWritebackAdapter.cs"), "interface IErpWritebackAdapter", "writeback adapter contract");
 
 const duplicatePid = getListeningPid(5011);
 if (duplicatePid) stopPid(duplicatePid, "duplicate API on 5011");
@@ -530,7 +530,7 @@ try {
   stopPid(canonicalPidBefore, "canonical API on 5000");
   const restarted = spawn(
     process.platform === "win32" ? "dotnet.exe" : "dotnet",
-    ["run", "--project", "apps/api/NevaxisFactOS.Api.csproj", "--no-launch-profile"],
+    ["run", "--project", "apps/api/NevaxisZentra.Api.csproj", "--no-launch-profile"],
     {
       cwd: projectRoot,
       detached: true,

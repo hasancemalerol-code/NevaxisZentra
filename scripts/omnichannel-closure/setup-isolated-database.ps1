@@ -12,7 +12,7 @@ if ([string]::IsNullOrWhiteSpace($PostgresPassword)) {
 }
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "../..")
-$migrationProject = Join-Path $root "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"
+$migrationProject = Join-Path $root "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj"
 
 Write-Host "Creating isolated database: $ClosureDatabaseName"
 $existsResult = docker exec $ClosurePostgresContainer psql -U $ClosureMigrationUser -d postgres -t -A -c "SELECT 1 FROM pg_database WHERE datname = '$ClosureDatabaseName'" 2>&1
@@ -34,7 +34,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "300"
 
 Write-Host "Applying EF migrations to $ClosureDatabaseName ..."
 Push-Location $root
-dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context NevaxisZentraDbContext
 if ($LASTEXITCODE -ne 0) { throw "Migration apply failed." }
 Pop-Location
 

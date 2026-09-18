@@ -46,7 +46,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -69,9 +69,9 @@ async function api(method, path, body) {
 
 console.log("Running ERP-2L reconciliation verifier.");
 
-const mappingRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpMappingRepository.cs");
+const mappingRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpMappingRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
 
 requireText(mappingRepo, "ListCustomerReconciliationAsync", "ErpMappingRepository");
 requireText(mappingRepo, "ListProductReconciliationAsync", "ErpMappingRepository");

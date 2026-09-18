@@ -43,7 +43,7 @@ function headers(subject = OPERATOR, tenant = TENANT) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
@@ -55,13 +55,13 @@ function percentile(values, p) {
 }
 
 function runStaticPerformanceAssertions() {
-  const engines = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
+  const engines = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
   requireText(engines, "MetricCardinalityGuard", "metric cardinality guard");
   requireText(engines, "AllowedLabelKeys", "bounded metric labels");
   requireText(engines, "MaxAttempts = 5", "bounded retry attempts");
   checks.push("STATIC_BOUNDED_RETRY = PASS");
 
-  const edgeBuffer = readRequired("packages/NevaxisFactOS.EdgeBuffer/EdgeBufferStore.cs");
+  const edgeBuffer = readRequired("packages/NevaxisZentra.EdgeBuffer/EdgeBufferStore.cs");
   requireText(edgeBuffer, "ClaimBatch", "bounded batch delivery");
   requireText(edgeBuffer, "GetEffectiveMaxBufferedEvents", "bounded buffer capacity");
   checks.push("STATIC_BOUNDED_BUFFER = PASS");

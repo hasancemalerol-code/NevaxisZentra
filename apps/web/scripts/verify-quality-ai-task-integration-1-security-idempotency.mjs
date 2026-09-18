@@ -31,7 +31,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -50,9 +50,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running QUALITY-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityNcrFollowUpEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityFollowUpPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityFollowUpConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityNonconformanceRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityFollowUpPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityFollowUpConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes('MapPost("/ncr-follow-up/{ncrId:guid}/task-draft"'));
 assert("follow-up requires ncr manage permission", endpoints.includes("QualityPermissionKeys.NcrManage"));

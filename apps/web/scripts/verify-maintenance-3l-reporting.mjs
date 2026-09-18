@@ -45,7 +45,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -63,13 +63,13 @@ const reportingEndpoints = readRequired(
   "apps/api/Maintenance/MaintenanceReportingEndpointRouteBuilderExtensions.cs",
 );
 const reliabilityRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceReliabilityRepository.cs",
 );
 const reliabilityModels = readRequired(
-  "packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityModels.cs",
+  "packages/NevaxisZentra.Persistence/Maintenance/MaintenanceReliabilityModels.cs",
 );
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809190000_AddMaintenanceReliabilityFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809190000_AddMaintenanceReliabilityFoundation.cs",
 );
 const mapper = readRequired("apps/api/Maintenance/MaintenanceApiMapper.cs");
 

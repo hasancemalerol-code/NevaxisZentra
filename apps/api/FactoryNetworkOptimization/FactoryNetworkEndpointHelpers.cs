@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.FactoryNetworkOptimization;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.FactoryNetworkOptimization;
+namespace NevaxisZentra.Api.FactoryNetworkOptimization;
 
 internal sealed record FactoryNetworkAccessContext(
     FacilityAccessContext RequestingAccess,

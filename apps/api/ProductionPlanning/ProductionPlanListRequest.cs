@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.ProductionPlanning;
+namespace NevaxisZentra.Api.ProductionPlanning;
 
 public sealed record ProductionPlanListRequest(
     Guid FacilityId,

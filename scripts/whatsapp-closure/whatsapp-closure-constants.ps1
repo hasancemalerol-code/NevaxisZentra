@@ -1,6 +1,6 @@
 # WhatsApp runtime closure — isolated database constants
 $script:WhatsAppClosureDatabaseName = "NEVAXIS_FACTOS_whatsapp_closure_1"
-$script:WhatsAppClosurePostgresContainer = "NevaxisFactOS-local-postgres-1"
+$script:WhatsAppClosurePostgresContainer = "NevaxisZentra-local-postgres-1"
 $script:WhatsAppClosurePostgresHost = "127.0.0.1"
 $script:WhatsAppClosurePostgresPort = 5433
 $script:WhatsAppClosureMigrationUser = "crevafactos"

@@ -90,8 +90,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
+  if (jar?.cookies.get("NevaxisZentra.session") && jar.cookies.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.cookies.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -116,7 +116,7 @@ async function signInOwner() {
   const jar = new CookieJar();
   const signInResult = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "admin@demo.nevaxisfactos.local",
+    email: "admin@demo.nevaxiszentra.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: "app-action-1b-shell",
   }, jar);
@@ -152,7 +152,7 @@ assert("no future-work shell aria labels remain", !/işlev ileriki pakette eklen
 
 const signOut = await api("POST", "/api/identity/sign-out", undefined, owner);
 assert("sign-out succeeds", signOut.status === 200 || signOut.status === 204);
-assert("session cookie cleared", !owner.cookies.has("NevaxisFactOS.session") || owner.cookies.get("NevaxisFactOS.session") === "");
+assert("session cookie cleared", !owner.cookies.has("NevaxisZentra.session") || owner.cookies.get("NevaxisZentra.session") === "");
 
 const revokedJar = owner.clone();
 const revoked = await api("GET", "/api/admin-access/me/effective-access", undefined, revokedJar);

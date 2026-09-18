@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.AiTasks.Delivery;
-using NevaxisFactOS.Persistence.AiTasks.Delivery.Email;
-using NevaxisFactOS.Persistence.AiTasks.Delivery.WhatsApp;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.AiTasks.Delivery;
+using NevaxisZentra.Persistence.AiTasks.Delivery.Email;
+using NevaxisZentra.Persistence.AiTasks.Delivery.WhatsApp;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Threading.RateLimiting;
 
-namespace NevaxisFactOS.Api.AiTasks;
+namespace NevaxisZentra.Api.AiTasks;
 
 public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 {
@@ -241,7 +241,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         return TypedResults.Ok(result);
     }
 
-    public static IServiceCollection AddNevaxisFactOSAiTaskDelivery(
+    public static IServiceCollection AddNevaxisZentraAiTaskDelivery(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -266,7 +266,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
         services.AddScoped<IAiTaskDeliveryChannelAdapter, EmailDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, WhatsAppBusinessDeliveryAdapter>();
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
-            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.NevaxisFactOSTeams, "NevaxisFactOS Teams"));
+            => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.NevaxisZentraTeams, "NevaxisZentra Teams"));
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
             => new NotConfiguredAiTaskDeliveryChannelAdapter(AiTaskDeliveryChannels.MicrosoftTeams, "Microsoft Teams"));
         services.AddScoped<IAiTaskDeliveryChannelAdapter, NotConfiguredAiTaskDeliveryChannelAdapter>(_
@@ -276,7 +276,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskDeliveryRepository>(sp =>
         {
-            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+            var db = sp.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
             return db is null
                 ? new UnavailableAiTaskDeliveryRepository()
                 : new AiTaskDeliveryRepository(
@@ -290,7 +290,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskSecureAccessRepository>(sp =>
         {
-            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+            var db = sp.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
             return db is null
                 ? new UnavailableAiTaskSecureAccessRepository()
                 : new AiTaskSecureAccessRepository(
@@ -303,7 +303,7 @@ public static class AiTaskDeliveryEndpointRouteBuilderExtensions
 
         services.AddScoped<IAiTaskDeliveryWorker>(sp =>
         {
-            var db = sp.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+            var db = sp.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
             return db is null
                 ? new UnavailableAiTaskDeliveryWorker()
                 : new AiTaskDeliveryWorker(
@@ -602,7 +602,7 @@ internal sealed class AiTaskDeliveryBackgroundService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
+                var db = scope.ServiceProvider.GetService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
                 if (db is null)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);

@@ -1,8 +1,8 @@
-# NevaxisFactOS Shared Packages
+# NevaxisZentra Shared Packages
 
 
 
-Bu klasör, NevaxisFactOS uygulamaları arasında kontrollü biçimde paylaşılacak ortak paketleri içerir.
+Bu klasör, NevaxisZentra uygulamaları arasında kontrollü biçimde paylaşılacak ortak paketleri içerir.
 
 
 
@@ -14,7 +14,7 @@ Bu klasör, NevaxisFactOS uygulamaları arasında kontrollü biçimde paylaşıl
 
 
 
-NevaxisFactOS tasarım sisteminin temel görsel değerlerini içerir.
+NevaxisZentra tasarım sisteminin temel görsel değerlerini içerir.
 
 
 
@@ -152,7 +152,7 @@ Kapsam:
 
 
 
-NevaxisFactOS metinleri ve yerelleştirme altyapısını içerir.
+NevaxisZentra metinleri ve yerelleştirme altyapısını içerir.
 
 
 

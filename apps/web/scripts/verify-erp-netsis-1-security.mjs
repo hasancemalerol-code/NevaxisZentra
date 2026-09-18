@@ -34,15 +34,15 @@ function forbidText(source, forbidden, label) {
 
 console.log("Running ERP-NETSIS-1 security verifier.");
 
-const netsisAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
-const netsisTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/INetsisReadTransport.cs");
-const netsisFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisReadTransportTestFixture.cs");
-const netsisDescriptor = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisConnectionDescriptor.cs");
-const netsisBridge = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisBridgeReadTransport.cs");
-const bridgeProgram = readRequired("tools/NevaxisFactOS.NetsisBridge/Program.cs");
-const bridgeCsproj = readRequired("tools/NevaxisFactOS.NetsisBridge/NevaxisFactOS.NetsisBridge.csproj");
+const netsisAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+const netsisTransport = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/INetsisReadTransport.cs");
+const netsisFixture = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisReadTransportTestFixture.cs");
+const netsisDescriptor = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisConnectionDescriptor.cs");
+const netsisBridge = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisBridgeReadTransport.cs");
+const bridgeProgram = readRequired("tools/NevaxisZentra.NetsisBridge/Program.cs");
+const bridgeCsproj = readRequired("tools/NevaxisZentra.NetsisBridge/NevaxisZentra.NetsisBridge.csproj");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
 
 forbidText(netsisTransport, "Password", "no plaintext password in transport");
 forbidText(netsisBridge, "Password", "no plaintext password in bridge transport");

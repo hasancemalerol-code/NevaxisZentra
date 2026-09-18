@@ -49,7 +49,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -84,7 +84,7 @@ function readMigrationConnectionEnv() {
 }
 
 function runMigrationApply() {
-  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
     [
@@ -99,7 +99,7 @@ function runMigrationApply() {
       "--startup-project",
       migrationProject,
       "--context",
-      "NevaxisFactOSDbContext",
+      "NevaxisZentraDbContext",
     ],
     {
       cwd: ROOT,
@@ -111,10 +111,10 @@ function runMigrationApply() {
 
 console.log("Running IOT-PLC-1 migration verifier.");
 
-const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
-const designer = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
-const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIotPlcSeed.cs");
+const migration = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
+const designer = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
+const snapshot = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIotPlcSeed.cs");
 
 assert("migration source present", migration.includes("AddIotPlcIndustrialConnectivityFoundation"));
 assert("designer present", designer.includes("AddIotPlcIndustrialConnectivityFoundation"));

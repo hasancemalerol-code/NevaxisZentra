@@ -36,7 +36,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -48,7 +48,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -92,8 +92,8 @@ function removeClosureFixtures() {
 
 console.log("Running ENERGY-1 domain/calculation verifier.");
 
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyCalculator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Energy/EnergyConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Energy/EnergyCalculator.cs");
 
 assert("rule-set ENERGY-1.0", constants.includes("ENERGY-1.0"));
 assert("interval sum method", calculator.includes("EnergyCalculationMethods.IntervalSum"));

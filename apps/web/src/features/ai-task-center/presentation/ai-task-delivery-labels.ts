@@ -9,7 +9,7 @@ export const AI_TASK_DELIVERY_STATUS_LABELS: Readonly<Record<string, string>> = 
 };
 
 export const AI_TASK_DELIVERY_CHANNEL_LABELS: Readonly<Record<string, string>> = {
-  "NevaxisFactOS-teams": "FactOS Teams",
+  "NevaxisZentra-teams": "Zentra Teams",
   email: "E-posta",
   whatsapp: "WhatsApp",
   "microsoft-teams": "Microsoft Teams",

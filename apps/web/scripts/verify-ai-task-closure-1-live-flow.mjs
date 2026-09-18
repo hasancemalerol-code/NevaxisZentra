@@ -38,7 +38,7 @@ function bootstrapSecrets() {
   const ids = ["a7824c6f-6aa8-498f-895d-7f9b31bab8e3", "85d2e353-dc82-41df-ae90-9baa4397ee63", "0e3b0257-2b6c-4a42-81dc-cceb6078d79f", "6aa3a2aa-05da-4f17-9e21-8f4415d6c3f8", "e4795037-6822-4158-86cc-66f2bbb7cc33"];
   let text = "";
   for (const id of ids) {
-    const p = join(home, ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts", id, `${id}.jsonl`);
+    const p = join(home, ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts", id, `${id}.jsonl`);
     if (existsSync(p)) text += readFileSync(p, "utf8");
   }
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret"]) {
@@ -76,11 +76,11 @@ function generateTotp(secret, counterOffset = 0) {
 }
 
 function managerHeaders() {
-  return { "Content-Type": "application/json", "X-crevafactos-dev-Issuer": MANAGER.issuer, "X-crevafactos-dev-Subject": MANAGER.subject, "X-NevaxisFactOS-Tenant": MANAGER.tenant };
+  return { "Content-Type": "application/json", "X-crevafactos-dev-Issuer": MANAGER.issuer, "X-crevafactos-dev-Subject": MANAGER.subject, "X-NevaxisZentra-Tenant": MANAGER.tenant };
 }
 
 function reviewerHeaders() {
-  return { "Content-Type": "application/json", "X-crevafactos-dev-Issuer": REVIEWER.issuer, "X-crevafactos-dev-Subject": REVIEWER.subject, "X-NevaxisFactOS-Tenant": REVIEWER.tenant };
+  return { "Content-Type": "application/json", "X-crevafactos-dev-Issuer": REVIEWER.issuer, "X-crevafactos-dev-Subject": REVIEWER.subject, "X-NevaxisZentra-Tenant": REVIEWER.tenant };
 }
 
 async function apiJson(method, path, body, headers = managerHeaders()) {
@@ -92,7 +92,7 @@ async function apiJson(method, path, body, headers = managerHeaders()) {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }

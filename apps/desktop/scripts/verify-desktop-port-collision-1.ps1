@@ -1,4 +1,4 @@
-# NevaxisFactOS-DESKTOP-RC1-WEB-PORT-COLLISION-CLOSURE-1 verifier
+# NevaxisZentra-DESKTOP-RC1-WEB-PORT-COLLISION-CLOSURE-1 verifier
 
 [CmdletBinding()]
 param(
@@ -14,10 +14,10 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 }
 if ([string]::IsNullOrWhiteSpace($BundleRoot)) {
-    $BundleRoot = Join-Path $RepositoryRoot "artifacts\desktop-runtime\NevaxisFactOS-RC1"
+    $BundleRoot = Join-Path $RepositoryRoot "artifacts\desktop-runtime\NevaxisZentra-RC1"
 }
 
-$desktopExe = Join-Path $BundleRoot "desktop\NevaxisFactOS.exe"
+$desktopExe = Join-Path $BundleRoot "desktop\NevaxisZentra.exe"
 $webAppDir = Join-Path $BundleRoot "web\apps\web"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-authentication-live-1-cdp.mjs"
 $resultsPath = Join-Path $RepositoryRoot ".cursor-screenshots\desktop-runtime-packaging-1\port-collision-results.json"
@@ -43,8 +43,8 @@ function Get-ProcessCommandLine([int]$ProcessId) {
     return $proc.CommandLine
 }
 
-function Stop-NevaxisFactOSOnly {
-    foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop", "NevaxisFactOS.Api")) {
+function Stop-NevaxisZentraOnly {
+    foreach ($name in @("crevafactos", "NevaxisZentra.Desktop", "NevaxisZentra.Api")) {
         Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     }
     foreach ($port in $packagedWebPorts + @(5000)) {
@@ -53,11 +53,11 @@ function Stop-NevaxisFactOSOnly {
             if ($listener.OwningProcess -le 0) { continue }
             $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
             if (-not $proc) { continue }
-            $isNevaxisFactOS = $proc.Name -match '^NevaxisFactOS' -or
+            $isNevaxisZentra = $proc.Name -match '^NevaxisZentra' -or
                 ($proc.CommandLine -match 'desktop-runtime') -or
-                ($proc.CommandLine -match 'NevaxisFactOS-RC1') -or
+                ($proc.CommandLine -match 'NevaxisZentra-RC1') -or
                 ($proc.Name -eq 'node.exe' -and $proc.CommandLine -match 'server\.js')
-            if ($isNevaxisFactOS) {
+            if ($isNevaxisZentra) {
                 Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
             }
         }
@@ -65,7 +65,7 @@ function Stop-NevaxisFactOSOnly {
     Start-Sleep -Seconds 4
 }
 
-function Test-NevaxisFactOSWebReady([int]$Port) {
+function Test-NevaxisZentraWebReady([int]$Port) {
     try {
         $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
         $response = Invoke-WebRequest "http://127.0.0.1:$Port/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
@@ -82,9 +82,9 @@ function Wait-WebReady([int]$TimeoutSeconds = 300) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         $logPort = Get-SelectedWebPortFromLifecycleLog
-        if ($logPort -and (Test-NevaxisFactOSWebReady $logPort)) { return $logPort }
+        if ($logPort -and (Test-NevaxisZentraWebReady $logPort)) { return $logPort }
         foreach ($port in $packagedWebPorts) {
-            if (Test-NevaxisFactOSWebReady $port) { return $port }
+            if (Test-NevaxisZentraWebReady $port) { return $port }
         }
         Start-Sleep -Seconds 2
     }
@@ -92,7 +92,7 @@ function Wait-WebReady([int]$TimeoutSeconds = 300) {
 }
 
 function Get-SelectedWebPortFromLifecycleLog {
-    $logDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "NevaxisFactOS\Desktop\runtime\logs"
+    $logDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "NevaxisZentra\Desktop\runtime\logs"
     if (-not (Test-Path $logDir)) { return $null }
     $latest = Get-ChildItem $logDir -Filter "desktop-lifecycle-*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if (-not $latest) { return $null }
@@ -147,15 +147,15 @@ function Test-CaseA {
     $pid3001 = Get-ListenerPid 3001
     if ($pid3001) {
         $cmd = Get-ProcessCommandLine $pid3001
-        if ($cmd -match 'desktop-runtime|NevaxisFactOS-RC1') {
-            Stop-NevaxisFactOSOnly
+        if ($cmd -match 'desktop-runtime|NevaxisZentra-RC1') {
+            Stop-NevaxisZentraOnly
         } elseif ($cmd) {
             Write-Host "SKIP Test A: port 3001 occupied by foreign PID $pid3001 (not killed)"
             $results["Test A - Free 3001"] = "SKIP"
             return
         }
     }
-    Stop-NevaxisFactOSOnly
+    Stop-NevaxisZentraOnly
     $still = Get-ListenerPid 3001
     if ($still) {
         Write-Host "SKIP Test A: port 3001 still occupied by PID $still"
@@ -167,18 +167,18 @@ function Test-CaseA {
     Assert-Check "SELECTED_WEB_PORT" ($launch.SelectedPort -eq 3001) "actual=$($launch.SelectedPort)"
     Assert-Check "AUTH login MFA dashboard" (Run-AuthSmoke $launch.SelectedPort)
     $results["Test A - Free 3001"] = "PASS"
-    Stop-NevaxisFactOSOnly
+    Stop-NevaxisZentraOnly
 }
 
 function Test-CaseB {
-    Write-Host "`n== Test B: Stale NevaxisFactOS listener =="
-    Stop-NevaxisFactOSOnly
+    Write-Host "`n== Test B: Stale NevaxisZentra listener =="
+    Stop-NevaxisZentraOnly
     $targetPort = 3001
     if (Get-ListenerPid 3001) {
         $targetPort = 3011
         if (Get-ListenerPid 3011) {
             Write-Host "SKIP Test B: no free candidate port for stale owned listener"
-            $results["Test B - Stale NevaxisFactOS listener"] = "SKIP"
+            $results["Test B - Stale NevaxisZentra listener"] = "SKIP"
             return
         }
     }
@@ -195,13 +195,13 @@ function Test-CaseB {
     Assert-Check "ownership recognized and reclaimed" ($launch.SelectedPort -eq $targetPort) "actual=$($launch.SelectedPort)"
     Assert-Check "SELECTED_WEB_PORT after reclaim" ($launch.SelectedPort -eq $targetPort)
     Assert-Check "AUTH login MFA dashboard" (Run-AuthSmoke $launch.SelectedPort)
-    $results["Test B - Stale NevaxisFactOS listener"] = "PASS"
-    Stop-NevaxisFactOSOnly
+    $results["Test B - Stale NevaxisZentra listener"] = "PASS"
+    Stop-NevaxisZentraOnly
 }
 
 function Test-CaseC {
     Write-Host "`n== Test C: Foreign 3001 listener =="
-    Stop-NevaxisFactOSOnly
+    Stop-NevaxisZentraOnly
     $foreignPid = Get-ListenerPid 3001
     $foreignListener = $null
     if (-not $foreignPid) {
@@ -221,7 +221,7 @@ function Test-CaseC {
     Assert-Check "AUTH login MFA dashboard" (Run-AuthSmoke $launch.SelectedPort)
     $results["Test C - Foreign 3001 listener"] = "PASS"
     $results["SELECTED_WEB_PORT"] = $launch.SelectedPort
-    Stop-NevaxisFactOSOnly
+    Stop-NevaxisZentraOnly
 
     if ($foreignListener) {
         $foreignListener.Stop()
@@ -231,7 +231,7 @@ function Test-CaseC {
 
 function Test-RealColdStart {
     Write-Host "`n== Real User Cold Start =="
-    Stop-NevaxisFactOSOnly
+    Stop-NevaxisZentraOnly
     $foreignPid = Get-ListenerPid 3001
     if ($foreignPid) {
         Write-Host "Port 3001 occupied by PID $foreignPid (foreign expected)"

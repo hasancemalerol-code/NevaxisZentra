@@ -35,7 +35,7 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality 3L reporting verifier.");
 
 const endpoints = readRequired("apps/api/Quality/QualityReportingEndpointRouteBuilderExtensions.cs");
-const reportingRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityReportingRepository.cs");
+const reportingRepo = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityReportingRepository.cs");
 const domain = readRequired("apps/web/src/features/quality-control/domain/quality-control.ts");
 const contracts = readRequired("apps/web/src/features/quality-control/server/quality-control-api-contracts.ts");
 const client = readRequired("apps/web/src/features/quality-control/server/quality-control-api-client.ts");

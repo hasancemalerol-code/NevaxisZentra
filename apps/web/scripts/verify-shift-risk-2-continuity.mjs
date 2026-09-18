@@ -51,7 +51,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -63,7 +63,7 @@ function headers(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -133,10 +133,10 @@ function pilotShiftDate() {
 
 console.log("Running SHIFT-RISK-2 continuity verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/ShiftRisk/ShiftWorkforceContinuityRiskEvaluator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/ShiftRisk/ShiftWorkforceContinuityConstants.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/ShiftRisk/ShiftRiskRepository.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/ShiftRisk/ShiftWorkforceContinuityRiskEvaluator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/ShiftRisk/ShiftWorkforceContinuityConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/ShiftRisk/ShiftRiskRepository.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
 
 assert("rule-set version constant", constants.includes("SHIFT-WORKFORCE-CONTINUITY-RISK-V1"));
 assert("continuity-clear reason", constants.includes("continuity-clear"));

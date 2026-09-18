@@ -1,14 +1,14 @@
-using NevaxisFactOS.Persistence.SaasIdentity;
-using NevaxisFactOS.Api.SaasIdentity;
+using NevaxisZentra.Persistence.SaasIdentity;
+using NevaxisZentra.Api.SaasIdentity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace NevaxisFactOS.Api.Authentication;
+namespace NevaxisZentra.Api.Authentication;
 
 public static class AuthenticationServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSAuthentication(
+    public static IServiceCollection AddNevaxisZentraAuthentication(
         this IServiceCollection services,
         IConfiguration configuration,
         IHostEnvironment environment)
@@ -84,7 +84,7 @@ public static class AuthenticationServiceCollectionExtensions
             case AuthenticationMode.SessionCookie:
                 if (environment.IsDevelopment())
                 {
-                    const string policyScheme = "NevaxisFactOS.SessionOrDevelopment";
+                    const string policyScheme = "NevaxisZentra.SessionOrDevelopment";
                     services.AddAuthentication(authenticationOptions =>
                         {
                             authenticationOptions.DefaultAuthenticateScheme = policyScheme;

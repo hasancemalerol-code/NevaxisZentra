@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.SaasBilling.Payments;
+using NevaxisZentra.Persistence.SaasBilling.Payments;
 
-namespace NevaxisFactOS.Api.SaasBilling.Payments;
+namespace NevaxisZentra.Api.SaasBilling.Payments;
 
 public sealed class NotConfiguredSaasPaymentProvider : ISaasPaymentProvider
 {

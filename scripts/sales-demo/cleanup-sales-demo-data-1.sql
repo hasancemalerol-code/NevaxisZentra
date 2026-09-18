@@ -1,4 +1,4 @@
--- NevaxisFactOS-SALES-DEMO-FINAL-DATA-CLEANUP-AND-FREEZE-1
+-- NevaxisZentra-SALES-DEMO-FINAL-DATA-CLEANUP-AND-FREEZE-1
 -- Development Pilot only. Idempotent cleanup of verifier/test pollution.
 
 BEGIN;

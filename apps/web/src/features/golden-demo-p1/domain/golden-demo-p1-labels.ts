@@ -36,7 +36,7 @@ export function getGoldenDemoAgentLabel(agentCode: string): string {
     case "energy":
       return "Enerji Dijital Çalışanı";
     case "orchestrator":
-      return "FactOS Orchestrator";
+      return "Zentra Orchestrator";
     default:
       return agentCode;
   }

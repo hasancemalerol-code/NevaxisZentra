@@ -43,11 +43,11 @@ function assertContains(label, content, text) {
 // ---------------------------------------------------------------------------
 
 console.log("\n[1] Idempotency implementation");
-const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const ingestion = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeIngestionService.cs");
 
 assertContains("Duplicate check queries by IdempotencyKey", ingestion, "IdempotencyKey == request.IdempotencyKey");
 assertContains("EdgeIngestResult.Duplicate returned on dup", ingestion, "EdgeIngestResult.Duplicate");
-const modelsFile = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
+const modelsFile = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeModels.cs");
 assertContains("Accepted false on duplicate", modelsFile, "Accepted = false, IsDuplicate = true");
 assertContains("No exception on duplicate — safe failure preservation", ingestion, "EdgeIngestResult.Duplicate");
 
@@ -80,7 +80,7 @@ assertContains("IsReadyForProduction derived from Running status", ingestion, 'M
 console.log("\n[4] Failure preservation (Unavailable paths)");
 
 assertContains("UnavailableEdgeIngestionService returns Failure not throws", ingestion, "Task.FromResult(EdgeIngestResult.Failure");
-const repo = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
+const repo = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeRepository.cs");
 assertContains("UnavailableEdgeQueryRepository list returns empty (no throws)", repo, "Task.FromResult<IReadOnlyList<EdgeGatewayReadModel>>([])");
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ assertContains("UnavailableEdgeQueryRepository list returns empty (no throws)", 
 // ---------------------------------------------------------------------------
 
 console.log("\n[5] MachineSimulator determinism");
-const scenarios = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const scenarios = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 
 assertContains("CNC-001 has at least one cycle-start", scenarios, '"cycle-start"');
 assertContains("PRESS-001 has heartbeat", scenarios, '"PRESS-001"');

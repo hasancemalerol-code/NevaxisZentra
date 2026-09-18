@@ -26,8 +26,8 @@ console.log("Running MATERIAL-3 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialRequirementEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Material/MaterialEndpointHelpers.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialRequirementRepository.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812145938_AddMaterialRequirementConsumptionIntelligence.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialRequirementRepository.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260812145938_AddMaterialRequirementConsumptionIntelligence.cs");
 
 requireText(endpoints, "RequireAuthorization", "requirement endpoints");
 requireText(endpoints, "ResolveReadAccessAsync", "requirement read access");
@@ -53,14 +53,14 @@ const READ_ACTOR = {
   "Content-Type": "application/json",
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 
 const MANAGE_ACTOR = {
   "Content-Type": "application/json",
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "production-pilot-operator",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 
 async function liveRequest(method, path, body, headers = MANAGE_ACTOR) {
@@ -107,7 +107,7 @@ const NEGATIVE_ACTOR = {
   "Content-Type": "application/json",
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "quality-negative-test-user",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const unauthorizedActor = await liveRequest("GET", `/api/materials/${MATERIAL_PP}/requirement-overview?facilityId=${FACILITY}`, null, NEGATIVE_ACTOR);
 assertLive("unauthorized actor HTTP 403", unauthorizedActor.status === 403);

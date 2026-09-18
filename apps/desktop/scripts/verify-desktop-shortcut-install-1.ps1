@@ -1,13 +1,13 @@
-# NevaxisFactOS-DESKTOP-SHELL-SHORTCUT-INSTALL-CLOSURE-1
+# NevaxisZentra-DESKTOP-SHELL-SHORTCUT-INSTALL-CLOSURE-1
 # Verifies Windows desktop shortcut install and live launch behavior.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
-$artifactExe = Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS\NevaxisFactOS.exe"
+$artifactExe = Join-Path $repoRoot "artifacts\desktop\NevaxisZentra\NevaxisZentra.exe"
 $artifactDir = Split-Path $artifactExe -Parent
 $desktopFolder = [Environment]::GetFolderPath("Desktop")
-$shortcutPath = Join-Path $desktopFolder "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path $desktopFolder "NevaxisZentra.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
 $results = [ordered]@{}
 
@@ -93,7 +93,7 @@ public static class ShortcutInstallCapture
         var deadline = Environment.TickCount + timeoutMs;
         while (Environment.TickCount < deadline)
         {
-            foreach (var processName in new[] { "crevafactos", "NevaxisFactOS.Desktop" })
+            foreach (var processName in new[] { "crevafactos", "NevaxisZentra.Desktop" })
             {
                 foreach (var process in Process.GetProcessesByName(processName))
                 {
@@ -111,16 +111,16 @@ public static class ShortcutInstallCapture
 }
 "@
 
-function Get-NevaxisFactOSProcessCount {
+function Get-NevaxisZentraProcessCount {
     $count = 0
-    foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop")) {
+    foreach ($name in @("crevafactos", "NevaxisZentra.Desktop")) {
         $count += @(Get-Process -Name $name -ErrorAction SilentlyContinue).Count
     }
     return $count
 }
 
-function Stop-NevaxisFactOSDesktop {
-    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisZentraDesktop {
+    Get-Process -Name "crevafactos", "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
 
@@ -145,7 +145,7 @@ function Wait-ForWebViewScreenshot([string]$ShotPath, [int]$TimeoutSeconds = 180
 }
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
 
@@ -156,7 +156,7 @@ Assert-Check "shortcut target path" ($shortcut.TargetPath -eq $artifactExe) "exp
 Assert-Check "shortcut working directory" ((Test-Path $shortcut.WorkingDirectory) -and ($shortcut.WorkingDirectory -eq $artifactDir)) $shortcut.WorkingDirectory
 Assert-Check "shortcut icon location" ($shortcut.IconLocation -like "$artifactExe,*") $shortcut.IconLocation
 
-$duplicateCount = @(Get-ChildItem $desktopFolder -Filter "NevaxisFactOS*.lnk" -ErrorAction SilentlyContinue).Count
+$duplicateCount = @(Get-ChildItem $desktopFolder -Filter "NevaxisZentra*.lnk" -ErrorAction SilentlyContinue).Count
 Assert-Check "no duplicate shortcuts" ($duplicateCount -eq 1) "count=$duplicateCount"
 
 $desktopShot = Join-Path $screenshotDir "08-windows-desktop-shortcut.png"
@@ -187,7 +187,7 @@ try {
     $mainHandle = $null
     $deadline = (Get-Date).AddMinutes(4)
     while ((Get-Date) -lt $deadline) {
-        foreach ($processName in @("crevafactos", "NevaxisFactOS.Desktop")) {
+        foreach ($processName in @("crevafactos", "NevaxisZentra.Desktop")) {
             foreach ($process in Get-Process -Name $processName -ErrorAction SilentlyContinue) {
                 $process.Refresh()
                 if ($process.MainWindowHandle -eq [IntPtr]::Zero) { continue }
@@ -214,14 +214,14 @@ try {
     }
     Assert-Check "shortcut launch" $captured
 
-    $beforeCount = Get-NevaxisFactOSProcessCount
+    $beforeCount = Get-NevaxisZentraProcessCount
     if ($beforeCount -lt 1) { $beforeCount = 1 }
     Launch-DesktopShortcut | Out-Null
     Start-Sleep -Seconds 4
-    $afterCount = Get-NevaxisFactOSProcessCount
+    $afterCount = Get-NevaxisZentraProcessCount
     Assert-Check "second launch single instance" ($afterCount -eq $beforeCount) "before=$beforeCount after=$afterCount"
 
-    Stop-NevaxisFactOSDesktop
+    Stop-NevaxisZentraDesktop
     Start-Sleep -Seconds 3
     Launch-DesktopShortcut | Out-Null
     $reopenHandle = [ShortcutInstallCapture]::WaitForWindow({ param($p) $p.MainWindowHandle -ne [IntPtr]::Zero }, 240000)
@@ -230,7 +230,7 @@ try {
 finally {
     Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_ENTRY_PATH -ErrorAction SilentlyContinue
     Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_SCREENSHOT_PATH -ErrorAction SilentlyContinue
-    Stop-NevaxisFactOSDesktop
+    Stop-NevaxisZentraDesktop
 }
 
 $resultsPath = Join-Path $screenshotDir "shortcut-install-results.json"

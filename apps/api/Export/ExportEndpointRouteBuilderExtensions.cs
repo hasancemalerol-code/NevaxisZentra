@@ -1,13 +1,13 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.AiUsage;
-using NevaxisFactOS.Persistence.Export;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.AiUsage;
+using NevaxisZentra.Persistence.Export;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Export;
+namespace NevaxisZentra.Api.Export;
 
 public static class ExportEndpointRouteBuilderExtensions
 {
@@ -1580,11 +1580,11 @@ public static class ExportEndpointRouteBuilderExtensions
 
 public static class ExportServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSExport(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraExport(this IServiceCollection services)
     {
         services.AddScoped<IExportCaseReadRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableExportCaseReadRepository()
                 : new ExportCaseReadRepository(
@@ -1594,7 +1594,7 @@ public static class ExportServiceCollectionExtensions
 
         services.AddScoped<IExportCaseWriteRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableExportCaseWriteRepository()
                 : new ExportCaseWriteRepository(
@@ -1606,84 +1606,84 @@ public static class ExportServiceCollectionExtensions
         // EXPORT-2L repositories
         services.AddScoped<IExportPackingReadRepository>(serviceProvider =>
             new ExportPackingReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportPackingWriteRepository>(serviceProvider =>
             new ExportPackingWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportShipmentReadRepository>(serviceProvider =>
             new ExportShipmentReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportShipmentWriteRepository>(serviceProvider =>
             new ExportShipmentWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportBrokerReadRepository>(serviceProvider =>
             new ExportBrokerReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportBrokerWriteRepository>(serviceProvider =>
             new ExportBrokerWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         // EXPORT-3L repositories
         services.AddScoped<IExportCountryRulePackReadRepository>(serviceProvider =>
             new ExportCountryRulePackReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportCountryRulePackWriteRepository>(serviceProvider =>
             new ExportCountryRulePackWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportComplianceReadRepository>(serviceProvider =>
             new ExportComplianceReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportComplianceWriteRepository>(serviceProvider =>
             new ExportComplianceWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportCountryResearchReadRepository>(serviceProvider =>
             new ExportCountryResearchReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportCountryResearchWriteRepository>(serviceProvider =>
             new ExportCountryResearchWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportCountryKnowledgeReadRepository>(serviceProvider =>
             new ExportCountryKnowledgeReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportCountryKnowledgeWriteRepository>(serviceProvider =>
             new ExportCountryKnowledgeWriteRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         services.AddScoped<IExportTraceabilityReadRepository>(serviceProvider =>
             new ExportTraceabilityReadRepository(
-                serviceProvider.GetRequiredService<NevaxisFactOSDbContext>(),
+                serviceProvider.GetRequiredService<NevaxisZentraDbContext>(),
                 serviceProvider.GetRequiredService<TenantDatabaseSession>()));
 
         // EXPORT-4L — AI copilot
         services.AddScoped<IExportAiReadRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableExportAiReadRepository()
                 : new ExportAiReadRepository(
@@ -1693,7 +1693,7 @@ public static class ExportServiceCollectionExtensions
 
         services.AddScoped<IExportAiWriteRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableExportAiWriteRepository()
                 : new ExportAiWriteRepository(
@@ -1705,7 +1705,7 @@ public static class ExportServiceCollectionExtensions
 
         services.AddScoped<ExportAiContextBuilder>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>()
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>()
                 ?? throw new InvalidOperationException("Export AI persistence is disabled.");
             return new ExportAiContextBuilder(dbContext);
         });
@@ -1714,7 +1714,7 @@ public static class ExportServiceCollectionExtensions
 
         services.AddScoped<IAiUsageMeteringService>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableAiUsageMeteringService()
                 : new AiUsageMeteringService(

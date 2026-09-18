@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 const migration = readFileSync(
-  resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260913135602_AddFactoryNetworkOptimizationFoundation.cs"),
+  resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260913135602_AddFactoryNetworkOptimizationFoundation.cs"),
   "utf8",
 );
 

@@ -46,7 +46,7 @@ function readDevelopmentIdentityHeaders(): Readonly<Record<string, string>> | nu
   return {
     "X-crevafactos-dev-Issuer": issuer,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenantKey,
+    "X-NevaxisZentra-Tenant": tenantKey,
   };
 }
 

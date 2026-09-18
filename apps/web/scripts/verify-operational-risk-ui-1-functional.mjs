@@ -14,7 +14,7 @@ const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const ORGANIZATION = "dev-pilot-tenant";
 const CLOSURE_PREFIX = "OPRISK-UI-FUNCTIONAL-CLOSURE";
 const CLOSURE_OVERRIDE_ID = "dd000003-00e6-4000-8000-0000000000e6";
-const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-operational-risk-runtime-closure-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisZentra-operational-risk-runtime-closure-screenshots");
 const WINDOW_START = "2026-08-21T08:00:00.000Z";
 const WINDOW_END = "2026-08-21T12:00:00.000Z";
 const TOTP_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -79,7 +79,7 @@ function isBenignDevConsoleError(message) {
 
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__OPRISK_UI_1_BOOTSTRAPPED === "1") return;
-  const transcript = join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl");
+  const transcript = join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl");
   const text = existsSync(transcript) ? readFileSync(transcript, "utf8") : "";
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret", "DevelopmentSaasIdentity__ActiveUserPassword"]) {
     if (!process.env[key]?.trim()) {
@@ -126,7 +126,7 @@ function resolveChromiumExecutable() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }
@@ -189,14 +189,14 @@ async function authHeaders(context) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
   if (cookieHeader) headers.Cookie = cookieHeader;
-  const csrf = cookies.find((cookie) => cookie.name === "NevaxisFactOS.csrf");
-  if (csrf?.value) headers["X-NevaxisFactOS-Csrf"] = csrf.value;
+  const csrf = cookies.find((cookie) => cookie.name === "NevaxisZentra.csrf");
+  if (csrf?.value) headers["X-NevaxisZentra-Csrf"] = csrf.value;
   return headers;
 }
 
 async function sessionFingerprint(context) {
   const cookies = await context.cookies();
-  const session = cookies.find((cookie) => cookie.name === "NevaxisFactOS.session");
+  const session = cookies.find((cookie) => cookie.name === "NevaxisZentra.session");
   if (!session?.value) return { hasSession: false, fingerprint: "none" };
   const fingerprint = createHash("sha256").update(session.value).digest("hex").slice(0, 12);
   return { hasSession: true, fingerprint };
@@ -371,7 +371,7 @@ function restartCanonicalApi() {
   const beforePid = listenerPid(5000);
   report.restart.apiPidBefore = beforePid;
   if (beforePid) spawnSync("taskkill", ["/PID", String(beforePid), "/F"], { stdio: "ignore" });
-  spawn("dotnet", ["run", "--project", join(REPO_ROOT, "apps/api/NevaxisFactOS.Api.csproj"), "--urls", "http://127.0.0.1:5000", "--no-build"], {
+  spawn("dotnet", ["run", "--project", join(REPO_ROOT, "apps/api/NevaxisZentra.Api.csproj"), "--urls", "http://127.0.0.1:5000", "--no-build"], {
     cwd: REPO_ROOT,
     env: { ...process.env, ASPNETCORE_ENVIRONMENT: "Development", NEVAXIS_FACTOS__AUTHENTICATION__MODE: "SessionCookie" },
     detached: true,
@@ -474,7 +474,7 @@ const ownerPage = await ownerContext.newPage();
 let subscriptionRestore = null;
 
 try {
-  await signInPersona(ownerPage, "admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
+  await signInPersona(ownerPage, "admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"), requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
   ownerPage.on("console", (msg) => { if (msg.type() === "error") report.consoleErrors.push(msg.text()); });
   ownerPage.on("pageerror", (error) => report.consoleErrors.push(error.message));
   await waitForAuthenticatedWorkspace(ownerPage);
@@ -662,7 +662,7 @@ try {
 
   const invalidContext = await browser.newContext({ deviceScaleFactor: 1 });
   await invalidContext.addCookies([{
-    name: "NevaxisFactOS.session",
+    name: "NevaxisZentra.session",
     value: "invalid-operational-risk-functional-closure",
     domain: "localhost",
     path: "/",

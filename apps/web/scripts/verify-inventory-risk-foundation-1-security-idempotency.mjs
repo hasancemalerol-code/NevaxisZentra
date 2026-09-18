@@ -41,14 +41,14 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -72,10 +72,10 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running INVENTORY-RISK-FOUNDATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialAvailabilityRiskEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialRequirementRepository.cs");
-const riskRepository = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskRepository.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialRequirementRepository.cs");
+const riskRepository = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialAvailabilityRiskRepository.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
 
 assert("workspace endpoint registered", endpoints.includes('MapGet("/workspace"'));
 assert("evaluate endpoint registered", endpoints.includes('MapPost("/evaluate"'));
@@ -143,7 +143,7 @@ spawnSync(
   "docker",
   [
     "exec",
-    "NevaxisFactOS-local-postgres-1",
+    "NevaxisZentra-local-postgres-1",
     "psql",
     "-U",
     "crevafactos",

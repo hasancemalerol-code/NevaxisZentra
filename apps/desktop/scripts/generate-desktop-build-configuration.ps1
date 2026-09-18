@@ -9,7 +9,7 @@ $devLiteral = if ($DevelopmentDistribution) { "true" } else { "false" }
 
 $lines = @(
     "#nullable enable"
-    "namespace NevaxisFactOS.Desktop.Configuration;"
+    "namespace NevaxisZentra.Desktop.Configuration;"
     ""
     "internal static class DesktopBuildConfiguration"
     "{"

@@ -30,7 +30,7 @@ function readRequired(relativePath) {
 function db(sql, database) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -56,7 +56,7 @@ function readMigrationConnectionEnv(database) {
 }
 
 function runMigrationApply(database) {
-  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
     [
@@ -71,7 +71,7 @@ function runMigrationApply(database) {
       "--startup-project",
       migrationProject,
       "--context",
-      "NevaxisFactOSDbContext",
+      "NevaxisZentraDbContext",
     ],
     { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv(database) },
   );
@@ -79,7 +79,7 @@ function runMigrationApply(database) {
 
 console.log("Running WHATSAPP-BUSINESS-ADAPTER-1 migration verifier.");
 
-const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
+const migration = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
 assert("provider columns on deliveries", migration.includes('name: "provider"') && migration.includes('name: "provider_status"'));
 assert("event hash unique index", migration.includes("ux_ai_task_delivery_provider_events_tenant_hash"));
 assert("FORCE RLS", migration.includes("FORCE ROW LEVEL SECURITY"));

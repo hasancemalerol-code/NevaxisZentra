@@ -23,7 +23,7 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const migrationPath = resolve(ROOT, `packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION}.cs`);
+const migrationPath = resolve(ROOT, `packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION}.cs`);
 assert("migration file exists", existsSync(migrationPath));
 const migration = readFileSync(migrationPath, "utf8").replaceAll("\r\n", "\n");
 assert("email channel config table", migration.includes("ai_task_email_channel_configurations"));
@@ -31,14 +31,14 @@ assert("RLS FORCE", migration.includes("FORCE ROW LEVEL SECURITY"));
 assert("email permissions", migration.includes("ai-task.delivery.email.send"));
 assert("no raw smtp password in migration", !migration.includes("SMTP__PASSWORD"));
 
-const adapterPath = resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/Email/EmailDeliveryAdapter.cs");
+const adapterPath = resolve(ROOT, "packages/NevaxisZentra.Persistence/AiTasks/Delivery/Email/EmailDeliveryAdapter.cs");
 const adapter = readFileSync(adapterPath, "utf8");
 assert("canonical channel email", adapter.includes("AiTaskDeliveryChannels.Email"));
-assert("smtp provider", readFileSync(resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/Email/EmailDeliveryConstants.cs"), "utf8").includes('Smtp = "smtp"'));
+assert("smtp provider", readFileSync(resolve(ROOT, "packages/NevaxisZentra.Persistence/AiTasks/Delivery/Email/EmailDeliveryConstants.cs"), "utf8").includes('Smtp = "smtp"'));
 assert("secure link reuse", adapter.includes("secureTaskUrl"));
 assert("no duplicate secure token system", !adapter.includes("EmailAccessToken"));
 
-const transportPath = resolve(ROOT, "packages/NevaxisFactOS.Persistence/AiTasks/Delivery/Email/SmtpEmailTransport.cs");
+const transportPath = resolve(ROOT, "packages/NevaxisZentra.Persistence/AiTasks/Delivery/Email/SmtpEmailTransport.cs");
 const transport = readFileSync(transportPath, "utf8");
 assert("mailkit transport", transport.includes("MailKit") || transport.includes("SmtpClient"));
 assert("certificate validation enabled", transport.includes("CheckCertificateRevocation"));
@@ -59,13 +59,13 @@ const labels = readFileSync(labelsPath, "utf8");
 assert("turkish email readiness labels", labels.includes("Yapılandırılmadı") && labels.includes("Kimlik bilgileri geçersiz"));
 assert("email provider status labels", labels.includes("Sunucu tarafından kabul edildi"));
 
-const testsPath = resolve(ROOT, "tests/NevaxisFactOS.Persistence.Tests/AiTaskEmailDeliveryAdapterTests.cs");
+const testsPath = resolve(ROOT, "tests/NevaxisZentra.Persistence.Tests/AiTaskEmailDeliveryAdapterTests.cs");
 assert("email tests file exists", existsSync(testsPath));
 const testRun = spawnSync(
   "dotnet",
   [
     "test",
-    resolve(ROOT, "tests/NevaxisFactOS.Persistence.Tests/NevaxisFactOS.Persistence.Tests.csproj"),
+    resolve(ROOT, "tests/NevaxisZentra.Persistence.Tests/NevaxisZentra.Persistence.Tests.csproj"),
     "--filter",
     "FullyQualifiedName~Email",
     "--no-restore",
@@ -83,7 +83,7 @@ const whatsappRun = spawnSync(
   "dotnet",
   [
     "test",
-    resolve(ROOT, "tests/NevaxisFactOS.Persistence.Tests/NevaxisFactOS.Persistence.Tests.csproj"),
+    resolve(ROOT, "tests/NevaxisZentra.Persistence.Tests/NevaxisZentra.Persistence.Tests.csproj"),
     "--filter",
     "FullyQualifiedName~WhatsApp",
     "--no-restore",

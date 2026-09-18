@@ -33,7 +33,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -52,9 +52,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running PRODUCTION-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Production/ProductionFollowUpEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionFollowUpRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionFollowUpPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Production/ProductionFollowUpConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Production/ProductionFollowUpRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Production/ProductionFollowUpPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Production/ProductionFollowUpConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes('MapPost("/follow-up/{exceptionId:guid}/task-draft"'));
 assert("follow-up uses exception manage access", endpoints.includes("ResolveExceptionManageAccessAsync"));

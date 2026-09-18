@@ -2,10 +2,10 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using NevaxisFactOS.Persistence.MarketRates;
+using NevaxisZentra.Persistence.MarketRates;
 using Microsoft.Extensions.Options;
 
-namespace NevaxisFactOS.Api.MarketRates;
+namespace NevaxisZentra.Api.MarketRates;
 
 public sealed class OpenExchangeRatesExchangeRateProvider(
     IHttpClientFactory httpClientFactory,

@@ -47,18 +47,18 @@ function assertNotContains(label, content, text) {
 }
 
 const EDGE3_SOURCES = [
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeDowntimeIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeAlarmIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeSetupIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeScrapIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeDowntimeIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeAlarmIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeSetupIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeScrapIngestionService.cs",
 ];
 
 // ---------------------------------------------------------------------------
 // 1. Scrap entity + validation
 // ---------------------------------------------------------------------------
 console.log("\n[1] MachineScrapObservation + Quantity/Unit validation");
-const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
-const scrapSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeScrapIngestionService.cs");
+const entities = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
+const scrapSvc = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeScrapIngestionService.cs");
 
 assertContains("MachineScrapObservation class", entities, "class MachineScrapObservation");
 assertContains("Quantity field", entities, "double Quantity");
@@ -104,7 +104,7 @@ for (const srcPath of EDGE3_SOURCES) {
 // 4. No MQTT/OPC/Modbus packages
 // ---------------------------------------------------------------------------
 console.log("\n[4] No MQTT/OPC/Modbus packages in simulator/persistence csproj");
-const simCsproj = readFileOpt("tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj");
+const simCsproj = readFileOpt("tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj");
 if (simCsproj) {
   assertNotContains("simulator csproj: no MQTTnet", simCsproj, "MQTTnet");
   assertNotContains("simulator csproj: no OPCFoundation", simCsproj, "OPCFoundation");
@@ -114,7 +114,7 @@ if (simCsproj) {
   assert("simulator csproj present", false, "file missing");
 }
 
-const persistCsproj = readFileOpt("packages/NevaxisFactOS.Persistence/NevaxisFactOS.Persistence.csproj");
+const persistCsproj = readFileOpt("packages/NevaxisZentra.Persistence/NevaxisZentra.Persistence.csproj");
 if (persistCsproj) {
   assertNotContains("persistence csproj: no MQTTnet", persistCsproj, "MQTTnet");
   assertNotContains("persistence csproj: no OPCFoundation", persistCsproj, "OPCFoundation");
@@ -146,7 +146,7 @@ assertNotContains("API: no WriteCommand", api, "WriteCommand");
 // ---------------------------------------------------------------------------
 console.log("\n[6] Migration machine_scrap_observations append-only GRANT");
 const migration = readFile(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
 );
 
 assertContains("machine_scrap_observations table", migration, "machine_scrap_observations");
@@ -158,7 +158,7 @@ assertContains("quantity > 0 check", migration, "quantity > 0");
 // 7. Failure codes + observed terminology
 // ---------------------------------------------------------------------------
 console.log("\n[7] Failure codes + observed terminology");
-const models = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
+const models = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeModels.cs");
 assertContains("edge.scrap.invalid", models, '"edge.scrap.invalid"');
 assertContains("edge.scrap.duplicate", models, '"edge.scrap.duplicate"');
 assertContains("ScrapInvalid constant", models, "ScrapInvalid");
@@ -174,7 +174,7 @@ assertContains("scrap endpoint", api, '"/scrap"');
 assertContains("DevIngestScrapAsync", api, "DevIngestScrapAsync");
 assertContains("dev guard (Development env only)", api, "env.IsDevelopment()");
 
-const sim = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const sim = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 assertContains("GetScrapScenario", sim, "GetScrapScenario");
 
 // ---------------------------------------------------------------------------

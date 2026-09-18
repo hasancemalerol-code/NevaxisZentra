@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.Integration.Webhook;
+using NevaxisZentra.Persistence.Integration.Webhook;
 
-namespace NevaxisFactOS.Api.Integration;
+namespace NevaxisZentra.Api.Integration;
 
 public static class IntegrationWebhookEndpointRouteBuilderExtensions
 {

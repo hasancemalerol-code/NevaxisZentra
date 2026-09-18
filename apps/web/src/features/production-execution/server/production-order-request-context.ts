@@ -91,7 +91,7 @@ export function resolveProductionOrderRequestContext(
         requestHeaders: {
           "X-crevafactos-dev-Issuer": developmentAuth.issuer,
           "X-crevafactos-dev-Subject": developmentAuth.subject,
-          "X-NevaxisFactOS-Tenant": developmentAuth.tenantKey,
+          "X-NevaxisZentra-Tenant": developmentAuth.tenantKey,
         },
       },
     };

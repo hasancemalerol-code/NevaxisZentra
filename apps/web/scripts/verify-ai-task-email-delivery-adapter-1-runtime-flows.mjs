@@ -26,7 +26,7 @@ function headers(tenant) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": tenant === TENANT_B ? "omnichannel-closure-tenant-b-owner" : "planning-pilot-user",
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
@@ -151,7 +151,7 @@ async function readDeliveryFromDb(idempotencyKey) {
     "docker",
     [
       "exec",
-      "NevaxisFactOS-local-postgres-1",
+      "NevaxisZentra-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",

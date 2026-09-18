@@ -31,7 +31,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -50,8 +50,8 @@ async function liveRequest(method, path, body, headers = actorHeaders(OWNER)) {
 console.log("Running TEAMS-DIRECT-MESSAGES-1 security verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsDirectMessageEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsDirectMessageRepository.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260830135508_AddTeamsDirectMessages.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsDirectMessageRepository.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260830135508_AddTeamsDirectMessages.cs");
 
 assert("direct route family", endpoints.includes("/api/teams/direct-messages"));
 assert("recipient directory route", endpoints.includes("/recipients"));

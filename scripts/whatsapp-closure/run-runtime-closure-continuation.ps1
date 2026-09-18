@@ -23,10 +23,10 @@ $failDouble = Start-Process node -ArgumentList "scripts/meta-whatsapp-provider-t
 Start-Sleep -Seconds 2
 $failKey = "whatsapp-failure-proof-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
 $issue = Invoke-RestMethod -Method POST -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/secure-access?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
-    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"
+    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisZentra-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"
 } -Body '{"ttlPolicy":"24h","scope":"read-only"}'
 Invoke-RestMethod -Method POST -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/deliveries?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
-    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"; "Idempotency-Key"=$failKey
+    "X-crevafactos-dev-Issuer"="crevafactos-dev"; "X-crevafactos-dev-Subject"="planning-pilot-user"; "X-NevaxisZentra-Tenant"="omnichannel-closure-tenant-a"; "Content-Type"="application/json"; "Idempotency-Key"=$failKey
 } -Body (@{
     channel="whatsapp"; recipientKind="external"; maskedRecipient="+90 5** *** ** 99"; recipientE164="+905551112234"
     consentStatus="known"; secureAccessGrantId=$issue.grant.id; secureTaskUrl="$webBase/gorev#access=opaque"

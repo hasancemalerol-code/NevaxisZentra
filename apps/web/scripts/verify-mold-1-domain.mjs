@@ -23,10 +23,10 @@ function requireText(source, expected, label) {
 
 console.log("Running MOLD-1 domain verifier.");
 
-const stateMachine = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldLifecycleStateMachine.cs");
-const normalizer = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldCodeNormalizer.cs");
-const validator = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldTechnicalValidator.cs");
-const repo = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldRepository.cs");
+const stateMachine = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldLifecycleStateMachine.cs");
+const normalizer = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldCodeNormalizer.cs");
+const validator = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldTechnicalValidator.cs");
+const repo = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldRepository.cs");
 const labels = readRequired("apps/web/src/features/molds/presentation/mold-labels.ts");
 
 requireText(stateMachine, "MoldLifecycleState.Scrapped", "state machine");

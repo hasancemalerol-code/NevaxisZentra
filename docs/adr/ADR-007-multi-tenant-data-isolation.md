@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: NevaxisFactOS Product & Development
+- Decision owners: NevaxisZentra Product & Development
 - Scope: Tenant, company, facility, and data-access isolation
 
 ## Context
 
-NevaxisFactOS serves multiple customers through shared applications and infrastructure. A tenant may contain multiple companies, factories, facilities, branches, warehouses, or mold workshops.
+NevaxisZentra serves multiple customers through shared applications and infrastructure. A tenant may contain multiple companies, factories, facilities, branches, warehouses, or mold workshops.
 
 No tenant may read, mutate, infer, route, or execute against another tenant’s data or integrations.
 

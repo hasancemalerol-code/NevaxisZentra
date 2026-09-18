@@ -85,8 +85,8 @@ async function api(method, path, body, jar) {
   const headers = { Accept: "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   if (jar?.header()) headers.Cookie = jar.header();
-  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
+  if (jar?.cookies.get("NevaxisZentra.session") && jar.cookies.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.cookies.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -110,7 +110,7 @@ async function signInOwner() {
   const jar = new CookieJar();
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "admin@demo.nevaxisfactos.local",
+    email: "admin@demo.nevaxiszentra.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: "app-action-1a-ai-maintenance",
   }, jar);
@@ -134,7 +134,7 @@ async function fetchWeb(path, jar) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -215,7 +215,7 @@ async function createWithFallback(path, body) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": "production-pilot-operator",
-    "X-NevaxisFactOS-Tenant": ORGANIZATION,
+    "X-NevaxisZentra-Tenant": ORGANIZATION,
   };
   const response = await fetch(`${API}${path}?facilityId=${FACILITY_ID}`, {
     method: "POST",

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NevaxisZentra.Worker</RootNamespace>
+    <AssemblyName>NevaxisZentra.Worker</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\..\packages\NevaxisZentra.Configuration\NevaxisZentra.Configuration.csproj" />
+  </ItemGroup>
+</Project>

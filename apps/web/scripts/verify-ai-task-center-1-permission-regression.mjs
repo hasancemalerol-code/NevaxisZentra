@@ -24,8 +24,8 @@ console.log("Running AI-TASK-CENTER-1 permission regression verifier.");
 const queries = read("apps/web/src/features/ai-task-center/server/ai-task-queries.ts");
 const actions = read("apps/web/src/features/ai-task-center/server/ai-task-actions.ts");
 const createPage = read("apps/web/src/app/(app)/ai-gorevleri/yeni/page.tsx");
-const bootstrap = read("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
-const migration = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260828094900_AddAiTaskCenterFoundation.cs");
+const bootstrap = read("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260828094900_AddAiTaskCenterFoundation.cs");
 
 assert("workspace read permission", queries.includes('denyUnlessGranted("ai-task.read")'));
 assert("detail read permission", queries.includes("readAiTaskDetail"));

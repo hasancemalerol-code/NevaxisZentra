@@ -50,8 +50,8 @@ function Reclaim-ProjectPort([int]$Port, [string]$Kind) {
     $cmd = ""
     try { $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId=$ownerPid").CommandLine } catch {}
     $ok = $false
-    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisFactOS.Api" -and $path -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
-    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisFactOS\*") { $ok = $true }
+    if ($Kind -eq "api" -and $owner -and $owner.ProcessName -eq "NevaxisZentra.Api" -and $path -like "*\Projects\NevaxisZentra\*") { $ok = $true }
+    if ($Kind -eq "web" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*\Projects\NevaxisZentra\*") { $ok = $true }
     if ($Kind -eq "smtp" -and $owner -and $owner.ProcessName -eq "node" -and $cmd -like "*smtp-email-provider-test-double*") { $ok = $true }
     if ($ok) {
         Write-Host "Reclaiming $Kind port $Port PID $ownerPid"
@@ -67,11 +67,11 @@ Reclaim-ProjectPort $webPort "web"
 Reclaim-ProjectPort $smtpPort "smtp"
 Reclaim-ProjectPort $smtpHttpPort "smtp"
 
-# Next.js dev uses a single project lock — reclaim any NevaxisFactOS web dev server.
+# Next.js dev uses a single project lock — reclaim any NevaxisZentra web dev server.
 Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue | ForEach-Object {
     $cmd = $_.CommandLine
-    if ($cmd -like "*\Projects\NevaxisFactOS\apps\web*" -and $cmd -like "*next*") {
-        Write-Host "Reclaiming NevaxisFactOS web dev PID $($_.ProcessId)"
+    if ($cmd -like "*\Projects\NevaxisZentra\apps\web*" -and $cmd -like "*next*") {
+        Write-Host "Reclaiming NevaxisZentra web dev PID $($_.ProcessId)"
         Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     }
 }

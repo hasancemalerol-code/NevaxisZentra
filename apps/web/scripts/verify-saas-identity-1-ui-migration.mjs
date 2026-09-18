@@ -42,7 +42,7 @@ const DEV_ACCOUNT_IDS = [
   "bb000002-0031-4000-8000-000000000031",
 ];
 
-const TENANT_OWNER_EMAIL = "admin@demo.nevaxisfactos.local";
+const TENANT_OWNER_EMAIL = "admin@demo.nevaxiszentra.local";
 const ACTIVE_USER_EMAIL = "active-user@dev.local";
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
@@ -78,7 +78,7 @@ function requireEnv(name) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -108,7 +108,7 @@ function readMigrationConnectionEnv() {
 function runSecondMigrationApply() {
   const migrationProject = resolve(
     ROOT,
-    "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj",
+    "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj",
   );
   return spawnSync(
     "dotnet",
@@ -124,7 +124,7 @@ function runSecondMigrationApply() {
       "--startup-project",
       migrationProject,
       "--context",
-      "NevaxisFactOSDbContext",
+      "NevaxisZentraDbContext",
     ],
     {
       cwd: ROOT,
@@ -389,7 +389,7 @@ const tenantOwnerPassword = requireEnv("DevelopmentSaasIdentity__TenantOwnerPass
 const activeUserPassword = requireEnv("DevelopmentSaasIdentity__ActiveUserPassword");
 const mfaSharedSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
 
-const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const snapshot = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
 const endpoints = readRequired("apps/api/SaasIdentity/SaasIdentityEndpointRouteBuilderExtensions.cs");
 const authExtensions = readRequired("apps/api/Authentication/AuthenticationServiceCollectionExtensions.cs");
 const authConstants = readRequired("apps/web/src/features/saas-identity/lib/saas-identity-constants.ts");
@@ -400,8 +400,8 @@ const resetPage = readRequired("apps/web/src/app/(auth)/sifre-sifirla/page.tsx")
 const invitationPage = readRequired("apps/web/src/app/(auth)/davet/kabul/page.tsx");
 
 for (const migrationInfo of MIGRATIONS) {
-  const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.cs`);
-  const designer = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationInfo.id}.Designer.cs`);
+  const migration = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${migrationInfo.id}.cs`);
+  const designer = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${migrationInfo.id}.Designer.cs`);
 
   assert(`${migrationInfo.id} migration source present`, migration.includes(migrationInfo.marker));
   assert(`${migrationInfo.id} designer present`, designer.includes(migrationInfo.marker));
@@ -417,7 +417,7 @@ for (const migrationInfo of MIGRATIONS) {
 }
 
 const fixMigration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814095248_FixSaasIdentitySessionResolutionFunction.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260814095248_FixSaasIdentitySessionResolutionFunction.cs",
 );
 const migrationFunctionBody = extractMigrationFunctionBody(fixMigration);
 const liveFunctionDefinition = db(`SELECT pg_get_functiondef('${FUNCTION_NAME}(text)'::regprocedure)`);
@@ -469,7 +469,7 @@ const functionOwner = db(`
   JOIN pg_roles r ON r.oid = p.proowner
   WHERE p.proname = '${FUNCTION_NAME}'
 `);
-assert("function owner is NevaxisFactOS", functionOwner === "crevafactos", functionOwner);
+assert("function owner is NevaxisZentra", functionOwner === "crevafactos", functionOwner);
 assert("function owner is not crevafactos_runtime", functionOwner !== "crevafactos_runtime");
 
 const publicExecute = Number(db(`

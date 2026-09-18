@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using NevaxisFactOS.Persistence.Development;
+using NevaxisZentra.Persistence.Development;
 
-namespace NevaxisFactOS.Api.Development;
+namespace NevaxisZentra.Api.Development;
 
 public sealed class DevelopmentPilotBootstrapHealthCheck(
     IHostEnvironment environment,

@@ -24,7 +24,7 @@ function read(rel) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -50,15 +50,15 @@ function readMigrationConnectionEnv() {
 
 console.log("Running PRODUCTION-AI-TASK-INTEGRATION-1 migration verifier.");
 
-const migrationsDir = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
+const migrationsDir = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations");
 const migrationFiles = readdirSync(migrationsDir);
 assert("migration class file exists", migrationFiles.includes(`${MIGRATION_ID}.cs`));
 assert("migration designer file exists", migrationFiles.includes(`${MIGRATION_ID}.Designer.cs`));
 
-const migration = read(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
-const designer = read(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_ID}.Designer.cs`);
-const entityConfig = read("packages/NevaxisFactOS.Persistence/Configurations/ProductionExecutionExceptionEntityConfiguration.cs");
-const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const migration = read(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION_ID}.cs`);
+const designer = read(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION_ID}.Designer.cs`);
+const entityConfig = read("packages/NevaxisZentra.Persistence/Configurations/ProductionExecutionExceptionEntityConfiguration.cs");
+const snapshot = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
 
 assert("follow_up_status column on exceptions", migration.includes("follow_up_status") && migration.includes("production_execution_exceptions"));
 assert("linked_ai_task_id column on exceptions", migration.includes("linked_ai_task_id"));
@@ -80,9 +80,9 @@ const applyResult = spawnSync(
   [
     "tool", "run", "dotnet-ef", "--",
     "database", "update",
-    "--project", resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"),
-    "--startup-project", resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"),
-    "--context", "NevaxisFactOSDbContext",
+    "--project", resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj"),
+    "--startup-project", resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj"),
+    "--context", "NevaxisZentraDbContext",
   ],
   { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv() },
 );

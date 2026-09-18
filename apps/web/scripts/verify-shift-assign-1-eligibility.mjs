@@ -44,7 +44,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -56,7 +56,7 @@ function headers(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -151,9 +151,9 @@ function assertPilotPreserved() {
 
 console.log("Running SHIFT-ASSIGN-1 eligibility verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/ShiftAssignment/ShiftOperatorEligibilityEvaluator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/ShiftAssignment/ShiftAssignmentConstants.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/ShiftAssignment/ShiftAssignmentRepository.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/ShiftAssignment/ShiftOperatorEligibilityEvaluator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/ShiftAssignment/ShiftAssignmentConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/ShiftAssignment/ShiftAssignmentRepository.cs");
 
 assert("rule-set version constant", constants.includes("SHIFT-OPERATOR-ELIGIBILITY-V1"));
 assert("eligible outcome", constants.includes('"eligible"') || constants.includes("Eligible = \"eligible\""));

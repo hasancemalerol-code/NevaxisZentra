@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.OperationalRisk;
-using NevaxisFactOS.Persistence.Teams;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.OperationalRisk;
+using NevaxisZentra.Persistence.Teams;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.Teams;
+namespace NevaxisZentra.Api.Teams;
 
 internal static class TeamsEndpointHelpers
 {

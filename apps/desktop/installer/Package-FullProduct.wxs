@@ -3,7 +3,7 @@
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
-  <Package Name="Nevaxis FactOS"
+  <Package Name="Nevaxis Zentra"
            Manufacturer="Nevaxis"
            Version="$(var.ProductVersion)"
            UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
@@ -11,7 +11,7 @@
            Compressed="yes"
            Codepage="65001">
 
-    <MajorUpgrade DowngradeErrorMessage="Nevaxis FactOS'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
+    <MajorUpgrade DowngradeErrorMessage="Nevaxis Zentra'un daha yeni bir surumu zaten yuklu. Kurulum durduruldu." />
 
     <MediaTemplate EmbedCab="yes" />
 
@@ -27,7 +27,7 @@
                       Type="raw" />
     </Property>
 
-    <Feature Id="MainFeature" Title="Nevaxis FactOS" Level="1">
+    <Feature Id="MainFeature" Title="Nevaxis Zentra" Level="1">
       <ComponentGroupRef Id="RuntimePayload" />
       <ComponentRef Id="MainExecutableComponent" />
       <ComponentRef Id="StartMenuCleanupComponent" />
@@ -35,13 +35,13 @@
     </Feature>
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Nevaxis FactOS">
+      <Directory Id="INSTALLFOLDER" Name="Nevaxis Zentra">
         <Directory Id="DesktopAppFolder" Name="desktop" />
       </Directory>
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="ApplicationProgramsFolder" Name="Nevaxis FactOS" />
+      <Directory Id="ApplicationProgramsFolder" Name="Nevaxis Zentra" />
     </StandardDirectory>
 
     <StandardDirectory Id="DesktopFolder" />
@@ -49,23 +49,23 @@
     <ComponentGroup Id="RuntimePayload" Directory="INSTALLFOLDER">
       <Files Include="$(var.StagingRoot)\**">
         <Exclude Files="$(var.StagingRoot)\logs\**" />
-        <Exclude Files="$(var.StagingRoot)\desktop\NevaxisFactOS.exe" />
+        <Exclude Files="$(var.StagingRoot)\desktop\NevaxisZentra.exe" />
       </Files>
     </ComponentGroup>
 
     <Component Id="MainExecutableComponent" Directory="DesktopAppFolder" Guid="*">
-      <File Id="NevaxisFactOSDesktopExe"
-            Source="$(var.StagingRoot)\desktop\NevaxisFactOS.exe"
+      <File Id="NevaxisZentraDesktopExe"
+            Source="$(var.StagingRoot)\desktop\NevaxisZentra.exe"
             KeyPath="yes">
         <Shortcut Id="StartMenuShortcut"
                   Directory="ApplicationProgramsFolder"
-                  Name="Nevaxis FactOS"
-                  Description="Nevaxis FactOS — Factory Intelligence and Action OS"
+                  Name="Nevaxis Zentra"
+                  Description="Nevaxis Zentra — Factory Intelligence and Action OS"
                   WorkingDirectory="DesktopAppFolder" />
         <Shortcut Id="DesktopShortcut"
                   Directory="DesktopFolder"
-                  Name="Nevaxis FactOS"
-                  Description="Nevaxis FactOS — Factory Intelligence and Action OS"
+                  Name="Nevaxis Zentra"
+                  Description="Nevaxis Zentra — Factory Intelligence and Action OS"
                   WorkingDirectory="DesktopAppFolder" />
       </File>
     </Component>
@@ -103,9 +103,9 @@
       <Custom Action="InstallWebView2Runtime" After="InstallFiles" Condition="NOT WEBVIEW2RUNTIMEINSTALLED AND NOT Installed" />
     </InstallExecuteSequence>
 
-    <util:CloseApplication Id="CloseNevaxisFactOSDesktop"
-                           Target="NevaxisFactOS.exe"
-                           Description="Nevaxis FactOS calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
+    <util:CloseApplication Id="CloseNevaxisZentraDesktop"
+                           Target="NevaxisZentra.exe"
+                           Description="Nevaxis Zentra calisiyor. Kuruluma devam etmek icin uygulamayi kapatın."
                            CloseMessage="yes"
                            RebootPrompt="no"
                            TerminateProcess="0"

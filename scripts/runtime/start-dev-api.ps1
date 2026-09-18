@@ -1,5 +1,5 @@
-# Loads infrastructure/.env (when present) and starts the NevaxisFactOS API for local development.
-# Enforces a single NevaxisFactOS development API instance for this repository.
+# Loads infrastructure/.env (when present) and starts the NevaxisZentra API for local development.
+# Enforces a single NevaxisZentra development API instance for this repository.
 
 [CmdletBinding()]
 param(
@@ -9,7 +9,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisZentra.Api.csproj'
 $devApiPort = 5000
 $devApiUrl = "http://127.0.0.1:$devApiPort"
 $repoRootLower = $repositoryRoot.ToLowerInvariant()
@@ -115,18 +115,18 @@ function Test-IsRepoDevApiProcess {
         return $false
     }
 
-    if ($ProcessDetails.Name -eq 'NevaxisFactOS.Api.exe') {
+    if ($ProcessDetails.Name -eq 'NevaxisZentra.Api.exe') {
         return $true
     }
 
     if ($ProcessDetails.Name -eq 'dotnet.exe') {
-        return $haystack.Contains('nevaxisfactos.api.csproj') -or
+        return $haystack.Contains('nevaxiszentra.api.csproj') -or
             ($haystack.Contains('apps\api') -and $haystack.Contains('dotnet run'))
     }
 
     if ($ProcessDetails.Name -in @('powershell.exe', 'pwsh.exe')) {
         return $haystack.Contains('start-dev-api.ps1') -or
-            $haystack.Contains('nevaxisfactos.api.csproj')
+            $haystack.Contains('nevaxiszentra.api.csproj')
     }
 
     return $false
@@ -269,7 +269,7 @@ function Stop-RepoDevApiProcessTree {
     )
 
     $stopOrder = @{
-        'NevaxisFactOS.Api.exe' = 0
+        'NevaxisZentra.Api.exe' = 0
         'dotnet.exe' = 1
         'powershell.exe' = 2
         'pwsh.exe' = 2
@@ -320,7 +320,7 @@ function Resolve-ExistingDevApiInstance {
             }
 
             throw @"
-Port $devApiPort is already in use by a non-NevaxisFactOS development API process.
+Port $devApiPort is already in use by a non-NevaxisZentra development API process.
 PID: $($portListener.Id)
 Process: $($portListener.Name)
 Path: $path
@@ -342,7 +342,7 @@ Stop that process manually or choose a different port for the other application.
         return @()
     }
 
-    Write-Host 'Existing NevaxisFactOS API found'
+    Write-Host 'Existing NevaxisZentra API found'
     Write-Host 'Stopping process tree...'
 
     $processTree = @()

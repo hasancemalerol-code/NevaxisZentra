@@ -69,8 +69,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, {
     method,
@@ -103,7 +103,7 @@ async function signIn(email, password) {
 async function signInOwner() {
   const { createHmac } = await import("node:crypto");
   const secret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
-  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const counter = Math.floor(Date.now() / 1000 / 30);
   const normalized = secret.trim().replace(/=+$/, "").toUpperCase();

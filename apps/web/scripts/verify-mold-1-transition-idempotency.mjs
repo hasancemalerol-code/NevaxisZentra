@@ -26,14 +26,14 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ACTOR.issuer,
     "X-crevafactos-dev-Subject": ACTOR.subject,
-    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
+    "X-NevaxisZentra-Tenant": ACTOR.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -189,7 +189,7 @@ const scrappedRow = spawnSync(
   "docker",
   [
     "exec",
-    "NevaxisFactOS-local-postgres-1",
+    "NevaxisZentra-local-postgres-1",
     "psql",
     "-U",
     "crevafactos",

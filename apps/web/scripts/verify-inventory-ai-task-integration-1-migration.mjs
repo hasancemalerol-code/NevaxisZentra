@@ -22,10 +22,10 @@ function read(rel) {
 console.log("Running INVENTORY-AI-TASK-INTEGRATION-1 migration verifier.");
 
 const migration = read(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260829183635_AddMaterialAvailabilityRiskFollowUpTaskIntegration.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260829183635_AddMaterialAvailabilityRiskFollowUpTaskIntegration.cs",
 );
-const entityConfig = read("packages/NevaxisFactOS.Persistence/Configurations/MaterialRequirementEntityConfigurations.cs");
-const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const entityConfig = read("packages/NevaxisZentra.Persistence/Configurations/MaterialRequirementEntityConfigurations.cs");
+const snapshot = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
 
 assert("follow_up_status column", migration.includes("follow_up_status"));
 assert("linked_ai_task_id column", migration.includes("linked_ai_task_id"));

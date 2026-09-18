@@ -1,6 +1,6 @@
-# NevaxisFactOS
+# NevaxisZentra
 
-NevaxisFactOS is an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing operations.
+NevaxisZentra is an AI Factory Operations Assistant and AI Production Manager layer for plastic injection molding and mold manufacturing operations.
 
 It works above existing ERP, HR, communication, machine, and factory systems. It does not replace the systems of record for accounting, finance, receivables/payables, official inventory, invoicing, payroll, purchasing records, or enterprise master data.
 
@@ -15,12 +15,12 @@ It works above existing ERP, HR, communication, machine, and factory systems. It
 - Quality and scrap analysis
 - Material, supplier, delivery, and bottleneck risk
 - AI Task Center and Human-in-the-Loop approvals
-- NevaxisFactOS Teams for internal routing and shift communication
+- NevaxisZentra Teams for internal routing and shift communication
 - Audit and AI Decision Ledger
 - ERP connectors and controlled write-back
 - Edge Agent, telemetry, and allowlisted machine integration
 
-AI Task Center is authoritative for tasks and approvals. Web and NevaxisFactOS Teams use the same task and approval records.
+AI Task Center is authoritative for tasks and approvals. Web and NevaxisZentra Teams use the same task and approval records.
 
 ## Operating Model
 
@@ -73,7 +73,7 @@ The repository contains foundations through FOUND-07: executable applications, l
 
 ```text
 pnpm install
-dotnet restore NevaxisFactOS.sln
+dotnet restore NevaxisZentra.sln
 dotnet tool restore
 ```
 
@@ -85,8 +85,8 @@ pnpm lint
 pnpm typecheck
 pnpm test
 
-dotnet build NevaxisFactOS.sln
-dotnet test NevaxisFactOS.sln
+dotnet build NevaxisZentra.sln
+dotnet test NevaxisZentra.sln
 ```
 
 The root `pnpm build` and `pnpm test` commands include their corresponding .NET solution commands. The explicit .NET commands are useful for targeted validation.

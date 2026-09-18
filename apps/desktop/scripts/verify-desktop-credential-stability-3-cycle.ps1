@@ -1,13 +1,13 @@
-# NevaxisFactOS-DESKTOP-DEMO-CREDENTIAL-STABILITY-CLOSURE-1
+# NevaxisZentra-DESKTOP-DEMO-CREDENTIAL-STABILITY-CLOSURE-1
 # Three consecutive shortcut launches with login -> MFA -> dashboard using canonical secrets only.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisZentra.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
-$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
+$desktopProject = Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-authentication-live-1-cdp.mjs"
 $ensureSecrets = Join-Path $repoRoot "scripts\desktop\ensure-development-saas-identity-secrets.ps1"
 $results = [ordered]@{}
@@ -18,14 +18,14 @@ function Assert-Check([string]$Name, [bool]$Ok, [string]$Detail = "") {
     if (-not $Ok) { throw "$Name failed$(if ($Detail) { ": $Detail" } else { '' })" }
 }
 
-function Stop-NevaxisFactOSDesktopOnly {
-    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisZentraDesktopOnly {
+    Get-Process -Name "crevafactos", "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 4
 }
 
 function Get-PasswordHashFingerprint {
-    $sql = "SELECT substring(pc.password_hash from 1 for 16), pc.updated_at_utc FROM saas_identity_password_credentials pc JOIN saas_identity_accounts a ON a.id=pc.account_id WHERE a.email_normalized='admin@demo.nevaxisfactos.local';"
-    $out = docker exec NevaxisFactOS-local-postgres-1 psql -U NevaxisFactOS -d crevafactos_local -t -A -c $sql 2>$null
+    $sql = "SELECT substring(pc.password_hash from 1 for 16), pc.updated_at_utc FROM saas_identity_password_credentials pc JOIN saas_identity_accounts a ON a.id=pc.account_id WHERE a.email_normalized='admin@demo.nevaxiszentra.local';"
+    $out = docker exec NevaxisZentra-local-postgres-1 psql -U NevaxisZentra -d crevafactos_local -t -A -c $sql 2>$null
     if ($null -eq $out) { return "" }
     return $out.Trim()
 }
@@ -52,17 +52,17 @@ if ($LASTEXITCODE -ne 0) { throw "Canonical secret readiness failed." }
 $hashBeforeVerifier = Get-PasswordHashFingerprint
 Write-Host "Password hash fingerprint before verifier: $hashBeforeVerifier"
 
-Stop-NevaxisFactOSDesktopOnly
+Stop-NevaxisZentraDesktopOnly
 
 Write-Host "Publishing desktop artifact..."
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS")
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained false -p:DesktopDevelopmentDistribution=true -o (Join-Path $repoRoot "artifacts\desktop\NevaxisZentra")
 if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 
 Assert-Check "shortcut exists" (Test-Path $shortcutPath) $shortcutPath
 
 for ($cycle = 1; $cycle -le 3; $cycle += 1) {
     Write-Host "=== Credential stability cycle $cycle/3 ==="
-    Stop-NevaxisFactOSDesktopOnly
+    Stop-NevaxisZentraDesktopOnly
 
     $launch = Start-Process -FilePath $shortcutPath -PassThru
     Assert-Check "cycle $cycle web ready" (Wait-WebReady 480)
@@ -72,7 +72,7 @@ for ($cycle = 1; $cycle -le 3; $cycle += 1) {
     if ($LASTEXITCODE -ne 0) { throw "Cycle $cycle CDP authentication failed." }
 
     Assert-Check "cycle $cycle dashboard screenshot" (Test-Path (Join-Path $screenshotDir "20-desktop-authenticated-dashboard.png"))
-    Stop-NevaxisFactOSDesktopOnly
+    Stop-NevaxisZentraDesktopOnly
     $results["Human Login Cycle $cycle"] = "PASS"
 }
 

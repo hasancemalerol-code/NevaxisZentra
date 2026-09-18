@@ -1,12 +1,12 @@
 $ErrorActionPreference = "Stop"
 
-$repoRoot = "C:\Projects\NevaxisFactOS"
-$desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe"
-$screenshotDir = "C:\Users\studiocreva\Pictures\NevaxisFactOS-Desktop-Shell-1-Closure"
-$profilePath = Join-Path $env:LOCALAPPDATA "NevaxisFactOS\Desktop\WebView2"
+$repoRoot = "C:\Projects\NevaxisZentra"
+$desktopExe = Join-Path $repoRoot "apps\desktop\NevaxisZentra.Desktop\bin\Debug\net10.0-windows\NevaxisZentra.Desktop.exe"
+$screenshotDir = "C:\Users\studiocreva\Pictures\NevaxisZentra-Desktop-Shell-1-Closure"
+$profilePath = Join-Path $env:LOCALAPPDATA "NevaxisZentra\Desktop\WebView2"
 $cookieFixturePort = 3020
 $cookieFixturePrefix = "http://localhost:$cookieFixturePort/"
-$cookieName = "NevaxisFactOS-desktop-closure-" + [Guid]::NewGuid().ToString("N").Substring(0, 8)
+$cookieName = "NevaxisZentra-desktop-closure-" + [Guid]::NewGuid().ToString("N").Substring(0, 8)
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 
@@ -268,7 +268,7 @@ public class CookieFixtureServer
 '@
 
 function Stop-DesktopProcesses {
-    Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 1
 }
 
@@ -463,7 +463,7 @@ if (($fixtureRequests | Where-Object { $_ -eq "/ cookie=True" }).Count -eq 0) {
     throw "Cookie was not established in the first desktop session."
 }
 Stop-DesktopProcessGracefully $firstDesktop
-if (Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue) { throw "First desktop process still running." }
+if (Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue) { throw "First desktop process still running." }
 
 $requestCountBeforeSecond = @($cookieFixture.Requests.ToArray()).Count
 $secondDesktop = Start-Desktop $cookieFixturePrefix
@@ -490,7 +490,7 @@ if (-not $sessionPresent) { throw "Persistent cookie/session was not available a
 Write-Host "=== PHASE 5: Single-instance reconfirmation ==="
 $duplicate = Start-Desktop $cookieFixturePrefix
 Start-Sleep -Seconds 2
-$instanceCount = (Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue).Count
+$instanceCount = (Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue).Count
 Write-Host "Duplicate launch PID: $($duplicate.Id); active desktop instance count: $instanceCount"
 if ($instanceCount -ne 1) { throw "Expected exactly one desktop instance." }
 if (-not $duplicate.HasExited) { throw "Duplicate desktop process did not exit safely." }

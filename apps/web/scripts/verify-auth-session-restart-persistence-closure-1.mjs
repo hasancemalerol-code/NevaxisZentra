@@ -26,7 +26,7 @@ const report = {
   authenticationMode: "SessionCookie",
   dataProtectionPath: DATA_PROTECTION_PATH,
   dataProtectionApplicationName: "crevafactos",
-  dataProtectionProcessIdentity: "NevaxisFactOS.Api (dotnet)",
+  dataProtectionProcessIdentity: "NevaxisZentra.Api (dotnet)",
   fingerprintBeforeApiRestart: null,
   fingerprintAfterApiRestart: null,
   fingerprintBeforeWebRestart: null,
@@ -46,9 +46,9 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__AUTH_RESTART_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(process.env.USERPROFILE ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -174,7 +174,7 @@ function resolveChromiumExecutable() {
 
 async function sessionFingerprint(context) {
   const cookies = await context.cookies(WEB);
-  const session = cookies.find((cookie) => cookie.name === "NevaxisFactOS.session");
+  const session = cookies.find((cookie) => cookie.name === "NevaxisZentra.session");
   if (!session?.value) return null;
   return createHash("sha256").update(session.value).digest("hex").slice(0, 16);
 }
@@ -242,7 +242,7 @@ await waitForHttp(`${WEB}/giris`);
 
 const { chromium } = await import("playwright");
 const executablePath = resolveChromiumExecutable();
-const profileDir = mkdtempSync(join(tmpdir(), "NevaxisFactOS-auth-restart-persist-"));
+const profileDir = mkdtempSync(join(tmpdir(), "NevaxisZentra-auth-restart-persist-"));
 
 try {
   const browser = await chromium.launchPersistentContext(profileDir, {
@@ -254,7 +254,7 @@ try {
   console.log("PHASE 1 — establish real session");
   await signInThroughForm(page, {
     organization: ORGANIZATION,
-    email: "admin@demo.nevaxisfactos.local",
+    email: "admin@demo.nevaxiszentra.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   });
   await completeMfa(page, requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"));
@@ -308,7 +308,7 @@ try {
 
     const invalid = await negativeBrowser.newContext();
     await invalid.addCookies([{
-      name: "NevaxisFactOS.session",
+      name: "NevaxisZentra.session",
       value: "invalid-restart-negative-probe",
       domain: new URL(WEB).hostname,
       path: "/",

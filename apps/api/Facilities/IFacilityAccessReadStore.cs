@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.Facilities;
+namespace NevaxisZentra.Api.Facilities;
 
 public interface IFacilityAccessReadStore
 {

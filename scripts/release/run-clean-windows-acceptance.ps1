@@ -1,4 +1,4 @@
-# Nevaxis FactOS — Clean Windows Release Acceptance Procedure
+# Nevaxis Zentra — Clean Windows Release Acceptance Procedure
 # Run on an isolated Windows VM or physical PC with ONLY customer release artifacts.
 #
 # RULE: The acceptance machine must NOT have the repository, dev tools, or manual file copies.
@@ -39,7 +39,7 @@ $stages = @(
 )
 
 $report = [ordered]@{
-    product = "Nevaxis FactOS"
+    product = "Nevaxis Zentra"
     procedure = "clean-windows-acceptance"
     generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     machineName = $env:COMPUTERNAME
@@ -59,8 +59,8 @@ foreach ($stage in $stages) {
 }
 
 # Automated checks available on acceptance machine
-$installDir = "${env:ProgramFiles}\Nevaxis FactOS"
-$desktopExe = Join-Path $installDir "desktop\NevaxisFactOS.exe"
+$installDir = "${env:ProgramFiles}\Nevaxis Zentra"
+$desktopExe = Join-Path $installDir "desktop\NevaxisZentra.exe"
 $manifestPath = Join-Path $installDir "manifests\runtime-manifest.json"
 $dataRoot = "${env:ProgramData}\Nevaxis\FactOS"
 
@@ -111,7 +111,7 @@ $report.stages += $autoStage
 $report | ConvertTo-Json -Depth 6 | Set-Content -Path $ReportPath -Encoding UTF8
 
 Write-Host ""
-Write-Host "NEVAXIS FACTOS CLEAN WINDOWS ACCEPTANCE"
+Write-Host "NEVAXIS ZENTRA CLEAN WINDOWS ACCEPTANCE"
 Write-Host "Report: $ReportPath"
 Write-Host ""
 Write-Host "MANDATORY MANUAL GATES (all must PASS for customer release):"

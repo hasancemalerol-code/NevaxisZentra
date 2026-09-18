@@ -24,15 +24,15 @@ const MANAGER = {
 };
 
 const QUOTATION_SOURCE_FILES = [
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskRepository.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskModels.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntities.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEntityConfigurations.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskIdempotencyFingerprint.cs",
-  "packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskContracts.cs",
-  "packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskRepository.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskModels.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskEntities.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskEntityConfigurations.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskIdempotencyFingerprint.cs",
+  "packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskContracts.cs",
+  "packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs",
   "apps/api/CommercialIntelligence/CommercialQuotationRiskEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -143,7 +143,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -155,7 +155,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -313,10 +313,10 @@ function windowSalesPrices(materialId, windowStartUtc, windowEndUtc, setCode) {
 
 console.log("Running COMMERCIAL-QUOTATION-RISK-1 domain-assessment verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs");
-const reader = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskEvaluator.cs");
+const reader = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialQuotationRiskSalesEvidenceReader.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligenceConstants.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialQuotationRiskSeed.cs");
 
 assert("median helper present", evaluator.includes("ComputeMedian"));
 assert("signed variance helper present", evaluator.includes("ComputeSignedPriceVarianceRatio"));

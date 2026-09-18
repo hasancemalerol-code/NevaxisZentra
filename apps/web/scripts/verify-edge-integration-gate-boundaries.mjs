@@ -66,8 +66,8 @@ runPackageVerifier("verify-edge-ui-1-honesty.mjs");
 runPackageVerifier("verify-edge-ui-final-cleanup.mjs");
 
 console.log("\n[3] No real transport adapters");
-const adapter = readFile("packages/NevaxisFactOS.Persistence/Edge/IEdgeGatewayAdapter.cs");
-const sim = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeSimulatorAdapter.cs");
+const adapter = readFile("packages/NevaxisZentra.Persistence/Edge/IEdgeGatewayAdapter.cs");
+const sim = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeSimulatorAdapter.cs");
 for (const [label, content] of [
   ["adapter", adapter],
   ["simulator adapter", sim],
@@ -85,11 +85,11 @@ assertNotContains("UI: no machine control", ui, "Makineyi Başlat");
 
 console.log("\n[5] Downstream mutation boundary (Edge persistence)");
 const edgeSources = [
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeTelemetryIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeDowntimeIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeAlarmIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeScrapIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeTelemetryIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeDowntimeIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeAlarmIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeScrapIngestionService.cs",
 ].filter((f) => existsSync(resolve(ROOT, f)));
 
 for (const rel of edgeSources) {

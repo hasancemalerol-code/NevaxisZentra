@@ -2,12 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace NevaxisFactOS.Api.Development;
+namespace NevaxisZentra.Api.Development;
 
 public sealed class DevelopmentPilotHostedBootstrapService(
     IServiceProvider serviceProvider,
     IHostEnvironment environment,
-    IOptions<NevaxisFactOS.Persistence.Development.DevelopmentPilotOptions> options)
+    IOptions<NevaxisZentra.Persistence.Development.DevelopmentPilotOptions> options)
     : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ public sealed class DevelopmentPilotHostedBootstrapService(
         using var scope = serviceProvider.CreateScope();
         var bootstrapService =
             scope.ServiceProvider.GetService<
-                NevaxisFactOS.Persistence.Development.IDevelopmentPilotBootstrapService>();
+                NevaxisZentra.Persistence.Development.IDevelopmentPilotBootstrapService>();
 
         if (bootstrapService is null)
         {
@@ -79,7 +79,7 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
 public static class DevelopmentPilotApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSDevelopmentPilotHostedBootstrap(
+    public static IServiceCollection AddNevaxisZentraDevelopmentPilotHostedBootstrap(
         this IServiceCollection services,
         IHostEnvironment environment)
     {

@@ -45,7 +45,7 @@ function assertNotContains(label, content, text) {
 // 1. Alarm entity model
 // ---------------------------------------------------------------------------
 console.log("\n[1] MachineAlarmObservation / MachineActiveAlarm / MachineAlarmProjection");
-const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
 
 assertContains("MachineAlarmObservation class", entities, "class MachineAlarmObservation");
 assertContains("MachineActiveAlarm class", entities, "class MachineActiveAlarm");
@@ -73,7 +73,7 @@ assertContains("Higher method", entities, "public static string Higher");
 // 3. EdgeAlarmIngestionService raise/clear
 // ---------------------------------------------------------------------------
 console.log("\n[3] EdgeAlarmIngestionService raise/clear");
-const alarmSvc = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeAlarmIngestionService.cs");
+const alarmSvc = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeAlarmIngestionService.cs");
 
 assertContains("EdgeAlarmIngestionService class", alarmSvc, "class EdgeAlarmIngestionService");
 assertContains("IEdgeAlarmIngestionService interface", alarmSvc, "interface IEdgeAlarmIngestionService");
@@ -88,7 +88,7 @@ assertContains("signal HighestAlarmSeverity sync", alarmSvc, "signal.HighestAlar
 // 4. Unmatched clear + duplicate + out-of-order
 // ---------------------------------------------------------------------------
 console.log("\n[4] Unmatched clear / duplicate / out-of-order");
-const models = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeModels.cs");
+const models = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeModels.cs");
 assertContains("edge.alarm.unmatched-clear failure code", models, '"edge.alarm.unmatched-clear"');
 assertContains("AlarmUnmatchedClear constant", models, "AlarmUnmatchedClear");
 assertContains("IsUnmatchedClear set when no active", alarmSvc, "IsUnmatchedClear = active is null");
@@ -113,7 +113,7 @@ assertContains("no Maintenance WO note", alarmSvc, "No Maintenance WO");
 // ---------------------------------------------------------------------------
 console.log("\n[6] Migration machine_alarm_observations / machine_active_alarms + RLS");
 const migration = readFile(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260810200000_AddEdgeOperationalObservations.cs",
 );
 
 assertContains("machine_alarm_observations table", migration, "machine_alarm_observations");
@@ -139,7 +139,7 @@ assertContains("dev guard (Development env only)", api, "env.IsDevelopment()");
 // 8. Simulator scenarios
 // ---------------------------------------------------------------------------
 console.log("\n[8] Simulator alarm scenarios");
-const sim = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const sim = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 assertContains("GetAlarmScenario", sim, "GetAlarmScenario");
 assertContains("GetMultipleAlarmScenario", sim, "GetMultipleAlarmScenario");
 assertContains("GetOutOfOrderAlarmRaise", sim, "GetOutOfOrderAlarmRaise");

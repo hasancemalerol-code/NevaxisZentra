@@ -1,13 +1,13 @@
-# NevaxisFactOS-DESKTOP-SHELL-SPLASH-TO-MAINWINDOW-LIVE-CLOSURE-1
+# NevaxisZentra-DESKTOP-SHELL-SPLASH-TO-MAINWINDOW-LIVE-CLOSURE-1
 # Proves real desktop shortcut splash-to-main-window handoff.
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 . (Join-Path $PSScriptRoot "desktop-verifier-isolation.ps1")
-$artifactExe = Join-Path $repoRoot "artifacts\desktop\NevaxisFactOS\NevaxisFactOS.exe"
+$artifactExe = Join-Path $repoRoot "artifacts\desktop\NevaxisZentra\NevaxisZentra.exe"
 $artifactDir = Split-Path $artifactExe -Parent
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisZentra.lnk"
 $screenshotDir = Join-Path $repoRoot ".cursor-screenshots\desktop-sales-demo-1"
 $results = [ordered]@{}
 
@@ -73,12 +73,12 @@ public static class SplashMainWindowProbe
         }
     }
 
-    public static IntPtr? FindNevaxisFactOSWindow(Func<WindowMetrics, bool> predicate, int timeoutMs)
+    public static IntPtr? FindNevaxisZentraWindow(Func<WindowMetrics, bool> predicate, int timeoutMs)
     {
         var deadline = Environment.TickCount + timeoutMs;
         while (Environment.TickCount < deadline)
         {
-            foreach (var processName in new[] { "crevafactos", "NevaxisFactOS.Desktop" })
+            foreach (var processName in new[] { "crevafactos", "NevaxisZentra.Desktop" })
             {
                 foreach (var process in Process.GetProcessesByName(processName))
                 {
@@ -95,21 +95,21 @@ public static class SplashMainWindowProbe
 }
 "@
 
-function Get-NevaxisFactOSProcessCount {
+function Get-NevaxisZentraProcessCount {
     $count = 0
-    foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop")) {
+    foreach ($name in @("crevafactos", "NevaxisZentra.Desktop")) {
         $count += @(Get-Process -Name $name -ErrorAction SilentlyContinue).Count
     }
     return $count
 }
 
-function Stop-NevaxisFactOSDesktop {
-    Get-Process -Name "crevafactos", "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-NevaxisZentraDesktop {
+    Get-Process -Name "crevafactos", "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
 
 function Reset-DesktopRuntimeEnvironment {
-    Stop-NevaxisFactOSDesktop
+    Stop-NevaxisZentraDesktop
     foreach ($port in @(3001, 5000)) {
         $connections = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
         foreach ($connection in $connections) {
@@ -136,14 +136,14 @@ function Launch-DesktopShortcut {
 
 function Test-MainWindowVisible {
     param([int]$TimeoutSeconds = 240)
-    $handle = [SplashMainWindowProbe]::FindNevaxisFactOSWindow({ param($s) $s.Visible -and $s.Width -ge 1000 -and $s.Height -ge 700 }, $TimeoutSeconds * 1000)
+    $handle = [SplashMainWindowProbe]::FindNevaxisZentraWindow({ param($s) $s.Visible -and $s.Width -ge 1000 -and $s.Height -ge 700 }, $TimeoutSeconds * 1000)
     if ($handle -eq $null) { return $null }
     return $handle
 }
 
 function Test-SplashWindowVisible {
     param([int]$TimeoutSeconds = 30)
-    $handle = [SplashMainWindowProbe]::FindNevaxisFactOSWindow({ param($s) $s.Visible -and $s.Width -lt 700 }, $TimeoutSeconds * 1000)
+    $handle = [SplashMainWindowProbe]::FindNevaxisZentraWindow({ param($s) $s.Visible -and $s.Width -lt 700 }, $TimeoutSeconds * 1000)
     if ($handle -eq $null) { return $null }
     return $handle
 }
@@ -226,34 +226,34 @@ if ($mainHandle -ne $null) {
 }
 Assert-Check "playbook detail screenshot" (Test-Path (Join-Path $screenshotDir "12-real-shortcut-playbook-detail.png"))
 
-$beforeCount = Get-NevaxisFactOSProcessCount
+$beforeCount = Get-NevaxisZentraProcessCount
 Launch-DesktopShortcut | Out-Null
 Start-Sleep -Seconds 4
-$afterCount = Get-NevaxisFactOSProcessCount
+$afterCount = Get-NevaxisZentraProcessCount
 Assert-Check "second launch single instance" ($afterCount -eq $beforeCount) "before=$beforeCount after=$afterCount"
 
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 Start-Sleep -Seconds 3
 $relaunch = Launch-DesktopShortcut
 $reopenHandle = Test-MainWindowVisible 300
 Assert-Check "close and reopen from shortcut" ($reopenHandle -ne $null)
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 
 Write-Host "Producing controlled startup failure..."
-$invalidRoot = Join-Path $env:TEMP "NevaxisFactOS-invalid-runtime-root"
+$invalidRoot = Join-Path $env:TEMP "NevaxisZentra-invalid-runtime-root"
 $failureHandle = $null
 $failLaunch = Invoke-NegativeRuntimeRootTest -ArtifactExe $artifactExe -ArtifactDir $artifactDir -InvalidRoot $invalidRoot -OnFailureWindow {
     param($Process, $TimeoutSeconds)
     Remove-Item Env:NEVAXIS_FACTOS_DESKTOP_ENTRY_PATH -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 6
-    $script:failureHandle = [SplashMainWindowProbe]::FindNevaxisFactOSWindow({ param($s) $s.Visible -and $s.Height -ge 400 -and $s.Width -ge 530 -and $s.Width -lt 1000 }, $TimeoutSeconds * 1000)
+    $script:failureHandle = [SplashMainWindowProbe]::FindNevaxisZentraWindow({ param($s) $s.Visible -and $s.Height -ge 400 -and $s.Width -ge 530 -and $s.Width -lt 1000 }, $TimeoutSeconds * 1000)
     Assert-Check "startup failure window visible" ($script:failureHandle -ne $null)
     if ($script:failureHandle -ne $null) {
         [SplashMainWindowProbe]::CaptureWindow($script:failureHandle, (Join-Path $screenshotDir "13-real-startup-failure-window.png"))
     }
     Assert-Check "failure process remains alive" (-not (Wait-ProcessExit $Process.Id 5))
 }
-Stop-NevaxisFactOSDesktop
+Stop-NevaxisZentraDesktop
 Assert-RepositoryRootValid -RepositoryRoot $repoRoot -Context "splash-final"
 Assert-RuntimeRootEnvironmentClean -Context "splash-final"
 Clear-KnownDesktopVerifierEnvironmentLeaks

@@ -45,18 +45,18 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
 
 console.log("Running maintenance integration boundaries verifier.");
 
-const workOrderRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
-const requestRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceRequestRepository.cs");
-const executionRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
-const reliabilityRepo = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceReliabilityRepository.cs");
-const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
+const workOrderRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceWorkOrderRepository.cs");
+const requestRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceRequestRepository.cs");
+const executionRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceExecutionRepository.cs");
+const reliabilityRepo = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceReliabilityRepository.cs");
+const lifecycle = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceLifecycleEngine.cs");
 const reportingEndpoints = readRequired(
   "apps/api/Maintenance/MaintenanceReportingEndpointRouteBuilderExtensions.cs",
 );

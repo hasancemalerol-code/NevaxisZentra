@@ -1,7 +1,7 @@
-using NevaxisFactOS.Persistence.Authorization;
+using NevaxisZentra.Persistence.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
-namespace NevaxisFactOS.Api.Authorization;
+namespace NevaxisZentra.Api.Authorization;
 
 public static class PermissionPolicies
 {

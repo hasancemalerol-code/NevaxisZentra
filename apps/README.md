@@ -1,8 +1,8 @@
-# NevaxisFactOS Applications
+# NevaxisZentra Applications
 
 
 
-Bu klasör, NevaxisFactOS platformunun çalıştırılabilir uygulamalarını içerir.
+Bu klasör, NevaxisZentra platformunun çalıştırılabilir uygulamalarını içerir.
 
 
 
@@ -32,7 +32,7 @@ Ana kullanım alanları:
 
 - Sipariş taslakları, malzeme riskleri, kalite ve bakım ekranları
 
-- NevaxisFactOS Teams ve authoritative AI Görev Merkezi etkileşimi
+- NevaxisZentra Teams ve authoritative AI Görev Merkezi etkileşimi
 
 - Platform ve tenant yönetimi
 
@@ -46,7 +46,7 @@ ASP.NET Core tabanlı ana backend uygulamasıdır.
 
 
 
-Modüler monolit yapısında çalışır ve NevaxisFactOS iş kurallarının ana uygulama sınırını oluşturur.
+Modüler monolit yapısında çalışır ve NevaxisZentra iş kurallarının ana uygulama sınırını oluşturur.
 
 
 
@@ -102,7 +102,7 @@ Yönetici, operatör, depo, bakım, kalite ve sevkiyat ekipleri için görev oda
 
 ### `teams`
 
-NevaxisFactOS Teams; internal messaging, routing, task interaction, approval viewing ve shift communication uygulamasıdır.
+NevaxisZentra Teams; internal messaging, routing, task interaction, approval viewing ve shift communication uygulamasıdır.
 
 Teams bağımsız task veya approval state tutmaz; Web ile aynı authoritative AI Görev Merkezi kayıtlarını kullanır.
 
@@ -134,7 +134,7 @@ OPC UA, Modbus, MQTT, seri port, dosya izleme ve üretici API adaptörlerini des
 
 - Tenant, yetki, audit ve correlation kuralları bütün uygulamalarda korunmalıdır.
 
-- Web, mobil ve NevaxisFactOS Teams aynı authoritative AI Görev Merkezi task ve approval kayıtlarını kullanmalıdır.
+- Web, mobil ve NevaxisZentra Teams aynı authoritative AI Görev Merkezi task ve approval kayıtlarını kullanmalıdır.
 
 - ERP erişimi read-only-first; write-back permission-bound, approval-bound, revalidated, idempotent ve audited olmalıdır.
 

@@ -35,13 +35,13 @@ function forbidText(source, forbidden, label) {
 console.log("Running quality integration boundaries verifier.");
 
 const contextReader = readRequired(
-  "packages/NevaxisFactOS.Persistence/Quality/ProductionOrderContextReader.cs",
+  "packages/NevaxisZentra.Persistence/Quality/ProductionOrderContextReader.cs",
 );
-const ncrRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
-const reportingRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityReportingRepository.cs");
-const engine = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityEvaluationEngine.cs");
+const ncrRepo = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityNonconformanceRepository.cs");
+const reportingRepo = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityReportingRepository.cs");
+const engine = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityEvaluationEngine.cs");
 const exportReadiness = readRequired(
-  "packages/NevaxisFactOS.Persistence/Quality/QualityTraceabilityRepository.cs",
+  "packages/NevaxisZentra.Persistence/Quality/QualityTraceabilityRepository.cs",
 );
 const writer = readRequired("apps/web/src/features/quality-control/server/quality-control-writer.ts");
 const dashboardView = readRequired(

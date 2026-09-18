@@ -49,7 +49,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -98,11 +98,11 @@ console.log("Running ERP-4L security verifier.");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
 );
-const productionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpProductionRepository.cs");
-const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const permissionKeys = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
+const productionRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpProductionRepository.cs");
+const writebackRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpWritebackRepository.cs");
+const permissionKeys = readRequired("packages/NevaxisZentra.Persistence/Authorization/ErpPermissionKeys.cs");
 
 requireText(permissionKeys, "WritebackRequest", "writeback request permission");
 requireText(permissionKeys, "WritebackApprove", "writeback approve permission");
@@ -179,7 +179,7 @@ try {
   const crossTenant = await fetch(`${BASE}/api/erp/documents?facilityId=${FACILITY}`, {
     headers: {
       ...headers(OPERATOR),
-      "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot",
+      "X-NevaxisZentra-Tenant": "other-tenant-not-pilot",
     },
   });
   if (crossTenant.status !== 403) {

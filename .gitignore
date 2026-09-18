@@ -104,7 +104,7 @@ release/staging-*/
 
 # Generated freeze/release checkpoint reports at repo root
 FACTOS-FULL-CURRENT-WINDOWS-RELEASE-WIP-CHECKPOINT.md
-NEVAXISFACTOS-GOLDEN-DEMO-RECOVERY-FINAL-REPORT.md
+NEVAXISZENTRA-GOLDEN-DEMO-RECOVERY-FINAL-REPORT.md
 
 # Packaged demo secrets (use runtime.example.env / local override instead)
 apps/desktop/runtime-packaging/config/release-demo-secrets.env

@@ -35,8 +35,8 @@ function Stop-ClosureRuntime {
 }
 
 function Stop-ProjectClosureApi {
-    Get-Process -Name "NevaxisFactOS.Api" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Path -like "*\Projects\NevaxisFactOS\*" } |
+    Get-Process -Name "NevaxisZentra.Api" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -like "*\Projects\NevaxisZentra\*" } |
         ForEach-Object {
             Write-Host "Stopping project closure API PID $($_.Id)"
             Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
@@ -58,7 +58,7 @@ $env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = "local_runtime_only_change_me"
 $env:NEVAXIS_FACTOS_CLOSURE_LIVE = "1"
 
 Write-Host "=== LIVE C# PROOFS (dual-worker, lease recovery) ==="
-dotnet test "tests/NevaxisFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannelClosureLiveTests" -v q
+dotnet test "tests/NevaxisZentra.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannelClosureLiveTests" -v q
 if ($LASTEXITCODE -ne 0) { Stop-ClosureRuntime; throw "Live C# proofs failed" }
 
 Write-Host "=== PHASE B: START SUPERVISOR (worker enabled) ==="
@@ -110,7 +110,7 @@ for ($i = 0; $i -lt 60; $i++) {
     $list = Invoke-RestMethod -Uri "$apiBase/api/ai-tasks/bb000001-03d0-4000-8000-0000000003d0/deliveries?facilityId=bb000001-0005-4000-8000-000000000005" -Headers @{
         "X-crevafactos-dev-Issuer"="crevafactos-dev"
         "X-crevafactos-dev-Subject"="planning-pilot-user"
-        "X-NevaxisFactOS-Tenant"="omnichannel-closure-tenant-a"
+        "X-NevaxisZentra-Tenant"="omnichannel-closure-tenant-a"
     }
     $item = $list.items | Where-Object { $_.idempotencyKey -eq "closure-restart-002" } | Select-Object -First 1
     if ($item -and $item.status -eq "sent") { $restartOk = $true; break }
@@ -138,7 +138,7 @@ if ($LASTEXITCODE -ne 0) { throw "web build failed" }
 node scripts/verify-ai-task-omnichannel-foundation-1-contract.mjs
 if ($LASTEXITCODE -ne 0) { throw "contract verifier failed" }
 Pop-Location
-dotnet test "tests/NevaxisFactOS.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannel" -v q
+dotnet test "tests/NevaxisZentra.Persistence.Tests" --filter "FullyQualifiedName~AiTaskOmnichannel" -v q
 if ($LASTEXITCODE -ne 0) { throw "unit tests failed" }
 
 Stop-ClosureRuntime

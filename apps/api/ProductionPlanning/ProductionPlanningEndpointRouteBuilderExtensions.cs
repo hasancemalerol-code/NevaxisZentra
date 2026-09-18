@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ProductionPlanning;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ProductionPlanning;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ProductionPlanning;
+namespace NevaxisZentra.Api.ProductionPlanning;
 
 public static class ProductionPlanningEndpointRouteBuilderExtensions
 {
@@ -770,11 +770,11 @@ public static class ProductionPlanningEndpointRouteBuilderExtensions
 
 public static class ProductionPlanningServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSProductionPlanning(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraProductionPlanning(this IServiceCollection services)
     {
         services.AddScoped<IProductionPlanReadRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanReadRepository()
                 : new ProductionPlanReadRepository(
@@ -783,7 +783,7 @@ public static class ProductionPlanningServiceCollectionExtensions
         });
         services.AddScoped<IProductionPlanWriteRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanWriteRepository()
                 : new ProductionPlanWriteRepository(
@@ -794,7 +794,7 @@ public static class ProductionPlanningServiceCollectionExtensions
         services.AddScoped<IProductionPlanDraftWriteService, ProductionPlanDraftWriteService>();
         services.AddScoped<IProductionPlanWorkflowRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanWorkflowRepository()
                 : new ProductionPlanWorkflowRepository(
@@ -805,7 +805,7 @@ public static class ProductionPlanningServiceCollectionExtensions
 
         services.AddScoped<IProductionPlanTransferRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanTransferRepository()
                 : new ProductionPlanTransferRepository(
@@ -822,7 +822,7 @@ public static class ProductionPlanningServiceCollectionExtensions
 
         services.AddScoped<IProductionPlanHandoffRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanHandoffRepository()
                 : new ProductionPlanHandoffRepository(
@@ -833,7 +833,7 @@ public static class ProductionPlanningServiceCollectionExtensions
 
         services.AddScoped<IPlanningLogisticsSourceReader>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailablePlanningLogisticsSourceReader()
                 : new PlanningLogisticsSourceReader(dbContext);
@@ -841,7 +841,7 @@ public static class ProductionPlanningServiceCollectionExtensions
         services.AddScoped<IPlanningMaterialInboundContextReader, UnavailablePlanningMaterialInboundContextReader>();
         services.AddScoped<IPlanningLogisticsConstraintRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailablePlanningLogisticsConstraintRepository()
                 : new PlanningLogisticsConstraintRepository(

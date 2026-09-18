@@ -33,7 +33,7 @@ function actorHeaders(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -77,10 +77,10 @@ function evaluateConnectivityBody(endpointReference, idempotencyKey) {
 
 console.log("Running IOT-PLC-2 quality/connectivity verifier.");
 
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcIntelligenceCalculator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/IotPlc/IotPlcIntelligenceConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/IotPlc/IotPlcIntelligenceCalculator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/IotPlc/IotPlcIntelligenceConstants.cs");
 const endpoints = readRequired("apps/api/IotPlc/IotPlcIntelligenceEndpointRouteBuilderExtensions.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
 
 assert("calculator uses numeric sequence regex only", calculator.includes('GeneratedRegex(@"^\\d+$")'));
 assert("no arbitrary textual sequence parsing", !calculator.includes("PILOT-SEQ"));

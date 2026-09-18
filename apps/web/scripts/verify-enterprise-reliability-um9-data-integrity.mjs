@@ -33,31 +33,31 @@ function headers(subject = OPERATOR, tenant = TENANT, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
     ...extra,
   };
 }
 
 function runStaticDataIntegrity() {
-  const service = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
+  const service = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
   requireText(service, "FindReplayAuditAsync", "no duplicate replay");
   requireText(service, "if (existing is not null)", "replay dedup guard");
   requireText(service, "CorrelationId", "correlation tracking");
   requireText(service, "RecordReplayAuditAsync", "replay audit trail");
   checks.push("STATIC_NO_DUPLICATE_REPLAY = PASS");
 
-  const engines = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
+  const engines = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs");
   requireText(engines, "ReconciliationRunStatuses.Conflict", "reconciliation conflict guard");
   requireText(engines, "conflicts.Count > 0", "conflict detection");
   checks.push("STATIC_RECONCILIATION_INTEGRITY = PASS");
 
-  const edgeBuffer = readRequired("packages/NevaxisFactOS.EdgeBuffer/EdgeBufferStore.cs");
+  const edgeBuffer = readRequired("packages/NevaxisZentra.EdgeBuffer/EdgeBufferStore.cs");
   requireText(edgeBuffer, "IdempotencyKey", "edge idempotency");
   requireText(edgeBuffer, "snapshot.Events.Any(e => e.IdempotencyKey == evt.IdempotencyKey)", "duplicate enqueue blocked");
   checks.push("STATIC_EDGE_IDEMPOTENCY = PASS");
 
   const migration = readRequired(
-    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
+    "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
   );
   requireText(migration, "integration_quarantine_replay_audit", "replay audit table");
   requireText(migration, "recovery_reconciliation_runs", "reconciliation runs table");
@@ -65,7 +65,7 @@ function runStaticDataIntegrity() {
   checks.push("STATIC_AUDIT_TABLES = PASS");
 
   const endpoints = readRequired("apps/api/EnterpriseReliability/EnterpriseReliabilityEndpointRouteBuilderExtensions.cs");
-  requireText(endpoints, "X-NevaxisFactOS-Correlation-Id", "correlation header");
+  requireText(endpoints, "X-NevaxisZentra-Correlation-Id", "correlation header");
   checks.push("STATIC_CORRELATION_HEADER = PASS");
 }
 
@@ -87,7 +87,7 @@ async function runLiveDataIntegrity() {
   const correlationId = crypto.randomUUID();
   const reconcile = await fetch(`${API_BASE}/api/system-status/reconcile?facilityId=${FACILITY_ID}`, {
     method: "POST",
-    headers: headers(OPERATOR, TENANT, { "X-NevaxisFactOS-Correlation-Id": correlationId }),
+    headers: headers(OPERATOR, TENANT, { "X-NevaxisZentra-Correlation-Id": correlationId }),
     body: JSON.stringify({
       facilityId: FACILITY_ID,
       scope: "um9-data-integrity",

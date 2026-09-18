@@ -48,9 +48,9 @@ function assertContains(label, content, text) {
 
 // All EDGE-2 source files to check
 const EDGE2_SOURCES = [
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeTelemetryIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeCycleIngestionService.cs",
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeCounterIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeTelemetryIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeCycleIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeCounterIngestionService.cs",
 ];
 
 // ---------------------------------------------------------------------------
@@ -121,7 +121,7 @@ for (const srcPath of EDGE2_SOURCES) {
 // ---------------------------------------------------------------------------
 console.log("\n[6] No OEE implementation");
 
-const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
 assertNotContains("entities: no OEE field", entities, "OEE");
 assertNotContains("entities: no Availability field", entities, "Availability");
 assertNotContains("entities: no Performance field", entities, "Performance");
@@ -147,7 +147,7 @@ for (const srcPath of EDGE2_SOURCES) {
   assertNotContains(`${name}: no setup session`, src, "SetupSession");
 }
 
-const migration = readFile("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
+const migration = readFile("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260810140000_AddEdgeTelemetryCycleFoundation.cs");
 assertNotContains("migration: no alarm table", migration, "machine_alarms");
 assertNotContains("migration: no downtime table", migration, "machine_downtime_events");
 assertNotContains("migration: no setup table", migration, "machine_setup_events");
@@ -159,7 +159,7 @@ console.log("\n[8] No machine write/control commands");
 
 const allEdgeSources = [
   ...EDGE2_SOURCES,
-  "packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs",
+  "packages/NevaxisZentra.Persistence/Edge/EdgeIngestionService.cs",
   "apps/api/Edge/EdgeEndpointRouteBuilderExtensions.cs",
 ];
 
@@ -179,21 +179,21 @@ for (const srcPath of allEdgeSources) {
 // ---------------------------------------------------------------------------
 console.log("\n[9] No real PLC/MQTT/OPC implementation");
 
-const simFile = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const simFile = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 assertNotContains("simulator: no MQTTnet", simFile, "MQTTnet");
 assertNotContains("simulator: no OPC Foundation", simFile, "OpcUa");
 assertNotContains("simulator: no Siemens S7", simFile, "SiemensS7");
 assertNotContains("simulator: no Beckhoff ADS", simFile, "BeckhoffAds");
 
 // Check csproj files don't reference real PLC SDKs
-const simCsproj = readFileOpt("tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj");
+const simCsproj = readFileOpt("tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj");
 if (simCsproj) {
   assertNotContains("simulator csproj: no MQTTnet pkg", simCsproj, "MQTTnet");
   assertNotContains("simulator csproj: no OPC Foundation pkg", simCsproj, "OPCFoundation");
   assertNotContains("simulator csproj: no Modbus pkg", simCsproj, "NModbus");
 }
 
-const persistCsproj = readFileOpt("packages/NevaxisFactOS.Persistence/NevaxisFactOS.Persistence.csproj");
+const persistCsproj = readFileOpt("packages/NevaxisZentra.Persistence/NevaxisZentra.Persistence.csproj");
 if (persistCsproj) {
   assertNotContains("persistence csproj: no MQTTnet pkg", persistCsproj, "MQTTnet");
   assertNotContains("persistence csproj: no OPC Foundation pkg", persistCsproj, "OPCFoundation");
@@ -210,7 +210,7 @@ assertContains("no-Production note in cycle svc", readFile(EDGE2_SOURCES[1]), "N
 assertContains("no-Production note in counter svc", readFile(EDGE2_SOURCES[2]), "No Production mutation");
 
 // Machine signal projection is read-only for downstream consumers
-const entities2 = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities2 = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
 assertContains("MachineSignalProjection marked read-only downstream", entities2, "Read-only downstream");
 
 // ---------------------------------------------------------------------------

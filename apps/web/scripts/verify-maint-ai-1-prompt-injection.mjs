@@ -19,14 +19,14 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const provider = read("packages/NevaxisFactOS.Persistence/Maintenance/DeterministicMaintenanceAiProvider.cs");
-const models = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
+const provider = read("packages/NevaxisZentra.Persistence/Maintenance/DeterministicMaintenanceAiProvider.cs");
+const models = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
 
 assert("prompt injection marker detection", provider.includes("ContainsPromptInjectionMarker"));
 assert("IGNORE PREVIOUS synthetic marker", provider.includes("IGNORE PREVIOUS"));
 assert("SYSTEM PROMPT synthetic marker", provider.includes("SYSTEM PROMPT"));
 assert("injection handled as evidence", provider.includes("yalnızca kanıt olarak değerlendirildi"));
 assert("bounded input snapshot DTO", models.includes("MaintenanceAiInputSnapshot"));
-assert("no unbounded history in snapshot builder", read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentServices.cs").includes(".Take("));
+assert("no unbounded history in snapshot builder", read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAiAgentServices.cs").includes(".Take("));
 
 console.log("MAINT-AI-1 prompt-injection verifier PASS");

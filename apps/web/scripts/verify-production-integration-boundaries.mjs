@@ -35,19 +35,19 @@ function forbidText(source, forbidden, label) {
 console.log("Running production integration boundaries verifier.");
 
 const signalReader = readRequired(
-  "packages/NevaxisFactOS.Persistence/Production/ProductionPlanningLogisticsSignalReader.cs",
+  "packages/NevaxisZentra.Persistence/Production/ProductionPlanningLogisticsSignalReader.cs",
 );
 const reportingRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/Production/ProductionReportingRepository.cs",
+  "packages/NevaxisZentra.Persistence/Production/ProductionReportingRepository.cs",
 );
 const reportingEngine = readRequired(
-  "packages/NevaxisFactOS.Persistence/Production/ProductionReportingEngine.cs",
+  "packages/NevaxisZentra.Persistence/Production/ProductionReportingEngine.cs",
 );
 const workflowRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs",
+  "packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs",
 );
 const writeRepo = readRequired(
-  "packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs",
+  "packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs",
 );
 
 // Planning ownership preserved — Production must not mutate planning schedule

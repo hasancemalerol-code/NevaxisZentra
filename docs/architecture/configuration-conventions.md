@@ -1,4 +1,4 @@
-# NevaxisFactOS Yapılandırma Standartları
+# NevaxisZentra Yapılandırma Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS uygulamalarında kullanılan configuration kaynaklarını, isimlendirme kurallarını, environment ayrımını, secret yönetimini ve doğrulama ilkelerini tanımlar.
+Bu belge NevaxisZentra uygulamalarında kullanılan configuration kaynaklarını, isimlendirme kurallarını, environment ayrımını, secret yönetimini ve doğrulama ilkelerini tanımlar.
 
 
 

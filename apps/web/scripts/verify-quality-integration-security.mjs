@@ -40,16 +40,16 @@ const reportingEndpoints = readRequired(
   "apps/api/Quality/QualityReportingEndpointRouteBuilderExtensions.cs",
 );
 const helpers = readRequired("apps/api/Quality/QualityEndpointHelpers.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/QualityPermissionKeys.cs");
-const inspectionRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityInspectionRepository.cs");
-const ncrRepo = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityNonconformanceRepository.cs");
-const auditConstants = readRequired("packages/NevaxisFactOS.Persistence/Quality/QualityAuditConstants.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/QualityPermissionKeys.cs");
+const inspectionRepo = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityInspectionRepository.cs");
+const ncrRepo = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityNonconformanceRepository.cs");
+const auditConstants = readRequired("packages/NevaxisZentra.Persistence/Quality/QualityAuditConstants.cs");
 const apiClient = readRequired("apps/web/src/features/quality-control/server/quality-control-api-client.ts");
 const migrationCore = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
 );
 const migrationNcr = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809150000_AddQualityNcrHoldAndCorrectiveAction.cs",
 );
 
 requireText(qualityEndpoints, "RequireAuthorization", "quality endpoints");
@@ -89,7 +89,7 @@ forbidText(reportingEndpoints, "MapPost", "reporting endpoints");
 forbidText(apiClient, 'method: "DELETE"', "quality api client");
 
 requireText(
-  readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs"),
+  readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs"),
   "quality-negative-test-user",
   "negative test fixture",
 );

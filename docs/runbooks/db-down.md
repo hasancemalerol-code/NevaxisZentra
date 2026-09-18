@@ -9,7 +9,7 @@
 ## Immediate actions
 
 1. Check PostgreSQL container: `docker ps --filter name=postgres`
-2. Verify connectivity: `docker exec NevaxisFactOS-local-postgres-1 pg_isready -U crevafactos -d crevafactos_local`
+2. Verify connectivity: `docker exec NevaxisZentra-local-postgres-1 pg_isready -U crevafactos -d crevafactos_local`
 3. Review PostgreSQL logs for disk, connection, or corruption errors
 
 ## Recovery

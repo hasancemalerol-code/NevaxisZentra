@@ -1,14 +1,14 @@
-using NevaxisFactOS.Api.AiTasks;
-using NevaxisFactOS.Api.Erp;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Erp;
-using NevaxisFactOS.Persistence.Procurement;
+using NevaxisZentra.Api.AiTasks;
+using NevaxisZentra.Api.Erp;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Erp;
+using NevaxisZentra.Persistence.Procurement;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NevaxisFactOS.Api.Procurement;
+namespace NevaxisZentra.Api.Procurement;
 
 internal static class ProcurementDeliveryRiskEndpointRouteBuilderExtensions
 {
@@ -304,12 +304,12 @@ public static class ProcurementEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSProcurement(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraProcurement(this IServiceCollection services)
     {
         services.AddScoped<IProcurementDeliveryRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.NevaxisFactOSDbContext>();
-            var tenantDatabaseSession = serviceProvider.GetRequiredService<NevaxisFactOS.Persistence.Tenancy.TenantDatabaseSession>();
+            var dbContext = serviceProvider.GetRequiredService<NevaxisZentra.Persistence.NevaxisZentraDbContext>();
+            var tenantDatabaseSession = serviceProvider.GetRequiredService<NevaxisZentra.Persistence.Tenancy.TenantDatabaseSession>();
             return new ProcurementDeliveryRiskRepository(dbContext, tenantDatabaseSession);
         });
 

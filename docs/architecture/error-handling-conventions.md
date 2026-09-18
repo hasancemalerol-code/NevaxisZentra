@@ -1,4 +1,4 @@
-# NevaxisFactOS Hata Yönetimi Standartları
+# NevaxisZentra Hata Yönetimi Standartları
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS uygulamalarında hata üretme, sınıflandırma, taşıma, loglama, kullanıcıya gösterme ve yeniden deneme kurallarını tanımlar.
+Bu belge NevaxisZentra uygulamalarında hata üretme, sınıflandırma, taşıma, loglama, kullanıcıya gösterme ve yeniden deneme kurallarını tanımlar.
 
 
 

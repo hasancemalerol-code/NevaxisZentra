@@ -106,7 +106,7 @@ export const PRODUCTION_PLAN_TRANSFER_STATUS_LABELS = {
 export const PRODUCTION_PLAN_TARGET_SYSTEM_LABELS = {
   erp: "ERP",
   mes: "MES",
-  crevafactos: "FactOS",
+  crevafactos: "Zentra",
 } satisfies Record<
   ProductionPlanTargetSystem,
   string

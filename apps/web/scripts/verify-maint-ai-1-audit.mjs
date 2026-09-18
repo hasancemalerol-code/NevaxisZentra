@@ -23,7 +23,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const r = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (r.status !== 0) {
@@ -33,8 +33,8 @@ function db(sql) {
   return r.stdout.trim();
 }
 
-const entities = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
-const repo = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
+const entities = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAiAgentEntities.cs");
+const repo = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAiDraftRepository.cs");
 
 const actions = [
   "maintenance.ai.draft.generation-requested",

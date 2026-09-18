@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoP1;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoP1;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.GoldenDemoP1;
+namespace NevaxisZentra.Api.GoldenDemoP1;
 
 public static class GoldenDemoP1EndpointRouteBuilderExtensions
 {
@@ -22,9 +22,9 @@ public static class GoldenDemoP1EndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSGoldenDemoP1Api(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraGoldenDemoP1Api(this IServiceCollection services)
     {
-        services.AddNevaxisFactOSGoldenDemoP1();
+        services.AddNevaxisZentraGoldenDemoP1();
         return services;
     }
 

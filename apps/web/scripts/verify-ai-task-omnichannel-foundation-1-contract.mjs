@@ -24,7 +24,7 @@ function assert(label, ok, detail = "") {
 
 const migrationPath = resolve(
   ROOT,
-  `packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION}.cs`,
+  `packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION}.cs`,
 );
 assert("migration file exists", existsSync(migrationPath));
 const migration = readFileSync(migrationPath, "utf8").replaceAll("\r\n", "\n");

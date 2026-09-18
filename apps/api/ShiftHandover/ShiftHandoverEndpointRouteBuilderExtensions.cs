@@ -1,14 +1,14 @@
 using System.Globalization;
-using NevaxisFactOS.Api.AiTasks;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.ShiftHandover;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.AiTasks;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.ShiftHandover;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ShiftHandover;
+namespace NevaxisZentra.Api.ShiftHandover;
 
 public static class ShiftHandoverEndpointRouteBuilderExtensions
 {
@@ -32,17 +32,17 @@ public static class ShiftHandoverEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSShiftHandover(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraShiftHandover(this IServiceCollection services)
     {
         services.AddScoped<IShiftHandoverRepository>(sp =>
         {
-            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableShiftHandoverRepository()
                 : new ShiftHandoverRepository(
                     dbContext,
                     sp.GetRequiredService<TenantDatabaseSession>(),
-                    sp.GetRequiredService<NevaxisFactOS.Persistence.Teams.ITeamsNotificationRepository>());
+                    sp.GetRequiredService<NevaxisZentra.Persistence.Teams.ITeamsNotificationRepository>());
         });
 
         return services;

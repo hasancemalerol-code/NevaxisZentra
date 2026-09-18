@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const WEB = process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001";
-const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-shift-ui-1-screenshots");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisZentra-shift-ui-1-screenshots");
 
 function fail(message) {
   console.error(`SHIFT-UI-1 premium UI verification failed: ${message}`);

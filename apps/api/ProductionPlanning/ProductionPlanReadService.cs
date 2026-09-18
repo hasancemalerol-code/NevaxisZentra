@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.ProductionPlanning;
+using NevaxisZentra.Persistence.ProductionPlanning;
 
-namespace NevaxisFactOS.Api.ProductionPlanning;
+namespace NevaxisZentra.Api.ProductionPlanning;
 
 public sealed record ProductionPlanServiceResult<T>(
     bool Succeeded,

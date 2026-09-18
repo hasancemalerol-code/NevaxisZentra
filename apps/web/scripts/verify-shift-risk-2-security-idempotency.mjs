@@ -47,7 +47,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -59,7 +59,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -104,9 +104,9 @@ function pilotShiftDate() {
 console.log("Running SHIFT-RISK-2 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/ShiftRisk/ShiftRiskEndpointRouteBuilderExtensions.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
-const fingerprint = readRequired("packages/NevaxisFactOS.Persistence/ShiftRisk/ShiftRiskIdempotencyFingerprint.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260813170000_AddShiftWorkforceContinuityRisk.cs");
+const fingerprint = readRequired("packages/NevaxisZentra.Persistence/ShiftRisk/ShiftRiskIdempotencyFingerprint.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("continuity evaluate endpoint", endpoints.includes("/workforce-continuity/evaluations"));
 assert("continuity overview endpoint", endpoints.includes("/workforce-continuity/overview"));

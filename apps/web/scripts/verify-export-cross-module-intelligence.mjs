@@ -35,7 +35,7 @@ function forbidText(source, forbidden, label) {
 
 const intelligence = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportCrossModuleIntelligence.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportCrossModuleIntelligence.cs",
 );
 requireText(intelligence, "LoadProductionAsync", "ExportCrossModuleIntelligence");
 requireText(intelligence, "LoadPlanningAsync", "ExportCrossModuleIntelligence");
@@ -52,7 +52,7 @@ forbidText(intelligence, "ReleaseStatus = \"released\"", "ExportCrossModuleIntel
 
 const models = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/Export4LModels.cs",
+  "packages/NevaxisZentra.Persistence/Export/Export4LModels.cs",
 );
 requireText(models, "ExportProductionIntelligenceRef", "Export4LModels");
 requireText(models, "ExportPlanningIntelligenceRef", "Export4LModels");
@@ -66,7 +66,7 @@ requireText(models, "Future Planning Logistics Constraints integration contract"
 
 const contextBuilder = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportAiContextBuilder.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportAiContextBuilder.cs",
 );
 requireText(contextBuilder, "ExportCrossModuleIntelligence.LoadProductionAsync", "ExportAiContextBuilder");
 requireText(contextBuilder, "ExportCrossModuleIntelligence.LoadPlanningAsync", "ExportAiContextBuilder");
@@ -76,7 +76,7 @@ requireText(contextBuilder, "ExportCrossModuleIntelligence.DetectRisks", "Export
 
 const provider = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/DeterministicExportAiProvider.cs",
+  "packages/NevaxisZentra.Persistence/Export/DeterministicExportAiProvider.cs",
 );
 requireText(provider, "CrossModuleRisks", "DeterministicExportAiProvider");
 requireText(provider, "BuildCrossModuleFindings", "DeterministicExportAiProvider");
@@ -84,7 +84,7 @@ requireText(provider, "ContextUnavailable", "DeterministicExportAiProvider");
 
 const enums = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/Export4LEnums.cs",
+  "packages/NevaxisZentra.Persistence/Export/Export4LEnums.cs",
 );
 requireText(enums, "ExportCrossModuleRiskType", "Export4LEnums");
 requireText(enums, "ExportCrossModuleSourceModule", "Export4LEnums");

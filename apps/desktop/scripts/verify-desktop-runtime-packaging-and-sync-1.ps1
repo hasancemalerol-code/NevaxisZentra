@@ -1,4 +1,4 @@
-# NevaxisFactOS-DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1 verifier
+# NevaxisZentra-DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1 verifier
 
 [CmdletBinding()]
 param(
@@ -12,7 +12,7 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 }
 if ([string]::IsNullOrWhiteSpace($BundleRoot)) {
-    $BundleRoot = Join-Path $RepositoryRoot "artifacts\desktop-runtime\NevaxisFactOS-RC1"
+    $BundleRoot = Join-Path $RepositoryRoot "artifacts\desktop-runtime\NevaxisZentra-RC1"
 }
 
 $screenshotDir = Join-Path $RepositoryRoot ".cursor-screenshots\desktop-runtime-packaging-1"
@@ -20,10 +20,10 @@ $resultsPath = Join-Path $screenshotDir "runtime-packaging-results.json"
 $cdpScript = Join-Path $PSScriptRoot "verify-desktop-all-modules-validation-1-cdp.mjs"
 $manifestPath = Join-Path $BundleRoot "manifests\runtime-manifest.json"
 $checksumPath = Join-Path $BundleRoot "manifests\checksums.sha256"
-$desktopExe = Join-Path $BundleRoot "desktop\NevaxisFactOS.exe"
-$apiExe = Join-Path $BundleRoot "api\NevaxisFactOS.Api.exe"
+$desktopExe = Join-Path $BundleRoot "desktop\NevaxisZentra.exe"
+$apiExe = Join-Path $BundleRoot "api\NevaxisZentra.Api.exe"
 $webServer = Join-Path $BundleRoot "web\apps\web\server.js"
-$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisFactOS.lnk"
+$shortcutPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "NevaxisZentra.lnk"
 function Get-PackagedBundleToken([string]$Root) {
     $leaf = Split-Path $Root -Leaf
     if ([string]::IsNullOrWhiteSpace($leaf)) {
@@ -103,7 +103,7 @@ function Get-ProcessAudit {
             $_.CommandLine -and (
                 $_.CommandLine -match 'desktop-runtime' -or
                 $_.CommandLine -match $packagedBundleToken -or
-                $_.Name -match '^NevaxisFactOS'
+                $_.Name -match '^NevaxisZentra'
             )
         }
     $dev = @{
@@ -114,7 +114,7 @@ function Get-ProcessAudit {
     $sourceDeps = @($scoped | Where-Object {
         $commandLine = $_.CommandLine
         if ($commandLine -like "*$bundleRootNormalized*") { return $false }
-        ($_.Name -eq 'NevaxisFactOS.Api.exe' -and $commandLine -match 'apps\\api\\') -or
+        ($_.Name -eq 'NevaxisZentra.Api.exe' -and $commandLine -match 'apps\\api\\') -or
         ($_.Name -eq 'node.exe' -and $commandLine -match 'apps\\web') -or
         ($commandLine -match '\\bin\\Debug\\' -and $commandLine -notmatch 'desktop-runtime')
     }).Count
@@ -134,11 +134,11 @@ function Stop-PortListeners([int[]]$Ports) {
             if ($listener.OwningProcess -le 0) { continue }
             $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
             if (-not $proc) { continue }
-            $isNevaxisFactOS = $proc.Name -match '^NevaxisFactOS' -or
+            $isNevaxisZentra = $proc.Name -match '^NevaxisZentra' -or
                 ($proc.CommandLine -match 'desktop-runtime') -or
                 ($proc.CommandLine -match $packagedBundleToken) -or
                 ($proc.Name -eq 'node.exe' -and $proc.CommandLine -match 'server\.js')
-            if ($isNevaxisFactOS) {
+            if ($isNevaxisZentra) {
                 Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
             }
         }
@@ -150,7 +150,7 @@ function Get-PackagedWebPortCandidates {
     return @(3001, 3011, 3021, 3031)
 }
 
-function Test-NevaxisFactOSApiIdentityReady {
+function Test-NevaxisZentraApiIdentityReady {
     try {
         $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
         $response = Invoke-WebRequest "http://127.0.0.1:5000/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
@@ -173,7 +173,7 @@ function Test-NevaxisFactOSApiIdentityReady {
     }
 }
 
-function Test-NevaxisFactOSApiHealthReady {
+function Test-NevaxisZentraApiHealthReady {
     try {
         $response = Invoke-WebRequest "http://127.0.0.1:5000/health/live" -UseBasicParsing -TimeoutSec 5
         return $response.StatusCode -eq 200
@@ -200,7 +200,7 @@ function Wait-PackagedApiProcessStart([int]$TimeoutSeconds = 180) {
 function Wait-PackagedApiReady([int]$TimeoutSeconds = 300) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
-        if ((Test-NevaxisFactOSApiHealthReady) -and (Test-NevaxisFactOSApiIdentityReady)) {
+        if ((Test-NevaxisZentraApiHealthReady) -and (Test-NevaxisZentraApiIdentityReady)) {
             return $true
         }
         Start-Sleep -Seconds 2
@@ -208,7 +208,7 @@ function Wait-PackagedApiReady([int]$TimeoutSeconds = 300) {
     return $false
 }
 
-function Test-NevaxisFactOSWebReady([int]$Port) {
+function Test-NevaxisZentraWebReady([int]$Port) {
     try {
         $body = '{"organizationContext":"dev-pilot-tenant","email":"desktop-probe@invalid.local","password":"__desktop_probe__","deviceLabel":"desktop-probe"}'
         $response = Invoke-WebRequest "http://127.0.0.1:$Port/api/identity/sign-in" -Method POST -Body $body -ContentType "application/json" -UseBasicParsing -TimeoutSec 8
@@ -235,9 +235,9 @@ function Wait-PackagedWebReady([int]$TimeoutSeconds = 480) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         $logPort = Get-SelectedWebPortFromLifecycleLog
-        if ($logPort -and (Test-NevaxisFactOSWebReady $logPort)) { return $logPort }
+        if ($logPort -and (Test-NevaxisZentraWebReady $logPort)) { return $logPort }
         foreach ($port in Get-PackagedWebPortCandidates) {
-            if (Test-NevaxisFactOSWebReady $port) { return $port }
+            if (Test-NevaxisZentraWebReady $port) { return $port }
         }
         Start-Sleep -Seconds 2
     }
@@ -245,7 +245,7 @@ function Wait-PackagedWebReady([int]$TimeoutSeconds = 480) {
 }
 
 function Get-SelectedWebPortFromLifecycleLog {
-    $logDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "NevaxisFactOS\Desktop\runtime\logs"
+    $logDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "NevaxisZentra\Desktop\runtime\logs"
     if (-not (Test-Path $logDir)) { return $null }
     $latest = Get-ChildItem $logDir -Filter "desktop-lifecycle-*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if (-not $latest) { return $null }
@@ -255,8 +255,8 @@ function Get-SelectedWebPortFromLifecycleLog {
     return $null
 }
 
-function Stop-NevaxisFactOSDesktopOnly {
-    foreach ($name in @("crevafactos", "NevaxisFactOS.Desktop", "NevaxisFactOS.Api")) {
+function Stop-NevaxisZentraDesktopOnly {
+    foreach ($name in @("crevafactos", "NevaxisZentra.Desktop", "NevaxisZentra.Api")) {
         Get-Process -Name $name -ErrorAction SilentlyContinue |
             Stop-Process -Force -ErrorAction SilentlyContinue
     }
@@ -273,13 +273,13 @@ function Stop-NevaxisFactOSDesktopOnly {
     Start-Sleep -Seconds 4
 }
 
-function Wait-NevaxisFactOSProcessesCleared([int]$TimeoutSeconds = 45) {
+function Wait-NevaxisZentraProcessesCleared([int]$TimeoutSeconds = 45) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         $desktop = Get-Process -Name "crevafactos" -ErrorAction SilentlyContinue
-        $api = Get-Process -Name "NevaxisFactOS.Api" -ErrorAction SilentlyContinue
+        $api = Get-Process -Name "NevaxisZentra.Api" -ErrorAction SilentlyContinue
         if (-not $desktop -and -not $api) { return $true }
-        Stop-NevaxisFactOSDesktopOnly
+        Stop-NevaxisZentraDesktopOnly
         Start-Sleep -Seconds 2
     }
     return $false
@@ -288,29 +288,29 @@ function Wait-NevaxisFactOSProcessesCleared([int]$TimeoutSeconds = 45) {
 function Wait-PackagedPortsCleared([int]$TimeoutSeconds = 60) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
-        $NevaxisFactOSWebOccupied = $false
+        $NevaxisZentraWebOccupied = $false
         foreach ($port in Get-PackagedWebPortCandidates) {
             $listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
             if ($null -eq $listeners) { continue }
             foreach ($listener in @($listeners)) {
                 $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
                 if ($proc -and (
-                    $proc.Name -match '^NevaxisFactOS' -or
+                    $proc.Name -match '^NevaxisZentra' -or
                     ($proc.CommandLine -match 'desktop-runtime') -or
                     ($proc.CommandLine -match $packagedBundleToken))) {
-                    $NevaxisFactOSWebOccupied = $true
+                    $NevaxisZentraWebOccupied = $true
                 }
             }
         }
         $apiListeners = Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue
-        $NevaxisFactOSApiOccupied = $false
+        $NevaxisZentraApiOccupied = $false
         if ($apiListeners) {
             foreach ($listener in @($apiListeners)) {
                 $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue
-                if ($proc -and $proc.Name -match 'crevafactos') { $NevaxisFactOSApiOccupied = $true }
+                if ($proc -and $proc.Name -match 'crevafactos') { $NevaxisZentraApiOccupied = $true }
             }
         }
-        if (-not $NevaxisFactOSWebOccupied -and -not $NevaxisFactOSApiOccupied) { return $true }
+        if (-not $NevaxisZentraWebOccupied -and -not $NevaxisZentraApiOccupied) { return $true }
         Start-Sleep -Seconds 2
     }
     return $false
@@ -321,7 +321,7 @@ New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 Assert-Check "dashboard protected diff" (Test-DashboardProtectedDiff)
 Assert-Check "runtime manifest exists" (Test-Path $manifestPath)
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
-Assert-Check "runtime manifest valid" ($manifest.productName -eq "NevaxisFactOS")
+Assert-Check "runtime manifest valid" ($manifest.productName -eq "NevaxisZentra")
 Assert-Check "checksums valid" (Test-ChecksumsValid $BundleRoot $checksumPath)
 Assert-Check "desktop exe exists" (Test-Path $desktopExe)
 Assert-Check "api publish exists" (Test-Path $apiExe)
@@ -334,15 +334,15 @@ $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($shortcutPath)
 Assert-Check "shortcut targets packaged exe" ($shortcut.TargetPath -eq $desktopExe) "actual=$($shortcut.TargetPath)"
 
-Stop-NevaxisFactOSDesktopOnly
-Assert-Check "NevaxisFactOS processes cleared before cold start" (Wait-NevaxisFactOSProcessesCleared 45)
+Stop-NevaxisZentraDesktopOnly
+Assert-Check "NevaxisZentra processes cleared before cold start" (Wait-NevaxisZentraProcessesCleared 45)
 Assert-Check "packaged ports cleared before cold start" (Wait-PackagedPortsCleared 90)
 Write-Host "Cold-starting packaged runtime..."
 try {
 $launch = Start-Process -FilePath $desktopExe -WorkingDirectory (Split-Path $desktopExe -Parent) -PassThru
 Assert-Check "packaged api process start" (Wait-PackagedApiProcessStart 180)
 Assert-Check "packaged api readiness" (Wait-PackagedApiReady 300)
-Assert-Check "packaged identity endpoint readiness" (Test-NevaxisFactOSApiIdentityReady)
+Assert-Check "packaged identity endpoint readiness" (Test-NevaxisZentraApiIdentityReady)
 $selectedWebPort = Wait-PackagedWebReady 480
 Assert-Check "packaged cold start web ready" ($null -ne $selectedWebPort) "no candidate port ready"
 $logSelectedPort = Get-SelectedWebPortFromLifecycleLog
@@ -352,7 +352,7 @@ if ($logSelectedPort) {
 Write-Host "SELECTED_WEB_PORT=$selectedWebPort"
 Start-Sleep -Seconds 20
 
-$apiProcess = Get-CimInstance Win32_Process -Filter "Name='NevaxisFactOS.Api.exe'" |
+$apiProcess = Get-CimInstance Win32_Process -Filter "Name='NevaxisZentra.Api.exe'" |
     Select-Object -First 1
 if ($apiProcess) {
     Assert-Check "packaged api process path" ($apiProcess.CommandLine -like "*$packagedBundleToken*") $apiProcess.CommandLine
@@ -409,9 +409,9 @@ $results["sourceCommit"] = $manifest.sourceCommit
 $results | ConvertTo-Json -Depth 6 | Set-Content -Path $resultsPath -Encoding UTF8
 }
 finally {
-    Stop-NevaxisFactOSDesktopOnly
+    Stop-NevaxisZentraDesktopOnly
 }
 
-Stop-NevaxisFactOSDesktopOnly
+Stop-NevaxisZentraDesktopOnly
 Write-Host "DESKTOP-RUNTIME-PACKAGING-AND-SYNC-1: PASS"
 Write-Host "Results: $resultsPath"

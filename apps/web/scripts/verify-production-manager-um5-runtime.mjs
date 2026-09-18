@@ -18,8 +18,8 @@ function resolvePostgresContainer() {
 
   const candidates = [
     "crevafactos-local-postgres-1",
-    "nevaxisfactos-local-postgres-1",
-    "NevaxisFactOS-local-postgres-1",
+    "nevaxiszentra-local-postgres-1",
+    "NevaxisZentra-local-postgres-1",
   ];
   for (const name of candidates) {
     const result = spawnSync("docker", ["ps", "--filter", `name=${name}`, "--format", "{{.Names}}"], { encoding: "utf8" });
@@ -38,7 +38,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
   if (process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER) {
     base.Authorization = `Bearer ${process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER}`;

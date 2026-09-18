@@ -32,7 +32,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -52,8 +52,8 @@ console.log("Running TEAMS-APPROVALS-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsApprovalEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsApprovalRepository.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsApprovalRepository.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsConstants.cs");
 
 assert("approvals route family", endpoints.includes("/api/teams/approvals"));
 assert("create permission resolver", helpers.includes("ResolveApprovalCreateAccessAsync"));

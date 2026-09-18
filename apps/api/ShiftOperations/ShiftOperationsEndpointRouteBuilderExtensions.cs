@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ShiftOperations;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ShiftOperations;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ShiftOperations;
+namespace NevaxisZentra.Api.ShiftOperations;
 
 public static class ShiftOperationsEndpointRouteBuilderExtensions
 {
@@ -29,7 +29,7 @@ public static class ShiftOperationsEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSShiftOperations(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraShiftOperations(this IServiceCollection services)
     {
         services.AddScoped<IShiftOperationsRepository, ShiftOperationsRepository>();
         services.AddScoped<IShiftOperationsService, ShiftOperationsService>();

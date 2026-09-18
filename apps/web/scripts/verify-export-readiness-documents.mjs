@@ -40,7 +40,7 @@ function forbidText(source, forbidden, label) {
 
 const engine = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportReadinessEngine.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportReadinessEngine.cs",
 );
 requireText(engine, "source-order-linked", "ExportReadinessEngine");
 requireText(engine, "destination-country-known", "ExportReadinessEngine");
@@ -52,7 +52,7 @@ forbidText(engine, "USA requires", "ExportReadinessEngine");
 
 const writeRepo = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportCaseWriteRepository.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportCaseWriteRepository.cs",
 );
 requireText(writeRepo, "RegisterDocumentAsync", "ExportCaseWriteRepository");
 requireText(writeRepo, "VerifyDocumentAsync", "ExportCaseWriteRepository");

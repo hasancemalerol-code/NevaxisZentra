@@ -38,13 +38,13 @@ function assertContains(label, content, text) {
 }
 
 console.log("\n[1] Replay implementation static checks");
-const store = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
-const scenarios = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs");
-const worker = readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
-const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const store = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeBufferStore.cs");
+const scenarios = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeReliabilityScenarios.cs");
+const worker = readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeDeliveryWorker.cs");
+const ingestion = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeIngestionService.cs");
 
 assertContains("ordered claim batch", store, ".ThenBy(e => e.MachineId)");
-assertContains("source timestamp preserved in buffer", readFile("tools/NevaxisFactOS.MachineSimulator/EdgeBuffer/EdgeBufferedEvent.cs"), "SourceTimestampUtc");
+assertContains("source timestamp preserved in buffer", readFile("tools/NevaxisZentra.MachineSimulator/EdgeBuffer/EdgeBufferedEvent.cs"), "SourceTimestampUtc");
 assertContains("offline buffer 12+ events", scenarios, "BuildOfflineBufferEvents");
 assertContains("poison event fixture", scenarios, "CreatePoisonEvent");
 assertContains("partial failure batch", scenarios, "BuildPartialFailureBatch");
@@ -53,7 +53,7 @@ assertContains("central idempotency preserved", ingestion, "IdempotencyKey == re
 assertContains("duplicate result safe", ingestion, "EdgeIngestResult.Duplicate");
 
 console.log("\n[2] Scenario modes in simulator");
-const program = readFile("tools/NevaxisFactOS.MachineSimulator/Program.cs");
+const program = readFile("tools/NevaxisZentra.MachineSimulator/Program.cs");
 for (const mode of [
   "offline-buffer",
   "recover-replay",

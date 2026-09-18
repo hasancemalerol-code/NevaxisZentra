@@ -12,7 +12,7 @@ function Get-RuntimeRootEnvironmentState {
 function Test-KnownVerifierRuntimeRootLeak {
     param([string]$Value)
     if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
-    return $Value -match '(?i)NevaxisFactOS-web-readiness-|NevaxisFactOS-invalid-runtime|NevaxisFactOS-invalid-|invalid-runtime-root|desktop-negative-runtime-'
+    return $Value -match '(?i)NevaxisZentra-web-readiness-|NevaxisZentra-invalid-runtime|NevaxisZentra-invalid-|invalid-runtime-root|desktop-negative-runtime-'
 }
 
 function Clear-KnownDesktopVerifierEnvironmentLeaks {
@@ -48,7 +48,7 @@ function Assert-RepositoryRootValid {
         [string]$Context = "verifier"
     )
 
-    $markers = @("NevaxisFactOS.sln", "package.json")
+    $markers = @("NevaxisZentra.sln", "package.json")
     $valid = $false
     foreach ($marker in $markers) {
         if (Test-Path (Join-Path $RepositoryRoot $marker)) {

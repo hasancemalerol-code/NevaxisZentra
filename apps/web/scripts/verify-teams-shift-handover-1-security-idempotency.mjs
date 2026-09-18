@@ -31,7 +31,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -61,8 +61,8 @@ console.log("Running TEAMS-SHIFT-HANDOVER-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Teams/TeamsHandoverEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Teams/TeamsEndpointHelpers.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsHandoverRepository.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsHandoverRepository.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsConstants.cs");
 
 assert("handovers route family", endpoints.includes("/api/teams/handovers"));
 assert("create permission resolver", helpers.includes("ResolveHandoverCreateAccessAsync"));

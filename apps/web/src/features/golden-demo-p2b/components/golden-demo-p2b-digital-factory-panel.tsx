@@ -426,7 +426,7 @@ export function GoldenDemoP2BDigitalFactoryPanel({
       </section>
 
       <section className="commint-panel" data-testid="golden-demo-p2b-orchestrator">
-        <h2 className="commint-panel__title">FactOS Orchestrator</h2>
+        <h2 className="commint-panel__title">Zentra Orchestrator</h2>
         <h3>Ne oluyor?</h3>
         <p>{translateGoldenDemoApiText(team.orchestrator.whatIsHappening, recoveryGoodParts)}</p>
         <h3>Neden?</h3>
@@ -477,7 +477,7 @@ export function GoldenDemoP2BDigitalFactoryPanel({
       <section className="commint-panel" data-testid="golden-demo-p2b-plan-traceability">
         <h2 className="commint-panel__title">Kurtarma Planı → Operasyonel İş İzlenebilirliği</h2>
         <p className="commint-panel__hint">
-          FactOS yalnızca önermedi; operasyonel iş oluşturdu.
+          Zentra yalnızca önermedi; operasyonel iş oluşturdu.
         </p>
         <ul>
           {team.planActions.map((action) => (
@@ -531,7 +531,7 @@ export function GoldenDemoP2BDigitalFactoryPanel({
           ))}
         </ul>
         <p className="commint-panel__hint">
-          FactOS teknik müdahaleyi koordine etti ve kurtarma işini izledi. Yetkili operatör/bakım rolü fiziksel
+          Zentra teknik müdahaleyi koordine etti ve kurtarma işini izledi. Yetkili operatör/bakım rolü fiziksel
           müdahaleyi uyguladı.
         </p>
       </section>

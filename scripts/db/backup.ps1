@@ -14,7 +14,7 @@ function Resolve-PostgresContainer {
         $exists = docker ps --filter "name=$Preferred" --format "{{.Names}}" 2>$null
         if ($exists) { return $Preferred.Trim() }
     }
-    foreach ($name in @("NevaxisFactOS-local-postgres-1", "crevafactos-local-postgres-1", "nevaxisfactos-local-postgres-1")) {
+    foreach ($name in @("NevaxisZentra-local-postgres-1", "crevafactos-local-postgres-1", "nevaxiszentra-local-postgres-1")) {
         $match = docker ps --filter "name=$name" --format "{{.Names}}" 2>$null
         if ($match) { return $match.Trim() }
     }

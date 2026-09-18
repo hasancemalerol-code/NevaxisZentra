@@ -1,8 +1,8 @@
-# NevaxisFactOS GitHub Configuration
+# NevaxisZentra GitHub Configuration
 
 
 
-Bu klasör, NevaxisFactOS repository'sinin GitHub tabanlı geliştirme ve kalite süreçlerini içerir.
+Bu klasör, NevaxisZentra repository'sinin GitHub tabanlı geliştirme ve kalite süreçlerini içerir.
 
 
 

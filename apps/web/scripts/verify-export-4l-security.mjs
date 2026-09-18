@@ -35,7 +35,7 @@ function forbidText(source, forbidden, label) {
 
 const permissions = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
+  "packages/NevaxisZentra.Persistence/Authorization/ExportPermissionKeys.cs",
 );
 requireText(permissions, "export.ai.read", "ExportPermissionKeys");
 requireText(permissions, "export.ai.run", "ExportPermissionKeys");
@@ -79,14 +79,14 @@ requireText(contracts, "exportFacilityUrl", "export-4l-api-contracts");
 
 const entities = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Export/ExportAiEntities.cs",
+  "packages/NevaxisZentra.Persistence/Export/ExportAiEntities.cs",
 );
 requireText(entities, "ITenantScopedEntity", "ExportAiEntities");
 requireText(entities, "FacilityId", "ExportAiEntities");
 
 const usageRecord = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/AiUsage/AiUsageRecord.cs",
+  "packages/NevaxisZentra.Persistence/AiUsage/AiUsageRecord.cs",
 );
 requireText(usageRecord, "ITenantScopedEntity", "AiUsageRecord");
 requireText(usageRecord, "FacilityId", "AiUsageRecord");

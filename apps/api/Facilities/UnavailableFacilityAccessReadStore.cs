@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.Facilities;
+namespace NevaxisZentra.Api.Facilities;
 
 internal sealed class UnavailableFacilityAccessReadStore : IFacilityAccessReadStore
 {

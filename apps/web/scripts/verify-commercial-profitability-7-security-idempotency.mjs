@@ -48,7 +48,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -60,7 +60,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -175,12 +175,12 @@ console.log("Running COMMERCIAL-PROFITABILITY-7 security/idempotency verifier.")
 
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialPricingScenarioEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointHelpers.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260828143401_AddCommercialPricingScenariosFoundation.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
-const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialPricingScenarioLifecycle.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialPricingScenarioRepository.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
-const profitabilitySeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260828143401_AddCommercialPricingScenariosFoundation.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
+const lifecycle = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialPricingScenarioLifecycle.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialPricingScenarioRepository.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const profitabilitySeed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialProfitabilitySeed.cs");
 const apiCommercialDir = [
   "apps/api/CommercialIntelligence/CommercialPricingScenarioEndpointRouteBuilderExtensions.cs",
   "apps/api/CommercialIntelligence/CommercialIntelligenceEndpointHelpers.cs",

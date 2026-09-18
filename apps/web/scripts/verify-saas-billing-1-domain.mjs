@@ -51,7 +51,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -221,8 +221,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -244,7 +244,7 @@ async function signInOwner() {
   const jar = new CookieJar();
   const signIn = await api("POST", "/api/identity/sign-in", {
     organizationContext: ORGANIZATION,
-    email: "admin@demo.nevaxisfactos.local",
+    email: "admin@demo.nevaxiszentra.local",
     password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
     deviceLabel: `${CLOSURE_PREFIX}-domain`,
   }, jar);
@@ -260,7 +260,7 @@ console.log("Running SAAS-BILLING-1 domain verifier.");
 
 const endpoints = readRequired("apps/api/SaasBilling/SaasBillingEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/SaasBilling/SaasBillingEndpointHelpers.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/SaasBilling/SaasBillingConstants.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/SaasBilling/SaasBillingConstants.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -324,7 +324,7 @@ const reopenDraft = await api("POST", "/api/saas-billing/invoices/transitions", 
 }, owner);
 assert("issued invoice cannot return to draft", reopenDraft.status === 409, `status=${reopenDraft.status}`);
 
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260815061939_AddSaasBillingAccountInvoicePaymentFoundation.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260815061939_AddSaasBillingAccountInvoicePaymentFoundation.cs");
 assert("issued invoice lines append-only grant", migration.includes("GRANT SELECT, INSERT ON TABLE saas_billing_invoice_lines"));
 assert("issued invoice lines no runtime UPDATE grant", !migration.includes("GRANT SELECT, INSERT, UPDATE ON TABLE saas_billing_invoice_lines"));
 

@@ -1,5 +1,5 @@
-# Controlled NevaxisFactOS -> NevaxisFactOS technical migration helper.
-# Run from repository root: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/migration/rename-to-nevaxisfactos.ps1
+# Controlled NevaxisZentra -> NevaxisZentra technical migration helper.
+# Run from repository root: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/migration/rename-to-nevaxiszentra.ps1
 
 [CmdletBinding()]
 param(
@@ -62,11 +62,11 @@ function Test-ExcludedPath {
     }
 
     $fileName = Split-Path -Leaf $normalized
-    if ($fileName -like 'NevaxisFactOS-*-*.md') {
+    if ($fileName -like 'NevaxisZentra-*-*.md') {
         return $true
     }
 
-    if ($fileName -like 'NevaxisFactOS-*.md') {
+    if ($fileName -like 'NevaxisZentra-*.md') {
         return $true
     }
 
@@ -84,18 +84,18 @@ if (-not $SkipRenames) {
     Write-Host "==> Phase 1: directory and file renames"
 
     $directoryRenames = @(
-        @{ From = "packages/NevaxisFactOS.Configuration"; To = "packages/NevaxisFactOS.Configuration" },
-        @{ From = "packages/NevaxisFactOS.Persistence"; To = "packages/NevaxisFactOS.Persistence" },
-        @{ From = "packages/NevaxisFactOS.Persistence.Migrations"; To = "packages/NevaxisFactOS.Persistence.Migrations" },
-        @{ From = "tests/NevaxisFactOS.SmokeTests"; To = "tests/NevaxisFactOS.SmokeTests" },
-        @{ From = "tests/NevaxisFactOS.Persistence.Tests"; To = "tests/NevaxisFactOS.Persistence.Tests" },
-        @{ From = "tests/NevaxisFactOS.Desktop.Tests"; To = "tests/NevaxisFactOS.Desktop.Tests" },
-        @{ From = "tools/NevaxisFactOS.DatabaseTool"; To = "tools/NevaxisFactOS.DatabaseTool" },
-        @{ From = "tools/NevaxisFactOS.LogoBridge"; To = "tools/NevaxisFactOS.LogoBridge" },
-        @{ From = "tools/NevaxisFactOS.MikroBridge"; To = "tools/NevaxisFactOS.MikroBridge" },
-        @{ From = "tools/NevaxisFactOS.NetsisBridge"; To = "tools/NevaxisFactOS.NetsisBridge" },
-        @{ From = "tools/NevaxisFactOS.MachineSimulator"; To = "tools/NevaxisFactOS.MachineSimulator" },
-        @{ From = "apps/desktop/NevaxisFactOS.Desktop"; To = "apps/desktop/NevaxisFactOS.Desktop" }
+        @{ From = "packages/NevaxisZentra.Configuration"; To = "packages/NevaxisZentra.Configuration" },
+        @{ From = "packages/NevaxisZentra.Persistence"; To = "packages/NevaxisZentra.Persistence" },
+        @{ From = "packages/NevaxisZentra.Persistence.Migrations"; To = "packages/NevaxisZentra.Persistence.Migrations" },
+        @{ From = "tests/NevaxisZentra.SmokeTests"; To = "tests/NevaxisZentra.SmokeTests" },
+        @{ From = "tests/NevaxisZentra.Persistence.Tests"; To = "tests/NevaxisZentra.Persistence.Tests" },
+        @{ From = "tests/NevaxisZentra.Desktop.Tests"; To = "tests/NevaxisZentra.Desktop.Tests" },
+        @{ From = "tools/NevaxisZentra.DatabaseTool"; To = "tools/NevaxisZentra.DatabaseTool" },
+        @{ From = "tools/NevaxisZentra.LogoBridge"; To = "tools/NevaxisZentra.LogoBridge" },
+        @{ From = "tools/NevaxisZentra.MikroBridge"; To = "tools/NevaxisZentra.MikroBridge" },
+        @{ From = "tools/NevaxisZentra.NetsisBridge"; To = "tools/NevaxisZentra.NetsisBridge" },
+        @{ From = "tools/NevaxisZentra.MachineSimulator"; To = "tools/NevaxisZentra.MachineSimulator" },
+        @{ From = "apps/desktop/NevaxisZentra.Desktop"; To = "apps/desktop/NevaxisZentra.Desktop" }
     )
 
     foreach ($rename in $directoryRenames) {
@@ -103,22 +103,22 @@ if (-not $SkipRenames) {
     }
 
     $fileRenames = @(
-        @{ From = "NevaxisFactOS.sln"; To = "NevaxisFactOS.sln" },
-        @{ From = "apps/api/NevaxisFactOS.Api.csproj"; To = "apps/api/NevaxisFactOS.Api.csproj" },
-        @{ From = "apps/worker/NevaxisFactOS.Worker.csproj"; To = "apps/worker/NevaxisFactOS.Worker.csproj" },
-        @{ From = "apps/edge-agent/NevaxisFactOS.EdgeAgent.csproj"; To = "apps/edge-agent/NevaxisFactOS.EdgeAgent.csproj" },
-        @{ From = "packages/NevaxisFactOS.Configuration/NevaxisFactOS.Configuration.csproj"; To = "packages/NevaxisFactOS.Configuration/NevaxisFactOS.Configuration.csproj" },
-        @{ From = "packages/NevaxisFactOS.Persistence/NevaxisFactOS.Persistence.csproj"; To = "packages/NevaxisFactOS.Persistence/NevaxisFactOS.Persistence.csproj" },
-        @{ From = "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"; To = "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj" },
-        @{ From = "tests/NevaxisFactOS.SmokeTests/NevaxisFactOS.SmokeTests.csproj"; To = "tests/NevaxisFactOS.SmokeTests/NevaxisFactOS.SmokeTests.csproj" },
-        @{ From = "tests/NevaxisFactOS.Persistence.Tests/NevaxisFactOS.Persistence.Tests.csproj"; To = "tests/NevaxisFactOS.Persistence.Tests/NevaxisFactOS.Persistence.Tests.csproj" },
-        @{ From = "tests/NevaxisFactOS.Desktop.Tests/NevaxisFactOS.Desktop.Tests.csproj"; To = "tests/NevaxisFactOS.Desktop.Tests/NevaxisFactOS.Desktop.Tests.csproj" },
-        @{ From = "tools/NevaxisFactOS.DatabaseTool/NevaxisFactOS.DatabaseTool.csproj"; To = "tools/NevaxisFactOS.DatabaseTool/NevaxisFactOS.DatabaseTool.csproj" },
-        @{ From = "tools/NevaxisFactOS.LogoBridge/NevaxisFactOS.LogoBridge.csproj"; To = "tools/NevaxisFactOS.LogoBridge/NevaxisFactOS.LogoBridge.csproj" },
-        @{ From = "tools/NevaxisFactOS.MikroBridge/NevaxisFactOS.MikroBridge.csproj"; To = "tools/NevaxisFactOS.MikroBridge/NevaxisFactOS.MikroBridge.csproj" },
-        @{ From = "tools/NevaxisFactOS.NetsisBridge/NevaxisFactOS.NetsisBridge.csproj"; To = "tools/NevaxisFactOS.NetsisBridge/NevaxisFactOS.NetsisBridge.csproj" },
-        @{ From = "tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj"; To = "tools/NevaxisFactOS.MachineSimulator/NevaxisFactOS.MachineSimulator.csproj" },
-        @{ From = "apps/desktop/NevaxisFactOS.Desktop/NevaxisFactOS.Desktop.csproj"; To = "apps/desktop/NevaxisFactOS.Desktop/NevaxisFactOS.Desktop.csproj" }
+        @{ From = "NevaxisZentra.sln"; To = "NevaxisZentra.sln" },
+        @{ From = "apps/api/NevaxisZentra.Api.csproj"; To = "apps/api/NevaxisZentra.Api.csproj" },
+        @{ From = "apps/worker/NevaxisZentra.Worker.csproj"; To = "apps/worker/NevaxisZentra.Worker.csproj" },
+        @{ From = "apps/edge-agent/NevaxisZentra.EdgeAgent.csproj"; To = "apps/edge-agent/NevaxisZentra.EdgeAgent.csproj" },
+        @{ From = "packages/NevaxisZentra.Configuration/NevaxisZentra.Configuration.csproj"; To = "packages/NevaxisZentra.Configuration/NevaxisZentra.Configuration.csproj" },
+        @{ From = "packages/NevaxisZentra.Persistence/NevaxisZentra.Persistence.csproj"; To = "packages/NevaxisZentra.Persistence/NevaxisZentra.Persistence.csproj" },
+        @{ From = "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj"; To = "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj" },
+        @{ From = "tests/NevaxisZentra.SmokeTests/NevaxisZentra.SmokeTests.csproj"; To = "tests/NevaxisZentra.SmokeTests/NevaxisZentra.SmokeTests.csproj" },
+        @{ From = "tests/NevaxisZentra.Persistence.Tests/NevaxisZentra.Persistence.Tests.csproj"; To = "tests/NevaxisZentra.Persistence.Tests/NevaxisZentra.Persistence.Tests.csproj" },
+        @{ From = "tests/NevaxisZentra.Desktop.Tests/NevaxisZentra.Desktop.Tests.csproj"; To = "tests/NevaxisZentra.Desktop.Tests/NevaxisZentra.Desktop.Tests.csproj" },
+        @{ From = "tools/NevaxisZentra.DatabaseTool/NevaxisZentra.DatabaseTool.csproj"; To = "tools/NevaxisZentra.DatabaseTool/NevaxisZentra.DatabaseTool.csproj" },
+        @{ From = "tools/NevaxisZentra.LogoBridge/NevaxisZentra.LogoBridge.csproj"; To = "tools/NevaxisZentra.LogoBridge/NevaxisZentra.LogoBridge.csproj" },
+        @{ From = "tools/NevaxisZentra.MikroBridge/NevaxisZentra.MikroBridge.csproj"; To = "tools/NevaxisZentra.MikroBridge/NevaxisZentra.MikroBridge.csproj" },
+        @{ From = "tools/NevaxisZentra.NetsisBridge/NevaxisZentra.NetsisBridge.csproj"; To = "tools/NevaxisZentra.NetsisBridge/NevaxisZentra.NetsisBridge.csproj" },
+        @{ From = "tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj"; To = "tools/NevaxisZentra.MachineSimulator/NevaxisZentra.MachineSimulator.csproj" },
+        @{ From = "apps/desktop/NevaxisZentra.Desktop/NevaxisZentra.Desktop.csproj"; To = "apps/desktop/NevaxisZentra.Desktop/NevaxisZentra.Desktop.csproj" }
     )
 
     foreach ($rename in $fileRenames) {
@@ -126,8 +126,8 @@ if (-not $SkipRenames) {
     }
 
     $optionalIconRename = @{
-        From = "apps/desktop/scripts/generate-NevaxisFactOS-app-icon.py"
-        To   = "apps/desktop/scripts/generate-nevaxisfactos-app-icon.py"
+        From = "apps/desktop/scripts/generate-NevaxisZentra-app-icon.py"
+        To   = "apps/desktop/scripts/generate-nevaxiszentra-app-icon.py"
     }
     if ((Test-Path -LiteralPath $optionalIconRename.From) -and -not (Test-Path -LiteralPath $optionalIconRename.To)) {
         Invoke-GitMove -From $optionalIconRename.From -To $optionalIconRename.To
@@ -154,7 +154,7 @@ if (-not $SkipContent) {
         $original = $content
 
         $content = $content -replace 'crevafactos', 'crevafactos'
-        $content = $content -replace '@NevaxisFactOS/', '@nevaxisfactos/'
+        $content = $content -replace '@NevaxisZentra/', '@nevaxiszentra/'
         $content = $content -replace '"name": "crevafactos"', '"name": "crevafactos"'
 
         if ($content -ne $original) {

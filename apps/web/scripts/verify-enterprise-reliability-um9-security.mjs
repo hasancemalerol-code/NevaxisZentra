@@ -38,7 +38,7 @@ function headers(subject = OPERATOR, tenant = TENANT, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
     ...extra,
   };
 }
@@ -68,19 +68,19 @@ function runStaticSecurity() {
   forbidText(endpoints, "MapDelete", "no delete endpoints");
   checks.push("STATIC_AUTH_BOUNDARIES = PASS");
 
-  const service = readRequired("packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
+  const service = readRequired("packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityService.cs");
   requireText(service, "FindReplayAuditAsync", "replay idempotency lookup");
   requireText(service, "ReplayIdempotencyKey", "replay idempotency key");
   checks.push("STATIC_REPLAY_IDEMPOTENCY = PASS");
 
   const migration = readRequired(
-    "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
+    "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260913214325_AddEnterpriseReliabilityFoundation.cs",
   );
   requireText(migration, "ENABLE ROW LEVEL SECURITY", "RLS");
   requireText(migration, "FORCE ROW LEVEL SECURITY", "force RLS");
   checks.push("STATIC_TENANT_RLS = PASS");
 
-  const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/EnterpriseReliabilityPermissionKeys.cs");
+  const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/EnterpriseReliabilityPermissionKeys.cs");
   requireText(permissions, "operability.read", "operability.read");
   requireText(permissions, "operability.reconcile.run", "reconcile permission");
   requireText(permissions, "operability.quarantine.replay", "replay permission");
@@ -127,10 +127,10 @@ async function runLiveSecurity() {
     replayIdempotencyKey: replayKey,
   };
   const first = await request("POST", "/api/system-status/quarantine/replay", replayBody, OPERATOR, TENANT, {
-    "X-NevaxisFactOS-Correlation-Id": correlationId,
+    "X-NevaxisZentra-Correlation-Id": correlationId,
   });
   const second = await request("POST", "/api/system-status/quarantine/replay", replayBody, OPERATOR, TENANT, {
-    "X-NevaxisFactOS-Correlation-Id": correlationId,
+    "X-NevaxisZentra-Correlation-Id": correlationId,
   });
   if (first.status === 200 && second.status === 200 && first.json?.id && second.json?.id) {
     assert(first.json.id === second.json.id, "replay idempotency must return same audit");

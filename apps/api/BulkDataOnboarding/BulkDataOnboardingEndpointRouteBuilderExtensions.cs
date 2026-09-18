@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.BulkDataOnboarding;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.BulkDataOnboarding;
 
-namespace NevaxisFactOS.Api.BulkDataOnboarding;
+namespace NevaxisZentra.Api.BulkDataOnboarding;
 
 public static class BulkDataOnboardingEndpointRouteBuilderExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSBulkDataOnboardingApi(this IServiceCollection services) =>
-        services.AddNevaxisFactOSBulkDataOnboarding();
+    public static IServiceCollection AddNevaxisZentraBulkDataOnboardingApi(this IServiceCollection services) =>
+        services.AddNevaxisZentraBulkDataOnboarding();
 
     public static IEndpointRouteBuilder MapBulkDataOnboardingEndpoints(this IEndpointRouteBuilder endpoints)
     {

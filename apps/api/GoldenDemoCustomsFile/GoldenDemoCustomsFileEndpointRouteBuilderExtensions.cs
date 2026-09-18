@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoCustomsFile;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.GoldenDemoCustomsFile;
+namespace NevaxisZentra.Api.GoldenDemoCustomsFile;
 
 public static class GoldenDemoCustomsFileEndpointRouteBuilderExtensions
 {
@@ -23,9 +23,9 @@ public static class GoldenDemoCustomsFileEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSGoldenDemoCustomsFileApi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraGoldenDemoCustomsFileApi(this IServiceCollection services)
     {
-        services.AddNevaxisFactOSGoldenDemoCustomsFile();
+        services.AddNevaxisZentraGoldenDemoCustomsFile();
         return services;
     }
 

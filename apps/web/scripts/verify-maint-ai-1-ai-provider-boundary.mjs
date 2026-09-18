@@ -19,8 +19,8 @@ function assert(label, ok, detail = "") {
   console.log(`✓ ${label}`);
 }
 
-const models = read("packages/NevaxisFactOS.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
-const provider = read("packages/NevaxisFactOS.Persistence/Maintenance/DeterministicMaintenanceAiProvider.cs");
+const models = read("packages/NevaxisZentra.Persistence/Maintenance/MaintenanceAiAgentModels.cs");
+const provider = read("packages/NevaxisZentra.Persistence/Maintenance/DeterministicMaintenanceAiProvider.cs");
 const endpoints = read("apps/api/Maintenance/MaintenanceAiEndpointRouteBuilderExtensions.cs");
 
 assert("IMaintenanceAiProvider interface", models.includes("interface IMaintenanceAiProvider"));

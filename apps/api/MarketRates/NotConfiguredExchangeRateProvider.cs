@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.MarketRates;
+using NevaxisZentra.Persistence.MarketRates;
 
-namespace NevaxisFactOS.Api.MarketRates;
+namespace NevaxisZentra.Api.MarketRates;
 
 public sealed class NotConfiguredExchangeRateProvider : IExchangeRateProvider
 {

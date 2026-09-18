@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const MIGRATIONS = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
+const MIGRATIONS = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations");
 
 function fail(message) {
   console.error(`SHIFT-HANDOVER-SAFE-2 migration verification failed: ${message}`);
@@ -26,10 +26,10 @@ assert("generated migration present", Boolean(migrationFile));
 const designerFile = files.find((name) => name.includes("AddFactoryShiftHandoverFoundation.Designer.cs"));
 assert("designer present", Boolean(designerFile));
 
-const migration = read(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationFile}`);
-const snapshot = read("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
-const entities = read("packages/NevaxisFactOS.Persistence/ShiftHandover/ShiftHandoverEntities.cs");
-const entityConfig = read("packages/NevaxisFactOS.Persistence/ShiftHandover/ShiftHandoverEntityConfigurations.cs");
+const migration = read(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${migrationFile}`);
+const snapshot = read("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
+const entities = read("packages/NevaxisZentra.Persistence/ShiftHandover/ShiftHandoverEntities.cs");
+const entityConfig = read("packages/NevaxisZentra.Persistence/ShiftHandover/ShiftHandoverEntityConfigurations.cs");
 
 assert("handovers table", migration.includes('name: "factory_shift_handovers"'));
 assert("items table", migration.includes('name: "factory_shift_handover_items"'));

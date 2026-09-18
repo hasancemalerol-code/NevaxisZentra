@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.ShiftRisk;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.ShiftRisk;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.ShiftRisk;
+namespace NevaxisZentra.Api.ShiftRisk;
 
 internal static class ShiftRiskEndpointHelpers
 {

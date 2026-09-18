@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: NevaxisFactOS Product & Development
+- Decision owners: NevaxisZentra Product & Development
 - Scope: Consistency between PostgreSQL transactions and message publication
 
 ## Context
 
-NevaxisFactOS cannot atomically commit PostgreSQL data and RabbitMQ publication with a distributed transaction. Publishing before or after a database commit without durable coordination can lose events or announce state that never committed.
+NevaxisZentra cannot atomically commit PostgreSQL data and RabbitMQ publication with a distributed transaction. Publishing before or after a database commit without durable coordination can lose events or announce state that never committed.
 
 ## Decision
 

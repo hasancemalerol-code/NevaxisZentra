@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <RootNamespace>NevaxisFactOS.NetsisBridge</RootNamespace>
-    <AssemblyName>NevaxisFactOS.NetsisBridge</AssemblyName>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\packages\NevaxisFactOS.Persistence\NevaxisFactOS.Persistence.csproj" />
-  </ItemGroup>
-</Project>

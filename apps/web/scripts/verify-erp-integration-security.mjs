@@ -50,7 +50,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -86,22 +86,22 @@ console.log("Running ERP integration security verifier.");
 
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Erp/ErpEndpointHelpers.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ErpPermissionKeys.cs");
-const connectionRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpConnectionRepository.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const writebackRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpWritebackRepository.cs");
-const auditConstants = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAuditConstants.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/ErpPermissionKeys.cs");
+const connectionRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpConnectionRepository.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const writebackRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpWritebackRepository.cs");
+const auditConstants = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAuditConstants.cs");
 const migration1 = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809200000_AddErpIntegrationFoundation.cs",
 );
 const migration2 = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809210000_AddErpOrderInboundAndReconciliation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809210000_AddErpOrderInboundAndReconciliation.cs",
 );
 const migration3 = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809220000_AddErpInventoryWarehouseAndPurchasingReadModels.cs",
 );
 const migration4 = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809230000_AddErpProductionDocumentsAndWritebackFoundation.cs",
 );
 
 for (const key of ["erp.read", "erp.manage", "erp.sync", "erp.writeback.request", "erp.writeback.approve", "erp.writeback.execute"]) {
@@ -338,7 +338,7 @@ try {
   if (r.status !== 403) fail(`wrong facility expected 403 got ${r.status}`);
 
   const crossTenant = await fetch(`${BASE}/api/erp/inventory?facilityId=${FACILITY}`, {
-    headers: { ...headers(OPERATOR), "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot" },
+    headers: { ...headers(OPERATOR), "X-NevaxisZentra-Tenant": "other-tenant-not-pilot" },
   });
   if (crossTenant.status !== 403) fail(`cross-tenant expected 403 got ${crossTenant.status}`);
 
@@ -372,8 +372,8 @@ try {
     }
   }
 
-  const writebackAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/IErpWritebackAdapter.cs");
-  const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
+  const writebackAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/IErpWritebackAdapter.cs");
+  const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
   forbidText(adapters, "class LogoErpAdapterPlaceholder : IErpWritebackAdapter", "Logo writeback blocked");
   forbidText(adapters, "class MikroErpAdapter : IErpWritebackAdapter", "Mikro writeback blocked");
   forbidText(adapters, "class NetsisErpAdapterPlaceholder : IErpWritebackAdapter", "Netsis writeback blocked");

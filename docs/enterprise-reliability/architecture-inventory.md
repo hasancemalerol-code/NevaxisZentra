@@ -1,6 +1,6 @@
 # RUNTIME_ARCHITECTURE_INVENTORY
 
-Enterprise reliability (UM-9) runtime inventory for NevaxisFactOS.
+Enterprise reliability (UM-9) runtime inventory for NevaxisZentra.
 
 ## API layer
 
@@ -39,7 +39,7 @@ All UM-9 tables use tenant RLS with `FORCE ROW LEVEL SECURITY`.
 
 ## Engines
 
-`packages/NevaxisFactOS.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs`
+`packages/NevaxisZentra.Persistence/EnterpriseReliability/EnterpriseReliabilityEngines.cs`
 
 | Engine | Function |
 |--------|----------|
@@ -52,7 +52,7 @@ All UM-9 tables use tenant RLS with `FORCE ROW LEVEL SECURITY`.
 
 ## Edge buffer package
 
-`packages/NevaxisFactOS.EdgeBuffer`
+`packages/NevaxisZentra.EdgeBuffer`
 
 - `EdgeBufferStore` — local JSON-backed event buffer with idempotency and capacity guards
 - `EdgeDeliveryWorker` — ordered batch delivery with retry policy
@@ -65,7 +65,7 @@ All UM-9 tables use tenant RLS with `FORCE ROW LEVEL SECURITY`.
 
 - Registers `EdgeBufferStore`, heartbeat reporter, health reporter
 - Posts heartbeats to `/api/system-status/edge/heartbeat`
-- Uses dev auth headers (`X-crevafactos-dev-Issuer`, `X-NevaxisFactOS-Tenant`)
+- Uses dev auth headers (`X-crevafactos-dev-Issuer`, `X-NevaxisZentra-Tenant`)
 
 ## Pilot identifiers
 

@@ -34,7 +34,7 @@ function assert(label, ok, detail = "") {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__OPRISK_UI_1_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/c756ab40-4354-47d0-8f9e-2a16ca92f36f/c756ab40-4354-47d0-8f9e-2a16ca92f36f.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -88,8 +88,8 @@ async function api(method, path, body, jar, headers = {}) {
   const requestHeaders = { Accept: "application/json", ...headers };
   if (body) requestHeaders["Content-Type"] = "application/json";
   if (jar?.header()) requestHeaders.Cookie = jar.header();
-  if (jar?.cookies.get("NevaxisFactOS.session") && jar.cookies.get("NevaxisFactOS.csrf") && method !== "GET") {
-    requestHeaders["X-NevaxisFactOS-Csrf"] = jar.cookies.get("NevaxisFactOS.csrf");
+  if (jar?.cookies.get("NevaxisZentra.session") && jar.cookies.get("NevaxisZentra.csrf") && method !== "GET") {
+    requestHeaders["X-NevaxisZentra-Csrf"] = jar.cookies.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${API}${path}`, { method, headers: requestHeaders, body: body ? JSON.stringify(body) : undefined });
   jar?.ingest(response);
@@ -103,7 +103,7 @@ async function devApi(method, path, body, actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   });
 }
 
@@ -115,7 +115,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwner() {
-  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const verify = await api("POST", "/api/identity/mfa/verify", { totpCode: generateTotp(requireEnv("DevelopmentSaasIdentity__MfaSharedSecret")) }, jar);
   if (verify.status !== 200) fail("owner MFA failed");
   return jar;
@@ -136,7 +136,7 @@ function navigationSource() {
 }
 
 function db(sql) {
-  const result = spawnSync("docker", ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) fail(result.stderr || result.stdout);
   return result.stdout.trim();
 }

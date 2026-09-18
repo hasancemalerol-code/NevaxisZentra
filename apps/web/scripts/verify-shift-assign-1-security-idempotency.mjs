@@ -38,7 +38,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -50,7 +50,7 @@ function actorHeaders(subject, tenant = "dev-pilot-tenant") {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
@@ -98,9 +98,9 @@ console.log("Running SHIFT-ASSIGN-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/ShiftAssignment/ShiftAssignmentEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/ShiftAssignment/ShiftAssignmentEndpointHelpers.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260813040000_AddShiftOperatorAssignmentFoundation.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/ShiftAssignment/ShiftAssignmentPermissionKeys.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260813040000_AddShiftOperatorAssignmentFoundation.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/ShiftAssignment/ShiftAssignmentPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", helpers.includes("ResolveReadAccessAsync"));

@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $databaseScript = Join-Path $repositoryRoot 'scripts\database\database.ps1'
-$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisZentra.Api.csproj'
 $artifactDirectory = Join-Path $repositoryRoot 'artifacts\authorization'
 $apiBaseUrl = "http://127.0.0.1:$ApiPort"
 $apiProcess = $null
@@ -71,7 +71,7 @@ function New-IdentityHeaders {
     return @{
         'X-crevafactos-dev-Issuer' = 'https://authorization.local.test'
         'X-crevafactos-dev-Subject' = $Subject
-        'X-NevaxisFactOS-Tenant' = $Tenant
+        'X-NevaxisZentra-Tenant' = $Tenant
     }
 }
 

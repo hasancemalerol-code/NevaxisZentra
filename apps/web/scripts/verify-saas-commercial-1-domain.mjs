@@ -34,7 +34,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -46,7 +46,7 @@ function dbExpectFailure(sql) {
     "docker",
     [
       "exec",
-      "NevaxisFactOS-local-postgres-1",
+      "NevaxisZentra-local-postgres-1",
       "psql",
       "-U",
       "crevafactos",
@@ -67,7 +67,7 @@ function headers(actor = MANAGER) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -180,10 +180,10 @@ function insertClosureVersion(versionId, planId, versionNumber, cadence, effecti
 
 console.log("Running SAAS-COMMERCIAL-1 domain verifier.");
 
-const conversions = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialConstants.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialRepository.cs");
+const conversions = readRequired("packages/NevaxisZentra.Persistence/SaasCommercial/SaasCommercialConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/SaasCommercial/SaasCommercialRepository.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
 );
 
 assert("plan code normalizer", conversions.includes("NormalizePlanCode"));

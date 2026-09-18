@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Teams;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Teams;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Teams;
+namespace NevaxisZentra.Api.Teams;
 
 public static class TeamsHandoverEndpointRouteBuilderExtensions
 {

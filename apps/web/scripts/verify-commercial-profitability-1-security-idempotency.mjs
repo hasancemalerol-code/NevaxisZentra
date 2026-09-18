@@ -43,7 +43,7 @@ function forbidText(source, forbidden, label) {
 }
 
 function discoverMigrationBasename() {
-  const migrationsDir = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations");
+  const migrationsDir = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations");
   const match = readdirSync(migrationsDir)
     .filter((name) => name.endsWith(".cs") && !name.endsWith(".Designer.cs"))
     .find((name) => name.includes("AddCommercialProfitabilityIntelligenceFoundation"));
@@ -56,7 +56,7 @@ function discoverMigrationBasename() {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -68,7 +68,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -113,7 +113,7 @@ function removeClosureFixtures() {
 console.log("Running COMMERCIAL-PROFITABILITY-1 security/idempotency verifier.");
 
 const migrationBasename = discoverMigrationBasename();
-const migrationPath = `packages/NevaxisFactOS.Persistence.Migrations/Migrations/${migrationBasename}`;
+const migrationPath = `packages/NevaxisZentra.Persistence.Migrations/Migrations/${migrationBasename}`;
 if (!existsSync(resolve(ROOT, migrationPath))) {
   fail(`Missing migration file ${migrationPath}`);
 }
@@ -121,8 +121,8 @@ if (!existsSync(resolve(ROOT, migrationPath))) {
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialProfitabilityEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointHelpers.cs");
 const migration = readRequired(migrationPath);
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligencePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", helpers.includes("ResolveReadAccessAsync"));

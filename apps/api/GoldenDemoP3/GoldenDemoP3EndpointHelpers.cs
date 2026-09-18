@@ -1,10 +1,10 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Api.PresentationMode;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoP1;
-using NevaxisFactOS.Persistence.GoldenDemoP3;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Api.PresentationMode;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoP1;
+using NevaxisZentra.Persistence.GoldenDemoP3;
 
-namespace NevaxisFactOS.Api.GoldenDemoP3;
+namespace NevaxisZentra.Api.GoldenDemoP3;
 
 internal static class GoldenDemoP3EndpointHelpers
 {

@@ -1,6 +1,6 @@
-using NevaxisFactOS.Persistence.Identity;
+using NevaxisZentra.Persistence.Identity;
 
-namespace NevaxisFactOS.Api.Authentication;
+namespace NevaxisZentra.Api.Authentication;
 
 public sealed class IdentityResolutionMiddleware(
     RequestDelegate next,

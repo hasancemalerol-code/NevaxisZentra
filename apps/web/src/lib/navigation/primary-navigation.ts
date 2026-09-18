@@ -53,7 +53,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         permissionKey: "factory-intelligence.read",
       },
       {
-        label: "FactOS Teams",
+        label: "Zentra Teams",
         href: "/teams",
         iconKey: "messages-square",
       },

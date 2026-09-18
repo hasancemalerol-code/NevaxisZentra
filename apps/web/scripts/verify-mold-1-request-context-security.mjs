@@ -26,14 +26,14 @@ function headers(subject, tenant = "dev-pilot-tenant") {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -89,7 +89,7 @@ const unauthorizedList = await request("GET", `/api/molds?facilityId=${FACILITY}
 assert("unauthorized actor list → 403", unauthorizedList.status === 403);
 
 const migration = readFileSync(
-  resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs"),
+  resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260811200000_AddMoldRegistryLifecycleFoundation.cs"),
   "utf8",
 );
 assert("RLS in migration", migration.includes("ENABLE ROW LEVEL SECURITY") && migration.includes("FORCE ROW LEVEL SECURITY"));
@@ -101,7 +101,7 @@ for (const table of ["molds", "mold_lifecycle_events", "mold_counter_snapshots"]
 
 function runtimeTenantCount(tenantId, whereClause = "") {
   const output = db(
-    `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisFactOS.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM molds ${whereClause};`,
+    `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisZentra.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM molds ${whereClause};`,
   );
   const lines = output.split("\n").map((line) => line.trim()).filter(Boolean);
   return Number(lines.at(-1));

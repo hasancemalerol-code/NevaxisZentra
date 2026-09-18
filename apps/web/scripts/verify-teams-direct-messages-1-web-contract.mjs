@@ -22,7 +22,7 @@ console.log("Running TEAMS-DIRECT-MESSAGES-1 web contract verifier.");
 const page = read("apps/web/src/app/(app)/teams/ozel-mesajlar/page.tsx");
 const client = read("apps/web/src/features/teams/components/teams-direct-messages-client.tsx");
 const endpoints = read("apps/api/Teams/TeamsDirectMessageEndpointRouteBuilderExtensions.cs");
-const repository = read("packages/NevaxisFactOS.Persistence/Teams/TeamsDirectMessageRepository.cs");
+const repository = read("packages/NevaxisZentra.Persistence/Teams/TeamsDirectMessageRepository.cs");
 const actions = read("apps/web/src/features/teams/server/teams-actions.ts");
 const apiClient = read("apps/web/src/features/teams/server/teams-api-client.ts");
 

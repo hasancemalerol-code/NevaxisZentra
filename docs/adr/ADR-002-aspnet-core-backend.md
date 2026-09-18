@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-04
-- Decision owners: NevaxisFactOS Product & Development
+- Decision owners: NevaxisZentra Product & Development
 - Scope: API, Worker, integration, and Edge backend technology
 
 ## Context
 
-NevaxisFactOS requires strong type safety, transactional consistency, long-term support, observability, and controlled integration with ERP and factory systems. It is an AI Factory Operations Assistant, not the system of record for classic ERP functions.
+NevaxisZentra requires strong type safety, transactional consistency, long-term support, observability, and controlled integration with ERP and factory systems. It is an AI Factory Operations Assistant, not the system of record for classic ERP functions.
 
 The backend must support multi-tenant operational planning, AI Task Center, approvals, audit, AI Decision Ledger, transactional messaging, integrations, and Edge connectivity.
 
@@ -28,7 +28,7 @@ The API is a modular monolith. Worker and Edge Agent are separate executable app
 
 ## Product Boundary
 
-The backend owns native production plans, shift plans, machine and mold intelligence, AI tasks, approvals, audit, AI decisions, and integration state. Externally owned customer, supplier, personnel, finance, accounting, stock, order, and purchasing data is represented only through scoped references or operational projections unless ADR-011 explicitly assigns ownership to NevaxisFactOS.
+The backend owns native production plans, shift plans, machine and mold intelligence, AI tasks, approvals, audit, AI decisions, and integration state. Externally owned customer, supplier, personnel, finance, accounting, stock, order, and purchasing data is represented only through scoped references or operational projections unless ADR-011 explicitly assigns ownership to NevaxisZentra.
 
 No native accounting, receivables/payables, invoicing, payroll, official stock ledger, or general purchasing ERP module is authorized by this ADR.
 

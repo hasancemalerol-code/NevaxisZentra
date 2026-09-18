@@ -10,8 +10,8 @@ const requiredPaths = [
   "apps/web/src/features/golden-demo-p1/components/golden-demo-p1-workspace-view.tsx",
   "apps/web/src/features/golden-demo-p1/server/golden-demo-p1-api-client.ts",
   "apps/api/GoldenDemoP1/GoldenDemoP1EndpointRouteBuilderExtensions.cs",
-  "packages/NevaxisFactOS.Persistence/GoldenDemoP1/GoldenDemoP1Engines.cs",
-  "tests/NevaxisFactOS.Persistence.Tests/GoldenDemoP1FoundationTests.cs",
+  "packages/NevaxisZentra.Persistence/GoldenDemoP1/GoldenDemoP1Engines.cs",
+  "tests/NevaxisZentra.Persistence.Tests/GoldenDemoP1FoundationTests.cs",
 ];
 
 for (const relativePath of requiredPaths) {

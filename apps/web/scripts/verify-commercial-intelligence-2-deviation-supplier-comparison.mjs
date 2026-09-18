@@ -58,7 +58,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -70,7 +70,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -171,13 +171,13 @@ function insertBoundaryHighVarianceObservations() {
 
 console.log("Running COMMERCIAL-INTELLIGENCE-2 deviation/supplier-comparison verifier.");
 
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialPurchasePriceComparisonEvaluator.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotCommercialIntelligenceComparisonSeed.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialPurchasePriceComparisonEvaluator.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotCommercialIntelligenceComparisonSeed.cs");
 const endpoints = readRequired("apps/api/CommercialIntelligence/CommercialIntelligenceEndpointRouteBuilderExtensions.cs");
 
 assert("comparison evaluator present", evaluator.includes("EvaluateTemporalDeviation"));
 assert("supplier position evaluator present", evaluator.includes("EvaluateSupplierPricePosition"));
-assert("non-overlap validation in repository", readRequired("packages/NevaxisFactOS.Persistence/CommercialIntelligence/CommercialIntelligenceComparisonOperations.cs").includes("must not overlap"));
+assert("non-overlap validation in repository", readRequired("packages/NevaxisZentra.Persistence/CommercialIntelligence/CommercialIntelligenceComparisonOperations.cs").includes("must not overlap"));
 assert("comparison endpoints present", endpoints.includes("/comparisons"));
 forbidText(evaluator, "recommended supplier", "evaluator");
 forbidText(evaluator, "guaranteed savings", "evaluator");

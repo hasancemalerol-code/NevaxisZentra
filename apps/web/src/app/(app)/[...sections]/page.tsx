@@ -64,7 +64,7 @@ export default async function SectionPlaceholderPage({
   return (
     <PageContent>
       <PageHeader
-        description="Bu bölüm, FactOS ürün navigasyonunda tanımlı route sözleşmesini temsil eder. Modül içeriği sonraki geliştirme paketlerinde uygulanacaktır."
+        description="Bu bölüm, Zentra ürün navigasyonunda tanımlı route sözleşmesini temsil eder. Modül içeriği sonraki geliştirme paketlerinde uygulanacaktır."
         eyebrow="Uygulama bölümü"
         preview
         title={item.label}

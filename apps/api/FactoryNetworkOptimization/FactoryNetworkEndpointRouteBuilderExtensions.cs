@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.FactoryNetworkOptimization;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.FactoryNetworkOptimization;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.FactoryNetworkOptimization;
+namespace NevaxisZentra.Api.FactoryNetworkOptimization;
 
 public static class FactoryNetworkEndpointRouteBuilderExtensions
 {
@@ -23,7 +23,7 @@ public static class FactoryNetworkEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSFactoryNetwork(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraFactoryNetwork(this IServiceCollection services)
     {
         services.AddScoped<IFactoryNetworkRepository, FactoryNetworkRepository>();
         services.AddScoped<IFactoryNetworkService, FactoryNetworkService>();

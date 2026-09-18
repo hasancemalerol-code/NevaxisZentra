@@ -1,4 +1,4 @@
-# NevaxisFactOS Kapsam Dışı Alanlar
+# NevaxisZentra Kapsam Dışı Alanlar
 
 
 
@@ -6,7 +6,7 @@
 
 - Tarih: 2026-08-04
 
-- Ürün: NevaxisFactOS
+- Ürün: NevaxisZentra
 
 - Kategori: AI Factory Operations Assistant
 
@@ -18,7 +18,7 @@
 
 
 
-Bu belge NevaxisFactOS içinde geliştirilmemesi gereken klasik ERP, muhasebe, bordro ve ana kayıt sistemi işlevlerini tanımlar.
+Bu belge NevaxisZentra içinde geliştirilmemesi gereken klasik ERP, muhasebe, bordro ve ana kayıt sistemi işlevlerini tanımlar.
 
 
 
@@ -28,7 +28,7 @@ Amaçlar:
 
 - Ürün kapsamının kontrolsüz genişlemesini önlemek
 
-- NevaxisFactOS'u klasik ERP ürününe dönüştürmemek
+- NevaxisZentra'u klasik ERP ürününe dönüştürmemek
 
 - AI üretim ve fabrika operasyonları odağını korumak
 
@@ -46,7 +46,7 @@ Amaçlar:
 
 
 
-NevaxisFactOS:
+NevaxisZentra:
 
 
 
@@ -68,7 +68,7 @@ NevaxisFactOS:
 
 
 
-NevaxisFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel AI planlarına, risklere, görevlere ve onaylı aksiyonlara dönüştürür.
+NevaxisZentra mevcut sistemlerden gerekli verileri alır ve bunları operasyonel AI planlarına, risklere, görevlere ve onaylı aksiyonlara dönüştürür.
 
 
 
@@ -76,7 +76,7 @@ NevaxisFactOS mevcut sistemlerden gerekli verileri alır ve bunları operasyonel
 
 
 
-NevaxisFactOS içinde bağımsız genel muhasebe sistemi geliştirilmeyecektir.
+NevaxisZentra içinde bağımsız genel muhasebe sistemi geliştirilmeyecektir.
 
 
 
@@ -110,7 +110,7 @@ Bu veriler gerekli olduğunda mevcut ERP veya muhasebe sisteminden okunabilir.
 
 
 
-NevaxisFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için kullanabilir.
+NevaxisZentra bu verileri operasyonel risk, maliyet ve kârlılık analizi için kullanabilir.
 
 
 
@@ -118,7 +118,7 @@ NevaxisFactOS bu verileri operasyonel risk, maliyet ve kârlılık analizi için
 
 
 
-NevaxisFactOS bağımsız cari hesap defteri oluşturmayacaktır.
+NevaxisZentra bağımsız cari hesap defteri oluşturmayacaktır.
 
 
 
@@ -144,7 +144,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS mevcut ERP'den:
+NevaxisZentra mevcut ERP'den:
 
 
 
@@ -168,7 +168,7 @@ gibi özet verileri alabilir.
 
 
 
-NevaxisFactOS resmî faturalama sistemi olmayacaktır.
+NevaxisZentra resmî faturalama sistemi olmayacaktır.
 
 
 
@@ -198,7 +198,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS sevkiyat veya sipariş tamamlandığında mevcut ERP'ye faturalama için görev veya bilgi gönderebilir.
+NevaxisZentra sevkiyat veya sipariş tamamlandığında mevcut ERP'ye faturalama için görev veya bilgi gönderebilir.
 
 
 
@@ -210,7 +210,7 @@ Resmî belge mevcut ERP veya muhasebe sistemi tarafından oluşturulur.
 
 
 
-NevaxisFactOS banka veya ödeme sistemi değildir.
+NevaxisZentra banka veya ödeme sistemi değildir.
 
 
 
@@ -238,7 +238,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS operasyonel karar için nakit veya ödeme riskini mevcut ERP'den okuyabilir.
+NevaxisZentra operasyonel karar için nakit veya ödeme riskini mevcut ERP'den okuyabilir.
 
 
 
@@ -250,7 +250,7 @@ AI doğrudan banka işlemi başlatamaz.
 
 
 
-NevaxisFactOS resmî veya ana stok defteri olmayacaktır.
+NevaxisZentra resmî veya ana stok defteri olmayacaktır.
 
 
 
@@ -282,7 +282,7 @@ Ana stok miktarı mevcut ERP veya depo sisteminde tutulur.
 
 
 
-NevaxisFactOS bu verileri:
+NevaxisZentra bu verileri:
 
 
 
@@ -306,7 +306,7 @@ için kullanır.
 
 
 
-NevaxisFactOS genel amaçlı depo yönetim sistemi olmayacaktır.
+NevaxisZentra genel amaçlı depo yönetim sistemi olmayacaktır.
 
 
 
@@ -352,7 +352,7 @@ Ancak üretim operasyonu için gerekli aşağıdaki bilgiler analiz kapsamında 
 
 
 
-NevaxisFactOS tam kapsamlı satın alma kayıt sistemi olmayacaktır.
+NevaxisZentra tam kapsamlı satın alma kayıt sistemi olmayacaktır.
 
 
 
@@ -378,7 +378,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS:
+NevaxisZentra:
 
 
 
@@ -398,7 +398,7 @@ NevaxisFactOS:
 
 
 
-NevaxisFactOS bordro sistemi değildir.
+NevaxisZentra bordro sistemi değildir.
 
 
 
@@ -428,7 +428,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS vardiya planında fazla mesai ihtiyacını gösterebilir.
+NevaxisZentra vardiya planında fazla mesai ihtiyacını gösterebilir.
 
 
 
@@ -440,7 +440,7 @@ Maaş ve resmî ücret hesabı mevcut bordro veya İK sisteminde yapılır.
 
 
 
-NevaxisFactOS personel ana kayıt sistemi olmayacaktır.
+NevaxisZentra personel ana kayıt sistemi olmayacaktır.
 
 
 
@@ -470,7 +470,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS vardiya planlama için yalnızca gerekli operasyonel personel verisini kullanabilir:
+NevaxisZentra vardiya planlama için yalnızca gerekli operasyonel personel verisini kullanabilir:
 
 
 
@@ -494,7 +494,7 @@ NevaxisFactOS vardiya planlama için yalnızca gerekli operasyonel personel veri
 
 
 
-NevaxisFactOS kapsamlı İK yönetim platformu olmayacaktır.
+NevaxisZentra kapsamlı İK yönetim platformu olmayacaktır.
 
 
 
@@ -530,7 +530,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS genel amaçlı müşteri ilişkileri yönetimi sistemi olmayacaktır.
+NevaxisZentra genel amaçlı müşteri ilişkileri yönetimi sistemi olmayacaktır.
 
 
 
@@ -556,7 +556,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli müşteri verilerini kullanır.
+NevaxisZentra yalnızca sipariş toplama ve üretim operasyonu için gerekli müşteri verilerini kullanır.
 
 
 
@@ -564,7 +564,7 @@ NevaxisFactOS yalnızca sipariş toplama ve üretim operasyonu için gerekli mü
 
 
 
-NevaxisFactOS bütün satış süreçlerinin ana sistemi olmayacaktır.
+NevaxisZentra bütün satış süreçlerinin ana sistemi olmayacaktır.
 
 
 
@@ -590,7 +590,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut ERP sipariş sistemiyle entegre olabilir.
+NevaxisZentra omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcut ERP sipariş sistemiyle entegre olabilir.
 
 
 
@@ -598,7 +598,7 @@ NevaxisFactOS omnichannel taleplerden sipariş taslağı oluşturabilir ve mevcu
 
 
 
-NevaxisFactOS bütün şirket belgelerini yöneten genel DMS ürünü olmayacaktır.
+NevaxisZentra bütün şirket belgelerini yöneten genel DMS ürünü olmayacaktır.
 
 
 
@@ -620,7 +620,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
+NevaxisZentra yalnızca operasyonla ilişkili belgeleri yönetebilir:
 
 
 
@@ -644,7 +644,7 @@ NevaxisFactOS yalnızca operasyonla ilişkili belgeleri yönetebilir:
 
 
 
-NevaxisFactOS Jira, Asana veya genel proje yönetim platformunun yerine geçmez.
+NevaxisZentra Jira, Asana veya genel proje yönetim platformunun yerine geçmez.
 
 
 
@@ -664,7 +664,7 @@ Kapsam dışı işlevler:
 
 
 
-NevaxisFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
+NevaxisZentra yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
 
 
 
@@ -688,7 +688,7 @@ NevaxisFactOS yalnızca fabrika operasyonlarına bağlı görevleri yönetir:
 
 
 
-Bakım NevaxisFactOS kapsamındadır ancak ürün bütün sektörlere yönelik bağımsız CMMS olarak konumlandırılmayacaktır.
+Bakım NevaxisZentra kapsamındadır ancak ürün bütün sektörlere yönelik bağımsız CMMS olarak konumlandırılmayacaktır.
 
 
 
@@ -716,7 +716,7 @@ Bakım yetenekleri plastik enjeksiyon ve kalıp üretimi bağlamında geliştiri
 
 
 
-NevaxisFactOS üretim operasyonlarını takip eder ancak bütün üretim sektörlerine uygun genel MES olarak geliştirilmez.
+NevaxisZentra üretim operasyonlarını takip eder ancak bütün üretim sektörlerine uygun genel MES olarak geliştirilmez.
 
 
 
@@ -746,7 +746,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS makine güvenlik sistemi değildir.
+NevaxisZentra makine güvenlik sistemi değildir.
 
 
 
@@ -776,7 +776,7 @@ Bu kontroller yerel makine ve PLC üzerinde kalır.
 
 
 
-NevaxisFactOS bu sistemleri devre dışı bırakamaz.
+NevaxisZentra bu sistemleri devre dışı bırakamaz.
 
 
 
@@ -784,7 +784,7 @@ NevaxisFactOS bu sistemleri devre dışı bırakamaz.
 
 
 
-NevaxisFactOS kullanıcıya veya AI'a sınırsız makine komutu yetkisi vermez.
+NevaxisZentra kullanıcıya veya AI'a sınırsız makine komutu yetkisi vermez.
 
 
 
@@ -818,7 +818,7 @@ Desteklenen komutlar allowlist ve açık onay ile sınırlandırılır.
 
 
 
-NevaxisFactOS varsayılan olarak tam otonom fabrika sistemi değildir.
+NevaxisZentra varsayılan olarak tam otonom fabrika sistemi değildir.
 
 
 
@@ -888,7 +888,7 @@ AI yalnızca sürümlenmiş ve izinli tool sözleşmelerini kullanır.
 
 
 
-NevaxisFactOS kurumun bütün verilerini toplayan sınırsız genel veri ambarı olmayacaktır.
+NevaxisZentra kurumun bütün verilerini toplayan sınırsız genel veri ambarı olmayacaktır.
 
 
 
@@ -918,7 +918,7 @@ Operational Data Hub yalnızca fabrika operasyon kararı için gerekli verileri 
 
 
 
-NevaxisFactOS mevcut ERP'nin bütün tablo ve alanlarını kopyalamaz.
+NevaxisZentra mevcut ERP'nin bütün tablo ve alanlarını kopyalamaz.
 
 
 
@@ -946,7 +946,7 @@ Yalnızca operasyonel karar için gerekli kanonik alanlar tutulur.
 
 
 
-NevaxisFactOS system-of-record olarak belirlenmemiş verileri tek taraflı değiştiremez.
+NevaxisZentra system-of-record olarak belirlenmemiş verileri tek taraflı değiştiremez.
 
 
 
@@ -976,7 +976,7 @@ Bu veriler yalnızca desteklenen ve onaylanan write-back akışıyla kaynak sist
 
 
 
-NevaxisFactOS bütün uygulamalar için genel RPA ürünü olmayacaktır.
+NevaxisZentra bütün uygulamalar için genel RPA ürünü olmayacaktır.
 
 
 
@@ -1004,7 +1004,7 @@ RPA benzeri adaptörler yalnızca API bulunmayan belirli ERP entegrasyonları i�
 
 
 
-NevaxisFactOS genel low-code veya no-code uygulama geliştirme platformu değildir.
+NevaxisZentra genel low-code veya no-code uygulama geliştirme platformu değildir.
 
 
 
@@ -1034,7 +1034,7 @@ Yapılandırılabilir alanlar kontrollü ürün sınırlarında kalır.
 
 
 
-NevaxisFactOS yalnızca raporlama ürünü değildir ve sınırsız BI platformu da olmayacaktır.
+NevaxisZentra yalnızca raporlama ürünü değildir ve sınırsız BI platformu da olmayacaktır.
 
 
 
@@ -1054,7 +1054,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir AI çıktıları sunar.
+NevaxisZentra fabrika operasyonlarına özel hazır analizler ve açıklanabilir AI çıktıları sunar.
 
 
 
@@ -1062,7 +1062,7 @@ NevaxisFactOS fabrika operasyonlarına özel hazır analizler ve açıklanabilir
 
 
 
-Enerji verileri operasyonel analizde kullanılabilir ancak NevaxisFactOS bağımsız enerji yönetimi ve faturalama sistemi değildir.
+Enerji verileri operasyonel analizde kullanılabilir ancak NevaxisZentra bağımsız enerji yönetimi ve faturalama sistemi değildir.
 
 
 
@@ -1082,7 +1082,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS:
+NevaxisZentra:
 
 
 
@@ -1104,7 +1104,7 @@ analiz edebilir.
 
 
 
-NevaxisFactOS tam kapsamlı İSG ana sistemi değildir.
+NevaxisZentra tam kapsamlı İSG ana sistemi değildir.
 
 
 
@@ -1132,7 +1132,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS genel lojistik veya filo yönetim ürünü değildir.
+NevaxisZentra genel lojistik veya filo yönetim ürünü değildir.
 
 
 
@@ -1156,7 +1156,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu takip edebilir.
+NevaxisZentra üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumunu takip edebilir.
 
 
 
@@ -1164,7 +1164,7 @@ NevaxisFactOS üretim ve sipariş terminini etkileyen sevkiyat hazırlık durumu
 
 
 
-NevaxisFactOS genel tedarikçi pazaryeri değildir.
+NevaxisZentra genel tedarikçi pazaryeri değildir.
 
 
 
@@ -1262,7 +1262,7 @@ ile sınırlandırılabilir.
 
 
 
-NevaxisFactOS genel Master Data Management platformu olmayacaktır.
+NevaxisZentra genel Master Data Management platformu olmayacaktır.
 
 
 
@@ -1282,7 +1282,7 @@ Kapsam dışı:
 
 
 
-NevaxisFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
+NevaxisZentra gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
 
 
 
@@ -1290,7 +1290,7 @@ NevaxisFactOS gerekli dış kayıtları referans ve eşleme modeliyle kullanır.
 
 
 
-NevaxisFactOS satışı için müşterinin mevcut ERP'sini bırakması istenmez.
+NevaxisZentra satışı için müşterinin mevcut ERP'sini bırakması istenmez.
 
 
 
@@ -1302,7 +1302,7 @@ NevaxisFactOS satışı için müşterinin mevcut ERP'sini bırakması istenmez.
 
 
 
-ERP değiştirme projesi NevaxisFactOS satışının ön koşulu değildir.
+ERP değiştirme projesi NevaxisZentra satışının ön koşulu değildir.
 
 
 
@@ -1364,11 +1364,11 @@ Yapay veya anonimleştirilmiş veri kullanılmalıdır.
 
 
 
-Aşağıdaki alanlar NevaxisFactOS içinde analiz ve karar desteği olarak bulunur ancak ana kayıt sistemi değildir:
+Aşağıdaki alanlar NevaxisZentra içinde analiz ve karar desteği olarak bulunur ancak ana kayıt sistemi değildir:
 
 
 
-| Alan | NevaxisFactOS rolü | Ana kaynak |
+| Alan | NevaxisZentra rolü | Ana kaynak |
 
 | --- | --- | --- |
 
@@ -1576,7 +1576,7 @@ Klasik ERP kapsamı sessizce geri eklenemez.
 
 
 
-NevaxisFactOS'un görevi:
+NevaxisZentra'un görevi:
 
 
 
@@ -1584,5 +1584,5 @@ NevaxisFactOS'un görevi:
 
 
 
-NevaxisFactOS'un görevi mevcut ERP'yi yeniden geliştirmek değildir.
+NevaxisZentra'un görevi mevcut ERP'yi yeniden geliştirmek değildir.
 

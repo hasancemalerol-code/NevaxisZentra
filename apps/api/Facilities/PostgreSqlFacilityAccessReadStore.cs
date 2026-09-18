@@ -1,12 +1,12 @@
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Facilities;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Facilities;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
-namespace NevaxisFactOS.Api.Facilities;
+namespace NevaxisZentra.Api.Facilities;
 
 public sealed class PostgreSqlFacilityAccessReadStore(
-    NevaxisFactOSDbContext dbContext,
+    NevaxisZentraDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession)
     : IFacilityAccessReadStore
 {

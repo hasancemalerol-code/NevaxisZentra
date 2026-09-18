@@ -17,7 +17,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -33,7 +33,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": "production-pilot-operator",
-    "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+    "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
   };
 }
 

@@ -28,7 +28,7 @@ function readRequired(relativePath) {
 function db(sql, database) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", database, "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -54,7 +54,7 @@ function readMigrationConnectionEnv(database) {
 function runMigrationApply(database) {
   const migrationProject = resolve(
     ROOT,
-    "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj",
+    "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj",
   );
   return spawnSync(
     "dotnet",
@@ -70,7 +70,7 @@ function runMigrationApply(database) {
       "--startup-project",
       migrationProject,
       "--context",
-      "NevaxisFactOSDbContext",
+      "NevaxisZentraDbContext",
     ],
     { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv(database) },
   );
@@ -78,8 +78,8 @@ function runMigrationApply(database) {
 
 console.log("Running INTEGRATION-WAVE-C migration verifier.");
 
-const waveC = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${WAVE_C_MIGRATION}.cs`);
-const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
+const waveC = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${WAVE_C_MIGRATION}.cs`);
+const snapshot = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
 
 assert("wave-c migration adds ingress_key", waveC.includes("ingress_key"));
 assert("wave-c migration adds ingress resolver function", waveC.includes("resolve_integration_ingress_connector"));

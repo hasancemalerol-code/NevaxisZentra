@@ -42,7 +42,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -54,7 +54,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -91,11 +91,11 @@ function removeClosureFixtures() {
 
 console.log("Running OPERATIONAL-RISK-2 cross-module detection verifier.");
 
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskSourceAdapters.cs");
-const evaluator = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionEvaluator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionConstants.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskDetectionRepository.cs");
-const energyCalc = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskSourceAdapters.cs");
+const evaluator = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskDetectionEvaluator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskDetectionConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskDetectionRepository.cs");
+const energyCalc = readRequired("packages/NevaxisZentra.Persistence/Energy/EnergyIntelligenceCalculator.cs");
 
 assert("IOperationalRiskEvidenceSource contract", adapters.includes("IOperationalRiskEvidenceSource"));
 assert("energy adapter reads assessments only", adapters.includes("EnergyIntelligenceAssessments"));

@@ -95,7 +95,7 @@ test("development-api mode uses server-side development headers", () => {
     );
     assert.equal(
       contextResult.context.requestHeaders[
-        "X-NevaxisFactOS-Tenant"
+        "X-NevaxisZentra-Tenant"
       ],
       "tenant-key",
     );

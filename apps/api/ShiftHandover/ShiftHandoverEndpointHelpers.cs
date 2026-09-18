@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.ShiftHandover;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.ShiftHandover;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.ShiftHandover;
+namespace NevaxisZentra.Api.ShiftHandover;
 
 internal static class ShiftHandoverEndpointHelpers
 {

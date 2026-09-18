@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>NevaxisZentra.LogoBridge</RootNamespace>
+    <AssemblyName>NevaxisZentra.LogoBridge</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\NevaxisZentra.Persistence\NevaxisZentra.Persistence.csproj" />
+  </ItemGroup>
+</Project>

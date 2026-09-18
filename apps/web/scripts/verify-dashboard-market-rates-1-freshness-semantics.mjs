@@ -47,8 +47,8 @@ function toDisplayFreshnessState(state) {
 
 console.log("Running DASHBOARD-MARKET-RATES-1 freshness semantics verifier.");
 
-const constants = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRatesConstants.cs");
-const conversions = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRatesValueConversions.cs");
+const constants = read("packages/NevaxisZentra.Persistence/MarketRates/MarketRatesConstants.cs");
+const conversions = read("packages/NevaxisZentra.Persistence/MarketRates/MarketRatesValueConversions.cs");
 const panel = read("apps/web/src/components/dashboard/piyasa-ozeti-panel.tsx");
 
 assert("fresh limit 90 minutes", constants.includes("TimeSpan.FromMinutes(90)"));

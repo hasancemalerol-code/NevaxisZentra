@@ -1,6 +1,6 @@
 {
-  "package": "NevaxisFactOS-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
-  "baseline": "NevaxisFactOS-SALES-DEMO-ALL-MODULES-READINESS-1",
+  "package": "NevaxisZentra-DESKTOP-SHELL-ALL-MODULES-VALIDATION-1",
+  "baseline": "NevaxisZentra-SALES-DEMO-ALL-MODULES-READINESS-1",
   "generatedAt": "2026-09-05T00:37:58.343Z",
   "canonicalRouteCount": 46,
   "representativeScreenshots": {

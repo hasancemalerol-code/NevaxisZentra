@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/closure-constants.ps1"
 
-$migrationFile = Join-Path (Resolve-Path "$PSScriptRoot/../..") "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260906180000_AddAiTaskOmnichannelDeliverySecureAccessFoundation.cs"
+$migrationFile = Join-Path (Resolve-Path "$PSScriptRoot/../..") "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260906180000_AddAiTaskOmnichannelDeliverySecureAccessFoundation.cs"
 if (-not (Test-Path $migrationFile)) { throw "Migration file missing." }
 
 $exists = Get-Content "$PSScriptRoot/tmp-check-omnichannel.sql" -ErrorAction SilentlyContinue
@@ -18,7 +18,7 @@ if ($present -eq "1") {
 
 Write-Host "Applying omnichannel migration via EF to target only ..."
 $root = Resolve-Path "$PSScriptRoot/../.."
-$migrationProject = Join-Path $root "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj"
+$migrationProject = Join-Path $root "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj"
 $env:NEVAXIS_FACTOS__MIGRATIONS__HOST = $ClosurePostgresHost
 $env:NEVAXIS_FACTOS__MIGRATIONS__PORT = "$ClosurePostgresPort"
 $env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE = $ClosureDatabaseName
@@ -28,7 +28,7 @@ $env:NEVAXIS_FACTOS__MIGRATIONS__SSL_MODE = "Disable"
 $env:NEVAXIS_FACTOS__MIGRATIONS__COMMAND_TIMEOUT_SECONDS = "120"
 
 Push-Location $root
-dotnet tool run dotnet-ef -- database update 20260906180000_AddAiTaskOmnichannelDeliverySecureAccessFoundation --project $migrationProject --startup-project $migrationProject --context NevaxisFactOSDbContext
+dotnet tool run dotnet-ef -- database update 20260906180000_AddAiTaskOmnichannelDeliverySecureAccessFoundation --project $migrationProject --startup-project $migrationProject --context NevaxisZentraDbContext
 if ($LASTEXITCODE -ne 0) { throw "Targeted migration apply failed." }
 Pop-Location
 Write-Host "OMNICHANNEL_MIGRATION_PRESENT = PASS"

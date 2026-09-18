@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.MarketRates;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.MarketRates;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.MarketRates;
+namespace NevaxisZentra.Api.MarketRates;
 
 internal static class MarketRatesEndpointHelpers
 {

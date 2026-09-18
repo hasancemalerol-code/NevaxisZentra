@@ -11,8 +11,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $composeFile = Join-Path $repositoryRoot 'infrastructure\compose.yaml'
-$migrationProject = Join-Path $repositoryRoot 'packages\NevaxisFactOS.Persistence.Migrations\NevaxisFactOS.Persistence.Migrations.csproj'
-$databaseToolProject = Join-Path $repositoryRoot 'tools\NevaxisFactOS.DatabaseTool\NevaxisFactOS.DatabaseTool.csproj'
+$migrationProject = Join-Path $repositoryRoot 'packages\NevaxisZentra.Persistence.Migrations\NevaxisZentra.Persistence.Migrations.csproj'
+$databaseToolProject = Join-Path $repositoryRoot 'tools\NevaxisZentra.DatabaseTool\NevaxisZentra.DatabaseTool.csproj'
 
 function Import-EnvironmentFile {
     param([string]$Path)
@@ -131,7 +131,7 @@ $efPrefix = @('tool', 'run', 'dotnet-ef', '--')
 $efOptions = @(
     '--project', $migrationProject,
     '--startup-project', $migrationProject,
-    '--context', 'NevaxisFactOSDbContext'
+    '--context', 'NevaxisZentraDbContext'
 )
 
 Push-Location $repositoryRoot
@@ -215,7 +215,7 @@ try {
             Invoke-DotNet ($efPrefix + @('database', 'update', '0') + $efOptions)
         }
         'migrations-script' {
-            $outputPath = Join-Path $repositoryRoot 'artifacts\database\NevaxisFactOS.idempotent.sql'
+            $outputPath = Join-Path $repositoryRoot 'artifacts\database\NevaxisZentra.idempotent.sql'
             New-Item -ItemType Directory -Path (Split-Path -Parent $outputPath) -Force | Out-Null
             Invoke-DotNet ($efPrefix + @('migrations', 'script', '--idempotent', '--output', $outputPath) + $efOptions)
             Write-Host "Generated idempotent SQL: $outputPath"

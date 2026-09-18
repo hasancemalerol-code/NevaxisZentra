@@ -93,17 +93,17 @@ $setupSize = (Get-Item $setupMsiPath).Length
 
 $readmePath = Join-Path $ArtifactRoot "README-DEMO.txt"
 Write-Utf8NoBomFile -Path $readmePath -Content @"
-NEVAXIS FACTOS
+NEVAXIS ZENTRA
 Factory Intelligence & Action OS
 
 INSTALLATION
 1. Run Nevaxis-FactOS-Setup.msi
 2. Complete installation
-3. Launch Nevaxis FactOS from Start Menu or Desktop
+3. Launch Nevaxis Zentra from Start Menu or Desktop
 4. Login with the demo account below
 
 DEMO LOGIN
-Email: admin@demo.nevaxisfactos.local
+Email: admin@demo.nevaxiszentra.local
 Password: NevaxisDemo2026!
 
 GOLDEN DEMO ACCESS
@@ -128,11 +128,11 @@ Compress-Archive -Path $versionedMsiPath, $readmePath, $checksumPath -Destinatio
 $zipHash = Get-Sha256Hex $zipPath
 Add-Content -Path $checksumPath -Value "$zipHash  Nevaxis-FactOS-Demo.zip" -Encoding ASCII
 
-$manifestPath = Join-Path $ArtifactRoot "NEVAXISFACTOS-WINDOWS-RELEASE-MANIFEST.md"
+$manifestPath = Join-Path $ArtifactRoot "NEVAXISZENTRA-WINDOWS-RELEASE-MANIFEST.md"
 Write-Utf8NoBomFile -Path $manifestPath -Content @"
-# Nevaxis FactOS Windows Release Manifest
+# Nevaxis Zentra Windows Release Manifest
 
-- Product: Nevaxis FactOS
+- Product: Nevaxis Zentra
 - Release: Full Current Windows Release
 - Version: $Version
 - Source freeze: $SourceCommit
@@ -148,7 +148,7 @@ Write-Utf8NoBomFile -Path $manifestPath -Content @"
 - ZIP SHA-256: $zipHash
 - Database strategy: EMBEDDED_LOCAL PostgreSQL
 - Persistent data: %PROGRAMDATA%\Nevaxis\FactOS
-- Machine secrets: %LOCALAPPDATA%\NevaxisFactOS\config\runtime.env.local
+- Machine secrets: %LOCALAPPDATA%\NevaxisZentra\config\runtime.env.local
 "@
 
 Write-Host "Installer: $setupMsiPath ($([math]::Round($setupSize / 1MB, 2)) MB)"

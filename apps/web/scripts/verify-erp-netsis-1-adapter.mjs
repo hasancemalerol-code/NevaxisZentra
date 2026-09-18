@@ -45,7 +45,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": OPERATOR,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -68,15 +68,15 @@ async function api(method, path, body) {
 
 console.log("Running ERP-NETSIS-1 adapter verifier.");
 
-const netsisAdapter = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
-const netsisTransport = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/INetsisReadTransport.cs");
-const netsisFixture = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisReadTransportTestFixture.cs");
-const netsisMapper = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisSourceRecords.cs");
-const adapters = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpAdapters.cs");
-const syncRepo = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpSyncRepository.cs");
+const netsisAdapter = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisErpAdapter.cs");
+const netsisTransport = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/INetsisReadTransport.cs");
+const netsisFixture = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisReadTransportTestFixture.cs");
+const netsisMapper = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisSourceRecords.cs");
+const adapters = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpAdapters.cs");
+const syncRepo = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpSyncRepository.cs");
 const endpoints = readRequired("apps/api/Erp/ErpEndpointRouteBuilderExtensions.cs");
-const entities = readRequired("packages/NevaxisFactOS.Persistence/Erp/ErpEntities.cs");
-const bridgeProgram = readRequired("tools/NevaxisFactOS.NetsisBridge/Program.cs");
+const entities = readRequired("packages/NevaxisZentra.Persistence/Erp/ErpEntities.cs");
+const bridgeProgram = readRequired("tools/NevaxisZentra.NetsisBridge/Program.cs");
 
 requireText(netsisAdapter, "class NetsisErpAdapter", "NetsisErpAdapter");
 forbidText(adapters, "class NetsisErpAdapterPlaceholder", "placeholder removed");
@@ -92,7 +92,7 @@ requireText(netsisMapper, "NetsisProductMapper", "product mapping");
 requireText(netsisMapper, "ErpExternalCustomerRecord", "canonical customer mapping");
 requireText(netsisMapper, "ErpExternalProductRecord", "canonical product mapping");
 requireText(netsisTransport, "NetsisReadPageRequest", "pagination request");
-const netsisReadPage = readRequired("packages/NevaxisFactOS.Persistence/Erp/Netsis/NetsisReadPage.cs");
+const netsisReadPage = readRequired("packages/NevaxisZentra.Persistence/Erp/Netsis/NetsisReadPage.cs");
 requireText(netsisReadPage, "ContinuationToken", "pagination cursor");
 requireText(netsisAdapter, "CancelAfter", "timeout support");
 requireText(netsisAdapter, "CancellationToken", "cancellation support");

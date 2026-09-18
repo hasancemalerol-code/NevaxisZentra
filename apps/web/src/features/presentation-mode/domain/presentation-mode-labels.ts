@@ -1,7 +1,7 @@
 export const PRESENTATION_MODE_ROUTE = "/sunum-modu";
 export const PRESENTATION_MODE_TITLE = "SUNUM MODU";
 export const PRESENTATION_MODE_SUBTITLE =
-  "FactOS'un dijital iş gücü, karar ve doğrulama yeteneklerini uçtan uca senaryolar üzerinden gösterin.";
+  "Zentra'nın dijital iş gücü, karar ve doğrulama yeteneklerini uçtan uca senaryolar üzerinden gösterin.";
 
 export const FACTORY_DECISION_CENTER_ROUTE = "/fabrika-karar-merkezi";
 export const CRITICAL_ORDER_RECOVERY_ORDER_REFERENCE = "ORD-2026-0915-047";

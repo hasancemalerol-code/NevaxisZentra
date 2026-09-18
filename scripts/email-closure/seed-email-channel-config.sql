@@ -14,7 +14,7 @@ VALUES (
     'none',
     'closure-smtp-user',
     NULL,
-    'notifications@closure.NevaxisFactOS.local',
+    'notifications@closure.NevaxisZentra.local',
     'crevafactos',
     NULL,
     'tr',

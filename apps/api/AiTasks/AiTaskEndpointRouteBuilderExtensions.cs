@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.AiTasks;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Teams;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.AiTasks;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Teams;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.AiTasks;
+namespace NevaxisZentra.Api.AiTasks;
 
 public static class AiTaskEndpointRouteBuilderExtensions
 {
@@ -570,12 +570,12 @@ public sealed record AiTaskSourceReferenceRequest(
 
 public static class AiTaskServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSAiTasks(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraAiTasks(this IServiceCollection services)
     {
         services.AddScoped<IAiTaskClosureEngine, AiTaskClosureEngine>();
         services.AddScoped<IAiTaskClosureRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskClosureRepository();
@@ -593,7 +593,7 @@ public static class AiTaskServiceCollectionExtensions
         services.AddScoped<AiTaskPlaybookRepository>();
         services.AddScoped<IAiTaskPlaybookRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskPlaybookRepository();
@@ -603,7 +603,7 @@ public static class AiTaskServiceCollectionExtensions
         });
         services.AddScoped<IAiTaskPlaybookOrchestrator>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskPlaybookRepository();
@@ -615,7 +615,7 @@ public static class AiTaskServiceCollectionExtensions
         services.AddScoped<IAiTaskAutomationEngine, AiTaskAutomationEngine>();
         services.AddScoped<IAiTaskAutomationRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskAutomationRepository();
@@ -632,7 +632,7 @@ public static class AiTaskServiceCollectionExtensions
         services.AddScoped<IAiTaskRoutingService, AiTaskRoutingService>();
         services.AddScoped<IAiTaskOperationsRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskOperationsRepository();
@@ -649,7 +649,7 @@ public static class AiTaskServiceCollectionExtensions
         services.AddScoped<IAiTaskDecisionProvider, DeterministicAiTaskDecisionProvider>();
         services.AddScoped<IAiTaskDecisionIntelligenceRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             if (dbContext is null)
             {
                 return new UnavailableAiTaskDecisionIntelligenceRepository();
@@ -665,7 +665,7 @@ public static class AiTaskServiceCollectionExtensions
 
         services.AddScoped<IAiTaskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableAiTaskRepository()
                 : new AiTaskRepository(

@@ -11,7 +11,7 @@ const API = process.env.NEVAXIS_FACTOS_API_BASE_URL ?? "http://127.0.0.1:5000";
 const WEB = (process.env.NEVAXIS_FACTOS_WEB_BASE_URL ?? "http://localhost:3001").replace("127.0.0.1", "localhost").replace(/\/$/, "");
 const FACILITY = "bb000001-0005-4000-8000-000000000005";
 const TENANT_ID = "bb000001-0001-4000-8000-000000000001";
-const ACTOR_EMAIL = "admin@demo.nevaxisfactos.local";
+const ACTOR_EMAIL = "admin@demo.nevaxiszentra.local";
 const SCREENSHOT_DIR = join(ROOT, ".cursor-screenshots");
 const LIVE_SHOT = join(SCREENSHOT_DIR, "dashboard-market-rates-1-automatic-refresh-live-closure-authenticated.png");
 const REFRESHED_EVENT = "market-rates.snapshot.refreshed";
@@ -43,7 +43,7 @@ function bootstrapSecrets() {
   ];
   let text = "";
   for (const id of ids) {
-    const path = `${home}/.cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/${id}/${id}.jsonl`;
+    const path = `${home}/.cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/${id}/${id}.jsonl`;
     if (existsSync(path)) text += readFileSync(path, "utf8");
   }
   for (const key of ["DevelopmentSaasIdentity__TenantOwnerPassword", "DevelopmentSaasIdentity__MfaSharedSecret"]) {
@@ -85,7 +85,7 @@ function actorHeaders() {
     Accept: "application/json",
     "X-crevafactos-dev-Issuer": "crevafactos-dev",
     "X-crevafactos-dev-Subject": "planning-pilot-user",
-    "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+    "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
   };
 }
 
@@ -102,7 +102,7 @@ function persistenceConfig() {
 }
 
 function tenantSql(sqlBody) {
-  return `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisFactOS.tenant_id', '${TENANT_ID}', true); ${sqlBody}`;
+  return `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisZentra.tenant_id', '${TENANT_ID}', true); ${sqlBody}`;
 }
 
 function runTenantSql(sqlBody) {
@@ -111,7 +111,7 @@ function runTenantSql(sqlBody) {
     "docker",
     [
       "exec",
-      "NevaxisFactOS-local-postgres-1",
+      "NevaxisZentra-local-postgres-1",
       "psql",
       "-U", persistence.Username,
       "-d", persistence.Database,
@@ -148,7 +148,7 @@ function auditCount(eventType) {
     "docker",
     [
       "exec",
-      "NevaxisFactOS-local-postgres-1",
+      "NevaxisZentra-local-postgres-1",
       "psql",
       "-U", persistence.Username,
       "-d", persistence.Database,
@@ -171,7 +171,7 @@ function auditCount(eventType) {
 
 function backdateSnapshot() {
   runTenantSql(
-    "UPDATE market_rate_snapshots SET provider_observed_at_utc = NOW() - INTERVAL '181 minutes', synchronized_at_utc = NOW() - INTERVAL '181 minutes', updated_at_utc = NOW() WHERE tenant_id = current_setting('NevaxisFactOS.tenant_id')::uuid;",
+    "UPDATE market_rate_snapshots SET provider_observed_at_utc = NOW() - INTERVAL '181 minutes', synchronized_at_utc = NOW() - INTERVAL '181 minutes', updated_at_utc = NOW() WHERE tenant_id = current_setting('NevaxisZentra.tenant_id')::uuid;",
   );
 }
 
@@ -189,9 +189,9 @@ console.log("Running MARKET-RATES-1-AUTOMATIC-REFRESH-LIVE-CLOSURE-1 verifier.")
 bootstrapSecrets();
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-const constants = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRatesConstants.cs");
-const repository = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRateRepository.cs");
-const coordinator = read("packages/NevaxisFactOS.Persistence/MarketRates/MarketRateAutomaticRefreshCoordinator.cs");
+const constants = read("packages/NevaxisZentra.Persistence/MarketRates/MarketRatesConstants.cs");
+const repository = read("packages/NevaxisZentra.Persistence/MarketRates/MarketRateRepository.cs");
+const coordinator = read("packages/NevaxisZentra.Persistence/MarketRates/MarketRateAutomaticRefreshCoordinator.cs");
 const panel = read("apps/web/src/components/dashboard/piyasa-ozeti-panel.tsx");
 
 assert("70 minute refresh threshold", constants.includes("TimeSpan.FromMinutes(70)"));
@@ -319,8 +319,8 @@ try {
       awaitPromise: true,
       returnByValue: true,
       expression: `(async () => {
-        const csrf = decodeURIComponent((document.cookie.match(/NevaxisFactOS\\.csrf=([^;]+)/) || [])[1] || "");
-        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisFactOS-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
+        const csrf = decodeURIComponent((document.cookie.match(/NevaxisZentra\\.csrf=([^;]+)/) || [])[1] || "");
+        const res = await fetch("/api/identity/mfa/verify", { method: "POST", credentials: "include", headers: { Accept: "application/json", "Content-Type": "application/json", "X-NevaxisZentra-Csrf": csrf }, body: JSON.stringify({ totpCode: ${JSON.stringify(generateTotp(mfaSecret, offset))} }) });
         return { status: res.status };
       })()`,
     });

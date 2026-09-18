@@ -30,9 +30,9 @@ console.log("Running PROCESS-OEE-1 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/ProcessOee/ProcessOeeEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/ProcessOee/ProcessOeeEndpointHelpers.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812172702_AddProcessOeeFoundation.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/ProcessOeePermissionKeys.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260812172702_AddProcessOeeFoundation.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/ProcessOeePermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -67,17 +67,17 @@ assert("API ready", ready.status === 200, `status=${ready.status}`);
 const operatorHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "production-pilot-operator",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "quality-negative-test-user",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 
 assert("missing auth → 401", (await liveRequest("GET", `/api/process-oee/workspace-summary?facilityId=${FACILITY}`)) === 401);

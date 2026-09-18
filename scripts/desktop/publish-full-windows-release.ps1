@@ -1,5 +1,5 @@
 # FACTOS-FULL-CURRENT-WINDOWS-RELEASE publisher
-# Packages complete Nevaxis FactOS for standalone Windows installation.
+# Packages complete Nevaxis Zentra for standalone Windows installation.
 
 [CmdletBinding()]
 param(
@@ -29,12 +29,12 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 $stagingRoot = Join-Path $OutputRoot "staging"
 $artifactRoot = Join-Path $OutputRoot "artifacts"
 $cacheRoot = Join-Path $RepositoryRoot "artifacts\desktop-release-cache"
-$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
-$apiProject = Join-Path $RepositoryRoot "apps\api\NevaxisFactOS.Api.csproj"
-$databaseToolProject = Join-Path $RepositoryRoot "tools\NevaxisFactOS.DatabaseTool\NevaxisFactOS.DatabaseTool.csproj"
+$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj"
+$apiProject = Join-Path $RepositoryRoot "apps\api\NevaxisZentra.Api.csproj"
+$databaseToolProject = Join-Path $RepositoryRoot "tools\NevaxisZentra.DatabaseTool\NevaxisZentra.DatabaseTool.csproj"
 $webDir = Join-Path $RepositoryRoot "apps\web"
 $packagingConfig = Join-Path $RepositoryRoot "apps\desktop\runtime-packaging\config"
-$migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisFactOS.Persistence.Migrations\Migrations"
+$migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.Migrations\Migrations"
 $nodeVersion = "22.18.0"
 $postgresVersion = "17.4-1"
 $postgresPort = 55432
@@ -101,9 +101,9 @@ if (-not $SkipWebBuild) {
     Write-Step "Web production build"
     Push-Location $RepositoryRoot
     try {
-        & pnpm --filter @nevaxisfactos/web typecheck
+        & pnpm --filter @nevaxiszentra/web typecheck
         if ($LASTEXITCODE -ne 0) { throw "Web typecheck failed." }
-        & pnpm --filter @nevaxisfactos/web build
+        & pnpm --filter @nevaxiszentra/web build
         if ($LASTEXITCODE -ne 0) { throw "Web build failed." }
     }
     finally { Pop-Location }
@@ -185,9 +185,9 @@ if (-not $SkipDatabaseTemplate) {
 }
 
 $runtimeManifest = [ordered]@{
-    productName = "Nevaxis FactOS"
+    productName = "Nevaxis Zentra"
     runtimeVersion = $ReleaseVersion
-    runtimeLabel = "Nevaxis FactOS Full Current Windows Release"
+    runtimeLabel = "Nevaxis Zentra Full Current Windows Release"
     sourceCommit = $currentSha
     freezeTag = "factos-final-sales-freeze-2026-09"
     buildTimestampUtc = $buildTimestampUtc

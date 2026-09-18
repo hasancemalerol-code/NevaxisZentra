@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.ShiftWorkforce;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.ShiftWorkforce;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ShiftWorkforce;
+namespace NevaxisZentra.Api.ShiftWorkforce;
 
 public static class ShiftWorkforceEndpointRouteBuilderExtensions
 {
@@ -321,13 +321,13 @@ public sealed record UpdateShiftWorkforceCompetencyRequest(
 
 public static class ShiftWorkforceServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSShiftWorkforce(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraShiftWorkforce(this IServiceCollection services)
     {
         services.AddScoped<IWorkforceSourceProvider, LocalDevelopmentWorkforceSourceProvider>();
         services.AddScoped<ShiftWorkforceSourceSynchronizer>();
         services.AddScoped<IShiftWorkforceRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableShiftWorkforceRepository()
                 : new ShiftWorkforceRepository(

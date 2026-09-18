@@ -37,14 +37,14 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
 function dbCount(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -66,9 +66,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running PROCUREMENT-RISK-FOUNDATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Procurement/ProcurementDeliveryRiskEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskRepository.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskRepository.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskCalculator.cs");
 
 assert("workspace endpoint registered", endpoints.includes('MapGet("/workspace"'));
 assert("evaluate endpoint registered", endpoints.includes('MapPost("/evaluate"'));
@@ -133,7 +133,7 @@ const aiTaskCountBefore = dbCount("SELECT COUNT(*) FROM ai_tasks");
 
 spawnSync(
   "docker",
-  ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
+  ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-c",
     `DELETE FROM procurement_delivery_risk_assessments WHERE purchase_order_line_id = '${ON_TRACK_LINE}' AND id != 'bb000001-00cb-4000-8000-0000000000cb';`],
   { encoding: "utf8" },
 );

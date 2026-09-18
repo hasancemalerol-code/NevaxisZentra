@@ -12,7 +12,7 @@ const VIEWPORTS = [
   { width: 1920, height: 1080, label: "1920x1080" },
   { width: 3840, height: 2160, label: "3840x2160" },
 ];
-const SCREENSHOT_DIR = join(tmpdir(), "NevaxisFactOS-dashboard-showcase-1");
+const SCREENSHOT_DIR = join(tmpdir(), "NevaxisZentra-dashboard-showcase-1");
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
 const KPI_LABELS = [
@@ -195,7 +195,7 @@ async function exerciseShowcase(page, label) {
 
   const bodyText = await page.locator("body").innerText();
   assert(`${label} header title`, bodyText.includes("Fabrika Operasyon Görünümü"));
-  assert(`${label} brand text`, bodyText.includes("NevaxisFactOS"));
+  assert(`${label} brand text`, bodyText.includes("NevaxisZentra"));
   assert(`${label} live status`, bodyText.includes("Operasyon akışı izleniyor"));
   assert(`${label} refresh label`, bodyText.includes("Son güncelleme:"));
   assert(`${label} hourly chart`, bodyText.includes("Saatlik Üretim Performansı"));
@@ -249,7 +249,7 @@ try {
 
     await signInThroughForm(page, {
       organization: ORGANIZATION,
-      email: "admin@demo.nevaxisfactos.local",
+      email: "admin@demo.nevaxiszentra.local",
       password: ownerPassword,
       mfaSecret: mfaSharedSecret,
     });

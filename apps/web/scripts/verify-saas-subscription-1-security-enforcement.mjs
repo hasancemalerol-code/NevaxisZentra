@@ -50,7 +50,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -180,8 +180,8 @@ class CookieJar {
 async function api(method, path, body, jar, extraHeaders = {}) {
   const headers = { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders };
   if (jar?.cookieHeader()) headers.Cookie = jar.cookieHeader();
-  if (jar?.get("NevaxisFactOS.session") && jar.get("NevaxisFactOS.csrf") && method !== "GET") {
-    headers["X-NevaxisFactOS-Csrf"] = jar.get("NevaxisFactOS.csrf");
+  if (jar?.get("NevaxisZentra.session") && jar.get("NevaxisZentra.csrf") && method !== "GET") {
+    headers["X-NevaxisZentra-Csrf"] = jar.get("NevaxisZentra.csrf");
   }
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -234,7 +234,7 @@ const endpoints = readRequired("apps/api/SaasSubscription/SaasSubscriptionEndpoi
 const helpers = readRequired("apps/api/SaasSubscription/SaasSubscriptionEndpointHelpers.cs");
 const middleware = readRequired("apps/api/SaasSubscription/TenantSubscriptionAccessMiddleware.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814220344_AddSaasTenantSubscriptionEntitlementEnforcement.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260814220344_AddSaasTenantSubscriptionEntitlementEnforcement.cs",
 );
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
@@ -288,7 +288,7 @@ assert("unauthorized subscription read → 403", restrictedDenied.status === 403
 const sales = await signIn("materials-sales@dev.local", salesPassword);
 
 const owner = await signIn(
-  "admin@demo.nevaxisfactos.local",
+  "admin@demo.nevaxiszentra.local",
   requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
   requireEnv("DevelopmentSaasIdentity__MfaSharedSecret"),
 );
@@ -323,7 +323,7 @@ const untrustedTenant = await api(
   "/api/saas-subscription/current",
   undefined,
   owner.jar,
-  { "X-NevaxisFactOS-Tenant": "other-tenant-not-pilot" },
+  { "X-NevaxisZentra-Tenant": "other-tenant-not-pilot" },
 );
 assert("untrusted tenant header rejected", untrustedTenant.status === 403, `status=${untrustedTenant.status}`);
 

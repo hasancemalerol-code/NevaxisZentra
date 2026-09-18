@@ -45,7 +45,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout || "psql failed");
@@ -160,7 +160,7 @@ function ensureModuleEntitlements() {
 }
 
 console.log("Bootstrapping Development Pilot Tenant sales-demo full access profile.");
-assert("postgres container reachable", spawnSync("docker", ["ps", "--filter", "name=NevaxisFactOS-local-postgres-1", "--format", "{{.Names}}"], { encoding: "utf8" }).stdout.includes("NevaxisFactOS-local-postgres-1"));
+assert("postgres container reachable", spawnSync("docker", ["ps", "--filter", "name=NevaxisZentra-local-postgres-1", "--format", "{{.Names}}"], { encoding: "utf8" }).stdout.includes("NevaxisZentra-local-postgres-1"));
 ensureSubscriptionActive();
 ensureModuleEntitlements();
 ensurePermissions();

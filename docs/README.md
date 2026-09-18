@@ -1,8 +1,8 @@
-# NevaxisFactOS Documentation
+# NevaxisZentra Documentation
 
 
 
-Bu klasör, NevaxisFactOS ürün, mimari, güvenlik ve teknik karar belgelerini içerir.
+Bu klasör, NevaxisZentra ürün, mimari, güvenlik ve teknik karar belgelerini içerir.
 
 
 

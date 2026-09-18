@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.Export;
+namespace NevaxisZentra.Api.Export;
 
 public static class ExportApiFailureCodes
 {

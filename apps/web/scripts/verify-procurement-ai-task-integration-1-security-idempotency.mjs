@@ -30,7 +30,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -57,9 +57,9 @@ function resolveAssessmentId(assessments, preferredId, result) {
 console.log("Running PROCUREMENT-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Procurement/ProcurementDeliveryRiskFollowUpEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskFollowUpRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskFollowUpPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Procurement/ProcurementDeliveryRiskFollowUpConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskFollowUpRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskFollowUpPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Procurement/ProcurementDeliveryRiskFollowUpConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes("/{assessmentId:guid}/task-draft"));
 assert("follow-up endpoint registered", endpoints.includes("/{assessmentId:guid}/follow-up"));

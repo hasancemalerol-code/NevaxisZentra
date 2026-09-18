@@ -59,31 +59,31 @@ console.log("Running production planning final-hardening verifier.");
 
 // Load key backend files
 const workflowRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWorkflowRepository.cs"),
   "ProductionPlanWorkflowRepository.cs",
 );
 const writeRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanWriteRepository.cs"),
   "ProductionPlanWriteRepository.cs",
 );
 const transferRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanTransferRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanTransferRepository.cs"),
   "ProductionPlanTransferRepository.cs",
 );
 const handoffRepository = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/ProductionPlanning/ProductionPlanHandoffRepository.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/ProductionPlanning/ProductionPlanHandoffRepository.cs"),
   "ProductionPlanHandoffRepository.cs",
 );
 const dbContext = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/NevaxisFactOSDbContext.cs"),
-  "NevaxisFactOSDbContext.cs",
+  resolveProjectPath("packages/NevaxisZentra.Persistence/NevaxisZentraDbContext.cs"),
+  "NevaxisZentraDbContext.cs",
 );
 const tenantSession = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/Tenancy/TenantDatabaseSession.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/Tenancy/TenantDatabaseSession.cs"),
   "TenantDatabaseSession.cs",
 );
 const permissionKeys = readRequiredFile(
-  resolveProjectPath("packages/NevaxisFactOS.Persistence/Authorization/ProductionPlanningPermissionKeys.cs"),
+  resolveProjectPath("packages/NevaxisZentra.Persistence/Authorization/ProductionPlanningPermissionKeys.cs"),
   "ProductionPlanningPermissionKeys.cs",
 );
 const endpointExtensions = readRequiredFile(
@@ -156,8 +156,8 @@ forbidText(permissionKeys, "\"*\"", "ProductionPlanningPermissionKeys.cs");
 // ── Tenant/Facility Isolation ──
 
 // 9. DbContext has global query filters (tenant isolation)
-requireText(dbContext, "HasQueryFilter", "NevaxisFactOSDbContext.cs");
-requireText(dbContext, "TenantId", "NevaxisFactOSDbContext.cs");
+requireText(dbContext, "HasQueryFilter", "NevaxisZentraDbContext.cs");
+requireText(dbContext, "TenantId", "NevaxisZentraDbContext.cs");
 
 // 10. TenantDatabaseSession enforces tenant scope
 requireText(tenantSession, "TenantId", "TenantDatabaseSession.cs");
@@ -180,8 +180,8 @@ forbidText(handoffRepository, "aiHandoff", "ProductionPlanHandoffRepository.cs")
 // ── No separate Production application package ──
 
 forbidFile(
-  resolveProjectPath("packages/NevaxisFactOS.Production"),
-  "packages/NevaxisFactOS.Production",
+  resolveProjectPath("packages/NevaxisZentra.Production"),
+  "packages/NevaxisZentra.Production",
 );
 
 // ── Planning / Production ownership boundary ──
@@ -195,8 +195,8 @@ forbidText(handoffRepository, "dbContext.ProductionOrders", "ProductionPlanHando
 requireText(handoffRepository, "ProductionPlanHandoff", "ProductionPlanHandoffRepository.cs");
 
 // Persistence may expose ProductionOrders for read/reporting in the shared DbContext.
-requireText(dbContext, "ProductionOrders", "NevaxisFactOSDbContext.cs");
-forbidText(dbContext, "MachineCommands", "NevaxisFactOSDbContext.cs");
+requireText(dbContext, "ProductionOrders", "NevaxisZentraDbContext.cs");
+forbidText(dbContext, "MachineCommands", "NevaxisZentraDbContext.cs");
 
 // ── Server Boundary ──
 
@@ -223,7 +223,7 @@ requireText(planDetailPage, "ProductionPlanHandoffPanel", "planlama/[planId]/pag
 
 // 19. No DELETE grant in migration
 const migrationPath = resolveProjectPath(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260807150000_AddProductionPlanningHandoffAndMakerChecker.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260807150000_AddProductionPlanningHandoffAndMakerChecker.cs",
 );
 if (existsSync(migrationPath)) {
   const migration = readFileSync(migrationPath, "utf8").replaceAll("\r\n", "\n");

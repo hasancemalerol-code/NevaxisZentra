@@ -51,7 +51,7 @@ function assert(label, ok, detail = "") {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -62,7 +62,7 @@ function ps(headers, path, method = "GET", body) {
   const args = [
     "-NoProfile",
     "-Command",
-    `$h=@{'X-crevafactos-dev-Issuer'='crevafactos-dev';'X-crevafactos-dev-Subject'='${headers.subject}';'X-NevaxisFactOS-Tenant'='${headers.tenant}';'Content-Type'='application/json'}; try { (Invoke-WebRequest -Uri '${API_BASE}${path}' -Method ${method} -Headers $h ${body ? `-Body '${JSON.stringify(body)}'` : ""} -UseBasicParsing).StatusCode } catch { $_.Exception.Response.StatusCode.value__ }`,
+    `$h=@{'X-crevafactos-dev-Issuer'='crevafactos-dev';'X-crevafactos-dev-Subject'='${headers.subject}';'X-NevaxisZentra-Tenant'='${headers.tenant}';'Content-Type'='application/json'}; try { (Invoke-WebRequest -Uri '${API_BASE}${path}' -Method ${method} -Headers $h ${body ? `-Body '${JSON.stringify(body)}'` : ""} -UseBasicParsing).StatusCode } catch { $_.Exception.Response.StatusCode.value__ }`,
   ];
   const result = spawnSync("powershell", args, { encoding: "utf8" });
   return Number(result.stdout.trim());
@@ -102,12 +102,12 @@ function startApi() {
   return spawnSync("powershell", [
     "-NoProfile",
     "-Command",
-    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/NevaxisFactOS.Api.csproj','--no-build'`,
+    `Start-Process -WindowStyle Hidden -WorkingDirectory '${ROOT}' -FilePath 'dotnet' -ArgumentList 'run','--project','apps/api/NevaxisZentra.Api.csproj','--no-build'`,
   ], { encoding: "utf8" });
 }
 
 function buildApi() {
-  const result = spawnSync("dotnet", ["build", "apps/api/NevaxisFactOS.Api.csproj", "--no-restore"], {
+  const result = spawnSync("dotnet", ["build", "apps/api/NevaxisZentra.Api.csproj", "--no-restore"], {
     cwd: ROOT,
     encoding: "utf8",
   });

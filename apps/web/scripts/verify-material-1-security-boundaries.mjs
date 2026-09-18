@@ -27,9 +27,9 @@ console.log("Running MATERIAL-1 security/boundary verifier.");
 
 const endpoints = readRequired("apps/api/Material/MaterialEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/Material/MaterialEndpointHelpers.cs");
-const migration = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260812104059_AddMaterialRegistryTechnicalSpecifications.cs");
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/MaterialPermissionKeys.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const migration = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260812104059_AddMaterialRegistryTechnicalSpecifications.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/MaterialPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 requireText(endpoints, "RequireAuthorization", "material endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "material endpoints");
@@ -77,17 +77,17 @@ if (ready.status !== 200) fail(`API not ready: ${ready.status}`);
 const operatorHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "production-pilot-operator",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const reviewerHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "planning-pilot-reviewer",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "quality-negative-test-user",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 
 const missingAuth = await liveRequest("GET", `/api/materials/workspace-summary?facilityId=${FACILITY}`);

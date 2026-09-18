@@ -31,9 +31,9 @@ function readRequired(relativePath) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__AUTH_LOGIN_CLICK_RECOVERY_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
-    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl"),
+    join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/e4795037-6822-4158-86cc-66f2bbb7cc33/e4795037-6822-4158-86cc-66f2bbb7cc33.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -71,7 +71,7 @@ function assertNoHardcodedCredentials(label, value) {
     MARKER_PASSWORD,
     process.env.DevelopmentSaasIdentity__ActiveUserPassword,
     process.env.DevelopmentSaasIdentity__TenantOwnerPassword,
-    "admin@demo.nevaxisfactos.local",
+    "admin@demo.nevaxiszentra.local",
     "machine-responsible@dev.local",
     "DevOwner-",
     "DevActive-",
@@ -148,7 +148,7 @@ function describeCookie(setCookies, name) {
 }
 
 function cookieHeaderFromSetCookies(setCookies) {
-  return ["NevaxisFactOS.session", "NevaxisFactOS.csrf"]
+  return ["NevaxisZentra.session", "NevaxisZentra.csrf"]
     .map((name) => cookiePair(setCookies, name))
     .filter(Boolean)
     .map((pair) => `${pair.name}=${pair.value}`)
@@ -257,13 +257,13 @@ assert("valid credentials create an authenticated session redirect", normal.stat
 assert("valid login redirects away from /giris", /\/(dashboard|mfa-dogrula)/.test(normal.location), normal.location);
 assert(
   "valid credentials create an authenticated session",
-  normal.cookies.some((cookie) => cookie.includes("NevaxisFactOS.session=")),
+  normal.cookies.some((cookie) => cookie.includes("NevaxisZentra.session=")),
   normal.cookies.join("; "),
 );
 
 const owner = await postSignIn({
   organizationContext: ORGANIZATION,
-  email: "admin@demo.nevaxisfactos.local",
+  email: "admin@demo.nevaxiszentra.local",
   password: requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"),
 });
 assert("existing tenant-code owner password step is preserved", owner.status === 303 && owner.location.includes("/mfa-dogrula"));
@@ -278,8 +278,8 @@ assert(
   normal.location,
 );
 
-const sessionCookie = describeCookie(normal.cookies, "NevaxisFactOS.session");
-const csrfCookie = describeCookie(normal.cookies, "NevaxisFactOS.csrf");
+const sessionCookie = describeCookie(normal.cookies, "NevaxisZentra.session");
+const csrfCookie = describeCookie(normal.cookies, "NevaxisZentra.csrf");
 assert("session cookie is issued with a non-empty opaque value", Boolean(sessionCookie?.valueLength), JSON.stringify(sessionCookie));
 assert("session cookie path is /", sessionCookie?.path === "/", JSON.stringify(sessionCookie));
 assert("session cookie has no Domain attribute", sessionCookie?.domain == null, JSON.stringify(sessionCookie));
@@ -344,7 +344,7 @@ assert(
 );
 
 const crossTenant = await fetchWithSession(`${API}/api/identity/me`, sessionHeader, {
-  headers: { "X-NevaxisFactOS-Tenant": "foreign-tenant" },
+  headers: { "X-NevaxisZentra-Tenant": "foreign-tenant" },
 });
 const crossTenantJson = await crossTenant.json().catch(() => null);
 assert(
@@ -353,12 +353,12 @@ assert(
   `status=${crossTenant.status} title=${crossTenantJson?.title ?? ""}`,
 );
 
-const csrf = cookiePair(normal.cookies, "NevaxisFactOS.csrf")?.value ?? "";
+const csrf = cookiePair(normal.cookies, "NevaxisZentra.csrf")?.value ?? "";
 const signOut = await fetchWithSession(`${WEB}/api/identity/sign-out`, sessionHeader, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "X-NevaxisFactOS-Csrf": csrf,
+    "X-NevaxisZentra-Csrf": csrf,
   },
   body: "{}",
 });
@@ -696,15 +696,15 @@ try {
         return { ok: true, via: "menu" };
       }
       const csrfPair = document.cookie.split(";").map((part) => part.trim())
-        .find((part) => part.startsWith("NevaxisFactOS.csrf="));
-      const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("NevaxisFactOS.csrf=".length)) : "";
+        .find((part) => part.startsWith("NevaxisZentra.csrf="));
+      const csrf = csrfPair ? decodeURIComponent(csrfPair.slice("NevaxisZentra.csrf=".length)) : "";
       const response = await fetch("/api/identity/sign-out", {
         method: "POST",
         credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-NevaxisFactOS-Csrf": csrf,
+          "X-NevaxisZentra-Csrf": csrf,
         },
       });
       if (!response.ok) {

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.AiTasks;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Erp;
-using NevaxisFactOS.Persistence.Material;
+using NevaxisZentra.Api.AiTasks;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Erp;
+using NevaxisZentra.Persistence.Material;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Material;
+namespace NevaxisZentra.Api.Material;
 
 internal static class MaterialAvailabilityRiskEndpointRouteBuilderExtensions
 {

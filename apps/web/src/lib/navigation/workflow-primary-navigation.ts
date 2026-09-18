@@ -73,7 +73,7 @@ const ISLER_CONTEXT: ContextualNavigationSection = {
     { label: "Dijital İş Gücü", href: "/dijital-is-gucu", iconKey: "users-round", permissionKey: "digital-workforce.read" },
     { label: "Onaylar", href: "/dijital-is-gucu/onaylar", iconKey: "shield-check", permissionKey: "digital-workforce.read" },
     { label: "Sonuçlar", href: "/dijital-is-gucu/sonuclar", iconKey: "circle-gauge", permissionKey: "digital-workforce.read" },
-    { label: "FactOS Teams", href: "/teams", iconKey: "messages-square", subscriptionModulePath: "/teams" },
+    { label: "Zentra Teams", href: "/teams", iconKey: "messages-square", subscriptionModulePath: "/teams" },
   ],
 };
 

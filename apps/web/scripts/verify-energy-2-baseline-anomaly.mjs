@@ -35,7 +35,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ACTOR.issuer,
     "X-crevafactos-dev-Subject": ACTOR.subject,
-    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
+    "X-NevaxisZentra-Tenant": ACTOR.tenant,
   };
 }
 
@@ -62,9 +62,9 @@ function mad(values, center) {
 
 console.log("Running ENERGY-2 baseline/anomaly verifier.");
 
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceConstants.cs");
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Energy/EnergyIntelligenceCalculator.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotEnergyIntelligenceSeed.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Energy/EnergyIntelligenceConstants.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Energy/EnergyIntelligenceCalculator.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotEnergyIntelligenceSeed.cs");
 
 assert("rule-set ENERGY-2.0", constants.includes("ENERGY-2.0"));
 assert("minimum comparable windows 6", constants.includes("MinimumComparableWindows = 6"));

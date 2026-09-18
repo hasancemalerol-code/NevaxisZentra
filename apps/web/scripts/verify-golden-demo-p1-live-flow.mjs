@@ -33,7 +33,7 @@ function headers(subject = OPERATOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
   };
 }
 
@@ -72,7 +72,7 @@ async function api(method, path, body, subject = OPERATOR) {
 }
 
 function resolvePostgresContainer() {
-  for (const name of ["crevafactos-local-postgres-1", "nevaxisfactos-local-postgres-1"]) {
+  for (const name of ["crevafactos-local-postgres-1", "nevaxiszentra-local-postgres-1"]) {
     const result = spawnSync("docker", ["ps", "--filter", `name=${name}`, "--format", "{{.Names}}"], {
       encoding: "utf8",
     });

@@ -1,4 +1,4 @@
-# NevaxisFactOS User Roles
+# NevaxisZentra User Roles
 
 - Status: Locked
 - Date: 2026-08-04
@@ -20,7 +20,7 @@ authenticated user
   + current state
 ```
 
-NevaxisFactOS does not create finance, accounting, receivables/payables, payroll, official inventory, or general purchasing ERP roles. Users from those units receive only the operational read, task, review, approval, or connector permissions needed in NevaxisFactOS.
+NevaxisZentra does not create finance, accounting, receivables/payables, payroll, official inventory, or general purchasing ERP roles. Users from those units receive only the operational read, task, review, approval, or connector permissions needed in NevaxisZentra.
 
 ## Initial Operational Roles
 
@@ -47,7 +47,7 @@ Organizations may compose narrower role bundles. Permission names and risk polic
 
 ## Unit Routing
 
-AI Task Center and NevaxisFactOS Teams can route work to:
+AI Task Center and NevaxisZentra Teams can route work to:
 
 - Purchasing
 - Warehouse/material

@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.IotPlc;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.IotPlc;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.IotPlc;
+namespace NevaxisZentra.Api.IotPlc;
 
 public static class IotPlcIntelligenceEndpointRouteBuilderExtensions
 {
@@ -28,11 +28,11 @@ public static class IotPlcIntelligenceEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSIotPlcIntelligence(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraIotPlcIntelligence(this IServiceCollection services)
     {
         services.AddScoped<IIotPlcIntelligenceRepository>(sp =>
         {
-            var dbContext = sp.GetService<NevaxisFactOSDbContext>();
+            var dbContext = sp.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableIotPlcIntelligenceRepository()
                 : new IotPlcIntelligenceRepository(dbContext, sp.GetRequiredService<TenantDatabaseSession>());

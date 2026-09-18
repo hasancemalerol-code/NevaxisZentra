@@ -3,8 +3,10 @@ import type { NextRequest } from "next/server";
 
 import {
   SAAS_IDENTITY_AUTH_ROUTES,
+  SAAS_IDENTITY_LEGACY_SESSION_COOKIES,
   SAAS_IDENTITY_SESSION_COOKIE,
 } from "@/features/saas-identity/lib/saas-identity-constants";
+import { readZentraEnv } from "@/lib/config/zentra-env";
 
 function isAuthRoute(pathname: string): boolean {
   return SAAS_IDENTITY_AUTH_ROUTES.some(
@@ -25,10 +27,18 @@ function isPublicRoute(pathname: string): boolean {
 
 function isDevelopmentApiBypass(): boolean {
   return (
-    process.env.NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
-    Boolean(process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER?.trim()) &&
-    Boolean(process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY?.trim())
+    readZentraEnv("PRODUCTION_EXECUTION_RUNTIME_MODE") === "development-api" &&
+    Boolean(readZentraEnv("DEV_AUTH_ISSUER")) &&
+    Boolean(readZentraEnv("DEV_TENANT_KEY"))
   );
+}
+
+function hasIdentitySession(request: NextRequest): boolean {
+  const cookieNames = [
+    SAAS_IDENTITY_SESSION_COOKIE,
+    ...SAAS_IDENTITY_LEGACY_SESSION_COOKIES,
+  ];
+  return cookieNames.some((name) => Boolean(request.cookies.get(name)?.value));
 }
 
 export function middleware(request: NextRequest) {
@@ -38,9 +48,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasSession = Boolean(
-    request.cookies.get(SAAS_IDENTITY_SESSION_COOKIE)?.value,
-  );
+  const hasSession = hasIdentitySession(request);
 
   if (isAuthRoute(pathname)) {
     return NextResponse.next();

@@ -1,7 +1,7 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
 
-namespace NevaxisFactOS.Api.PresentationMode;
+namespace NevaxisZentra.Api.PresentationMode;
 
 internal static class PresentationModeEndpointHelpers
 {

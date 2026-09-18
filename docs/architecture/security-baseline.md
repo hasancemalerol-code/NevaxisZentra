@@ -1,4 +1,4 @@
-# NevaxisFactOS Güvenlik Temel Standardı
+# NevaxisZentra Güvenlik Temel Standardı
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS platformu için bütün uygulama, modül, entegrasyon ve geliştirme paketlerinde uygulanması gereken minimum güvenlik gereksinimlerini tanımlar.
+Bu belge NevaxisZentra platformu için bütün uygulama, modül, entegrasyon ve geliştirme paketlerinde uygulanması gereken minimum güvenlik gereksinimlerini tanımlar.
 
 
 
@@ -58,7 +58,7 @@ Bir modül veya müşteri daha güçlü güvenlik gereksinimine sahip olabilir a
 
 
 
-NevaxisFactOS aşağıdaki ilkeleri uygular:
+NevaxisZentra aşağıdaki ilkeleri uygular:
 
 
 

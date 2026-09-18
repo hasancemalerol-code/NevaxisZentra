@@ -33,7 +33,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -52,9 +52,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running MOLD-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Mold/MoldFollowUpEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldFollowUpRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldFollowUpPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Mold/MoldFollowUpConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldFollowUpRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldFollowUpPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Mold/MoldFollowUpConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes('MapPost("/follow-up/{moldId:guid}/task-draft"'));
 assert("follow-up uses mold write access", endpoints.includes("ResolveWriteAccessAsync"));

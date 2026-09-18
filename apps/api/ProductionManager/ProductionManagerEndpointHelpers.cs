@@ -1,7 +1,7 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.ProductionManager;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.ProductionManager;
 
-namespace NevaxisFactOS.Api.ProductionManager;
+namespace NevaxisZentra.Api.ProductionManager;
 
 internal static class ProductionManagerEndpointHelpers
 {

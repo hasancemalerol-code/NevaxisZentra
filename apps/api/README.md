@@ -1,6 +1,6 @@
-# NevaxisFactOS API
+# NevaxisZentra API
 
-ASP.NET Core modular monolith backend for NevaxisFactOS.
+ASP.NET Core modular monolith backend for NevaxisZentra.
 
 ## Development pilot — Production Planning read flow
 
@@ -36,7 +36,7 @@ The bootstrap assigns only `production.planning.read` to the pilot role.
 ### Start API
 
 ```bash
-dotnet run --project apps/api/NevaxisFactOS.Api.csproj
+dotnet run --project apps/api/NevaxisZentra.Api.csproj
 ```
 
 On startup the hosted bootstrap runs once when enabled. It is idempotent: repeated runs do not create duplicates.

@@ -34,7 +34,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": MANAGER.issuer,
     "X-crevafactos-dev-Subject": MANAGER.subject,
-    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
+    "X-NevaxisZentra-Tenant": MANAGER.tenant,
   };
 }
 
@@ -56,10 +56,10 @@ function isNullishQuantity(value) {
 
 console.log("Running INVENTORY-RISK-FOUNDATION-1 domain assessment verifier.");
 
-const calculator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotMaterialAvailabilityRiskSeed.cs");
-const erpSeed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotErpInventorySeed.cs");
+const calculator = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialAvailabilityRiskCalculator.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialAvailabilityRiskConstants.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotMaterialAvailabilityRiskSeed.cs");
+const erpSeed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotErpInventorySeed.cs");
 
 assert("calculator assess method", calculator.includes("AssessAvailabilityRisk"));
 assert("calculator shortage branch", calculator.includes("MaterialAvailabilityRiskStatuses.Shortage"));

@@ -1,4 +1,4 @@
-# Prepares NevaxisFactOS Windows desktop sales-demo artifact and desktop shortcut.
+# Prepares NevaxisZentra Windows desktop sales-demo artifact and desktop shortcut.
 # Run once before the Wednesday presentation — NOT during the meeting.
 
 [CmdletBinding()]
@@ -17,13 +17,13 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) {
-    $ArtifactRoot = Join-Path $RepositoryRoot "artifacts\desktop\NevaxisFactOS"
+    $ArtifactRoot = Join-Path $RepositoryRoot "artifacts\desktop\NevaxisZentra"
 }
 
-$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisFactOS.Desktop\NevaxisFactOS.Desktop.csproj"
-$desktopExe = Join-Path $ArtifactRoot "NevaxisFactOS.exe"
+$desktopProject = Join-Path $RepositoryRoot "apps\desktop\NevaxisZentra.Desktop\NevaxisZentra.Desktop.csproj"
+$desktopExe = Join-Path $ArtifactRoot "NevaxisZentra.exe"
 $bootstrapScript = Join-Path $RepositoryRoot "apps\web\scripts\bootstrap-sales-demo-pilot-full-access-1.mjs"
-$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-NevaxisFactOS-app-icon.py"
+$iconGenerator = Join-Path $RepositoryRoot "apps\desktop\scripts\generate-NevaxisZentra-app-icon.py"
 
 function Assert-Command([string]$Name) {
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
@@ -31,13 +31,13 @@ function Assert-Command([string]$Name) {
     }
 }
 
-Write-Host "NevaxisFactOS sales-demo desktop preparation"
+Write-Host "NevaxisZentra sales-demo desktop preparation"
 Write-Host "Repository: $RepositoryRoot"
 
 function Test-KnownVerifierRuntimeRootLeak {
     param([string]$Value)
     if ([string]::IsNullOrWhiteSpace($Value)) { return $false }
-    return $Value -match '(?i)NevaxisFactOS-web-readiness-|NevaxisFactOS-invalid-runtime|NevaxisFactOS-invalid-|invalid-runtime-root|desktop-negative-runtime-'
+    return $Value -match '(?i)NevaxisZentra-web-readiness-|NevaxisZentra-invalid-runtime|NevaxisZentra-invalid-|invalid-runtime-root|desktop-negative-runtime-'
 }
 
 function Clear-KnownDesktopVerifierEnvironmentLeaks {
@@ -98,7 +98,7 @@ if ($SkipPublish -and (Test-Path $desktopExe)) {
 } else {
     Write-Host "Publishing desktop shell..."
     if (Test-Path $iconGenerator) {
-        Write-Host "Generating canonical NevaxisFactOS desktop icon..."
+        Write-Host "Generating canonical NevaxisZentra desktop icon..."
         & python $iconGenerator
         if ($LASTEXITCODE -ne 0) {
             throw "Desktop icon generation failed."
@@ -131,9 +131,9 @@ Write-Host "Desktop artifact: $desktopExe"
 if (-not $SkipShortcut) {
     $shell = New-Object -ComObject WScript.Shell
     $desktopFolder = [Environment]::GetFolderPath("Desktop")
-    $shortcutPath = Join-Path $desktopFolder "NevaxisFactOS.lnk"
+    $shortcutPath = Join-Path $desktopFolder "NevaxisZentra.lnk"
 
-    foreach ($duplicateName in @("NevaxisFactOS.lnk", "NevaxisFactOS Desktop.lnk")) {
+    foreach ($duplicateName in @("NevaxisZentra.lnk", "NevaxisZentra Desktop.lnk")) {
         $duplicatePath = Join-Path $desktopFolder $duplicateName
         if ($duplicatePath -ne $shortcutPath -and (Test-Path $duplicatePath)) {
             Remove-Item $duplicatePath -Force
@@ -144,7 +144,7 @@ if (-not $SkipShortcut) {
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $desktopExe
     $shortcut.WorkingDirectory = $ArtifactRoot
-    $shortcut.Description = "NevaxisFactOS AI Factory Operations OS"
+    $shortcut.Description = "NevaxisZentra AI Factory Operations OS"
     $shortcut.IconLocation = "$desktopExe,0"
     $shortcut.Save()
     # Re-save refreshes Explorer icon cache when the embedded executable icon changes.

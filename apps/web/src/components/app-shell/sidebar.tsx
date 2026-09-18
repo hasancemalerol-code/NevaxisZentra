@@ -4,10 +4,10 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
-import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
+import { ZentraBrandLockup } from "@/components/brand/zentra-brand-lockup";
 import { IconButton } from "@/components/ui/button";
 import { SidebarNavigation } from "@/components/app-shell/sidebar-navigation";
-import { FACTOS_BRAND } from "@/lib/brand/factos-brand";
+import { ZENTRA_BRAND } from "@/lib/brand/zentra-brand";
 import type { SerializableNavigationGroup } from "@/lib/navigation/navigation-types";
 
 type SidebarProps = Readonly<{
@@ -32,11 +32,11 @@ export function Sidebar({
     >
       <div className="sidebar-brand">
         <Link
-          aria-label={`${FACTOS_BRAND.productName} ${FACTOS_BRAND.endorsement} ana çalışma alanı`}
+          aria-label={`${ZENTRA_BRAND.productName} ${ZENTRA_BRAND.endorsement} ana çalışma alanı`}
           className="brand-link"
           href="/"
         >
-          <FactosBrandLockup className="brand-lockup" priority />
+          <ZentraBrandLockup className="brand-lockup" />
         </Link>
 
         <IconButton
@@ -75,7 +75,7 @@ export function Sidebar({
         />
 
         <span className="sidebar-footer-copy">
-          <strong>FactOS</strong>
+          <strong>Zentra</strong>
           <small>Endüstriyel operasyon</small>
         </span>
       </div>

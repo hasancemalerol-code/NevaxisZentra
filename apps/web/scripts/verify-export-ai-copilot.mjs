@@ -29,7 +29,7 @@ function requireText(source, expected, label) {
 
 const permissions = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
+  "packages/NevaxisZentra.Persistence/Authorization/ExportPermissionKeys.cs",
 );
 requireText(permissions, "export.ai.read", "ExportPermissionKeys");
 requireText(permissions, "export.ai.run", "ExportPermissionKeys");

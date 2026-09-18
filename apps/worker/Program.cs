@@ -2,9 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NevaxisFactOS.Configuration;
+using NevaxisZentra.Configuration;
 
-namespace NevaxisFactOS.Worker;
+namespace NevaxisZentra.Worker;
 
 public static class Program
 {
@@ -16,7 +16,7 @@ public static class WorkerApplication
     public static IHost BuildHost(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
-        builder.Configuration["Application:Name"] ??= "NevaxisFactOS Worker";
+        builder.Configuration["Application:Name"] ??= "NevaxisZentra Worker";
 
         ValidateConfiguration(builder.Configuration);
         builder.Services.AddInfrastructureOptions(builder.Configuration);

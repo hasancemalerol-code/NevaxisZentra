@@ -1,4 +1,4 @@
-# Nevaxis FactOS — Destek Runbook (Uygulama Açılmıyor)
+# Nevaxis Zentra — Destek Runbook (Uygulama Açılmıyor)
 
 ## 1. Tanılama paketi
 
@@ -38,7 +38,7 @@ MSI SHA256 değerini release manifest ile karşılaştırın.
 
 ## 6. Bilinen kök neden (2026.09 düzeltmesi)
 
-Önceki MSI sürümleri masaüstü exe dosyasını `Program Files\Nevaxis FactOS\` köküne koyuyordu; runtime `desktop\` alt dizinini bekliyordu. Bu durum sessiz başlatma hatasına yol açıyordu. Düzeltilmiş MSI `desktop\NevaxisFactOS.exe` yolunu kullanır.
+Önceki MSI sürümleri masaüstü exe dosyasını `Program Files\Nevaxis Zentra\` köküne koyuyordu; runtime `desktop\` alt dizinini bekliyordu. Bu durum sessiz başlatma hatasına yol açıyordu. Düzeltilmiş MSI `desktop\NevaxisZentra.exe` yolunu kullanır.
 
 ## 7. Kurtarma
 

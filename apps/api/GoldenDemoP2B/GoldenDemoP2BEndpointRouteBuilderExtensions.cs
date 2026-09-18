@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.GoldenDemoP1;
-using NevaxisFactOS.Persistence.GoldenDemoP2B;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.GoldenDemoP1;
+using NevaxisZentra.Persistence.GoldenDemoP2B;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.GoldenDemoP2B;
+namespace NevaxisZentra.Api.GoldenDemoP2B;
 
 public static class GoldenDemoP2BEndpointRouteBuilderExtensions
 {
@@ -16,9 +16,9 @@ public static class GoldenDemoP2BEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSGoldenDemoP2BApi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraGoldenDemoP2BApi(this IServiceCollection services)
     {
-        services.AddNevaxisFactOSGoldenDemoP2B();
+        services.AddNevaxisZentraGoldenDemoP2B();
         return services;
     }
 

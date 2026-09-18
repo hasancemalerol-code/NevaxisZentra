@@ -48,7 +48,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -71,7 +71,7 @@ function applyDevelopmentIdentityEnvFromText(text, key) {
 function bootstrapDevelopmentIdentityEnv() {
   if (process.env.__COMMPROFIT3_PERM_BOOTSTRAPPED === "1") return;
   const transcriptCandidates = [
-    join(homedir(), ".cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
+    join(homedir(), ".cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/a7824c6f-6aa8-498f-895d-7f9b31bab8e3/a7824c6f-6aa8-498f-895d-7f9b31bab8e3.jsonl"),
   ];
   let text = "";
   for (const candidate of transcriptCandidates) {
@@ -142,7 +142,7 @@ async function signIn(email, password) {
 }
 
 async function signInOwnerOrThrow() {
-  const jar = await signIn("admin@demo.nevaxisfactos.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
+  const jar = await signIn("admin@demo.nevaxiszentra.local", requireEnv("DevelopmentSaasIdentity__TenantOwnerPassword"));
   const mfaSecret = requireEnv("DevelopmentSaasIdentity__MfaSharedSecret");
   let verified = false;
   for (const counterOffset of [-1, 0, 1]) {

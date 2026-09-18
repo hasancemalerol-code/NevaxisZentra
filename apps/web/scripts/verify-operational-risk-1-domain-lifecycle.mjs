@@ -33,7 +33,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -45,7 +45,7 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -95,10 +95,10 @@ function assess(evidenceState, likelihood, impact) {
 
 console.log("Running OPERATIONAL-RISK-1 domain/lifecycle verifier.");
 
-const constants = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskConstants.cs");
-const assessor = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskAssessor.cs");
-const lifecycle = readRequired("packages/NevaxisFactOS.Persistence/OperationalRisk/OperationalRiskLifecycle.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotOperationalRiskSeed.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskConstants.cs");
+const assessor = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskAssessor.cs");
+const lifecycle = readRequired("packages/NevaxisZentra.Persistence/OperationalRisk/OperationalRiskLifecycle.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotOperationalRiskSeed.cs");
 
 assert("rule-set OPERATIONAL-RISK-1.0", constants.includes("OPERATIONAL-RISK-1.0"));
 assert("material-availability category", constants.includes("material-availability"));

@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.SaasBilling.Payments.Iyzico;
+namespace NevaxisZentra.Api.SaasBilling.Payments.Iyzico;
 
 internal static class IyzicoPaymentMasking
 {

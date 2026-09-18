@@ -42,7 +42,7 @@ function readRequired(relativePath) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -77,27 +77,27 @@ function readMigrationConnectionEnv() {
 }
 
 function runMigrationApply() {
-  const migrationProject = resolve(ROOT, "packages/NevaxisFactOS.Persistence.Migrations/NevaxisFactOS.Persistence.Migrations.csproj");
+  const migrationProject = resolve(ROOT, "packages/NevaxisZentra.Persistence.Migrations/NevaxisZentra.Persistence.Migrations.csproj");
   return spawnSync(
     "dotnet",
-    ["tool", "run", "dotnet-ef", "--", "database", "update", "--project", migrationProject, "--startup-project", migrationProject, "--context", "NevaxisFactOSDbContext"],
+    ["tool", "run", "dotnet-ef", "--", "database", "update", "--project", migrationProject, "--startup-project", migrationProject, "--context", "NevaxisZentraDbContext"],
     { cwd: ROOT, encoding: "utf8", env: readMigrationConnectionEnv() },
   );
 }
 
 console.log("Running IOT-PLC-2 migration verifier.");
 
-const migration = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
-const designer = readRequired(`packages/NevaxisFactOS.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
-const snapshot = readRequired("packages/NevaxisFactOS.Persistence.Migrations/Migrations/NevaxisFactOSDbContextModelSnapshot.cs");
-const seed = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
+const migration = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${MIGRATION_BASENAME}`);
+const designer = readRequired(`packages/NevaxisZentra.Persistence.Migrations/Migrations/${DESIGNER_BASENAME}`);
+const snapshot = readRequired("packages/NevaxisZentra.Persistence.Migrations/Migrations/NevaxisZentraDbContextModelSnapshot.cs");
+const seed = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIotPlcIntelligenceSeed.cs");
 
 assert("migration source present", migration.includes("AddIotPlcSignalQualityConnectivityIntelligence"));
 assert("designer present", designer.includes("AddIotPlcSignalQualityConnectivityIntelligence"));
 assert("snapshot includes intelligence tables", snapshot.includes("iot_plc_quality_profiles"));
 assert("RLS in migration", migration.includes("FORCE ROW LEVEL SECURITY"));
 assert("grants in migration", migration.includes("GRANT SELECT, INSERT, UPDATE ON TABLE iot_plc_quality_profiles"));
-assert("bootstrap seed wired", readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs").includes("DevelopmentPilotIotPlcIntelligenceSeed"));
+assert("bootstrap seed wired", readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs").includes("DevelopmentPilotIotPlcIntelligenceSeed"));
 assert("seed idempotent profile", seed.includes("IgnoreQueryFilters"));
 
 const countBefore = Number(db(`SELECT COUNT(*) FROM "__EFMigrationsHistory" WHERE "MigrationId" = '${MIGRATION_ID}'`));

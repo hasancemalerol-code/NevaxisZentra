@@ -1,16 +1,16 @@
 # AUTH-SESSION-RESTART-PERSISTENCE-CLOSURE-1 — desktop WebView2 restart proof (runtime only).
 $ErrorActionPreference = 'Stop'
 
-$desktopExe = 'C:\Projects\NevaxisFactOS\apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe'
+$desktopExe = 'C:\Projects\NevaxisZentra\apps\desktop\NevaxisZentra.Desktop\bin\Debug\net10.0-windows\NevaxisZentra.Desktop.exe'
 $webBase = 'http://localhost:3001'
-$profilePath = Join-Path $env:LOCALAPPDATA 'NevaxisFactOS\Desktop\WebView2'
+$profilePath = Join-Path $env:LOCALAPPDATA 'NevaxisZentra\Desktop\WebView2'
 $cookieDb = Join-Path $profilePath 'EBWebView\Default\Network\Cookies'
 
 function Bootstrap-DevelopmentIdentityEnv {
     if ($env:__AUTH_RESTART_DESKTOP_BOOTSTRAPPED -eq '1') { return }
     $candidates = @(
-        (Join-Path $env:USERPROFILE '.cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl'),
-        (Join-Path $env:USERPROFILE '.cursor/projects/c-Projects-NevaxisFactOS/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl')
+        (Join-Path $env:USERPROFILE '.cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/85d2e353-dc82-41df-ae90-9baa4397ee63/85d2e353-dc82-41df-ae90-9baa4397ee63.jsonl'),
+        (Join-Path $env:USERPROFILE '.cursor/projects/c-Projects-NevaxisZentra/agent-transcripts/0e3b0257-2b6c-4a42-81dc-cceb6078d79f/0e3b0257-2b6c-4a42-81dc-cceb6078d79f.jsonl')
     )
     $text = ''
     foreach ($candidate in $candidates) {
@@ -59,7 +59,7 @@ function Get-TotpCode([string]$secret) {
 }
 
 function Stop-DesktopProcesses {
-    Get-Process -Name 'NevaxisFactOS.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name 'NevaxisZentra.Desktop' -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
 
@@ -109,7 +109,7 @@ function Get-CookieStoreFingerprint {
         return 'missing-cookie-db'
     }
     $info = Get-Item -LiteralPath $cookieDb
-    $raw = 'NevaxisFactOS.session|{0}|{1}' -f $info.Length, $info.LastWriteTimeUtc.Ticks
+    $raw = 'NevaxisZentra.session|{0}|{1}' -f $info.Length, $info.LastWriteTimeUtc.Ticks
     $sha = [System.Security.Cryptography.SHA256]::Create()
     try {
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($raw)
@@ -219,7 +219,7 @@ if ($fingerprintBefore -eq 'missing-cookie-db') {
 
 $duplicate = Start-Process -FilePath $desktopExe -PassThru
 Start-Sleep -Seconds 2
-$instanceCount = (Get-Process -Name 'NevaxisFactOS.Desktop' -ErrorAction SilentlyContinue).Count
+$instanceCount = (Get-Process -Name 'NevaxisZentra.Desktop' -ErrorAction SilentlyContinue).Count
 Write-Host "DESKTOP_INSTANCE_COUNT=$instanceCount"
 if ($instanceCount -ne 1) {
     throw "Expected exactly one desktop instance, found $instanceCount"

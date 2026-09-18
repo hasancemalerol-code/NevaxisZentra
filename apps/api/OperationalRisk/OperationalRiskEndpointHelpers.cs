@@ -1,9 +1,9 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.OperationalRisk;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.OperationalRisk;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.OperationalRisk;
+namespace NevaxisZentra.Api.OperationalRisk;
 
 internal static class OperationalRiskEndpointHelpers
 {

@@ -22,7 +22,7 @@ function actorHeaders(actor) {
   return {
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
     "Content-Type": "application/json",
   };
 }

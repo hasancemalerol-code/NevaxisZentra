@@ -1,4 +1,4 @@
-namespace NevaxisFactOS.Api.Authentication;
+namespace NevaxisZentra.Api.Authentication;
 
 public sealed class AuthenticationOptions
 {

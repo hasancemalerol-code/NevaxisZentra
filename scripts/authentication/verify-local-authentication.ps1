@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
 $databaseScript = Join-Path $repositoryRoot 'scripts\database\database.ps1'
-$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisFactOS.Api.csproj'
+$apiProject = Join-Path $repositoryRoot 'apps\api\NevaxisZentra.Api.csproj'
 $artifactDirectory = Join-Path $repositoryRoot 'artifacts\authentication'
 $apiBaseUrl = "http://127.0.0.1:$ApiPort"
 $runtimePort = if ($env:NEVAXIS_FACTOS_POSTGRES_PORT) { $env:NEVAXIS_FACTOS_POSTGRES_PORT } else { '5432' }
@@ -69,7 +69,7 @@ function New-IdentityHeaders {
     return @{
         'X-crevafactos-dev-Issuer' = $Issuer
         'X-crevafactos-dev-Subject' = $Subject
-        'X-NevaxisFactOS-Tenant' = $Tenant
+        'X-NevaxisZentra-Tenant' = $Tenant
     }
 }
 
@@ -132,7 +132,7 @@ try {
     Assert-Status $activeByKey 200 'Active membership by key'
     Assert-Status $activeById 200 'Active membership by UUID'
 
-    $headerOnly = Invoke-TestRequest -Headers @{ 'X-NevaxisFactOS-Tenant' = 'auth-a' }
+    $headerOnly = Invoke-TestRequest -Headers @{ 'X-NevaxisZentra-Tenant' = 'auth-a' }
     Assert-Status $headerOnly 401 'Header-only selection'
 
     $denied = @(

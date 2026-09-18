@@ -1,16 +1,16 @@
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.SaasIdentity;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.SaasIdentity;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.SaasIdentity;
+namespace NevaxisZentra.Api.SaasIdentity;
 
 public static class SaasIdentityServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSSaasIdentity(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraSaasIdentity(this IServiceCollection services)
     {
         services.AddScoped<ISaasIdentityRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableSaasIdentityRepository()
                 : new SaasIdentityRepository(

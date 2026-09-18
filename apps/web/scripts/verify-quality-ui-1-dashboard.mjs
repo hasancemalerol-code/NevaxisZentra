@@ -85,7 +85,7 @@ forbidText(mainPage, "globals.css", "kalite main page");
 forbidText(dashboardView, "globals.css", "quality dashboard view");
 
 const migrationGlob = [
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations",
 ];
 for (const dir of migrationGlob) {
   const path = resolve(projectRoot, dir);

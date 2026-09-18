@@ -29,7 +29,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -48,9 +48,9 @@ async function liveRequest(method, path, body, headers = actorHeaders(MANAGER)) 
 console.log("Running MAINTENANCE-AI-TASK-INTEGRATION-1 security/idempotency verifier.");
 
 const endpoints = readRequired("apps/api/Maintenance/MaintenancePredictiveRiskEndpointRouteBuilderExtensions.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
-const presentation = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskPresentationBuilder.cs");
-const constants = readRequired("packages/NevaxisFactOS.Persistence/Maintenance/MaintenancePredictiveRiskConstants.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenancePredictiveRiskRepository.cs");
+const presentation = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenancePredictiveRiskPresentationBuilder.cs");
+const constants = readRequired("packages/NevaxisZentra.Persistence/Maintenance/MaintenancePredictiveRiskConstants.cs");
 
 assert("task draft endpoint registered", endpoints.includes('MapPost("/predictive-risk/{assessmentId:guid}/task-draft"'));
 assert("follow-up requires manage permission", endpoints.includes("MaintenancePermissionKeys.Manage"));

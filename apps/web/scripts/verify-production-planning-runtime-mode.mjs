@@ -188,7 +188,7 @@ runRuntimeConfigCase(
     NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
     NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
-      "tenant-NevaxisFactOS",
+      "tenant-NevaxisZentra",
     NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       "facility-istanbul",
   },
@@ -242,7 +242,7 @@ runRuntimeConfigCase(
     NEVAXIS_FACTOS_PRODUCTION_PLANNING_RUNTIME_MODE:
       "development-preview",
     NEVAXIS_FACTOS_DEV_PREVIEW_TENANT_ID:
-      "tenant-NevaxisFactOS",
+      "tenant-NevaxisZentra",
     NEVAXIS_FACTOS_DEV_PREVIEW_FACILITY_ID:
       "facility-istanbul",
   },

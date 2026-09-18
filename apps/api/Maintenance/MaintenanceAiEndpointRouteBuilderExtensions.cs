@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Maintenance;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Maintenance;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.Maintenance;
+namespace NevaxisZentra.Api.Maintenance;
 
 public static class MaintenanceAiEndpointRouteBuilderExtensions
 {
@@ -232,12 +232,12 @@ public static class MaintenanceAiEndpointRouteBuilderExtensions
         });
     }
 
-    public static IServiceCollection AddNevaxisFactOSMaintenanceAi(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraMaintenanceAi(this IServiceCollection services)
     {
         services.AddScoped<IMaintenanceAiProvider, DeterministicMaintenanceAiProvider>();
         services.AddScoped<IMaintenanceAiDraftRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableMaintenanceAiDraftRepository()
                 : new MaintenanceAiDraftRepository(

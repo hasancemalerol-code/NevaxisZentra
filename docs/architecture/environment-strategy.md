@@ -1,4 +1,4 @@
-# NevaxisFactOS Ortam Stratejisi
+# NevaxisZentra Ortam Stratejisi
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Bu belge NevaxisFactOS için local, test, staging ve production ortamlarının nasıl ayrılacağını, yapılandırılacağını ve işletileceğini tanımlar.
+Bu belge NevaxisZentra için local, test, staging ve production ortamlarının nasıl ayrılacağını, yapılandırılacağını ve işletileceğini tanımlar.
 
 
 
@@ -36,7 +36,7 @@ Amaçlar:
 
 
 
-NevaxisFactOS en az aşağıdaki ortamları destekleyecektir:
+NevaxisZentra en az aşağıdaki ortamları destekleyecektir:
 
 
 

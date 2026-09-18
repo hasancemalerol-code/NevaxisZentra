@@ -44,7 +44,7 @@ function managerHeaders() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": MANAGER.issuer,
     "X-crevafactos-dev-Subject": MANAGER.subject,
-    "X-NevaxisFactOS-Tenant": MANAGER.tenant,
+    "X-NevaxisZentra-Tenant": MANAGER.tenant,
   };
 }
 
@@ -59,7 +59,7 @@ async function api(path, init = {}) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(`db query failed: ${result.stderr || result.stdout}`);

@@ -1,4 +1,4 @@
-# NevaxisFactOS Repository Structure
+# NevaxisZentra Repository Structure
 
 ## Purpose
 
@@ -7,7 +7,7 @@ This document defines the intended monorepo layout and dependency boundaries. Th
 ## Intended Layout
 
 ```text
-NevaxisFactOS/
+NevaxisZentra/
 ├── apps/
 │   ├── web/              # Next.js operational Web application
 │   ├── api/              # ASP.NET Core modular-monolith API
@@ -34,7 +34,7 @@ NevaxisFactOS/
 │   └── security/
 ├── scripts/
 ├── .github/workflows/
-├── NevaxisFactOS.sln
+├── NevaxisZentra.sln
 ├── Directory.Build.props
 ├── global.json
 ├── package.json
@@ -48,10 +48,10 @@ NevaxisFactOS/
 - `worker` performs durable asynchronous work and cannot bypass application permissions or approval rules.
 - `ai-orchestrator` uses versioned tools and never accesses databases, queues, ERP, or machines directly.
 - `mobile` is a task-focused field client using the same authoritative task and approval records.
-- `teams` is the NevaxisFactOS Teams application. Its deployment packaging may be decided separately, but its logical application boundary is locked and it uses AI Task Center as the task and approval authority.
+- `teams` is the NevaxisZentra Teams application. Its deployment packaging may be decided separately, but its logical application boundary is locked and it uses AI Task Center as the task and approval authority.
 - `edge-agent` handles allowlisted factory-local connectivity while local safety remains authoritative.
 
-NevaxisFactOS Teams does not maintain parallel task or approval state.
+NevaxisZentra Teams does not maintain parallel task or approval state.
 
 ## Shared Package Rules
 

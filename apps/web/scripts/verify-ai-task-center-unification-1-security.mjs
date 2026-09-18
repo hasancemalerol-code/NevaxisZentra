@@ -41,7 +41,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -53,7 +53,7 @@ function actorHeaders(actor) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
@@ -73,9 +73,9 @@ console.log("Running AI-TASK-CENTER-UNIFICATION-1 security verifier.");
 
 const centerQueries = readRequired("apps/web/src/features/ai-task-center/server/ai-task-center-queries.ts");
 const composition = readRequired("apps/web/src/features/ai-task-center/application/ai-task-center-composition.ts");
-const workInboxRepo = readRequired("packages/NevaxisFactOS.Persistence/Teams/TeamsWorkInboxRepository.cs");
-const originResolver = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskListOriginResolver.cs");
-const repository = readRequired("packages/NevaxisFactOS.Persistence/AiTasks/AiTaskRepository.cs");
+const workInboxRepo = readRequired("packages/NevaxisZentra.Persistence/Teams/TeamsWorkInboxRepository.cs");
+const originResolver = readRequired("packages/NevaxisZentra.Persistence/AiTasks/AiTaskListOriginResolver.cs");
+const repository = readRequired("packages/NevaxisZentra.Persistence/AiTasks/AiTaskRepository.cs");
 const aiTaskEndpoints = readRequired("apps/api/AiTasks/AiTaskEndpointRouteBuilderExtensions.cs");
 
 assert("permission union gate", centerQueries.includes('denyUnlessAnyGranted(["ai-task.read", "teams.read"])'));

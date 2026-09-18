@@ -1,12 +1,12 @@
 using System.Globalization;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.ShiftAssignment;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.ShiftAssignment;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.ShiftAssignment;
+namespace NevaxisZentra.Api.ShiftAssignment;
 
 public static class ShiftAssignmentEndpointRouteBuilderExtensions
 {
@@ -442,11 +442,11 @@ public sealed record CancelShiftAssignmentRequest(uint ExpectedVersion, string? 
 
 public static class ShiftAssignmentServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSShiftAssignment(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraShiftAssignment(this IServiceCollection services)
     {
         services.AddScoped<IShiftAssignmentRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableShiftAssignmentRepository()
                 : new ShiftAssignmentRepository(

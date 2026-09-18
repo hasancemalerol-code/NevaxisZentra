@@ -1,10 +1,10 @@
-using NevaxisFactOS.Persistence.Audit;
+using NevaxisZentra.Persistence.Audit;
 
-namespace NevaxisFactOS.Api.Audit;
+namespace NevaxisZentra.Api.Audit;
 
 public sealed class CorrelationContextMiddleware(RequestDelegate next)
 {
-    public const string HeaderName = "X-NevaxisFactOS-Correlation-Id";
+    public const string HeaderName = "X-NevaxisZentra-Correlation-Id";
     public const string LegacyHeaderName = "X-CrevaFactOS-Correlation-Id";
 
     public async Task InvokeAsync(HttpContext httpContext, CorrelationContext correlationContext)

@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
-using NevaxisFactOS.Persistence.SaasIdentity;
+using NevaxisZentra.Persistence.SaasIdentity;
 
-namespace NevaxisFactOS.Api.SaasIdentity;
+namespace NevaxisZentra.Api.SaasIdentity;
 
 public sealed class SaasIdentityCsrfMiddleware(RequestDelegate next)
 {

@@ -131,7 +131,7 @@ function createSmtpServer() {
       }
     };
 
-    send("220 NevaxisFactOS-email-test-double ESMTP");
+    send("220 NevaxisZentra-email-test-double ESMTP");
 
     socket.on("data", (chunk) => {
       if (shouldHang) return;
@@ -153,7 +153,7 @@ function createSmtpServer() {
 
           acceptSequence += 1;
           const parsed = parseMime(dataBuffer);
-          const messageId = parsed.messageId ?? `<test-double-${Date.now()}.${acceptSequence}@closure.NevaxisFactOS.local>`;
+          const messageId = parsed.messageId ?? `<test-double-${Date.now()}.${acceptSequence}@closure.NevaxisZentra.local>`;
           recordCapture({
             capturedAtUtc: new Date().toISOString(),
             mode: MODE,
@@ -183,7 +183,7 @@ function createSmtpServer() {
             socket.destroy();
             return;
           }
-          const extensions = ["250-NevaxisFactOS-email-test-double Hello", "250-AUTH LOGIN PLAIN", "250 STARTTLS"];
+          const extensions = ["250-NevaxisZentra-email-test-double Hello", "250-AUTH LOGIN PLAIN", "250 STARTTLS"];
           extensions.forEach((ext, idx) => {
             if (idx === extensions.length - 1) send(ext);
             else send(ext);

@@ -28,7 +28,7 @@ function headers() {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ACTOR.issuer,
     "X-crevafactos-dev-Subject": ACTOR.subject,
-    "X-NevaxisFactOS-Tenant": ACTOR.tenant,
+    "X-NevaxisZentra-Tenant": ACTOR.tenant,
   };
 }
 

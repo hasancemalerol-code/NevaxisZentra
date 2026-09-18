@@ -1,15 +1,15 @@
-name: NevaxisFactOS-local
+name: NevaxisZentra-local
 
 services:
   postgres:
     image: postgres:17.6-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${NEVAXIS_FACTOS_POSTGRES_DATABASE:-crevafactos_local}
-      POSTGRES_USER: ${NEVAXIS_FACTOS_POSTGRES_USERNAME:-NevaxisFactOS}
-      POSTGRES_PASSWORD: ${NEVAXIS_FACTOS_POSTGRES_PASSWORD:-local_dev_only_change_me}
+      POSTGRES_DB: ${NEVAXIS_ZENTRA_POSTGRES_DATABASE:-${NEVAXIS_FACTOS_POSTGRES_DATABASE:-nevaxis_zentra}}
+      POSTGRES_USER: ${NEVAXIS_ZENTRA_POSTGRES_USERNAME:-${NEVAXIS_FACTOS_POSTGRES_USERNAME:-NevaxisZentra}}
+      POSTGRES_PASSWORD: ${NEVAXIS_ZENTRA_POSTGRES_PASSWORD:-${NEVAXIS_FACTOS_POSTGRES_PASSWORD:-local_dev_only_change_me}}
     ports:
-      - "${NEVAXIS_FACTOS_POSTGRES_PORT:-5432}:5432"
+      - "${NEVAXIS_ZENTRA_POSTGRES_PORT:-${NEVAXIS_FACTOS_POSTGRES_PORT:-5432}}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -25,11 +25,11 @@ services:
     image: rabbitmq:4.1.4-management-alpine
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: ${NEVAXIS_FACTOS_RABBITMQ_USERNAME:-NevaxisFactOS}
-      RABBITMQ_DEFAULT_PASS: ${NEVAXIS_FACTOS_RABBITMQ_PASSWORD:-local_dev_only_change_me}
+      RABBITMQ_DEFAULT_USER: ${NEVAXIS_ZENTRA_RABBITMQ_USERNAME:-${NEVAXIS_FACTOS_RABBITMQ_USERNAME:-NevaxisZentra}}
+      RABBITMQ_DEFAULT_PASS: ${NEVAXIS_ZENTRA_RABBITMQ_PASSWORD:-${NEVAXIS_FACTOS_RABBITMQ_PASSWORD:-local_dev_only_change_me}}
     ports:
-      - "${NEVAXIS_FACTOS_RABBITMQ_AMQP_PORT:-5672}:5672"
-      - "${NEVAXIS_FACTOS_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      - "${NEVAXIS_ZENTRA_RABBITMQ_AMQP_PORT:-${NEVAXIS_FACTOS_RABBITMQ_AMQP_PORT:-5672}}:5672"
+      - "${NEVAXIS_ZENTRA_RABBITMQ_MANAGEMENT_PORT:-${NEVAXIS_FACTOS_RABBITMQ_MANAGEMENT_PORT:-15672}}:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -49,5 +49,5 @@ volumes:
 
 networks:
   local-infrastructure:
-    name: NevaxisFactOS-local-network
+    name: NevaxisZentra-local-network
     driver: bridge

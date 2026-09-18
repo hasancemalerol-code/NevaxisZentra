@@ -1,11 +1,11 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.OperationalRisk;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.OperationalRisk;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NevaxisFactOS.Api.OperationalRisk;
+namespace NevaxisZentra.Api.OperationalRisk;
 
 public static class OperationalRiskEndpointRouteBuilderExtensions
 {
@@ -610,11 +610,11 @@ public sealed record ExecuteOperationalRiskDetectionRunRequest(
 
 public static class OperationalRiskServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSOperationalRisk(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraOperationalRisk(this IServiceCollection services)
     {
         services.AddScoped<IOperationalRiskRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableOperationalRiskRepository()
                 : new OperationalRiskRepository(
@@ -642,7 +642,7 @@ public static class OperationalRiskServiceCollectionExtensions
 
         services.AddScoped<IOperationalRiskDetectionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableOperationalRiskDetectionRepository()
                 : new OperationalRiskDetectionRepository(

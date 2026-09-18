@@ -45,14 +45,14 @@ function headers(actor = ACTOR) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": actor.issuer,
     "X-crevafactos-dev-Subject": actor.subject,
-    "X-NevaxisFactOS-Tenant": actor.tenant,
+    "X-NevaxisZentra-Tenant": actor.tenant,
   };
 }
 
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -170,10 +170,10 @@ function assertClosureCleanupComplete() {
 
 console.log("Running MATERIAL-1 domain/idempotency verifier.");
 
-const stateMachine = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialLifecycleStateMachine.cs");
-const normalizer = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialCodeNormalizer.cs");
-const validator = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialTechnicalValidator.cs");
-const repo = readRequired("packages/NevaxisFactOS.Persistence/Material/MaterialRepository.cs");
+const stateMachine = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialLifecycleStateMachine.cs");
+const normalizer = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialCodeNormalizer.cs");
+const validator = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialTechnicalValidator.cs");
+const repo = readRequired("packages/NevaxisZentra.Persistence/Material/MaterialRepository.cs");
 
 assert("state machine present", stateMachine.includes("MaterialLifecycleStatus.Obsolete"));
 assert("code normalizer uppercase", normalizer.includes("ToUpperInvariant"));

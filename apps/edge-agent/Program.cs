@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using NevaxisFactOS.Configuration;
-using NevaxisFactOS.EdgeBuffer;
+using NevaxisZentra.Configuration;
+using NevaxisZentra.EdgeBuffer;
 
-namespace NevaxisFactOS.EdgeAgent;
+namespace NevaxisZentra.EdgeAgent;
 
 public static class Program
 {
@@ -18,7 +18,7 @@ public static class EdgeAgentApplication
     public static IHost BuildHost(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
-        builder.Configuration["Application:Name"] ??= "NevaxisFactOS Edge Agent";
+        builder.Configuration["Application:Name"] ??= "NevaxisZentra Edge Agent";
 
         ValidateConfiguration(builder.Configuration);
         builder.Services.AddInfrastructureOptions(builder.Configuration);
@@ -117,7 +117,7 @@ internal sealed class EdgeAgentHeartbeatReporter(
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
 
-        client.DefaultRequestHeaders.Add("X-NevaxisFactOS-Tenant", tenant);
+        client.DefaultRequestHeaders.Add("X-NevaxisZentra-Tenant", tenant);
         client.DefaultRequestHeaders.Add("X-crevafactos-dev-Issuer", "crevafactos-dev");
         client.DefaultRequestHeaders.Add("X-crevafactos-dev-Subject", "edge-agent");
 

@@ -38,7 +38,7 @@ function forbidText(source, forbidden, label) {
 
 const permissions = readRequired(
   repoRootUrl,
-  "packages/NevaxisFactOS.Persistence/Authorization/ExportPermissionKeys.cs",
+  "packages/NevaxisZentra.Persistence/Authorization/ExportPermissionKeys.cs",
 );
 requireText(permissions, "export.packing.manage", "ExportPermissionKeys");
 requireText(permissions, "export.packing.verify", "ExportPermissionKeys");

@@ -1,12 +1,12 @@
-using NevaxisFactOS.Api.Authentication;
-using NevaxisFactOS.Api.SaasIdentity;
-using NevaxisFactOS.Persistence.AdminAccess;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Authentication;
+using NevaxisZentra.Api.SaasIdentity;
+using NevaxisZentra.Persistence.AdminAccess;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.AdminAccess;
+namespace NevaxisZentra.Api.AdminAccess;
 
 internal static class AdminAccessEndpointHelpers
 {

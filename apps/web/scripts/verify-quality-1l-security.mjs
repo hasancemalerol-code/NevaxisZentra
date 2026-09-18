@@ -37,9 +37,9 @@ console.log("Running quality 1L security verifier.");
 const endpoints = readRequired("apps/api/Quality/QualityEndpointRouteBuilderExtensions.cs");
 const endpointHelpers = readRequired("apps/api/Quality/QualityEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260809140000_AddQualityControlCore.cs",
 );
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/Authorization/QualityPermissionKeys.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/Authorization/QualityPermissionKeys.cs");
 
 requireText(endpoints, "RequireAuthorization", "quality endpoints");
 requireText(endpoints, "IFacilityAccessResolver", "quality endpoints");

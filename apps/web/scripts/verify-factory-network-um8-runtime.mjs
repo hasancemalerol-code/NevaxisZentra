@@ -20,7 +20,7 @@ function resolvePostgresContainer() {
   if (process.env.NEVAXIS_FACTOS_POSTGRES_CONTAINER) {
     return process.env.NEVAXIS_FACTOS_POSTGRES_CONTAINER;
   }
-  for (const name of ["crevafactos-local-postgres-1", "nevaxisfactos-local-postgres-1"]) {
+  for (const name of ["crevafactos-local-postgres-1", "nevaxiszentra-local-postgres-1"]) {
     const result = spawnSync("docker", ["ps", "--filter", `name=${name}`, "--format", "{{.Names}}"], { encoding: "utf8" });
     const match = (result.stdout ?? "").trim().split(/\r?\n/).find(Boolean);
     if (match) return match;
@@ -34,7 +34,7 @@ function headers(subject = OPERATOR, tenant = TENANT) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
   if (process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER) {
     base.Authorization = `Bearer ${process.env.NEVAXIS_FACTOS_DEV_OPERATOR_BEARER}`;
@@ -78,7 +78,7 @@ function runSql(sql) {
 
 function runtimeTenantCount(tenantId, table, whereClause = "") {
   const output = runSql(
-    `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisFactOS.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM ${table} ${whereClause};`,
+    `SET ROLE crevafactos_runtime; SELECT set_config('NevaxisZentra.tenant_id', '${tenantId}', true); SELECT COUNT(*) FROM ${table} ${whereClause};`,
   );
   return Number(output.split("\n").map((l) => l.trim()).filter(Boolean).at(-1));
 }

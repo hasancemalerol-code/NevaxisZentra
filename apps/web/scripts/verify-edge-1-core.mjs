@@ -47,7 +47,7 @@ function assertNotContains(label, content, text) {
 // ---------------------------------------------------------------------------
 
 console.log("\n[1] Edge entities");
-const entities = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeEntities.cs");
+const entities = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeEntities.cs");
 
 assertContains("EdgeGateway entity exists", entities, "public sealed class EdgeGateway");
 assertContains("MachineRegistry entity exists", entities, "public sealed class MachineRegistry");
@@ -68,7 +68,7 @@ assertNotContains("No maintenance mutation in entities", entities, "MaintenanceW
 // ---------------------------------------------------------------------------
 
 console.log("\n[2] Adapter contract");
-const adapterFile = readFile("packages/NevaxisFactOS.Persistence/Edge/IEdgeGatewayAdapter.cs");
+const adapterFile = readFile("packages/NevaxisZentra.Persistence/Edge/IEdgeGatewayAdapter.cs");
 
 assertContains("IEdgeGatewayAdapter interface exists", adapterFile, "interface IEdgeGatewayAdapter");
 assertContains("VendorKey property", adapterFile, "string VendorKey");
@@ -85,7 +85,7 @@ assertNotContains("No OPC UA in interface", adapterFile, "OpcUa");
 // ---------------------------------------------------------------------------
 
 console.log("\n[3] Simulator adapter");
-const simAdapter = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeSimulatorAdapter.cs");
+const simAdapter = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeSimulatorAdapter.cs");
 
 assertContains("EdgeSimulatorAdapter class", simAdapter, "class EdgeSimulatorAdapter");
 assertContains("VendorKey = simulator", simAdapter, 'EdgeGatewayVendorKeys.Simulator');
@@ -100,7 +100,7 @@ assertNotContains("No plaintext credential hardcode", simAdapter, 'Password = "'
 // ---------------------------------------------------------------------------
 
 console.log("\n[4] Ingestion service");
-const ingestion = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeIngestionService.cs");
+const ingestion = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeIngestionService.cs");
 
 assertContains("IEdgeIngestionService interface", ingestion, "interface IEdgeIngestionService");
 assertContains("EdgeIngestionService class", ingestion, "class EdgeIngestionService");
@@ -116,7 +116,7 @@ assertNotContains("No write to external machine", ingestion, "WriteToMachine");
 // ---------------------------------------------------------------------------
 
 console.log("\n[5] Repository");
-const repo = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgeRepository.cs");
+const repo = readFile("packages/NevaxisZentra.Persistence/Edge/EdgeRepository.cs");
 
 assertContains("IEdgeQueryRepository interface", repo, "interface IEdgeQueryRepository");
 assertContains("ListGatewaysAsync", repo, "ListGatewaysAsync");
@@ -130,7 +130,7 @@ assertContains("UnavailableEdgeQueryRepository", repo, "class UnavailableEdgeQue
 // ---------------------------------------------------------------------------
 
 console.log("\n[6] Permission keys");
-const permKeys = readFile("packages/NevaxisFactOS.Persistence/Edge/EdgePermissionKeys.cs");
+const permKeys = readFile("packages/NevaxisZentra.Persistence/Edge/EdgePermissionKeys.cs");
 
 assertContains("edge.read permission", permKeys, '"edge.read"');
 assertContains("edge.manage permission", permKeys, '"edge.manage"');
@@ -141,7 +141,7 @@ assertContains("edge.ingest permission", permKeys, '"edge.ingest"');
 // ---------------------------------------------------------------------------
 
 console.log("\n[7] Migration");
-const migration = readFile("packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260810120000_AddEdgeGatewayMachineFoundation.cs");
+const migration = readFile("packages/NevaxisZentra.Persistence.Migrations/Migrations/20260810120000_AddEdgeGatewayMachineFoundation.cs");
 
 assertContains("Permission: edge.read inserted", migration, "'edge.read'");
 assertContains("Permission: edge.manage inserted", migration, "'edge.manage'");
@@ -166,7 +166,7 @@ assertContains("Outbox constraint updated", migration, "'edge-gateway-registered
 console.log("\n[8] DI registration");
 const di = readFile("apps/api/Edge/EdgeEndpointRouteBuilderExtensions.cs");
 
-assertContains("AddNevaxisFactOSEdge service registration", di, "AddNevaxisFactOSEdge");
+assertContains("AddNevaxisZentraEdge service registration", di, "AddNevaxisZentraEdge");
 assertContains("MapEdgeEndpoints route mapping", di, "MapEdgeEndpoints");
 assertContains("Unavailable fallback for query repo", di, "UnavailableEdgeQueryRepository");
 assertContains("Unavailable fallback for ingestion", di, "UnavailableEdgeIngestionService");
@@ -177,7 +177,7 @@ assertContains("MachineSimulator HttpClient registered", di, "EdgeSimulatorClien
 // ---------------------------------------------------------------------------
 
 console.log("\n[9] Development seed");
-const seedFile = readFile("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
+const seedFile = readFile("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotEdgeSeed.cs");
 
 assertContains("Simulator gateway seeded", seedFile, '"SIM-GW-001"');
 assertContains("CNC-001 machine seeded", seedFile, '"CNC-001"');
@@ -192,7 +192,7 @@ assertNotContains("Seed does not create ProductionOrder", seedFile, "ProductionO
 // ---------------------------------------------------------------------------
 
 console.log("\n[10] DevelopmentPilotIds");
-const pilotIds = readFile("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotIds.cs");
+const pilotIds = readFile("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotIds.cs");
 
 assertContains("Edge read permission GUID defined", pilotIds, "EdgeReadPermissionDefinitionId");
 assertContains("Edge manage permission GUID defined", pilotIds, "EdgeManagePermissionDefinitionId");
@@ -206,7 +206,7 @@ assertContains("Edge PRESS machine ID", pilotIds, "EdgePilotPressMachineId");
 // ---------------------------------------------------------------------------
 
 console.log("\n[11] MachineSimulator scenarios");
-const scenarios = readFile("tools/NevaxisFactOS.MachineSimulator/MachineSimulatorScenarios.cs");
+const scenarios = readFile("tools/NevaxisZentra.MachineSimulator/MachineSimulatorScenarios.cs");
 
 assertContains("CNC-001 machine defined", scenarios, '"CNC-001"');
 assertContains("PRESS-001 machine defined", scenarios, '"PRESS-001"');
@@ -223,7 +223,7 @@ assertNotContains("No MQTT publish in scenarios", scenarios, "MqttClient");
 // ---------------------------------------------------------------------------
 
 console.log("\n[12] Entity configurations");
-const configs = readFile("packages/NevaxisFactOS.Persistence/Configurations/EdgeEntityConfigurations.cs");
+const configs = readFile("packages/NevaxisZentra.Persistence/Configurations/EdgeEntityConfigurations.cs");
 
 assertContains("EdgeGatewayEntityConfiguration", configs, "class EdgeGatewayEntityConfiguration");
 assertContains("MachineRegistryEntityConfiguration", configs, "class MachineRegistryEntityConfiguration");

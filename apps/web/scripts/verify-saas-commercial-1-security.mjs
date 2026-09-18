@@ -29,7 +29,7 @@ function forbidText(source, forbidden, label) {
 function db(sql) {
   const result = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (result.status !== 0) fail(result.stderr || result.stdout);
@@ -74,10 +74,10 @@ console.log("Running SAAS-COMMERCIAL-1 security/boundary verifier.");
 const endpoints = readRequired("apps/api/SaasCommercial/SaasCommercialEndpointRouteBuilderExtensions.cs");
 const helpers = readRequired("apps/api/SaasCommercial/SaasCommercialEndpointHelpers.cs");
 const migration = readRequired(
-  "packages/NevaxisFactOS.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
+  "packages/NevaxisZentra.Persistence.Migrations/Migrations/20260814051728_AddSaasCommercialPlanAndEntitlementFoundation.cs",
 );
-const permissions = readRequired("packages/NevaxisFactOS.Persistence/SaasCommercial/SaasCommercialPermissionKeys.cs");
-const bootstrap = readRequired("packages/NevaxisFactOS.Persistence/Development/DevelopmentPilotBootstrapService.cs");
+const permissions = readRequired("packages/NevaxisZentra.Persistence/SaasCommercial/SaasCommercialPermissionKeys.cs");
+const bootstrap = readRequired("packages/NevaxisZentra.Persistence/Development/DevelopmentPilotBootstrapService.cs");
 
 assert("endpoints require auth", endpoints.includes("RequireAuthorization"));
 assert("read access helper", endpoints.includes("ResolveReadAccessAsync"));
@@ -100,17 +100,17 @@ assert("helpers return 403 without permission", helpers.includes("Authorization 
 const managerHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "planning-pilot-user",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const negativeHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "quality-negative-test-user",
-  "X-NevaxisFactOS-Tenant": "dev-pilot-tenant",
+  "X-NevaxisZentra-Tenant": "dev-pilot-tenant",
 };
 const crossTenantHeaders = {
   "X-crevafactos-dev-Issuer": "crevafactos-dev",
   "X-crevafactos-dev-Subject": "planning-pilot-user",
-  "X-NevaxisFactOS-Tenant": "unknown-tenant-key",
+  "X-NevaxisZentra-Tenant": "unknown-tenant-key",
 };
 
 const ready = await fetch(`${BASE}/health/ready`);

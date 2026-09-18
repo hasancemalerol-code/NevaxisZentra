@@ -39,7 +39,7 @@ function headers(subject = OPERATOR, extra = {}) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ISSUER,
     "X-crevafactos-dev-Subject": subject,
-    "X-NevaxisFactOS-Tenant": TENANT,
+    "X-NevaxisZentra-Tenant": TENANT,
     ...extra,
   };
 }
@@ -52,7 +52,7 @@ async function statusFor(method, path, subject = OPERATOR, extra = {}) {
 function dbCount(sql) {
   const r = spawnSync(
     "docker",
-    ["exec", "NevaxisFactOS-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
+    ["exec", "NevaxisZentra-local-postgres-1", "psql", "-U", "crevafactos", "-d", "crevafactos_local", "-t", "-A", "-c", sql],
     { encoding: "utf8" },
   );
   if (r.status !== 0) fail(r.stderr || r.stdout);
@@ -100,7 +100,7 @@ try {
   const unauthFacility = await statusFor("POST", `/api/maintenance/condition/risk/evaluate?facilityId=${UNAUTH_FACILITY}`, OPERATOR);
   assert("unauthorized facility POST evaluate → 403", unauthFacility === 403, `got ${unauthFacility}`);
 
-  const crossTenant = await statusFor("POST", EVAL_PATH, OPERATOR, { "X-NevaxisFactOS-Tenant": OTHER_TENANT });
+  const crossTenant = await statusFor("POST", EVAL_PATH, OPERATOR, { "X-NevaxisZentra-Tenant": OTHER_TENANT });
   assert("cross-tenant POST evaluate → 403", crossTenant === 403, `got ${crossTenant}`);
 
   const readGet = await statusFor("GET", OVERVIEW_PATH, REVIEWER);

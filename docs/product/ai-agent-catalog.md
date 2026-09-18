@@ -1,4 +1,4 @@
-# NevaxisFactOS AI Agent Catalog
+# NevaxisZentra AI Agent Catalog
 
 - Status: Locked
 - Date: 2026-08-04
@@ -33,7 +33,7 @@ An agent recommendation is not an approval. Execution tools revalidate authorita
 
 ## Routing
 
-Agents may route authoritative AI Task Center work through NevaxisFactOS Teams to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, or management. Routing cannot bypass unit permissions or create parallel approval state.
+Agents may route authoritative AI Task Center work through NevaxisZentra Teams to purchasing, warehouse/material, order operations, finance/accounting, production, shift, maintenance, quality, or management. Routing cannot bypass unit permissions or create parallel approval state.
 
 ## Adding an Agent
 

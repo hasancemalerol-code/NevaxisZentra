@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.FactoryIntelligence;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.FactoryIntelligence;
 
-namespace NevaxisFactOS.Api.FactoryIntelligence;
+namespace NevaxisZentra.Api.FactoryIntelligence;
 
 public static class FactoryIntelligenceEndpointRouteBuilderExtensions
 {
@@ -22,7 +22,7 @@ public static class FactoryIntelligenceEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisFactOSFactoryIntelligence(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraFactoryIntelligence(this IServiceCollection services)
     {
         services.AddScoped<IFactoryIntelligenceService, FactoryIntelligenceService>();
         return services;

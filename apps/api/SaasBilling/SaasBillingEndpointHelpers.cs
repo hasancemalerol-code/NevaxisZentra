@@ -1,13 +1,13 @@
-using NevaxisFactOS.Persistence.AdminAccess;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Identity;
-using NevaxisFactOS.Persistence.SaasBilling;
-using NevaxisFactOS.Persistence.SaasBilling.Payments;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Persistence.AdminAccess;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Identity;
+using NevaxisZentra.Persistence.SaasBilling;
+using NevaxisZentra.Persistence.SaasBilling.Payments;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Http;
 
-namespace NevaxisFactOS.Api.SaasBilling;
+namespace NevaxisZentra.Api.SaasBilling;
 
 internal sealed record SaasBillingOperationContext(
     Guid TenantId,

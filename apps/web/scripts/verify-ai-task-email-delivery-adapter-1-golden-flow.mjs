@@ -27,7 +27,7 @@ function headers(tenant = ACTOR.tenant) {
     "Content-Type": "application/json",
     "X-crevafactos-dev-Issuer": ACTOR.issuer,
     "X-crevafactos-dev-Subject": ACTOR.subject,
-    "X-NevaxisFactOS-Tenant": tenant,
+    "X-NevaxisZentra-Tenant": tenant,
   };
 }
 
@@ -127,7 +127,7 @@ try {
 }
 
 if (!captured?.subject?.includes("crevafactos") || !captured?.subject?.includes("bildirimi")) fail("EMAIL_SUBJECT missing");
-if (!captured?.from?.includes("closure.NevaxisFactOS") && !captured?.from?.includes("crevafactos")) fail("EMAIL_FROM missing");
+if (!captured?.from?.includes("closure.NevaxisZentra") && !captured?.from?.includes("crevafactos")) fail("EMAIL_FROM missing");
 if (!captured?.toMasked && !captured?.rcptTo) fail("EMAIL_RECIPIENT missing");
 const bodyBlob = `${captured?.plainTextBody ?? ""}\n${captured?.htmlBody ?? ""}`;
 if (!captured?.plainTextBody?.includes("Factory Operations")) fail("EMAIL_PLAIN_TEXT_PART missing");

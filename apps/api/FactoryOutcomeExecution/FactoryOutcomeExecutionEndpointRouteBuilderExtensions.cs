@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-using NevaxisFactOS.Api.FactoryOrchestration;
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.FactoryOrchestration;
-using NevaxisFactOS.Persistence.FactoryOutcomeExecution;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.FactoryOrchestration;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.FactoryOrchestration;
+using NevaxisZentra.Persistence.FactoryOutcomeExecution;
+using NevaxisZentra.Persistence.Tenancy;
 
-namespace NevaxisFactOS.Api.FactoryOutcomeExecution;
+namespace NevaxisZentra.Api.FactoryOutcomeExecution;
 
 public static class FactoryOutcomeExecutionEndpointRouteBuilderExtensions
 {

@@ -1,13 +1,13 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence;
-using NevaxisFactOS.Persistence.Audit;
-using NevaxisFactOS.Persistence.Authorization;
-using NevaxisFactOS.Persistence.Production;
-using NevaxisFactOS.Persistence.Tenancy;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Audit;
+using NevaxisZentra.Persistence.Authorization;
+using NevaxisZentra.Persistence.Production;
+using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace NevaxisFactOS.Api.Production;
+namespace NevaxisZentra.Api.Production;
 
 public static class ProductionExecutionEndpointRouteBuilderExtensions
 {
@@ -1741,11 +1741,11 @@ public static class ProductionExecutionEndpointRouteBuilderExtensions
 
 public static class ProductionExecutionServiceCollectionExtensions
 {
-    public static IServiceCollection AddNevaxisFactOSProductionExecution(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraProductionExecution(this IServiceCollection services)
     {
         services.AddScoped<IProductionOrderReadRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionOrderReadRepository()
                 : new ProductionOrderReadRepository(
@@ -1755,7 +1755,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionExecutionEntryRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetRequiredService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetRequiredService<NevaxisZentraDbContext>();
             return new ProductionExecutionEntryRepository(
                 dbContext,
                 serviceProvider.GetRequiredService<TenantDatabaseSession>());
@@ -1763,7 +1763,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionOperationsRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionOperationsRepository()
                 : new ProductionOperationsRepository(
@@ -1774,7 +1774,7 @@ public static class ProductionExecutionServiceCollectionExtensions
         // 4L — exception repository
         services.AddScoped<IProductionExceptionRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionExceptionRepository()
                 : new ProductionExceptionRepository(
@@ -1784,7 +1784,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionFollowUpRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionFollowUpRepository()
                 : new ProductionFollowUpRepository(
@@ -1799,7 +1799,7 @@ public static class ProductionExecutionServiceCollectionExtensions
         // 5L — shift, operator, handover repositories
         services.AddScoped<IProductionShiftRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionShiftRepository()
                 : new ProductionShiftRepository(
@@ -1809,7 +1809,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionOperatorRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionOperatorRepository()
                 : new ProductionOperatorRepository(
@@ -1819,7 +1819,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionHandoverRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionHandoverRepository()
                 : new ProductionHandoverRepository(
@@ -1834,7 +1834,7 @@ public static class ProductionExecutionServiceCollectionExtensions
         // Override ProductionOrderWriteRepository to inject policy options
         services.AddScoped<IProductionOrderWriteRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionOrderWriteRepository()
                 : new ProductionOrderWriteRepository(
@@ -1845,7 +1845,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionPlanningLogisticsSignalReader>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionPlanningLogisticsSignalReader()
                 : new ProductionPlanningLogisticsSignalReader(dbContext);
@@ -1853,7 +1853,7 @@ public static class ProductionExecutionServiceCollectionExtensions
 
         services.AddScoped<IProductionReportingRepository>(serviceProvider =>
         {
-            var dbContext = serviceProvider.GetService<NevaxisFactOSDbContext>();
+            var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();
             return dbContext is null
                 ? new UnavailableProductionReportingRepository()
                 : new ProductionReportingRepository(

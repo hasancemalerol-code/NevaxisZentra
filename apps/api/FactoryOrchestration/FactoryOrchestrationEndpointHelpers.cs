@@ -1,8 +1,8 @@
-using NevaxisFactOS.Api.Facilities;
-using NevaxisFactOS.Persistence.DigitalWorkforce;
-using NevaxisFactOS.Persistence.FactoryOrchestration;
+using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.DigitalWorkforce;
+using NevaxisZentra.Persistence.FactoryOrchestration;
 
-namespace NevaxisFactOS.Api.FactoryOrchestration;
+namespace NevaxisZentra.Api.FactoryOrchestration;
 
 internal static class FactoryOrchestrationEndpointHelpers
 {

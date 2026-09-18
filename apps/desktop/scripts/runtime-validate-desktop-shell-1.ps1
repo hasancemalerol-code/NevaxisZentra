@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
-$desktopExe = "C:\Projects\NevaxisFactOS\apps\desktop\NevaxisFactOS.Desktop\bin\Debug\net10.0-windows\NevaxisFactOS.Desktop.exe"
-$screenshotDir = "C:\Users\studiocreva\Pictures\NevaxisFactOS-Desktop-Shell-1"
+$desktopExe = "C:\Projects\NevaxisZentra\apps\desktop\NevaxisZentra.Desktop\bin\Debug\net10.0-windows\NevaxisZentra.Desktop.exe"
+$screenshotDir = "C:\Users\studiocreva\Pictures\NevaxisZentra-Desktop-Shell-1"
 
 New-Item -ItemType Directory -Force -Path $screenshotDir | Out-Null
 
@@ -67,7 +67,7 @@ public static class DesktopCapture
 "@
 
 function Stop-DesktopProcesses {
-    Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 1
 }
 
@@ -106,7 +106,7 @@ Start-Sleep -Seconds 1
 
 $second = Start-DesktopApp "http://127.0.0.1:3001"
 Start-Sleep -Seconds 2
-$instanceCount = (Get-Process -Name "NevaxisFactOS.Desktop" -ErrorAction SilentlyContinue).Count
+$instanceCount = (Get-Process -Name "NevaxisZentra.Desktop" -ErrorAction SilentlyContinue).Count
 Write-Host "Desktop PID: $($process.Id); duplicate instance launch PID: $($second.Id); active instance count: $instanceCount"
 if ($second.HasExited -eq $false) { Stop-Process -Id $second.Id -Force -ErrorAction SilentlyContinue }
 
@@ -126,7 +126,7 @@ $listener.Start()
 $listenerTask = [System.Threading.Tasks.Task]::Run([Action]{
     while ($listener.IsListening) {
         $context = $listener.GetContext()
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes("<html><body>NevaxisFactOS retry proof</body></html>")
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes("<html><body>NevaxisZentra retry proof</body></html>")
         $context.Response.ContentType = "text/html"
         $context.Response.OutputStream.Write($bytes, 0, $bytes.Length)
         $context.Response.Close()
