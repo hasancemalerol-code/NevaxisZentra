@@ -11,6 +11,7 @@ public static class MixedProductionEndpointRouteBuilderExtensions
         var group = endpoints.MapGroup("/api/mixed-production").RequireAuthorization();
 
         group.MapGet("/lines", ListLinesAsync);
+        group.MapGet("/resources/workspace", GetResourceWorkspaceAsync);
         group.MapGet("/lines/{lineId:guid}", GetLineDetailAsync);
         group.MapGet("/lines/{lineId:guid}/timeline", GetTimelineAsync);
         group.MapGet("/lines/{lineId:guid}/playback", GetPlaybackAsync);
@@ -25,6 +26,20 @@ public static class MixedProductionEndpointRouteBuilderExtensions
     {
         services.AddScoped<IMixedProductionService, MixedProductionService>();
         return services;
+    }
+
+    private static async Task<IResult> GetResourceWorkspaceAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
+        IMixedProductionService service,
+        CancellationToken cancellationToken)
+    {
+        var (access, failure) = await ResolveAccessAsync(
+            facilityId, MixedProductionPermissionKeys.Read, facilityAccessResolver, cancellationToken);
+        if (access is null) return failure!;
+
+        var workspace = await service.GetResourceWorkspaceAsync(access.FacilityId, cancellationToken);
+        return TypedResults.Ok(workspace);
     }
 
     private static async Task<IResult> ListLinesAsync(

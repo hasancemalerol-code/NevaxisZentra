@@ -23,6 +23,7 @@ import {
   type AiTaskCenterTaskOriginFilter,
   type AiTaskCenterView,
 } from "../domain/ai-task-center-item";
+import { TASK_CENTER_VIEW_ARIA_LABEL } from "../domain/ai-task-product-labels";
 import { AiTaskCenterItemCard } from "./ai-task-center-item-card";
 
 type AiTaskCenterUnifiedWorkspaceProps = Readonly<{
@@ -56,7 +57,11 @@ function formatDateTime(value: string | null): string | null {
 }
 
 function parsePresentationMode(value: string | null): AiTaskCenterPresentationMode {
-  return value === "liste" ? "list" : "cards";
+  if (value === "kart") {
+    return "cards";
+  }
+
+  return "list";
 }
 
 function buildCenterHref(
@@ -72,7 +77,9 @@ function buildCenterHref(
     params.set("kaynak", originFilter);
   }
 
-  if (presentationMode === "list") {
+  if (presentationMode === "cards") {
+    params.set("gosterim", "kart");
+  } else {
     params.set("gosterim", "liste");
   }
 
@@ -228,7 +235,7 @@ export function AiTaskCenterUnifiedWorkspace({
     <div className="ai-task-center-unified" data-testid="ai-task-center-unified-workspace">
       <div className="ai-task-center-unified__toolbar">
         <div
-          aria-label="AI Görev Merkezi görünümleri"
+          aria-label={TASK_CENTER_VIEW_ARIA_LABEL}
           className="ai-task-center-unified__view-rail"
           role="tablist"
         >

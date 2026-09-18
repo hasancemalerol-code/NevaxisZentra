@@ -8,10 +8,10 @@ export type NavigationGroup = SerializableNavigationGroup;
 
 export const primaryNavigation: readonly NavigationGroup[] = [
   {
-    label: "Çalışma alanı",
+    label: "Çalışma Alanı",
     items: [
       {
-        label: "AI Görev Merkezi",
+        label: "Görev Merkezi",
         href: "/",
         iconKey: "list-todo",
         exact: true,
@@ -22,7 +22,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "users-round",
       },
       {
-        label: "Dashboard / Operasyon Merkezi",
+        label: "Operasyon Merkezi",
         href: "/dashboard",
         iconKey: "layout-dashboard",
       },
@@ -47,21 +47,33 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/operasyon/yonetim-merkezi",
       },
       {
-        label: "Sunum Modu",
-        href: "/sunum-modu",
-        iconKey: "activity",
-        permissionKey: "presentation-mode.access",
+        label: "Fabrika Zekâsı",
+        href: "/fabrika-zekasi",
+        iconKey: "circle-gauge",
+        permissionKey: "factory-intelligence.read",
       },
       {
         label: "FactOS Teams",
         href: "/teams",
         iconKey: "messages-square",
       },
+      {
+        label: "Sunum Modu",
+        href: "/sunum-modu",
+        iconKey: "activity",
+        permissionKey: "presentation-mode.access",
+      },
     ],
   },
   {
-    label: "Fabrika operasyonları",
+    label: "Üretim",
     items: [
+      {
+        label: "Genel Bakış",
+        href: "/uretim",
+        iconKey: "factory",
+        subscriptionModulePath: "/uretim",
+      },
       {
         label: "Siparişler",
         href: "/siparisler",
@@ -75,23 +87,18 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/planlama",
       },
       {
-        label: "Fabrika Ağı",
-        href: "/fabrika-agi",
+        label: "Hatlar",
+        href: "/uretim/hatlar",
         iconKey: "factory",
-        permissionKey: "factory-network.read",
-        subscriptionModulePath: "/planlama",
-      },
-      {
-        label: "Üretim",
-        href: "/uretim",
-        iconKey: "factory",
+        permissionKey: "mixed-production.read",
         subscriptionModulePath: "/uretim",
       },
       {
-        label: "İhracat",
-        href: "/ihracat",
-        iconKey: "ship",
-        subscriptionModulePath: "/ihracat",
+        label: "Üretim Kaynakları",
+        href: "/uretim/kaynaklar",
+        iconKey: "cpu",
+        permissionKey: "mixed-production.read",
+        subscriptionModulePath: "/uretim",
       },
       {
         label: "Vardiyalar",
@@ -108,6 +115,18 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/proses-oee",
       },
       {
+        label: "Fabrika Ağı",
+        href: "/fabrika-agi",
+        iconKey: "factory",
+        permissionKey: "factory-network.read",
+        subscriptionModulePath: "/planlama",
+      },
+    ],
+  },
+  {
+    label: "Kaynaklar",
+    items: [
+      {
         label: "Makineler",
         href: "/makineler",
         iconKey: "cpu",
@@ -115,26 +134,17 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/makineler",
       },
       {
-        label: "Kalıplar",
+        label: "Kalıp & Takımlar",
         href: "/kaliplar",
         iconKey: "molds",
         permissionKey: "mold.read",
         subscriptionModulePath: "/kaliplar",
       },
-      {
-        label: "Malzemeler",
-        href: "/malzemeler",
-        iconKey: "package",
-        permissionKey: "material.read",
-        subscriptionModulePath: "/malzemeler",
-      },
-      {
-        label: "Malzeme Riskleri",
-        href: "/stok-ve-depo/malzeme-riskleri",
-        iconKey: "package-search",
-        permissionKey: "material.read",
-        subscriptionModulePath: "/malzemeler",
-      },
+    ],
+  },
+  {
+    label: "Operasyon",
+    items: [
       {
         label: "Bakım",
         href: "/bakim",
@@ -143,10 +153,17 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/bakim",
       },
       {
-        label: "Kalite Kontrol",
+        label: "Kalite",
         href: "/kalite",
         iconKey: "shield-check",
         subscriptionModulePath: "/kalite",
+      },
+      {
+        label: "Malzemeler",
+        href: "/malzemeler",
+        iconKey: "package",
+        permissionKey: "material.read",
+        subscriptionModulePath: "/malzemeler",
       },
       {
         label: "Enerji",
@@ -165,7 +182,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "Operasyonel riskler",
+    label: "Risk & Tedarik",
     items: [
       {
         label: "Operasyonel Riskler",
@@ -204,10 +221,28 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         href: "/riskler/kalite",
         iconKey: "file-warning",
       },
+      {
+        label: "Satın Alma Tedarik Riskleri",
+        href: "/satin-alma/tedarik-riskleri",
+        iconKey: "shopping-basket",
+        permissionKey: "erp.read",
+        subscriptionModulePath: "/satin-alma",
+      },
     ],
   },
   {
-    label: "TİCARİ ZEKÂ",
+    label: "Dış Operasyonlar",
+    items: [
+      {
+        label: "İhracat",
+        href: "/ihracat",
+        iconKey: "ship",
+        subscriptionModulePath: "/ihracat",
+      },
+    ],
+  },
+  {
+    label: "Ticari Zekâ",
     items: [
       {
         label: "Satın Alma Fiyat Analizi",
@@ -274,19 +309,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "Satın alma",
-    items: [
-      {
-        label: "Tedarik Riskleri",
-        href: "/satin-alma/tedarik-riskleri",
-        iconKey: "shopping-basket",
-        permissionKey: "erp.read",
-        subscriptionModulePath: "/satin-alma",
-      },
-    ],
-  },
-  {
-    label: "ERP entegrasyonları",
+    label: "ERP & Entegrasyon",
     items: [
       {
         label: "ERP Bağlantısı",
@@ -316,7 +339,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "Yönetim",
+    label: "Sistem",
     items: [
       {
         label: "Raporlama & Analitik",
@@ -324,7 +347,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "chart-no-axes-combined",
       },
       {
-        label: "Entegrasyonlar",
+        label: "Entegrasyon Merkezi",
         href: "/ayarlar/entegrasyonlar",
         iconKey: "cable",
         permissionKey: "integration.read",

@@ -22,7 +22,7 @@ test("renders the AI task center home without implying live operational data", a
   });
   const markup = renderToStaticMarkup(element as ReactElement);
 
-  assert.match(markup, /AI Görev Merkezi/);
+  assert.match(markup, /Görev Merkezi/);
   assert.match(markup, /Gerçek görev verisi bağlı değil/);
   assert.doesNotMatch(markup, /Active Production Orders|Live Alarms/);
 });
@@ -51,7 +51,7 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
       .replaceAll("&", "&amp;");
     assert.match(markup, new RegExp(escapedLabel));
   }
-  assert.equal(navigationItems.length, 49);
+  assert.equal(navigationItems.length, 52);
   assert.ok(
     navigationItems.some(
       (item) => item.label === "Fabrika Karar Merkezi" && item.href === "/fabrika-karar-merkezi",
@@ -78,13 +78,16 @@ test("sidebar renders the exact locked navigation and marks AI Task Center activ
       (item) => item.label === "İhracat" && item.href === "/ihracat",
     ),
   );
-  const productionNavIndex = navigationItems.findIndex(
-    (item) => item.label === "Üretim",
+  assert.ok(
+    navigationItems.some(
+      (item) => item.label === "Üretim Kaynakları" && item.href === "/uretim/kaynaklar",
+    ),
   );
-  const exportNavIndex = navigationItems.findIndex(
-    (item) => item.label === "İhracat",
+  assert.ok(
+    navigationItems.some(
+      (item) => item.label === "Görev Merkezi" && item.href === "/",
+    ),
   );
-  assert.equal(exportNavIndex, productionNavIndex + 1);
   assert.match(markup, /navigation-label">İhracat</);
   assert.match(markup, /href="\/ihracat"/);
   assert.match(markup, /aria-current="page"[^>]*href="\/"/);
@@ -102,10 +105,10 @@ test("collapsed sidebar preserves accessible labels and expandable control", () 
   assert.match(markup, /data-collapsed="true"/);
   assert.match(markup, /aria-label="Kenar çubuğunu genişlet"/);
   assert.match(markup, /aria-expanded="false"/);
-  assert.match(markup, /title="AI Görev Merkezi"/);
+  assert.match(markup, /title="Görev Merkezi"/);
   assert.match(
     markup,
-    /aria-current="page"[^>]*title="Dashboard \/ Operasyon Merkezi"[^>]*href="\/dashboard"|aria-current="page"[^>]*href="\/dashboard"[^>]*title="Dashboard \/ Operasyon Merkezi"/,
+    /aria-current="page"[^>]*title="Operasyon Merkezi"[^>]*href="\/dashboard"|aria-current="page"[^>]*href="\/dashboard"[^>]*title="Operasyon Merkezi"/,
   );
 });
 

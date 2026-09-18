@@ -48,7 +48,7 @@ export default async function DashboardPage() {
             FactOS Operasyon Merkezi
           </p>
 
-          <h1>AI Görev Merkezi</h1>
+          <h1>Operasyon Merkezi</h1>
 
           <p className="command-center__description">
             Üretim, planlama, risk ve sistem durumlarını tek
@@ -58,10 +58,10 @@ export default async function DashboardPage() {
 
         <div className="command-center__titlebar-actions">
           <button
-              aria-label="AI'ya Görev Ver. AI görev oluşturma akışı henüz kullanıma hazır değil."
+              aria-label="Görev oluştur. Görev oluşturma akışı henüz kullanıma hazır değil."
               className="command-center__ai-task-button"
               disabled
-              title="AI görev oluşturma akışı henüz kullanıma hazır değil."
+              title="Görev oluşturma akışı henüz kullanıma hazır değil."
               type="button"
             >
               <span
@@ -84,8 +84,8 @@ export default async function DashboardPage() {
               </span>
 
               <span className="command-center__ai-task-button-copy">
-                <strong>AI&apos;ya Görev Ver</strong>
-                <span>AI görev oluşturma akışı henüz kullanıma hazır değil.</span>
+                <strong>Görev Oluştur</strong>
+                <span>Görev oluşturma akışı henüz kullanıma hazır değil.</span>
               </span>
             </button>
             <DashboardShowcaseTvAction />

@@ -131,3 +131,109 @@
 .production-execution-page .input:focus {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 25%, transparent) !important;
 }
+
+/* Navigation — flat active state (no gradient) */
+.navigation-link[data-active="true"],
+.navigation-link[data-active="true"]:hover {
+  background: rgb(235 244 255) !important;
+}
+
+/* Command center / dashboard — operational tone */
+.command-center__titlebar h1 {
+  font-size: var(--fact-text-page-title) !important;
+  font-weight: 700 !important;
+}
+
+.command-center__ai-task-button {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: none !important;
+}
+
+.dashboard-section-heading__meta svg[data-decorative="true"] {
+  display: none;
+}
+
+/* AI task center — dense enterprise workspace */
+.ai-task-center-unified__card-grid {
+  display: none !important;
+}
+
+.ai-task-center-unified__table-wrap {
+  border: 1px solid var(--fact-border);
+  border-radius: var(--fact-radius-md);
+  background: var(--fact-surface-panel);
+}
+
+.ai-task-center-unified__table th,
+.ai-task-center-unified__table td {
+  padding: var(--fact-density-table-cell-y) var(--fact-density-table-cell-x) !important;
+  font-size: var(--fact-text-object) !important;
+}
+
+.ai-task-center-unified__view-tab {
+  border-radius: var(--fact-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+.ai-task-create-button,
+.ai-task-automation-nav-link {
+  border-radius: var(--fact-radius-md) !important;
+  box-shadow: none !important;
+}
+
+/* Executive command — preserve industrial flat panels */
+.commint-executive,
+.commint-panel {
+  background-image: none !important;
+}
+
+/* Factory intelligence / decision — section density */
+.fact-workspace .fact-section,
+.fact-workspace .fact-context-panel {
+  box-shadow: var(--fact-shadow-panel) !important;
+}
+
+/* Reduce decorative badge chains in dashboard panels */
+.dashboard-panel .badge:not([data-semantic="true"]) {
+  padding: 1px 6px !important;
+  font-size: 0.68rem !important;
+  border-radius: var(--fact-radius-xs) !important;
+}
+
+/* 1366 sidebar usability */
+@media (max-width: 1400px) {
+  .navigation-label {
+    font-size: 10.5px;
+  }
+
+  .navigation-link {
+    min-height: 36px;
+    padding: 7px 9px;
+  }
+
+  .navigation-group + .navigation-group {
+    margin-top: 14px;
+  }
+
+  .sidebar-brand {
+    padding: 10px 12px !important;
+  }
+
+  .production-resources-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.85fr);
+  }
+}
+
+@media (max-width: 1366px) {
+  .content-viewport {
+    min-width: 0;
+  }
+
+  .fact-master-detail {
+    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  }
+
+  .commint-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+  }
+}

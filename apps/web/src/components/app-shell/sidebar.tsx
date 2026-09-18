@@ -6,9 +6,8 @@ import {
 
 import { FactosBrandLockup } from "@/components/brand/factos-brand-lockup";
 import { IconButton } from "@/components/ui/button";
+import { SidebarNavigation } from "@/components/app-shell/sidebar-navigation";
 import { FACTOS_BRAND } from "@/lib/brand/factos-brand";
-import { resolveNavigationIcon } from "@/lib/navigation/navigation-icon-registry";
-import { isNavigationItemActive } from "@/lib/navigation/navigation-types";
 import type { SerializableNavigationGroup } from "@/lib/navigation/navigation-types";
 
 type SidebarProps = Readonly<{
@@ -63,67 +62,11 @@ export function Sidebar({
         </IconButton>
       </div>
 
-      <nav
-        aria-label="Birincil navigasyon"
-        className="sidebar-navigation"
-        data-collapsed={collapsed}
-      >
-        {navigation.map((group, groupIndex) => {
-          const groupLabelId = `navigation-group-${groupIndex}`;
-
-          return (
-          <section
-            aria-labelledby={groupLabelId}
-            className="navigation-group"
-            key={group.label}
-          >
-            <p
-              className="navigation-group-label"
-              id={groupLabelId}
-            >
-              {group.label}
-            </p>
-
-            <ul className="navigation-list">
-              {group.items.map((item) => {
-                const active =
-                  isNavigationItemActive(
-                    item,
-                    pathname,
-                  );
-                const Icon = resolveNavigationIcon(item.iconKey);
-
-                return (
-                  <li key={item.href}>
-                    <Link
-                      aria-current={
-                        active
-                          ? "page"
-                          : undefined
-                      }
-                      className="navigation-link"
-                      data-active={active}
-                      href={item.href}
-                      title={
-                        collapsed
-                          ? item.label
-                          : undefined
-                      }
-                    >
-                      <Icon aria-hidden="true" />
-
-                      <span className="navigation-label">
-                        {item.label}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-          );
-        })}
-      </nav>
+      <SidebarNavigation
+        pathname={pathname}
+        collapsed={collapsed}
+        navigation={navigation}
+      />
 
       <div className="sidebar-footer">
         <span
@@ -132,8 +75,8 @@ export function Sidebar({
         />
 
         <span className="sidebar-footer-copy">
-          <strong>UI Foundation</strong>
-          <small>Operasyon katmanı</small>
+          <strong>FactOS</strong>
+          <small>Endüstriyel operasyon</small>
         </span>
       </div>
     </aside>

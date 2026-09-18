@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Clock3,
   PackageSearch,
-  Sparkles,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
@@ -401,16 +400,11 @@ export function AiTaskCenterSummary({
             className="dashboard-section-heading__title"
             id="ai-task-center-title"
           >
-            AI Görev Merkezi
+            Görev Merkezi
           </h2>
         </div>
 
         <div className="dashboard-section-heading__meta">
-          <Sparkles
-            aria-hidden="true"
-            size={16}
-            strokeWidth={1.8}
-          />
           {visibleTasks.length} görev bekliyor
         </div>
       </div>
@@ -422,7 +416,7 @@ export function AiTaskCenterSummary({
           const catalogTask = getAiTaskPreviewById(task.id);
           const inspectLabel = catalogTask
             ? `${task.title} görevini incele`
-            : `${task.title}. AI Görev Merkezi'nde incele`;
+            : `${task.title}. Görev Merkezi'nde incele`;
 
           return (
             <article

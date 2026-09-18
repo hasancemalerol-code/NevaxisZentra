@@ -47,7 +47,7 @@ const MODULE_ENTITLEMENT_LABELS: Record<string, string> = {
   "module.erp-integration": "ERP entegrasyonları",
   "module.commercial-intelligence": "Ticari zekâ",
   "module.operational-risk": "Operasyonel riskler",
-  "module.ai-task-center": "AI Görev Merkezi",
+  "module.ai-task-center": "Görev Merkezi",
 };
 
 const LIMIT_LABELS: Record<string, string> = {

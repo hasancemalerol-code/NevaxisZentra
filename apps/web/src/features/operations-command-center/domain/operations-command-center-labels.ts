@@ -28,7 +28,7 @@ export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_ROUTE_PATH =
 
 const MODULE_LABELS: Record<OperationsCommandCenterModuleCode, string> = {
   factory: "Fabrika vakası",
-  "production-manager": "AI Üretim Yöneticisi",
+  "production-manager": "Üretim Yöneticisi",
   commercial: "Ticari zekâ",
   production: "Üretim",
   quality: "Kalite",
@@ -36,7 +36,7 @@ const MODULE_LABELS: Record<OperationsCommandCenterModuleCode, string> = {
   mold: "Kalıp",
   material: "Malzeme",
   procurement: "Satın alma",
-  "ai-task": "AI Görev",
+  "ai-task": "Görev",
 };
 
 export function getOperationsCommandCenterModuleLabel(

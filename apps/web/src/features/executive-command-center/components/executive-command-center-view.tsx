@@ -29,6 +29,7 @@ import {
   EXECUTIVE_PRIORITY_SECTION_LABELS,
 } from "../domain/executive-command-center-labels";
 import { refreshExecutiveCommandCenterAction } from "../server/executive-command-center-actions";
+import { TASK_CENTER_DRILL_DOWN_LABEL } from "@/features/ai-task-center/domain/ai-task-product-labels";
 import type {
   ExecutiveCommandCenterWorkspacePayload,
   ExecutiveOutcomeCard,
@@ -458,7 +459,7 @@ export function ExecutiveCommandCenterView({ workspace: initialWorkspace }: Exec
         <p>
           Karar yönetimi: <Link href="/fabrika-karar-merkezi">Fabrika Karar Merkezi</Link>
           {" · "}
-          Görevler: <Link href="/">AI Görev Merkezi</Link>
+          Görevler: <Link href="/">{TASK_CENTER_DRILL_DOWN_LABEL}</Link>
           {" · "}
           Operasyon: <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
         </p>

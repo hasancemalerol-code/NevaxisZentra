@@ -113,3 +113,41 @@ public sealed record MixedProductionSeedResult(
     int ResourceCount,
     int EventCount,
     string Message);
+
+public sealed record MixedProductionResourceWorkspaceRow(
+    Guid ResourceId,
+    string Code,
+    string Name,
+    string ResourceType,
+    string? MachineRegistryCode,
+    Guid StationId,
+    string StationCode,
+    string StationName,
+    string StationKind,
+    Guid LineId,
+    string LineCode,
+    string LineName,
+    string AreaCode,
+    string State,
+    string? OperationCode,
+    string? OperatorCode,
+    string? OrderReference,
+    int GoodCount,
+    int RejectCount,
+    int? BufferQuantity,
+    int? BufferCapacity,
+    bool IsStarved,
+    bool IsBlocked);
+
+public sealed record MixedProductionResourceWorkspaceStatusSummary(
+    int Total,
+    int Running,
+    int Idle,
+    int Waiting,
+    int Stopped,
+    int Fault,
+    int AtRisk);
+
+public sealed record MixedProductionResourceWorkspacePayload(
+    IReadOnlyList<MixedProductionResourceWorkspaceRow> Resources,
+    MixedProductionResourceWorkspaceStatusSummary Status);

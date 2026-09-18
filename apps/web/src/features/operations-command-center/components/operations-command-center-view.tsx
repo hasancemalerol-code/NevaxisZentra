@@ -253,7 +253,7 @@ export function OperationsCommandCenterView({
             <option value="material">Malzeme</option>
             <option value="procurement">Satın alma</option>
             <option value="commercial">Ticari zekâ</option>
-            <option value="ai-task">AI Görev</option>
+            <option value="ai-task">Görev</option>
           </select>
         </label>
         <label className="commint-filter-field">

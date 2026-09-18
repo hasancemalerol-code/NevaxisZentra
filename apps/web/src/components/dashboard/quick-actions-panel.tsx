@@ -26,8 +26,8 @@ type QuickAction = Readonly<{
 
 const quickActions: readonly QuickAction[] = [
   {
-    label: "AI Görevi",
-    description: "AI görevlerini incele",
+    label: "Görev",
+    description: "Bekleyen görevleri incele",
     href: "/",
     icon: Bot,
     tone: "blue",

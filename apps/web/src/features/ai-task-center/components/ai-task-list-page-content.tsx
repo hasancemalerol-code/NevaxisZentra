@@ -4,7 +4,6 @@ import {
   BookOpen,
   Plus,
   RefreshCw,
-  Sparkles,
   Workflow,
 } from "lucide-react";
 
@@ -24,6 +23,11 @@ import {
   parseAiTaskCenterView,
 } from "@/features/ai-task-center/domain/ai-task-center-item";
 import { refreshAiTaskWorkspaceAction } from "@/features/ai-task-center/server/ai-task-actions";
+import {
+  TASK_CENTER_CREATE_ACTION,
+  TASK_CENTER_PRODUCT_DESCRIPTION,
+  TASK_CENTER_PRODUCT_NAME,
+} from "@/features/ai-task-center/domain/ai-task-product-labels";
 import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-task-center-queries";
 
 type AiTaskListPageContentProps = Readonly<{
@@ -60,15 +64,15 @@ export async function AiTaskListPageContent({
     return (
       <PageContent>
         <PageHeader
-          description="AI destekli birleşik görev ve aksiyon yönetimi"
-          eyebrow="AI Görev Merkezi"
-          title="AI Görev Merkezi"
+          description={TASK_CENTER_PRODUCT_DESCRIPTION}
+          eyebrow={TASK_CENTER_PRODUCT_NAME}
+          title={TASK_CENTER_PRODUCT_NAME}
         />
 
         <EmptyState
           data-testid="ai-task-center-list-error"
           description={result.message}
-          title="AI Görev Merkezi yüklenemedi"
+          title={`${TASK_CENTER_PRODUCT_NAME} yüklenemedi`}
         />
       </PageContent>
     );
@@ -88,7 +92,7 @@ export async function AiTaskListPageContent({
               >
                 <Plus aria-hidden="true" />
                 <span>
-                  <strong>AI&apos;ya Görev Ver</strong>
+                  <strong>{TASK_CENTER_CREATE_ACTION}</strong>
                   <small>Yeni taslak görev oluştur</small>
                 </span>
               </Link>
@@ -113,9 +117,9 @@ export async function AiTaskListPageContent({
             <RefreshButton />
           </>
         }
-        description="AI destekli birleşik görev ve aksiyon yönetimi"
-        eyebrow="AI Görev Merkezi"
-        title="AI Görev Merkezi"
+        description={TASK_CENTER_PRODUCT_DESCRIPTION}
+        eyebrow={TASK_CENTER_PRODUCT_NAME}
+        title={TASK_CENTER_PRODUCT_NAME}
       />
 
       {center.canReadTasks ? (
@@ -126,9 +130,8 @@ export async function AiTaskListPageContent({
 
       <Section
         action={
-          <Badge tone="ai">
-            <Sparkles aria-hidden="true" />
-            Human-in-the-Loop
+          <Badge tone="neutral">
+            İnsan onayı
           </Badge>
         }
         description="Görevleri, onayları, vardiya teslimlerini ve etiketlemeleri tek merkezden inceleyin."

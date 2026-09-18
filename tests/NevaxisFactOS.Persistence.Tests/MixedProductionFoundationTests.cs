@@ -416,6 +416,20 @@ public sealed class MixedProductionTenantIsolationTests
     }
 }
 
+public sealed class MixedProductionResourceWorkspaceTests
+{
+    [Fact]
+    public void ResourceWorkspacePayloadDefaultsToEmptyCollections()
+    {
+        var payload = new MixedProductionResourceWorkspacePayload(
+            [],
+            new MixedProductionResourceWorkspaceStatusSummary(0, 0, 0, 0, 0, 0, 0));
+
+        Assert.Empty(payload.Resources);
+        Assert.Equal(0, payload.Status.Total);
+    }
+}
+
 public sealed class MixedProductionInjectionCompatibilityTests
 {
     [Fact]

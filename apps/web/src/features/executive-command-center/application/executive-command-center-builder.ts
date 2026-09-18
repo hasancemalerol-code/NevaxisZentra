@@ -2,6 +2,7 @@ import type { DigitalWorkActivityApiSummary, DigitalWorkApprovalApiSummary, Digi
 import type { FactoryDecisionCaseQueueItemApi, FactoryDecisionCenterWorkspaceApi, FactoryDecisionEarlyWarningCardApi } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import type { RawAiTaskSummary } from "@/features/ai-task-center/server/ai-task-api-client";
 import { isAiTaskFinalStatus, type AiTaskStatus } from "@/features/ai-task-center/domain/ai-task";
+import { TASK_CENTER_DRILL_DOWN_LABEL } from "@/features/ai-task-center/domain/ai-task-product-labels";
 import type { ThroughputOptimizerExecutiveSummaryApi } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
 
 import {
@@ -219,7 +220,7 @@ export function buildExecutiveOutcomeCards(
       detail: "İnsan incelemesi gerektiren görevler",
       tone: openAiTasks > 0 ? "warning" : "neutral",
       drillDownHref: AI_TASKS_PATH,
-      drillDownLabel: "AI Görev Merkezi",
+      drillDownLabel: TASK_CENTER_DRILL_DOWN_LABEL,
     },
   ];
 }
