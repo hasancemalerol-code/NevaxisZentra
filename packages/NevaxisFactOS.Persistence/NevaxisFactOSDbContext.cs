@@ -56,6 +56,7 @@ using NevaxisFactOS.Persistence.ContextKnowledge;
 using NevaxisFactOS.Persistence.ModelGateway;
 using NevaxisFactOS.Persistence.ThroughputOptimizer;
 using NevaxisFactOS.Persistence.RealFactoryPilot;
+using NevaxisFactOS.Persistence.BulkDataOnboarding;
 
 namespace NevaxisFactOS.Persistence;
 
@@ -441,6 +442,14 @@ public sealed class NevaxisFactOSDbContext : DbContext
     public DbSet<RealFactoryShadowAccuracyRecord> RealFactoryShadowAccuracyRecords => Set<RealFactoryShadowAccuracyRecord>();
     public DbSet<Mp2CalibrationVersionRecord> Mp2CalibrationVersionRecords => Set<Mp2CalibrationVersionRecord>();
     public DbSet<RealFactoryPilotEvidencePackRecord> RealFactoryPilotEvidencePackRecords => Set<RealFactoryPilotEvidencePackRecord>();
+
+    public DbSet<BulkDataImportJob> BulkDataImportJobs => Set<BulkDataImportJob>();
+    public DbSet<FactoryDataMappingProfile> FactoryDataMappingProfiles => Set<FactoryDataMappingProfile>();
+    public DbSet<BulkImportSourceCatalogEntry> BulkImportSourceCatalogEntries => Set<BulkImportSourceCatalogEntry>();
+    public DbSet<BulkImportStagingRecord> BulkImportStagingRecords => Set<BulkImportStagingRecord>();
+    public DbSet<BulkImportQuarantineRecord> BulkImportQuarantineRecords => Set<BulkImportQuarantineRecord>();
+    public DbSet<BulkImportLineageRecord> BulkImportLineageRecords => Set<BulkImportLineageRecord>();
+    public DbSet<BulkImportEntityMutation> BulkImportEntityMutations => Set<BulkImportEntityMutation>();
 
     public DbSet<FactoryShiftHandover> ShiftHandovers => Set<FactoryShiftHandover>();
     public DbSet<ShiftHandoverItem> ShiftHandoverItems => Set<ShiftHandoverItem>();
@@ -3456,6 +3465,41 @@ public sealed class NevaxisFactOSDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new RealFactoryPilotEvidencePackRecordConfiguration());
         modelBuilder.Entity<RealFactoryPilotEvidencePackRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkDataImportJobConfiguration());
+        modelBuilder.Entity<BulkDataImportJob>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new FactoryDataMappingProfileConfiguration());
+        modelBuilder.Entity<FactoryDataMappingProfile>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkImportSourceCatalogEntryConfiguration());
+        modelBuilder.Entity<BulkImportSourceCatalogEntry>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkImportStagingRecordConfiguration());
+        modelBuilder.Entity<BulkImportStagingRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkImportQuarantineRecordConfiguration());
+        modelBuilder.Entity<BulkImportQuarantineRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkImportLineageRecordConfiguration());
+        modelBuilder.Entity<BulkImportLineageRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new BulkImportEntityMutationConfiguration());
+        modelBuilder.Entity<BulkImportEntityMutation>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
     }

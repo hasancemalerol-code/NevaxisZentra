@@ -19,7 +19,6 @@ using NevaxisFactOS.Persistence.GoldenDemoP2;
 using NevaxisFactOS.Persistence.GoldenDemoP2B;
 using NevaxisFactOS.Persistence.GoldenDemoP3;
 using NevaxisFactOS.Persistence.GoldenDemoCustomsFile;
-
 namespace NevaxisFactOS.Persistence;
 
 public static class PersistenceServiceCollectionExtensions

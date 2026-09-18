@@ -353,6 +353,12 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         permissionKey: "integration.read",
       },
       {
+        label: "Veri Aktarım Merkezi",
+        href: "/ayarlar/veri-aktarim-merkezi",
+        iconKey: "boxes",
+        permissionKey: "bulk-onboarding.read",
+      },
+      {
         label: "Sistem Durumu",
         href: "/ayarlar/sistem-durumu",
         iconKey: "activity",
