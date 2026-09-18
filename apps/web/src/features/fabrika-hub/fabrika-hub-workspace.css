@@ -1,0 +1,30 @@
+.fabrika-hub-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.fabrika-hub-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--fact-border);
+  background: var(--fact-surface-elevated);
+}
+
+.fabrika-hub-card h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.fabrika-hub-card p {
+  margin: 0 0 6px;
+  color: var(--color-text-muted);
+  font-size: var(--fact-text-meta);
+}
+
+.fabrika-hub-card span {
+  font-size: var(--fact-text-meta);
+  font-weight: 600;
+}

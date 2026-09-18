@@ -17,6 +17,7 @@ import {
 } from "@/features/saas-subscription/server/require-subscription-access";
 import {
   buildShellSearchItems,
+  resolvePermissionAwareAppsCatalog,
   resolvePermissionAwareNavigation,
   resolveSettingsHref,
 } from "@/lib/navigation/navigation-visibility";
@@ -93,7 +94,14 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     return <FactoryShowcaseShell>{children}</FactoryShowcaseShell>;
   }
 
-  const navigation = await resolvePermissionAwareNavigation();
+  const [navigation, appsCatalog] = await Promise.all([
+    resolvePermissionAwareNavigation(pathname),
+    resolvePermissionAwareAppsCatalog(),
+  ]);
+  const searchNavigation = [
+    ...navigation,
+    ...appsCatalog.map((group) => ({ ...group, label: `Uygulamalar · ${group.label}` })),
+  ];
 
   return (
     <AppShellFrame
@@ -102,8 +110,8 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
       navigation={navigation}
       notificationsSlot={<NotificationsControlServer />}
       organizationLabel={organizationLabel}
-      searchItems={buildShellSearchItems(navigation)}
-      settingsHref={resolveSettingsHref(navigation)}
+      searchItems={buildShellSearchItems(searchNavigation)}
+      settingsHref={resolveSettingsHref([...navigation, ...appsCatalog])}
       subscriptionGraceWarning={resolveSubscriptionGraceBanner(subscriptionAccess)}
     >
       {children}

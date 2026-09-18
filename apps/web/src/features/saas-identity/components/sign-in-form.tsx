@@ -145,7 +145,7 @@ export function SignInForm({
         router.push(
           isSafeAppReturnUrl(requestedReturnUrl)
             ? requestedReturnUrl
-            : "/dashboard",
+            : "/",
         );
         router.refresh();
       } catch {

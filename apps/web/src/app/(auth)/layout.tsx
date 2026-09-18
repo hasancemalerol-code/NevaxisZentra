@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { FactosAuthHero } from "@/components/brand/factos-auth-hero";
 import { getWebApplicationConfig } from "@/config";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
+import { resolvePostAuthLandingPath } from "@/lib/navigation/resolve-post-auth-landing";
 
 import "./auth.css";
 
@@ -15,7 +16,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
   const session = await resolveSaasIdentitySession();
 
   if (session.status === "authenticated") {
-    redirect("/dashboard");
+    redirect(await resolvePostAuthLandingPath());
   }
 
   const config = getWebApplicationConfig();

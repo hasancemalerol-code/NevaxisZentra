@@ -59,7 +59,7 @@ function readIncomingCookie(request: Request, name: string): string | null {
 export async function POST(request: Request): Promise<NextResponse> {
   const session = await resolveSaasIdentitySession();
   if (session.status === "authenticated") {
-    return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+    return NextResponse.redirect(new URL("/", request.url), 303);
   }
 
   const config = resolveSaasIdentityRuntimeConfig();

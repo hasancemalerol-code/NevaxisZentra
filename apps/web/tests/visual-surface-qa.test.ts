@@ -8,7 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
-import { primaryNavigation } from "../src/lib/navigation/primary-navigation";
+import { workflowNavigationFixture } from "./fixtures/workflow-navigation-fixture";
 
 const WEB_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT_DIR = resolve(WEB_ROOT, ".visual-qa");
@@ -209,8 +209,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
 
   const navigationShell = renderToStaticMarkup(
     createElement(AppShellFrame, {
-      navigation: primaryNavigation,
-      searchItems: buildShellSearchItems(primaryNavigation),
+      navigation: workflowNavigationFixture,
+      searchItems: buildShellSearchItems(workflowNavigationFixture),
       children: createElement("p", null, "Visual QA content"),
     }),
   );

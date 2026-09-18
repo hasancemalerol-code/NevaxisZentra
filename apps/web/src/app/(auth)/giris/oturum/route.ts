@@ -109,7 +109,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   if (outcome === "authenticated") {
-    return safeRedirect(request, returnUrl ?? "/dashboard", setCookies);
+    return safeRedirect(request, returnUrl ?? "/", setCookies);
   }
 
   return deniedSignInRedirect(request, returnUrl);

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 
+import { FactoryContextBreadcrumb } from "@/components/workspace/factory-context-breadcrumb";
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { EventTimeline } from "@/components/workspace/event-timeline";
 import { LineTopology } from "@/components/workspace/line-topology";
@@ -80,10 +79,12 @@ export function MixedProductionLineDetailView({ detail, playback, throughput, co
         title={line.name}
         meta={`${line.code} · ${line.currentProductCode ?? "—"} · ${line.currentOrderReference ?? "—"} · Vardiya ${line.currentShiftCode ?? "—"}`}
         breadcrumb={
-          <Link href="/uretim/hatlar">
-            <ArrowLeft aria-hidden="true" size={14} />
-            Hatlar
-          </Link>
+          <FactoryContextBreadcrumb
+            segments={[
+              { label: "Hatlar", href: "/uretim/hatlar" },
+              { label: line.name },
+            ]}
+          />
         }
       />
 

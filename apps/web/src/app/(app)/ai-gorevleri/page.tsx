@@ -1,5 +1,12 @@
-import { AiTaskListPageContent } from "@/features/ai-task-center/components/ai-task-list-page-content";
+import { redirect } from "next/navigation";
 
-export default function AiTaskListPage() {
-  return <AiTaskListPageContent />;
+import { buildCanonicalTaskCenterRedirect } from "@/lib/navigation/legacy-task-routes";
+
+type AiTaskLegacyListPageProps = Readonly<{
+  searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}>;
+
+export default async function AiTaskLegacyListPage({ searchParams }: AiTaskLegacyListPageProps) {
+  const params = await searchParams;
+  redirect(buildCanonicalTaskCenterRedirect(params));
 }

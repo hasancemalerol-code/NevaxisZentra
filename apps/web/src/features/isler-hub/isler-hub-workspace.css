@@ -1,0 +1,30 @@
+.isler-hub-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.isler-hub-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--fact-border);
+  background: var(--fact-surface-elevated);
+}
+
+.isler-hub-card h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.isler-hub-card p {
+  margin: 0 0 6px;
+  color: var(--color-text-muted);
+  font-size: var(--fact-text-meta);
+}
+
+.isler-hub-card span {
+  font-size: var(--fact-text-meta);
+  font-weight: 600;
+}

@@ -11,6 +11,8 @@ import { Sidebar } from "../src/components/app-shell/sidebar";
 import { KpiCard } from "../src/components/ui/card";
 import { PageHeader } from "../src/components/ui/page";
 import { navigationItems, primaryNavigation } from "../src/lib/navigation/primary-navigation";
+import { WORKFLOW_PRIMARY_HOMES } from "../src/lib/navigation/workflow-primary-navigation";
+import { workflowNavigationFixture } from "./fixtures/workflow-navigation-fixture";
 
 test("renders the AI task center home without implying live operational data", async () => {
   const { AiTaskListPageContent } = await import(
@@ -40,76 +42,39 @@ test("app shell renders landmarks, skip link, top bar, and content viewport", ()
   assert.match(markup, /<main class="content-viewport" id="main-content"/);
 });
 
-test("sidebar renders the exact locked navigation and marks AI Task Center active", () => {
+test("sidebar renders workflow-first primary navigation and marks Bugün active", () => {
   const markup = renderToStaticMarkup(
-    <Sidebar pathname="/" collapsed={false} onToggle={() => undefined} navigation={primaryNavigation} />,
+    <Sidebar pathname="/" collapsed={false} onToggle={() => undefined} navigation={workflowNavigationFixture} />,
   );
 
-  for (const item of navigationItems) {
+  for (const item of WORKFLOW_PRIMARY_HOMES) {
     const escapedLabel = item.label
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       .replaceAll("&", "&amp;");
     assert.match(markup, new RegExp(escapedLabel));
   }
+
+  assert.equal(WORKFLOW_PRIMARY_HOMES.length, 5);
   assert.equal(navigationItems.length, 53);
   assert.ok(
     navigationItems.some(
       (item) => item.label === "Fabrika Karar Merkezi" && item.href === "/fabrika-karar-merkezi",
     ),
   );
-  assert.ok(
-    navigationItems.some(
-      (item) =>
-        item.label === "Sunum Modu"
-        && item.href === "/sunum-modu"
-        && item.permissionKey === "presentation-mode.access",
-    ),
-  );
-  assert.ok(
-    !navigationItems.some((item) => item.label.startsWith("Altın Demo")),
-  );
-  assert.ok(
-    navigationItems.some(
-      (item) => item.label === "Fabrika Ağı" && item.href === "/fabrika-agi",
-    ),
-  );
-  assert.ok(
-    navigationItems.some(
-      (item) => item.label === "İhracat" && item.href === "/ihracat",
-    ),
-  );
-  assert.ok(
-    navigationItems.some(
-      (item) => item.label === "Üretim Kaynakları" && item.href === "/uretim/kaynaklar",
-    ),
-  );
-  assert.ok(
-    navigationItems.some(
-      (item) => item.label === "Görev Merkezi" && item.href === "/",
-    ),
-  );
-  assert.match(markup, /navigation-label">İhracat</);
-  assert.match(markup, /href="\/ihracat"/);
   assert.match(markup, /aria-current="page"[^>]*href="\/"/);
-  assert.doesNotMatch(markup, />Finance</i);
-  assert.doesNotMatch(markup, />Accounting</i);
-  assert.doesNotMatch(markup, />Payroll</i);
-  assert.doesNotMatch(markup, />Official Stock/i);
+  assert.doesNotMatch(markup, /navigation-label">Operasyon Merkezi</);
 });
 
 test("collapsed sidebar preserves accessible labels and expandable control", () => {
   const markup = renderToStaticMarkup(
-    <Sidebar pathname="/dashboard" collapsed onToggle={() => undefined} navigation={primaryNavigation} />,
+    <Sidebar pathname="/fabrika" collapsed onToggle={() => undefined} navigation={workflowNavigationFixture} />,
   );
 
   assert.match(markup, /data-collapsed="true"/);
   assert.match(markup, /aria-label="Kenar çubuğunu genişlet"/);
   assert.match(markup, /aria-expanded="false"/);
-  assert.match(markup, /title="Görev Merkezi"/);
-  assert.match(
-    markup,
-    /aria-current="page"[^>]*title="Operasyon Merkezi"[^>]*href="\/dashboard"|aria-current="page"[^>]*href="\/dashboard"[^>]*title="Operasyon Merkezi"/,
-  );
+  assert.match(markup, /title="Fabrika"/);
+  assert.match(markup, /aria-current="page"[^>]*href="\/fabrika"/);
 });
 
 test("page header and KPI variants render typed foundational treatments", () => {

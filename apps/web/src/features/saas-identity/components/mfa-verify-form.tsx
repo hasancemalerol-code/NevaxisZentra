@@ -44,7 +44,7 @@ export function MfaVerifyForm() {
         return;
       }
 
-      window.location.assign("/dashboard");
+      window.location.assign("/");
     },
     [mode, recoveryCode, totpCode],
   );
