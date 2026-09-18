@@ -1,0 +1,147 @@
+.live-plan-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.live-plan-workspace__layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(280px, 340px);
+  gap: 12px;
+  align-items: start;
+  min-width: 0;
+}
+
+.live-plan-workspace__panel {
+  border: 1px solid var(--fact-border);
+  background: var(--fact-surface-elevated);
+  min-width: 0;
+}
+
+.live-plan-workspace__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--fact-border);
+}
+
+.live-plan-workspace__panel-header h2 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.live-plan-workspace__panel-body {
+  padding: 10px 12px;
+}
+
+.live-plan-navigator__search {
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--fact-border);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.live-plan-navigator__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
+.live-plan-navigator__button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.live-plan-navigator__button:hover {
+  background: var(--fact-surface-muted);
+}
+
+.live-plan-navigator__button[data-active="true"] {
+  border-color: var(--fact-accent);
+  background: color-mix(in srgb, var(--fact-accent) 8%, transparent);
+}
+
+.live-plan-navigator__meta {
+  color: var(--fact-text-secondary);
+  font-size: 0.72rem;
+}
+
+.live-plan-line-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--fact-border);
+}
+
+.live-plan-line-button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.live-plan-line-button[data-active="true"] {
+  border-color: var(--fact-border-strong);
+  background: var(--fact-surface-muted);
+}
+
+.live-plan-inspector__section {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.live-plan-inspector__section h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fact-text-secondary);
+}
+
+.live-plan-inspector__metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 1200px) {
+  .live-plan-workspace__layout {
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 1.4fr);
+  }
+
+  .live-plan-workspace__panel--inspector {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .live-plan-workspace__layout {
+    grid-template-columns: 1fr;
+  }
+}

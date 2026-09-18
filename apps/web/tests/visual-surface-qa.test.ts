@@ -202,6 +202,7 @@ const css = readCss([
   "src/app/globals.css",
   "src/features/production-resources/components/production-resources-workspace.css",
   "src/features/factory-workspace/factory-workspace.css",
+  "src/features/live-plan-workspace/live-plan-workspace.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -221,6 +222,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
   const { chromium } = await import("playwright");
 
   const navigationShell = renderToStaticMarkup(
+    // eslint-disable-next-line react/no-children-prop -- AppShellFrame typing requires children on props for renderToStaticMarkup
     createElement(AppShellFrame, {
       navigation: workflowNavigationFixture,
       searchItems: buildShellSearchItems(workflowNavigationFixture),
@@ -256,10 +258,21 @@ test("browser visual QA for critical industrial surfaces", async () => {
 
   const factoryWorkspace = renderFactoryWorkspaceHtml();
 
+  const livePlanWorkspace = `<main class="fact-workspace live-plan-workspace" data-testid="live-plan-workspace">
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">PLAN</p><h1 class="fact-workspace__title">Bugün ne üretilecek?</h1></div></header>
+    <div class="fact-status-strip"><div class="fact-status-strip__item"><span class="fact-status-strip__label">Toplam plan</span><span class="fact-status-strip__value">3</span></div></div>
+    <div class="live-plan-workspace__layout">
+      <aside class="live-plan-workspace__panel" data-testid="live-plan-navigator"><div class="live-plan-workspace__panel-body"><ul class="live-plan-navigator__list"><li><a class="live-plan-navigator__button" data-active="true"><strong>PLN-001</strong></a></li></ul></div></aside>
+      <section class="live-plan-workspace__panel" data-testid="live-plan-operational-center"><table class="fact-data-grid"><thead><tr><th>Operasyon</th></tr></thead><tbody><tr><td>INJ</td></tr></tbody></table></section>
+      <aside class="live-plan-workspace__panel live-plan-workspace__panel--inspector" data-testid="live-plan-scheduling-inspector"><div class="fact-context-panel"><header class="fact-context-panel__header">Planlama Zekâsı</header></div></aside>
+    </div>
+  </main>`;
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
     { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
+    { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
     { id: "production-resources", title: "Üretim Kaynakları", html: productionResources },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
   ] as const;
@@ -300,6 +313,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "navigation-sidebar" && !metrics.sidebarVisible) score -= 1.0;
       if (surface.id === "factory-workspace" && !metrics.hasTable) score -= 0.3;
       if (surface.id === "factory-workspace" && !metrics.hasInspector) score -= 0.3;
+      if (surface.id === "live-plan-workspace" && !metrics.hasTable) score -= 0.3;
+      if (surface.id === "live-plan-workspace" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "production-resources" && !metrics.hasTable) score -= 0.5;
       if (surface.id === "production-resources" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "task-center" && !metrics.hasTable) score -= 0.3;

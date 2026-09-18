@@ -59,7 +59,7 @@ const PLAN_CONTEXT: ContextualNavigationSection = {
   homeId: "plan",
   label: "Plan",
   items: [
-    { label: "Planlama", href: "/planlama", iconKey: "calendar-range", subscriptionModulePath: "/planlama" },
+    { label: "Canlı Plan", href: "/planlama", iconKey: "calendar-range", subscriptionModulePath: "/planlama", exact: true },
     { label: "Fabrika Ağı", href: "/fabrika-agi", iconKey: "factory", permissionKey: "factory-network.read", subscriptionModulePath: "/planlama" },
     { label: "Siparişler (Önizleme)", href: "/siparisler", iconKey: "shopping-basket", subscriptionModulePath: "/siparisler" },
   ],

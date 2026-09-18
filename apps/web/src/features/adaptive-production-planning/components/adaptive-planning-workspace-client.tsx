@@ -2,7 +2,7 @@
 
 import "./adaptive-planning.css";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { CheckCircle2, PlayCircle, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +54,8 @@ type WorkspaceTabId = (typeof WORKSPACE_TABS)[number]["id"];
 type AdaptivePlanningWorkspaceClientProps = Readonly<{
   workspace: AdaptivePlanningWorkspaceApi;
   replanEvaluation: ReplanEvaluationResultApi | null;
+  initialTab?: WorkspaceTabId;
+  onTabChange?: (tab: WorkspaceTabId) => void;
 }>;
 
 type ParsedDiffRow = Readonly<{
@@ -132,8 +134,19 @@ function buildGanttRows(operations: readonly AdaptivePlanningOperationApi[]) {
 export function AdaptivePlanningWorkspaceClient({
   workspace,
   replanEvaluation,
+  initialTab = "summary",
+  onTabChange,
 }: AdaptivePlanningWorkspaceClientProps) {
-  const [activeTab, setActiveTab] = useState<WorkspaceTabId>("summary");
+  const [activeTab, setActiveTab] = useState<WorkspaceTabId>(initialTab);
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
+  function selectTab(tab: WorkspaceTabId) {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  }
+
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -199,7 +212,7 @@ export function AdaptivePlanningWorkspaceClient({
             role="tab"
             aria-selected={activeTab === tab.id}
             className={`adaptive-planning-workspace__tab${activeTab === tab.id ? " adaptive-planning-workspace__tab--active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => selectTab(tab.id)}
           >
             {tab.label}
           </button>
