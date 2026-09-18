@@ -201,8 +201,21 @@ const css = readCss([
   "src/design-system/industrial-hardening.css",
   "src/app/globals.css",
   "src/features/production-resources/components/production-resources-workspace.css",
+  "src/features/factory-workspace/factory-workspace.css",
   "src/app/dashboard-premium.css",
 ]);
+
+function renderFactoryWorkspaceHtml(): string {
+  return `<main class="fact-workspace factory-workspace" data-testid="factory-workspace">
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">FABRİKA</p><h1 class="fact-workspace__title">Fabrikada şu anda ne oluyor?</h1></div></header>
+    <div class="fact-status-strip"><div class="fact-status-strip__item"><span class="fact-status-strip__label">Çalışan kaynak</span><span class="fact-status-strip__value">1</span></div></div>
+    <div class="factory-workspace__layout">
+      <aside class="factory-workspace__panel"><div class="factory-workspace__panel-body"><ul class="factory-hierarchy-tree" data-testid="factory-hierarchy-tree"><li><button class="factory-hierarchy-tree__button" data-active="true"><strong>MIX-01</strong></button></li></ul></div></aside>
+      <section class="factory-workspace__panel" data-testid="factory-line-view"><div class="fact-line-topology"><button type="button" class="fact-station-row" data-selected="true"><span class="fact-station-row__code">INJ-ST-01</span></button></div><table class="fact-data-grid"><thead><tr><th>Olay</th><th>Özet</th></tr></thead><tbody><tr><td>StateChange</td><td>Hat çalışıyor</td></tr></tbody></table></section>
+      <aside class="factory-workspace__panel factory-workspace__panel--inspector" data-testid="factory-resource-inspector"><div class="fact-context-panel"><header class="fact-context-panel__header">Kimlik</header></div></aside>
+    </div>
+  </main>`;
+}
 
 test("browser visual QA for critical industrial surfaces", async () => {
   const { chromium } = await import("playwright");
@@ -241,9 +254,12 @@ test("browser visual QA for critical industrial surfaces", async () => {
     ),
   );
 
+  const factoryWorkspace = renderFactoryWorkspaceHtml();
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
+    { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
     { id: "production-resources", title: "Üretim Kaynakları", html: productionResources },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
   ] as const;
@@ -282,6 +298,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (metrics.overflowX > 2) score -= 0.8;
       if (metrics.clippedNav) score -= 0.4;
       if (surface.id === "navigation-sidebar" && !metrics.sidebarVisible) score -= 1.0;
+      if (surface.id === "factory-workspace" && !metrics.hasTable) score -= 0.3;
+      if (surface.id === "factory-workspace" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "production-resources" && !metrics.hasTable) score -= 0.5;
       if (surface.id === "production-resources" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "task-center" && !metrics.hasTable) score -= 0.3;
