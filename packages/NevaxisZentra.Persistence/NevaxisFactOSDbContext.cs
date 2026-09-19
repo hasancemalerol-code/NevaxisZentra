@@ -55,6 +55,7 @@ using NevaxisZentra.Persistence.ThroughputIntelligence;
 using NevaxisZentra.Persistence.ContextKnowledge;
 using NevaxisZentra.Persistence.ModelGateway;
 using NevaxisZentra.Persistence.ThroughputOptimizer;
+using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.RealFactoryPilot;
 using NevaxisZentra.Persistence.BulkDataOnboarding;
 
@@ -433,6 +434,11 @@ public sealed class NevaxisZentraDbContext : DbContext
     public DbSet<ThroughputOptimizerRunRecord> ThroughputOptimizerRunRecords => Set<ThroughputOptimizerRunRecord>();
     public DbSet<VerifiedImprovementRecord> VerifiedImprovementRecords => Set<VerifiedImprovementRecord>();
     public DbSet<VerifiedTrainingDatasetCandidateRecord> VerifiedTrainingDatasetCandidateRecords => Set<VerifiedTrainingDatasetCandidateRecord>();
+
+    public DbSet<ScenarioRecoveryRunRecord> ScenarioRecoveryRunRecords => Set<ScenarioRecoveryRunRecord>();
+    public DbSet<ScenarioRecoveryOptionRecord> ScenarioRecoveryOptionRecords => Set<ScenarioRecoveryOptionRecord>();
+    public DbSet<ScenarioRecoveryPredictionAccuracyRecord> ScenarioRecoveryPredictionAccuracyRecords =>
+        Set<ScenarioRecoveryPredictionAccuracyRecord>();
 
     public DbSet<RealFactoryPilotRunRecord> RealFactoryPilotRunRecords => Set<RealFactoryPilotRunRecord>();
     public DbSet<RealFactoryFieldMappingRecord> RealFactoryFieldMappingRecords => Set<RealFactoryFieldMappingRecord>();
@@ -3425,6 +3431,21 @@ public sealed class NevaxisZentraDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new VerifiedTrainingDatasetCandidateRecordConfiguration());
         modelBuilder.Entity<VerifiedTrainingDatasetCandidateRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ScenarioRecoveryRunRecordConfiguration());
+        modelBuilder.Entity<ScenarioRecoveryRunRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ScenarioRecoveryOptionRecordConfiguration());
+        modelBuilder.Entity<ScenarioRecoveryOptionRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ScenarioRecoveryPredictionAccuracyRecordConfiguration());
+        modelBuilder.Entity<ScenarioRecoveryPredictionAccuracyRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
 

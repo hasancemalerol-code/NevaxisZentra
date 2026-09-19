@@ -105,6 +105,18 @@ export async function readBugunWorkspace(): Promise<BugunWorkspaceResult> {
             category: "Kurtarma",
           });
         }
+
+        if (hasGrantedPermission(access, "scenario-recovery.read")
+          && workspace.summary.recoveryOperations > 0) {
+          attentionItems.push({
+            id: "scenario-recovery-evaluate",
+            title: "Kurtarma seçeneklerini değerlendir",
+            summary: "Operasyonel kurtarma senaryolarını karşılaştırın.",
+            href: "/senaryo-kurtarma?entryPoint=BUGUN",
+            tone: "warning",
+            category: "Senaryo",
+          });
+        }
       }
     }
   }

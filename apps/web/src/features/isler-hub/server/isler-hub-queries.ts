@@ -85,5 +85,14 @@ export async function readIslerHubWorkspace(): Promise<IslerHubWorkspace> {
     metric: "İşbirliği",
   });
 
+  if (hasGrantedPermission(access, "scenario-recovery.read")) {
+    entries.push({
+      label: "Senaryo Kurtarma",
+      description: "Simülasyon, karşılaştırma ve doğrulanmış kurtarma geçmişi",
+      href: "/senaryo-kurtarma?entryPoint=ISLER",
+      metric: "Analiz",
+    });
+  }
+
   return { entries };
 }

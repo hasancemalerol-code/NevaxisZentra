@@ -203,6 +203,7 @@ const css = readCss([
   "src/features/production-resources/components/production-resources-workspace.css",
   "src/features/factory-workspace/factory-workspace.css",
   "src/features/live-plan-workspace/live-plan-workspace.css",
+  "src/features/scenario-recovery/scenario-recovery-workspace.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -268,11 +269,22 @@ test("browser visual QA for critical industrial surfaces", async () => {
     </div>
   </main>`;
 
+  const scenarioRecoveryWorkspace = `<main class="fact-workspace scenario-recovery-workspace" data-testid="scenario-recovery-workspace">
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">SENARYO / KURTARMA</p><h1 class="fact-workspace__title">Assembly bottleneck blocks Order 418 delivery</h1></div></header>
+    <div class="fact-status-strip"><div class="fact-status-strip__item"><span class="fact-status-strip__label">Öneri</span><span class="fact-status-strip__value">OPTION_A</span></div></div>
+    <div class="scenario-recovery-workspace__grid">
+      <aside class="scenario-recovery-workspace__left" data-testid="scenario-recovery-constraints"><div class="fact-context-panel"><header class="fact-context-panel__header">Darboğaz hareketi</header></div></aside>
+      <main class="scenario-recovery-workspace__center" data-testid="scenario-recovery-comparison"><div class="fact-scenario-compare"><article class="fact-scenario-compare__column" data-testid="scenario-option-BASELINE"><strong>BASELINE</strong></article><article class="fact-scenario-compare__column" data-testid="scenario-option-OPTION_A"><strong>OPTION_A</strong></article></div></main>
+      <aside class="scenario-recovery-workspace__right" data-testid="scenario-recovery-decision"><div class="fact-context-panel"><header class="fact-context-panel__header">Zentra önerisi</header></div></aside>
+    </div>
+  </main>`;
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
     { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
     { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
+    { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
     { id: "production-resources", title: "Üretim Kaynakları", html: productionResources },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
   ] as const;

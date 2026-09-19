@@ -10,6 +10,7 @@ import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/o
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { ThroughputIntelligencePanel } from "@/features/throughput-intelligence/components/throughput-intelligence-panel";
 import { ThroughputOptimizerPanel } from "@/features/throughput-optimizer/components/throughput-optimizer-panel";
+import { buildScenarioRecoveryHref } from "@/features/scenario-recovery/application/scenario-recovery-links";
 import type { MixedProductionStationSnapshotApi } from "@/features/mixed-production/server/mixed-production-api-client";
 import { resolveActiveSelectionKind } from "../application/factory-workspace-selection";
 import type { FactoryWorkspacePayload } from "../domain/factory-workspace-types";
@@ -213,7 +214,19 @@ export function FactoryOperationalCenter({
         <section className="fact-section">
           <header className="fact-section__header">
             <h2 className="fact-section__title">Hat topolojisi</h2>
-            <OperationalBadge label={line.lineState} status={mapOperationalStatus(line.lineState)} />
+            <div className="fact-section__actions">
+              <Link
+                href={buildScenarioRecoveryHref({
+                  lineId: line.lineId,
+                  entryPoint: "FABRIKA",
+                  constraintStationCode: workspace.throughput?.overview?.constraints?.[0]?.stationCode,
+                })}
+                data-testid="factory-simulate-recovery-link"
+              >
+                Simüle et
+              </Link>
+              <OperationalBadge label={line.lineState} status={mapOperationalStatus(line.lineState)} />
+            </div>
           </header>
           <div className="fact-section__body">
             <LineTopology
