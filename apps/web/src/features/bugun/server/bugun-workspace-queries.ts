@@ -10,6 +10,11 @@ import type { FactoryDecisionCaseQueueItemApi } from "@/features/factory-decisio
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
+import { fetchWorksWorkspace } from "@/features/works/server/works-api-client";
+import {
+  WORKS_QUEUE_PENDING_APPROVAL,
+  WORKS_QUEUE_VERIFICATION_PENDING,
+} from "@/features/works/domain/works-queues";
 import {
   resolveRoleLandingLabel,
   resolveRoleLandingProfile,
@@ -136,6 +141,41 @@ export async function readBugunWorkspace(): Promise<BugunWorkspaceResult> {
           tone: "warning",
           category: "Vardiya",
         });
+      }
+    }
+  }
+
+  if (hasGrantedPermission(access, "digital-workforce.read")) {
+    const contextResult = await resolveProductionContext();
+    if (contextResult.status === "success") {
+      try {
+        const worksSnapshot = await fetchWorksWorkspace(contextResult.context, { limit: 1 });
+        const pendingApprovalsCount = worksSnapshot.queueCounts.pendingApproval;
+        const verificationPendingCount = worksSnapshot.queueCounts.verificationPending;
+
+        if (pendingApprovalsCount > 0) {
+          attentionItems.push({
+            id: "works-pending-approval",
+            title: "Onay bekleyen işler",
+            summary: `${pendingApprovalsCount} iş insan onayı bekliyor.`,
+            href: `/isler?kuyruk=${WORKS_QUEUE_PENDING_APPROVAL}`,
+            tone: "warning",
+            category: "İş",
+          });
+        }
+
+        if (verificationPendingCount > 0) {
+          attentionItems.push({
+            id: "works-verification-pending",
+            title: "Doğrulama bekleyen işler",
+            summary: `${verificationPendingCount} iş sonuç doğrulaması bekliyor.`,
+            href: `/isler?kuyruk=${WORKS_QUEUE_VERIFICATION_PENDING}`,
+            tone: "warning",
+            category: "Doğrulama",
+          });
+        }
+      } catch {
+        // Works snapshot is optional for the Bugün attention strip.
       }
     }
   }

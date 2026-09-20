@@ -8,6 +8,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
+import { WorksWorkspaceView } from "../src/features/works/components/works-workspace-view";
+import type {
+  WorksCaseDetailSnapshot,
+  WorksListItem,
+  WorksWorkspacePagePayload,
+} from "../src/features/works/domain/works-types";
 import { workflowNavigationFixture } from "./fixtures/workflow-navigation-fixture";
 
 const WEB_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -204,8 +210,120 @@ const css = readCss([
   "src/features/factory-workspace/factory-workspace.css",
   "src/features/live-plan-workspace/live-plan-workspace.css",
   "src/features/scenario-recovery/scenario-recovery-workspace.css",
+  "src/features/works/works-workspace.css",
   "src/app/dashboard-premium.css",
 ]);
+
+const worksListItem: WorksListItem = {
+  id: "case-golden-001",
+  title: "Assembly bottleneck recovery in observation",
+  problemSummary: "MIX-LINE-01 throughput below target with Order 418 delivery risk",
+  displayState: "GÖZLEMLENİYOR",
+  priorityLabel: "Kritik",
+  workTypeLabel: "Üretim Kurtarma",
+  factoryContextLabel: "Pilot tesis · MIX-LINE-01",
+  ownerLabel: "Operasyon ekibi",
+  actingSystemLabel: "Üretim Kurtarma Dijital Çalışanı",
+  slaLabel: null,
+  hasPendingApproval: false,
+  isBlocked: false,
+  blockerLabel: null,
+  expectedImpact: "Order 418 delivery risk",
+  lastUpdateLabel: "20.09.2026 09:00",
+  updatedAtUtc: "2026-09-20T06:00:00.000Z",
+  status: "executing",
+  verificationState: "pending",
+  outcomeLabel: "",
+  severity: "high",
+  primaryDomain: "scenario-recovery",
+  concurrencyToken: 1,
+};
+
+const worksCaseDetail: WorksCaseDetailSnapshot = {
+  summary: worksListItem,
+  description: worksListItem.problemSummary,
+  impactSummary: "Order 418 delivery risk",
+  nextStepLabel: "Uygulama ilerlemesini izleyin.",
+  activeActionLabel: null,
+  pendingApproval: null,
+  blocker: null,
+  dependencies: [],
+  relatedWork: [],
+  timeline: [
+    {
+      code: "created",
+      label: "İş oluşturuldu",
+      occurredAtUtc: "2026-09-20T05:00:00.000Z",
+      detail: worksListItem.title,
+    },
+    {
+      code: "verification-completed",
+      label: "Doğrulama tamamlandı",
+      occurredAtUtc: "2026-09-20T06:30:00.000Z",
+      detail: "DOĞRULANMIŞ İYİLEŞME",
+    },
+  ],
+  verification: {
+    outcomeLabel: "DOĞRULANMIŞ İYİLEŞME",
+    beforeValue: 185,
+    afterValue: 804,
+    verificationState: "passed",
+    verifiedAtUtc: "2026-09-20T06:30:00.000Z",
+    verifiedByLabel: "Üretim Kurtarma Dijital Çalışanı",
+  },
+  scenarioContext: {
+    runId: "run-golden-001",
+    lineCode: "MIX-LINE-01",
+    currentPhase: "CLOSED",
+    selectedOptionLabel: "OPTION_B",
+    verificationOutcome: "VERIFIED_SUCCESS",
+    baselineThroughput: 185,
+    predictedThroughput: 613.34,
+    actualThroughput: 804,
+    scenarioHref: "/senaryo-kurtarma?entryPoint=ISLER&runId=run-golden-001",
+  },
+  evidence: [
+    {
+      kind: "measurement",
+      label: "Operasyon ölçümü",
+      detail: "185 → 804 GOOD/saat",
+      occurredAtUtc: "2026-09-20T06:30:00.000Z",
+    },
+  ],
+  permittedActions: ["open-factory-context", "open-scenario"],
+  factoryHref: "/fabrika",
+  planHref: null,
+  scenarioHref: "/senaryo-kurtarma?entryPoint=ISLER&runId=run-golden-001",
+  digitalWorkforceHref: "/dijital-is-gucu/worker?case=case-golden-001",
+};
+
+const worksPage: WorksWorkspacePagePayload = {
+  workspace: {
+    queueCounts: {
+      assigned: 1,
+      team: 4,
+      pendingApproval: 1,
+      critical: 2,
+      blocked: 1,
+      inProgress: 3,
+      observing: 1,
+      verificationPending: 1,
+      completedToday: 2,
+    },
+    items: [worksListItem],
+    activeQueue: "team",
+    totalCount: 4,
+  },
+  caseDetail: worksCaseDetail,
+  canDecideApproval: true,
+  initialQueue: "team",
+  selectedCaseId: worksListItem.id,
+  search: "",
+};
+
+function renderWorksWorkspaceHtml(): string {
+  return renderToStaticMarkup(createElement(WorksWorkspaceView, { page: worksPage }));
+}
 
 function renderFactoryWorkspaceHtml(): string {
   return `<main class="fact-workspace factory-workspace" data-testid="factory-workspace">
@@ -282,6 +400,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
+    { id: "works-workspace", title: "İşler Çalışma Alanı", html: renderWorksWorkspaceHtml() },
     { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
     { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
     { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
@@ -314,8 +433,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
           overflowX,
           sidebarVisible: Boolean(sidebar && sidebar.getBoundingClientRect().width > 40),
           clippedNav,
-          hasTable: Boolean(document.body.querySelector(".fact-data-grid, .ai-task-center-unified__table")),
-          hasInspector: Boolean(document.body.querySelector(".fact-context-panel, .production-resources-inspector")),
+          hasTable: Boolean(document.body.querySelector(".fact-data-grid, .ai-task-center-unified__table, .works-table")),
+          hasInspector: Boolean(document.body.querySelector(".fact-context-panel, .production-resources-inspector, .works-inspector")),
+          hasWorksLayout: Boolean(document.body.querySelector(".works-workspace__left, .works-workspace__center, .works-workspace__right")),
         };
       });
 
@@ -330,6 +450,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "production-resources" && !metrics.hasTable) score -= 0.5;
       if (surface.id === "production-resources" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "task-center" && !metrics.hasTable) score -= 0.3;
+      if (surface.id === "works-workspace" && !metrics.hasTable) score -= 0.5;
+      if (surface.id === "works-workspace" && !metrics.hasInspector) score -= 0.5;
+      if (surface.id === "works-workspace" && !metrics.hasWorksLayout) score -= 0.8;
       score = Math.max(0, Math.min(10, Number(score.toFixed(1))));
       scores.push(score);
 
@@ -369,4 +492,33 @@ test("browser visual QA for critical industrial surfaces", async () => {
   assert.equal(viewportPass["1366"], true, "1366 visual QA failed");
   assert.ok(Math.round(productWide * 100) / 100 >= 9.6, `product-wide score ${productWide.toFixed(2)} below 9.6`);
   assert.ok(Math.min(...scores) >= 9.3, `lowest score ${Math.min(...scores)} below 9.3`);
+});
+
+test("works workspace tablet width keeps list and inspector usable", async () => {
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.setContent(buildHtmlDocument(renderWorksWorkspaceHtml(), css), { waitUntil: "networkidle" });
+
+  const metrics = await page.evaluate(() => {
+    const doc = document.documentElement;
+    return {
+      overflowX: doc.scrollWidth - doc.clientWidth,
+      hasWorkspace: Boolean(document.body.querySelector('[data-testid="works-workspace"]')),
+      hasList: Boolean(document.body.querySelector('[data-testid="works-list-panel"]')),
+      hasInspector: Boolean(document.body.querySelector('[data-testid="works-inspector-detail"]')),
+    };
+  });
+
+  await page.screenshot({
+    path: resolve(OUTPUT_DIR, "works-workspace-tablet.png"),
+    fullPage: true,
+  });
+  await browser.close();
+
+  assert.ok(metrics.hasWorkspace, "works workspace missing at tablet width");
+  assert.ok(metrics.hasList, "works list missing at tablet width");
+  assert.ok(metrics.hasInspector, "works inspector missing at tablet width");
+  assert.ok(metrics.overflowX <= 8, `tablet overflow ${metrics.overflowX}px`);
 });

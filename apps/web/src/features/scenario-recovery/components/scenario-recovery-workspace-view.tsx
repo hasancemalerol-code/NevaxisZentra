@@ -7,6 +7,7 @@ import { ContextPanel } from "@/components/workspace/context-panel";
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 
+import { buildWorksCaseHref } from "../application/scenario-recovery-links";
 import type { ScenarioRecoveryHistoryItemApi, ScenarioRecoveryWorkspaceApi } from "../server/scenario-recovery-api-client";
 
 type ScenarioRecoveryWorkspaceViewProps = Readonly<{
@@ -235,8 +236,8 @@ export function ScenarioRecoveryWorkspaceView({ workspace, history }: ScenarioRe
 
               {workspace.digitalWorkCaseId ? (
                 <p>
-                  <Link href={`/dijital-is-gucu/vakalar/${workspace.digitalWorkCaseId}`}>
-                    Bağlı DigitalWorkCase
+                  <Link href={buildWorksCaseHref(workspace.digitalWorkCaseId)}>
+                    Bağlı operasyonel iş
                   </Link>
                 </p>
               ) : null}

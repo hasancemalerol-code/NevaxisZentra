@@ -1,5 +1,9 @@
-import { IslerHubPageContent } from "@/features/isler-hub/components/isler-hub-page-content";
+import { WorksPageContent } from "@/features/works/components/works-page-content";
 
-export default function IslerPage() {
-  return <IslerHubPageContent />;
+type IslerPageProps = Readonly<{
+  searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}>;
+
+export default function IslerPage({ searchParams }: IslerPageProps) {
+  return <WorksPageContent searchParams={searchParams} />;
 }

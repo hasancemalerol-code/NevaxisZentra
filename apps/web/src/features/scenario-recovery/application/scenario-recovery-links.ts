@@ -14,3 +14,12 @@ export function buildScenarioRecoveryHref(input: {
   const query = params.toString();
   return query ? `/senaryo-kurtarma?${query}` : "/senaryo-kurtarma";
 }
+
+export function buildWorksCaseHref(caseId: string, queue?: string): string {
+  const params = new URLSearchParams();
+  params.set("is", caseId);
+  if (queue) {
+    params.set("kuyruk", queue);
+  }
+  return `/isler?${params.toString()}`;
+}
