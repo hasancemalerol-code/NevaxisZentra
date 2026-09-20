@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
+import { FactoryCopilotDrawer } from "../src/features/factory-copilot/components/factory-copilot-drawer";
 import { WorksWorkspaceView } from "../src/features/works/components/works-workspace-view";
 import type {
   WorksCaseDetailSnapshot,
@@ -201,6 +202,17 @@ function renderProductionResourcesHtml(): string {
   </main>`;
 }
 
+function renderCopilotHtml(pathname: string, search = ""): string {
+  return renderToStaticMarkup(
+    createElement(FactoryCopilotDrawer, {
+      open: true,
+      onClose: () => undefined,
+      pathname,
+      searchParams: new URLSearchParams(search),
+    }),
+  );
+}
+
 const css = readCss([
   "src/design-system/tokens.css",
   "src/design-system/industrial-foundation.css",
@@ -211,6 +223,7 @@ const css = readCss([
   "src/features/live-plan-workspace/live-plan-workspace.css",
   "src/features/scenario-recovery/scenario-recovery-workspace.css",
   "src/features/works/works-workspace.css",
+  "src/features/factory-copilot/factory-copilot.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -406,6 +419,10 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
     { id: "production-resources", title: "Üretim Kaynakları", html: productionResources },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
+    { id: "factory-copilot-fabrika", title: "Factory Copilot / Fabrika", html: renderCopilotHtml("/fabrika", "hat=line-1") },
+    { id: "factory-copilot-isler", title: "Factory Copilot / İşler", html: renderCopilotHtml("/isler", "is=case-1") },
+    { id: "factory-copilot-plan", title: "Factory Copilot / Plan", html: renderCopilotHtml("/planlama/plan-1") },
+    { id: "factory-copilot-scenario", title: "Factory Copilot / Senaryo", html: renderCopilotHtml("/senaryo-kurtarma", "run=run-1") },
   ] as const;
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -436,6 +453,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasTable: Boolean(document.body.querySelector(".fact-data-grid, .ai-task-center-unified__table, .works-table")),
           hasInspector: Boolean(document.body.querySelector(".fact-context-panel, .production-resources-inspector, .works-inspector")),
           hasWorksLayout: Boolean(document.body.querySelector(".works-workspace__left, .works-workspace__center, .works-workspace__right")),
+          hasCopilotDrawer: Boolean(document.body.querySelector('[data-testid="factory-copilot-drawer"]')),
         };
       });
 
@@ -453,6 +471,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "works-workspace" && !metrics.hasTable) score -= 0.5;
       if (surface.id === "works-workspace" && !metrics.hasInspector) score -= 0.5;
       if (surface.id === "works-workspace" && !metrics.hasWorksLayout) score -= 0.8;
+      if (surface.id.startsWith("factory-copilot-") && !metrics.hasCopilotDrawer) score -= 1.0;
       score = Math.max(0, Math.min(10, Number(score.toFixed(1))));
       scores.push(score);
 
@@ -521,4 +540,34 @@ test("works workspace tablet width keeps list and inspector usable", async () =>
   assert.ok(metrics.hasList, "works list missing at tablet width");
   assert.ok(metrics.hasInspector, "works inspector missing at tablet width");
   assert.ok(metrics.overflowX <= 8, `tablet overflow ${metrics.overflowX}px`);
+});
+
+test("factory copilot drawer keeps context and input usable at tablet width", async () => {
+  const { chromium } = await import("playwright");
+  mkdirSync(OUTPUT_DIR, { recursive: true });
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.setContent(buildHtmlDocument(renderCopilotHtml("/fabrika", "hat=line-1"), css), {
+    waitUntil: "networkidle",
+  });
+
+  const metrics = await page.evaluate(() => {
+    const doc = document.documentElement;
+    return {
+      overflowX: doc.scrollWidth - doc.clientWidth,
+      hasDrawer: Boolean(document.body.querySelector('[data-testid="factory-copilot-drawer"]')),
+      hasInput: Boolean(document.body.querySelector(".factory-copilot-drawer__input")),
+    };
+  });
+
+  await page.screenshot({
+    path: resolve(OUTPUT_DIR, "factory-copilot-tablet.png"),
+    fullPage: true,
+  });
+  await browser.close();
+
+  assert.ok(metrics.hasDrawer, "copilot drawer missing at tablet width");
+  assert.ok(metrics.hasInput, "copilot input missing at tablet width");
+  assert.ok(metrics.overflowX <= 8, `copilot tablet overflow ${metrics.overflowX}px`);
 });

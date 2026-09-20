@@ -6,6 +6,7 @@ using NevaxisZentra.Persistence.CommercialIntelligence;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.Energy;
 using NevaxisZentra.Persistence.Export;
+using NevaxisZentra.Persistence.FactoryCopilot;
 using NevaxisZentra.Persistence.FactoryIntelligence;
 using NevaxisZentra.Persistence.Facilities;
 using NevaxisZentra.Persistence.Identity;
@@ -78,6 +79,8 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
         EnterpriseReliabilityPermissionKeys.Read,
         AdminAccessPermissionKeys.Read,
         TeamsPermissionKeys.Read,
+        FactoryCopilotPermissionKeys.Read,
+        FactoryCopilotPermissionKeys.Query,
     ];
 
     internal static async Task EnsureOperatorPresentationAccessAsync(

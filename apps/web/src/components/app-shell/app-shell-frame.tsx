@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
+import { FactoryCopilotShell } from "@/features/factory-copilot/components/factory-copilot-shell";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
 import type { ShellSearchItem } from "./shell-types";
@@ -57,7 +58,9 @@ export function AppShellFrame({
               {subscriptionGraceWarning}
             </div>
           ) : null}
-          {children}
+          <Suspense fallback={children}>
+            <FactoryCopilotShell>{children}</FactoryCopilotShell>
+          </Suspense>
         </main>
       </div>
     </div>
