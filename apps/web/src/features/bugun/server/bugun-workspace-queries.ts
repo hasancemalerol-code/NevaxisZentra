@@ -20,6 +20,7 @@ import {
   resolveRoleLandingProfile,
   type RoleLandingProfile,
 } from "@/lib/navigation/role-landing";
+import { loadContinuousOptimizationControlCenter } from "@/features/continuous-optimization/server/continuous-optimization-reader";
 
 export type BugunAttentionItem = Readonly<{
   id: string;
@@ -176,6 +177,34 @@ export async function readBugunWorkspace(): Promise<BugunWorkspaceResult> {
         }
       } catch {
         // Works snapshot is optional for the Bugün attention strip.
+      }
+    }
+  }
+
+  if (hasGrantedPermission(access, "continuous-optimization.read")) {
+    const optimizationResult = await loadContinuousOptimizationControlCenter();
+    if (optimizationResult.status === "success") {
+      const center = optimizationResult.controlCenter;
+      if (center.awaitingApproval.length > 0) {
+        attentionItems.push({
+          id: "continuous-optimization-approval",
+          title: "Optimizasyon onayı bekliyor",
+          summary: `${center.awaitingApproval.length} sürekli optimizasyon müdahalesi onay bekliyor.`,
+          href: "/surekli-optimizasyon",
+          tone: "warning",
+          category: "Optimizasyon",
+        });
+      }
+
+      if (center.verifiedGains.length > 0) {
+        attentionItems.push({
+          id: "continuous-optimization-verified-gain",
+          title: "Doğrulanmış optimizasyon kazancı",
+          summary: `${center.verifiedGains.length} optimizasyon doğrulandı.`,
+          href: "/surekli-optimizasyon",
+          tone: "neutral",
+          category: "Optimizasyon",
+        });
       }
     }
   }

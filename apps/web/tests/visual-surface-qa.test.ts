@@ -224,6 +224,7 @@ const css = readCss([
   "src/features/scenario-recovery/scenario-recovery-workspace.css",
   "src/features/works/works-workspace.css",
   "src/features/factory-copilot/factory-copilot.css",
+  "src/features/continuous-optimization/continuous-optimization.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -410,6 +411,15 @@ test("browser visual QA for critical industrial surfaces", async () => {
     </div>
   </main>`;
 
+  const continuousOptimizationControlCenter = `<main class="fact-workspace continuous-optimization-shell" data-testid="continuous-optimization-control-center">
+    <header class="fact-section__header"><div><p class="fact-section__eyebrow">ULTRA G</p><h1>Sürekli Optimizasyon</h1></div></header>
+    <section class="continuous-optimization-kpis" data-testid="continuous-optimization-kpis"><div class="continuous-optimization-kpi"><div class="continuous-optimization-kpi__label">Aktif koşu</div><div class="continuous-optimization-kpi__value">1</div></div></section>
+    <section class="continuous-optimization-section"><div class="continuous-optimization-section__header"><h2>Aktif fırsatlar</h2></div><div class="continuous-optimization-section__body" data-testid="continuous-optimization-opportunities"><div class="continuous-optimization-item"><div class="continuous-optimization-item__title">Assembly constraint — +8.4% potential good throughput</div></div></div></section>
+    <section class="continuous-optimization-section"><div class="continuous-optimization-section__header"><h2>Doğrulanmış kazançlar</h2></div><div class="continuous-optimization-section__body" data-testid="continuous-optimization-verified-gains"><div class="continuous-optimization-item"><div class="continuous-optimization-item__title">Throughput +7.2%</div></div></div></section>
+  </main>`;
+
+  const continuousOptimizationFabrika = `<main class="fact-workspace"><section class="fact-section" data-testid="continuous-optimization-factory-strip"><header class="fact-section__header"><h3>Anlamlı fırsatlar</h3></header><div class="continuous-optimization-opportunity-strip fact-section__body"><div class="continuous-optimization-opportunity-strip__item"><div><div class="continuous-optimization-item__title">Buffer starvation recurring</div></div><div class="continuous-optimization-opportunity-strip__benefit">+8.4</div></div></div></section></main>`;
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
@@ -423,6 +433,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "factory-copilot-isler", title: "Factory Copilot / İşler", html: renderCopilotHtml("/isler", "is=case-1") },
     { id: "factory-copilot-plan", title: "Factory Copilot / Plan", html: renderCopilotHtml("/planlama/plan-1") },
     { id: "factory-copilot-scenario", title: "Factory Copilot / Senaryo", html: renderCopilotHtml("/senaryo-kurtarma", "run=run-1") },
+    { id: "continuous-optimization-control", title: "Sürekli Optimizasyon Kontrol Merkezi", html: continuousOptimizationControlCenter },
+    { id: "continuous-optimization-fabrika", title: "Sürekli Optimizasyon / Fabrika", html: continuousOptimizationFabrika },
   ] as const;
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -454,6 +466,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasInspector: Boolean(document.body.querySelector(".fact-context-panel, .production-resources-inspector, .works-inspector")),
           hasWorksLayout: Boolean(document.body.querySelector(".works-workspace__left, .works-workspace__center, .works-workspace__right")),
           hasCopilotDrawer: Boolean(document.body.querySelector('[data-testid="factory-copilot-drawer"]')),
+          hasContinuousOptimizationControlCenter: Boolean(document.body.querySelector('[data-testid="continuous-optimization-control-center"]')),
+          hasContinuousOptimizationFactoryStrip: Boolean(document.body.querySelector('[data-testid="continuous-optimization-factory-strip"]')),
         };
       });
 
@@ -472,6 +486,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "works-workspace" && !metrics.hasInspector) score -= 0.5;
       if (surface.id === "works-workspace" && !metrics.hasWorksLayout) score -= 0.8;
       if (surface.id.startsWith("factory-copilot-") && !metrics.hasCopilotDrawer) score -= 1.0;
+      if (surface.id === "continuous-optimization-control" && !metrics.hasContinuousOptimizationControlCenter) score -= 1.0;
+      if (surface.id === "continuous-optimization-fabrika" && !metrics.hasContinuousOptimizationFactoryStrip) score -= 1.0;
       score = Math.max(0, Math.min(10, Number(score.toFixed(1))));
       scores.push(score);
 

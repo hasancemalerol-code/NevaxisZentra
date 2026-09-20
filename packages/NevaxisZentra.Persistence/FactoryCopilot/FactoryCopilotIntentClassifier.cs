@@ -67,7 +67,14 @@ public static class FactoryCopilotIntentClassifier
         }
 
         if (MatchesAny(normalized,
-                "option b", "option a", "seçenek neden", "neden b", "scenario", "senaryo",
+                "optimizasyon", "optimization", "neden önerdi", "ne kazandır", "uygulanmadı", "sürekli optimizasyon"))
+        {
+            return ClassifyIntent(FactoryCopilotIntents.OptimizationExplanation, FactoryCopilotRoutingClasses.Deterministic,
+                [FactoryCopilotToolIds.GetOptimizationRun]);
+        }
+
+        if (MatchesAny(normalized,
+                "option b", "option a", "seçenek neden", "scenario", "senaryo",
                 "daha iyi", "why option"))
         {
             return ClassifyIntent(FactoryCopilotIntents.ScenarioExplanation, FactoryCopilotRoutingClasses.Deterministic,

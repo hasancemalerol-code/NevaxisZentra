@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NevaxisZentra.Persistence.Audit;
 using NevaxisZentra.Persistence.ContextKnowledge;
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.ModelGateway;
 using NevaxisZentra.Persistence.MixedProduction;
@@ -36,6 +37,7 @@ public sealed class FactoryCopilotService(
     IThroughputIntelligenceService throughputIntelligence,
     IScenarioRecoveryService scenarioRecovery,
     IDigitalWorkforceWorksService worksService,
+    IContinuousOptimizationService continuousOptimization,
     IModelGatewayService modelGateway,
     IAuditWriter auditWriter) : IFactoryCopilotService
 {
@@ -44,7 +46,8 @@ public sealed class FactoryCopilotService(
         contextKnowledge,
         throughputIntelligence,
         scenarioRecovery,
-        worksService);
+        worksService,
+        continuousOptimization);
 
     public Task<FactoryCopilotQueryResult> QueryAsync(
         Guid facilityId,

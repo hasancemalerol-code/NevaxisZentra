@@ -1,3 +1,4 @@
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.ThroughputIntelligence;
 
@@ -72,8 +73,50 @@ internal static class FactoryCopilotResponseComposer
                 or FactoryCopilotIntents.MaterialRisk => ComposeKnowledge(bundle, resolved),
             FactoryCopilotIntents.RecoveryOptions => ComposeRecoveryOptions(bundle, resolved),
             FactoryCopilotIntents.ExecutiveSummary => ComposeExecutiveSummary(bundle, resolved),
+            FactoryCopilotIntents.OptimizationExplanation => ComposeOptimizationExplanation(bundle, resolved),
             _ => ComposeCauseAnalysis(bundle, resolved),
         };
+    }
+
+    private static FactoryCopilotStructuredResponse ComposeOptimizationExplanation(
+        FactoryCopilotToolBundle bundle,
+        FactoryCopilotResolvedContext resolved)
+    {
+        var explainability = bundle.OptimizationExplainability;
+        var run = bundle.OptimizationRun;
+        if (explainability is null || run is null)
+        {
+            return new FactoryCopilotStructuredResponse(
+                Answer: "Bu bağlam için sürekli optimizasyon kaydı bulunamadı.",
+                WhatUsed: "Continuous optimization explainability",
+                KeyFacts: [],
+                Causes: [],
+                Impact: null,
+                RecommendedNextStep: "İlgili hat veya iş bağlamını seçip tekrar deneyin.",
+                Uncertainty: null,
+                Evidence: [],
+                RelatedActions: []);
+        }
+
+        return new FactoryCopilotStructuredResponse(
+            Answer:
+            $"Zentra {explainability.Trigger} tetikleyicisiyle optimizasyon önerdi. Beklenen kazanç: {explainability.ExpectedBenefit}. Aşama: {run.CurrentPhase}.",
+            WhatUsed: "ContinuousOptimizationRun + explainability payload",
+            KeyFacts:
+            [
+                $"Tetikleyici: {explainability.Trigger}",
+                $"Gözlem: {explainability.Observation}",
+                $"Taban: {explainability.Baseline}",
+                $"Risk: {explainability.RiskClass}",
+            ],
+            Causes: explainability.Evidence.ToList(),
+            Impact: explainability.ExpectedBenefit,
+            RecommendedNextStep: explainability.ProposedAction ?? "Sürekli optimizasyon kontrol merkezinden detayları inceleyin.",
+            Uncertainty: run.Outcome is null ? "Sonuç henüz doğrulanmadı." : $"Sonuç: {run.Outcome}",
+            Evidence: explainability.Evidence
+                .Select(item => new FactoryCopilotEvidenceRef("optimization", run.RunId.ToString(), item, null))
+                .ToList(),
+            RelatedActions: BuildActions(FactoryCopilotIntents.OptimizationExplanation, resolved, bundle));
     }
 
     private static FactoryCopilotStructuredResponse ComposeCurrentState(

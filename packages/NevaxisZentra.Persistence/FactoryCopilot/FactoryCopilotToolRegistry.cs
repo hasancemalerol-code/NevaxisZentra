@@ -90,6 +90,11 @@ public static class FactoryCopilotToolRegistry
                 FactoryCopilotToolAccessClasses.Analytic,
                 "High-value operational signals",
                 [FactoryCopilotIntents.ExecutiveSummary]),
+            [FactoryCopilotToolIds.GetOptimizationRun] = new(
+                FactoryCopilotToolIds.GetOptimizationRun,
+                FactoryCopilotToolAccessClasses.Read,
+                "Continuous optimization run explainability",
+                [FactoryCopilotIntents.OptimizationExplanation]),
         };
 
     public static FactoryCopilotToolDefinition Require(string toolId, string intent)

@@ -31,6 +31,7 @@ using NevaxisZentra.Persistence.ThroughputOptimizer;
 using NevaxisZentra.Persistence.RealFactoryPilot;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.FactoryCopilot;
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -535,6 +536,18 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureFactoryCopilotQueryPermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureContinuousOptimizationManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
@@ -3430,6 +3443,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             FactoryCopilotPermissionKeys.Query,
             DevelopmentPilotFactoryCopilotIds.QueryPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContinuousOptimizationReadPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousOptimizationPermissionKeys.Read,
+            DevelopmentPilotContinuousOptimizationIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContinuousOptimizationRunPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousOptimizationPermissionKeys.Run,
+            DevelopmentPilotContinuousOptimizationIds.RunPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureContinuousOptimizationManagePermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ContinuousOptimizationPermissionKeys.Manage,
+            DevelopmentPilotContinuousOptimizationIds.ManagePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

@@ -1,4 +1,5 @@
 using NevaxisZentra.Persistence.ContextKnowledge;
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.ThroughputIntelligence;
@@ -19,4 +20,6 @@ internal sealed record FactoryCopilotToolBundle
     public IReadOnlyList<string> ShiftSignals { get; init; } = [];
     public IReadOnlyList<string> RecoveryOptions { get; init; } = [];
     public IReadOnlyList<string> KnownEntityTokens { get; init; } = [];
+    public ContinuousOptimizationRunSummary? OptimizationRun { get; init; }
+    public ContinuousOptimizationExplainability? OptimizationExplainability { get; init; }
 }

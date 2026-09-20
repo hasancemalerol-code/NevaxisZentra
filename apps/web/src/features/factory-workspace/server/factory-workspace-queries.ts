@@ -16,6 +16,8 @@ import { readProductionResourceWorkspace } from "@/features/production-resources
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
 import { loadThroughputIntelligenceWorkspace } from "@/features/throughput-intelligence/server/throughput-intelligence-reader";
 import { loadThroughputOptimizerWorkspaceForLine } from "@/features/throughput-optimizer/server/throughput-optimizer-reader";
+import { loadContinuousOptimizationOpportunities } from "@/features/continuous-optimization/server/continuous-optimization-reader";
+import type { OptimizationOpportunityApi } from "@/features/continuous-optimization/server/continuous-optimization-api-client";
 import { resolveRoleLandingProfile } from "@/lib/navigation/role-landing";
 
 import { buildFactoryHierarchy } from "../application/build-factory-hierarchy";
@@ -108,6 +110,7 @@ export async function readFactoryWorkspace(
   let playback = null;
   let throughput = null;
   let optimizer = null;
+  let continuousOptimization: readonly OptimizationOpportunityApi[] = [];
 
   if (selection.lineId) {
     const lineResult = await loadMixedProductionLineWorkspace(selection.lineId);
@@ -127,6 +130,16 @@ export async function readFactoryWorkspace(
     const optimizerResult = await loadThroughputOptimizerWorkspaceForLine(selection.lineId);
     if (optimizerResult.status === "success") {
       optimizer = optimizerResult.workspace;
+    }
+
+    const optimizationResult = await loadContinuousOptimizationOpportunities(selection.lineId);
+    if (optimizationResult.status === "success") {
+      continuousOptimization = optimizationResult.opportunities;
+    }
+  } else {
+    const optimizationResult = await loadContinuousOptimizationOpportunities();
+    if (optimizationResult.status === "success") {
+      continuousOptimization = optimizationResult.opportunities;
     }
   }
 
@@ -168,6 +181,7 @@ export async function readFactoryWorkspace(
       playback,
       throughput,
       optimizer,
+      continuousOptimization,
       selectedResource,
       machineRegistry,
       machineDetail,

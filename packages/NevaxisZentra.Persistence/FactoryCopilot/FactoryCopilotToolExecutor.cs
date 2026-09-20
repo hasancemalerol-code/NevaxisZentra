@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using NevaxisZentra.Persistence.ContextKnowledge;
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.MixedProduction;
 using NevaxisZentra.Persistence.ScenarioRecovery;
@@ -13,7 +14,8 @@ internal sealed class FactoryCopilotToolExecutor(
     IContextKnowledgeService contextKnowledge,
     IThroughputIntelligenceService throughputIntelligence,
     IScenarioRecoveryService scenarioRecovery,
-    IDigitalWorkforceWorksService worksService)
+    IDigitalWorkforceWorksService worksService,
+    IContinuousOptimizationService continuousOptimization)
 {
     public async Task<(FactoryCopilotToolBundle Bundle, IReadOnlyList<FactoryCopilotToolInvocation> Invocations)> ExecuteAsync(
         Guid facilityId,
@@ -183,6 +185,40 @@ internal sealed class FactoryCopilotToolExecutor(
                         TrackThroughputTokens(knownTokens, overview);
                         invocations.Add(Success(toolId, stopwatch, "Executive signals compiled"));
                         break;
+                    case FactoryCopilotToolIds.GetOptimizationRun:
+                    {
+                        ContinuousOptimizationRunSummary? optimizationRun = null;
+                        ContinuousOptimizationExplainability? optimizationExplainability = null;
+                        var coRunQuery = dbContext.ContinuousOptimizationRunRecords.AsNoTracking()
+                            .Where(r => r.FacilityId == facilityId);
+                        if (context.DigitalWorkCaseId.HasValue)
+                        {
+                            coRunQuery = coRunQuery.Where(r => r.DigitalWorkCaseId == context.DigitalWorkCaseId);
+                        }
+                        else if (resolved.LineId != Guid.Empty)
+                        {
+                            coRunQuery = coRunQuery.Where(r => r.LineId == resolved.LineId);
+                        }
+
+                        var coRun = await coRunQuery
+                            .OrderByDescending(r => r.UpdatedAtUtc)
+                            .FirstOrDefaultAsync(cancellationToken);
+                        if (coRun is not null)
+                        {
+                            optimizationRun = await continuousOptimization.GetRunAsync(
+                                facilityId, coRun.Id, cancellationToken);
+                            optimizationExplainability = await continuousOptimization.GetExplainabilityAsync(
+                                facilityId, coRun.Id, cancellationToken);
+                        }
+
+                        bundle = bundle with
+                        {
+                            OptimizationRun = optimizationRun,
+                            OptimizationExplainability = optimizationExplainability,
+                        };
+                        invocations.Add(Success(toolId, stopwatch, "Continuous optimization explainability loaded"));
+                        break;
+                    }
                     default:
                         throw new FactoryCopilotException(
                             FactoryCopilotFailureCodes.ToolUnauthorized,

@@ -56,6 +56,7 @@ using NevaxisZentra.Persistence.ContextKnowledge;
 using NevaxisZentra.Persistence.ModelGateway;
 using NevaxisZentra.Persistence.ThroughputOptimizer;
 using NevaxisZentra.Persistence.ScenarioRecovery;
+using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.RealFactoryPilot;
 using NevaxisZentra.Persistence.BulkDataOnboarding;
 
@@ -439,6 +440,12 @@ public sealed class NevaxisZentraDbContext : DbContext
     public DbSet<ScenarioRecoveryOptionRecord> ScenarioRecoveryOptionRecords => Set<ScenarioRecoveryOptionRecord>();
     public DbSet<ScenarioRecoveryPredictionAccuracyRecord> ScenarioRecoveryPredictionAccuracyRecords =>
         Set<ScenarioRecoveryPredictionAccuracyRecord>();
+
+    public DbSet<ContinuousOptimizationRunRecord> ContinuousOptimizationRunRecords => Set<ContinuousOptimizationRunRecord>();
+    public DbSet<ContinuousOptimizationOpportunityRecord> ContinuousOptimizationOpportunityRecords =>
+        Set<ContinuousOptimizationOpportunityRecord>();
+    public DbSet<ContinuousOptimizationPolicyRecord> ContinuousOptimizationPolicyRecords =>
+        Set<ContinuousOptimizationPolicyRecord>();
 
     public DbSet<RealFactoryPilotRunRecord> RealFactoryPilotRunRecords => Set<RealFactoryPilotRunRecord>();
     public DbSet<RealFactoryFieldMappingRecord> RealFactoryFieldMappingRecords => Set<RealFactoryFieldMappingRecord>();
@@ -3446,6 +3453,21 @@ public sealed class NevaxisZentraDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ScenarioRecoveryPredictionAccuracyRecordConfiguration());
         modelBuilder.Entity<ScenarioRecoveryPredictionAccuracyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ContinuousOptimizationRunRecordConfiguration());
+        modelBuilder.Entity<ContinuousOptimizationRunRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ContinuousOptimizationOpportunityRecordConfiguration());
+        modelBuilder.Entity<ContinuousOptimizationOpportunityRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ContinuousOptimizationPolicyRecordConfiguration());
+        modelBuilder.Entity<ContinuousOptimizationPolicyRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
 

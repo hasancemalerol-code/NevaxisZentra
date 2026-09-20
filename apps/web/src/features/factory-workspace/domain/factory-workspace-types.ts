@@ -4,6 +4,7 @@ import type { FactoryIntelligenceRiskCardApi } from "@/features/factory-intellig
 import type { MixedProductionLineDetailApi, MixedProductionPlaybackApi } from "@/features/mixed-production/server/mixed-production-api-client";
 import type { ProductionResourceRowApi, ProductionResourceWorkspaceApi } from "@/features/production-resources/server/production-resources-api-client";
 import type { ThroughputOptimizerWorkspaceApi } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
+import type { OptimizationOpportunityApi } from "@/features/continuous-optimization/server/continuous-optimization-api-client";
 import type {
   ScenarioComparisonRowApi,
   ThroughputIntelligenceOverviewApi,
@@ -58,6 +59,7 @@ export type FactoryWorkspacePayload = Readonly<{
       }>
     | null;
   optimizer: ThroughputOptimizerWorkspaceApi | null;
+  continuousOptimization: readonly OptimizationOpportunityApi[];
   selectedResource: ProductionResourceRowApi | null;
   machineRegistry: MachineRegistryReadModel | null;
   machineDetail: EdgeMachineDetailBundle | null;

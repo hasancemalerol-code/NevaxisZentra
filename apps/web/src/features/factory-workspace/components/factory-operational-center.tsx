@@ -10,6 +10,7 @@ import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/o
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { ThroughputIntelligencePanel } from "@/features/throughput-intelligence/components/throughput-intelligence-panel";
 import { ThroughputOptimizerPanel } from "@/features/throughput-optimizer/components/throughput-optimizer-panel";
+import { ContinuousOptimizationOpportunityStrip } from "@/features/continuous-optimization/components/continuous-optimization-control-center-view";
 import { buildScenarioRecoveryHref } from "@/features/scenario-recovery/application/scenario-recovery-links";
 import type { MixedProductionStationSnapshotApi } from "@/features/mixed-production/server/mixed-production-api-client";
 import { resolveActiveSelectionKind } from "../application/factory-workspace-selection";
@@ -137,6 +138,10 @@ export function FactoryOperationalCenter({
               ))}
             </ul>
           </section>
+        ) : null}
+
+        {workspace.continuousOptimization.length > 0 ? (
+          <ContinuousOptimizationOpportunityStrip opportunities={workspace.continuousOptimization} />
         ) : null}
       </div>
     );
@@ -270,6 +275,10 @@ export function FactoryOperationalCenter({
             comparison={workspace.throughput.comparison}
             overview={workspace.throughput.overview}
           />
+        ) : null}
+
+        {workspace.continuousOptimization.length > 0 ? (
+          <ContinuousOptimizationOpportunityStrip opportunities={workspace.continuousOptimization} />
         ) : null}
 
         {workspace.optimizer ? <ThroughputOptimizerPanel workspace={workspace.optimizer} /> : null}
