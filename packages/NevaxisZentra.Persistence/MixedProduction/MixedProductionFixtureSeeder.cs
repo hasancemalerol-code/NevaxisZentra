@@ -12,7 +12,9 @@ public static class MixedProductionFixtureSeeder
         Guid facilityId,
         CancellationToken cancellationToken = default)
     {
-        var existing = await db.ProductionLines.AsNoTracking()
+        await db.SetTenantSessionContextAsync(tenantId, cancellationToken);
+
+        var existing = await db.ProductionLines.IgnoreQueryFilters().AsNoTracking()
             .FirstOrDefaultAsync(
                 l => l.TenantId == tenantId && l.FacilityId == facilityId && l.Code == MixedProductionFixtureCodes.LineCode,
                 cancellationToken);

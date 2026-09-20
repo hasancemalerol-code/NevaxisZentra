@@ -35,6 +35,7 @@ public static class ScenarioRecoveryFixtureSeeder
         Guid tenantId,
         Guid facilityId,
         Guid lineId,
+        decimal? targetGoodThroughputPerHour = null,
         CancellationToken cancellationToken = default)
     {
         var stations = await db.ProductionStations.AsNoTracking()
@@ -48,8 +49,12 @@ public static class ScenarioRecoveryFixtureSeeder
             ?? stations.Last();
 
         var now = DateTimeOffset.UtcNow;
+        var eventCount = targetGoodThroughputPerHour.HasValue
+            ? (int)Math.Ceiling(Math.Max(0m, targetGoodThroughputPerHour.Value - 190m) + 50m)
+            : 400;
+        eventCount = Math.Max(eventCount, 400);
         var events = new List<CanonicalProductionEvent>();
-        for (var i = 0; i < 200; i++)
+        for (var i = 0; i < eventCount; i++)
         {
             var station = i % 3 == 0 ? welding : assembly;
             events.Add(new CanonicalProductionEvent

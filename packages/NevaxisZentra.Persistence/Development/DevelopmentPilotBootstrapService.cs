@@ -29,6 +29,7 @@ using NevaxisZentra.Persistence.ContextKnowledge;
 using NevaxisZentra.Persistence.ModelGateway;
 using NevaxisZentra.Persistence.ThroughputOptimizer;
 using NevaxisZentra.Persistence.RealFactoryPilot;
+using NevaxisZentra.Persistence.ScenarioRecovery;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -502,6 +503,24 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureRealFactoryPilotManagePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureRealFactoryPilotRunPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryManagePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoverySimulatePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoverySimulatePermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoverySimulatePermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryExecutePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureScenarioRecoveryExecutePermissionAssignmentAsync(
             dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3344,6 +3363,42 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             RealFactoryPilotPermissionKeys.Run,
             DevelopmentPilotRealFactoryPilotIds.RunPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureScenarioRecoveryReadPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ScenarioRecoveryPermissionKeys.Read,
+            DevelopmentPilotScenarioRecoveryIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureScenarioRecoveryManagePermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ScenarioRecoveryPermissionKeys.Manage,
+            DevelopmentPilotScenarioRecoveryIds.ManagePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureScenarioRecoverySimulatePermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ScenarioRecoveryPermissionKeys.Simulate,
+            DevelopmentPilotScenarioRecoveryIds.SimulatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureScenarioRecoveryExecutePermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            ScenarioRecoveryPermissionKeys.Execute,
+            DevelopmentPilotScenarioRecoveryIds.ExecutePermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

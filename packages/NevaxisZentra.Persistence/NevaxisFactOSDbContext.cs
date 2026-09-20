@@ -3571,6 +3571,8 @@ public sealed class NevaxisZentraDbContext : DbContext
         Database.ExecuteSqlInterpolated(
             $"""
             SELECT set_config('NevaxisZentra.tenant_id', {tenantIdText}, true);
+            SELECT set_config('NevaxisFactOS.tenant_id', {tenantIdText}, true);
+            SELECT set_config('app.current_tenant_id', {tenantIdText}, true);
             SELECT set_config('crevafactos.tenant_id', {tenantIdText}, true);
             """);
     }
@@ -3583,6 +3585,8 @@ public sealed class NevaxisZentraDbContext : DbContext
         return Database.ExecuteSqlInterpolatedAsync(
             $"""
             SELECT set_config('NevaxisZentra.tenant_id', {tenantIdText}, true);
+            SELECT set_config('NevaxisFactOS.tenant_id', {tenantIdText}, true);
+            SELECT set_config('app.current_tenant_id', {tenantIdText}, true);
             SELECT set_config('crevafactos.tenant_id', {tenantIdText}, true);
             """,
             cancellationToken);

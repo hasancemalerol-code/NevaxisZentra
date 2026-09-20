@@ -35585,6 +35585,301 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
                     b.ToTable("saas_tenant_subscription_transition_history", (string)null);
                 });
 
+            modelBuilder.Entity("NevaxisZentra.Persistence.ScenarioRecovery.ScenarioRecoveryOptionRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actions_json");
+
+                    b.Property<string>("AssumptionsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assumptions_json");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FeasibilityReasonsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("feasibility_reasons_json");
+
+                    b.Property<string>("FeasibilityState")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("feasibility_state");
+
+                    b.Property<bool>("IsDominated")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_dominated");
+
+                    b.Property<string>("MetricsJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("metrics_json");
+
+                    b.Property<string>("OptionLabel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("option_label");
+
+                    b.Property<decimal>("RecommendationScore")
+                        .HasColumnType("numeric")
+                        .HasColumnName("recommendation_score");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_approval");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("SimulationJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("simulation_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "RunId", "OptionLabel")
+                        .IsUnique();
+
+                    b.ToTable("scenario_recovery_options", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisZentra.Persistence.ScenarioRecovery.ScenarioRecoveryPredictionAccuracyRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActualValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("actual_value");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("DigitalWorkCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("digital_work_case_id");
+
+                    b.Property<string>("EngineVersion")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("engine_version");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("MetricCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("metric_code");
+
+                    b.Property<decimal>("PredictedValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("predicted_value");
+
+                    b.Property<decimal?>("PredictionError")
+                        .HasColumnType("numeric")
+                        .HasColumnName("prediction_error");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("VerificationOutcome")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("verification_outcome");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "RunId", "MetricCode");
+
+                    b.ToTable("scenario_recovery_prediction_accuracy", (string)null);
+                });
+
+            modelBuilder.Entity("NevaxisZentra.Persistence.ScenarioRecovery.ScenarioRecoveryRunRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("ComparisonJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("comparison_json");
+
+                    b.Property<long>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("concurrency_token");
+
+                    b.Property<Guid?>("ContextSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("context_snapshot_id");
+
+                    b.Property<string>("CorrelationKey")
+                        .IsRequired()
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)")
+                        .HasColumnName("correlation_key");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CurrentPhase")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("current_phase");
+
+                    b.Property<Guid?>("DigitalWorkCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("digital_work_case_id");
+
+                    b.Property<string>("EngineVersion")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("engine_version");
+
+                    b.Property<string>("EntryPoint")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("entry_point");
+
+                    b.Property<string>("ExecutionState")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("execution_state");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<Guid>("LineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("line_id");
+
+                    b.Property<string>("ObjectivesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("objectives_json");
+
+                    b.Property<string>("ProblemJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("problem_json");
+
+                    b.Property<string>("RecoveryPlanJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recovery_plan_json");
+
+                    b.Property<string>("SchemaVersion")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("schema_version");
+
+                    b.Property<string>("SelectedOptionLabel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("selected_option_label");
+
+                    b.Property<string>("SnapshotSummaryJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot_summary_json");
+
+                    b.Property<string>("SourceEntityId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("source_entity_id");
+
+                    b.Property<string>("SourceEntityType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("source_entity_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("VerificationJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("verification_json");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "FacilityId", "CorrelationKey");
+
+                    b.HasIndex("TenantId", "FacilityId", "LineId", "UpdatedAtUtc");
+
+                    b.ToTable("scenario_recovery_runs", (string)null);
+                });
+
             modelBuilder.Entity("NevaxisZentra.Persistence.ShiftAssignment.ShiftOperatorAssignment", b =>
                 {
                     b.Property<Guid>("Id")

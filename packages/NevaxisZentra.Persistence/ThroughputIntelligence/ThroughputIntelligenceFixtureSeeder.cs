@@ -12,7 +12,9 @@ public static class ThroughputIntelligenceFixtureSeeder
         Guid facilityId,
         CancellationToken cancellationToken = default)
     {
-        var line = await db.ProductionLines.AsNoTracking()
+        await db.SetTenantSessionContextAsync(tenantId, cancellationToken);
+
+        var line = await db.ProductionLines.IgnoreQueryFilters().AsNoTracking()
             .FirstOrDefaultAsync(
                 l => l.TenantId == tenantId && l.FacilityId == facilityId && l.Code == MixedProductionFixtureCodes.LineCode,
                 cancellationToken)

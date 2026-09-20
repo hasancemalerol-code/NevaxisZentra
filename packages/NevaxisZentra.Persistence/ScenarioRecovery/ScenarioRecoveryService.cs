@@ -268,6 +268,7 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
         var optionTemplates = ScenarioRecoveryOptionGenerator.GenerateGoldenRecoveryOptions(assemblyCode);
         var optionSnapshots = new List<ScenarioRecoveryOptionSnapshot>();
+        var optionRecords = new Dictionary<string, ScenarioRecoveryOptionRecord>(StringComparer.Ordinal);
 
         await db.ScenarioRecoveryOptionRecords
             .Where(o => o.RunId == run.Id)
@@ -323,7 +324,7 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
             optionSnapshots.Add(snapshot);
 
-            db.ScenarioRecoveryOptionRecords.Add(new ScenarioRecoveryOptionRecord
+            var record = new ScenarioRecoveryOptionRecord
             {
                 Id = Guid.NewGuid(),
                 TenantId = tenantId,
@@ -340,7 +341,9 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
                 RequiresApproval = requiresApproval,
                 FeasibilityReasonsJson = JsonSerializer.Serialize(feasibilityReasons),
                 CreatedAtUtc = DateTimeOffset.UtcNow,
-            });
+            };
+            optionRecords[label] = record;
+            db.ScenarioRecoveryOptionRecords.Add(record);
         }
 
         var dominated = ScenarioRecoveryDominanceEngine.MarkDominatedOptions(optionSnapshots);
@@ -352,8 +355,7 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
         foreach (var option in optionSnapshots)
         {
-            var row = await db.ScenarioRecoveryOptionRecords
-                .FirstAsync(r => r.RunId == run.Id && r.OptionLabel == option.OptionLabel, cancellationToken);
+            var row = optionRecords[option.OptionLabel];
             row.IsDominated = option.IsDominated;
             row.RecommendationScore = option.RecommendationScore;
         }
@@ -518,6 +520,8 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
                 break;
 
             case ScenarioRecoveryPhases.Observing:
+                overview = await throughputIntelligence.GetLineOverviewAsync(
+                    facilityId, run.LineId, ThroughputIntelligenceAnalysisWindows.Current, null, null, cancellationToken);
                 run.CurrentPhase = ScenarioRecoveryPhases.Verified;
                 await VerifyAndCloseAsync(run, workCase!, overview, tenantId, facilityId, subjectId, cancellationToken);
                 run.ExecutionState = ScenarioRecoveryExecutionStates.Verified;
@@ -533,9 +537,11 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
     private async Task<ScenarioRecoveryGoldenDemoResult> RunGoldenRecoveryDemoCoreAsync(
         Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken)
     {
-        await throughputIntelligence.SeedMixLine01Mp2ExtensionAsync(facilityId, tenantId, cancellationToken);
-        var line = await db.ProductionLines.AsNoTracking()
-            .FirstAsync(l => l.FacilityId == facilityId && l.Code == MixedProductionFixtureCodes.LineCode, cancellationToken);
+        await MixedProductionFixtureSeeder.SeedMixLine01Async(db, tenantId, facilityId, cancellationToken);
+        var line = await db.ProductionLines.IgnoreQueryFilters().AsNoTracking()
+            .FirstAsync(
+                l => l.TenantId == tenantId && l.FacilityId == facilityId && l.Code == MixedProductionFixtureCodes.LineCode,
+                cancellationToken);
 
         await ThroughputIntelligenceFixtureSeeder.EnsureMixLine01Mp2EventHistoryAsync(
             db, tenantId, facilityId, line.Id, cancellationToken);
@@ -594,8 +600,19 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
             if (workspace.CurrentPhase == ScenarioRecoveryPhases.Applied)
             {
+                var appliedRun = await LoadRunAsync(facilityId, workspace.RunId, cancellationToken);
+                var selected = await GetSelectedOptionSnapshotAsync(appliedRun, cancellationToken);
+                var targetActual = appliedRun.VerificationJson is { Length: > 0 } verificationJson
+                    && verificationJson != "{}"
+                    ? JsonSerializer.Deserialize<ScenarioRecoveryVerificationSnapshot>(verificationJson)!.Baseline
+                        .GoodThroughputPerHour
+                      + 0.92m * (selected.Simulation.PredictedGoodThroughputPerHour
+                          - JsonSerializer.Deserialize<ScenarioRecoveryVerificationSnapshot>(verificationJson)!.Baseline
+                              .GoodThroughputPerHour)
+                    : selected.Simulation.PredictedGoodThroughputPerHour;
+
                 await ScenarioRecoveryFixtureSeeder.SeedPostInterventionEventsAsync(
-                    db, tenantId, facilityId, line.Id, cancellationToken);
+                    db, tenantId, facilityId, line.Id, targetActual, cancellationToken);
             }
 
             workspace = await AdvanceCoreAsync(facilityId, tenantId, workspace.RunId, subjectId, cancellationToken);

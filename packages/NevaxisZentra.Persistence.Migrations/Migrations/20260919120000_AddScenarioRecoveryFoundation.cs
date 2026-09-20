@@ -72,15 +72,15 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
                     id, key, normalized_key, description, turkish_label, module_resource_code, action_code,
                     sensitivity_classification, requires_recent_auth, supported_record_scopes, status, created_at_utc)
                 VALUES
-                    ('10000000-0000-4000-8000-000000000f98', 'scenario-recovery.read', 'scenario-recovery.read',
+                    ('10000000-0000-4000-8000-000000000fa2', 'scenario-recovery.read', 'scenario-recovery.read',
                      'Read scenario recovery workspace, comparison, and history.',
                      'Senaryo kurtarma okuma', 'scenario-recovery', 'read',
                      'standard', FALSE, 'facility', 'Active', TIMESTAMPTZ '2026-09-19 12:00:00+00'),
-                    ('10000000-0000-4000-8000-000000000f99', 'scenario-recovery.manage', 'scenario-recovery.manage',
+                    ('10000000-0000-4000-8000-000000000fa3', 'scenario-recovery.manage', 'scenario-recovery.manage',
                      'Manage scenario recovery configuration and lifecycle metadata.',
                      'Senaryo kurtarma yönetimi', 'scenario-recovery', 'manage',
                      'sensitive', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-19 12:00:00+00'),
-                    ('10000000-0000-4000-8000-000000000fa0', 'scenario-recovery.simulate', 'scenario-recovery.simulate',
+                    ('10000000-0000-4000-8000-000000000fa4', 'scenario-recovery.simulate', 'scenario-recovery.simulate',
                      'Run scenario simulation and option comparison.',
                      'Senaryo simülasyonu', 'scenario-recovery', 'simulate',
                      'standard', FALSE, 'facility', 'Active', TIMESTAMPTZ '2026-09-19 12:00:00+00'),
@@ -139,8 +139,19 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
                 $"""
                 ALTER TABLE {tableName} ENABLE ROW LEVEL SECURITY;
                 ALTER TABLE {tableName} FORCE ROW LEVEL SECURITY;
-                CREATE POLICY {prefix}_tenant_isolation ON {tableName}
-                    USING (tenant_id = current_setting('app.current_tenant_id', true)::uuid);
+
+                CREATE POLICY rls_{prefix}_tenant_select ON {tableName}
+                    FOR SELECT TO crevafactos_runtime
+                    USING (tenant_id = current_setting('NevaxisZentra.tenant_id', true)::uuid);
+
+                CREATE POLICY rls_{prefix}_tenant_insert ON {tableName}
+                    FOR INSERT TO crevafactos_runtime
+                    WITH CHECK (tenant_id = current_setting('NevaxisZentra.tenant_id', true)::uuid);
+
+                CREATE POLICY rls_{prefix}_tenant_update ON {tableName}
+                    FOR UPDATE TO crevafactos_runtime
+                    USING (tenant_id = current_setting('NevaxisZentra.tenant_id', true)::uuid)
+                    WITH CHECK (tenant_id = current_setting('NevaxisZentra.tenant_id', true)::uuid);
                 """);
         }
     }
