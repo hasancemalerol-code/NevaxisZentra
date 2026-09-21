@@ -163,8 +163,14 @@ public static class FactoryIntelligenceEndpointRouteBuilderExtensions
         IFacilityAccessResolver facilityAccessResolver,
         IFactoryIntelligenceService service,
         HttpContext httpContext,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, FactoryIntelligencePermissionKeys.Manage, facilityAccessResolver, cancellationToken);
         if (access is null) return failure!;

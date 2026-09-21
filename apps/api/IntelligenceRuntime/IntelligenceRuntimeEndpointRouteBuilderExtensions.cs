@@ -183,9 +183,18 @@ public static class IntelligenceRuntimeEndpointRouteBuilderExtensions
     }
 
     private static async Task<IResult> ValidateOpenAiAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
         IIntelligenceRuntimeService service,
         CancellationToken cancellationToken)
     {
+        var (access, failure) = await ResolveAccessAsync(
+            facilityId, IntelligenceRuntimePermissionKeys.Manage, facilityAccessResolver, cancellationToken);
+        if (access is null)
+        {
+            return failure!;
+        }
+
         var result = await service.ValidateOpenAiLiveAsync(cancellationToken);
         return TypedResults.Ok(result);
     }
@@ -194,8 +203,14 @@ public static class IntelligenceRuntimeEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IIntelligenceRuntimeService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, IntelligenceRuntimePermissionKeys.Manage, facilityAccessResolver, cancellationToken);
         if (access is null)
@@ -211,8 +226,14 @@ public static class IntelligenceRuntimeEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IIntelligenceRuntimeService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, IntelligenceRuntimePermissionKeys.Manage, facilityAccessResolver, cancellationToken);
         if (access is null)
@@ -228,8 +249,14 @@ public static class IntelligenceRuntimeEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IIntelligenceRuntimeService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, IntelligenceRuntimePermissionKeys.Evaluate, facilityAccessResolver, cancellationToken);
         if (access is null)

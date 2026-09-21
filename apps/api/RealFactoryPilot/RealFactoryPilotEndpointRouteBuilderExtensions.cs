@@ -71,8 +71,14 @@ public static class RealFactoryPilotEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IRealFactoryPilotService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, RealFactoryPilotPermissionKeys.Run, facilityAccessResolver, cancellationToken);
         if (access is null) return failure!;

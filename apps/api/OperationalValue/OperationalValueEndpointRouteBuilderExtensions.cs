@@ -144,8 +144,14 @@ public static class OperationalValueEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IOperationalValueService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, OperationalValuePermissionKeys.Read, facilityAccessResolver, cancellationToken);
         if (access is null)
@@ -161,8 +167,14 @@ public static class OperationalValueEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IOperationalValueService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, OperationalValuePermissionKeys.Read, facilityAccessResolver, cancellationToken);
         if (access is null)
@@ -175,9 +187,24 @@ public static class OperationalValueEndpointRouteBuilderExtensions
     }
 
     private static async Task<IResult> RunGoldenUnverifiedAsync(
+        [FromQuery] Guid? facilityId,
+        IFacilityAccessResolver facilityAccessResolver,
         IOperationalValueService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
+        var (access, failure) = await ResolveAccessAsync(
+            facilityId, OperationalValuePermissionKeys.Read, facilityAccessResolver, cancellationToken);
+        if (access is null)
+        {
+            return failure!;
+        }
+
         var result = await service.RunGoldenUnverifiedDemoAsync(cancellationToken);
         return TypedResults.Ok(result);
     }
@@ -186,8 +213,14 @@ public static class OperationalValueEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IOperationalValueService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, OperationalValuePermissionKeys.Read, facilityAccessResolver, cancellationToken);
         if (access is null)

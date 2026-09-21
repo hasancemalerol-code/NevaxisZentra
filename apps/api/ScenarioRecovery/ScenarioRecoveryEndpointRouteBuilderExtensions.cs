@@ -186,8 +186,14 @@ public static class ScenarioRecoveryEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IScenarioRecoveryService service,
+        IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
+        if (!environment.IsDevelopment())
+        {
+            return TypedResults.NotFound();
+        }
+
         var (access, failure) = await ResolveAccessAsync(
             facilityId, ScenarioRecoveryPermissionKeys.Execute, facilityAccessResolver, cancellationToken);
         if (access is null) return failure!;
