@@ -226,6 +226,7 @@ const css = readCss([
   "src/features/factory-copilot/factory-copilot.css",
   "src/features/continuous-optimization/continuous-optimization.css",
   "src/features/intelligence-runtime/intelligence-runtime.css",
+  "src/features/operational-value/operational-value.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -430,6 +431,16 @@ test("browser visual QA for critical industrial surfaces", async () => {
     <section class="intelligence-runtime-section"><div class="intelligence-runtime-section__header"><h2>Değerlendirme karşılaştırması</h2></div><div class="intelligence-runtime-section__body" data-testid="intelligence-runtime-evaluations"><div class="intelligence-runtime-item"><div class="intelligence-runtime-item__title">nevaxis-mfg-v1</div><span class="intelligence-runtime-badge intelligence-runtime-badge--pass">PASS</span></div></div></section>
   </main>`;
 
+  const operationalValueControlCenter = `<main class="fact-workspace operational-value-shell" data-testid="operational-value-control-center">
+    <header class="fact-section__header"><div><p class="fact-section__eyebrow">ULTRA I</p><h1>Operasyonel Değer</h1></div></header>
+    <section class="operational-value-summary" data-testid="operational-value-summary"><div class="operational-value-summary__item"><div class="operational-value-summary__label">Doğrulanmış sonuç</div><div class="operational-value-summary__value">14</div></div><div class="operational-value-summary__item"><div class="operational-value-summary__label">İyi çıktı kazanımı</div><div class="operational-value-summary__value">+112</div></div></section>
+    <section class="operational-value-section"><div class="operational-value-section__header"><h2>Değer trendi</h2></div><div class="operational-value-section__body" data-testid="operational-value-trend"><div class="operational-value-trend-point"><div class="operational-value-trend-point__label">Hafta 38</div><div class="operational-value-trend-point__value">+64 adet</div></div></div></section>
+    <section class="operational-value-section"><div class="operational-value-section__header"><h2>Kırılım</h2></div><div class="operational-value-section__body" data-testid="operational-value-breakdown"><div class="operational-value-item"><div class="operational-value-item__title">İyi çıktı kazanımı</div></div></div></section>
+    <section class="operational-value-section"><div class="operational-value-section__header"><h2>Vaka detayı</h2></div><div class="operational-value-section__body" data-testid="operational-value-case-detail"><div class="operational-value-item"><div class="operational-value-item__title">Assembly bottleneck recovery</div></div></div></section>
+    <section class="operational-value-section"><div class="operational-value-section__header"><h2>Ekonomik girdi yapılandırması</h2></div><div class="operational-value-section__body" data-testid="operational-value-economic-inputs"><div class="operational-value-economic-field"><div class="operational-value-economic-field__label">Birim katkı</div><div class="operational-value-economic-field__value">$10.00</div></div></div></section>
+    <section class="operational-value-section"><div class="operational-value-section__header"><h2>Müşteri raporu önizleme</h2></div><div class="operational-value-section__body" data-testid="operational-value-report-preview"><div class="operational-value-report"><div class="operational-value-report__title">Son 30 gün · 14 doğrulanmış sonuç</div></div></div></section>
+  </main>`;
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
@@ -446,6 +457,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "continuous-optimization-control", title: "Sürekli Optimizasyon Kontrol Merkezi", html: continuousOptimizationControlCenter },
     { id: "continuous-optimization-fabrika", title: "Sürekli Optimizasyon / Fabrika", html: continuousOptimizationFabrika },
     { id: "intelligence-runtime-control", title: "Intelligence Runtime Kontrol Merkezi", html: intelligenceRuntimeControlCenter },
+    { id: "operational-value-control", title: "Operasyonel Değer Kontrol Merkezi", html: operationalValueControlCenter },
   ] as const;
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -480,6 +492,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasContinuousOptimizationControlCenter: Boolean(document.body.querySelector('[data-testid="continuous-optimization-control-center"]')),
           hasContinuousOptimizationFactoryStrip: Boolean(document.body.querySelector('[data-testid="continuous-optimization-factory-strip"]')),
           hasIntelligenceRuntimeControlCenter: Boolean(document.body.querySelector('[data-testid="intelligence-runtime-control-center"]')),
+          hasOperationalValueControlCenter: Boolean(document.body.querySelector('[data-testid="operational-value-control-center"]')),
         };
       });
 
@@ -501,6 +514,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "continuous-optimization-control" && !metrics.hasContinuousOptimizationControlCenter) score -= 1.0;
       if (surface.id === "continuous-optimization-fabrika" && !metrics.hasContinuousOptimizationFactoryStrip) score -= 1.0;
       if (surface.id === "intelligence-runtime-control" && !metrics.hasIntelligenceRuntimeControlCenter) score -= 1.0;
+      if (surface.id === "operational-value-control" && !metrics.hasOperationalValueControlCenter) score -= 1.0;
       score = Math.max(0, Math.min(10, Number(score.toFixed(1))));
       scores.push(score);
 

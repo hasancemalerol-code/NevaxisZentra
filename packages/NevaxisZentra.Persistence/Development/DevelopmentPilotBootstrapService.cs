@@ -33,6 +33,7 @@ using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.FactoryCopilot;
 using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.IntelligenceRuntime;
+using NevaxisZentra.Persistence.OperationalValue;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -558,6 +559,16 @@ internal sealed class DevelopmentPilotBootstrapService(
         await EnsureIntelligenceRuntimeManagePermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureIntelligenceRuntimeEvaluatePermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalValueReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalValueReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, reviewerRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalValueReadPermissionAssignmentAsync(
+            dbContext, tenant.Id, operatorRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalValueManageEconomicInputsPermissionAssignmentAsync(
+            dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
+        await EnsureOperationalValueExportPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
         await EnsureShiftOperationsReadPermissionAssignmentAsync(
             dbContext, tenant.Id, tenantRole.Id, seedTimestampUtc, cancellationToken);
@@ -3508,6 +3519,33 @@ internal sealed class DevelopmentPilotBootstrapService(
             dbContext, tenantId, tenantRoleId,
             IntelligenceRuntimePermissionKeys.Evaluate,
             DevelopmentPilotIntelligenceRuntimeIds.EvaluatePermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureOperationalValueReadPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            OperationalValuePermissionKeys.Read,
+            DevelopmentPilotOperationalValueIds.ReadPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureOperationalValueManageEconomicInputsPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            OperationalValuePermissionKeys.ManageEconomicInputs,
+            DevelopmentPilotOperationalValueIds.ManageEconomicInputsPermissionDefinitionId,
+            cancellationToken);
+
+    private static Task EnsureOperationalValueExportPermissionAssignmentAsync(
+        NevaxisZentraDbContext dbContext, Guid tenantId, Guid tenantRoleId,
+        DateTimeOffset seedTimestampUtc, CancellationToken cancellationToken) =>
+        EnsureNamedPermissionAssignmentAsync(
+            dbContext, tenantId, tenantRoleId,
+            OperationalValuePermissionKeys.Export,
+            DevelopmentPilotOperationalValueIds.ExportPermissionDefinitionId,
             cancellationToken);
 
     private static Task EnsureShiftOperationsReadPermissionAssignmentAsync(

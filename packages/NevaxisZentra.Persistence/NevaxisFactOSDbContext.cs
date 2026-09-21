@@ -58,6 +58,7 @@ using NevaxisZentra.Persistence.ThroughputOptimizer;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.ContinuousOptimization;
 using NevaxisZentra.Persistence.IntelligenceRuntime;
+using NevaxisZentra.Persistence.OperationalValue;
 using NevaxisZentra.Persistence.RealFactoryPilot;
 using NevaxisZentra.Persistence.BulkDataOnboarding;
 
@@ -463,6 +464,12 @@ public sealed class NevaxisZentraDbContext : DbContext
         Set<VerifiedOutcomeIntelligenceCostRecord>();
     public DbSet<IntelligenceRuntimeBudgetPolicyRecord> IntelligenceRuntimeBudgetPolicyRecords =>
         Set<IntelligenceRuntimeBudgetPolicyRecord>();
+
+    public DbSet<VerifiedOperationalValueRecord> VerifiedOperationalValueRecords => Set<VerifiedOperationalValueRecord>();
+    public DbSet<TenantEconomicInputConfigurationRecord> TenantEconomicInputConfigurationRecords =>
+        Set<TenantEconomicInputConfigurationRecord>();
+    public DbSet<OperationalValuePeriodSummaryRecord> OperationalValuePeriodSummaryRecords =>
+        Set<OperationalValuePeriodSummaryRecord>();
 
     public DbSet<RealFactoryPilotRunRecord> RealFactoryPilotRunRecords => Set<RealFactoryPilotRunRecord>();
     public DbSet<RealFactoryFieldMappingRecord> RealFactoryFieldMappingRecords => Set<RealFactoryFieldMappingRecord>();
@@ -3532,6 +3539,21 @@ public sealed class NevaxisZentraDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new IntelligenceRuntimeBudgetPolicyRecordConfiguration());
         modelBuilder.Entity<IntelligenceRuntimeBudgetPolicyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new VerifiedOperationalValueRecordConfiguration());
+        modelBuilder.Entity<VerifiedOperationalValueRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new TenantEconomicInputConfigurationRecordConfiguration());
+        modelBuilder.Entity<TenantEconomicInputConfigurationRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new OperationalValuePeriodSummaryRecordConfiguration());
+        modelBuilder.Entity<OperationalValuePeriodSummaryRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
