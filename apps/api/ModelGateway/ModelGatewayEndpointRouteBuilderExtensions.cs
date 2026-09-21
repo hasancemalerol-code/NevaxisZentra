@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.IntelligenceRuntime;
 using NevaxisZentra.Persistence.ModelGateway;
 
 namespace NevaxisZentra.Api.ModelGateway;
@@ -18,8 +19,10 @@ public static class ModelGatewayEndpointRouteBuilderExtensions
 
     public static IServiceCollection AddNevaxisZentraModelGateway(this IServiceCollection services)
     {
+        services.AddHttpClient(nameof(OpenAiFrontierModelClient));
+        services.AddScoped<OpenAiFrontierModelClient>();
         services.AddScoped<IModelProvider, DeterministicEngineProvider>();
-        services.AddScoped<IModelProvider, LocalModelProvider>();
+        services.AddScoped<IModelProvider, MockNevaxisCandidateModelProvider>();
         services.AddScoped<IModelProvider, FrontierModelProvider>();
         services.AddScoped<IModelGatewayService, ModelGatewayService>();
         return services;

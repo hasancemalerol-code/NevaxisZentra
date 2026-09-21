@@ -225,6 +225,7 @@ const css = readCss([
   "src/features/works/works-workspace.css",
   "src/features/factory-copilot/factory-copilot.css",
   "src/features/continuous-optimization/continuous-optimization.css",
+  "src/features/intelligence-runtime/intelligence-runtime.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -420,6 +421,15 @@ test("browser visual QA for critical industrial surfaces", async () => {
 
   const continuousOptimizationFabrika = `<main class="fact-workspace"><section class="fact-section" data-testid="continuous-optimization-factory-strip"><header class="fact-section__header"><h3>Anlamlı fırsatlar</h3></header><div class="continuous-optimization-opportunity-strip fact-section__body"><div class="continuous-optimization-opportunity-strip__item"><div><div class="continuous-optimization-item__title">Buffer starvation recurring</div></div><div class="continuous-optimization-opportunity-strip__benefit">+8.4</div></div></div></section></main>`;
 
+  const intelligenceRuntimeControlCenter = `<main class="fact-workspace intelligence-runtime-shell" data-testid="intelligence-runtime-control-center">
+    <header class="fact-section__header"><div><p class="fact-section__eyebrow">ULTRA H</p><h1>Intelligence Runtime</h1></div></header>
+    <section class="intelligence-runtime-kpis" data-testid="intelligence-runtime-kpis"><div class="intelligence-runtime-kpi"><div class="intelligence-runtime-kpi__label">Deterministik</div><div class="intelligence-runtime-kpi__value">62.0%</div></div><div class="intelligence-runtime-kpi"><div class="intelligence-runtime-kpi__label">Frontier model</div><div class="intelligence-runtime-kpi__value">4.0%</div></div></section>
+    <section class="intelligence-runtime-section"><div class="intelligence-runtime-section__header"><h2>Son routing kararları</h2></div><div class="intelligence-runtime-section__body" data-testid="intelligence-runtime-routes"><div class="intelligence-runtime-item"><div class="intelligence-runtime-item__title">ROOT_CAUSE_CANDIDATE</div></div></div></section>
+    <section class="intelligence-runtime-section"><div class="intelligence-runtime-section__header"><h2>Dataset sürümleri</h2></div><div class="intelligence-runtime-section__body" data-testid="intelligence-runtime-datasets"><div class="intelligence-runtime-item"><div class="intelligence-runtime-item__title">ds-2026-09</div></div></div></section>
+    <section class="intelligence-runtime-section"><div class="intelligence-runtime-section__header"><h2>Model kaydı</h2></div><div class="intelligence-runtime-section__body" data-testid="intelligence-runtime-models"><div class="intelligence-runtime-item"><div class="intelligence-runtime-item__title">nevaxis-mfg-v1</div></div></div></section>
+    <section class="intelligence-runtime-section"><div class="intelligence-runtime-section__header"><h2>Değerlendirme karşılaştırması</h2></div><div class="intelligence-runtime-section__body" data-testid="intelligence-runtime-evaluations"><div class="intelligence-runtime-item"><div class="intelligence-runtime-item__title">nevaxis-mfg-v1</div><span class="intelligence-runtime-badge intelligence-runtime-badge--pass">PASS</span></div></div></section>
+  </main>`;
+
   const surfaces = [
     { id: "navigation-sidebar", title: "Sidebar / Navigation", html: navigationShell },
     { id: "task-center", title: "Görev Merkezi", html: taskCenter },
@@ -435,6 +445,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "factory-copilot-scenario", title: "Factory Copilot / Senaryo", html: renderCopilotHtml("/senaryo-kurtarma", "run=run-1") },
     { id: "continuous-optimization-control", title: "Sürekli Optimizasyon Kontrol Merkezi", html: continuousOptimizationControlCenter },
     { id: "continuous-optimization-fabrika", title: "Sürekli Optimizasyon / Fabrika", html: continuousOptimizationFabrika },
+    { id: "intelligence-runtime-control", title: "Intelligence Runtime Kontrol Merkezi", html: intelligenceRuntimeControlCenter },
   ] as const;
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -468,6 +479,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasCopilotDrawer: Boolean(document.body.querySelector('[data-testid="factory-copilot-drawer"]')),
           hasContinuousOptimizationControlCenter: Boolean(document.body.querySelector('[data-testid="continuous-optimization-control-center"]')),
           hasContinuousOptimizationFactoryStrip: Boolean(document.body.querySelector('[data-testid="continuous-optimization-factory-strip"]')),
+          hasIntelligenceRuntimeControlCenter: Boolean(document.body.querySelector('[data-testid="intelligence-runtime-control-center"]')),
         };
       });
 
@@ -488,6 +500,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id.startsWith("factory-copilot-") && !metrics.hasCopilotDrawer) score -= 1.0;
       if (surface.id === "continuous-optimization-control" && !metrics.hasContinuousOptimizationControlCenter) score -= 1.0;
       if (surface.id === "continuous-optimization-fabrika" && !metrics.hasContinuousOptimizationFactoryStrip) score -= 1.0;
+      if (surface.id === "intelligence-runtime-control" && !metrics.hasIntelligenceRuntimeControlCenter) score -= 1.0;
       score = Math.max(0, Math.min(10, Number(score.toFixed(1))));
       scores.push(score);
 

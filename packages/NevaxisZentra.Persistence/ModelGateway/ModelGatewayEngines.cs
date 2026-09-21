@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using NevaxisZentra.Persistence.IntelligenceRuntime;
 
 namespace NevaxisZentra.Persistence.ModelGateway;
 
@@ -289,9 +290,10 @@ public sealed class LocalModelProvider : IModelProvider
             "unavailable"));
 }
 
-public sealed class FrontierModelProvider : IModelProvider
+public sealed class FrontierModelProvider(OpenAiFrontierModelClient? openAiClient = null) : IModelProvider
 {
     private readonly DeterministicEngineProvider deterministicFallback = new();
+    private readonly OpenAiFrontierModelClient? openAiClient = openAiClient;
 
     public string ProviderId => ModelGatewayProviderIds.FrontierModel;
     public string IntelligencePath => ModelGatewayIntelligencePaths.FrontierModel;
@@ -313,6 +315,15 @@ public sealed class FrontierModelProvider : IModelProvider
                 0,
                 0m,
                 "insufficient-context");
+        }
+
+        if (openAiClient?.IsConfigured == true)
+        {
+            var openAiResult = await openAiClient.InvokeStructuredAsync(request, cancellationToken);
+            if (openAiResult.Succeeded)
+            {
+                return openAiResult;
+            }
         }
 
         var deterministic = await deterministicFallback.InvokeAsync(request, cancellationToken);

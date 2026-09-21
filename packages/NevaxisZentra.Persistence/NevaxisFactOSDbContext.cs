@@ -57,6 +57,7 @@ using NevaxisZentra.Persistence.ModelGateway;
 using NevaxisZentra.Persistence.ThroughputOptimizer;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.ContinuousOptimization;
+using NevaxisZentra.Persistence.IntelligenceRuntime;
 using NevaxisZentra.Persistence.RealFactoryPilot;
 using NevaxisZentra.Persistence.BulkDataOnboarding;
 
@@ -446,6 +447,22 @@ public sealed class NevaxisZentraDbContext : DbContext
         Set<ContinuousOptimizationOpportunityRecord>();
     public DbSet<ContinuousOptimizationPolicyRecord> ContinuousOptimizationPolicyRecords =>
         Set<ContinuousOptimizationPolicyRecord>();
+
+    public DbSet<IntelligenceRuntimeRouteRecord> IntelligenceRuntimeRouteRecords => Set<IntelligenceRuntimeRouteRecord>();
+    public DbSet<ProviderPriceCatalogRecord> ProviderPriceCatalogRecords => Set<ProviderPriceCatalogRecord>();
+    public DbSet<TenantIntelligenceLearningPolicyRecord> TenantIntelligenceLearningPolicyRecords =>
+        Set<TenantIntelligenceLearningPolicyRecord>();
+    public DbSet<NevaxisVerifiedManufacturingDatasetRecord> NevaxisVerifiedManufacturingDatasetRecords =>
+        Set<NevaxisVerifiedManufacturingDatasetRecord>();
+    public DbSet<NevaxisVerifiedManufacturingDatasetEntryRecord> NevaxisVerifiedManufacturingDatasetEntryRecords =>
+        Set<NevaxisVerifiedManufacturingDatasetEntryRecord>();
+    public DbSet<NevaxisModelRegistryRecord> NevaxisModelRegistryRecords => Set<NevaxisModelRegistryRecord>();
+    public DbSet<NevaxisModelTrainingJobRecord> NevaxisModelTrainingJobRecords => Set<NevaxisModelTrainingJobRecord>();
+    public DbSet<NevaxisModelEvaluationRunRecord> NevaxisModelEvaluationRunRecords => Set<NevaxisModelEvaluationRunRecord>();
+    public DbSet<VerifiedOutcomeIntelligenceCostRecord> VerifiedOutcomeIntelligenceCostRecords =>
+        Set<VerifiedOutcomeIntelligenceCostRecord>();
+    public DbSet<IntelligenceRuntimeBudgetPolicyRecord> IntelligenceRuntimeBudgetPolicyRecords =>
+        Set<IntelligenceRuntimeBudgetPolicyRecord>();
 
     public DbSet<RealFactoryPilotRunRecord> RealFactoryPilotRunRecords => Set<RealFactoryPilotRunRecord>();
     public DbSet<RealFactoryFieldMappingRecord> RealFactoryFieldMappingRecords => Set<RealFactoryFieldMappingRecord>();
@@ -3468,6 +3485,53 @@ public sealed class NevaxisZentraDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ContinuousOptimizationPolicyRecordConfiguration());
         modelBuilder.Entity<ContinuousOptimizationPolicyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntelligenceRuntimeRouteRecordConfiguration());
+        modelBuilder.Entity<IntelligenceRuntimeRouteRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new ProviderPriceCatalogRecordConfiguration());
+
+        modelBuilder.ApplyConfiguration(new TenantIntelligenceLearningPolicyRecordConfiguration());
+        modelBuilder.Entity<TenantIntelligenceLearningPolicyRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NevaxisVerifiedManufacturingDatasetRecordConfiguration());
+        modelBuilder.Entity<NevaxisVerifiedManufacturingDatasetRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NevaxisVerifiedManufacturingDatasetEntryRecordConfiguration());
+        modelBuilder.Entity<NevaxisVerifiedManufacturingDatasetEntryRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NevaxisModelRegistryRecordConfiguration());
+        modelBuilder.Entity<NevaxisModelRegistryRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NevaxisModelTrainingJobRecordConfiguration());
+        modelBuilder.Entity<NevaxisModelTrainingJobRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new NevaxisModelEvaluationRunRecordConfiguration());
+        modelBuilder.Entity<NevaxisModelEvaluationRunRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new VerifiedOutcomeIntelligenceCostRecordConfiguration());
+        modelBuilder.Entity<VerifiedOutcomeIntelligenceCostRecord>().HasQueryFilter(e =>
+            tenantContextAccessor != null && tenantContextAccessor.IsAvailable
+            && e.TenantId == tenantContextAccessor.Current!.TenantId);
+
+        modelBuilder.ApplyConfiguration(new IntelligenceRuntimeBudgetPolicyRecordConfiguration());
+        modelBuilder.Entity<IntelligenceRuntimeBudgetPolicyRecord>().HasQueryFilter(e =>
             tenantContextAccessor != null && tenantContextAccessor.IsAvailable
             && e.TenantId == tenantContextAccessor.Current!.TenantId);
 
