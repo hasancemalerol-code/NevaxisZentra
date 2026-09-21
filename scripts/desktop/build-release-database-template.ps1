@@ -1,5 +1,4 @@
-# Builds a pre-migrated and pre-seeded PostgreSQL template for Windows release.
-# Uses the developer workstation's fully migrated FactOS database as source-of-truth.
+# Builds an empty customer PostgreSQL template (schema + migration history only, no business rows).
 
 [CmdletBinding()]
 param(
@@ -15,7 +14,14 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
-$seedSqlPath = Join-Path (Split-Path $TemplateOutputDirectory -Parent) "factos-release-seed.sql"
+$migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.Migrations\Migrations"
+$registeredMigrations = Get-ChildItem $migrationsDir -Filter "*.Designer.cs" |
+    ForEach-Object { $_.BaseName -replace '\.Designer$','' }
+$expectedMigrationId = Get-ChildItem $migrationsDir -Filter "*.cs" |
+    Where-Object { $_.Name -notmatch 'Designer|Snapshot' -and $registeredMigrations -contains $_.BaseName } |
+    Sort-Object Name -Descending |
+    Select-Object -First 1 -ExpandProperty BaseName
+
 $infraEnvFile = Join-Path $RepositoryRoot "infrastructure\.env"
 $secretsFile = Join-Path $RepositoryRoot "apps\desktop\runtime-packaging\config\release-demo-secrets.env"
 
@@ -36,10 +42,6 @@ Import-EnvFile $infraEnvFile
 $sourceHost = if ($env:NEVAXIS_FACTOS__MIGRATIONS__HOST) { $env:NEVAXIS_FACTOS__MIGRATIONS__HOST } elseif ($env:NEVAXIS_FACTOS_POSTGRES_HOST) { $env:NEVAXIS_FACTOS_POSTGRES_HOST } else { "127.0.0.1" }
 $sourcePort = if ($env:NEVAXIS_FACTOS__MIGRATIONS__PORT) { $env:NEVAXIS_FACTOS__MIGRATIONS__PORT } elseif ($env:NEVAXIS_FACTOS_POSTGRES_PORT) { $env:NEVAXIS_FACTOS_POSTGRES_PORT } else { "5432" }
 $sourceDatabase = if ($env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE) { $env:NEVAXIS_FACTOS__MIGRATIONS__DATABASE } elseif ($env:NEVAXIS_FACTOS_POSTGRES_DATABASE) { $env:NEVAXIS_FACTOS_POSTGRES_DATABASE } else { "crevafactos_local" }
-$migrationUser = if ($env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME) { $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME } elseif ($env:NEVAXIS_FACTOS_POSTGRES_USERNAME) { $env:NEVAXIS_FACTOS_POSTGRES_USERNAME } else { "crevafactos" }
-$migrationPassword = if ($env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD) { $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD } elseif ($env:NEVAXIS_FACTOS_POSTGRES_PASSWORD) { $env:NEVAXIS_FACTOS_POSTGRES_PASSWORD } else { "local_dev_only_change_me" }
-$persistenceUser = if ($env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME) { $env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME } else { "crevafactos_runtime" }
-$persistencePassword = if ($env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD) { $env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD } else { "local_runtime_only_change_me" }
 
 $psql = Join-Path $PostgresBinDirectory "psql.exe"
 $pgDump = Join-Path $PostgresBinDirectory "pg_dump.exe"
@@ -47,7 +49,7 @@ if (-not (Test-Path $psql) -or -not (Test-Path $pgDump)) {
     throw "Bundled PostgreSQL client tools not found in $PostgresBinDirectory"
 }
 
-function Test-PostgresCredential([hashtable]$Candidate, [switch]$RequireDumpPrivileges) {
+function Test-PostgresCredential([hashtable]$Candidate) {
     if ([string]::IsNullOrWhiteSpace($Candidate.User) -or [string]::IsNullOrWhiteSpace($Candidate.Password)) {
         return $false
     }
@@ -55,16 +57,6 @@ function Test-PostgresCredential([hashtable]$Candidate, [switch]$RequireDumpPriv
     $previousErrorAction = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        if ($RequireDumpPrivileges) {
-            $probeFile = [System.IO.Path]::GetTempFileName()
-            try {
-                & $pgDump -h $sourceHost -p $sourcePort -U $Candidate.User -d $sourceDatabase --schema-only --table=public.tenants --file $probeFile 2>$null | Out-Null
-                return $LASTEXITCODE -eq 0
-            }
-            finally {
-                if (Test-Path $probeFile) { Remove-Item -Force $probeFile }
-            }
-        }
         & $psql -h $sourceHost -p $sourcePort -U $Candidate.User -d $sourceDatabase -v ON_ERROR_STOP=1 -tA -c "SELECT 1;" 2>$null | Out-Null
         return $LASTEXITCODE -eq 0
     }
@@ -73,63 +65,79 @@ function Test-PostgresCredential([hashtable]$Candidate, [switch]$RequireDumpPriv
     }
 }
 
-function Resolve-SourceCredential([switch]$RequireDumpPrivileges) {
+function Resolve-SourceCredential() {
     $candidates = @(
         @{ User = $env:NEVAXIS_FACTOS_POSTGRES_USERNAME; Password = $env:NEVAXIS_FACTOS_POSTGRES_PASSWORD },
-        @{ User = $migrationUser; Password = $migrationPassword },
         @{ User = "crevafactos"; Password = "local_dev_only_change_me" },
+        @{ User = "nevaxiszentra"; Password = "local_dev_only_change_me" },
         @{ User = "NevaxisZentra"; Password = "local_dev_only_change_me" },
-        @{ User = $persistenceUser; Password = $persistencePassword }
+        @{ User = "crevafactos_runtime"; Password = "local_runtime_only_change_me" }
     )
     foreach ($candidate in $candidates) {
-        if (Test-PostgresCredential -Candidate $candidate -RequireDumpPrivileges:$RequireDumpPrivileges) {
+        if (Test-PostgresCredential -Candidate $candidate) {
             return $candidate
         }
     }
-    if ($RequireDumpPrivileges) {
-        throw "No configured database credential can perform pg_dump against the source database."
-    }
-    throw "Source database is unreachable with configured persistence/migration credentials."
-}
-
-Write-Host "Verifying source FactOS database at ${sourceHost}:${sourcePort}/${sourceDatabase}..."
-$sourceCredential = Resolve-SourceCredential
-$sourceUser = $sourceCredential.User
-$sourcePassword = $sourceCredential.Password
-$env:PGPASSWORD = $sourcePassword
-
-$tableCountRaw = & $psql -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase -tA -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';"
-$tableCount = [int]($tableCountRaw.Trim())
-if ($tableCount -lt 50) {
-    throw "Source database has insufficient schema (public tables=$tableCount). Apply migrations and bootstrap before building release template."
-}
-
-foreach ($requiredTable in @("golden_demo_production_events", "golden_demo_customs_file_outcomes", "tenants")) {
-    $existsRaw = & $psql -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase -tA -c "SELECT to_regclass('public.$requiredTable') IS NOT NULL;"
-    if ($existsRaw.Trim() -ne "t") {
-        throw "Source database is missing required table: $requiredTable"
-    }
-}
-
-Write-Host "Creating PostgreSQL seed dump from source database ($tableCount public tables)..."
-$dumpCredential = Resolve-SourceCredential -RequireDumpPrivileges
-$sourceUser = $dumpCredential.User
-$sourcePassword = $dumpCredential.Password
-$env:PGPASSWORD = $sourcePassword
-New-Item -ItemType Directory -Force -Path (Split-Path $seedSqlPath -Parent) | Out-Null
-& $pgDump -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase --no-owner --no-privileges --file $seedSqlPath
-if ($LASTEXITCODE -ne 0) { throw "pg_dump failed." }
-$seedSize = (Get-Item $seedSqlPath).Length
-if ($seedSize -lt 1048576) {
-    throw "Seed SQL dump is missing or too small ($seedSize bytes). Expected migrated+seeded database content."
+    throw "Source database is unreachable. Start local PostgreSQL and apply migrations before building the release template."
 }
 
 Import-EnvFile $secretsFile
 $runtimePassword = $env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD
-$migrationPassword = $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
-if ([string]::IsNullOrWhiteSpace($runtimePassword) -or [string]::IsNullOrWhiteSpace($migrationPassword)) {
-    throw "Release demo secrets must define persistence and migration passwords."
+$packagedMigrationPassword = $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
+if ([string]::IsNullOrWhiteSpace($runtimePassword) -or [string]::IsNullOrWhiteSpace($packagedMigrationPassword)) {
+    throw "Release packaged secrets must define persistence and migration passwords (release-demo-secrets.env)."
 }
+
+Write-Host "Verifying source schema at ${sourceHost}:${sourcePort}/${sourceDatabase}..."
+$sourceCredential = Resolve-SourceCredential
+$sourceUser = $sourceCredential.User
+$env:PGPASSWORD = $sourceCredential.Password
+
+function Get-LatestAppliedMigrationId([string]$User) {
+    $migrationHistorySql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-migration-history-" + [Guid]::NewGuid().ToString("N") + ".sql")
+    Set-Content -Path $migrationHistorySql -Value 'SELECT "MigrationId" FROM "__EFMigrationsHistory" ORDER BY "MigrationId" DESC LIMIT 1;' -Encoding UTF8
+    $latestAppliedRaw = & $psql -h $sourceHost -p $sourcePort -U $User -d $sourceDatabase -tA -f $migrationHistorySql
+    Remove-Item -Force $migrationHistorySql
+    return $latestAppliedRaw.Trim()
+}
+
+$latestApplied = Get-LatestAppliedMigrationId $sourceUser
+if ($latestApplied -ne $expectedMigrationId) {
+    Write-Host "Source database behind HEAD ($latestApplied -> $expectedMigrationId). Applying pending EF migrations..."
+    $migrationProject = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.Migrations\NevaxisZentra.Persistence.Migrations.csproj"
+    $connectionString = "Host=$sourceHost;Port=$sourcePort;Database=$sourceDatabase;Username=$sourceUser;Password=$($sourceCredential.Password);Ssl Mode=Disable"
+    Push-Location $RepositoryRoot
+    try {
+        & dotnet tool run dotnet-ef -- database update --project $migrationProject --startup-project $migrationProject --context NevaxisZentraDbContext --connection $connectionString
+        if ($LASTEXITCODE -ne 0) { throw "EF database update failed while bringing source database to HEAD." }
+    }
+    finally {
+        Pop-Location
+    }
+    $latestApplied = Get-LatestAppliedMigrationId $sourceUser
+    if ($latestApplied -ne $expectedMigrationId) {
+        throw "Source database migration ($latestApplied) still does not match HEAD ($expectedMigrationId) after EF update."
+    }
+}
+
+$schemaDump = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-release-schema-" + [Guid]::NewGuid().ToString("N") + ".sql")
+$historyDump = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-release-migrations-" + [Guid]::NewGuid().ToString("N") + ".sql")
+Write-Host "Exporting schema-only and migration history (no business data)..."
+& $pgDump -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase --schema-only --no-owner --file $schemaDump
+if ($LASTEXITCODE -ne 0) { throw "pg_dump --schema-only failed." }
+$historyExportSql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-export-history-" + [Guid]::NewGuid().ToString("N") + ".sql")
+Set-Content -Path $historyExportSql -Value @'
+SELECT format(
+    'INSERT INTO public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") VALUES (%L, %L) ON CONFLICT DO NOTHING;',
+    "MigrationId",
+    "ProductVersion")
+FROM public."__EFMigrationsHistory"
+ORDER BY "MigrationId";
+'@ -Encoding UTF8
+$historyLines = & $psql -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase -tA -f $historyExportSql
+Remove-Item -Force $historyExportSql
+if ($LASTEXITCODE -ne 0 -or -not $historyLines) { throw "Failed to export __EFMigrationsHistory rows." }
+Set-Content -Path $historyDump -Value $historyLines -Encoding UTF8
 
 Write-Host "Building Windows PostgreSQL template cluster..."
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-release-db-" + [Guid]::NewGuid().ToString("N"))
@@ -162,35 +170,7 @@ $logFile = Join-Path $logDir "postgresql.log"
 & $pgCtl start -D $dataDir -l $logFile -w -o "-p $Port"
 if ($LASTEXITCODE -ne 0) { throw "pg_ctl start failed." }
 
-function Get-PsqlRoleName([string]$User) {
-    if ($User -eq "NevaxisZentra") {
-        return "nevaxiszentra"
-    }
-    return $User
-}
-
-function Invoke-Psql([string]$User, [string]$Database, [string]$Command) {
-    $User = Get-PsqlRoleName $User
-    $previousUser = $env:PGUSER
-    $env:PGUSER = $User
-    try {
-        & $psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -p $Port -d $Database -c $Command
-        if ($LASTEXITCODE -ne 0) {
-            throw "psql failed for user '$User'."
-        }
-    }
-    finally {
-        if ($null -eq $previousUser) {
-            Remove-Item Env:PGUSER -ErrorAction SilentlyContinue
-        }
-        else {
-            $env:PGUSER = $previousUser
-        }
-    }
-}
-
 function Invoke-PsqlFile([string]$User, [string]$Database, [string]$FilePath) {
-    $User = Get-PsqlRoleName $User
     $previousUser = $env:PGUSER
     $env:PGUSER = $User
     try {
@@ -209,11 +189,85 @@ function Invoke-PsqlFile([string]$User, [string]$Database, [string]$FilePath) {
     }
 }
 
+function Invoke-PsqlScalar([string]$User, [string]$Database, [string]$Query) {
+    $previousUser = $env:PGUSER
+    $env:PGUSER = $User
+    $queryFile = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-query-" + [Guid]::NewGuid().ToString("N") + ".sql")
+    Set-Content -Path $queryFile -Value $Query -Encoding UTF8
+    try {
+        $raw = & $psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -p $Port -d $Database -tA -f $queryFile
+        if ($LASTEXITCODE -ne 0) {
+            throw "psql scalar failed."
+        }
+        return $raw.Trim()
+    }
+    finally {
+        if (Test-Path $queryFile) { Remove-Item -Force $queryFile }
+        if ($null -eq $previousUser) {
+            Remove-Item Env:PGUSER -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PGUSER = $previousUser
+        }
+    }
+}
+
 try {
-    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE ROLE NevaxisZentra LOGIN SUPERUSER PASSWORD '$migrationPassword';"
-    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';"
-    Invoke-Psql -User "postgres" -Database "postgres" -Command "CREATE DATABASE crevafactos_local OWNER NevaxisZentra;"
-    Invoke-PsqlFile -User "NevaxisZentra" -Database "crevafactos_local" -FilePath $seedSqlPath
+    $bootstrapSql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-bootstrap-" + [Guid]::NewGuid().ToString("N") + ".sql")
+    @"
+CREATE ROLE nevaxiszentra LOGIN SUPERUSER PASSWORD '$packagedMigrationPassword';
+CREATE ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';
+CREATE DATABASE crevafactos_local OWNER nevaxiszentra;
+"@ | Set-Content -Path $bootstrapSql -Encoding UTF8
+    Invoke-PsqlFile -User "postgres" -Database "postgres" -FilePath $bootstrapSql
+    Remove-Item -Force $bootstrapSql
+
+    Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $schemaDump
+    Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $historyDump
+
+    foreach ($systemTable in @("permission_definitions")) {
+        $systemDataDump = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-system-data-$systemTable-" + [Guid]::NewGuid().ToString("N") + ".sql")
+        & $pgDump -h $sourceHost -p $sourcePort -U $sourceUser -d $sourceDatabase --data-only --no-owner --table="public.$systemTable" --file $systemDataDump
+        if ($LASTEXITCODE -ne 0) { throw "pg_dump system data failed for $systemTable." }
+        Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $systemDataDump
+        Remove-Item -Force $systemDataDump
+    }
+
+    $hardenRolesSql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-harden-roles-" + [Guid]::NewGuid().ToString("N") + ".sql")
+    @"
+ALTER ROLE nevaxiszentra LOGIN SUPERUSER PASSWORD '$packagedMigrationPassword';
+ALTER ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';
+ALTER ROLE crevafactos_runtime NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+"@ | Set-Content -Path $hardenRolesSql -Encoding UTF8
+    Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $hardenRolesSql
+    Remove-Item -Force $hardenRolesSql
+
+    $appliedMigration = Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query 'SELECT "MigrationId" FROM "__EFMigrationsHistory" ORDER BY "MigrationId" DESC LIMIT 1;'
+    if ($appliedMigration -ne $expectedMigrationId) {
+        throw "Template migration mismatch. Expected=$expectedMigrationId Actual=$appliedMigration"
+    }
+
+    $demoChecks = @(
+        @{ Name = "MIX-LINE-01"; Query = "SELECT COUNT(*) FROM mixed_production_lines WHERE code = 'MIX-LINE-01';" },
+        @{ Name = "golden_demo_production_events"; Query = "SELECT COUNT(*) FROM golden_demo_production_events;" },
+        @{ Name = "tenants"; Query = "SELECT COUNT(*) FROM tenants;" }
+    )
+    foreach ($check in $demoChecks) {
+        $count = [int](Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query $check.Query)
+        if ($count -ne 0) {
+            throw "Customer template must not contain $($check.Name) rows (count=$count)."
+        }
+    }
+
+    $rlsCount = [int](Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query "SELECT COUNT(*) FROM pg_policies WHERE schemaname = 'public' AND tablename = 'tenants';")
+    if ($rlsCount -lt 1) {
+        throw "Template is missing expected RLS policies on tenants."
+    }
+
+    $forceRls = Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query "SELECT relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'tenants';"
+    if ($forceRls -ne "t") {
+        throw "Template tenants table does not have FORCE ROW LEVEL SECURITY enabled."
+    }
 
     $productionHba = @(
         "# TYPE  DATABASE        USER            ADDRESS                 METHOD",
@@ -225,6 +279,8 @@ try {
 }
 finally {
     & $pgCtl stop -D $dataDir -m fast
+    if (Test-Path $schemaDump) { Remove-Item -Force $schemaDump }
+    if (Test-Path $historyDump) { Remove-Item -Force $historyDump }
 }
 
 if (Test-Path $TemplateOutputDirectory) {
@@ -232,5 +288,10 @@ if (Test-Path $TemplateOutputDirectory) {
 }
 New-Item -ItemType Directory -Force -Path $TemplateOutputDirectory | Out-Null
 Get-ChildItem $dataDir -Force | Copy-Item -Destination $TemplateOutputDirectory -Recurse -Force
+
+$templateFiles = (Get-ChildItem $TemplateOutputDirectory -Recurse -File).Count
+$templateBytes = (Get-ChildItem $TemplateOutputDirectory -Recurse -File | Measure-Object -Property Length -Sum).Sum
 Write-Host "Database template ready at $TemplateOutputDirectory"
-Write-Host "Seed SQL retained at $seedSqlPath"
+Write-Host "  files: $templateFiles"
+Write-Host "  bytes: $templateBytes"
+Write-Host "  schema: $expectedMigrationId"

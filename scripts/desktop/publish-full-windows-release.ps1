@@ -4,19 +4,28 @@
 [CmdletBinding()]
 param(
     [string]$RepositoryRoot = "",
-    [string]$ReleaseVersion = "2026.09.16-production",
+    [string]$ReleaseVersion = "2026.09.22-production",
     [ValidateSet("DEMO", "PRESENTATION", "PRODUCTION")]
-    [string]$DeploymentChannel = "DEMO",
+    [string]$DeploymentChannel = "PRODUCTION",
     [string]$ExpectedFreezeSha = "fc8919b91d4ce47c352d22ae675b63925b4b72c8",
     [string]$OutputRoot = "",
     [switch]$SkipWebBuild,
     [switch]$SkipDatabaseTemplate,
+    [switch]$EngineeringArtifact,
     [switch]$SkipInstaller,
     [switch]$AllowDirty
 )
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "desktop-runtime-filesystem.ps1")
+
+if ($SkipDatabaseTemplate -and -not $EngineeringArtifact) {
+    throw "Customer release builds require the embedded database template. Pass -EngineeringArtifact together with -SkipDatabaseTemplate only for non-customer engineering payloads."
+}
+
+if (-not $SkipDatabaseTemplate -and -not $EngineeringArtifact -and $DeploymentChannel -eq "PRODUCTION" -and $SkipInstaller) {
+    throw "Customer release candidate cannot use -SkipInstaller. Build the MSI with a populated postgres/template."
+}
 
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
@@ -45,8 +54,10 @@ function Write-Step([string]$Message) {
 }
 
 function Get-LatestMigrationId {
+    $registered = Get-ChildItem $migrationsDir -Filter "*.Designer.cs" |
+        ForEach-Object { $_.BaseName -replace '\.Designer$','' }
     Get-ChildItem $migrationsDir -Filter "*.cs" |
-        Where-Object { $_.Name -notmatch 'Designer|Snapshot' } |
+        Where-Object { $_.Name -notmatch 'Designer|Snapshot' -and $registered -contains $_.BaseName } |
         Sort-Object Name -Descending |
         Select-Object -First 1 -ExpandProperty BaseName
 }
@@ -179,7 +190,7 @@ if (Test-Path $customerTemplateSrc) {
 }
 
 if (-not $SkipDatabaseTemplate) {
-    Write-Step "Build pre-seeded PostgreSQL template"
+    Write-Step "Build embedded PostgreSQL customer template"
     $templateBuilder = Join-Path $PSScriptRoot "build-release-database-template.ps1"
     if (-not (Test-Path $templateBuilder)) {
         throw "Missing database template builder: $templateBuilder"
@@ -190,6 +201,13 @@ if (-not $SkipDatabaseTemplate) {
         -TemplateOutputDirectory (Join-Path $stagingRoot "postgres\template") `
         -Port $postgresPort
     if ($LASTEXITCODE -ne 0) { throw "Database template build failed." }
+
+    $stagingValidator = Join-Path $RepositoryRoot "scripts\release\validate-release-staging.ps1"
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $stagingValidator -StagingRoot $stagingRoot -RepositoryRoot $RepositoryRoot
+    if ($LASTEXITCODE -ne 0) { throw "Release staging validation failed." }
+}
+elseif (-not $SkipInstaller) {
+    throw "Cannot build customer MSI without embedded postgres/template. Remove -SkipDatabaseTemplate or pass -EngineeringArtifact for engineering-only payloads."
 }
 
 $runtimeManifest = [ordered]@{
@@ -208,6 +226,7 @@ $runtimeManifest = [ordered]@{
     databasePort = $postgresPort
     databaseName = "crevafactos_local"
     databaseArchitecture = "EMBEDDED_LOCAL"
+    embeddedDatabaseTemplateIncluded = (-not $SkipDatabaseTemplate)
     deploymentChannel = $DeploymentChannel
     expectedSchemaVersion = $latestMigration
 }

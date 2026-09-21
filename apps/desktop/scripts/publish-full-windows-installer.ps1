@@ -91,28 +91,30 @@ $setupHash = Get-Sha256Hex $setupMsiPath
 $versionedHash = Get-Sha256Hex $versionedMsiPath
 $setupSize = (Get-Item $setupMsiPath).Length
 
-$readmePath = Join-Path $ArtifactRoot "README-DEMO.txt"
+$readmePath = Join-Path $ArtifactRoot "README-INSTALL.txt"
 Write-Utf8NoBomFile -Path $readmePath -Content @"
 NEVAXIS ZENTRA
 Factory Intelligence & Action OS
 
 INSTALLATION
-1. Run Nevaxis-FactOS-Setup.msi
-2. Complete installation
-3. Launch Nevaxis Zentra from Start Menu or Desktop
-4. Login with the demo account below
+1. Double-click Nevaxis-Zentra-Setup.msi (or the versioned MSI in this folder).
+2. When Windows User Account Control (UAC) prompts, choose Yes to allow the per-machine install.
+3. Complete the installation wizard (default: Program Files).
+4. Launch Nevaxis Zentra from the Start Menu or Desktop shortcut.
 
-DEMO LOGIN
-Email: admin@demo.nevaxiszentra.local
-Password: NevaxisDemo2026!
+FIRST LAUNCH
+- Embedded PostgreSQL and application services start automatically.
+- No terminal, Node.js, or PostgreSQL installation is required on the target PC.
 
-GOLDEN DEMO ACCESS
-- Production Recovery: Altın Demo — Üretim Kurtarma
-- Customs File Digital Worker: Altın Demo — Gümrük Dosyası
+PRODUCTION LOGIN
+- Use credentials provided by your organization administrator.
+- This installer ships an empty customer database template (no demo factory data).
 
-RECOVERY
-- Close and relaunch the application
-- Use demo reset controls inside each Golden Demo screen
+DEMO / PRESENTATION BUILDS
+- Demo channels may ship separate README-DEMO.txt with presentation credentials.
+
+VERIFY PACKAGE INTEGRITY
+- Compare SHA256 of the MSI with SHA256SUMS.txt before installation.
 
 "@
 
@@ -147,9 +149,22 @@ Write-Utf8NoBomFile -Path $manifestPath -Content @"
 - ZIP size bytes: $((Get-Item $zipPath).Length)
 - ZIP SHA-256: $zipHash
 - Database strategy: EMBEDDED_LOCAL PostgreSQL
+- Embedded database template: included in MSI payload (postgres/template)
+- Customer release candidate: yes (pending physical clean-PC acceptance)
+- Pending gates: clean-PC acceptance, full-scale load, 24h soak, real factory Phase B
 - Persistent data: %PROGRAMDATA%\Nevaxis\FactOS
 - Machine secrets: %LOCALAPPDATA%\NevaxisZentra\config\runtime.env.local
 "@
+
+$handoffRoot = Join-Path (Split-Path $ArtifactRoot -Parent) "handoff"
+$handoffVersionDir = Join-Path $handoffRoot $versionSlug
+if (Test-Path $handoffVersionDir) { Remove-Item -Recurse -Force $handoffVersionDir }
+New-Item -ItemType Directory -Force -Path $handoffVersionDir | Out-Null
+Copy-Item -Path $versionedMsiPath -Destination (Join-Path $handoffVersionDir $versionedMsiName) -Force
+Copy-Item -Path $checksumPath -Destination (Join-Path $handoffVersionDir "SHA256SUMS.txt") -Force
+Copy-Item -Path $manifestPath -Destination (Join-Path $handoffVersionDir "NEVAXISZENTRA-WINDOWS-RELEASE-MANIFEST.md") -Force
+Copy-Item -Path $readmePath -Destination (Join-Path $handoffVersionDir "README-INSTALL.txt") -Force
+Write-Host "Handoff package: $handoffVersionDir"
 
 Write-Host "Installer: $setupMsiPath ($([math]::Round($setupSize / 1MB, 2)) MB)"
 Write-Host "Distribution ZIP: $zipPath ($([math]::Round((Get-Item $zipPath).Length / 1MB, 2)) MB)"

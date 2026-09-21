@@ -9,8 +9,8 @@
 
 ## Kurulum
 
-1. `Nevaxis-FactOS-Setup.msi` dosyasını indirin.
-2. Kurulum sihirbazını yönetici olarak çalıştırın.
+1. `Nevaxis-Zentra-Setup-<sürüm>.msi` dosyasını indirin (SHA256 doğrulaması için `SHA256SUMS.txt` kullanın).
+2. MSI dosyasını normal şekilde çalıştırın; Windows UAC (Kullanıcı Hesabı Denetimi) istendiğinde **Evet** deyin. Kurulum makine genelinde (Program Files) yapılır ve yönetici onayı gerektirir.
 3. Lisansı onaylayın ve kurulumu tamamlayın.
 4. Başlat menüsünden veya masaüstü kısayolundan **Nevaxis Zentra** uygulamasını açın.
 

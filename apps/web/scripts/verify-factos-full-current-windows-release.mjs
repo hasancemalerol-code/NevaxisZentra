@@ -52,10 +52,13 @@ try {
   assert("web server exists", existsSync(join(stagingRoot, "web", "apps", "web", "server.js")));
   assert("bundled node exists", existsSync(join(stagingRoot, "node", "node.exe")));
   assert("postgres initdb exists", existsSync(join(stagingRoot, "postgres", "bin", "initdb.exe")));
+  assert("postgres template PG_VERSION exists", existsSync(join(stagingRoot, "postgres", "template", "PG_VERSION")));
+  assert("expected schema version exists", existsSync(join(stagingRoot, "migrations", "expected-schema-version.txt")));
   assert("runtime manifest exists", existsSync(join(stagingRoot, "manifests", "runtime-manifest.json")));
 
   const manifest = JSON.parse(readFileSync(join(stagingRoot, "manifests", "runtime-manifest.json"), "utf8"));
   assert("embedded postgres architecture", manifest.databaseArchitecture === "EMBEDDED_LOCAL");
+  assert("embedded database template included", manifest.embeddedDatabaseTemplateIncluded === true);
 
   const stagingFiles = walkFiles(stagingRoot);
   assert("staging non-empty", stagingFiles.length > 100, `${stagingFiles.length} files`);
@@ -77,10 +80,11 @@ try {
     }
   }
 
-  const setupMsi = join(releaseRoot, "Nevaxis-FactOS-Setup.msi");
-  const setupExe = join(releaseRoot, "Nevaxis-FactOS-Setup.exe");
-  const zip = join(releaseRoot, "Nevaxis-FactOS-Demo.zip");
-  const readme = join(releaseRoot, "README-DEMO.txt");
+  const setupMsi = join(releaseRoot, "Nevaxis-Zentra-Setup.msi");
+  const setupExe = join(releaseRoot, "Nevaxis-Zentra-Setup.exe");
+  const zipCandidates = readdirSync(releaseRoot).filter((name) => name.startsWith("Nevaxis-Zentra-Release-") && name.endsWith(".zip"));
+  const zip = zipCandidates.length > 0 ? join(releaseRoot, zipCandidates[0]) : join(releaseRoot, "Nevaxis-Zentra-Release.zip");
+  const readme = join(releaseRoot, "README-INSTALL.txt");
   const checksums = join(releaseRoot, "SHA256SUMS.txt");
   const releaseManifest = join(releaseRoot, "NEVAXISZENTRA-WINDOWS-RELEASE-MANIFEST.md");
 
@@ -88,7 +92,7 @@ try {
     assert("installer msi exists", existsSync(setupMsi));
     assert("installer artifact exists", existsSync(setupExe) || existsSync(setupMsi));
     assert("distribution zip exists", existsSync(zip));
-    assert("readme demo exists", existsSync(readme));
+    assert("readme install exists", existsSync(readme));
     assert("checksums exist", existsSync(checksums));
     assert("release manifest exists", existsSync(releaseManifest));
     assert("setup msi non-empty", statSync(setupMsi).size > 1024 * 1024);

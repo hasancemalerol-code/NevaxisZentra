@@ -110,6 +110,21 @@ public static class StartupPreflightValidator
             {
                 Pass("postgres-bin=present");
             }
+
+            var manifest = bundle.TryReadManifest();
+            var templateFailures = EmbeddedPostgresTemplateReadiness.Validate(bundle, manifest);
+            if (templateFailures.Count > 0)
+            {
+                Fail("postgres-template", string.Join(", ", templateFailures));
+            }
+            else if (manifest is null
+                     || string.Equals(
+                         manifest.DatabaseArchitecture,
+                         "EMBEDDED_LOCAL",
+                         StringComparison.OrdinalIgnoreCase))
+            {
+                Pass("postgres-template=ready");
+            }
         }
 
         foreach (var check in checks)
