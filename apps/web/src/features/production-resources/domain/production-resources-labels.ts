@@ -8,6 +8,9 @@ export const PRODUCTION_RESOURCES_SUBTITLE =
 export const PRODUCTION_RESOURCES_EMPTY =
   "Seçilen filtrelerle eşleşen üretim kaynağı bulunmuyor.";
 
+export const PRODUCTION_RESOURCES_ZERO_FACTORY =
+  "Henüz üretim kaynağı tanımlanmadı. Veri Aktarım Merkezi üzerinden toplu yükleme yapabilirsiniz.";
+
 export const PRODUCTION_RESOURCE_TYPE_LABELS: Record<string, string> = {
   machine: "Makine",
   human: "Operatör",

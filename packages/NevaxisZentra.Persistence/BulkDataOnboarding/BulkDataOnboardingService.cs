@@ -46,13 +46,40 @@ public interface IBulkDataOnboardingService
     Task<BulkSyntheticImportPerformance> RunSyntheticFoundationBenchmarkAsync(
         BulkDataOperationContext context,
         CancellationToken cancellationToken = default);
+
+    Task<UploadBulkImportFilesResult> UploadFilesAsync(
+        BulkDataOperationContext context,
+        Guid jobId,
+        IReadOnlyList<BulkImportUploadFile> files,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BulkImportJobSummary>> ListJobsAsync(
+        BulkDataOperationContext context,
+        CancellationToken cancellationToken = default);
+
+    Task<FactoryDataMappingProfile> UpsertMappingProfileAsync(
+        BulkDataOperationContext context,
+        Guid? profileId,
+        UpsertBulkMappingProfileRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BulkMappingProfileSummary>> ListMappingProfilesAsync(
+        BulkDataOperationContext context,
+        CancellationToken cancellationToken = default);
+
+    Task<BulkDataImportJob> ApplyAutoMappingAsync(
+        BulkDataOperationContext context,
+        Guid jobId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class BulkDataOnboardingService(
     NevaxisZentraDbContext dbContext,
     TenantDatabaseSession tenantDatabaseSession,
     IBulkDataSourceProviderResolver sourceProviderResolver,
-    IBulkDataCanonicalizationService canonicalizationService) : IBulkDataOnboardingService
+    IBulkDataCanonicalizationService canonicalizationService,
+    IBulkImportFileStore fileStore,
+    IBulkImportSourceContextAccessor sourceContextAccessor) : IBulkDataOnboardingService
 {
     private static readonly Dictionary<string, string> RequiredFields = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -162,6 +189,24 @@ public sealed class BulkDataOnboardingService(
             reconciliation = JsonSerializer.Deserialize<BulkReconciliationSummary>(job.ReconciliationJson);
         }
 
+        var quarantine = await dbContext.BulkImportQuarantineRecords
+            .Where(q => q.ImportJobId == jobId)
+            .OrderByDescending(q => q.OccurredAtUtc)
+            .Take(200)
+            .Select(q => new BulkQuarantineSummary(
+                q.Id,
+                q.SourceTable,
+                q.SourceKey,
+                q.ReasonCode,
+                q.SafeReason,
+                q.Severity,
+                q.Status,
+                q.OccurredAtUtc))
+            .ToListAsync(cancellationToken);
+
+        var mappingRules = await ResolveMappingRulesAsync(context, job, catalog, cancellationToken);
+        var uploadedFiles = fileStore.ReadManifest(job.ObservabilityJson);
+
         return new BulkImportJobWorkspace(
             ToSummary(job),
             catalog.Select(c => new BulkSourceTableDescriptor(
@@ -174,7 +219,10 @@ public sealed class BulkDataOnboardingService(
                 (c.TimestampColumns ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList())).ToList(),
             impact,
             reconciliation,
-            checkpoint);
+            checkpoint,
+            quarantine,
+            mappingRules,
+            uploadedFiles);
     }
 
     public Task<BulkDataImportJob> DiscoverAsync(
@@ -194,6 +242,7 @@ public sealed class BulkDataOnboardingService(
         job.Status = BulkDataImportJobStatuses.Discovering;
         job.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
+        using var sourceScope = SetSourceContext(job);
         var provider = sourceProviderResolver.Resolve(job.SourceProviderKind);
         var discovery = await provider.DiscoverAsync(cancellationToken);
         job.SourceSystem = discovery.SourceSystem;
@@ -228,6 +277,8 @@ public sealed class BulkDataOnboardingService(
         job.Status = BulkDataImportJobStatuses.Profiling;
         job.UpdatedAtUtc = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        await EnsureMappingProfileAsync(context, job, cancellationToken);
         return job;
     }
 
@@ -248,10 +299,16 @@ public sealed class BulkDataOnboardingService(
         job.Status = BulkDataImportJobStatuses.Validating;
         job.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
+        using var sourceScope = SetSourceContext(job);
         var provider = sourceProviderResolver.Resolve(job.SourceProviderKind);
         BulkImportCheckpoint? checkpoint = string.IsNullOrWhiteSpace(job.CheckpointJson)
             ? null
             : JsonSerializer.Deserialize<BulkImportCheckpoint>(job.CheckpointJson);
+
+        var mapping = await ResolveMappingProfileDefinitionAsync(context, job, cancellationToken);
+        var sourceDatabase = IsFileProvider(job.SourceProviderKind)
+            ? "customer_file_import"
+            : BulkDataOnboardingSyntheticFixture.SourceDatabase;
 
         var existingStaging = await dbContext.BulkImportStagingRecords
             .Where(s => s.ImportJobId == jobId)
@@ -262,7 +319,7 @@ public sealed class BulkDataOnboardingService(
             var batch = 0;
             var processed = 0;
             await foreach (var record in provider.ReadRecordsAsync(
-                BulkDataOnboardingSyntheticFixture.BuildDefaultMapping(),
+                mapping,
                 checkpoint,
                 cancellationToken))
             {
@@ -291,7 +348,7 @@ public sealed class BulkDataOnboardingService(
                     FacilityId = context.FacilityId,
                     ImportJobId = job.Id,
                     SourceSystem = job.SourceSystem,
-                    SourceDatabase = BulkDataOnboardingSyntheticFixture.SourceDatabase,
+                    SourceDatabase = sourceDatabase,
                     SourceTable = record.SourceTable,
                     SourceKey = record.SourceKey,
                     RecordChecksum = checksum,
@@ -589,6 +646,259 @@ public sealed class BulkDataOnboardingService(
             job.ImportedRows / durationSeconds,
             job.QuarantinedRows,
             reconciliation.Balanced);
+    }
+
+    public Task<UploadBulkImportFilesResult> UploadFilesAsync(
+        BulkDataOperationContext context,
+        Guid jobId,
+        IReadOnlyList<BulkImportUploadFile> files,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => UploadFilesCoreAsync(context, jobId, files, ct),
+            cancellationToken);
+
+    private async Task<UploadBulkImportFilesResult> UploadFilesCoreAsync(
+        BulkDataOperationContext context,
+        Guid jobId,
+        IReadOnlyList<BulkImportUploadFile> files,
+        CancellationToken cancellationToken)
+    {
+        var job = await RequireJobAsync(context, jobId, cancellationToken);
+        if (!IsFileProvider(job.SourceProviderKind))
+        {
+            throw new InvalidOperationException(BulkFailureCodes.InvalidState);
+        }
+
+        var manifest = await fileStore.SaveFilesAsync(context.TenantId, context.FacilityId, jobId, files, cancellationToken);
+        job.ObservabilityJson = fileStore.WriteManifest(manifest);
+        job.Status = BulkDataImportJobStatuses.Created;
+        job.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return new UploadBulkImportFilesResult(jobId, manifest.Files.Count, manifest.Files);
+    }
+
+    public Task<IReadOnlyList<BulkImportJobSummary>> ListJobsAsync(
+        BulkDataOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var jobs = await dbContext.BulkDataImportJobs
+                    .Where(j => j.TenantId == context.TenantId && j.FacilityId == context.FacilityId)
+                    .OrderByDescending(j => j.CreatedAtUtc)
+                    .Take(50)
+                    .ToListAsync(ct);
+                return (IReadOnlyList<BulkImportJobSummary>)jobs.Select(ToSummary).ToList();
+            },
+            cancellationToken);
+
+    public Task<FactoryDataMappingProfile> UpsertMappingProfileAsync(
+        BulkDataOperationContext context,
+        Guid? profileId,
+        UpsertBulkMappingProfileRequest request,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            ct => UpsertMappingProfileCoreAsync(context, profileId, request, ct),
+            cancellationToken);
+
+    private async Task<FactoryDataMappingProfile> UpsertMappingProfileCoreAsync(
+        BulkDataOperationContext context,
+        Guid? profileId,
+        UpsertBulkMappingProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        FactoryDataMappingProfile profile;
+        if (profileId is Guid existingId)
+        {
+            profile = await dbContext.FactoryDataMappingProfiles
+                .SingleOrDefaultAsync(
+                    p => p.Id == existingId
+                        && p.TenantId == context.TenantId
+                        && p.FacilityId == context.FacilityId,
+                    cancellationToken)
+                ?? throw new InvalidOperationException(BulkFailureCodes.NotFound);
+        }
+        else
+        {
+            profile = new FactoryDataMappingProfile
+            {
+                Id = Guid.NewGuid(),
+                TenantId = context.TenantId,
+                FacilityId = context.FacilityId,
+                CreatedBySubjectId = context.SubjectId,
+                CreatedAtUtc = DateTimeOffset.UtcNow,
+            };
+            dbContext.FactoryDataMappingProfiles.Add(profile);
+        }
+
+        profile.Name = request.Name;
+        profile.SourceSystem = request.SourceSystem;
+        profile.Status = "active";
+        profile.MappingJson = BulkMappingProfileEngine.SerializeRules(request.Rules);
+        profile.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return profile;
+    }
+
+    public Task<IReadOnlyList<BulkMappingProfileSummary>> ListMappingProfilesAsync(
+        BulkDataOperationContext context,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync(
+            async ct =>
+            {
+                var profiles = await dbContext.FactoryDataMappingProfiles
+                    .Where(p => p.TenantId == context.TenantId && p.FacilityId == context.FacilityId)
+                    .OrderByDescending(p => p.UpdatedAtUtc)
+                    .Take(50)
+                    .ToListAsync(ct);
+                return (IReadOnlyList<BulkMappingProfileSummary>)profiles
+                    .Select(p => new BulkMappingProfileSummary(
+                        p.Id,
+                        p.Name,
+                        p.SourceSystem,
+                        p.Status,
+                        JsonSerializer.Deserialize<List<BulkMappingRule>>(p.MappingJson)?.Count ?? 0,
+                        p.UpdatedAtUtc))
+                    .ToList();
+            },
+            cancellationToken);
+
+    public Task<BulkDataImportJob> ApplyAutoMappingAsync(
+        BulkDataOperationContext context,
+        Guid jobId,
+        CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteWriteAsync(
+            async ct =>
+            {
+                var job = await RequireJobAsync(context, jobId, ct);
+                await EnsureMappingProfileAsync(context, job, ct);
+                job.Status = BulkDataImportJobStatuses.MappingRequired;
+                job.UpdatedAtUtc = DateTimeOffset.UtcNow;
+                await dbContext.SaveChangesAsync(ct);
+                return job;
+            },
+            cancellationToken);
+
+    private async Task EnsureMappingProfileAsync(
+        BulkDataOperationContext context,
+        BulkDataImportJob job,
+        CancellationToken cancellationToken)
+    {
+        if (job.MappingProfileId is not null)
+        {
+            return;
+        }
+
+        var catalog = await dbContext.BulkImportSourceCatalogEntries
+            .Where(c => c.ImportJobId == job.Id)
+            .ToListAsync(cancellationToken);
+        if (catalog.Count == 0)
+        {
+            return;
+        }
+
+        var rules = new List<BulkMappingRule>();
+        foreach (var entry in catalog)
+        {
+            var columns = JsonSerializer.Deserialize<List<BulkColumnDescriptor>>(entry.ColumnsJson) ?? [];
+            rules.AddRange(BulkMappingProfileEngine.BuildAutoMappingRules(
+                entry.SourceTable,
+                columns.Select(c => c.Name).ToList()));
+        }
+
+        var profile = new FactoryDataMappingProfile
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            FacilityId = context.FacilityId,
+            Name = $"{job.Name} Mapping",
+            SourceSystem = job.SourceSystem,
+            SourceVersion = job.SourceVersion,
+            Status = "active",
+            MappingJson = BulkMappingProfileEngine.SerializeRules(rules),
+            CreatedBySubjectId = context.SubjectId,
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            UpdatedAtUtc = DateTimeOffset.UtcNow,
+        };
+        dbContext.FactoryDataMappingProfiles.Add(profile);
+        job.MappingProfileId = profile.Id;
+        job.Status = BulkDataImportJobStatuses.MappingRequired;
+        job.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<BulkMappingProfileDefinition> ResolveMappingProfileDefinitionAsync(
+        BulkDataOperationContext context,
+        BulkDataImportJob job,
+        CancellationToken cancellationToken)
+    {
+        if (job.MappingProfileId is Guid profileId)
+        {
+            var profile = await dbContext.FactoryDataMappingProfiles
+                .SingleOrDefaultAsync(
+                    p => p.Id == profileId
+                        && p.TenantId == context.TenantId
+                        && p.FacilityId == context.FacilityId,
+                    cancellationToken);
+            if (profile is not null)
+            {
+                return BulkMappingProfileEngine.DeserializeProfile(
+                    profile.MappingJson,
+                    profile.SourceSystem,
+                    profile.SourceVersion);
+            }
+        }
+
+        if (IsFileProvider(job.SourceProviderKind))
+        {
+            return new BulkMappingProfileDefinition(job.SourceSystem, job.SourceVersion, []);
+        }
+
+        return BulkDataOnboardingSyntheticFixture.BuildDefaultMapping();
+    }
+
+    private async Task<IReadOnlyList<BulkMappingRule>> ResolveMappingRulesAsync(
+        BulkDataOperationContext context,
+        BulkDataImportJob job,
+        IReadOnlyList<BulkImportSourceCatalogEntry> catalog,
+        CancellationToken cancellationToken)
+    {
+        var definition = await ResolveMappingProfileDefinitionAsync(context, job, cancellationToken);
+        if (definition.Rules.Count > 0)
+        {
+            return definition.Rules;
+        }
+
+        return catalog
+            .SelectMany(entry =>
+            {
+                var columns = JsonSerializer.Deserialize<List<BulkColumnDescriptor>>(entry.ColumnsJson) ?? [];
+                return BulkMappingProfileEngine.BuildAutoMappingRules(
+                    entry.SourceTable,
+                    columns.Select(c => c.Name).ToList());
+            })
+            .ToList();
+    }
+
+    private BulkImportSourceContextScope SetSourceContext(BulkDataImportJob job)
+    {
+        sourceContextAccessor.Current = new BulkImportSourceContext(
+            job.Id,
+            job.TenantId,
+            job.FacilityId,
+            job.SourceProviderKind,
+            job.ObservabilityJson,
+            job.SourceSystem);
+        return new BulkImportSourceContextScope(sourceContextAccessor);
+    }
+
+    private static bool IsFileProvider(string providerKind) =>
+        string.Equals(providerKind, BulkDataSourceProviderKinds.CsvFile, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(providerKind, BulkDataSourceProviderKinds.XlsxFile, StringComparison.OrdinalIgnoreCase);
+
+    private sealed class BulkImportSourceContextScope(IBulkImportSourceContextAccessor accessor) : IDisposable
+    {
+        public void Dispose() => accessor.Current = null;
     }
 
     private async Task<BulkDataImportJob> RequireJobAsync(

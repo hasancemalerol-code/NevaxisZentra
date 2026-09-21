@@ -48,4 +48,23 @@ export type BulkImportJobWorkspaceApi = {
     currentBatch: number;
     processedRows: number;
   };
+  quarantine?: Array<{
+    id: string;
+    sourceTable: string;
+    sourceKey: string;
+    reasonCode: string;
+    safeReason: string;
+    severity: string;
+    status: string;
+  }>;
+  mappingRules?: Array<{
+    sourceTable: string;
+    sourceColumn: string;
+    canonicalEntityType: string;
+    canonicalField: string;
+    mappingType: string;
+  }>;
+  uploadedFiles?: {
+    files: Array<{ fileName: string; storedName: string; sizeBytes: number }>;
+  };
 };

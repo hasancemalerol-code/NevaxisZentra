@@ -128,7 +128,10 @@ public sealed record BulkImportJobWorkspace(
     IReadOnlyList<BulkSourceTableDescriptor> Catalog,
     BulkImpactPreview? ImpactPreview,
     BulkReconciliationSummary? Reconciliation,
-    BulkImportCheckpoint? Checkpoint);
+    BulkImportCheckpoint? Checkpoint,
+    IReadOnlyList<BulkQuarantineSummary> Quarantine,
+    IReadOnlyList<BulkMappingRule> MappingRules,
+    BulkImportFileManifest UploadedFiles);
 
 public sealed record CreateBulkImportJobRequest(
     string Name,

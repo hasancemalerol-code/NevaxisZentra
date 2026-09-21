@@ -8,4 +8,7 @@
     <ProjectReference Include="..\..\packages\NevaxisZentra.Configuration\NevaxisZentra.Configuration.csproj" />
     <ProjectReference Include="..\..\packages\NevaxisZentra.Persistence\NevaxisZentra.Persistence.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\release\customer-import-templates\**\*" Link="customer-import-templates\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

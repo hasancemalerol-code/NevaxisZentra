@@ -1,0 +1,5 @@
+area_code,area_name
+AREA-01,Injection Area
+AREA-01,Duplicate Area Code
+,Missing Area Code
+LINE-99,Orphan Line Reference,AREA-99

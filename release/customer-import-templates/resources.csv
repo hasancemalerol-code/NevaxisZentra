@@ -1,0 +1,11 @@
+resource_code,resource_name,station_code,resource_type,machine_registry_code,manufacturer,model,status,external_id
+RES-001,Injection Press 01,ST-001,machine,MCH-INJ-001,Nevaxis,NP-450,running,ERP-MCH-001
+RES-002,Manual Assembly Bench,ST-002,human,,,,active,ERP-HUM-002
+RES-003,Conveyor Segment 01,ST-003,conveyor,,,,running,ERP-CNV-003
+RES-004,Quality Test Bench,ST-004,quality,,,,idle,ERP-QA-004
+RES-005,Robot Cell 01,ST-001,robot,MCH-RBT-005,Nevaxis,NR-120,running,ERP-RBT-005
+RES-006,Buffer Lane 01,ST-003,buffer,,,,running,ERP-BUF-006
+RES-007,Mold Station 01,ST-001,mold,MCH-MLD-007,,,active,ERP-MLD-007
+RES-008,Tooling Bay 01,ST-002,tool,,,,active,ERP-TOL-008
+RES-009,Injection Press 02,ST-001,machine,MCH-INJ-009,Nevaxis,NP-450,maintenance,ERP-MCH-009
+RES-010,Manual Pack Bench,ST-004,human,,,,active,ERP-HUM-010

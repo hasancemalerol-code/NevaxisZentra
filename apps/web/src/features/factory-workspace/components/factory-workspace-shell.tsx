@@ -9,6 +9,7 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { buildFactoryWorkspaceHref } from "../application/factory-workspace-selection";
 import type { FactoryWorkspacePayload, FactoryWorkspaceSelection } from "../domain/factory-workspace-types";
 import { FactoryHierarchyTree } from "./factory-hierarchy-tree";
+import { FactoryOnboardingEmptyState } from "./factory-onboarding-empty-state";
 import { FactoryOperationalCenter } from "./factory-operational-center";
 import { FactoryResourceInspector } from "./factory-resource-inspector";
 
@@ -82,6 +83,11 @@ export function FactoryWorkspaceShell({ workspace }: FactoryWorkspaceShellProps)
           { label: "Risk", value: workspace.resources.status.atRisk },
           { label: "Vardiya", value: workspace.shift?.shiftLabel ?? "—" },
         ]}
+      />
+
+      <FactoryOnboardingEmptyState
+        resourceCount={workspace.resources.resources.length}
+        lineCount={new Set(workspace.resources.resources.map((resource) => resource.lineId)).size}
       />
 
       <div className="factory-workspace__layout">

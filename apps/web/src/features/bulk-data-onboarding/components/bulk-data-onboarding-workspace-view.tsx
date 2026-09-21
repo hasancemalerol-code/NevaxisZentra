@@ -6,14 +6,16 @@ import {
   BULK_ONBOARDING_WORKFLOW_STEPS,
 } from "../domain/bulk-data-onboarding-labels";
 import type { BulkImportJobWorkspaceApi } from "../server/bulk-data-onboarding-api-client";
+import { BulkDataOnboardingWorkflowClient } from "./bulk-data-onboarding-workflow-client";
 
 import "./bulk-data-onboarding-workspace.css";
 
 type BulkDataOnboardingWorkspaceViewProps = Readonly<{
   workspace: BulkImportJobWorkspaceApi | null;
+  facilityId: string;
 }>;
 
-export function BulkDataOnboardingWorkspaceView({ workspace }: BulkDataOnboardingWorkspaceViewProps) {
+export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkDataOnboardingWorkspaceViewProps) {
   const job = workspace?.job;
 
   return (
@@ -42,6 +44,8 @@ export function BulkDataOnboardingWorkspaceView({ workspace }: BulkDataOnboardin
           ))}
         </ol>
       </section>
+
+      <BulkDataOnboardingWorkflowClient facilityId={facilityId} initialWorkspace={workspace} />
 
       {job ? (
         <>
@@ -117,10 +121,41 @@ export function BulkDataOnboardingWorkspaceView({ workspace }: BulkDataOnboardin
               <p>{workspace.reconciliation.balanced ? "Dengeli" : "Dengesiz"}</p>
             </section>
           ) : null}
+
+          {workspace?.quarantine && workspace.quarantine.length > 0 ? (
+            <section className="commint-panel" data-testid="bulk-onboarding-quarantine">
+              <h2>Karantina</h2>
+              <div className="bulk-onboarding-catalog-table">
+                <div className="bulk-onboarding-catalog-table__header">
+                  <span>Tablo</span>
+                  <span>Anahtar</span>
+                  <span>Neden</span>
+                </div>
+                {workspace.quarantine.map((entry) => (
+                  <div key={entry.id} className="bulk-onboarding-catalog-table__row">
+                    <span>{entry.sourceTable}</span>
+                    <span>{entry.sourceKey}</span>
+                    <span>{entry.safeReason}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {workspace?.mappingRules && workspace.mappingRules.length > 0 ? (
+            <section className="commint-panel" data-testid="bulk-onboarding-mapping">
+              <h2>Eşleme</h2>
+              <p>{workspace.mappingRules.length} alan eşlemesi tanımlı.</p>
+            </section>
+          ) : null}
         </>
       ) : (
         <section className="commint-panel" data-testid="bulk-onboarding-empty">
-          <p>Henüz bir toplu veri aktarım işi seçilmedi. Sunucu tarafı iş akışı hazır.</p>
+          <p>Henüz bir toplu veri aktarım işi seçilmedi.</p>
+          <p>
+            Yeni müşteri kurulumunda makine ve kaynakları toplu yüklemek için aşağıdaki akışı başlatın veya örnek
+            CSV şablonlarını indirin.
+          </p>
         </section>
       )}
     </div>

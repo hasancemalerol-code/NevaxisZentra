@@ -9,8 +9,13 @@ export default async function BulkDataOnboardingPage({ searchParams }: PageProps
   const params = await searchParams;
   const result = await readBulkDataOnboardingWorkspace(params?.jobId);
   if (result.status === "failure") {
-    return <BulkDataOnboardingWorkspaceView workspace={null} />;
+    return <BulkDataOnboardingWorkspaceView workspace={null} facilityId="" />;
   }
 
-  return <BulkDataOnboardingWorkspaceView workspace={result.workspace} />;
+  return (
+    <BulkDataOnboardingWorkspaceView
+      workspace={result.workspace}
+      facilityId={result.facilityId}
+    />
+  );
 }

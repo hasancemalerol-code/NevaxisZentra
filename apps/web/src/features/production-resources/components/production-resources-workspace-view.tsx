@@ -19,6 +19,7 @@ import {
 } from "../application/production-resources-filter";
 import {
   PRODUCTION_RESOURCES_EMPTY,
+  PRODUCTION_RESOURCES_ZERO_FACTORY,
   PRODUCTION_RESOURCES_SUBTITLE,
   PRODUCTION_RESOURCES_TITLE,
   PRODUCTION_RESOURCE_STATE_FILTER_OPTIONS,
@@ -203,7 +204,9 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
                 {filteredResources.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="production-resources-grid__empty">
-                      {PRODUCTION_RESOURCES_EMPTY}
+                      {workspace.resources.length === 0 && !filtersActive
+                        ? PRODUCTION_RESOURCES_ZERO_FACTORY
+                        : PRODUCTION_RESOURCES_EMPTY}
                     </td>
                   </tr>
                 ) : (

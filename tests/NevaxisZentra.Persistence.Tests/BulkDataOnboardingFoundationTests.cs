@@ -546,3 +546,124 @@ public sealed class BulkIntegrationSpineReuseTests
         Assert.StartsWith("bulk:", key);
     }
 }
+
+public sealed class BulkMappingProfileEngineTests
+{
+    [Fact]
+    public void AutoMappingMapsResourceColumnsToCanonicalFields()
+    {
+        var rules = BulkMappingProfileEngine.BuildAutoMappingRules(
+            "resources.csv",
+            ["resource_code", "resource_name", "station_code", "resource_type", "machine_registry_code"]);
+        Assert.Contains(rules, r => r.CanonicalField == "code" && r.SourceColumn == "resource_code");
+        Assert.Contains(rules, r => r.CanonicalField == "resource_type");
+    }
+
+    [Fact]
+    public void MapRowAppliesDirectAliasesForHierarchyTables()
+    {
+        var mapping = new BulkMappingProfileDefinition(
+            "CUSTOMER-FILE-IMPORT",
+            "1.0.0",
+            BulkMappingProfileEngine.BuildAutoMappingRules(
+                "areas",
+                ["area_code", "area_name"]));
+        var fields = BulkMappingProfileEngine.MapRow(
+            "areas",
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["area_code"] = "AREA-01",
+                ["area_name"] = "Injection",
+            },
+            mapping);
+        Assert.Equal("AREA-01", fields["code"]);
+        Assert.Equal("Injection", fields["name"]);
+    }
+
+    [Fact]
+    public void NormalizeTableNameAcceptsCustomerFileNames()
+    {
+        Assert.Equal("resources", BulkMappingProfileEngine.NormalizeTableName("production_resources.csv"));
+        Assert.Equal("areas", BulkMappingProfileEngine.NormalizeTableName("factory_areas.csv"));
+    }
+}
+
+public sealed class BulkCustomerFileProviderTests
+{
+    [Fact]
+    public async Task CsvProviderDiscoversUploadedTemplateTables()
+    {
+        var store = new BulkImportFileStore();
+        var accessor = new BulkImportSourceContextAccessor();
+        var tenantId = Guid.NewGuid();
+        var facilityId = Guid.NewGuid();
+        var jobId = Guid.NewGuid();
+        var csv = """
+            area_code,area_name
+            AREA-01,Injection Area
+            """;
+        await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csv));
+        var manifest = await store.SaveFilesAsync(
+            tenantId,
+            facilityId,
+            jobId,
+            [new BulkImportUploadFile("areas.csv", stream, stream.Length, "text/csv")]);
+        accessor.Current = new BulkImportSourceContext(
+            jobId,
+            tenantId,
+            facilityId,
+            BulkDataSourceProviderKinds.CsvFile,
+            store.WriteManifest(manifest),
+            "CUSTOMER-FILE-IMPORT");
+
+        var provider = new CsvFileSourceProvider(store, accessor);
+        var discovery = await provider.DiscoverAsync();
+        Assert.Single(discovery.Tables);
+        Assert.Equal("areas", discovery.Tables[0].SourceTable);
+        Assert.Equal(1, discovery.Tables[0].EstimatedRowCount);
+    }
+
+    [Fact]
+    public async Task CsvProviderMapsRowsForStagingPipeline()
+    {
+        var store = new BulkImportFileStore();
+        var accessor = new BulkImportSourceContextAccessor();
+        var tenantId = Guid.NewGuid();
+        var facilityId = Guid.NewGuid();
+        var jobId = Guid.NewGuid();
+        var csv = """
+            resource_code,resource_name,station_code,resource_type
+            RES-001,Injection Press,ST-001,machine
+            """;
+        await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csv));
+        var manifest = await store.SaveFilesAsync(
+            tenantId,
+            facilityId,
+            jobId,
+            [new BulkImportUploadFile("resources.csv", stream, stream.Length, "text/csv")]);
+        accessor.Current = new BulkImportSourceContext(
+            jobId,
+            tenantId,
+            facilityId,
+            BulkDataSourceProviderKinds.CsvFile,
+            store.WriteManifest(manifest),
+            "CUSTOMER-FILE-IMPORT");
+
+        var provider = new CsvFileSourceProvider(store, accessor);
+        var mapping = new BulkMappingProfileDefinition(
+            "CUSTOMER-FILE-IMPORT",
+            "1.0.0",
+            BulkMappingProfileEngine.BuildAutoMappingRules(
+                "resources",
+                ["resource_code", "resource_name", "station_code", "resource_type"]));
+        var records = new List<BulkMappedRecord>();
+        await foreach (var record in provider.ReadRecordsAsync(mapping, null))
+        {
+            records.Add(record);
+        }
+
+        Assert.Single(records);
+        Assert.Equal("RES-001", records[0].Fields["code"]);
+        Assert.Equal(BulkCanonicalEntityTypes.ManufacturingResource, records[0].CanonicalEntityType);
+    }
+}

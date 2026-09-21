@@ -21,4 +21,5 @@ test("bulk data onboarding workflow includes required steps", () => {
   assert.equal(BULK_DATA_ONBOARDING_TITLE, "Veri Aktarım Merkezi");
   assert.ok(BULK_ONBOARDING_WORKFLOW_STEPS.includes("Dry Run"));
   assert.ok(BULK_ONBOARDING_WORKFLOW_STEPS.includes("Mutabakat"));
+  assert.ok(BULK_ONBOARDING_WORKFLOW_STEPS.includes("Karantina"));
 });

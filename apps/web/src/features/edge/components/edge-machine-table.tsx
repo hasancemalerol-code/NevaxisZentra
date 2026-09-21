@@ -35,10 +35,11 @@ export function EdgeMachineTable({
 }: EdgeMachineTableProps) {
   if (machines.length === 0) {
     return (
-      <div className="edge-empty-state">
+      <div className="edge-empty-state" data-testid="edge-machines-empty">
         <p className="edge-empty-state__title">Kayıtlı makine yok</p>
         <p className="edge-empty-state__text">
-          Bu tesis için henüz makine kaydı bulunmuyor.
+          Bu tesis için henüz makine kaydı bulunmuyor. Makine ve kaynakları{" "}
+          <a href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi</a> üzerinden toplu yükleyebilirsiniz.
         </p>
       </div>
     );

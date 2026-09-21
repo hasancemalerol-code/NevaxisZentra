@@ -1,4 +1,4 @@
-# Builds Nevaxis-FactOS-Setup.exe from release staging using WiX.
+# Builds Nevaxis-Zentra-Setup.exe from release staging using WiX.
 
 [CmdletBinding()]
 param(
@@ -42,9 +42,9 @@ else {
     $msiProductVersion = "2026.9.16.0"
 }
 $versionSlug = ($Version -replace '[^\d\.A-Za-z\-]', '-')
-$setupMsiName = "Nevaxis-FactOS-Setup.msi"
-$versionedMsiName = "Nevaxis-FactOS-Setup-$versionSlug.msi"
-$setupExeName = "Nevaxis-FactOS-Setup.exe"
+$setupMsiName = "Nevaxis-Zentra-Setup.msi"
+$versionedMsiName = "Nevaxis-Zentra-Setup-$versionSlug.msi"
+$setupExeName = "Nevaxis-Zentra-Setup.exe"
 $setupMsiPath = Join-Path $ArtifactRoot $setupMsiName
 $setupExePath = Join-Path $ArtifactRoot $setupExeName
 
@@ -122,11 +122,11 @@ $checksumPath = Join-Path $ArtifactRoot "SHA256SUMS.txt"
     "$versionedHash  $versionedMsiName"
 ) | Set-Content -Path $checksumPath -Encoding ASCII
 
-$zipPath = Join-Path $ArtifactRoot "Nevaxis-FactOS-Release-$versionSlug.zip"
+$zipPath = Join-Path $ArtifactRoot "Nevaxis-Zentra-Release-$versionSlug.zip"
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
 Compress-Archive -Path $versionedMsiPath, $readmePath, $checksumPath -DestinationPath $zipPath -Force
 $zipHash = Get-Sha256Hex $zipPath
-Add-Content -Path $checksumPath -Value "$zipHash  Nevaxis-FactOS-Demo.zip" -Encoding ASCII
+Add-Content -Path $checksumPath -Value "$zipHash  Nevaxis-Zentra-Release-$versionSlug.zip" -Encoding ASCII
 
 $manifestPath = Join-Path $ArtifactRoot "NEVAXISZENTRA-WINDOWS-RELEASE-MANIFEST.md"
 Write-Utf8NoBomFile -Path $manifestPath -Content @"
@@ -143,7 +143,7 @@ Write-Utf8NoBomFile -Path $manifestPath -Content @"
 - Installer size MB: $([math]::Round($setupSize / 1MB, 2))
 - Installer SHA-256: $setupHash
 - Versioned installer SHA-256: $versionedHash
-- ZIP: Nevaxis-FactOS-Release-$versionSlug.zip
+- ZIP: Nevaxis-Zentra-Release-$versionSlug.zip
 - ZIP size bytes: $((Get-Item $zipPath).Length)
 - ZIP SHA-256: $zipHash
 - Database strategy: EMBEDDED_LOCAL PostgreSQL

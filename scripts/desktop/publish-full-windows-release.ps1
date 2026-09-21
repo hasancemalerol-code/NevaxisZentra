@@ -170,6 +170,14 @@ Write-Step "Copy runtime config"
 Copy-Item -Path (Join-Path $packagingConfig "*") -Destination (Join-Path $stagingRoot "config") -Force
 Set-Content -Path (Join-Path $stagingRoot "migrations\expected-schema-version.txt") -Value $latestMigration -Encoding UTF8
 
+$customerTemplateSrc = Join-Path $RepositoryRoot "release\customer-import-templates"
+$customerTemplateDest = Join-Path $stagingRoot "customer-import-templates"
+if (Test-Path $customerTemplateSrc) {
+    Write-Step "Copy customer import templates"
+    if (Test-Path $customerTemplateDest) { Remove-Item -Recurse -Force $customerTemplateDest }
+    Copy-Item -Path $customerTemplateSrc -Destination $customerTemplateDest -Recurse -Force
+}
+
 if (-not $SkipDatabaseTemplate) {
     Write-Step "Build pre-seeded PostgreSQL template"
     $templateBuilder = Join-Path $PSScriptRoot "build-release-database-template.ps1"

@@ -1,0 +1,5 @@
+station_code,station_name,line_code,sequence_order,station_kind
+ST-001,Injection Station 01,LINE-01,1,process
+ST-002,Manual Assembly 01,LINE-02,1,manual
+ST-003,Buffer Station 01,LINE-01,2,buffer
+ST-004,Quality Gate 01,LINE-03,1,quality
