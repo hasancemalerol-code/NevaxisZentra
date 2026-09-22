@@ -11,8 +11,6 @@ import {
 } from "../src/features/factory-workspace/application/factory-workspace-selection";
 import { FactoryHierarchyTree } from "../src/features/factory-workspace/components/factory-hierarchy-tree";
 import { FactoryMachineIntelligence } from "../src/features/factory-workspace/components/factory-machine-intelligence";
-import type { FactoryHierarchyNode } from "../src/features/factory-workspace/domain/factory-workspace-types";
-
 const lines = [
   {
     lineId: "line-1",

@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
+import { FactoryCopilotWorkspaceActions } from "@/features/factory-copilot/components/factory-copilot-workspace-actions";
 
 import { buildWorksCaseHref } from "../application/scenario-recovery-links";
 import type { ScenarioRecoveryHistoryItemApi, ScenarioRecoveryWorkspaceApi } from "../server/scenario-recovery-api-client";
@@ -70,6 +71,7 @@ export function ScenarioRecoveryWorkspaceView({ workspace, history }: ScenarioRe
         context="SENARYO / KURTARMA"
         title={workspace.problem.summary}
         meta={`${workspace.lineCode} · ${phaseLabel(workspace.currentPhase)} · ${workspace.executionState}`}
+        actions={<FactoryCopilotWorkspaceActions />}
       />
 
       <StatusStrip

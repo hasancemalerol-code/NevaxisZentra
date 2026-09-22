@@ -3,88 +3,138 @@ import test from "node:test";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { AppsOperationalOverviewSection } from "../src/features/apps-catalog/components/apps-operational-overview-section";
-import {
-  AppsOperationalOutputTrendChart,
-  AppsOperationalQuantityBarChart,
-} from "../src/features/apps-catalog/components/apps-operational-analytics-charts";
+import { AppsFactoryOperationsSection } from "../src/features/apps-catalog/components/apps-factory-operations-section";
+import { FactoryOperationsAnalyticsGrid } from "../src/features/factory-operations/components/factory-operations-analytics-grid";
+import { mapDashboardShowcaseViewModel } from "../src/features/dashboard-showcase/server/dashboard-showcase-mapper";
 
-test("apps operational overview renders empty analytics state", () => {
+const readyViewModel = mapDashboardShowcaseViewModel(
+  {
+    facilityDisplayName: "Creva Plast Enjeksiyon Tesisi",
+    developmentPilotBanner: false,
+    overview: {
+      totalOrderCount: 4,
+      activeOrderCount: 2,
+      completedOrderCount: 2,
+      pausedOrderCount: 0,
+      readyOrderCount: 0,
+      plannedQuantity: 50800,
+        goodQuantity: 12345,
+      scrapQuantity: 1000,
+      remainingQuantity: 8120,
+      completionRatePercent: 84,
+      yieldPercent: 97.7,
+      activeDowntimeCount: 1,
+      totalDowntimeMinutes: 36,
+      totalSetupMinutes: 0,
+      manualCycleCount: 0,
+      openExceptionCount: 1,
+      unresolvedExceptionCount: 1,
+      shiftCoverageCount: 2,
+      operatorCoverageCount: 2,
+      riskSignals: [],
+      logisticsRisk: { riskLevel: "low", slackMinutes: 0, blocking: false, available: true },
+    },
+    orders: [
+      {
+        productionOrderId: "o1",
+        referenceCode: "PO-1",
+        title: "Order 1",
+        status: "active",
+        productReference: "SKU-A",
+        sourceProductionPlanId: "p1",
+        hasActiveException: false,
+        hasActiveDowntime: false,
+        planActual: {
+          plannedStartAtUtc: "2026-09-22T08:00:00.000Z",
+          plannedEndAtUtc: "2026-09-22T18:00:00.000Z",
+          plannedQuantity: 22000,
+          goodQuantity: 20000,
+          scrapQuantity: 200,
+          remainingQuantity: 2000,
+          scheduleOverrun: false,
+        },
+      },
+    ],
+    shifts: Array.from({ length: 24 }, (_, hour) => ({
+      shiftId: `s-${hour}`,
+      shiftCode: `H${hour}`,
+      shiftName: `Hour ${hour}`,
+      activeWindowStartUtc: `2026-09-22T${String(hour).padStart(2, "0")}:00:00.000Z`,
+      productionOrderCount: 1,
+      goodQuantity: 1500 + hour * 20,
+      scrapQuantity: 0,
+      downtimeMinutes: 0,
+      setupMinutes: 0,
+      openExceptionCount: 0,
+      assignedResourceCount: 2,
+      assignedOperatorCount: 1,
+      handoverState: "open",
+    })),
+    scrapRatePercent: 2.35,
+    cycleDurationMs: 22800,
+    latestOeePercent: 78.5,
+    previousOeePercent: 76.2,
+    latestAssessment: {
+      id: "a1",
+      machineAssetId: "m1",
+      windowStartUtc: "2026-09-22T08:00:00.000Z",
+      windowEndUtc: "2026-09-22T09:00:00.000Z",
+      status: "calculated",
+      statusLabel: "Hesaplandı",
+      evaluatedAtUtc: "2026-09-22T10:00:00.000Z",
+      oeePercent: 78.5,
+      availabilityPercent: 82.1,
+      performancePercent: 86.7,
+      qualityPercent: 93.5,
+    },
+    qualityOverview: null,
+    assessments: [],
+  },
+  "2026-09-22T10:00:00.000Z",
+);
+
+const emptyViewModel = mapDashboardShowcaseViewModel(
+  {
+    facilityDisplayName: "—",
+    developmentPilotBanner: false,
+    overview: null,
+    orders: [],
+    shifts: [],
+    scrapRatePercent: null,
+    cycleDurationMs: null,
+    latestOeePercent: null,
+    previousOeePercent: null,
+    latestAssessment: null,
+    qualityOverview: null,
+    assessments: [],
+  },
+  "2026-09-22T10:00:00.000Z",
+);
+
+test("apps factory operations grid exposes nine canonical analytics surfaces", () => {
   const markup = renderToStaticMarkup(
-    <AppsOperationalOverviewSection
-      overview={{
-        state: "empty",
-        kpis: [],
-        outputTrend: [],
-        resourceTypeBars: [],
-        resourceStateBars: [],
-        scrapSummary: null,
-        downtimeSummary: null,
-        riskHighlights: [],
-      }}
-    /> as ReactElement,
+    <FactoryOperationsAnalyticsGrid pendingLabel="Veri yok" viewModel={readyViewModel} /> as ReactElement,
   );
 
-  assert.match(markup, /data-testid="apps-operational-overview-empty"/);
-  assert.match(markup, /Henüz operasyonel veri yok/);
-  assert.match(markup, /Fabrika yapısını yükle/);
-  assert.match(markup, /Veri Aktarım Merkezi/);
-  assert.doesNotMatch(markup, /data-testid="apps-operational-overview-metrics"/);
+  assert.match(markup, /data-kpi-id="actual-production"/);
+  assert.match(markup, /data-kpi-id="oee"/);
+  assert.match(markup, /data-kpi-id="scrap-rate"/);
+  assert.match(markup, /data-kpi-id="cycle-time"/);
+  assert.match(markup, /data-kpi-id="quality-compliance"/);
+  assert.match(markup, /data-kpi-id="target-achievement"/);
+  assert.match(markup, /Saatlik Üretim Performansı/);
+  assert.match(markup, /data-testid="apps-hourly-production-chart"/);
+  assert.match(markup, /OEE Bileşenleri/);
+  assert.match(markup, /data-testid="apps-oee-components-chart"/);
+  assert.match(markup, /Üretim Dağılımı/);
+  assert.match(markup, /data-testid="apps-production-distribution-chart"/);
 });
 
-test("apps operational overview renders chart components with live projection shape", () => {
+test("apps factory operations section uses Veri yok for missing metrics", () => {
   const markup = renderToStaticMarkup(
-    <AppsOperationalOverviewSection
-      overview={{
-        state: "ready",
-        kpis: [{ label: "Aktif sipariş", value: "3" }],
-        outputTrend: [
-          { label: "08:00", goodQuantity: 120, targetQuantity: 100 },
-          { label: "12:00", goodQuantity: 140, targetQuantity: 110 },
-        ],
-        resourceTypeBars: [
-          { label: "Makine", count: 2 },
-          { label: "Montaj / İnsan İstasyonu", count: 1 },
-        ],
-        resourceStateBars: [{ label: "Çalışıyor", count: 2 }],
-        scrapSummary: { goodQuantity: 200, scrapQuantity: 4, scrapRatePercent: 2 },
-        downtimeSummary: { activeCount: 1, totalMinutes: 12 },
-        riskHighlights: ["Termin riski"],
-      }}
-    /> as ReactElement,
+    <AppsFactoryOperationsSection viewModel={emptyViewModel} /> as ReactElement,
   );
 
-  assert.match(markup, /data-testid="apps-operational-overview-metrics"/);
-  assert.match(markup, /data-testid="apps-operational-analytics-charts"/);
-  assert.match(markup, /data-testid="apps-output-trend-chart"/);
-  assert.match(markup, /data-testid="apps-resource-type-chart"/);
-  assert.match(markup, /data-chart-kind="output-trend"/);
-  assert.match(markup, /Termin riski/);
-});
-
-test("apps output trend chart renders axes and series paths", () => {
-  const markup = renderToStaticMarkup(
-    <AppsOperationalOutputTrendChart
-      points={[
-        { label: "A", goodQuantity: 10, targetQuantity: 8 },
-        { label: "B", goodQuantity: 14, targetQuantity: 12 },
-      ]}
-    /> as ReactElement,
-  );
-
-  assert.match(markup, /data-testid="apps-output-trend-chart"/);
-  assert.match(markup, /apps-analytics-chart__line--actual/);
-});
-
-test("apps quantity bar chart shows numeric values", () => {
-  const markup = renderToStaticMarkup(
-    <AppsOperationalQuantityBarChart
-      title="Kaynak tip dağılımı"
-      bars={[{ label: "Makine", count: 3 }]}
-      testId="apps-resource-type-chart"
-    /> as ReactElement,
-  );
-
-  assert.match(markup, />\s*3\s*</);
-  assert.match(markup, /Makine/);
+  assert.match(markup, /data-testid="apps-factory-operations-section"/);
+  assert.match(markup, /Veri yok/);
 });

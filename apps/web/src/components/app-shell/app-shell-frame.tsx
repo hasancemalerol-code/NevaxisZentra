@@ -19,6 +19,7 @@ type AppShellFrameProps = Readonly<{
   settingsHref?: string | null;
   subscriptionGraceWarning?: string | null;
   notificationsSlot?: ReactNode;
+  canAccessFactoryCopilot?: boolean;
 }>;
 
 export function AppShellFrame({
@@ -31,6 +32,7 @@ export function AppShellFrame({
   settingsHref = null,
   subscriptionGraceWarning = null,
   notificationsSlot = null,
+  canAccessFactoryCopilot = false,
 }: AppShellFrameProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -59,7 +61,7 @@ export function AppShellFrame({
             </div>
           ) : null}
           <Suspense fallback={children}>
-            <FactoryCopilotShell>{children}</FactoryCopilotShell>
+            <FactoryCopilotShell canAccessCopilot={canAccessFactoryCopilot}>{children}</FactoryCopilotShell>
           </Suspense>
         </main>
       </div>

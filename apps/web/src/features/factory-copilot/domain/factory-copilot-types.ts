@@ -10,6 +10,7 @@ export type FactoryCopilotEntryPoint =
 
 export type FactoryCopilotContextInput = Readonly<{
   entryPoint: FactoryCopilotEntryPoint;
+  areaCode?: string | null;
   lineId?: string | null;
   lineCode?: string | null;
   resourceId?: string | null;
@@ -48,6 +49,7 @@ export type FactoryCopilotStructuredResponse = Readonly<{
 export type FactoryCopilotContextHeader = Readonly<{
   entryPoint: string;
   factoryLabel?: string | null;
+  areaLabel?: string | null;
   lineLabel?: string | null;
   resourceLabel?: string | null;
   orderLabel?: string | null;

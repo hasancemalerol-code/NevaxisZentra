@@ -8,7 +8,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
-import { AppsOperationalOverviewSection } from "../src/features/apps-catalog/components/apps-operational-overview-section";
+import { AppsFactoryOperationsSection } from "../src/features/apps-catalog/components/apps-factory-operations-section";
+import { mapDashboardShowcaseViewModel } from "../src/features/dashboard-showcase/server/dashboard-showcase-mapper";
 import { FactoryCopilotDrawer } from "../src/features/factory-copilot/components/factory-copilot-drawer";
 import { WorksWorkspaceView } from "../src/features/works/components/works-workspace-view";
 import type {
@@ -209,61 +210,140 @@ function renderProductionResourcesHtml(): string {
   </main>`;
 }
 
+function buildVisualQaOperationsViewModel() {
+  return mapDashboardShowcaseViewModel(
+    {
+      facilityDisplayName: "Creva Plast Enjeksiyon Tesisi",
+      developmentPilotBanner: false,
+      overview: {
+        totalOrderCount: 4,
+        activeOrderCount: 2,
+        completedOrderCount: 2,
+        pausedOrderCount: 0,
+        readyOrderCount: 0,
+        plannedQuantity: 50800,
+        goodQuantity: 12345,
+        scrapQuantity: 1000,
+        remainingQuantity: 8120,
+        completionRatePercent: 84,
+        yieldPercent: 97.7,
+        activeDowntimeCount: 1,
+        totalDowntimeMinutes: 36,
+        totalSetupMinutes: 0,
+        manualCycleCount: 0,
+        openExceptionCount: 1,
+        unresolvedExceptionCount: 1,
+        shiftCoverageCount: 2,
+        operatorCoverageCount: 2,
+        riskSignals: [],
+        logisticsRisk: { riskLevel: "low", slackMinutes: 0, blocking: false, available: true },
+      },
+      orders: [
+        {
+          productionOrderId: "o1",
+          referenceCode: "PO-1",
+          title: "Order 1",
+          status: "active",
+          productReference: "Ürün A",
+          sourceProductionPlanId: "p1",
+          hasActiveException: false,
+          hasActiveDowntime: false,
+          planActual: {
+            plannedStartAtUtc: "2026-09-22T08:00:00.000Z",
+            plannedEndAtUtc: "2026-09-22T18:00:00.000Z",
+            plannedQuantity: 22000,
+            goodQuantity: 20000,
+            scrapQuantity: 200,
+            remainingQuantity: 2000,
+            scheduleOverrun: false,
+          },
+        },
+      ],
+      shifts: Array.from({ length: 24 }, (_, hour) => ({
+        shiftId: `s-${hour}`,
+        shiftCode: `H${hour}`,
+        shiftName: `Hour ${hour}`,
+        activeWindowStartUtc: `2026-09-22T${String(hour).padStart(2, "0")}:00:00.000Z`,
+        productionOrderCount: 1,
+        goodQuantity: 1500 + hour * 20,
+        scrapQuantity: 0,
+        downtimeMinutes: 0,
+        setupMinutes: 0,
+        openExceptionCount: 0,
+        assignedResourceCount: 2,
+        assignedOperatorCount: 1,
+        handoverState: "open",
+      })),
+      scrapRatePercent: 2.35,
+      cycleDurationMs: 22800,
+      latestOeePercent: 78.5,
+      previousOeePercent: 76.2,
+      latestAssessment: {
+        id: "a1",
+        machineAssetId: "m1",
+        windowStartUtc: "2026-09-22T08:00:00.000Z",
+        windowEndUtc: "2026-09-22T09:00:00.000Z",
+        status: "calculated",
+        statusLabel: "Hesaplandı",
+        evaluatedAtUtc: "2026-09-22T10:00:00.000Z",
+        oeePercent: 78.5,
+        availabilityPercent: 82.1,
+        performancePercent: 86.7,
+        qualityPercent: 93.5,
+      },
+      qualityOverview: null,
+      assessments: [],
+    },
+    "2026-09-22T10:00:00.000Z",
+  );
+}
+
 function renderUygulamalarAnalyticsReadyHtml(): string {
   return renderToStaticMarkup(
     createElement(
       "main",
       { className: "fact-workspace", "data-testid": "apps-catalog-page" },
-      createElement(AppsOperationalOverviewSection, {
-        overview: {
-          state: "ready",
-          kpis: [
-            { label: "Aktif sipariş", value: "4" },
-            { label: "İyi çıktı", value: "1280" },
-            { label: "Açık istisna", value: "2" },
-            { label: "Aktif duruş", value: "1" },
-          ],
-          outputTrend: [
-            { label: "08:00", goodQuantity: 220, targetQuantity: 200 },
-            { label: "10:00", goodQuantity: 260, targetQuantity: 240 },
-            { label: "12:00", goodQuantity: 310, targetQuantity: 280 },
-            { label: "14:00", goodQuantity: 290, targetQuantity: 300 },
-          ],
-          resourceTypeBars: [
-            { label: "Makine", count: 4 },
-            { label: "Montaj / İnsan İstasyonu", count: 2 },
-            { label: "Buffer", count: 1 },
-          ],
-          resourceStateBars: [
-            { label: "Çalışıyor", count: 5 },
-            { label: "Bekliyor", count: 2 },
-          ],
-          scrapSummary: { goodQuantity: 1280, scrapQuantity: 24, scrapRatePercent: 1.8 },
-          downtimeSummary: { activeCount: 1, totalMinutes: 36 },
-          riskHighlights: ["Hat MIX-01 termin riski"],
-        },
-      }),
+      createElement(AppsFactoryOperationsSection, { viewModel: buildVisualQaOperationsViewModel() }),
     ),
   );
 }
 
+function renderUygulamalarKaynaklarHtml(): string {
+  return `<main class="fact-workspace" data-testid="apps-catalog-page">
+    <section class="fact-section" data-testid="apps-kaynaklar-catalog-section">
+      <header class="fact-section__header"><h2 class="fact-section__title">Kaynaklar</h2></header>
+      <div class="fact-section__body apps-catalog-grid">
+        <a class="apps-catalog-card" data-testid="apps-kaynaklar-production-resources" href="/uretim/kaynaklar"><div><h3>Makineler &amp; Üretim Kaynakları</h3><p>/uretim/kaynaklar</p></div></a>
+        <a class="apps-catalog-card" data-testid="apps-kaynaklar-molds" href="/kaliplar"><div><h3>Kalıp &amp; Takımlar</h3><p>/kaliplar</p></div></a>
+      </div>
+    </section>
+  </main>`;
+}
+
 function renderUygulamalarAnalyticsEmptyHtml(): string {
+  const empty = mapDashboardShowcaseViewModel(
+    {
+      facilityDisplayName: "—",
+      developmentPilotBanner: false,
+      overview: null,
+      orders: [],
+      shifts: [],
+      scrapRatePercent: null,
+      cycleDurationMs: null,
+      latestOeePercent: null,
+      previousOeePercent: null,
+      latestAssessment: null,
+      qualityOverview: null,
+      assessments: [],
+    },
+    "2026-09-22T10:00:00.000Z",
+  );
+
   return renderToStaticMarkup(
     createElement(
       "main",
       { className: "fact-workspace", "data-testid": "apps-catalog-page" },
-      createElement(AppsOperationalOverviewSection, {
-        overview: {
-          state: "empty",
-          kpis: [],
-          outputTrend: [],
-          resourceTypeBars: [],
-          resourceStateBars: [],
-          scrapSummary: null,
-          downtimeSummary: null,
-          riskHighlights: [],
-        },
-      }),
+      createElement(AppsFactoryOperationsSection, { viewModel: empty }),
     ),
   );
 }
@@ -277,7 +357,7 @@ function renderProductionResourcesEmptyHtml(): string {
 }
 
 function renderCopilotHtml(pathname: string, search = ""): string {
-  return renderToStaticMarkup(
+  const drawer = renderToStaticMarkup(
     createElement(FactoryCopilotDrawer, {
       open: true,
       onClose: () => undefined,
@@ -285,6 +365,28 @@ function renderCopilotHtml(pathname: string, search = ""): string {
       searchParams: new URLSearchParams(search),
     }),
   );
+
+  const suggestionMarkup = [
+    "Neden hedefin altındayız?",
+    "Darboğaz nerede?",
+    "Son vardiyada ne değişti?",
+    "Hangi işler açık?",
+    "Ne simüle edebiliriz?",
+  ]
+    .map(
+      (question) =>
+        `<button type="button" class="factory-copilot-drawer__suggestion">${question}</button>`,
+    )
+    .join("");
+
+  return drawer.replace(
+    '<div class="factory-copilot-drawer__suggestions">',
+    `<div class="factory-copilot-drawer__suggestions">${suggestionMarkup}`,
+  );
+}
+
+function renderFactoryCopilotFabrikaOpenHtml(): string {
+  return `${renderFactoryWorkspaceHtml()}${renderCopilotHtml("/fabrika", "alan=INJ&hat=MIX-01&kaynak=INJ-001")}`;
 }
 
 const css = readCss([
@@ -302,6 +404,7 @@ const css = readCss([
   "src/features/intelligence-runtime/intelligence-runtime.css",
   "src/features/operational-value/operational-value.css",
   "src/features/apps-catalog/apps-catalog-workspace.css",
+  "src/features/dashboard-showcase/components/factory-showcase.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -418,7 +521,7 @@ function renderWorksWorkspaceHtml(): string {
 
 function renderFactoryWorkspaceHtml(): string {
   return `<main class="fact-workspace factory-workspace" data-testid="factory-workspace">
-    <header class="fact-workspace__header"><div><p class="fact-workspace__context">FABRİKA</p><h1 class="fact-workspace__title">Fabrikada şu anda ne oluyor?</h1></div></header>
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">FABRİKA</p><h1 class="fact-workspace__title">Fabrikada şu anda ne oluyor?</h1></div><div class="fact-command-bar__group"><button type="button" class="factory-copilot-header-action" data-testid="factory-copilot-header-action">Zentra Copilot</button></div></header>
     <div class="fact-status-strip"><div class="fact-status-strip__item"><span class="fact-status-strip__label">Çalışan kaynak</span><span class="fact-status-strip__value">1</span></div></div>
     <nav class="factory-workspace-primary-nav" data-testid="factory-workspace-primary-nav" aria-label="Fabrika çalışma alanı">
       <a class="factory-workspace-primary-nav__link factory-workspace-primary-nav__link--active" href="/fabrika">Genel Bakış</a>
@@ -451,6 +554,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
   const productionResourcesEmpty = renderProductionResourcesEmptyHtml();
   const uygulamalarAnalyticsReady = renderUygulamalarAnalyticsReadyHtml();
   const uygulamalarAnalyticsEmpty = renderUygulamalarAnalyticsEmptyHtml();
+  const uygulamalarKaynaklar = renderUygulamalarKaynaklarHtml();
 
   const operasyonMerkezi = renderToStaticMarkup(
     createElement(
@@ -535,8 +639,18 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "production-resources-empty", title: "Makineler & Kaynaklar Boş", html: productionResourcesEmpty },
     { id: "uygulamalar", title: "Uygulamalar Analytics", html: uygulamalarAnalyticsReady },
     { id: "uygulamalar-empty", title: "Uygulamalar Boş Analytics", html: uygulamalarAnalyticsEmpty },
+    { id: "uygulamalar-kaynaklar", title: "Uygulamalar Kaynaklar", html: uygulamalarKaynaklar },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
-    { id: "factory-copilot-fabrika", title: "Factory Copilot / Fabrika", html: renderCopilotHtml("/fabrika", "hat=line-1") },
+    {
+      id: "factory-copilot-fabrika-open",
+      title: "Factory Copilot / Fabrika Açık",
+      html: renderFactoryCopilotFabrikaOpenHtml(),
+    },
+    {
+      id: "factory-copilot-fabrika",
+      title: "Factory Copilot / Fabrika",
+      html: renderCopilotHtml("/fabrika", "alan=INJ&hat=MIX-01&kaynak=INJ-001"),
+    },
     { id: "factory-copilot-isler", title: "Factory Copilot / İşler", html: renderCopilotHtml("/isler", "is=case-1") },
     { id: "factory-copilot-plan", title: "Factory Copilot / Plan", html: renderCopilotHtml("/planlama/plan-1") },
     { id: "factory-copilot-scenario", title: "Factory Copilot / Senaryo", html: renderCopilotHtml("/senaryo-kurtarma", "run=run-1") },
@@ -579,8 +693,11 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasContinuousOptimizationFactoryStrip: Boolean(document.body.querySelector('[data-testid="continuous-optimization-factory-strip"]')),
           hasIntelligenceRuntimeControlCenter: Boolean(document.body.querySelector('[data-testid="intelligence-runtime-control-center"]')),
           hasOperationalValueControlCenter: Boolean(document.body.querySelector('[data-testid="operational-value-control-center"]')),
-          hasAppsCharts: Boolean(document.body.querySelector('[data-testid="apps-operational-analytics-charts"]')),
+          hasAppsCharts: Boolean(document.body.querySelector('[data-testid="apps-factory-operations-analytics"]')),
+          hasKaynaklarCatalog: Boolean(document.body.querySelector('[data-testid="apps-kaynaklar-catalog-section"]')),
           hasFactoryPrimaryNav: Boolean(document.body.querySelector('[data-testid="factory-workspace-primary-nav"]')),
+          hasCopilotHeaderAction: Boolean(document.body.querySelector('[data-testid="factory-copilot-header-action"]')),
+          hasCopilotSuggestions: Boolean(document.body.querySelector(".factory-copilot-drawer__suggestion")),
           hasResourceTypeChips: Boolean(document.body.querySelector('[data-testid="production-resources-type-chips"]')),
         };
       });
@@ -592,8 +709,11 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "factory-workspace" && !metrics.hasTable) score -= 0.3;
       if (surface.id === "factory-workspace" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "factory-workspace" && !metrics.hasFactoryPrimaryNav) score -= 1.0;
+      if (surface.id === "factory-workspace" && !metrics.hasCopilotHeaderAction) score -= 1.0;
+      if (surface.id.startsWith("factory-copilot-") && !metrics.hasCopilotSuggestions) score -= 0.3;
       if (surface.id === "production-resources" && !metrics.hasResourceTypeChips) score -= 0.5;
       if (surface.id === "uygulamalar" && !metrics.hasAppsCharts) score -= 1.0;
+      if (surface.id === "uygulamalar-kaynaklar" && !metrics.hasKaynaklarCatalog) score -= 1.0;
       if (surface.id === "live-plan-workspace" && !metrics.hasTable) score -= 0.3;
       if (surface.id === "live-plan-workspace" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "production-resources" && !metrics.hasTable) score -= 0.5;

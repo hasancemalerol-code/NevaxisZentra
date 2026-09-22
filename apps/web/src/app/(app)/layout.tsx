@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AppShellFrame } from "@/components/app-shell/app-shell-frame";
 import { NotificationsControlServer } from "@/components/app-shell/notifications-control-server";
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { resolveFactoryCopilotAccess } from "@/features/factory-copilot/server/resolve-factory-copilot-access";
 import { FactoryShowcaseShell } from "@/features/dashboard-showcase/components/factory-showcase-shell";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
 import { SubscriptionRecoveryShell } from "@/features/saas-subscription/components/subscription-recovery-shell";
@@ -94,9 +95,10 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     return <FactoryShowcaseShell>{children}</FactoryShowcaseShell>;
   }
 
-  const [navigation, appsCatalog] = await Promise.all([
+  const [navigation, appsCatalog, canAccessFactoryCopilot] = await Promise.all([
     resolvePermissionAwareNavigation(pathname),
     resolvePermissionAwareAppsCatalog(),
+    resolveFactoryCopilotAccess(),
   ]);
   const searchNavigation = [
     ...navigation,
@@ -113,6 +115,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
       searchItems={buildShellSearchItems(searchNavigation)}
       settingsHref={resolveSettingsHref([...navigation, ...appsCatalog])}
       subscriptionGraceWarning={resolveSubscriptionGraceBanner(subscriptionAccess)}
+      canAccessFactoryCopilot={canAccessFactoryCopilot}
     >
       {children}
     </AppShellFrame>

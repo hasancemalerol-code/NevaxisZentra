@@ -5,26 +5,52 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { resolveNavigationIcon } from "@/lib/navigation/navigation-icon-registry";
 import { resolvePermissionAwareAppsCatalog } from "@/lib/navigation/navigation-visibility";
 
-import { readAppsOperationalOverview } from "../server/apps-operational-overview-reader";
-import { AppsOperationalOverviewSection } from "./apps-operational-overview-section";
+import { readAppsFactoryOperationsDashboard } from "../server/apps-factory-operations-reader";
+import { AppsFactoryOperationsSection } from "./apps-factory-operations-section";
+import { AppsKaynaklarCatalogSection } from "./apps-kaynaklar-catalog-section";
+import { mapDashboardShowcaseViewModel } from "@/features/dashboard-showcase/server/dashboard-showcase-mapper";
 
 import "../apps-catalog-workspace.css";
 
+function buildEmptyOperationsViewModel() {
+  return mapDashboardShowcaseViewModel(
+    {
+      facilityDisplayName: "—",
+      developmentPilotBanner: false,
+      overview: null,
+      orders: [],
+      shifts: [],
+      scrapRatePercent: null,
+      cycleDurationMs: null,
+      latestOeePercent: null,
+      previousOeePercent: null,
+      latestAssessment: null,
+      qualityOverview: null,
+      assessments: [],
+    },
+    new Date().toISOString(),
+  );
+}
+
 export async function AppsCatalogPageContent() {
-  const [catalog, overview] = await Promise.all([
+  const [catalog, operationsViewModel] = await Promise.all([
     resolvePermissionAwareAppsCatalog(),
-    readAppsOperationalOverview(),
+    readAppsFactoryOperationsDashboard(),
   ]);
+
+  const viewModel = operationsViewModel ?? buildEmptyOperationsViewModel();
 
   return (
     <main className="fact-workspace" data-testid="apps-catalog-page">
       <WorkspaceHeader
         context="UYGULAMALAR"
-        meta="Operasyonel özet ve uzman modül kataloğu"
+        meta="Fabrika operasyon görünümü ve uzman modül kataloğu"
         title="Uygulamalar"
       />
 
-      <AppsOperationalOverviewSection overview={overview} />
+      <AppsFactoryOperationsSection viewModel={viewModel} />
+
+      <AppsKaynaklarCatalogSection />
 
       <header className="apps-catalog-specialist-header">
         <p className="fact-workspace__context">UZMAN UYGULAMALAR</p>

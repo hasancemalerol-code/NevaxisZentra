@@ -2,6 +2,24 @@
   position: relative;
 }
 
+.factory-copilot-header-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-elevated));
+  color: var(--foreground);
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.factory-copilot-header-action:hover {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface-elevated));
+}
+
 .factory-copilot-toggle {
   position: fixed;
   right: 1rem;
@@ -10,11 +28,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
   background: var(--surface-elevated);
   color: var(--foreground);
   border-radius: 999px;
   padding: 0.65rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
   box-shadow: var(--shadow-md);
   cursor: pointer;
 }

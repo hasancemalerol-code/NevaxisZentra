@@ -10,6 +10,7 @@ import {
   getFactoryDecisionStatusLabel,
 } from "@/features/factory-decision-center/domain/factory-decision-center-labels";
 import { readBugunWorkspace } from "@/features/bugun/server/bugun-workspace-queries";
+import { FactoryCopilotWorkspaceActions } from "@/features/factory-copilot/components/factory-copilot-workspace-actions";
 
 type BugunPageContentProps = Readonly<{
   initialView?: string;
@@ -48,6 +49,7 @@ export async function BugunPageContent({
           context="BUGÜN"
           title="Bugün neye dikkat etmeliyim?"
           meta={workspace?.profileLabel ?? "Operasyonel öncelikler"}
+          actions={<FactoryCopilotWorkspaceActions />}
         />
 
         {statusItems.length > 0 ? (

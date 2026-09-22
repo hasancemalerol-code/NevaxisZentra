@@ -22,6 +22,7 @@ export function resolveFactoryCopilotContext(
   searchParams: Readonly<URLSearchParams>,
 ): FactoryCopilotContextInput {
   const entryPoint = resolveEntryPoint(pathname);
+  const areaCode = readParam(searchParams, "alan");
   const lineId = readParam(searchParams, "hat");
   const resourceId = readParam(searchParams, "kaynak");
   const workCaseId = readParam(searchParams, "is");
@@ -33,8 +34,8 @@ export function resolveFactoryCopilotContext(
 
   return {
     entryPoint,
+    areaCode,
     lineId,
-    lineCode: lineId ? undefined : entryPoint === "FABRIKA" ? "MIX-LINE-01" : undefined,
     resourceId,
     digitalWorkCaseId: workCaseId,
     scenarioRunId,
@@ -47,6 +48,7 @@ export function formatFactoryCopilotContextHeader(
   header: Readonly<{
     entryPoint: string;
     factoryLabel?: string | null;
+    areaLabel?: string | null;
     lineLabel?: string | null;
     resourceLabel?: string | null;
     orderLabel?: string | null;
@@ -56,6 +58,7 @@ export function formatFactoryCopilotContextHeader(
 ): string {
   const parts = [
     header.factoryLabel ? `Fabrika: ${header.factoryLabel}` : null,
+    header.areaLabel ? `Alan: ${header.areaLabel}` : null,
     header.lineLabel ? `Hat: ${header.lineLabel}` : null,
     header.resourceLabel ? `Kaynak: ${header.resourceLabel}` : null,
     header.orderLabel ? `Sipariş: ${header.orderLabel}` : null,

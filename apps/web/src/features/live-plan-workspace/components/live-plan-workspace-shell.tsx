@@ -7,6 +7,7 @@ import { StatusStrip } from "@/components/workspace/status-strip";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 
 import type { LivePlanWorkspacePayload } from "../domain/live-plan-workspace-types";
+import { FactoryCopilotWorkspaceActions } from "@/features/factory-copilot/components/factory-copilot-workspace-actions";
 import { LivePlanNavigator } from "./live-plan-navigator";
 import { LivePlanOperationalCenter } from "./live-plan-operational-center";
 import { LivePlanSchedulingInspector } from "./live-plan-scheduling-inspector";
@@ -37,9 +38,11 @@ export function LivePlanWorkspaceShell({ workspace }: LivePlanWorkspaceShellProp
         meta="Canlı plan · kısıtlar · yeniden planlama"
         title="Bugün ne üretilecek ve nasıl sıralanacak?"
         actions={
-          <Link href="/planlama/yeni" className="fact-link-button">
-            Yeni Plan
-          </Link>
+          <FactoryCopilotWorkspaceActions>
+            <Link href="/planlama/yeni" className="fact-link-button">
+              Yeni Plan
+            </Link>
+          </FactoryCopilotWorkspaceActions>
         }
       />
 

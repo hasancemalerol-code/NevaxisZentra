@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   getConnectivityLabel,
   getEdgeDeliveryPresentationLabel,
@@ -39,7 +41,7 @@ export function EdgeMachineTable({
         <p className="edge-empty-state__title">Kayıtlı makine yok</p>
         <p className="edge-empty-state__text">
           Bu tesis için henüz makine kaydı bulunmuyor. Makine ve kaynakları{" "}
-          <a href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi</a> üzerinden toplu yükleyebilirsiniz.
+          <Link href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi</Link> üzerinden toplu yükleyebilirsiniz.
         </p>
       </div>
     );

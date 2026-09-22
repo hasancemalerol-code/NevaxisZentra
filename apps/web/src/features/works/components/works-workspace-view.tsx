@@ -15,6 +15,7 @@ import { LoaderCircle, RefreshCw } from "lucide-react";
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
+import { FactoryCopilotWorkspaceActions } from "@/features/factory-copilot/components/factory-copilot-workspace-actions";
 
 import {
   getWorksQueueCount,
@@ -186,17 +187,19 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
         title="Operasyonel iş akışı"
         meta="İş · Sorun · Onay · Engel · Sonuç · Doğrulama"
         actions={(
-          <button
-            type="button"
-            className="works-action-button"
-            data-testid="works-refresh"
-            disabled={isPending}
-            onClick={() => router.refresh()}
-          >
-            {isPending ? <LoaderCircle aria-hidden="true" className="spin" size={14} /> : <RefreshCw aria-hidden="true" size={14} />}
-            {" "}
-            Yenile
-          </button>
+          <FactoryCopilotWorkspaceActions>
+            <button
+              type="button"
+              className="works-action-button"
+              data-testid="works-refresh"
+              disabled={isPending}
+              onClick={() => router.refresh()}
+            >
+              {isPending ? <LoaderCircle aria-hidden="true" className="spin" size={14} /> : <RefreshCw aria-hidden="true" size={14} />}
+              {" "}
+              Yenile
+            </button>
+          </FactoryCopilotWorkspaceActions>
         )}
       />
 

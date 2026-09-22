@@ -71,6 +71,7 @@ function mapApiResponse(raw: Record<string, unknown>): FactoryCopilotQueryResult
     contextHeader: {
       entryPoint: String((raw.contextHeader as Record<string, unknown> | undefined)?.entryPoint ?? ""),
       factoryLabel: (raw.contextHeader as Record<string, unknown> | undefined)?.factoryLabel as string | null,
+      areaLabel: (raw.contextHeader as Record<string, unknown> | undefined)?.areaLabel as string | null,
       lineLabel: (raw.contextHeader as Record<string, unknown> | undefined)?.lineLabel as string | null,
       resourceLabel: (raw.contextHeader as Record<string, unknown> | undefined)?.resourceLabel as string | null,
       orderLabel: (raw.contextHeader as Record<string, unknown> | undefined)?.orderLabel as string | null,
@@ -104,8 +105,10 @@ export function FactoryCopilotDrawer({
       const loaded = await loadFactoryCopilotSuggestedQuestionsAction(copilotContext);
       if ("status" in loaded && loaded.status === "failure") {
         setSuggestions([
-          "Bu hat neden hedefin altında?",
+          "Neden hedefin altındayız?",
           "Darboğaz nerede?",
+          "Son vardiyada ne değişti?",
+          "Hangi işler açık?",
           "Ne simüle edebiliriz?",
         ]);
         return;
@@ -150,8 +153,10 @@ export function FactoryCopilotDrawer({
 
   const header = result?.contextHeader ?? {
     entryPoint: copilotContext.entryPoint,
+    areaLabel: copilotContext.areaCode ?? null,
     lineLabel: copilotContext.lineCode ?? copilotContext.lineId ?? null,
-    resourceLabel: copilotContext.resourceId ?? null,
+    resourceLabel: copilotContext.resourceCode ?? copilotContext.resourceId ?? null,
+    orderLabel: copilotContext.orderReference ?? null,
     workLabel: copilotContext.digitalWorkCaseId ?? null,
     scenarioLabel: copilotContext.scenarioRunId ?? null,
   };
@@ -164,10 +169,10 @@ export function FactoryCopilotDrawer({
         aria-label="Copilot panelini kapat"
         onClick={onClose}
       />
-      <aside className="factory-copilot-drawer" data-testid="factory-copilot-drawer" aria-label="Factory Copilot">
+      <aside className="factory-copilot-drawer" data-testid="factory-copilot-drawer" aria-label="Zentra Copilot">
         <header className="factory-copilot-drawer__header">
           <div className="factory-copilot-drawer__title-row">
-            <strong>Factory Copilot</strong>
+            <strong>Zentra Copilot</strong>
             <button type="button" aria-label="Kapat" onClick={onClose}>
               <X size={16} />
             </button>
@@ -297,7 +302,7 @@ export function FactoryCopilotToggle({ onOpen }: Readonly<{ onOpen: () => void }
   return (
     <button type="button" className="factory-copilot-toggle" onClick={onOpen} data-testid="factory-copilot-toggle">
       <Bot size={16} />
-      Copilot
+      Zentra Copilot
     </button>
   );
 }
