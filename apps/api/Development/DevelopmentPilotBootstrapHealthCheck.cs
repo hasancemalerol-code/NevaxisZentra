@@ -19,9 +19,20 @@ public sealed class DevelopmentPilotBootstrapHealthCheck(
             return Task.FromResult(HealthCheckResult.Healthy("Development pilot bootstrap is not required."));
         }
 
+        if (!string.IsNullOrWhiteSpace(bootstrapState.AcceptanceRoleFailure))
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy(bootstrapState.AcceptanceRoleFailure));
+        }
+
+        if (!bootstrapState.AcceptanceRoleVerified)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy(
+                "Acceptance role contract has not been verified. Required modules must not be hidden."));
+        }
+
         return Task.FromResult(
             bootstrapState.IsCompleted
-                ? HealthCheckResult.Healthy("Development pilot bootstrap completed.")
+                ? HealthCheckResult.Healthy("Development pilot bootstrap completed and the acceptance role contract is satisfied.")
                 : HealthCheckResult.Unhealthy("Development pilot bootstrap has not completed."));
     }
 }

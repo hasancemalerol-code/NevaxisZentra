@@ -38,7 +38,8 @@ public sealed record AdminAccessEffectiveAccessReadModel(
     IReadOnlyList<string> FacilityCodes,
     IReadOnlyList<string> GrantedPermissionKeys,
     IReadOnlyList<string> DeniedPermissionKeys,
-    AdminAccessNavigationVisibilityReadModel Navigation);
+    AdminAccessNavigationVisibilityReadModel Navigation,
+    string PermissionCatalogVersion);
 
 public sealed record AdminAccessNavigationVisibilityReadModel(
     bool Machines,

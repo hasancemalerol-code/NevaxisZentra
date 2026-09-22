@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
 using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Authorization;
 using NevaxisZentra.DatabaseTool;
 using NevaxisZentra.Persistence.Development;
 using NevaxisZentra.Persistence.SaasIdentity;
@@ -9,7 +10,7 @@ using Npgsql;
 using System.Net.Sockets;
 
 var operation = args.FirstOrDefault()?.ToLowerInvariant() ?? "verify";
-var options = operation is "state" or "development-pilot-paid-access-ensure" or "development-pilot-operator-access-ensure" or "development-pilot-bootstrap" or "development-pilot-migration-prerequisites"
+var options = operation is "state" or "development-pilot-paid-access-ensure" or "development-pilot-operator-access-ensure" or "development-pilot-bootstrap" or "development-pilot-migration-prerequisites" or "acceptance-role-contract-verify"
     ? DatabaseConfiguration.LoadMigrations()
     : DatabaseConfiguration.LoadRuntime();
 
@@ -208,6 +209,15 @@ try
         var result = await bootstrapService.BootstrapAsync();
         Console.WriteLine(
             $"Development pilot bootstrap executed={result.Executed} tenant={result.TenantId:D} facility={result.FacilityId:D} plans={result.ProductionPlanCount}.");
+        return 0;
+    }
+
+    if (operation == "acceptance-role-contract-verify")
+    {
+        await using var acceptanceConnection = new NpgsqlConnection(
+            PostgreSqlConnectionFactory.BuildConnectionString(options));
+        await acceptanceConnection.OpenAsync();
+        await AcceptanceRoleContractVerifier.VerifyAsync(acceptanceConnection);
         return 0;
     }
 

@@ -1,6 +1,7 @@
 import "./bulk-data-onboarding-server-boundary";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -12,7 +13,7 @@ export async function readBulkDataOnboardingWorkspace(
   | { status: "success"; workspace: BulkImportJobWorkspaceApi | null; facilityId: string }
   | { status: "failure"; message: string }
 > {
-  const authorization = await denyUnlessGranted("bulk-onboarding.read");
+  const authorization = await denyUnlessGranted(requiredRoutePermission("veri-aktarim"));
   if (authorization.status === "failure") {
     return { status: "failure", message: "Veri aktarım merkezi görüntüleme yetkiniz yok." };
   }

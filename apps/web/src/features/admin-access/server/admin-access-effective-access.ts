@@ -13,6 +13,9 @@ export type AdminAccessNavigationVisibility = Readonly<{
 
 export type AdminAccessEffectiveAccess = Readonly<{
   memberReference: string | null;
+  authorizationVersion?: string | null;
+  permissionCatalogVersion?: string | null;
+  roleReferences?: readonly string[];
   grantedPermissionKeys: readonly string[];
   navigation: AdminAccessNavigationVisibility;
 }>;
@@ -91,6 +94,9 @@ export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiv
 
     const payload = (await response.json()) as {
       memberReference?: string;
+      authorizationVersion?: string;
+      permissionCatalogVersion?: string;
+      roleReferences?: string[];
       grantedPermissionKeys?: string[];
       navigation?: {
         machines?: boolean;
@@ -101,6 +107,9 @@ export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiv
 
     return {
       memberReference: payload.memberReference ?? null,
+      authorizationVersion: payload.authorizationVersion ?? null,
+      permissionCatalogVersion: payload.permissionCatalogVersion ?? null,
+      roleReferences: payload.roleReferences ?? [],
       grantedPermissionKeys: payload.grantedPermissionKeys ?? [],
       navigation: {
         machines: payload.navigation?.machines === true,

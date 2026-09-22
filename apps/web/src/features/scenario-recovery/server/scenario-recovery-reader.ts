@@ -1,6 +1,7 @@
 import "server-only";
 
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { acceptanceRoleRoute, requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -33,7 +34,7 @@ export async function readScenarioRecoveryPage(
   params: ScenarioRecoveryPageParams,
 ): Promise<ScenarioRecoveryPageResult> {
   const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "scenario-recovery.read")) {
+  if (!hasGrantedPermission(access, requiredRoutePermission("senaryo"))) {
     return { status: "forbidden", message: "Senaryo kurtarma okuma izni gerekli." };
   }
 
@@ -67,7 +68,7 @@ export async function readScenarioRecoveryPage(
     return { status: "failure", message: "Hat veya senaryo tanımlayıcısı gerekli." };
   }
 
-  if (!hasGrantedPermission(access, "scenario-recovery.simulate")) {
+  if (!hasGrantedPermission(access, acceptanceRoleRoute("senaryo").simulatePermissionKey ?? "")) {
     return { status: "forbidden", message: "Senaryo simülasyon izni gerekli." };
   }
 

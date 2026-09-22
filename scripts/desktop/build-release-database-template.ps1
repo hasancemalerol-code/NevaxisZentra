@@ -242,6 +242,24 @@ ALTER ROLE crevafactos_runtime NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOB
     Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $hardenRolesSql
     Remove-Item -Force $hardenRolesSql
 
+    $contractPath = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence\Authorization\acceptance-role-contract.json"
+    if (-not (Test-Path $contractPath)) {
+        throw "Acceptance role contract is missing at $contractPath"
+    }
+    $acceptanceContract = Get-Content $contractPath -Raw | ConvertFrom-Json
+    $missingPermissionKeys = @()
+    foreach ($permissionKey in $acceptanceContract.requiredPermissionKeys) {
+        $escapedKey = $permissionKey.Replace("'", "''")
+        $permissionCount = [int](Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query "SELECT COUNT(*) FROM permission_definitions WHERE key = '$escapedKey' AND status = 'Active';")
+        if ($permissionCount -ne 1) {
+            $missingPermissionKeys += $permissionKey
+        }
+    }
+    if ($missingPermissionKeys.Count -gt 0) {
+        throw "Template acceptance-role catalog contract failed. Missing active permission keys: $($missingPermissionKeys -join ', ')"
+    }
+    Write-Host "Acceptance role catalog contract PASS ($($acceptanceContract.catalogVersion)). Role grants are applied at customer bootstrap."
+
     $appliedMigration = Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query 'SELECT "MigrationId" FROM "__EFMigrationsHistory" ORDER BY "MigrationId" DESC LIMIT 1;'
     if ($appliedMigration -ne $expectedMigrationId) {
         throw "Template migration mismatch. Expected=$expectedMigrationId Actual=$appliedMigration"

@@ -1227,6 +1227,12 @@ internal sealed class DevelopmentPilotBootstrapService(
             options,
             cancellationToken);
 
+    public Task EnsureAcceptanceRoleContractAsync(CancellationToken cancellationToken = default) =>
+        DevelopmentPilotAccessEnsureService.EnsurePaidAccessAsync(
+            persistenceOptions,
+            options,
+            cancellationToken);
+
     public async Task EnsureSaasIdentityFixturesAsync(CancellationToken cancellationToken = default)
     {
         if (!options.Value.Enabled || !saasIdentityOptions.Value.Enabled
@@ -2587,9 +2593,17 @@ internal sealed class DevelopmentPilotBootstrapService(
         CancellationToken cancellationToken)
     {
         var permissionDefinition = await dbContext.PermissionDefinitions
-            .SingleOrDefaultAsync(p => p.Key == permissionKey, cancellationToken)
-            ?? await dbContext.PermissionDefinitions
+            .SingleOrDefaultAsync(p => p.Key == permissionKey, cancellationToken);
+        if (permissionDefinition is null)
+        {
+            var byFallbackId = await dbContext.PermissionDefinitions
                 .SingleOrDefaultAsync(p => p.Id == fallbackPermissionId, cancellationToken);
+            if (byFallbackId is not null
+                && string.Equals(byFallbackId.Key, permissionKey, StringComparison.Ordinal))
+            {
+                permissionDefinition = byFallbackId;
+            }
+        }
 
         if (permissionDefinition is null)
         {

@@ -10,6 +10,8 @@ public interface IDevelopmentPilotBootstrapService
     Task EnsureSaasIdentityFixturesAsync(CancellationToken cancellationToken = default);
 
     Task EnsureAdminAccessFixturesAsync(CancellationToken cancellationToken = default);
+
+    Task EnsureAcceptanceRoleContractAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed record DevelopmentPilotBootstrapResult(

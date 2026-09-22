@@ -4,6 +4,7 @@ import {
   fetchCurrentEffectiveAccess,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -35,7 +36,7 @@ export async function readWorksWorkspacePage(input?: Readonly<{
   search?: string | null;
 }>): Promise<WorksWorkspacePageResult> {
   const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "digital-workforce.read")) {
+  if (!hasGrantedPermission(access, requiredRoutePermission("isler"))) {
     return {
       status: "failure",
       message: "Bu modüle erişim yetkiniz yok.",
@@ -99,7 +100,7 @@ export async function readWorksWorkspacePage(input?: Readonly<{
 
 export async function readWorksCaseDetail(caseId: string) {
   const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "digital-workforce.read")) {
+  if (!hasGrantedPermission(access, requiredRoutePermission("isler"))) {
     return {
       status: "failure" as const,
       message: "Bu modüle erişim yetkiniz yok.",

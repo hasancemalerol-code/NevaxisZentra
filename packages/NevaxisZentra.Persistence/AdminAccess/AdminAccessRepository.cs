@@ -857,7 +857,8 @@ public sealed partial class AdminAccessRepository(
             new AdminAccessNavigationVisibilityReadModel(
                 allowed.Contains(EdgePermissionKeys.Read),
                 allowed.Contains(MaterialPermissionKeys.Read),
-                allowed.Contains(MaintenancePermissionKeys.Read)));
+                allowed.Contains(MaintenancePermissionKeys.Read)),
+            AcceptanceRoleContract.CatalogVersion);
     }
 
     private async Task<HashSet<string>> LoadGrantedKeysAsync(Guid membershipId, CancellationToken cancellationToken)

@@ -2,12 +2,13 @@ import Link from "next/link";
 import { ArrowUpRight, Boxes, Cpu } from "lucide-react";
 
 import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 
 const KAYNAKLAR_LINKS = [
   {
     label: "Makineler & Üretim Kaynakları",
     href: "/uretim/kaynaklar",
-    permissionKey: "mixed-production.read",
+    permissionKey: requiredRoutePermission("kaynaklar"),
     icon: Cpu,
     testId: "apps-kaynaklar-production-resources",
   },
@@ -18,7 +19,7 @@ const KAYNAKLAR_LINKS = [
     icon: Boxes,
     testId: "apps-kaynaklar-molds",
   },
-] as const;
+];
 
 export async function AppsKaynaklarCatalogSection() {
   const access = await fetchCurrentEffectiveAccess();

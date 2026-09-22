@@ -1,6 +1,7 @@
 import "server-only";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -10,7 +11,7 @@ export async function loadProductionResourceWorkspace(): Promise<
   | { status: "success"; workspace: ProductionResourceWorkspaceApi }
   | { status: "failure"; message: string }
 > {
-  const authorization = await denyUnlessGranted("mixed-production.read");
+  const authorization = await denyUnlessGranted(requiredRoutePermission("kaynaklar"));
   if (authorization.status === "failure") {
     return { status: "failure", message: "Üretim kaynakları görüntüleme yetkiniz yok." };
   }

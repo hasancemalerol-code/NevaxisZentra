@@ -1,90 +1,20 @@
 using Microsoft.EntityFrameworkCore;
-using NevaxisZentra.Persistence.AdminAccess;
-using NevaxisZentra.Persistence.AiTasks;
 using NevaxisZentra.Persistence.Authorization;
-using NevaxisZentra.Persistence.CommercialIntelligence;
-using NevaxisZentra.Persistence.DigitalWorkforce;
-using NevaxisZentra.Persistence.Energy;
-using NevaxisZentra.Persistence.Export;
-using NevaxisZentra.Persistence.FactoryCopilot;
-using NevaxisZentra.Persistence.ContinuousOptimization;
-using NevaxisZentra.Persistence.FactoryIntelligence;
 using NevaxisZentra.Persistence.Facilities;
 using NevaxisZentra.Persistence.Identity;
-using NevaxisZentra.Persistence.MixedProduction;
-using NevaxisZentra.Persistence.IotPlc;
-using NevaxisZentra.Persistence.OperationalRisk;
-using NevaxisZentra.Persistence.ShiftWorkforce;
-using NevaxisZentra.Persistence.Teams;
 using NevaxisZentra.Persistence.Tenancy;
 
 namespace NevaxisZentra.Persistence.Development;
 
 /// <summary>
-/// Idempotent repair seed for production-pilot-operator presentation/demo module access.
-/// Runs outside the main bootstrap transaction so permissions survive re-seed rollbacks.
+/// Idempotent repair seed for the canonical production-pilot-operator acceptance role.
+/// Permission keys come only from AcceptanceRoleContract.
+/// Runs outside the main bootstrap transaction so grants survive re-seed rollbacks.
 /// </summary>
 internal static class DevelopmentPilotOperatorPresentationAccessSeed
 {
-    internal static readonly string[] PresentationPermissionKeys =
-    [
-        PresentationModePermissionKeys.Access,
-        ProductionExecutionPermissionKeys.Read,
-        ProductionPlanningPermissionKeys.Read,
-        EdgePermissionKeys.Read,
-        MoldPermissionKeys.Read,
-        MaterialPermissionKeys.Read,
-        MaintenancePermissionKeys.Read,
-        QualityPermissionKeys.Read,
-        EnergyPermissionKeys.Read,
-        IotPlcPermissionKeys.Read,
-        ProcessOeePermissionKeys.Read,
-        ExportPermissionKeys.Read,
-        AiTaskPermissionKeys.Read,
-        AiTaskPermissionKeys.Create,
-        AiTaskPermissionKeys.Review,
-        AiTaskPermissionKeys.Acknowledge,
-        AiTaskPermissionKeys.Assign,
-        DigitalWorkforcePermissionKeys.Read,
-        FactoryOrchestrationPermissionKeys.Read,
-        FactoryOrchestrationPermissionKeys.Manage,
-        FactoryOrchestrationPermissionKeys.Verify,
-        DigitalWorkforcePermissionKeys.ApprovalDecide,
-        GoldenDemoP1PermissionKeys.Read,
-        GoldenDemoP1PermissionKeys.Manage,
-        GoldenDemoP1PermissionKeys.Approve,
-        GoldenDemoP1PermissionKeys.Execute,
-        GoldenDemoP1PermissionKeys.Verify,
-        GoldenDemoP2PermissionKeys.Read,
-        GoldenDemoP2PermissionKeys.Reset,
-        GoldenDemoCustomsFilePermissionKeys.Read,
-        GoldenDemoCustomsFilePermissionKeys.Manage,
-        GoldenDemoCustomsFilePermissionKeys.Execute,
-        GoldenDemoCustomsFilePermissionKeys.Approve,
-        GoldenDemoCustomsFilePermissionKeys.Verify,
-        GoldenDemoCustomsFilePermissionKeys.Reset,
-        OperationalRiskPermissionKeys.Read,
-        FactoryIntelligencePermissionKeys.Read,
-        MixedProductionPermissionKeys.Read,
-        MixedProductionPermissionKeys.Manage,
-        MixedProductionPermissionKeys.Operate,
-        ShiftWorkforcePermissionKeys.Read,
-        ShiftWorkforcePermissionKeys.Manage,
-        ShiftOperationsPermissionKeys.Read,
-        ShiftOperationsPermissionKeys.Manage,
-        FactoryNetworkPermissionKeys.Read,
-        ErpPermissionKeys.Read,
-        CommercialIntelligencePermissionKeys.Read,
-        IntegrationPermissionKeys.Read,
-        BulkDataOnboardingPermissionKeys.Read,
-        EnterpriseReliabilityPermissionKeys.Read,
-        AdminAccessPermissionKeys.Read,
-        TeamsPermissionKeys.Read,
-        FactoryCopilotPermissionKeys.Read,
-        FactoryCopilotPermissionKeys.Query,
-        ContinuousOptimizationPermissionKeys.Read,
-        ContinuousOptimizationPermissionKeys.Run,
-    ];
+    internal static IReadOnlyList<string> PresentationPermissionKeys =>
+        AcceptanceRoleContract.RequiredPermissionKeys;
 
     internal static async Task EnsureOperatorPresentationAccessAsync(
         NevaxisZentraDbContext dbContext,
@@ -136,51 +66,13 @@ internal static class DevelopmentPilotOperatorPresentationAccessSeed
                 cancellationToken);
         }
 
-        foreach (var permissionKey in PresentationPermissionKeys)
-        {
-            await EnsureRolePermissionAssignmentAsync(
-                dbContext,
-                tenantId,
-                operatorRole.Id,
-                permissionKey,
-                cancellationToken);
-        }
+        await AcceptanceRoleGrantService.EnsureAsync(
+            dbContext,
+            tenantId,
+            operatorRole.Id,
+            cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private static async Task EnsureRolePermissionAssignmentAsync(
-        NevaxisZentraDbContext dbContext,
-        Guid tenantId,
-        Guid tenantRoleId,
-        string permissionKey,
-        CancellationToken cancellationToken)
-    {
-        var permissionDefinition = await dbContext.PermissionDefinitions
-            .SingleOrDefaultAsync(p => p.Key == permissionKey, cancellationToken);
-        if (permissionDefinition is null)
-        {
-            return;
-        }
-
-        var exists = await dbContext.TenantRolePermissions
-            .IgnoreQueryFilters()
-            .AnyAsync(
-                assignment => assignment.TenantId == tenantId
-                    && assignment.TenantRoleId == tenantRoleId
-                    && assignment.PermissionDefinitionId == permissionDefinition.Id,
-                cancellationToken);
-        if (exists)
-        {
-            return;
-        }
-
-        dbContext.TenantRolePermissions.Add(new TenantRolePermissionAssignment
-        {
-            TenantId = tenantId,
-            TenantRoleId = tenantRoleId,
-            PermissionDefinitionId = permissionDefinition.Id,
-        });
     }
 
     private static async Task<IdentitySubject> EnsureOperatorIdentitySubjectAsync(

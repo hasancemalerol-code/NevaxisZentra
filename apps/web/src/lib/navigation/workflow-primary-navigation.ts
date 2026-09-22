@@ -1,11 +1,12 @@
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import type { SerializableNavigationItem } from "./navigation-types";
 
 /** Primary workflow-first homes (ULTRA A). */
 export const WORKFLOW_PRIMARY_HOMES: readonly SerializableNavigationItem[] = [
   { label: "Bugün", href: "/", iconKey: "list-todo", exact: true },
-  { label: "Fabrika", href: "/fabrika", iconKey: "factory" },
-  { label: "Plan", href: "/planlama", iconKey: "calendar-range" },
-  { label: "İşler", href: "/isler", iconKey: "activity" },
+  { label: "Fabrika", href: "/fabrika", iconKey: "factory", permissionKey: requiredRoutePermission("fabrika") },
+  { label: "Plan", href: "/planlama", iconKey: "calendar-range", permissionKey: requiredRoutePermission("plan") },
+  { label: "İşler", href: "/isler", iconKey: "activity", permissionKey: requiredRoutePermission("isler") },
   { label: "Uygulamalar", href: "/uygulamalar", iconKey: "boxes" },
 ] as const;
 
@@ -46,13 +47,13 @@ const FABRIKA_CONTEXT: ContextualNavigationSection = {
   homeId: "fabrika",
   label: "Fabrika",
   items: [
-    { label: "Genel Bakış", href: "/fabrika", iconKey: "factory", exact: true },
-    { label: "Hatlar", href: "/uretim/hatlar", iconKey: "factory", permissionKey: "mixed-production.read" },
+    { label: "Genel Bakış", href: "/fabrika", iconKey: "factory", exact: true, permissionKey: requiredRoutePermission("fabrika") },
+    { label: "Hatlar", href: "/uretim/hatlar", iconKey: "factory", permissionKey: requiredRoutePermission("hatlar") },
     {
       label: "Makineler & Kaynaklar",
       href: "/uretim/kaynaklar",
       iconKey: "cpu",
-      permissionKey: "mixed-production.read",
+      permissionKey: requiredRoutePermission("kaynaklar"),
     },
     { label: "Üretim Emirleri", href: "/uretim", iconKey: "factory", subscriptionModulePath: "/uretim" },
     { label: "Proses & OEE", href: "/proses-oee", iconKey: "circle-gauge", permissionKey: "process-oee.read", subscriptionModulePath: "/proses-oee" },
@@ -63,7 +64,7 @@ const PLAN_CONTEXT: ContextualNavigationSection = {
   homeId: "plan",
   label: "Plan",
   items: [
-    { label: "Canlı Plan", href: "/planlama", iconKey: "calendar-range", subscriptionModulePath: "/planlama", exact: true },
+    { label: "Canlı Plan", href: "/planlama", iconKey: "calendar-range", subscriptionModulePath: "/planlama", exact: true, permissionKey: requiredRoutePermission("plan") },
     { label: "Fabrika Ağı", href: "/fabrika-agi", iconKey: "factory", permissionKey: "factory-network.read", subscriptionModulePath: "/planlama" },
     { label: "Siparişler (Önizleme)", href: "/siparisler", iconKey: "shopping-basket", subscriptionModulePath: "/siparisler" },
   ],
@@ -73,7 +74,7 @@ const ISLER_CONTEXT: ContextualNavigationSection = {
   homeId: "isler",
   label: "İşler",
   items: [
-    { label: "Açık İşler", href: "/isler", iconKey: "activity", exact: true },
+    { label: "Açık İşler", href: "/isler", iconKey: "activity", exact: true, permissionKey: requiredRoutePermission("isler") },
     { label: "Dijital İş Gücü", href: "/dijital-is-gucu", iconKey: "users-round", permissionKey: "digital-workforce.read" },
     { label: "Onaylar", href: "/dijital-is-gucu/onaylar", iconKey: "shield-check", permissionKey: "digital-workforce.read" },
     { label: "Sonuçlar", href: "/dijital-is-gucu/sonuclar", iconKey: "circle-gauge", permissionKey: "digital-workforce.read" },

@@ -1,3 +1,4 @@
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import type {
   SerializableNavigationGroup,
   SerializableNavigationItem,
@@ -84,20 +85,21 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Planlama",
         href: "/planlama",
         iconKey: "calendar-range",
+        permissionKey: requiredRoutePermission("plan"),
         subscriptionModulePath: "/planlama",
       },
       {
         label: "Hatlar",
         href: "/uretim/hatlar",
         iconKey: "factory",
-        permissionKey: "mixed-production.read",
+        permissionKey: requiredRoutePermission("hatlar"),
         subscriptionModulePath: "/uretim",
       },
       {
         label: "Makineler & Kaynaklar",
         href: "/uretim/kaynaklar",
         iconKey: "cpu",
-        permissionKey: "mixed-production.read",
+        permissionKey: requiredRoutePermission("kaynaklar"),
         subscriptionModulePath: "/uretim",
       },
       {
@@ -356,7 +358,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         label: "Veri Aktarım Merkezi",
         href: "/ayarlar/veri-aktarim-merkezi",
         iconKey: "boxes",
-        permissionKey: "bulk-onboarding.read",
+        permissionKey: requiredRoutePermission("veri-aktarim"),
       },
       {
         label: "Sistem Durumu",

@@ -1,4 +1,5 @@
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { fetchCurrentEffectiveAccess } from "@/features/admin-access/server/admin-access-effective-access";
+import { isSubscriptionExemptCustomerWorkflowPath } from "@/lib/authorization/acceptance-role-contract";
 import {
   isModuleEntitled,
   resolveEntitlementCodeFromPath,
@@ -45,24 +46,35 @@ function hasSubscriptionModuleAccess(
   return isModuleEntitled(subscription.value, entitlementCode);
 }
 
+export function isNavigationItemVisible(
+  item: SerializableNavigationItem,
+  grantedPermissionKeys: readonly string[],
+  subscription: Awaited<ReturnType<typeof fetchCurrentTenantSubscription>>,
+): boolean {
+  if (item.permissionKey && !grantedPermissionKeys.includes(item.permissionKey)) {
+    return false;
+  }
+
+  if (isSubscriptionExemptCustomerWorkflowPath(item.href)) {
+    return true;
+  }
+
+  const modulePath = item.subscriptionModulePath ?? item.href;
+  if (item.subscriptionModulePath || resolveEntitlementCodeFromPath(item.href)) {
+    return hasSubscriptionModuleAccess(modulePath, subscription);
+  }
+
+  return true;
+}
+
 function filterNavigationItems(
   items: readonly SerializableNavigationItem[],
   access: Awaited<ReturnType<typeof fetchCurrentEffectiveAccess>>,
   subscription: Awaited<ReturnType<typeof fetchCurrentTenantSubscription>>,
 ): readonly SerializableNavigationItem[] {
+  const grantedPermissionKeys = access?.grantedPermissionKeys ?? [];
   return items
-    .filter((item) => {
-      if (item.permissionKey && !hasGrantedPermission(access, item.permissionKey)) {
-        return false;
-      }
-
-      const modulePath = item.subscriptionModulePath ?? item.href;
-      if (item.subscriptionModulePath || resolveEntitlementCodeFromPath(item.href)) {
-        return hasSubscriptionModuleAccess(modulePath, subscription);
-      }
-
-      return true;
-    })
+    .filter((item) => isNavigationItemVisible(item, grantedPermissionKeys, subscription))
     .map(toSerializableItem);
 }
 

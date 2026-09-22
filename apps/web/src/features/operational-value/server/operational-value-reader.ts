@@ -4,6 +4,7 @@ import {
   fetchCurrentEffectiveAccess,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -16,7 +17,7 @@ export type OperationalValueWorkspaceResult =
   | Readonly<{ status: "success"; controlCenter: OperationalValueControlCenterApi }>
   | Readonly<{ status: "failure"; message: string }>;
 
-async function resolveContext(permission = "operational-value.read") {
+async function resolveContext(permission = requiredRoutePermission("operational-value")) {
   const access = await fetchCurrentEffectiveAccess();
   if (!hasGrantedPermission(access, permission)) {
     return { status: "failure" as const, message: "Operasyonel değer görüntüleme yetkiniz yok." };

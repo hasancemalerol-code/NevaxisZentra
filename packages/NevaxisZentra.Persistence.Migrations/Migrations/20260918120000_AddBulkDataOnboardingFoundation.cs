@@ -143,11 +143,11 @@ public partial class AddBulkDataOnboardingFoundation : Migration
                  'Read bulk data onboarding jobs, catalog, staging summaries, and reconciliation.',
                  'Toplu veri aktarım okuma', 'bulk-onboarding', 'read',
                  'standard', FALSE, 'facility', 'Active', TIMESTAMPTZ '2026-09-18 12:00:00+00'),
-                ('10000000-0000-4000-8000-000000000fb1', 'bulk-onboarding.manage', 'bulk-onboarding.manage',
+                ('10000000-0000-4000-8000-000000000fb5', 'bulk-onboarding.manage', 'bulk-onboarding.manage',
                  'Create and manage bulk data onboarding jobs and mapping profiles.',
                  'Toplu veri aktarım yönetimi', 'bulk-onboarding', 'manage',
                  'sensitive', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-18 12:00:00+00'),
-                ('10000000-0000-4000-8000-000000000fb2', 'bulk-onboarding.mapping.manage', 'bulk-onboarding.mapping.manage',
+                ('10000000-0000-4000-8000-000000000fb6', 'bulk-onboarding.mapping.manage', 'bulk-onboarding.mapping.manage',
                  'Manage factory data mapping profiles for bulk onboarding.',
                  'Toplu veri aktarım eşleme yönetimi', 'bulk-onboarding', 'mapping.manage',
                  'sensitive', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-18 12:00:00+00'),
@@ -158,7 +158,7 @@ public partial class AddBulkDataOnboardingFoundation : Migration
                 ('10000000-0000-4000-8000-000000000fb4', 'bulk-onboarding.commit', 'bulk-onboarding.commit',
                  'Commit validated bulk onboarding data into canonical FactOS domains.',
                  'Toplu veri aktarım onaylı içe aktarma', 'bulk-onboarding', 'commit',
-                 'critical', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-18 12:00:00+00')
+                 'sensitive', TRUE, 'facility', 'Active', TIMESTAMPTZ '2026-09-18 12:00:00+00')
             ON CONFLICT (id) DO NOTHING;
             """);
     }

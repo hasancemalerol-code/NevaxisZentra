@@ -1,6 +1,7 @@
 import "server-only";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -14,7 +15,7 @@ import {
 } from "./mixed-production-api-client";
 
 async function resolveContext() {
-  const authorization = await denyUnlessGranted("mixed-production.read");
+  const authorization = await denyUnlessGranted(requiredRoutePermission("hatlar"));
   if (authorization.status === "failure") {
     return { status: "failure" as const, message: "Karma üretim hatları görüntüleme yetkiniz yok." };
   }

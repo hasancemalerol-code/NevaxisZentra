@@ -20,14 +20,6 @@ export async function denyUnlessGranted(
   | Readonly<{ status: "granted" }>
   | Readonly<{ status: "failure"; message: string }>
 > {
-  if (
-    process.env.NEVAXIS_FACTOS_PRODUCTION_EXECUTION_RUNTIME_MODE === "development-api" &&
-    process.env.NEVAXIS_FACTOS_DEV_AUTH_ISSUER?.trim() &&
-    process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY?.trim()
-  ) {
-    return { status: "granted" };
-  }
-
   const access = await fetchCurrentEffectiveAccess();
   if (!hasGrantedPermission(access, permissionKey)) {
     return { status: "failure", message: "Authorization denied." };

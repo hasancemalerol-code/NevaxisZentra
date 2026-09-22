@@ -4,6 +4,11 @@
     <AssemblyName>NevaxisZentra.Persistence</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Authorization\acceptance-role-contract.json">
+      <LogicalName>NevaxisZentra.Persistence.Authorization.acceptance-role-contract.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\NevaxisZentra.Configuration\NevaxisZentra.Configuration.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.4" />

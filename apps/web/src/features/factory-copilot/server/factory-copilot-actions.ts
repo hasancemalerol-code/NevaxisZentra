@@ -3,6 +3,7 @@
 import "./factory-copilot-server-boundary";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { requiredRoutePermission, requiredRouteQueryPermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -39,7 +40,7 @@ async function resolveContext(): Promise<
 export async function queryFactoryCopilotAction(
   request: FactoryCopilotQueryRequest,
 ): Promise<FactoryCopilotQueryResult | ActionFailure> {
-  const permission = await denyUnlessGranted("factory-copilot.query");
+  const permission = await denyUnlessGranted(requiredRouteQueryPermission("factory-copilot"));
   if (permission.status === "failure") {
     return permission;
   }
@@ -62,7 +63,7 @@ export async function queryFactoryCopilotAction(
 export async function loadFactoryCopilotSuggestedQuestionsAction(
   context: FactoryCopilotContextInput,
 ): Promise<FactoryCopilotSuggestedQuestionsResult | ActionFailure> {
-  const permission = await denyUnlessGranted("factory-copilot.read");
+  const permission = await denyUnlessGranted(requiredRoutePermission("factory-copilot"));
   if (permission.status === "failure") {
     return permission;
   }

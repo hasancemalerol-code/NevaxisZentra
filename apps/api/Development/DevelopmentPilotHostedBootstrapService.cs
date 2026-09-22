@@ -67,10 +67,25 @@ public sealed class DevelopmentPilotHostedBootstrapService(
         }
         catch (Exception)
         {
-            // Main bootstrap may fail on re-seed; paid-access ensure runs separately.
+            // Main bootstrap may fail on re-seed; acceptance-role ensure runs separately.
         }
 
-        serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>().MarkCompleted();
+        var state = serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>();
+        try
+        {
+            await bootstrapService.EnsureAcceptanceRoleContractAsync(cancellationToken);
+            state.MarkAcceptanceRoleVerified();
+        }
+        catch (Exception exception)
+        {
+            var message = exception is NevaxisZentra.Persistence.Authorization.AcceptanceRoleContractException
+                ? exception.Message
+                : $"Acceptance role contract ensure failed: {exception.Message}";
+            state.MarkAcceptanceRoleFailure(message);
+            Console.Error.WriteLine(message);
+        }
+
+        state.MarkCompleted();
     }
 
     public Task StopAsync(CancellationToken cancellationToken) =>

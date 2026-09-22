@@ -4,6 +4,7 @@ import {
   fetchCurrentEffectiveAccess,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
@@ -22,7 +23,7 @@ export type ContinuousOptimizationOpportunitiesResult =
   | Readonly<{ status: "success"; opportunities: readonly OptimizationOpportunityApi[] }>
   | Readonly<{ status: "failure"; message: string }>;
 
-async function resolveContext(permission = "continuous-optimization.read") {
+async function resolveContext(permission = requiredRoutePermission("continuous-optimization")) {
   const access = await fetchCurrentEffectiveAccess();
   if (!hasGrantedPermission(access, permission)) {
     return { status: "failure" as const, message: "Sürekli optimizasyon görüntüleme yetkiniz yok." };

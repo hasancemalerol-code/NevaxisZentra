@@ -18,6 +18,7 @@ import { loadThroughputIntelligenceWorkspace } from "@/features/throughput-intel
 import { loadThroughputOptimizerWorkspaceForLine } from "@/features/throughput-optimizer/server/throughput-optimizer-reader";
 import { loadContinuousOptimizationOpportunities } from "@/features/continuous-optimization/server/continuous-optimization-reader";
 import type { OptimizationOpportunityApi } from "@/features/continuous-optimization/server/continuous-optimization-api-client";
+import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { resolveRoleLandingProfile } from "@/lib/navigation/role-landing";
 
 import { buildFactoryHierarchy } from "../application/build-factory-hierarchy";
@@ -46,9 +47,14 @@ export async function readFactoryWorkspace(
   searchParams?: Readonly<Record<string, string | string[] | undefined>>,
 ): Promise<FactoryWorkspaceResult> {
   const access = await fetchCurrentEffectiveAccess();
-  const canReadMixedProduction = hasGrantedPermission(access, "mixed-production.read");
+  const factoryPermission = requiredRoutePermission("fabrika");
+  const canReadMixedProduction = hasGrantedPermission(access, factoryPermission);
   const canReadEdge = hasGrantedPermission(access, "edge.read");
   const canReadFactoryIntelligence = hasGrantedPermission(access, "factory-intelligence.read");
+
+  if (!access) {
+    return { status: "failure", message: "Oturum yetkileri okunamadı. Fabrika çalışma alanı açılamadı." };
+  }
 
   if (!canReadMixedProduction) {
     return { status: "failure", message: "Fabrika çalışma alanı görüntüleme yetkiniz yok." };

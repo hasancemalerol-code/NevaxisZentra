@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet('config', 'verify', 'state', 'tenant-isolation-verify', 'authentication-membership-verify', 'authentication-membership-bootstrap', 'authentication-membership-cleanup', 'permission-authorization-verify', 'permission-authorization-bootstrap', 'permission-authorization-cleanup', 'audit-trail-verify', 'audit-trail-bootstrap', 'audit-trail-cleanup', 'development-pilot-migration-prerequisites', 'development-pilot-operator-access-ensure', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
+    [ValidateSet('config', 'verify', 'state', 'tenant-isolation-verify', 'authentication-membership-verify', 'authentication-membership-bootstrap', 'authentication-membership-cleanup', 'permission-authorization-verify', 'permission-authorization-bootstrap', 'permission-authorization-cleanup', 'audit-trail-verify', 'audit-trail-bootstrap', 'audit-trail-cleanup', 'development-pilot-migration-prerequisites', 'development-pilot-operator-access-ensure', 'acceptance-role-contract-verify', 'migrations-list', 'migrations-add', 'migrations-apply', 'migrations-rollback', 'migrations-script')]
     [string]$Operation,
 
     [Parameter(Position = 1)]
@@ -195,6 +195,10 @@ try {
         'development-pilot-operator-access-ensure' {
             Assert-PostgreSqlContainerHealthy
             Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'development-pilot-operator-access-ensure')
+        }
+        'acceptance-role-contract-verify' {
+            Assert-PostgreSqlContainerHealthy
+            Invoke-DotNet @('run', '--project', $databaseToolProject, '--no-launch-profile', '--', 'acceptance-role-contract-verify')
         }
         'migrations-list' {
             Invoke-DotNet ($efPrefix + @('migrations', 'list') + $efOptions)

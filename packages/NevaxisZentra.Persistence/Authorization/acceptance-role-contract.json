@@ -1,0 +1,324 @@
+{
+  "catalogVersion": "2026.09.22.1",
+  "roleKey": "production-execution-operator",
+  "subject": "production-pilot-operator",
+  "restrictedRole": {
+    "roleKey": "quality-authz-negative-test",
+    "subject": "quality-negative-test-user"
+  },
+  "requiredPermissionKeys": [
+    "admin-access.read",
+    "ai-task.acknowledge",
+    "ai-task.assign",
+    "ai-task.create",
+    "ai-task.read",
+    "ai-task.review",
+    "bulk-onboarding.manage",
+    "bulk-onboarding.mapping.manage",
+    "bulk-onboarding.read",
+    "bulk-onboarding.run",
+    "commercial-intelligence.read",
+    "continuous-optimization.read",
+    "continuous-optimization.run",
+    "digital-workforce.approval.decide",
+    "digital-workforce.read",
+    "edge.read",
+    "energy.read",
+    "erp.read",
+    "export.read",
+    "factory-case.manage",
+    "factory-case.read",
+    "factory-case.verify",
+    "factory-copilot.query",
+    "factory-copilot.read",
+    "factory-intelligence.read",
+    "factory-network.read",
+    "golden-demo-customs-file.approve",
+    "golden-demo-customs-file.execute",
+    "golden-demo-customs-file.manage",
+    "golden-demo-customs-file.read",
+    "golden-demo-customs-file.reset",
+    "golden-demo-customs-file.verify",
+    "golden-demo-p1.approve",
+    "golden-demo-p1.execute",
+    "golden-demo-p1.manage",
+    "golden-demo-p1.read",
+    "golden-demo-p1.verify",
+    "golden-demo-p2.read",
+    "golden-demo-p2.reset",
+    "integration.read",
+    "intelligence-runtime.read",
+    "iot-plc.read",
+    "maintenance.read",
+    "material.read",
+    "mixed-production.manage",
+    "mixed-production.operate",
+    "mixed-production.read",
+    "mold.read",
+    "operability.read",
+    "operational-risk.read",
+    "operational-value.read",
+    "presentation-mode.access",
+    "process-oee.read",
+    "production.execution.read",
+    "production.planning.read",
+    "quality.read",
+    "scenario-recovery.read",
+    "scenario-recovery.simulate",
+    "shift-workforce.manage",
+    "shift-workforce.read",
+    "shift.manage",
+    "shift.read",
+    "teams.read",
+    "throughput-optimizer.read"
+  ],
+  "forbiddenPermissionKeys": [
+    "admin-access.grant-owner",
+    "admin-access.manage",
+    "billing.manage",
+    "bulk-onboarding.commit",
+    "saas-subscription.manage",
+    "scenario-recovery.execute"
+  ],
+  "subscriptionExemptPaths": [
+    "/",
+    "/ayarlar/veri-aktarim-merkezi",
+    "/fabrika",
+    "/isler",
+    "/planlama",
+    "/uretim/hatlar",
+    "/uretim/kaynaklar",
+    "/uygulamalar"
+  ],
+  "intentionalSubscriptionGates": [
+    {
+      "pathPrefix": "/uretim",
+      "entitlement": "module.production",
+      "note": "Specialist production pages stay entitlement-gated. /uretim/hatlar and /uretim/kaynaklar are core workflow and are exempt."
+    },
+    {
+      "pathPrefix": "/planlama",
+      "entitlement": "module.planning",
+      "note": "The Plan home is a core workflow route and is exempt. Deeper planning tools may still declare their own entitlement."
+    },
+    {
+      "pathPrefix": "/bakim",
+      "entitlement": "module.maintenance",
+      "note": "Maintenance remains an apps-catalog module, not a core onboarding home."
+    }
+  ],
+  "routes": [
+    {
+      "id": "bugun",
+      "label": "Bugün",
+      "path": "/",
+      "permissionKey": null,
+      "nav": "primary",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "fabrika",
+      "label": "Fabrika",
+      "path": "/fabrika",
+      "permissionKey": "mixed-production.read",
+      "nav": "primary",
+      "acceptance": "required",
+      "api": "GET /api/mixed-production/lines"
+    },
+    {
+      "id": "hatlar",
+      "label": "Hatlar",
+      "path": "/uretim/hatlar",
+      "permissionKey": "mixed-production.read",
+      "nav": "contextual",
+      "acceptance": "required",
+      "api": "GET /api/mixed-production/lines"
+    },
+    {
+      "id": "kaynaklar",
+      "label": "Makineler & Kaynaklar",
+      "path": "/uretim/kaynaklar",
+      "permissionKey": "mixed-production.read",
+      "nav": "contextual",
+      "acceptance": "required",
+      "api": "GET /api/mixed-production/resources/workspace"
+    },
+    {
+      "id": "plan",
+      "label": "Plan",
+      "path": "/planlama",
+      "permissionKey": "production.planning.read",
+      "nav": "primary",
+      "acceptance": "required",
+      "api": "GET /api/production-planning/plans"
+    },
+    {
+      "id": "isler",
+      "label": "İşler",
+      "path": "/isler",
+      "permissionKey": "digital-workforce.read",
+      "nav": "primary",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "uygulamalar",
+      "label": "Uygulamalar",
+      "path": "/uygulamalar",
+      "permissionKey": null,
+      "nav": "primary",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "factory-copilot",
+      "label": "Factory Copilot",
+      "path": null,
+      "permissionKey": "factory-copilot.read",
+      "queryPermissionKey": "factory-copilot.query",
+      "nav": "shell",
+      "acceptance": "required",
+      "api": "POST /api/factory-copilot/query"
+    },
+    {
+      "id": "veri-aktarim",
+      "label": "Veri Aktarım Merkezi",
+      "path": "/ayarlar/veri-aktarim-merkezi",
+      "permissionKey": "bulk-onboarding.read",
+      "preparePermissionKeys": [
+        "bulk-onboarding.manage",
+        "bulk-onboarding.mapping.manage",
+        "bulk-onboarding.run"
+      ],
+      "forbiddenPermissionKey": "bulk-onboarding.commit",
+      "nav": "apps",
+      "acceptance": "required",
+      "api": "GET /api/bulk-data-onboarding"
+    },
+    {
+      "id": "senaryo",
+      "label": "Senaryo Kurtarma",
+      "path": "/senaryo-kurtarma",
+      "permissionKey": "scenario-recovery.read",
+      "simulatePermissionKey": "scenario-recovery.simulate",
+      "forbiddenPermissionKey": "scenario-recovery.execute",
+      "nav": "direct",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "intelligence-runtime",
+      "label": "Intelligence Runtime",
+      "path": "/intelligence-runtime",
+      "permissionKey": "intelligence-runtime.read",
+      "nav": "direct",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "operational-value",
+      "label": "Operational Value",
+      "path": "/operational-value",
+      "permissionKey": "operational-value.read",
+      "nav": "direct",
+      "acceptance": "required",
+      "api": null
+    },
+    {
+      "id": "continuous-optimization",
+      "label": "Sürekli Optimizasyon",
+      "path": "/surekli-optimizasyon",
+      "permissionKey": "continuous-optimization.read",
+      "nav": "direct",
+      "acceptance": "required",
+      "api": null
+    }
+  ],
+  "inventory": [
+    {
+      "module": "FABRIKA",
+      "keys": ["mixed-production.read", "mixed-production.manage", "mixed-production.operate"],
+      "ui": true,
+      "api": true,
+      "notes": "Page, nav, and mixed-production API all use mixed-production.read. Alias keys are not used."
+    },
+    {
+      "module": "Hatlar",
+      "keys": ["mixed-production.read"],
+      "ui": true,
+      "api": true,
+      "notes": "Same read key as FABRIKA. Core workflow path is subscription-exempt."
+    },
+    {
+      "module": "Makineler/Kaynaklar",
+      "keys": ["mixed-production.read"],
+      "ui": true,
+      "api": true,
+      "notes": "Resource workspace API is GET /api/mixed-production/resources/workspace."
+    },
+    {
+      "module": "Factory Copilot",
+      "keys": ["factory-copilot.read", "factory-copilot.query"],
+      "ui": true,
+      "api": true,
+      "notes": "Shell entry uses read. Query action uses query. Both are required for the acceptance role."
+    },
+    {
+      "module": "Veri Aktarım Merkezi",
+      "keys": ["bulk-onboarding.read", "bulk-onboarding.manage", "bulk-onboarding.mapping.manage", "bulk-onboarding.run"],
+      "ui": true,
+      "api": true,
+      "notes": "Read opens the UI. Manage, mapping, and run prepare an import. Commit is forbidden for this role."
+    },
+    {
+      "module": "PLAN",
+      "keys": ["production.planning.read"],
+      "ui": true,
+      "api": true,
+      "notes": "Canonical key is production.planning.read. AdaptivePlanningPermissionKeys.Read is the same string, not a second catalog key."
+    },
+    {
+      "module": "İŞLER",
+      "keys": ["digital-workforce.read", "digital-workforce.approval.decide"],
+      "ui": true,
+      "api": true,
+      "notes": "Workspace read is digital-workforce.read. Approval actions use digital-workforce.approval.decide."
+    },
+    {
+      "module": "UYGULAMALAR",
+      "keys": [],
+      "ui": true,
+      "api": false,
+      "notes": "Catalog shell has no single permission. Items inside keep their own keys."
+    },
+    {
+      "module": "Scenario",
+      "keys": ["scenario-recovery.read", "scenario-recovery.simulate"],
+      "ui": true,
+      "api": true,
+      "notes": "Read opens history. Simulate creates a recovery run. Execute stays forbidden."
+    },
+    {
+      "module": "Continuous Optimization",
+      "keys": ["continuous-optimization.read", "continuous-optimization.run"],
+      "ui": true,
+      "api": true,
+      "notes": "Manage is not granted. Read and run are the acceptance surface."
+    },
+    {
+      "module": "Intelligence Runtime",
+      "keys": ["intelligence-runtime.read"],
+      "ui": true,
+      "api": true,
+      "notes": "Manage and evaluate stay off the acceptance role."
+    },
+    {
+      "module": "Operational Value",
+      "keys": ["operational-value.read"],
+      "ui": true,
+      "api": true,
+      "notes": "Economic-input management and export stay off the acceptance role."
+    }
+  ]
+}

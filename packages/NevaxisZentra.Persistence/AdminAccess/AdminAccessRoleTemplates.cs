@@ -11,10 +11,17 @@ using NevaxisZentra.Persistence.SaasSubscription;
 using NevaxisZentra.Persistence.ShiftAssignment;
 using NevaxisZentra.Persistence.ShiftRisk;
 using NevaxisZentra.Persistence.ShiftWorkforce;
+using NevaxisZentra.Persistence.ContinuousOptimization;
+using NevaxisZentra.Persistence.DigitalWorkforce;
+using NevaxisZentra.Persistence.FactoryCopilot;
 using NevaxisZentra.Persistence.FactoryIntelligence;
+using NevaxisZentra.Persistence.IntelligenceRuntime;
 using NevaxisZentra.Persistence.MixedProduction;
 using NevaxisZentra.Persistence.MarketRates;
+using NevaxisZentra.Persistence.OperationalValue;
+using NevaxisZentra.Persistence.ScenarioRecovery;
 using NevaxisZentra.Persistence.Teams;
+using NevaxisZentra.Persistence.ThroughputOptimizer;
 
 namespace NevaxisZentra.Persistence.AdminAccess;
 
@@ -184,6 +191,17 @@ internal static class CustomerCatalogKeys
         ShiftAssignmentPermissionKeys.Read, ShiftRiskPermissionKeys.Read,
         FactoryIntelligencePermissionKeys.Read,
         MixedProductionPermissionKeys.Read,
+        FactoryCopilotPermissionKeys.Read,
+        ContinuousOptimizationPermissionKeys.Read,
+        IntelligenceRuntimePermissionKeys.Read,
+        OperationalValuePermissionKeys.Read,
+        ScenarioRecoveryPermissionKeys.Read,
+        DigitalWorkforcePermissionKeys.Read,
+        FactoryOrchestrationPermissionKeys.Read,
+        FactoryNetworkPermissionKeys.Read,
+        PresentationModePermissionKeys.Access,
+        ThroughputOptimizerPermissionKeys.Read,
+        BulkDataOnboardingPermissionKeys.Read,
         ProductionPlanningPermissionKeys.Read, ProductionExecutionPermissionKeys.Read,
         QualityPermissionKeys.Read, ExportPermissionKeys.Read, ErpPermissionKeys.Read,
         EnergyPermissionKeys.Read,
@@ -256,5 +274,24 @@ internal static class CustomerCatalogKeys
         FactoryIntelligencePermissionKeys.Calibration,
         MixedProductionPermissionKeys.Read, MixedProductionPermissionKeys.Manage,
         MixedProductionPermissionKeys.Operate,
+        FactoryCopilotPermissionKeys.Read, FactoryCopilotPermissionKeys.Query,
+        BulkDataOnboardingPermissionKeys.Read, BulkDataOnboardingPermissionKeys.Manage,
+        BulkDataOnboardingPermissionKeys.MappingManage, BulkDataOnboardingPermissionKeys.Run,
+        BulkDataOnboardingPermissionKeys.Commit,
+        ContinuousOptimizationPermissionKeys.Read, ContinuousOptimizationPermissionKeys.Manage,
+        ContinuousOptimizationPermissionKeys.Run,
+        IntelligenceRuntimePermissionKeys.Read, IntelligenceRuntimePermissionKeys.Manage,
+        IntelligenceRuntimePermissionKeys.Evaluate,
+        OperationalValuePermissionKeys.Read, OperationalValuePermissionKeys.ManageEconomicInputs,
+        OperationalValuePermissionKeys.Export,
+        ScenarioRecoveryPermissionKeys.Read, ScenarioRecoveryPermissionKeys.Manage,
+        ScenarioRecoveryPermissionKeys.Simulate, ScenarioRecoveryPermissionKeys.Execute,
+        DigitalWorkforcePermissionKeys.Read, DigitalWorkforcePermissionKeys.Manage,
+        DigitalWorkforcePermissionKeys.ApprovalDecide,
+        FactoryOrchestrationPermissionKeys.Read, FactoryOrchestrationPermissionKeys.Manage,
+        FactoryOrchestrationPermissionKeys.Verify,
+        FactoryNetworkPermissionKeys.Read,
+        PresentationModePermissionKeys.Access,
+        ThroughputOptimizerPermissionKeys.Read,
     ];
 }
