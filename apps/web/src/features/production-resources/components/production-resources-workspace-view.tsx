@@ -17,6 +17,8 @@ import {
   hasActiveProductionResourcesFilters,
   readProductionResourcesFilters,
 } from "../application/production-resources-filter";
+import { BULK_DATA_ONBOARDING_ROUTE } from "@/features/bulk-data-onboarding/domain/bulk-data-onboarding-labels";
+
 import {
   PRODUCTION_RESOURCES_EMPTY,
   PRODUCTION_RESOURCES_ZERO_FACTORY,
@@ -204,9 +206,27 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
                 {filteredResources.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="production-resources-grid__empty">
-                      {workspace.resources.length === 0 && !filtersActive
-                        ? PRODUCTION_RESOURCES_ZERO_FACTORY
-                        : PRODUCTION_RESOURCES_EMPTY}
+                      {workspace.resources.length === 0 && !filtersActive ? (
+                        <div
+                          className="production-resources-zero-factory"
+                          data-testid="production-resources-zero-factory"
+                        >
+                          <p>{PRODUCTION_RESOURCES_ZERO_FACTORY}</p>
+                          <div className="production-resources-zero-factory__actions">
+                            <Link
+                              href={BULK_DATA_ONBOARDING_ROUTE}
+                              className="commint-button commint-button--primary"
+                            >
+                              Veri Aktarım Merkezi
+                            </Link>
+                            <Link href="/fabrika" className="commint-button commint-button--ghost">
+                              Fabrika genel bakış
+                            </Link>
+                          </div>
+                        </div>
+                      ) : (
+                        PRODUCTION_RESOURCES_EMPTY
+                      )}
                     </td>
                   </tr>
                 ) : (

@@ -161,8 +161,8 @@ function renderProductionResourcesHtml(): string {
     <header class="fact-workspace__header">
       <div>
         <p class="fact-workspace__context">ÜRETİM · KAYNAKLAR</p>
-        <h1 class="fact-workspace__title">Üretim Kaynakları</h1>
-        <p class="fact-workspace__meta">Fabrika kaynaklarını hat, istasyon ve operasyon bağlamında izleyin.</p>
+        <h1 class="fact-workspace__title">Makineler &amp; Kaynaklar</h1>
+        <p class="fact-workspace__meta">Hat, istasyon ve üretim kaynaklarının birleşik operasyon görünümü.</p>
       </div>
     </header>
     <div class="fact-status-strip" aria-label="Kaynak durum özeti">
@@ -448,7 +448,7 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
     { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
     { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
-    { id: "production-resources", title: "Üretim Kaynakları", html: productionResources },
+    { id: "production-resources", title: "Makineler & Kaynaklar", html: productionResources },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
     { id: "factory-copilot-fabrika", title: "Factory Copilot / Fabrika", html: renderCopilotHtml("/fabrika", "hat=line-1") },
     { id: "factory-copilot-isler", title: "Factory Copilot / İşler", html: renderCopilotHtml("/isler", "is=case-1") },

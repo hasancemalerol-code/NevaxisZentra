@@ -1,9 +1,9 @@
 export const PRODUCTION_RESOURCES_ROUTE_PATH = "/uretim/kaynaklar";
 
-export const PRODUCTION_RESOURCES_TITLE = "Üretim Kaynakları";
+export const PRODUCTION_RESOURCES_TITLE = "Makineler & Kaynaklar";
 
 export const PRODUCTION_RESOURCES_SUBTITLE =
-  "Hat, istasyon ve kaynak durumlarının birleşik operasyon görünümü.";
+  "Hat, istasyon ve üretim kaynaklarının (makine, montaj, robot, buffer) birleşik operasyon görünümü.";
 
 export const PRODUCTION_RESOURCES_EMPTY =
   "Seçilen filtrelerle eşleşen üretim kaynağı bulunmuyor.";
@@ -13,23 +13,23 @@ export const PRODUCTION_RESOURCES_ZERO_FACTORY =
 
 export const PRODUCTION_RESOURCE_TYPE_LABELS: Record<string, string> = {
   machine: "Makine",
-  human: "Operatör",
-  robot: "Robot / Cobot",
-  tool: "Takım",
+  human: "Montaj / İnsan İstasyonu",
+  robot: "Robot",
+  tool: "Kalıp & Takım",
   conveyor: "Konveyör",
-  buffer: "Buffer / WIP",
-  quality_station: "Kalite / Test",
+  buffer: "Buffer",
+  quality_station: "Test / Kalite",
 };
 
 export const PRODUCTION_RESOURCE_TYPE_FILTER_OPTIONS = [
-  { value: "", label: "Tüm tipler" },
-  { value: "machine", label: "Makine" },
-  { value: "human", label: "Operatör" },
-  { value: "robot", label: "Robot" },
-  { value: "tool", label: "Takım" },
-  { value: "conveyor", label: "Konveyör" },
-  { value: "buffer", label: "Buffer / WIP" },
-  { value: "quality_station", label: "Kalite / Test" },
+  { value: "", label: "Tümü" },
+  { value: "machine", label: "Makineler" },
+  { value: "human", label: "Montaj / İnsan İstasyonları" },
+  { value: "robot", label: "Robotlar" },
+  { value: "buffer", label: "Bufferlar" },
+  { value: "conveyor", label: "Konveyörler" },
+  { value: "quality_station", label: "Test / Kalite" },
+  { value: "tool", label: "Kalıp & Takımlar" },
 ] as const;
 
 export const PRODUCTION_RESOURCE_STATE_FILTER_OPTIONS = [

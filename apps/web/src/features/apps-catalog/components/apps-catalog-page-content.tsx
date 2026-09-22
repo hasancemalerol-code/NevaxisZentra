@@ -5,18 +5,26 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { resolveNavigationIcon } from "@/lib/navigation/navigation-icon-registry";
 import { resolvePermissionAwareAppsCatalog } from "@/lib/navigation/navigation-visibility";
 
+import { readAppsOperationalOverview } from "../server/apps-operational-overview-reader";
+import { AppsOperationalOverviewSection } from "./apps-operational-overview-section";
+
 import "../apps-catalog-workspace.css";
 
 export async function AppsCatalogPageContent() {
-  const catalog = await resolvePermissionAwareAppsCatalog();
+  const [catalog, overview] = await Promise.all([
+    resolvePermissionAwareAppsCatalog(),
+    readAppsOperationalOverview(),
+  ]);
 
   return (
     <main className="fact-workspace" data-testid="apps-catalog-page">
       <WorkspaceHeader
         context="UYGULAMALAR"
-        meta="Uzman modüller, entegrasyonlar ve yönetim"
-        title="Uygulamalar ve daha fazla"
+        meta="Operasyonel özet ve uzman modül kataloğu"
+        title="Uygulamalar"
       />
+
+      <AppsOperationalOverviewSection overview={overview} />
 
       {catalog.map((group) => (
         <section aria-label={group.label} className="fact-section" key={group.label}>

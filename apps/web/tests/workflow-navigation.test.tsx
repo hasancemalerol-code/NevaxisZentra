@@ -69,7 +69,12 @@ test("contextual navigation resolves by active workflow home", () => {
 
   const fabrikaSection = resolveContextualNavigationSection("/uretim/kaynaklar");
   assert.equal(fabrikaSection?.homeId, "fabrika");
-  assert.ok(fabrikaSection?.items.some((item) => item.href === "/makineler"));
+  assert.ok(
+    fabrikaSection?.items.some(
+      (item) => item.href === "/uretim/kaynaklar" && item.label === "Makineler & Kaynaklar",
+    ),
+  );
+  assert.ok(fabrikaSection?.items.some((item) => item.label === "Genel Bakış" && item.href === "/fabrika"));
 });
 
 test("role landing prioritizes planner and operator contexts", () => {

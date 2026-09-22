@@ -23,8 +23,7 @@ export function FactoryOnboardingEmptyState({
       </p>
       <div className="factory-onboarding-empty__actions">
         <Link href={BULK_DATA_ONBOARDING_ROUTE}>Veri Aktarım Merkezi&apos;nden toplu yükle</Link>
-        <Link href="/uretim/kaynaklar">Üretim Kaynakları</Link>
-        <Link href="/makineler">Makineler</Link>
+        <Link href="/uretim/kaynaklar">Makineler &amp; Kaynaklar</Link>
       </div>
     </section>
   );

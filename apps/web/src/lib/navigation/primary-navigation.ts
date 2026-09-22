@@ -94,7 +94,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/uretim",
       },
       {
-        label: "Üretim Kaynakları",
+        label: "Makineler & Kaynaklar",
         href: "/uretim/kaynaklar",
         iconKey: "cpu",
         permissionKey: "mixed-production.read",
