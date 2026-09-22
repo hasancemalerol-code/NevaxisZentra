@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppShellFrame } from "../src/components/app-shell/app-shell-frame";
 import { buildShellSearchItems } from "../src/components/app-shell/shell-navigation";
+import { AppsOperationalOverviewSection } from "../src/features/apps-catalog/components/apps-operational-overview-section";
 import { FactoryCopilotDrawer } from "../src/features/factory-copilot/components/factory-copilot-drawer";
 import { WorksWorkspaceView } from "../src/features/works/components/works-workspace-view";
 import type {
@@ -170,6 +171,12 @@ function renderProductionResourcesHtml(): string {
       <div class="fact-status-strip__item"><span class="fact-status-strip__label">Çalışıyor</span><span class="fact-status-strip__value">${mockWorkspace.status.running}</span></div>
       <div class="fact-status-strip__item"><span class="fact-status-strip__label">Risk</span><span class="fact-status-strip__value">${mockWorkspace.status.atRisk}</span></div>
     </div>
+    <div class="production-resources-type-chips" data-testid="production-resources-type-chips" role="toolbar" aria-label="Kaynak tipi filtreleri">
+      <button type="button" class="production-resources-type-chips__chip production-resources-type-chips__chip--active">Tümü</button>
+      <button type="button" class="production-resources-type-chips__chip">Makineler</button>
+      <button type="button" class="production-resources-type-chips__chip">Montaj / İnsan İstasyonları</button>
+      <button type="button" class="production-resources-type-chips__chip">Robotlar</button>
+    </div>
     <div class="fact-command-bar production-resources-filter-rail">
       <div class="fact-command-bar__group">
         <label class="fact-command-bar__field"><span>Hat</span><select><option>Tüm hatlar</option></select></label>
@@ -202,6 +209,73 @@ function renderProductionResourcesHtml(): string {
   </main>`;
 }
 
+function renderUygulamalarAnalyticsReadyHtml(): string {
+  return renderToStaticMarkup(
+    createElement(
+      "main",
+      { className: "fact-workspace", "data-testid": "apps-catalog-page" },
+      createElement(AppsOperationalOverviewSection, {
+        overview: {
+          state: "ready",
+          kpis: [
+            { label: "Aktif sipariş", value: "4" },
+            { label: "İyi çıktı", value: "1280" },
+            { label: "Açık istisna", value: "2" },
+            { label: "Aktif duruş", value: "1" },
+          ],
+          outputTrend: [
+            { label: "08:00", goodQuantity: 220, targetQuantity: 200 },
+            { label: "10:00", goodQuantity: 260, targetQuantity: 240 },
+            { label: "12:00", goodQuantity: 310, targetQuantity: 280 },
+            { label: "14:00", goodQuantity: 290, targetQuantity: 300 },
+          ],
+          resourceTypeBars: [
+            { label: "Makine", count: 4 },
+            { label: "Montaj / İnsan İstasyonu", count: 2 },
+            { label: "Buffer", count: 1 },
+          ],
+          resourceStateBars: [
+            { label: "Çalışıyor", count: 5 },
+            { label: "Bekliyor", count: 2 },
+          ],
+          scrapSummary: { goodQuantity: 1280, scrapQuantity: 24, scrapRatePercent: 1.8 },
+          downtimeSummary: { activeCount: 1, totalMinutes: 36 },
+          riskHighlights: ["Hat MIX-01 termin riski"],
+        },
+      }),
+    ),
+  );
+}
+
+function renderUygulamalarAnalyticsEmptyHtml(): string {
+  return renderToStaticMarkup(
+    createElement(
+      "main",
+      { className: "fact-workspace", "data-testid": "apps-catalog-page" },
+      createElement(AppsOperationalOverviewSection, {
+        overview: {
+          state: "empty",
+          kpis: [],
+          outputTrend: [],
+          resourceTypeBars: [],
+          resourceStateBars: [],
+          scrapSummary: null,
+          downtimeSummary: null,
+          riskHighlights: [],
+        },
+      }),
+    ),
+  );
+}
+
+function renderProductionResourcesEmptyHtml(): string {
+  return `<main class="fact-workspace production-resources-workspace" data-testid="production-resources-workspace">
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">ÜRETİM · KAYNAKLAR</p><h1 class="fact-workspace__title">Makineler &amp; Kaynaklar</h1></div></header>
+    <div class="production-resources-type-chips" data-testid="production-resources-type-chips"><button type="button" class="production-resources-type-chips__chip production-resources-type-chips__chip--active">Tümü</button><button type="button" class="production-resources-type-chips__chip">Montaj / İnsan İstasyonları</button></div>
+    <table class="fact-data-grid"><tbody><tr><td colspan="9"><div class="production-resources-zero-factory" data-testid="production-resources-zero-factory"><p>Henüz üretim kaynağı yok.</p><a href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi'nden yükle</a></div></td></tr></tbody></table>
+  </main>`;
+}
+
 function renderCopilotHtml(pathname: string, search = ""): string {
   return renderToStaticMarkup(
     createElement(FactoryCopilotDrawer, {
@@ -227,6 +301,7 @@ const css = readCss([
   "src/features/continuous-optimization/continuous-optimization.css",
   "src/features/intelligence-runtime/intelligence-runtime.css",
   "src/features/operational-value/operational-value.css",
+  "src/features/apps-catalog/apps-catalog-workspace.css",
   "src/app/dashboard-premium.css",
 ]);
 
@@ -345,6 +420,11 @@ function renderFactoryWorkspaceHtml(): string {
   return `<main class="fact-workspace factory-workspace" data-testid="factory-workspace">
     <header class="fact-workspace__header"><div><p class="fact-workspace__context">FABRİKA</p><h1 class="fact-workspace__title">Fabrikada şu anda ne oluyor?</h1></div></header>
     <div class="fact-status-strip"><div class="fact-status-strip__item"><span class="fact-status-strip__label">Çalışan kaynak</span><span class="fact-status-strip__value">1</span></div></div>
+    <nav class="factory-workspace-primary-nav" data-testid="factory-workspace-primary-nav" aria-label="Fabrika çalışma alanı">
+      <a class="factory-workspace-primary-nav__link factory-workspace-primary-nav__link--active" href="/fabrika">Genel Bakış</a>
+      <a class="factory-workspace-primary-nav__link" href="/uretim/hatlar">Hatlar</a>
+      <a class="factory-workspace-primary-nav__link" href="/uretim/kaynaklar">Makineler &amp; Kaynaklar</a>
+    </nav>
     <div class="factory-workspace__layout">
       <aside class="factory-workspace__panel"><div class="factory-workspace__panel-body"><ul class="factory-hierarchy-tree" data-testid="factory-hierarchy-tree"><li><button class="factory-hierarchy-tree__button" data-active="true"><strong>MIX-01</strong></button></li></ul></div></aside>
       <section class="factory-workspace__panel" data-testid="factory-line-view"><div class="fact-line-topology"><button type="button" class="fact-station-row" data-selected="true"><span class="fact-station-row__code">INJ-ST-01</span></button></div><table class="fact-data-grid"><thead><tr><th>Olay</th><th>Özet</th></tr></thead><tbody><tr><td>StateChange</td><td>Hat çalışıyor</td></tr></tbody></table></section>
@@ -368,6 +448,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
   const taskCenter = renderTaskCenterHtml();
 
   const productionResources = renderProductionResourcesHtml();
+  const productionResourcesEmpty = renderProductionResourcesEmptyHtml();
+  const uygulamalarAnalyticsReady = renderUygulamalarAnalyticsReadyHtml();
+  const uygulamalarAnalyticsEmpty = renderUygulamalarAnalyticsEmptyHtml();
 
   const operasyonMerkezi = renderToStaticMarkup(
     createElement(
@@ -449,6 +532,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
     { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
     { id: "production-resources", title: "Makineler & Kaynaklar", html: productionResources },
+    { id: "production-resources-empty", title: "Makineler & Kaynaklar Boş", html: productionResourcesEmpty },
+    { id: "uygulamalar", title: "Uygulamalar Analytics", html: uygulamalarAnalyticsReady },
+    { id: "uygulamalar-empty", title: "Uygulamalar Boş Analytics", html: uygulamalarAnalyticsEmpty },
     { id: "operasyon-merkezi", title: "Operasyon Merkezi", html: operasyonMerkezi },
     { id: "factory-copilot-fabrika", title: "Factory Copilot / Fabrika", html: renderCopilotHtml("/fabrika", "hat=line-1") },
     { id: "factory-copilot-isler", title: "Factory Copilot / İşler", html: renderCopilotHtml("/isler", "is=case-1") },
@@ -493,6 +579,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
           hasContinuousOptimizationFactoryStrip: Boolean(document.body.querySelector('[data-testid="continuous-optimization-factory-strip"]')),
           hasIntelligenceRuntimeControlCenter: Boolean(document.body.querySelector('[data-testid="intelligence-runtime-control-center"]')),
           hasOperationalValueControlCenter: Boolean(document.body.querySelector('[data-testid="operational-value-control-center"]')),
+          hasAppsCharts: Boolean(document.body.querySelector('[data-testid="apps-operational-analytics-charts"]')),
+          hasFactoryPrimaryNav: Boolean(document.body.querySelector('[data-testid="factory-workspace-primary-nav"]')),
+          hasResourceTypeChips: Boolean(document.body.querySelector('[data-testid="production-resources-type-chips"]')),
         };
       });
 
@@ -502,6 +591,9 @@ test("browser visual QA for critical industrial surfaces", async () => {
       if (surface.id === "navigation-sidebar" && !metrics.sidebarVisible) score -= 1.0;
       if (surface.id === "factory-workspace" && !metrics.hasTable) score -= 0.3;
       if (surface.id === "factory-workspace" && !metrics.hasInspector) score -= 0.3;
+      if (surface.id === "factory-workspace" && !metrics.hasFactoryPrimaryNav) score -= 1.0;
+      if (surface.id === "production-resources" && !metrics.hasResourceTypeChips) score -= 0.5;
+      if (surface.id === "uygulamalar" && !metrics.hasAppsCharts) score -= 1.0;
       if (surface.id === "live-plan-workspace" && !metrics.hasTable) score -= 0.3;
       if (surface.id === "live-plan-workspace" && !metrics.hasInspector) score -= 0.3;
       if (surface.id === "production-resources" && !metrics.hasTable) score -= 0.5;

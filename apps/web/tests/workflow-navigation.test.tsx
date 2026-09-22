@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { DecisionCard } from "../src/components/workspace/decision-card";
 import { FactoryContextBreadcrumb } from "../src/components/workspace/factory-context-breadcrumb";
 import { Sidebar } from "../src/components/app-shell/sidebar";
+import { FactoryWorkspacePrimaryNav } from "../src/features/factory-workspace/components/factory-workspace-primary-nav";
 import { appsCatalogItems } from "../src/lib/navigation/apps-catalog-navigation";
 import { buildCanonicalTaskCenterRedirect } from "../src/lib/navigation/legacy-task-routes";
 import { navigationItems, primaryNavigation } from "../src/lib/navigation/primary-navigation";
@@ -57,6 +58,9 @@ test("sidebar renders workflow-first primary navigation", () => {
   assert.match(markup, /navigation-label">İşler</);
   assert.match(markup, /navigation-label">Uygulamalar</);
   assert.match(markup, /aria-current="page"[^>]*href="\/fabrika"/);
+  assert.match(markup, /navigation-label">Makineler &amp; Kaynaklar</);
+  assert.match(markup, /navigation-label">Genel Bakış</);
+  assert.match(markup, /navigation-label">Hatlar</);
   assert.doesNotMatch(markup, /navigation-label">Operasyon Merkezi</);
 });
 
@@ -75,6 +79,17 @@ test("contextual navigation resolves by active workflow home", () => {
     ),
   );
   assert.ok(fabrikaSection?.items.some((item) => item.label === "Genel Bakış" && item.href === "/fabrika"));
+  assert.ok(fabrikaSection?.items.some((item) => item.label === "Hatlar"));
+});
+
+test("factory workspace primary nav exposes machines and resources entry", () => {
+  const markup = renderToStaticMarkup(
+    <FactoryWorkspacePrimaryNav pathname="/fabrika" /> as ReactElement,
+  );
+
+  assert.match(markup, /data-testid="factory-workspace-primary-nav"/);
+  assert.match(markup, /Makineler &amp; Kaynaklar/);
+  assert.match(markup, /href="\/uretim\/kaynaklar"/);
 });
 
 test("role landing prioritizes planner and operator contexts", () => {

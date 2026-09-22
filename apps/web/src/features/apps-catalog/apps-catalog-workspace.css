@@ -112,3 +112,155 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.apps-catalog-specialist-header {
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--fact-border);
+}
+
+.apps-operational-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.apps-analytics-panel {
+  border: 1px solid var(--fact-border);
+  background: var(--fact-surface-elevated);
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.apps-analytics-panel--wide {
+  grid-column: 1 / -1;
+}
+
+.apps-analytics-panel--compact {
+  align-self: start;
+}
+
+.apps-analytics-panel__title {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.apps-analytics-chart__plot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.apps-analytics-chart__grid {
+  stroke: var(--fact-border);
+  stroke-width: 1;
+}
+
+.apps-analytics-chart__line--actual {
+  stroke: var(--fact-accent);
+  stroke-width: 2;
+}
+
+.apps-analytics-chart__line--target {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.apps-analytics-chart__point {
+  fill: var(--fact-accent);
+}
+
+.apps-analytics-chart__axis-y,
+.apps-analytics-chart__axis-x {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.apps-analytics-chart__bar {
+  fill: color-mix(in srgb, var(--fact-accent) 72%, transparent);
+}
+
+.apps-analytics-chart__bar-value {
+  fill: var(--color-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.apps-analytics-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: var(--fact-text-meta);
+  color: var(--color-text-muted);
+}
+
+.apps-analytics-chart__legend-line {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--fact-accent);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.apps-analytics-chart__legend-line--target {
+  border-top-style: dashed;
+  border-top-color: var(--color-text-muted);
+}
+
+.apps-analytics-chart__table {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: var(--fact-text-meta);
+}
+
+.apps-analytics-chart__table li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.apps-analytics-chart__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fact-text-meta);
+}
+
+.apps-analytics-summary {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.apps-analytics-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.apps-analytics-summary dt {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fact-text-meta);
+}
+
+.apps-analytics-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (max-width: 1440px) {
+  .apps-operational-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apps-analytics-panel--wide {
+    grid-column: auto;
+  }
+}

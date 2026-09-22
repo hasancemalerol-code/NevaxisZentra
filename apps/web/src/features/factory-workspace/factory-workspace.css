@@ -3,6 +3,31 @@
   gap: 12px;
 }
 
+.factory-workspace-primary-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--fact-border);
+  background: var(--fact-surface-elevated);
+}
+
+.factory-workspace-primary-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 12px;
+  border: 1px solid var(--fact-border);
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.factory-workspace-primary-nav__link--active {
+  border-color: var(--fact-accent);
+  background: color-mix(in srgb, var(--fact-accent) 12%, transparent);
+}
+
 .factory-workspace__layout {
   display: grid;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 340px);

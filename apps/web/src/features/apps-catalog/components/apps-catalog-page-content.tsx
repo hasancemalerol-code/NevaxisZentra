@@ -26,6 +26,11 @@ export async function AppsCatalogPageContent() {
 
       <AppsOperationalOverviewSection overview={overview} />
 
+      <header className="apps-catalog-specialist-header">
+        <p className="fact-workspace__context">UZMAN UYGULAMALAR</p>
+        <h2 className="fact-section__title">Modül kataloğu</h2>
+      </header>
+
       {catalog.map((group) => (
         <section aria-label={group.label} className="fact-section" key={group.label}>
           <header className="fact-section__header">

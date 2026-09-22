@@ -12,6 +12,7 @@ import { FactoryHierarchyTree } from "./factory-hierarchy-tree";
 import { FactoryOnboardingEmptyState } from "./factory-onboarding-empty-state";
 import { FactoryOperationalCenter } from "./factory-operational-center";
 import { FactoryResourceInspector } from "./factory-resource-inspector";
+import { FactoryWorkspacePrimaryNav } from "./factory-workspace-primary-nav";
 
 import "../factory-workspace.css";
 
@@ -84,6 +85,8 @@ export function FactoryWorkspaceShell({ workspace }: FactoryWorkspaceShellProps)
           { label: "Vardiya", value: workspace.shift?.shiftLabel ?? "—" },
         ]}
       />
+
+      <FactoryWorkspacePrimaryNav pathname={pathname} />
 
       <FactoryOnboardingEmptyState
         resourceCount={workspace.resources.resources.length}

@@ -47,13 +47,12 @@ const FABRIKA_CONTEXT: ContextualNavigationSection = {
   label: "Fabrika",
   items: [
     { label: "Genel Bakış", href: "/fabrika", iconKey: "factory", exact: true },
-    { label: "Hatlar", href: "/uretim/hatlar", iconKey: "factory", permissionKey: "mixed-production.read", subscriptionModulePath: "/uretim" },
+    { label: "Hatlar", href: "/uretim/hatlar", iconKey: "factory", permissionKey: "mixed-production.read" },
     {
       label: "Makineler & Kaynaklar",
       href: "/uretim/kaynaklar",
       iconKey: "cpu",
       permissionKey: "mixed-production.read",
-      subscriptionModulePath: "/uretim",
     },
     { label: "Üretim Emirleri", href: "/uretim", iconKey: "factory", subscriptionModulePath: "/uretim" },
     { label: "Proses & OEE", href: "/proses-oee", iconKey: "circle-gauge", permissionKey: "process-oee.read", subscriptionModulePath: "/proses-oee" },

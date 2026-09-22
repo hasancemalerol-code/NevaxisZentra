@@ -19,6 +19,27 @@
   gap: 12px;
 }
 
+.production-resources-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.production-resources-type-chips__chip {
+  min-height: 2rem;
+  padding: 0 10px;
+  border: 1px solid var(--fact-border, #dbe3ee);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.production-resources-type-chips__chip--active {
+  border-color: var(--fact-accent, #2563eb);
+  background: color-mix(in srgb, var(--fact-accent, #2563eb) 10%, #fff);
+}
+
 .production-resources-filter-rail {
   align-items: end;
 }

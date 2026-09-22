@@ -22,6 +22,7 @@ import { BULK_DATA_ONBOARDING_ROUTE } from "@/features/bulk-data-onboarding/doma
 import {
   PRODUCTION_RESOURCES_EMPTY,
   PRODUCTION_RESOURCES_ZERO_FACTORY,
+  PRODUCTION_RESOURCES_ZERO_FACTORY_CTA,
   PRODUCTION_RESOURCES_SUBTITLE,
   PRODUCTION_RESOURCES_TITLE,
   PRODUCTION_RESOURCE_STATE_FILTER_OPTIONS,
@@ -110,6 +111,29 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
           { label: "Risk", value: workspace.status.atRisk },
         ]}
       />
+
+      <div
+        className="production-resources-type-chips"
+        data-testid="production-resources-type-chips"
+        role="toolbar"
+        aria-label="Kaynak tipi filtreleri"
+      >
+        {PRODUCTION_RESOURCE_TYPE_FILTER_OPTIONS.map((option) => {
+          const active = (filters.resourceType ?? "") === option.value;
+          return (
+            <button
+              key={option.value || "all"}
+              type="button"
+              className={`production-resources-type-chips__chip${active ? " production-resources-type-chips__chip--active" : ""}`}
+              data-testid={`production-resources-type-chip-${option.value || "all"}`}
+              aria-pressed={active}
+              onClick={() => applyFilterUpdates({ resourceType: option.value })}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
 
       <div
         className={`fact-command-bar production-resources-filter-rail${filtersActive ? " production-resources-filter-rail--active" : ""}`}
@@ -217,7 +241,7 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
                               href={BULK_DATA_ONBOARDING_ROUTE}
                               className="commint-button commint-button--primary"
                             >
-                              Veri Aktarım Merkezi
+                              {PRODUCTION_RESOURCES_ZERO_FACTORY_CTA}
                             </Link>
                             <Link href="/fabrika" className="commint-button commint-button--ghost">
                               Fabrika genel bakış

@@ -2,109 +2,55 @@ import "server-only";
 
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
-import { getProductionReportingOverview } from "@/features/production-reporting/server/production-reporting-api-client";
+import {
+  getProductionDowntimeReporting,
+  getProductionReportingOverview,
+  getProductionScrapAnalytics,
+  listProductionShiftReporting,
+} from "@/features/production-reporting/server/production-reporting-api-client";
 import { readProductionResourceWorkspace } from "@/features/production-resources/server/production-resources-api-client";
-import { getProductionResourceTypeLabel } from "@/features/production-resources/domain/production-resources-labels";
 
-export type AppsOperationalOverviewMetric = Readonly<{
-  label: string;
-  value: string;
-}>;
+import type { AppsOperationalAnalyticsModel } from "../domain/apps-operational-analytics-types";
+import { EMPTY_APPS_OPERATIONAL_ANALYTICS } from "../domain/apps-operational-analytics-types";
+import { buildAppsOperationalAnalytics } from "./apps-operational-analytics-builder";
 
-export type AppsOperationalResourceBar = Readonly<{
-  resourceType: string;
-  label: string;
-  count: number;
-}>;
-
-export type AppsOperationalOverviewModel = Readonly<{
-  state: "empty" | "ready";
-  metrics: readonly AppsOperationalOverviewMetric[];
-  resourceDistribution: readonly AppsOperationalResourceBar[];
-  riskHighlights: readonly string[];
-}>;
-
-const EMPTY_OVERVIEW: AppsOperationalOverviewModel = {
-  state: "empty",
-  metrics: [],
-  resourceDistribution: [],
-  riskHighlights: [],
-};
-
-function buildResourceDistribution(
-  resources: readonly { resourceType: string }[],
-): readonly AppsOperationalResourceBar[] {
-  const counts = new Map<string, number>();
-  for (const row of resources) {
-    counts.set(row.resourceType, (counts.get(row.resourceType) ?? 0) + 1);
-  }
-
-  return [...counts.entries()]
-    .map(([resourceType, count]) => ({
-      resourceType,
-      label: getProductionResourceTypeLabel(resourceType),
-      count,
-    }))
-    .sort((left, right) => right.count - left.count);
-}
+export type AppsOperationalOverviewModel = AppsOperationalAnalyticsModel;
 
 export async function readAppsOperationalOverview(): Promise<AppsOperationalOverviewModel> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
-    return EMPTY_OVERVIEW;
+    return EMPTY_APPS_OPERATIONAL_ANALYTICS;
   }
 
   const contextResult = resolveProductionOrderRequestContext(configResult.config);
   if (contextResult.status === "failure") {
-    return EMPTY_OVERVIEW;
+    return EMPTY_APPS_OPERATIONAL_ANALYTICS;
   }
 
   const context = contextResult.context;
-  const [overviewResult, resourcesResult] = await Promise.all([
+  const [overviewResult, resourcesResult, shiftsResult, scrapResult, downtimeResult] = await Promise.all([
     getProductionReportingOverview(context),
     readProductionResourceWorkspace(context),
+    listProductionShiftReporting(context),
+    getProductionScrapAnalytics(context),
+    getProductionDowntimeReporting(context),
   ]);
 
   const overview = overviewResult.status === "success" ? overviewResult.value : null;
   const resources =
     resourcesResult.status === "success" ? resourcesResult.value.resources : [];
+  const shifts = shiftsResult.status === "success" ? shiftsResult.value : [];
+  const scrap = scrapResult.status === "success" ? scrapResult.value : null;
+  const downtime = downtimeResult.status === "success" ? downtimeResult.value : null;
 
-  const resourceDistribution = buildResourceDistribution(resources);
-  const hasProductionSignal =
-    (overview?.goodQuantity ?? 0) > 0
-    || (overview?.activeOrderCount ?? 0) > 0
-    || resources.length > 0;
-
-  if (!hasProductionSignal) {
-    return EMPTY_OVERVIEW;
-  }
-
-  const metrics: AppsOperationalOverviewMetric[] = [];
-  if (overview) {
-    metrics.push(
-      { label: "Aktif sipariş", value: String(overview.activeOrderCount) },
-      { label: "İyi çıktı", value: String(overview.goodQuantity) },
-      { label: "Açık istisna", value: String(overview.openExceptionCount) },
-      { label: "Aktif duruş", value: String(overview.activeDowntimeCount) },
-    );
-  } else if (resources.length > 0) {
-    const running = resources.filter((row) => row.state.toLowerCase() === "running").length;
-    metrics.push(
-      { label: "Kaynak", value: String(resources.length) },
-      { label: "Çalışan", value: String(running) },
-    );
-  }
-
-  const riskHighlights =
-    overview?.riskSignals
-      ?.filter((signal) => signal.severity === "high" || signal.severity === "critical")
-      .map((signal) => signal.label)
-      .slice(0, 3) ?? [];
-
-  return {
-    state: "ready",
-    metrics,
-    resourceDistribution,
-    riskHighlights,
-  };
+  return buildAppsOperationalAnalytics({
+    overview,
+    shifts,
+    resources,
+    scrapRatePercent: scrap?.scrapRatePercent ?? null,
+    scrapQuantity: scrap?.scrapQuantity ?? null,
+    goodQuantityFromScrap: scrap?.goodQuantity ?? null,
+    downtimeActiveCount: downtime?.activeDowntimeCount ?? null,
+    downtimeTotalMinutes: downtime?.totalDowntimeMinutes ?? null,
+  });
 }

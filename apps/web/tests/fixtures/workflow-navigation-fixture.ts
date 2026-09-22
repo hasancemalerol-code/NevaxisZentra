@@ -7,7 +7,7 @@ export const workflowNavigationFixture: readonly SerializableNavigationGroup[] =
     items: [...WORKFLOW_PRIMARY_HOMES],
   },
   {
-    label: "Bugün",
-    items: [...CONTEXTUAL_NAVIGATION_SECTIONS[0].items],
+    label: "Fabrika",
+    items: [...CONTEXTUAL_NAVIGATION_SECTIONS[1].items],
   },
 ];
