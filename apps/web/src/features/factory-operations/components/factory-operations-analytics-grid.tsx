@@ -212,16 +212,22 @@ function HourlyProductionChart({
   const getX = (index: number) => padding.left + (index / Math.max(points.length - 1, 1)) * innerWidth;
   const getY = (value: number) => padding.top + innerHeight - (value / yMax) * innerHeight;
 
-  const createSeriesPath = (key: "actual" | "target") =>
-    points
-      .map((point, index) => {
-        const value = key === "actual" ? point.actual ?? 0 : point.target ?? 0;
-        return `${index === 0 ? "M" : "L"} ${getX(index)} ${getY(value)}`;
-      })
-      .join(" ");
+  const createSeriesPath = (key: "actual" | "target") => {
+    const commands: string[] = [];
+    points.forEach((point, index) => {
+      const value = point[key];
+      if (!hasNumeric(value)) {
+        return;
+      }
+
+      commands.push(`${commands.length === 0 ? "M" : "L"} ${getX(index)} ${getY(value)}`);
+    });
+    return commands.join(" ");
+  };
 
   const actualPath = createSeriesPath("actual");
   const targetPath = createSeriesPath("target");
+  const hasTargetSeries = points.some((point) => hasNumeric(point.target));
 
   return (
     <div className="factory-showcase-chart__canvas" data-chart-kind="hourly-production" data-testid="apps-hourly-production-chart">
@@ -250,7 +256,7 @@ function HourlyProductionChart({
             );
           })}
 
-          <path className="factory-showcase-chart__line factory-showcase-chart__line--target" d={targetPath} fill="none" data-series="target" />
+          {hasTargetSeries ? <path className="factory-showcase-chart__line factory-showcase-chart__line--target" d={targetPath} fill="none" data-series="target" /> : null}
           <path className="factory-showcase-chart__line factory-showcase-chart__line--actual" d={actualPath} fill="none" data-series="actual" />
 
           {points.map((point, index) => {

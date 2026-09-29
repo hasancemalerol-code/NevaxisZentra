@@ -33,7 +33,9 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
         try
         {
-            await bootstrapService.EnsurePaidAccessAsync(cancellationToken);
+            await RetryTransientAsync(
+                bootstrapService.EnsurePaidAccessAsync,
+                cancellationToken);
         }
         catch (Exception exception)
         {
@@ -73,7 +75,9 @@ public sealed class DevelopmentPilotHostedBootstrapService(
         var state = serviceProvider.GetRequiredService<DevelopmentPilotBootstrapState>();
         try
         {
-            await bootstrapService.EnsureAcceptanceRoleContractAsync(cancellationToken);
+            await RetryTransientAsync(
+                bootstrapService.EnsureAcceptanceRoleContractAsync,
+                cancellationToken);
             state.MarkAcceptanceRoleVerified();
         }
         catch (Exception exception)
@@ -90,6 +94,29 @@ public sealed class DevelopmentPilotHostedBootstrapService(
 
     public Task StopAsync(CancellationToken cancellationToken) =>
         Task.CompletedTask;
+
+    private static async Task RetryTransientAsync(
+        Func<CancellationToken, Task> action,
+        CancellationToken cancellationToken)
+    {
+        const int attempts = 3;
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await action(cancellationToken);
+                return;
+            }
+            catch (Exception exception) when (
+                attempt < attempts
+                && exception is not NevaxisZentra.Persistence.Authorization.AcceptanceRoleContractException)
+            {
+                Console.Error.WriteLine(
+                    $"Development pilot ensure attempt {attempt} failed: {exception.Message}");
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+            }
+        }
+    }
 }
 
 public static class DevelopmentPilotApiServiceCollectionExtensions

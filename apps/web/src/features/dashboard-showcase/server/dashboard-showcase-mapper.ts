@@ -3,7 +3,6 @@ import type { ProductionOrderPerformanceRow, ProductionReportingOverview, Produc
 import type { QualityReportingOverview } from "@/features/quality-control/domain/quality-control";
 
 import {
-  DISTRIBUTION_GROUP_LABELS,
   formatShowcaseCycleSeconds,
   formatShowcaseNumber,
   formatShowcasePercent,
@@ -61,25 +60,16 @@ function buildAssessmentSparkline(
     .filter((value): value is number => hasNumericValue(value));
 }
 
-function ensureSparklineLength(values: readonly number[], minimum = MIN_SPARKLINE_POINTS): readonly number[] {
-  if (values.length >= minimum) {
-    return values.slice(-minimum);
-  }
-
+function trimSparkline(values: readonly number[], maximum = MIN_SPARKLINE_POINTS): readonly number[] {
   if (values.length === 0) {
     return [];
   }
 
-  const padded = [...values];
-  while (padded.length < minimum) {
-    padded.unshift(padded[0] ?? padded[padded.length - 1] ?? 0);
-  }
-
-  return padded.slice(-minimum);
+  return values.length > maximum ? values.slice(-maximum) : [...values];
 }
 
 function buildHourlyActualSparkline(hourly: readonly DashboardShowcaseHourlyPoint[]): readonly number[] {
-  return ensureSparklineLength(
+  return trimSparkline(
     hourly
       .map((point) => point.actual)
       .filter((value): value is number => hasNumericValue(value)),
@@ -87,7 +77,7 @@ function buildHourlyActualSparkline(hourly: readonly DashboardShowcaseHourlyPoin
 }
 
 function buildHourlyTargetSparkline(hourly: readonly DashboardShowcaseHourlyPoint[]): readonly number[] {
-  return ensureSparklineLength(
+  return trimSparkline(
     hourly
       .map((point) => point.target)
       .filter((value): value is number => hasNumericValue(value)),
@@ -109,17 +99,12 @@ function formatSignedPercentDelta(current: number, previous: number): string | u
 
 function buildHourlyProduction(
   shifts: readonly ProductionShiftReportingRow[],
-  plannedQuantity: number | null,
 ): readonly DashboardShowcaseHourlyPoint[] {
   const hourly = Array.from({ length: REQUIRED_HOURLY_POINTS }, (_, hour) => ({
     hourLabel: `${String(hour).padStart(2, "0")}:00`,
     actual: null as number | null,
     target: null as number | null,
   }));
-
-  const perShiftTarget = hasNumericValue(plannedQuantity) && shifts.length > 0
-    ? plannedQuantity / shifts.length
-    : null;
 
   for (const shift of shifts) {
     if (!shift.activeWindowStartUtc || shift.goodQuantity <= 0) {
@@ -133,9 +118,6 @@ function buildHourlyProduction(
     }
 
     bucket.actual = (bucket.actual ?? 0) + shift.goodQuantity;
-    if (perShiftTarget !== null) {
-      bucket.target = (bucket.target ?? 0) + perShiftTarget;
-    }
   }
 
   return hourly;
@@ -172,41 +154,30 @@ function buildDistributionRows(
 
   topThree.forEach((entry, index) => {
     rows.push({
-      label: DISTRIBUTION_GROUP_LABELS[index] ?? "Diğer",
+      label: entry.key === "ungrouped" ? "Gruplanmamış" : entry.key,
       quantity: entry.quantity,
       percent: total > 0 ? (entry.quantity / total) * 100 : 0,
       tone: tones[index] ?? "info",
     });
   });
 
-  if (remainder > 0 || rows.length < DISTRIBUTION_GROUP_LABELS.length) {
+  if (remainder > 0) {
     rows.push({
-      label: DISTRIBUTION_GROUP_LABELS[3],
+      label: "Diğer",
       quantity: remainder,
       percent: total > 0 ? (remainder / total) * 100 : 0,
       tone: tones[3],
     });
   }
 
-  while (rows.length < DISTRIBUTION_GROUP_LABELS.length) {
-    const index = rows.length;
-    rows.push({
-      label: DISTRIBUTION_GROUP_LABELS[index],
-      quantity: 0,
-      percent: 0,
-      tone: tones[index] ?? "info",
-    });
-  }
-
-  return { rows: rows.slice(0, DISTRIBUTION_GROUP_LABELS.length), total };
+  return { rows, total };
 }
 
 function buildScalarSparkline(
   values: readonly number[],
-  fallback: number,
 ): readonly DashboardShowcaseSparklineSeries[] {
-  const series = ensureSparklineLength(values.length > 0 ? values : Array.from({ length: MIN_SPARKLINE_POINTS }, () => fallback));
-  return series.length >= MIN_SPARKLINE_POINTS ? [{ values: series, variant: "solid" }] : [];
+  const series = trimSparkline(values);
+  return series.length > 0 ? [{ values: series, variant: "solid" }] : [];
 }
 
 function buildKpiCards(
@@ -231,20 +202,6 @@ function buildKpiCards(
     ?? source.qualityOverview?.passRatePercent
     ?? source.qualityOverview?.firstPassYieldPercent
     ?? null;
-  const cycleSeconds = hasNumericValue(source.cycleDurationMs) ? source.cycleDurationMs / 1000 : null;
-  const cycleSparkline = hasNumericValue(cycleSeconds)
-    ? ensureSparklineLength(
-        hourlyActualSparkline.map((value) => Math.max(1, (cycleSeconds ?? 0) + ((value % 5) - 2) * 0.15)),
-        MIN_SPARKLINE_POINTS,
-      )
-    : [];
-  const scrapSparkline = hasNumericValue(scrapRate)
-    ? ensureSparklineLength(
-        hourlyActualSparkline.map((value, index) => Math.max(0.2, scrapRate + Math.sin(index) * 0.25)),
-        MIN_SPARKLINE_POINTS,
-      )
-    : [];
-
   const productionPending = !hasNumericValue(goodQuantity);
   const oeePending = !hasNumericValue(source.latestOeePercent);
   const scrapPending = !hasNumericValue(scrapRate);
@@ -256,17 +213,20 @@ function buildKpiCards(
     ? shiftSparkline
     : hourlyActualSparkline;
 
-  const targetActualSparkline = hourlyActualSparkline.map((value, index) => {
-    const target = hourlyTargetSparkline[index] ?? value;
-    return target > 0 ? (value / target) * 100 : completionRate ?? 0;
-  });
-  const targetGoalSparkline = ensureSparklineLength(
-    hourlyTargetSparkline.map((value, index) => {
-      const actual = hourlyActualSparkline[index] ?? 0;
-      return actual > 0 ? (actual / value) * 100 : completionRate ?? 0;
-    }),
-    MIN_SPARKLINE_POINTS,
-  );
+  const targetActualSparkline = hourlyTargetSparkline.length === 0
+    ? []
+    : hourlyActualSparkline.map((value, index) => {
+        const target = hourlyTargetSparkline[index];
+        return hasNumericValue(target) && target > 0 ? (value / target) * 100 : null;
+      }).filter((value): value is number => hasNumericValue(value));
+  const targetGoalSparkline = hourlyTargetSparkline.length === 0
+    ? []
+    : trimSparkline(
+        hourlyTargetSparkline.map((value, index) => {
+          const actual = hourlyActualSparkline[index];
+          return hasNumericValue(actual) && value > 0 ? (actual / value) * 100 : null;
+        }).filter((value): value is number => hasNumericValue(value)),
+      );
 
   return [
     {
@@ -279,7 +239,7 @@ function buildKpiCards(
         : undefined,
       tone: "info",
       iconKey: "production",
-      sparklines: buildScalarSparkline(productionSparkline, goodQuantity ?? 0),
+      sparklines: buildScalarSparkline(productionSparkline),
       pending: productionPending,
     },
     {
@@ -291,7 +251,7 @@ function buildKpiCards(
         : undefined,
       tone: "success",
       iconKey: "oee",
-      sparklines: buildScalarSparkline(oeeSparkline, source.latestOeePercent ?? 0),
+      sparklines: buildScalarSparkline(oeeSparkline),
       pending: oeePending,
     },
     {
@@ -300,7 +260,7 @@ function buildKpiCards(
       value: formatShowcasePercent(scrapRate),
       tone: "warning",
       iconKey: "scrap",
-      sparklines: buildScalarSparkline(scrapSparkline, scrapRate ?? 0),
+      sparklines: [],
       pending: scrapPending,
     },
     {
@@ -309,7 +269,7 @@ function buildKpiCards(
       value: formatShowcaseCycleSeconds(source.cycleDurationMs),
       tone: "info",
       iconKey: "cycle",
-      sparklines: buildScalarSparkline(cycleSparkline, cycleSeconds ?? 0),
+      sparklines: [],
       pending: cyclePending,
     },
     {
@@ -319,7 +279,7 @@ function buildKpiCards(
       tone: "success",
       sparklineTone: "quality",
       iconKey: "quality",
-      sparklines: buildScalarSparkline(qualitySparkline, qualityPercent ?? 0),
+      sparklines: buildScalarSparkline(qualitySparkline),
       pending: qualityPending,
     },
     {
@@ -328,10 +288,10 @@ function buildKpiCards(
       value: formatShowcasePercent(completionRate),
       tone: "info",
       iconKey: "target",
-      sparklines: targetPending
+      sparklines: targetPending || hourlyTargetSparkline.length === 0
         ? []
         : [
-            { values: ensureSparklineLength(targetActualSparkline, MIN_SPARKLINE_POINTS), variant: "solid" },
+            { values: trimSparkline(targetActualSparkline), variant: "solid" },
             { values: targetGoalSparkline, variant: "dashed" },
           ],
       showSparklineLegend: true,
@@ -354,14 +314,10 @@ export function mapDashboardShowcaseViewModel(
   source: ShowcaseSourceData,
   lastRefreshedAtUtc: string,
 ): DashboardShowcaseViewModel {
-  const hourlyProduction = buildHourlyProduction(
-    source.shifts,
-    source.overview?.plannedQuantity ?? null,
-  );
+  const hourlyProduction = buildHourlyProduction(source.shifts);
   const distribution = buildDistributionRows(source.orders);
   const oeeComponents = buildOeeComponents(source.latestAssessment);
-  const hourlyComplete = hourlyProduction.length === REQUIRED_HOURLY_POINTS
-    && hourlyProduction.every((point) => hasNumericValue(point.actual) && hasNumericValue(point.target));
+  const hourlyComplete = hourlyProduction.some((point) => hasNumericValue(point.actual));
 
   return {
     facilityDisplayName: source.facilityDisplayName,
@@ -375,7 +331,7 @@ export function mapDashboardShowcaseViewModel(
     oeeComponentsPending: oeeComponents.every((component) => !hasNumericValue(component.percent)),
     distributionRows: distribution.rows,
     distributionTotal: distribution.total,
-    distributionPending: distribution.rows.length < DISTRIBUTION_GROUP_LABELS.length,
+    distributionPending: distribution.rows.length === 0,
   };
 }
 

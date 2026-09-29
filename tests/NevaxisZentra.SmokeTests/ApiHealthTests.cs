@@ -10,7 +10,8 @@ public sealed class ApiHealthTests
     [InlineData("/health/ready")]
     public async Task HealthEndpointReturnsHealthy(string path)
     {
-        await using var factory = new WebApplicationFactory<Program>();
+        await using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(SmokeTestServiceStubs.ConfigureIsolatedDevelopmentHost);
         using var client = factory.CreateClient();
 
         using var response = await client.GetAsync(path);
