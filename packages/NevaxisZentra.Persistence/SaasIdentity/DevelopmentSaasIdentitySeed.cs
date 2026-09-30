@@ -273,9 +273,13 @@ internal static class DevelopmentSaasIdentitySeed
         DateTimeOffset seedTimestampUtc,
         CancellationToken cancellationToken)
     {
-        if (await dbContext.SaasIdentityPasswordCredentials.AsNoTracking()
-                .AnyAsync(c => c.AccountId == account.Id, cancellationToken))
+        var existingCredential = await dbContext.SaasIdentityPasswordCredentials
+            .SingleOrDefaultAsync(c => c.AccountId == account.Id, cancellationToken);
+        if (existingCredential is not null)
         {
+            // Development/acceptance bootstrap only: this seed is reachable solely through the
+            // development pilot bootstrap (guarded against non-Development hosts).
+            TrySyncExistingCredential(passwordHasher, account, existingCredential, password, seedTimestampUtc);
             return;
         }
 
@@ -288,6 +292,38 @@ internal static class DevelopmentSaasIdentitySeed
             CreatedAtUtc = seedTimestampUtc,
             UpdatedAtUtc = seedTimestampUtc,
         });
+    }
+
+    /// <summary>
+    /// Re-aligns an already-seeded development credential with the configured development password.
+    /// Verifies through the canonical <see cref="PasswordHasher{TUser}"/> (never compares hashes); a password
+    /// that already verifies causes no mutation. On mismatch the hash is replaced and the account security
+    /// stamp is rotated so sessions issued against the old credential stop resolving.
+    /// </summary>
+    /// <returns><c>true</c> when the credential was rewritten.</returns>
+    internal static bool TrySyncExistingCredential(
+        PasswordHasher<SaasIdentityAccount> passwordHasher,
+        SaasIdentityAccount account,
+        SaasIdentityPasswordCredential credential,
+        string password,
+        DateTimeOffset seedTimestampUtc)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return false;
+        }
+
+        var verification = passwordHasher.VerifyHashedPassword(account, credential.PasswordHash, password);
+        if (verification != PasswordVerificationResult.Failed)
+        {
+            return false;
+        }
+
+        credential.PasswordHash = passwordHasher.HashPassword(account, password);
+        credential.UpdatedAtUtc = seedTimestampUtc;
+        account.SecurityStamp = Guid.NewGuid();
+        account.UpdatedAtUtc = seedTimestampUtc;
+        return true;
     }
 
     private static async Task EnsureMembershipAsync(
