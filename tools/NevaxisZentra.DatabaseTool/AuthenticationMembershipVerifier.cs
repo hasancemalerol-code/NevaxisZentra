@@ -177,8 +177,43 @@ internal static class AuthenticationMembershipVerifier
             "Runtime role enumerated identity subjects.");
         await AssertInsufficientPrivilegeAsync(
             connection,
+            "SELECT id, external_issuer, external_subject, status FROM identity_subjects",
+            "Runtime role read identity subject columns directly.");
+        await AssertInsufficientPrivilegeAsync(
+            connection,
+            "SELECT external_subject FROM identity_subjects WHERE external_subject = 'auth-subject-probe'",
+            "Runtime role probed identity subjects by external subject.");
+
+        // The constrained facility-membership lookup must fail closed without a matching tenant context.
+        Require(
+            !await IsFacilityMemberBySubjectAsync(connection, TenantAId, "auth-subject-probe"),
+            "Facility membership lookup answered without tenant context.");
+        await using (var mismatchTransaction = await connection.BeginTransactionAsync())
+        {
+            await SetTenantAsync(connection, TenantBId);
+            Require(
+                !await IsFacilityMemberBySubjectAsync(connection, TenantAId, "auth-subject-probe"),
+                "Facility membership lookup answered for a tenant other than the current tenant context.");
+            await mismatchTransaction.RollbackAsync();
+        }
+        await AssertInsufficientPrivilegeAsync(
+            connection,
             "SELECT tenant_id FROM resolve_active_tenant('auth-a')",
             "The legacy tenant resolver remained callable by the runtime role.");
+    }
+
+    private static async Task<bool> IsFacilityMemberBySubjectAsync(
+        NpgsqlConnection connection,
+        Guid tenantId,
+        string externalSubject)
+    {
+        await using var command = new NpgsqlCommand(
+            "SELECT public.is_active_facility_member_by_subject(@tenant_id, @facility_id, @external_subject)",
+            connection);
+        command.Parameters.AddWithValue("tenant_id", tenantId);
+        command.Parameters.AddWithValue("facility_id", Guid.NewGuid());
+        command.Parameters.AddWithValue("external_subject", externalSubject);
+        return await command.ExecuteScalarAsync() is true;
     }
 
     private static async Task AssertMembershipRlsAsync(NpgsqlConnection connection)

@@ -375,22 +375,12 @@ public sealed class ProductionOperatorRepository(
 
     private async Task<bool> IsFacilityMemberAsync(Guid tenantId, Guid facilityId, string subjectId, CancellationToken ct)
     {
-        // Validate via FacilityMembership → TenantMembership → IdentitySubject chain using ExternalSubject.
-        return await dbContext.FacilityMemberships
-            .AsNoTracking()
-            .Join(dbContext.TenantMemberships.AsNoTracking(),
-                fm => fm.TenantMembershipId,
-                tm => tm.Id,
-                (fm, tm) => new { fm, tm })
-            .Join(dbContext.IdentitySubjects.AsNoTracking(),
-                x => x.tm.IdentitySubjectId,
-                is2 => is2.Id,
-                (x, is2) => new { x.fm, x.tm, is2 })
-            .AnyAsync(x =>
-                x.fm.TenantId == tenantId
-                && x.fm.FacilityId == facilityId
-                && x.fm.Status == FacilityMembershipStatus.Active
-                && x.is2.ExternalSubject == subjectId,
-            ct);
+        // The runtime role has no direct access to identity_subjects. Validation goes through a
+        // SECURITY DEFINER function that returns only a boolean and only answers for the current tenant context.
+        FormattableString membershipSql =
+            $"SELECT public.is_active_facility_member_by_subject({tenantId}, {facilityId}, {subjectId}) AS \"Value\"";
+        return await dbContext.Database
+            .SqlQuery<bool>(membershipSql)
+            .SingleAsync(ct);
     }
 }
