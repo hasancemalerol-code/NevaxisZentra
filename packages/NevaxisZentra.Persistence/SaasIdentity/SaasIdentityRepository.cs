@@ -26,7 +26,7 @@ public sealed class SaasIdentityRepository(
         var normalizedTenantKey = SaasIdentityEmailNormalizer.NormalizeOrganizationContext(command.OrganizationContext);
 
         FormattableString tenantLookupSql =
-            $"SELECT tenant_id AS \"TenantId\", tenant_key AS \"TenantKey\" FROM resolve_active_tenant({normalizedTenantKey})";
+            $"SELECT tenant_id AS \"TenantId\", tenant_key AS \"TenantKey\" FROM resolve_active_tenant_for_signin({normalizedTenantKey})";
         var tenantMatch = await dbContext.Database
             .SqlQuery<TenantSignInContext>(tenantLookupSql)
             .SingleOrDefaultAsync(cancellationToken);

@@ -55,7 +55,6 @@ _ReSharper*/
 *.db-wal
 *.sqlite
 *.sqlite3
-data/
 postgres-data/
 redis-data/
 rabbitmq-data/

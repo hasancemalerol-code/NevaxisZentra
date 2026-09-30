@@ -1,3 +1,4 @@
+using NevaxisZentra.Configuration;
 using NevaxisZentra.Persistence.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ internal static class DevelopmentPilotBootstrapDbContextFactory
             Host = GetMigrationValue("HOST", runtimeOptions.Host),
             Port = GetMigrationInt32("PORT", runtimeOptions.Port),
             Database = GetMigrationValue("DATABASE", runtimeOptions.Database),
-            Username = NormalizeMigrationUsername(GetMigrationValue("USERNAME", "crevafactos")),
+            Username = GetMigrationValue("USERNAME", "crevafactos"),
             Password = GetMigrationValue("PASSWORD", "local_dev_only_change_me"),
             SslMode = GetMigrationValue("SSL_MODE", runtimeOptions.SslMode),
             ConnectionTimeoutSeconds = runtimeOptions.ConnectionTimeoutSeconds,
@@ -45,16 +46,11 @@ internal static class DevelopmentPilotBootstrapDbContextFactory
     }
 
     private static string GetMigrationValue(string suffix, string fallback) =>
-        Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__MIGRATIONS__{suffix}") ?? fallback;
+        LegacyEnvironmentVariables.GetSectioned("MIGRATIONS", suffix) ?? fallback;
 
     private static int GetMigrationInt32(string suffix, int fallback)
     {
-        var value = Environment.GetEnvironmentVariable($"NEVAXIS_FACTOS__MIGRATIONS__{suffix}");
+        var value = LegacyEnvironmentVariables.GetSectioned("MIGRATIONS", suffix);
         return string.IsNullOrWhiteSpace(value) ? fallback : int.Parse(value, provider: null);
     }
-
-    private static string NormalizeMigrationUsername(string username) =>
-        string.Equals(username, "NevaxisZentra", StringComparison.OrdinalIgnoreCase)
-            ? "crevafactos"
-            : username;
 }

@@ -177,8 +177,68 @@ internal static class AuthenticationMembershipVerifier
             "Runtime role enumerated identity subjects.");
         await AssertInsufficientPrivilegeAsync(
             connection,
+            "SELECT id, external_issuer, external_subject, status FROM identity_subjects",
+            "Runtime role read identity subject columns directly.");
+        await AssertInsufficientPrivilegeAsync(
+            connection,
+            "SELECT external_subject FROM identity_subjects WHERE external_subject = 'auth-subject-probe'",
+            "Runtime role probed identity subjects by external subject.");
+
+        // The constrained facility-membership lookup must fail closed without a matching tenant context.
+        Require(
+            !await IsFacilityMemberBySubjectAsync(connection, TenantAId, "auth-subject-probe"),
+            "Facility membership lookup answered without tenant context.");
+        await using (var mismatchTransaction = await connection.BeginTransactionAsync())
+        {
+            await SetTenantAsync(connection, TenantBId);
+            Require(
+                !await IsFacilityMemberBySubjectAsync(connection, TenantAId, "auth-subject-probe"),
+                "Facility membership lookup answered for a tenant other than the current tenant context.");
+            await mismatchTransaction.RollbackAsync();
+        }
+        await AssertInsufficientPrivilegeAsync(
+            connection,
             "SELECT tenant_id FROM resolve_active_tenant('auth-a')",
             "The legacy tenant resolver remained callable by the runtime role.");
+
+        // The sign-in flow's replacement resolver must still work for a known tenant key/id
+        // and must still fail closed for an unknown one.
+        Require(
+            await ResolveTenantForSignInAsync(connection, "auth-a") == TenantAId,
+            "Tenant resolver replacement failed to resolve an active tenant by key.");
+        Require(
+            await ResolveTenantForSignInAsync(connection, TenantAId.ToString()) == TenantAId,
+            "Tenant resolver replacement failed to resolve an active tenant by id.");
+        Require(
+            await ResolveTenantForSignInAsync(connection, "auth-unknown") is null,
+            "Tenant resolver replacement resolved an unknown tenant identifier.");
+        Require(
+            await ResolveTenantForSignInAsync(connection, "auth-inactive") is null,
+            "Tenant resolver replacement resolved an inactive tenant.");
+    }
+
+    private static async Task<Guid?> ResolveTenantForSignInAsync(NpgsqlConnection connection, string tenantIdentifier)
+    {
+        await using var command = new NpgsqlCommand(
+            "SELECT tenant_id FROM resolve_active_tenant_for_signin(@tenant_identifier)",
+            connection);
+        command.Parameters.AddWithValue("tenant_identifier", tenantIdentifier);
+        var result = await command.ExecuteScalarAsync();
+        return result is Guid tenantId ? tenantId : null;
+    }
+
+    private static async Task<bool> IsFacilityMemberBySubjectAsync(
+        NpgsqlConnection connection,
+        Guid tenantId,
+        string externalSubject)
+    {
+        await using var command = new NpgsqlCommand(
+            "SELECT public.is_active_facility_member_by_subject(@tenant_id, @facility_id, @external_subject)",
+            connection);
+        command.Parameters.AddWithValue("tenant_id", tenantId);
+        command.Parameters.AddWithValue("facility_id", Guid.NewGuid());
+        command.Parameters.AddWithValue("external_subject", externalSubject);
+        return await command.ExecuteScalarAsync() is true;
     }
 
     private static async Task AssertMembershipRlsAsync(NpgsqlConnection connection)

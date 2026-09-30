@@ -64,6 +64,44 @@ function Get-DotNetPath {
     throw 'The .NET SDK is unavailable. Install the SDK selected by global.json and ensure dotnet is on PATH.'
 }
 
+function Get-EffectiveSectionedValue {
+    param([string]$Section, [string]$Suffix)
+
+    $preferred = [Environment]::GetEnvironmentVariable("NEVAXIS_ZENTRA__${Section}__$Suffix", 'Process')
+    if ($preferred) {
+        return $preferred
+    }
+
+    return [Environment]::GetEnvironmentVariable("NEVAXIS_FACTOS__${Section}__$Suffix", 'Process')
+}
+
+function Assert-ResolvedPortMatchesCompose {
+    # Guards against the exact failure mode found during the 2026-09-30 security/release
+    # audit: this worktree had no infrastructure/.env, so every DB command silently fell
+    # back to port 5432 and reached a DIFFERENT worktree's PostgreSQL container instead of
+    # this repository's own (published on a different host port). Docker health alone
+    # cannot catch this, because THIS compose file's container is perfectly healthy — the
+    # .NET tooling was just never going to talk to it. See "WORKTREE DB ISOLATION DEFECT"
+    # in ZENTRA-INDEPENDENT-E2E-TECHNICAL-UX-AUDIT.md.
+    $composePort = (& docker compose -f $composeFile port postgres 5432 2>$null) -replace '^.*:', ''
+    if (-not $composePort) {
+        throw "Unable to resolve the published host port for the 'postgres' service in $composeFile. Is it running? Run pnpm infra:start."
+    }
+
+    foreach ($section in @('PERSISTENCE', 'MIGRATIONS')) {
+        $resolvedPort = Get-EffectiveSectionedValue $section 'PORT'
+        if ($resolvedPort -and $resolvedPort -ne $composePort) {
+            throw @"
+Resolved $section port ($resolvedPort) does not match this worktree's compose-published PostgreSQL port ($composePort).
+This command would silently talk to a DIFFERENT PostgreSQL container/worktree.
+Fix: copy infrastructure/.env.example to infrastructure/.env in THIS worktree and set
+NEVAXIS_ZENTRA_POSTGRES_PORT / NEVAXIS_ZENTRA__${section}__PORT to $composePort (and matching
+DATABASE/USERNAME/PASSWORD for this worktree's container), then retry.
+"@
+        }
+    }
+}
+
 function Assert-PostgreSqlContainerHealthy {
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
         throw 'Docker is unavailable. Install Docker Desktop and ensure docker is on PATH.'
@@ -78,6 +116,8 @@ function Assert-PostgreSqlContainerHealthy {
     if ($LASTEXITCODE -ne 0) {
         throw 'The PostgreSQL container is absent or unhealthy. Run pnpm infra:start and pnpm infra:status.'
     }
+
+    Assert-ResolvedPortMatchesCompose
 }
 
 function Invoke-DotNet {
