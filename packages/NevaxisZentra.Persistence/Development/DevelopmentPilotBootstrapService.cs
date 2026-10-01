@@ -1028,6 +1028,7 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
             await DevelopmentPilotShiftAssignmentSeed.EnsureShiftAssignmentPilotRecordsAsync(
                 dbContext,
                 tenant.Id,
@@ -1035,6 +1036,7 @@ internal sealed class DevelopmentPilotBootstrapService(
                 operatorIdentity.Id.ToString(),
                 seedTimestampUtc,
                 cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
             await DevelopmentPilotShiftRiskSeed.EnsureShiftRiskPilotRecordsAsync(
                 dbContext,
                 tenant.Id,

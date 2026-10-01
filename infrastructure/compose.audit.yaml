@@ -1,0 +1,18 @@
+# Release-audit worktree overlay. Merged only for the NevaxisZentra-release-audit
+# checkout (or NEVAXIS_ZENTRA_INFRA_PROFILE=audit). It does not rename the default
+# NevaxisZentra-local project used by a normal development checkout.
+name: nevaxiszentra-release-audit
+
+services:
+  postgres:
+    container_name: nevaxiszentra-release-audit-postgres
+
+volumes:
+  postgres-data:
+    name: nevaxiszentra-release-audit-postgres-data
+  rabbitmq-data:
+    name: nevaxiszentra-release-audit-rabbitmq-data
+
+networks:
+  local-infrastructure:
+    name: nevaxiszentra-release-audit-network

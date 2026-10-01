@@ -29,10 +29,12 @@ public static class SaasSubscriptionModuleEntitlements
     private static readonly IReadOnlyList<(string RoutePrefix, string EntitlementCode)> RouteMappings =
     [
         ("/dashboard", EntitlementCodes.Dashboard),
+        ("/fabrika", EntitlementCodes.Production),
         ("/fabrika-vitrini", EntitlementCodes.Dashboard),
         ("/teams", EntitlementCodes.Teams),
         ("/siparisler", EntitlementCodes.Orders),
         ("/planlama", EntitlementCodes.Planning),
+        ("/isler", EntitlementCodes.AiTaskCenter),
         ("/uretim", EntitlementCodes.Production),
         ("/ihracat", EntitlementCodes.Export),
         ("/vardiyalar", EntitlementCodes.ShiftWorkforce),
@@ -60,6 +62,7 @@ public static class SaasSubscriptionModuleEntitlements
     {
         "/",
         "/ayarlar",
+        "/uygulamalar",
     };
 
     public static bool IsRecoveryExemptRoute(string? routePath)

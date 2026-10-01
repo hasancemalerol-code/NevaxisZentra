@@ -58,10 +58,12 @@ const LIMIT_LABELS: Record<string, string> = {
 
 const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: string }>[] = [
   { prefix: "/dashboard", code: "module.dashboard" },
+  { prefix: "/fabrika", code: "module.production" },
   { prefix: "/fabrika-vitrini", code: "module.dashboard" },
   { prefix: "/teams", code: "module.teams" },
   { prefix: "/siparisler", code: "module.orders" },
   { prefix: "/planlama", code: "module.planning" },
+  { prefix: "/isler", code: "module.ai-task-center" },
   { prefix: "/uretim", code: "module.production" },
   { prefix: "/ihracat", code: "module.export" },
   { prefix: "/vardiyalar", code: "module.shift-workforce" },
@@ -87,7 +89,7 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/ai-gorevleri", code: "module.ai-task-center" },
 ];
 
-export const SUBSCRIPTION_RECOVERY_ROUTES = ["/ayarlar", "/abonelik-erisimi"] as const;
+export const SUBSCRIPTION_RECOVERY_ROUTES = ["/ayarlar", "/abonelik-erisimi", "/uygulamalar"] as const;
 
 function humanizeToken(value: string): string {
   return value

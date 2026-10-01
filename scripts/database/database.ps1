@@ -10,6 +10,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
+. (Join-Path $repositoryRoot 'scripts\infrastructure\NevaxisCompose.ps1')
+$script:composeArguments = @(Get-NevaxisComposeArguments -RepositoryRoot $repositoryRoot)
 $composeFile = Join-Path $repositoryRoot 'infrastructure\compose.yaml'
 $migrationProject = Join-Path $repositoryRoot 'packages\NevaxisZentra.Persistence.Migrations\NevaxisZentra.Persistence.Migrations.csproj'
 $databaseToolProject = Join-Path $repositoryRoot 'tools\NevaxisZentra.DatabaseTool\NevaxisZentra.DatabaseTool.csproj'
@@ -83,7 +85,7 @@ function Assert-ResolvedPortMatchesCompose {
     # cannot catch this, because THIS compose file's container is perfectly healthy — the
     # .NET tooling was just never going to talk to it. See "WORKTREE DB ISOLATION DEFECT"
     # in ZENTRA-INDEPENDENT-E2E-TECHNICAL-UX-AUDIT.md.
-    $composePort = (& docker compose -f $composeFile port postgres 5432 2>$null) -replace '^.*:', ''
+    $composePort = (& docker compose @script:composeArguments port postgres 5432 2>$null) -replace '^.*:', ''
     if (-not $composePort) {
         throw "Unable to resolve the published host port for the 'postgres' service in $composeFile. Is it running? Run pnpm infra:start."
     }
@@ -112,7 +114,15 @@ function Assert-PostgreSqlContainerHealthy {
         throw 'Docker is unavailable. Start Docker Desktop before running this database command.'
     }
 
-    & docker compose -f $composeFile exec -T postgres pg_isready -U $env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME -d $env:NEVAXIS_FACTOS__PERSISTENCE__DATABASE *> $null
+    $readyUser = Get-EffectiveSectionedValue 'MIGRATIONS' 'USERNAME'
+    $readyDatabase = Get-EffectiveSectionedValue 'MIGRATIONS' 'DATABASE'
+    if ([string]::IsNullOrWhiteSpace($readyUser) -or [string]::IsNullOrWhiteSpace($readyDatabase)) {
+        throw 'Migration database identity is not configured. Set NEVAXIS_ZENTRA__MIGRATIONS__USERNAME and NEVAXIS_ZENTRA__MIGRATIONS__DATABASE.'
+    }
+
+    # Probe with the migration role. A new audit database creates that role in
+    # initdb; the runtime role is created later by the tenant-isolation migration.
+    & docker compose @script:composeArguments exec -T postgres pg_isready -U $readyUser -d $readyDatabase *> $null
     if ($LASTEXITCODE -ne 0) {
         throw 'The PostgreSQL container is absent or unhealthy. Run pnpm infra:start and pnpm infra:status.'
     }

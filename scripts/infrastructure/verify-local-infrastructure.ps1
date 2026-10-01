@@ -7,6 +7,8 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
+. (Join-Path $PSScriptRoot 'NevaxisCompose.ps1')
+$script:composeArguments = @(Get-NevaxisComposeArguments -RepositoryRoot $repositoryRoot)
 $composePath = Join-Path $repositoryRoot 'infrastructure\compose.yaml'
 $exampleEnvironmentPath = Join-Path $repositoryRoot 'infrastructure\.env.example'
 $localEnvironmentPath = Join-Path $repositoryRoot 'infrastructure\.env'
@@ -88,14 +90,11 @@ function Get-ComposeServiceHealth {
         [string] $Service
     )
 
-    $result = Invoke-DockerCommand -Arguments @(
-        'compose',
-        '-f',
-        $composePath,
+    $result = Invoke-DockerCommand -Arguments (@('compose') + $script:composeArguments + @(
         'ps',
         '--format',
         'json',
-        $Service)
+        $Service))
     if ($result.ExitCode -ne 0) {
         throw "Unable to inspect '$Service': $($result.Output -join [Environment]::NewLine)"
     }
