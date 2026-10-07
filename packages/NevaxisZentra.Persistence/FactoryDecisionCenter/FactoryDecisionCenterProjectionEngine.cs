@@ -133,7 +133,7 @@ public static class FactoryDecisionCenterProjectionEngine
         Func<DigitalWorkCase, FactoryDecisionCaseQueueItem> projectItem)
     {
         var decisionCases = rootCases.Where(IsDecisionCenterCase).ToList();
-        var today = DateTimeOffset.UtcNow.Date;
+        var today = DateTime.UtcNow.Date;
 
         return new FactoryDecisionCenterLiveQueues(
             decisionCases.Where(c => c.Severity is "critical" or "high" && c.Status != DigitalWorkCaseStatuses.Closed)

@@ -1,6 +1,6 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { getFactoryLearningWorkspace } from "./factory-learning-api-client";
 
@@ -10,7 +10,7 @@ async function resolveAuthorizedContext(permission = "continuous-improvement.rea
     return {
       status: "failure" as const,
       code: "permission-denied",
-      message: "Sürekli iyileştirme görüntüleme yetkiniz yok.",
+      message: authorization.code === "authorization-denied" ? "Sürekli iyileştirme görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 
@@ -19,7 +19,7 @@ async function resolveAuthorizedContext(permission = "continuous-improvement.rea
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

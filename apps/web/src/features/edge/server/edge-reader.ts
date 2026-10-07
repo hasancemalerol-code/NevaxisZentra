@@ -1,7 +1,7 @@
 import "./edge-server-boundary";
 
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import type { EdgeMachineDetailBundle, EdgeWorkspaceData } from "../domain/edge-types";
 import { buildEdgeWorkspaceFixture } from "../presentation/edge-workspace-fixtures";
 import type {
@@ -174,7 +174,7 @@ export async function readEdgeWorkspace(): Promise<EdgeWorkspaceData> {
     return { ...fixture, loadError: null };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { ...fixture, loadError: null };
   }

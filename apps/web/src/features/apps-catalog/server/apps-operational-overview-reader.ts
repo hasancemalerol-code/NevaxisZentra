@@ -1,7 +1,7 @@
 import "server-only";
 
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import {
   getProductionDowntimeReporting,
   getProductionReportingOverview,
@@ -22,7 +22,7 @@ export async function readAppsOperationalOverview(): Promise<AppsOperationalOver
     return EMPTY_APPS_OPERATIONAL_ANALYTICS;
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return EMPTY_APPS_OPERATIONAL_ANALYTICS;
   }

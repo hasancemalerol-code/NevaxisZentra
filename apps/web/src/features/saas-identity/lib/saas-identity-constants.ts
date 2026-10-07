@@ -23,4 +23,5 @@ export const SAAS_IDENTITY_AUTH_ROUTES = [
   "/sifre-sifirla",
   "/davet/kabul",
   "/mfa-dogrula",
+  "/kurulum",
 ] as const;

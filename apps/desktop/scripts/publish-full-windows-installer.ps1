@@ -106,8 +106,16 @@ FIRST LAUNCH
 - Embedded PostgreSQL and application services start automatically.
 - No terminal, Node.js, or PostgreSQL installation is required on the target PC.
 
+PRODUCTION FIRST-TIME SETUP
+- A fresh install has no users and no default password.
+- The first launch writes a single-use, time-limited setup token to:
+    %LOCALAPPDATA%\NevaxisZentra\config\first-run-token.txt   (never to a log or screen)
+- On the sign-in page choose 'Ilk kurulum', enter the token and create the first owner account.
+- Setup is available only on this computer and closes permanently once the account exists.
+- If the token expires unused, restart the application to receive a new one.
+
 PRODUCTION LOGIN
-- Use credentials provided by your organization administrator.
+- Use the owner account created during first-time setup.
 - This installer ships an empty customer database template (no demo factory data).
 
 DEMO / PRESENTATION BUILDS

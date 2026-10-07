@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   postFactoryDecisionApproval,
@@ -26,7 +26,7 @@ async function resolveContext() {
   if (configResult.status !== "success") {
     return { status: "failure" as const, message: configResult.message };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }
@@ -51,7 +51,7 @@ export async function factoryDecisionApproveAction(
 ): Promise<ActionResult<FactoryDecisionCaseDetailApi>> {
   const authorization = await denyUnlessGranted("digital-workforce.approval.decide");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Onay yetkiniz yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Onay yetkiniz yok." : authorization.message };
   }
 
   const resolved = await resolveContext();
@@ -77,7 +77,7 @@ export async function factoryDecisionExecuteAction(
 ): Promise<ActionResult<FactoryDecisionCaseDetailApi>> {
   const authorization = await denyUnlessGranted("factory-case.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Yürütme yetkiniz yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Yürütme yetkiniz yok." : authorization.message };
   }
 
   const resolved = await resolveContext();
@@ -99,7 +99,7 @@ export async function factoryDecisionVerifyAction(
 ): Promise<ActionResult<FactoryDecisionCaseDetailApi>> {
   const authorization = await denyUnlessGranted("factory-case.verify");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Doğrulama yetkiniz yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Doğrulama yetkiniz yok." : authorization.message };
   }
 
   const resolved = await resolveContext();
@@ -118,7 +118,7 @@ export async function factoryDecisionVerifyAction(
 export async function factoryDecisionResetAction(): Promise<ActionResult<FactoryDecisionCenterWorkspaceApi>> {
   const authorization = await denyUnlessGranted("factory-case.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Sıfırlama yetkiniz yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Sıfırlama yetkiniz yok." : authorization.message };
   }
 
   const resolved = await resolveContext();

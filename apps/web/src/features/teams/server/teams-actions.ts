@@ -40,7 +40,7 @@ export async function sendTeamsMessageAction(input: Readonly<{
 }>): Promise<ActionResult> {
   const authorization = await denyUnlessGranted("teams.write");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Mesaj gönderme yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Mesaj gönderme yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -68,7 +68,7 @@ export async function markTeamsChannelReadAction(input: Readonly<{
 }>): Promise<ActionResult> {
   const authorization = await denyUnlessGranted("teams.write");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Okundu işaretleme yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Okundu işaretleme yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -103,12 +103,12 @@ export async function createMessageTaskDraftAction(input: Readonly<{
 }>): Promise<TaskDraftActionResult> {
   const authorization = await denyUnlessGranted("ai-task.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Görev taslağı oluşturma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Görev taslağı oluşturma yetkisi yok." : authorization.message };
   }
 
   const teamsAuthorization = await denyUnlessGranted("teams.read");
   if (teamsAuthorization.status === "failure") {
-    return { status: "failure", message: "Teams okuma yetkisi yok." };
+    return { status: "failure", message: teamsAuthorization.code === "authorization-denied" ? "Teams okuma yetkisi yok." : teamsAuthorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -150,12 +150,12 @@ export async function createTeamsApprovalAction(input: Readonly<{
 }>): Promise<ApprovalActionResult> {
   const authorization = await denyUnlessGranted("teams.approvals.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Onay isteği oluşturma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Onay isteği oluşturma yetkisi yok." : authorization.message };
   }
 
   const readAuthorization = await denyUnlessGranted("teams.read");
   if (readAuthorization.status === "failure") {
-    return { status: "failure", message: "Teams okuma yetkisi yok." };
+    return { status: "failure", message: readAuthorization.code === "authorization-denied" ? "Teams okuma yetkisi yok." : readAuthorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -193,7 +193,7 @@ export async function decideTeamsApprovalAction(input: Readonly<{
 }>): Promise<ApprovalActionResult> {
   const authorization = await denyUnlessGranted("teams.approvals.review");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Onay kararı yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Onay kararı yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -220,7 +220,7 @@ export async function cancelTeamsApprovalAction(input: Readonly<{
 }>): Promise<ApprovalActionResult> {
   const authorization = await denyUnlessGranted("teams.approvals.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Onay isteği iptal yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Onay isteği iptal yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -245,7 +245,7 @@ export async function assignTeamsApprovalReviewerAction(input: Readonly<{
 }>): Promise<ApprovalActionResult> {
   const authorization = await denyUnlessGranted("teams.approvals.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "İnceleyen atama yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "İnceleyen atama yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -280,7 +280,7 @@ export async function createTeamsHandoverAction(input: Readonly<{
 }>): Promise<HandoverActionResult> {
   const authorization = await denyUnlessGranted("teams.handover.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Vardiya devri oluşturma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Vardiya devri oluşturma yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -318,7 +318,7 @@ export async function updateTeamsHandoverDraftAction(input: Readonly<{
 }>): Promise<HandoverActionResult> {
   const authorization = await denyUnlessGranted("teams.handover.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Vardiya devri güncelleme yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Vardiya devri güncelleme yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -348,7 +348,7 @@ export async function publishTeamsHandoverAction(input: Readonly<{
 }>): Promise<HandoverActionResult> {
   const authorization = await denyUnlessGranted("teams.handover.create");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Vardiya devri yayımlama yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Vardiya devri yayımlama yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -371,7 +371,7 @@ export async function acknowledgeTeamsHandoverAction(input: Readonly<{
 }>): Promise<HandoverActionResult> {
   const authorization = await denyUnlessGranted("teams.handover.acknowledge");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Vardiya devri teslim alma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Vardiya devri teslim alma yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -398,7 +398,7 @@ export async function createTeamsDirectConversationAction(input: Readonly<{
 }>): Promise<DirectMessageActionResult> {
   const authorization = await denyUnlessGranted("teams.direct.write");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Özel mesaj başlatma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Özel mesaj başlatma yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -426,7 +426,7 @@ export async function sendTeamsDirectMessageAction(input: Readonly<{
 }>): Promise<ActionResult> {
   const authorization = await denyUnlessGranted("teams.direct.write");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Özel mesaj gönderme yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Özel mesaj gönderme yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -453,7 +453,7 @@ export async function markTeamsDirectConversationReadAction(input: Readonly<{
 }>): Promise<ActionResult> {
   const authorization = await denyUnlessGranted("teams.direct.write");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Okundu işaretleme yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Okundu işaretleme yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();
@@ -478,7 +478,7 @@ export async function markTeamsNotificationReadAction(input: Readonly<{
 }>): Promise<ActionResult> {
   const authorization = await denyUnlessGranted("teams.notifications.read");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Bildirim okuma yetkisi yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Bildirim okuma yetkisi yok." : authorization.message };
   }
 
   const contextResult = await resolveTeamsRequestContext();

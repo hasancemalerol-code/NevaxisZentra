@@ -80,7 +80,7 @@ public sealed class MaintenanceWorkOrderRepository(
                 .Select(p => new { p.Status, p.NextDueAtUtc })
                 .ToListAsync(ct);
 
-            var today = DateTimeOffset.UtcNow.Date;
+            var today = DateTime.UtcNow.Date;
             return new MaintenanceWorkspaceSummaryReadModel(
                 requests.Count(s => s is MaintenanceRequestStatus.Open or MaintenanceRequestStatus.Triaged),
                 workOrders.Count(w => w.Status is not MaintenanceWorkOrderStatus.Completed and not MaintenanceWorkOrderStatus.Cancelled),

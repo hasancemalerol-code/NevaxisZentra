@@ -12,6 +12,7 @@ import {
 } from "./production-plan-runtime-config";
 import {
   resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
 } from "./production-plan-request-context";
 import {
   resolveProductionPlanningServerScope,
@@ -29,9 +30,9 @@ const CONFIGURATION_ERROR_RESULT: ProductionPlanWorkflowResult = {
   message: "Üretim planlama servisi yapılandırılamadı.",
 };
 
-function resolveWorkflowContext():
+async function resolveWorkflowContext(): Promise<
   | { context: Awaited<ReturnType<typeof resolveProductionPlanRequestContext> & { status: "success" }>["context"] }
-  | { error: ProductionPlanWorkflowResult } {
+  | { error: ProductionPlanWorkflowResult }> {
   const configResult = parseProductionPlanRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -56,7 +57,7 @@ function resolveWorkflowContext():
     };
   }
 
-  const contextResult = resolveProductionPlanRequestContext(
+  const contextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     config,
     scopeResult.scope,
   );
@@ -79,7 +80,7 @@ export async function writeSubmitProductionPlanForReview(
   expectedVersion: number,
   comment?: string,
 ): Promise<ProductionPlanWorkflowResult> {
-  const resolved = resolveWorkflowContext();
+  const resolved = await resolveWorkflowContext();
 
   if ("error" in resolved) {
     return resolved.error;
@@ -96,7 +97,7 @@ export async function writeRequestProductionPlanRevision(
   expectedVersion: number,
   reason: string,
 ): Promise<ProductionPlanWorkflowResult> {
-  const resolved = resolveWorkflowContext();
+  const resolved = await resolveWorkflowContext();
 
   if ("error" in resolved) {
     return resolved.error;
@@ -113,7 +114,7 @@ export async function writeApproveProductionPlan(
   expectedVersion: number,
   note?: string,
 ): Promise<ProductionPlanWorkflowResult> {
-  const resolved = resolveWorkflowContext();
+  const resolved = await resolveWorkflowContext();
 
   if ("error" in resolved) {
     return resolved.error;
@@ -130,7 +131,7 @@ export async function writeRejectProductionPlan(
   expectedVersion: number,
   reason: string,
 ): Promise<ProductionPlanWorkflowResult> {
-  const resolved = resolveWorkflowContext();
+  const resolved = await resolveWorkflowContext();
 
   if ("error" in resolved) {
     return resolved.error;

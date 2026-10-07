@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using NevaxisZentra.Persistence.Audit;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.Integration;
 using NevaxisZentra.Persistence.MixedProduction;
@@ -12,7 +13,10 @@ namespace NevaxisZentra.Persistence.RealFactoryPilot;
 public interface IRealFactoryPilotService
 {
     Task<RealFactoryPilotWorkspace> GetWorkspaceAsync(Guid facilityId, Guid pilotRunId, CancellationToken cancellationToken = default);
-    Task<RealFactoryPilotWorkspace> InitializePilotAsync(Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken = default);
+    /// <summary>Pure read: the facility's current pilot workspace, or null when no pilot was ever initialized. Never creates data.</summary>
+    Task<RealFactoryPilotWorkspace?> GetCurrentWorkspaceAsync(Guid facilityId, CancellationToken cancellationToken = default);
+    /// <summary>Mutating: seeds the SYNTHETIC pilot fixture. Callers must gate it (permission + deployment channel); pass an audit context to record the action.</summary>
+    Task<RealFactoryPilotWorkspace> InitializePilotAsync(Guid facilityId, Guid tenantId, string subjectId, RealFactoryPilotInitializationAudit? audit = null, CancellationToken cancellationToken = default);
     Task<RealFactoryGoldenPilotResult> RunGoldenPilotAsync(Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken = default);
 }
 
@@ -47,10 +51,24 @@ public sealed class RealFactoryPilotService : IRealFactoryPilotService
             ct => GetWorkspaceCoreAsync(facilityId, pilotRunId, ct),
             cancellationToken);
 
+    public Task<RealFactoryPilotWorkspace?> GetCurrentWorkspaceAsync(
+        Guid facilityId, CancellationToken cancellationToken = default) =>
+        tenantDatabaseSession.ExecuteReadAsync<RealFactoryPilotWorkspace?>(
+            async ct =>
+            {
+                var run = await db.RealFactoryPilotRunRecords
+                    .AsNoTracking()
+                    .Where(r => r.FacilityId == facilityId)
+                    .OrderByDescending(r => r.UpdatedAtUtc)
+                    .FirstOrDefaultAsync(ct);
+                return run is null ? null : await BuildWorkspaceAsync(run, ct);
+            },
+            cancellationToken);
+
     public Task<RealFactoryPilotWorkspace> InitializePilotAsync(
-        Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken = default) =>
+        Guid facilityId, Guid tenantId, string subjectId, RealFactoryPilotInitializationAudit? audit = null, CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteWriteAsync(
-            ct => InitializePilotCoreAsync(facilityId, tenantId, subjectId, ct),
+            ct => InitializePilotCoreAsync(facilityId, tenantId, subjectId, ct, audit),
             cancellationToken);
 
     public Task<RealFactoryGoldenPilotResult> RunGoldenPilotAsync(
@@ -60,7 +78,8 @@ public sealed class RealFactoryPilotService : IRealFactoryPilotService
             cancellationToken);
 
     private async Task<RealFactoryPilotWorkspace> InitializePilotCoreAsync(
-        Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken)
+        Guid facilityId, Guid tenantId, string subjectId, CancellationToken cancellationToken,
+        RealFactoryPilotInitializationAudit? audit = null)
     {
         var seed = await RealFactoryPilotFixtureSeeder.EnsurePilotFactoryAsync(
             db, tenantId, facilityId, subjectId, cancellationToken);
@@ -88,6 +107,35 @@ public sealed class RealFactoryPilotService : IRealFactoryPilotService
         }
 
         run.UpdatedAtUtc = now;
+        if (audit is not null)
+        {
+            db.AuditRecords.Add(new AuditRecord
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                IdentitySubjectId = audit.IdentitySubjectId,
+                TenantMembershipId = audit.MembershipId,
+                EventType = RealFactoryPilotAuditTaxonomy.EventType,
+                Action = RealFactoryPilotAuditTaxonomy.Action,
+                ResourceType = RealFactoryPilotAuditTaxonomy.ResourceType,
+                ResourceId = run.Id.ToString(),
+                Outcome = AuditOutcome.Success,
+                PermissionKey = audit.PermissionKey,
+                CorrelationId = audit.CorrelationId,
+                RequestId = audit.RequestId,
+                Source = AuditSource.Api,
+                OccurredAtUtc = now,
+                RecordedAtUtc = now,
+                MetadataJson = JsonSerializer.Serialize(new
+                {
+                    facilityId,
+                    lineCode = seed.LineCode,
+                    acceptanceKind = RealFactoryPilotAcceptanceKinds.Synthetic,
+                    synthetic = true,
+                }),
+            });
+        }
+
         await db.SaveChangesAsync(cancellationToken);
         return await BuildWorkspaceAsync(run, cancellationToken);
     }

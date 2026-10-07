@@ -9,20 +9,27 @@ public sealed class EmbeddedPostgreSqlRuntime : IAsyncDisposable
 {
     private readonly PackagedRuntimeBundle bundle;
     private readonly IList<string> diagnostics;
+    private readonly bool machineSecretsCreatedThisRun;
     private RuntimeProcess? ownedProcess;
+    private PackagedMachineProvisioner? provisioner;
 
-    public EmbeddedPostgreSqlRuntime(PackagedRuntimeBundle bundle, IList<string> diagnostics)
+    public EmbeddedPostgreSqlRuntime(
+        PackagedRuntimeBundle bundle,
+        IList<string> diagnostics,
+        bool machineSecretsCreatedThisRun = false)
     {
         this.bundle = bundle;
         this.diagnostics = diagnostics;
+        this.machineSecretsCreatedThisRun = machineSecretsCreatedThisRun;
     }
 
     public async Task EnsureReadyAsync(int port, CancellationToken cancellationToken)
     {
-        var dataDirectory = Path.Combine(PackagedRuntimeBundle.GetPersistentDataRoot(), "database", "data");
-        var logDirectory = Path.Combine(PackagedRuntimeBundle.GetPersistentDataRoot(), "database", "logs");
+        var persistentRoot = PackagedRuntimeBundle.GetPersistentDataRoot();
+        var dataDirectory = Path.Combine(persistentRoot, "database", "data");
+        var logDirectory = Path.Combine(persistentRoot, "database", "logs");
 
-        Directory.CreateDirectory(PackagedRuntimeBundle.GetPersistentDataRoot());
+        Directory.CreateDirectory(persistentRoot);
         Directory.CreateDirectory(logDirectory);
 
         if (!Directory.Exists(bundle.PostgresBinDirectory))
@@ -31,9 +38,28 @@ public sealed class EmbeddedPostgreSqlRuntime : IAsyncDisposable
                 $"Embedded PostgreSQL binaries missing: {bundle.PostgresBinDirectory}");
         }
 
-        if (!File.Exists(Path.Combine(dataDirectory, "PG_VERSION")))
+        if (Directory.Exists(bundle.PostgresTemplateDirectory))
         {
-            await InitializeFromTemplateAsync(dataDirectory, cancellationToken).ConfigureAwait(false);
+            // Template, required directories, then role credential sync: all before any server start.
+            provisioner = new PackagedMachineProvisioner(
+                new MachineProvisioningLayout(
+                    bundle.PostgresTemplateDirectory,
+                    dataDirectory,
+                    Path.Combine(persistentRoot, "database", "provisioning-state.json"),
+                    PackagedRuntimeBundle.GetMachineLocalSecretsPath()),
+                new SingleUserPostgresRoleBootstrapper(bundle.PostgresBinDirectory),
+                diagnostics);
+            await provisioner.EnsureEmbeddedDatabaseAsync(machineSecretsCreatedThisRun, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            if (!File.Exists(Path.Combine(dataDirectory, "PG_VERSION")))
+            {
+                await InitializeWithInitdbAsync(dataDirectory, cancellationToken).ConfigureAwait(false);
+            }
+
+            EmbeddedPostgresDataDirectory.EnsureRequiredDirectories(dataDirectory);
         }
 
         ConfigurePort(dataDirectory, port);
@@ -50,17 +76,36 @@ public sealed class EmbeddedPostgreSqlRuntime : IAsyncDisposable
         }
 
         diagnostics.Add($"postgres=embedded-started port={port.ToString(CultureInfo.InvariantCulture)}");
+
+        if (provisioner is not null)
+        {
+            await ValidateRuntimeCredentialsAsync(port, cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    private async Task InitializeFromTemplateAsync(string dataDirectory, CancellationToken cancellationToken)
+    /// <summary>Marks first-run provisioning complete; call after API and web are healthy.</summary>
+    public void MarkProvisioningComplete() => provisioner?.MarkComplete();
+
+    private async Task ValidateRuntimeCredentialsAsync(int port, CancellationToken cancellationToken)
     {
-        if (Directory.Exists(bundle.PostgresTemplateDirectory))
+        var database = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__DATABASE")
+            ?? "crevafactos_local";
+        var username = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__USERNAME")
+            ?? SingleUserPostgresRoleBootstrapper.RuntimeRole;
+        var password = Environment.GetEnvironmentVariable(PackagedMachineSecrets.RuntimePasswordKey) ?? string.Empty;
+
+        var result = await QueryScalarAsync(port, database, username, password, "SELECT 1;", cancellationToken)
+            .ConfigureAwait(false);
+        if (result != "1")
         {
-            diagnostics.Add("postgres=copy-template");
-            CopyDirectory(bundle.PostgresTemplateDirectory, dataDirectory);
-            return;
+            throw new InvalidOperationException("Embedded database rejected the machine runtime credentials.");
         }
 
+        diagnostics.Add("postgres=runtime-credentials-valid");
+    }
+
+    private async Task InitializeWithInitdbAsync(string dataDirectory, CancellationToken cancellationToken)
+    {
         diagnostics.Add("postgres=initdb");
         var initdb = Path.Combine(bundle.PostgresBinDirectory, "initdb.exe");
         if (!File.Exists(initdb))
@@ -226,22 +271,6 @@ public sealed class EmbeddedPostgreSqlRuntime : IAsyncDisposable
         }
 
         lines.Add($"{key} = {value}");
-    }
-
-    private static void CopyDirectory(string source, string destination)
-    {
-        Directory.CreateDirectory(destination);
-        foreach (var directory in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
-        {
-            Directory.CreateDirectory(directory.Replace(source, destination, StringComparison.OrdinalIgnoreCase));
-        }
-
-        foreach (var file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        {
-            var target = file.Replace(source, destination, StringComparison.OrdinalIgnoreCase);
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            File.Copy(file, target, overwrite: true);
-        }
     }
 
     private static async Task RunUtilityAsync(

@@ -8,7 +8,7 @@ import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-tas
 import { readFactoryDecisionCenterWorkspace } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import type { FactoryDecisionCaseQueueItemApi } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
 import { fetchWorksWorkspace } from "@/features/works/server/works-api-client";
 import {
@@ -55,7 +55,7 @@ async function resolveProductionContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

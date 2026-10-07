@@ -1,12 +1,24 @@
 import Link from "next/link";
 
+import {
+  fetchCurrentEffectiveAccessResult,
+  hasGrantedPermission,
+} from "@/features/admin-access/server/admin-access-effective-access";
+import { RealFactoryPilotEmptyState } from "@/features/real-factory-pilot/components/real-factory-pilot-empty-state";
 import { RealFactoryPilotPanel } from "@/features/real-factory-pilot/components/real-factory-pilot-panel";
 import { readRealFactoryPilotWorkspaceState } from "@/features/real-factory-pilot/server/real-factory-pilot-reader";
 
 export const dynamic = "force-dynamic";
 
-export default async function GercekFabrikaPilotPage() {
+type GercekFabrikaPilotPageProps = Readonly<{
+  searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}>;
+
+export default async function GercekFabrikaPilotPage({ searchParams }: GercekFabrikaPilotPageProps) {
+  // Viewing this page is read-only. It never creates connectors, runs or synthetic data.
   const result = await readRealFactoryPilotWorkspaceState();
+  const params = await searchParams;
+  const notice = typeof params?.pilot === "string" ? params.pilot : null;
 
   if (result.status === "failure") {
     return (
@@ -23,6 +35,12 @@ export default async function GercekFabrikaPilotPage() {
     );
   }
 
+  const access = await fetchCurrentEffectiveAccessResult();
+  const canInitialize =
+    result.syntheticInitializationAvailable &&
+    access.status === "ok" &&
+    hasGrantedPermission(access.access, "real-factory-pilot.manage");
+
   return (
     <main className="production-execution-page">
       <header className="production-execution-header">
@@ -34,7 +52,11 @@ export default async function GercekFabrikaPilotPage() {
           <Link href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</Link>
         </p>
       </header>
-      <RealFactoryPilotPanel workspace={result.workspace} />
+      {result.workspace ? (
+        <RealFactoryPilotPanel workspace={result.workspace} />
+      ) : (
+        <RealFactoryPilotEmptyState canInitialize={canInitialize} notice={notice} />
+      )}
     </main>
   );
 }

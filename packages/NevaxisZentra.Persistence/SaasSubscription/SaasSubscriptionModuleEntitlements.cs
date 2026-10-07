@@ -54,8 +54,19 @@ public static class SaasSubscriptionModuleEntitlements
         ("/ticari-zeka", EntitlementCodes.CommercialIntelligence),
         ("/operasyonel-riskler", EntitlementCodes.OperationalRisk),
         ("/operasyon/yonetim-merkezi", EntitlementCodes.Production),
+        ("/fabrika-karar-merkezi", EntitlementCodes.Production),
+        ("/yonetici-komuta-merkezi", EntitlementCodes.Production),
         ("/riskler", EntitlementCodes.OperationalRisk),
         ("/ai-gorevleri", EntitlementCodes.AiTaskCenter),
+        ("/dijital-is-gucu", EntitlementCodes.AiTaskCenter),
+        ("/fabrika-zekasi", EntitlementCodes.Production),
+        ("/fabrika-agi", EntitlementCodes.Planning),
+        ("/sunum-modu", EntitlementCodes.Dashboard),
+        ("/golden-demo", EntitlementCodes.Dashboard),
+        ("/intelligence-runtime", EntitlementCodes.Production),
+        ("/operational-value", EntitlementCodes.Production),
+        ("/surekli-optimizasyon", EntitlementCodes.Production),
+        ("/senaryo-kurtarma", EntitlementCodes.Production),
     ];
 
     private static readonly HashSet<string> RecoveryExemptRoutes = new(StringComparer.OrdinalIgnoreCase)
@@ -74,7 +85,10 @@ public static class SaasSubscriptionModuleEntitlements
 
         var normalized = NormalizeRoute(routePath);
         return RecoveryExemptRoutes.Contains(normalized)
-            || normalized.StartsWith("/ayarlar/", StringComparison.Ordinal);
+            || normalized.StartsWith("/ayarlar/", StringComparison.Ordinal)
+            // Development-only diagnostics: the page itself answers 404 outside development-api, so the licence
+            // gate must not turn it into an unexplained redirect to the subscription page.
+            || normalized.StartsWith("/internal/", StringComparison.Ordinal);
     }
 
     public static bool TryResolveEntitlementCode(string? routePath, out string entitlementCode)

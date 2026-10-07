@@ -13,7 +13,7 @@ import {
   parseProductionPlanRuntimeConfig,
 } from "./production-plan-runtime-config";
 import {
-  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
 } from "./production-plan-request-context";
 import {
   resolveProductionPlanningServerScope,
@@ -31,7 +31,7 @@ const CONFIGURATION_ERROR_RESULT: ProductionPlanDraftWriteResult = {
   message: "Üretim planlama servisi yapılandırılamadı.",
 };
 
-function resolveWriteContext() {
+async function resolveWriteContext() {
   const configResult = parseProductionPlanRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -56,7 +56,7 @@ function resolveWriteContext() {
     };
   }
 
-  const contextResult = resolveProductionPlanRequestContext(
+  const contextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     config,
     scopeResult.scope,
   );
@@ -77,7 +77,7 @@ function resolveWriteContext() {
 export async function writeCreateProductionPlanDraft(
   body: ProductionPlanDraftWriteRequestBody,
 ): Promise<ProductionPlanDraftWriteResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.error) {
     return resolved.error;
@@ -90,7 +90,7 @@ export async function writeUpdateProductionPlanDraft(
   productionPlanId: string,
   body: ProductionPlanDraftUpdateRequestBody,
 ): Promise<ProductionPlanDraftWriteResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.error) {
     return resolved.error;

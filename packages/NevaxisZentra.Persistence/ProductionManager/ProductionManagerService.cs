@@ -107,7 +107,7 @@ public sealed class ProductionManagerService : IProductionManagerService
         var recent = await repository.ListDecisionsAsync(facilityId, null, 10, cancellationToken);
         var bottlenecks = BottleneckDetector.Detect(state);
 
-        var today = DateTimeOffset.UtcNow.Date;
+        var today = DateTime.UtcNow.Date;
         var verifiedToday = recent.Count(d =>
             d.Status == ProductionManagerDecisionStatuses.Verified &&
             d.VerifiedAtUtc?.Date == today);

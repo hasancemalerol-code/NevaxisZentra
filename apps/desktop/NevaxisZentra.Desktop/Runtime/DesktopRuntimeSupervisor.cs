@@ -29,6 +29,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
     private string? _runtimeRoot;
     private PackagedRuntimeBundle? _packagedBundle;
     private EmbeddedPostgreSqlRuntime? _embeddedPostgres;
+    private bool _machineSecretsCreatedThisRun;
+    private BootstrapApiAccess _bootstrapAccess = BootstrapApiAccess.None;
     private RuntimeWatchdog? _watchdog;
     private StartupSession? _session;
 
@@ -68,8 +70,12 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         ReportStatus("Sistem hazırlanıyor");
         if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
         {
-            ImportPackagedConfiguration(_packagedBundle);
-            PackagedFirstRunInitializer.EnsureMachineSecrets(_packagedBundle, _diagnostics);
+            // First-run order: non-secret config -> generate/persist machine secrets (ACL-protected)
+            // -> import them -> (embedded DB) template copy + credential sync -> start DB/API/web.
+            ImportEnvironmentFile(Path.Combine(_packagedBundle.ConfigDirectory, "runtime.env"));
+            _machineSecretsCreatedThisRun = PackagedFirstRunInitializer.EnsureMachineSecrets(_packagedBundle, _diagnostics);
+            PackagedMachineSecrets.ImportIntoProcess(
+                PackagedMachineSecrets.Load(RuntimePaths.GetPackagedMachineSecretsFilePath()));
         }
         else
         {
@@ -83,6 +89,17 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
             ReportStatus("Veritabanı kontrol ediliyor");
             await EnsurePostgresInfrastructureAsync(options, cancellationToken).ConfigureAwait(false);
             _session?.SetStage("database-health");
+        }
+
+        if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
+        {
+            // PRODUCTION: issue / keep / replace the one-time first-account enrollment token (or close
+            // the bootstrap path for an installation that already has tenants) before the API starts.
+            _bootstrapAccess = await PackagedBootstrapEnrollment.PrepareAsync(
+                IsProductionChannel(),
+                PackagedBootstrapEnrollment.ResolveDirectory(),
+                () => QueryTenantCountAsync(options, cancellationToken),
+                _diagnostics).ConfigureAwait(false);
         }
 
         if (options.ManageApi)
@@ -128,6 +145,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         _session?.SetStage("ready");
+        _embeddedPostgres?.MarkProvisioningComplete();
         _watchdog = new RuntimeWatchdog(_ownedProcesses, _diagnostics);
         ReportStatus("Uygulama hazırlanıyor");
 
@@ -246,7 +264,10 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null &&
             UsesEmbeddedPostgres(_packagedBundle))
         {
-            _embeddedPostgres = new EmbeddedPostgreSqlRuntime(_packagedBundle, _diagnostics);
+            _embeddedPostgres = new EmbeddedPostgreSqlRuntime(
+                _packagedBundle,
+                _diagnostics,
+                _machineSecretsCreatedThisRun);
             await _embeddedPostgres.EnsureReadyAsync(postgresPort, cancellationToken).ConfigureAwait(false);
             await ValidateSchemaVersionIfRequiredAsync(options, postgresHost, postgresPort, cancellationToken)
                 .ConfigureAwait(false);
@@ -358,7 +379,7 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         var apiProject = RuntimePaths.GetApiProjectPath(_runtimeRoot!);
-        var environment = BuildApiEnvironment(options, _runtimeRoot, _packagedBundle);
+        var environment = BuildApiEnvironment(options, _runtimeRoot, _packagedBundle, _bootstrapAccess);
         RuntimeProcess owned;
         if (options.Mode == DesktopRuntimeMode.Packaged && _packagedBundle is not null)
         {
@@ -373,7 +394,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 $"--urls http://127.0.0.1:{options.ApiPort}",
                 _packagedBundle.ApiDirectory,
                 environment,
-                RuntimePaths.CreateLogFilePath("api"));
+                RuntimePaths.CreateLogFilePath("api"),
+                removeEnvironmentKeys: _bootstrapAccess.ApiKeysToRemove);
         }
         else
         {
@@ -487,7 +509,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
                 _packagedBundle.WebAppDirectory,
                 environment,
                 stdoutLog,
-                stderrLog);
+                stderrLog,
+                removeEnvironmentKeys: _bootstrapAccess.WebKeysToRemove);
         }
         else
         {
@@ -605,7 +628,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
     private static Dictionary<string, string> BuildApiEnvironment(
         Configuration.DesktopRuntimeOptions options,
         string? runtimeRoot,
-        PackagedRuntimeBundle? packagedBundle)
+        PackagedRuntimeBundle? packagedBundle,
+        BootstrapApiAccess bootstrapAccess)
     {
         var aspnetEnvironment = ResolveAspNetCoreEnvironment(packagedBundle);
         var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -638,15 +662,40 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         RuntimePaths.CopyProcessEnvironmentPrefix(environment, "DevelopmentSaasIdentity__");
         RuntimePaths.CopyProcessEnvironmentPrefix(environment, "NEVAXIS_FACTOS__");
 
+        // The Data Protection key ring lives in the per-machine secrets directory (same ACL-protected
+        // location as machine secrets and the bootstrap token), never under Program Files.
+        environment["NEVAXIS_ZENTRA_DATA_PROTECTION_PATH"] = Path.Combine(
+            PackagedBootstrapEnrollment.ResolveDirectory(),
+            "data-protection");
+
+        if (bootstrapAccess.IsProduction)
+        {
+            // The API receives the superuser migration credential only while first-account enrollment is pending.
+            foreach (var key in bootstrapAccess.ApiKeysToRemove)
+            {
+                environment.Remove(key);
+            }
+
+            if (bootstrapAccess.Pending && bootstrapAccess.Directory is not null)
+            {
+                environment[NevaxisZentra.Configuration.Bootstrap.BootstrapEnrollmentStore.DirectoryEnvironmentVariable] =
+                    bootstrapAccess.Directory;
+            }
+        }
+
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__ENABLED", "true");
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__HOST", "127.0.0.1");
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__PORT", "5432");
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__DATABASE", "crevafactos_local");
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__USERNAME", "crevafactos_runtime");
+#if !ZENTRA_PRODUCTION_BUILD
+        // Development convenience only: a production binary has no default database password
+        // (machine secrets always supply it; a missing one is a visible configuration error).
         SetIfMissing(
             environment,
             "NEVAXIS_FACTOS__PERSISTENCE__PASSWORD",
             "local_runtime_only_change_me");
+#endif
         SetIfMissing(environment, "NEVAXIS_FACTOS__PERSISTENCE__SSL_MODE", "Disable");
 
         return environment;
@@ -793,6 +842,36 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         throw new InvalidOperationException("node.exe bulunamadı. Node.js kurulu olmalıdır.");
     }
 
+    private bool IsProductionChannel() =>
+        string.Equals(
+            _packagedBundle?.TryReadManifest()?.DeploymentChannel,
+            "PRODUCTION",
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Authoritative tenant count (migration role, first-run decision only); null when unknown.</summary>
+    private async Task<int?> QueryTenantCountAsync(
+        Configuration.DesktopRuntimeOptions options,
+        CancellationToken cancellationToken)
+    {
+        var username = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__USERNAME") ?? "nevaxiszentra";
+        var password = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__PASSWORD");
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
+
+        var database = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__DATABASE") ?? "crevafactos_local";
+        const string query = "SELECT count(*) FROM tenants;";
+        var port = ResolvePostgresPort();
+        var host = ResolvePostgresHost();
+        var answer = _embeddedPostgres is not null
+            ? await _embeddedPostgres.QueryScalarAsync(port, database, username, password, query, cancellationToken)
+                .ConfigureAwait(false)
+            : await QueryPostgresScalarAsync(host, port, database, username, password, query, cancellationToken)
+                .ConfigureAwait(false);
+        return int.TryParse(answer, NumberStyles.Integer, CultureInfo.InvariantCulture, out var count) ? count : null;
+    }
+
     private static bool UsesEmbeddedPostgres(PackagedRuntimeBundle bundle)
     {
         var manifest = bundle.TryReadManifest();
@@ -805,12 +884,6 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         }
 
         return Directory.Exists(bundle.PostgresBinDirectory);
-    }
-
-    private static void ImportPackagedConfiguration(PackagedRuntimeBundle bundle)
-    {
-        ImportEnvironmentFile(Path.Combine(bundle.ConfigDirectory, "runtime.env"));
-        ImportEnvironmentFile(RuntimePaths.GetPackagedMachineSecretsFilePath());
     }
 
     private static string ResolvePostgresHost() =>
@@ -841,29 +914,44 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         var database = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__DATABASE")
             ?? "crevafactos_local";
-        var username = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__USERNAME")
-            ?? Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__USERNAME")
-            ?? "crevafactos";
-        var password = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__PASSWORD")
-            ?? Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__PASSWORD")
-            ?? string.Empty;
-
+        // Normal operation uses only the least-privilege runtime role. New installations grant it
+        // read access to the migration history; the migration role is consulted only as a fallback
+        // for legacy databases created before that grant existed.
         var query =
             "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\" DESC LIMIT 1;";
-        string? actual;
-        if (_embeddedPostgres is not null)
+        var actual = await QueryHeadAsync(
+            Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__USERNAME") ?? "crevafactos_runtime",
+            Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__PERSISTENCE__PASSWORD") ?? string.Empty)
+            .ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(actual))
         {
-            actual = await _embeddedPostgres.QueryScalarAsync(
-                postgresPort,
-                database,
-                username,
-                password,
-                query,
-                cancellationToken).ConfigureAwait(false);
+            var legacyPassword = Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__PASSWORD");
+            if (!string.IsNullOrWhiteSpace(legacyPassword))
+            {
+                actual = await QueryHeadAsync(
+                    Environment.GetEnvironmentVariable("NEVAXIS_FACTOS__MIGRATIONS__USERNAME") ?? "nevaxiszentra",
+                    legacyPassword).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(actual))
+                {
+                    _diagnostics.Add("schema-check=legacy-migration-role-fallback");
+                }
+            }
         }
-        else
+
+        async Task<string?> QueryHeadAsync(string username, string password)
         {
-            actual = await QueryPostgresScalarAsync(
+            if (_embeddedPostgres is not null)
+            {
+                return await _embeddedPostgres.QueryScalarAsync(
+                    postgresPort,
+                    database,
+                    username,
+                    password,
+                    query,
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            return await QueryPostgresScalarAsync(
                 postgresHost,
                 postgresPort,
                 database,

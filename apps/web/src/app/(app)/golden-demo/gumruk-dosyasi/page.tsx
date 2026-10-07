@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { GoldenDemoCustomsFileWorkspaceView } from "@/features/golden-demo-customs-file/components/golden-demo-customs-file-workspace-view";
 import {
-  GOLDEN_DEMO_CUSTOMS_FILE_ROUTE,
   GOLDEN_DEMO_CUSTOMS_FILE_SUBTITLE,
   GOLDEN_DEMO_CUSTOMS_FILE_TITLE,
 } from "@/features/golden-demo-customs-file/domain/golden-demo-customs-file-labels";
@@ -26,9 +25,9 @@ export default async function GoldenDemoCustomsFilePage() {
           </div>
         </header>
         <div role="alert" className="commint-error-banner" data-testid="golden-demo-customs-file-forbidden">
-          <ShieldAlert aria-hidden="true" />
+          <TriangleAlert aria-hidden="true" />
           <div>
-            <h3>Erişim reddedildi</h3>
+            <h3>Veri yüklenemedi</h3>
             <p>{result.message}</p>
             <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
           </div>

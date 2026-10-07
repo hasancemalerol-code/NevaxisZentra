@@ -67,6 +67,20 @@ async function pilotFetch<T>(
   return { status: "success", value: (await response.json()) as T };
 }
 
+export type RealFactoryPilotCurrent = Readonly<{
+  workspace: RealFactoryPilotWorkspace | null;
+  /** True only in Development/Demo/Presentation deployments; Production never offers synthetic pilot data. */
+  syntheticInitializationAvailable: boolean;
+}>;
+
+/** Read-only (GET): never creates or changes anything. */
+export async function readCurrentRealFactoryPilot(
+  context: ProductionOrderRequestContext,
+): Promise<{ status: "success"; value: RealFactoryPilotCurrent } | { status: "failure"; code: string; message: string }> {
+  return pilotFetch<RealFactoryPilotCurrent>(context, "/api/real-factory-pilot/current");
+}
+
+/** Mutating (POST): explicit, permission-gated and audited by the API. Never call this from a page load. */
 export async function initializeRealFactoryPilot(
   context: ProductionOrderRequestContext,
 ): Promise<

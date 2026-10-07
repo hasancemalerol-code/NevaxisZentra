@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NevaxisZentra.Configuration;
+using NevaxisZentra.Persistence.DataProtection;
 using NevaxisZentra.Persistence.Tenancy;
 using NevaxisZentra.Persistence.Identity;
 using NevaxisZentra.Persistence.Authorization;
@@ -45,6 +46,16 @@ public static class PersistenceServiceCollectionExtensions
             {
                 dataProtectionBuilder.ProtectKeysWithDpapi();
             }
+        }
+        else if (environment is not null)
+        {
+            // Production-like hosts: persistent machine-local key ring (never the in-memory default), so
+            // MFA secrets and other protected payloads survive API restarts and reboots.
+            var keyRingDirectory = DataProtectionKeyRing.ResolveDirectory();
+            DataProtectionKeyRing.Prepare(keyRingDirectory);
+            DataProtectionKeyRing.Configure(dataProtectionBuilder, keyRingDirectory);
+            services.AddSingleton(new DataProtectionKeyRingSettings(keyRingDirectory));
+            services.AddHostedService<DataProtectionKeyRingInitializer>();
         }
 
         services.AddScoped<SaasIdentityMfaSecretProtector>();

@@ -27,6 +27,19 @@ Kurulum sırasında Microsoft Edge WebView2 Runtime eksikse otomatik olarak yük
 
 Terminal, PowerShell veya ek yazılım kurulumu gerekmez.
 
+## İlk kurulum (üretim dağıtımı)
+
+Yeni bir üretim kurulumu **hiç kullanıcı ve kuruluş olmadan** başlar. Varsayılan kullanıcı adı veya parola yoktur.
+
+1. İlk açılışta uygulama, bu bilgisayara özel, **tek kullanımlık ve süreli** bir kurulum anahtarı üretir.
+2. Anahtar yalnızca şu dosyaya yazılır (günlüklere, ekrana veya konsola yazılmaz; dosya yalnızca kurulumu yapan Windows kullanıcısına açıktır):
+   `%LOCALAPPDATA%\NevaxisZentra\config\first-run-token.txt`
+3. Giriş ekranındaki **İlk kurulum** bağlantısını açın; anahtarı, kuruluş kodunu, kuruluş adını ve yönetici bilgilerini girin. Parola en az 12 karakter olmalı ve büyük harf, küçük harf, rakam ve sembolden en az üçünü içermelidir.
+4. Kurulum tamamlanınca anahtar dosyası silinir ve ilk kurulum yolu **kalıcı olarak kapanır**; uygulamayı yeniden başlatmak yeni anahtar üretmez.
+5. Anahtarın süresi (24 saat) kullanılmadan dolarsa, uygulamayı yeniden başlatmanız yeterlidir: yeni bir anahtar üretilir ve eskisi geçersiz olur.
+6. Anahtar dosyasını kaybederseniz uygulamayı yeniden başlatın; yeni anahtar üretilir.
+
+İlk kurulum yalnızca bu bilgisayarın kendisinden (localhost) erişilebilir; ağdan erişilemez. Mevcut kurulumlar bu adımdan etkilenmez.
 ## Giriş
 
 Demo/presentation dağıtımlarında kurulum belgesinde belirtilen demo kimliği kullanılır. Üretim dağıtımlarında kuruluş yöneticinizin verdiği kimlik bilgileri kullanılır.

@@ -22,9 +22,7 @@ import {
   AUTONOMY_MODE_ORDER,
   DIGITAL_WORKFORCE_COST_NOTE,
   DIGITAL_WORKFORCE_FULL_NOTE,
-  DIGITAL_WORKFORCE_POSITIONING,
   DIGITAL_WORKFORCE_SUBTITLE,
-  DIGITAL_WORKFORCE_SUMMARY,
   DIGITAL_WORKFORCE_TITLE,
   DIGITAL_WORKFORCE_VERIFIED_CLOSED,
   STAGE_LABELS,
@@ -65,7 +63,6 @@ function buildKpiItems(snapshot: DigitalWorkforceControlCenterSnapshot | null) {
     (worker) => worker.status === "running" && !worker.isPaused && !worker.isKilled,
   ).length;
   const completedToday = snapshot.workers.reduce((sum, worker) => sum + worker.completedToday, 0);
-  const verifiedClosures = snapshot.workers.reduce((sum, worker) => sum + worker.verifiedClosures, 0);
 
   return [
     ["Toplam Dijital Çalışan", String(snapshot.workers.length)],

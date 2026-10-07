@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import { GOLDEN_DEMO_P1_ROUTE } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
 
 import { resetGoldenDemoPilotEvent } from "./golden-demo-p2-api-client";
@@ -24,7 +24,7 @@ function revalidateGoldenDemoRoutes() {
 export async function goldenDemoResetPilotEventAction(eventId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-p2.reset");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Altın demo sıfırlama yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Altın demo sıfırlama yetkiniz yok." : auth.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -32,7 +32,7 @@ export async function goldenDemoResetPilotEventAction(eventId: string): Promise<
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

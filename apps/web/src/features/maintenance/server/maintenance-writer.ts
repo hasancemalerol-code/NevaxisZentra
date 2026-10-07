@@ -16,7 +16,7 @@ import {
   denyUnlessAnyGranted,
   denyUnlessGranted,
 } from "../../admin-access/server/require-current-permission";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 
 export type MaintenanceActionResult = Readonly<{
@@ -27,9 +27,9 @@ export type MaintenanceActionResult = Readonly<{
   version?: number;
 }>;
 
-function resolveWriteContext():
+async function resolveWriteContext(): Promise<
   | Readonly<{ kind: "context"; context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
-  | Readonly<{ kind: "failure"; failure: MaintenanceActionResult }> {
+  | Readonly<{ kind: "failure"; failure: MaintenanceActionResult }>> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status === "failure") {
     return {
@@ -38,7 +38,7 @@ function resolveWriteContext():
     };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return {
       kind: "failure",
@@ -77,7 +77,7 @@ export async function createMaintenanceWorkNoteAction(input: {
     return authorization;
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -109,7 +109,7 @@ export async function createMaintenancePartUsageAction(input: {
     return authorization;
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -138,7 +138,7 @@ export async function generatePreventiveNextDueAction(
     return authorization;
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -182,7 +182,7 @@ export async function createMaintenanceRequestAction(input: {
 }): Promise<MaintenanceActionResult> {
   const authorization = await denyUnlessGranted("maintenance.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", code: "permission-denied", message: "Bu işlem için yetkiniz yok." };
+    return { status: "failure", code: "permission-denied", message: authorization.code === "authorization-denied" ? "Bu işlem için yetkiniz yok." : authorization.message };
   }
 
   const title = input.title.trim();
@@ -195,7 +195,7 @@ export async function createMaintenanceRequestAction(input: {
     };
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -224,7 +224,7 @@ export async function createMaintenanceWorkOrderAction(input: {
 }): Promise<MaintenanceActionResult> {
   const authorization = await denyUnlessGranted("maintenance.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", code: "permission-denied", message: "Bu işlem için yetkiniz yok." };
+    return { status: "failure", code: "permission-denied", message: authorization.code === "authorization-denied" ? "Bu işlem için yetkiniz yok." : authorization.message };
   }
 
   const title = input.title.trim();
@@ -237,7 +237,7 @@ export async function createMaintenanceWorkOrderAction(input: {
     };
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -267,7 +267,7 @@ export async function createPreventiveMaintenancePlanAction(input: {
 }): Promise<MaintenanceActionResult> {
   const authorization = await denyUnlessGranted("maintenance.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", code: "permission-denied", message: "Bu işlem için yetkiniz yok." };
+    return { status: "failure", code: "permission-denied", message: authorization.code === "authorization-denied" ? "Bu işlem için yetkiniz yok." : authorization.message };
   }
 
   const code = input.code.trim();
@@ -289,7 +289,7 @@ export async function createPreventiveMaintenancePlanAction(input: {
     };
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -327,10 +327,10 @@ export async function convertMaintenanceRequestAction(input: {
 }): Promise<MaintenanceActionResult> {
   const authorization = await denyUnlessGranted("maintenance.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", code: "permission-denied", message: "Bu işlem için yetkiniz yok." };
+    return { status: "failure", code: "permission-denied", message: authorization.code === "authorization-denied" ? "Bu işlem için yetkiniz yok." : authorization.message };
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -353,7 +353,7 @@ export async function createWorkOrderFromPreventiveDueAction(input: {
     return authorization;
   }
 
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }

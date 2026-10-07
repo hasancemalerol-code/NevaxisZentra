@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { GoldenDemoP1WorkspaceView } from "@/features/golden-demo-p1/components/golden-demo-p1-workspace-view";
 import {
-  GOLDEN_DEMO_P1_ROUTE,
   GOLDEN_DEMO_P1_SUBTITLE,
   GOLDEN_DEMO_P1_TITLE,
 } from "@/features/golden-demo-p1/domain/golden-demo-p1-labels";
@@ -33,9 +32,9 @@ export default async function GoldenDemoP1Page() {
           </div>
         </header>
         <div role="alert" className="commint-error-banner" data-testid="golden-demo-p1-forbidden">
-          <ShieldAlert aria-hidden="true" />
+          <TriangleAlert aria-hidden="true" />
           <div>
-            <h3>Erişim reddedildi</h3>
+            <h3>Veri yüklenemedi</h3>
             <p>{result.message}</p>
             <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
           </div>

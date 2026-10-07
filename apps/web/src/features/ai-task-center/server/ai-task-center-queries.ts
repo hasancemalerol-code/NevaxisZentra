@@ -58,6 +58,14 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
     };
   }
 
+  if (code === "subscription-required") {
+    return {
+      status: "failure",
+      message: "AI Görev Merkezi bu kurulumun lisansı kapsamında etkin değil. Lisans durumunu sistem yöneticinizle kontrol edin.",
+      code,
+    };
+  }
+
   return { status: "failure", message, code };
 }
 

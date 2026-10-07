@@ -75,10 +75,20 @@ function buildEffectiveAccessHeaders(cookieHeader: string): Record<string, strin
   return headers;
 }
 
-export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiveAccess | null> {
+/**
+ * Outcome of asking the API who the caller is. "unavailable" (misconfiguration, network failure, 5xx, malformed
+ * body) and "unauthenticated" (no or expired session) are runtime/session conditions and must never be reported to
+ * the customer as a missing permission; only a successful read that lacks the key is an authorization denial.
+ */
+export type AdminAccessEffectiveAccessResult =
+  | Readonly<{ status: "ok"; access: AdminAccessEffectiveAccess }>
+  | Readonly<{ status: "unauthenticated" }>
+  | Readonly<{ status: "unavailable"; reason: string }>;
+
+export async function fetchCurrentEffectiveAccessResult(): Promise<AdminAccessEffectiveAccessResult> {
   const config = resolveSaasIdentityRuntimeConfig();
   if (config.status === "failure") {
-    return null;
+    return { status: "unavailable", reason: "identity-runtime-not-configured" };
   }
 
   try {
@@ -88,8 +98,12 @@ export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiv
       cache: "no-store",
     });
 
+    if (response.status === 401) {
+      return { status: "unauthenticated" };
+    }
+
     if (!response.ok) {
-      return null;
+      return { status: "unavailable", reason: `http-${response.status}` };
     }
 
     const payload = (await response.json()) as {
@@ -106,20 +120,28 @@ export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiv
     };
 
     return {
-      memberReference: payload.memberReference ?? null,
-      authorizationVersion: payload.authorizationVersion ?? null,
-      permissionCatalogVersion: payload.permissionCatalogVersion ?? null,
-      roleReferences: payload.roleReferences ?? [],
-      grantedPermissionKeys: payload.grantedPermissionKeys ?? [],
-      navigation: {
-        machines: payload.navigation?.machines === true,
-        materials: payload.navigation?.materials === true,
-        maintenance: payload.navigation?.maintenance === true,
+      status: "ok",
+      access: {
+        memberReference: payload.memberReference ?? null,
+        authorizationVersion: payload.authorizationVersion ?? null,
+        permissionCatalogVersion: payload.permissionCatalogVersion ?? null,
+        roleReferences: payload.roleReferences ?? [],
+        grantedPermissionKeys: payload.grantedPermissionKeys ?? [],
+        navigation: {
+          machines: payload.navigation?.machines === true,
+          materials: payload.navigation?.materials === true,
+          maintenance: payload.navigation?.maintenance === true,
+        },
       },
     };
   } catch {
-    return null;
+    return { status: "unavailable", reason: "request-failed" };
   }
+}
+
+export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiveAccess | null> {
+  const result = await fetchCurrentEffectiveAccessResult();
+  return result.status === "ok" ? result.access : null;
 }
 
 export function hasGrantedPermission(

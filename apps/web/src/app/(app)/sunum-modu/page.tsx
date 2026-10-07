@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { PresentationModeView } from "@/features/presentation-mode/components/presentation-mode-view";
 import { loadPresentationModeDashboard } from "@/features/presentation-mode/server/presentation-mode-reader";
@@ -12,9 +12,9 @@ export default async function PresentationModePage() {
     return (
       <main className="commint-page">
         <div role="alert" className="commint-error-banner" data-testid="presentation-mode-forbidden">
-          <ShieldAlert aria-hidden="true" />
+          <TriangleAlert aria-hidden="true" />
           <div>
-            <h3>Erişim reddedildi</h3>
+            <h3>Veri yüklenemedi</h3>
             <p>{result.message}</p>
           </div>
         </div>

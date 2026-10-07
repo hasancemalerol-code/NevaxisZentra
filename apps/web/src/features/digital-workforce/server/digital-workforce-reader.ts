@@ -6,7 +6,7 @@ import { denyUnlessGranted } from "@/features/admin-access/server/require-curren
 
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 
 
@@ -70,7 +70,7 @@ async function resolveAuthorizedContext() {
 
   if (authorization.status === "failure") {
 
-    return { status: "failure" as const, message: "Dijital İş Gücü görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: authorization.code === "authorization-denied" ? "Dijital İş Gücü görüntüleme yetkiniz yok." : authorization.message };
 
   }
 
@@ -86,7 +86,7 @@ async function resolveAuthorizedContext() {
 
 
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
 
   if (contextResult.status === "failure") {
 

@@ -19,7 +19,7 @@ import {
   listPreventiveMaintenancePlans,
 } from "./maintenance-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import type {
   MaintenanceAssetHistory,
   MaintenanceAssetReliability,
@@ -61,7 +61,7 @@ export async function readMaintenanceDashboard(): Promise<MaintenanceDashboardRe
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -111,7 +111,7 @@ export async function readMaintenanceWorkOrderDetail(
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -136,7 +136,7 @@ export async function readMaintenanceRequestDetail(
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -167,7 +167,7 @@ export async function readMaintenanceWorkOrderExecution(
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -215,7 +215,7 @@ export async function readMaintenancePlanning(): Promise<MaintenancePlanningResu
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -253,7 +253,7 @@ export async function readMaintenanceAssetHistory(
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -285,7 +285,7 @@ async function resolveMaintenanceReadContext(): Promise<
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

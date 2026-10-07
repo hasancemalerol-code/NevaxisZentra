@@ -5,9 +5,18 @@ namespace NevaxisZentra.DatabaseTool;
 
 internal static class DatabaseConfiguration
 {
-    public static PersistenceOptions LoadRuntime() => Load("PERSISTENCE", "crevafactos_runtime", "local_runtime_only_change_me", true);
+#if ZENTRA_PRODUCTION_BUILD
+    // Customer builds carry no default database passwords; credentials must be supplied explicitly.
+    private const string DefaultRuntimePassword = "";
+    private const string DefaultMigrationPassword = "";
+#else
+    private const string DefaultRuntimePassword = "local_runtime_only_change_me";
+    private const string DefaultMigrationPassword = "local_dev_only_change_me";
+#endif
 
-    public static PersistenceOptions LoadMigrations() => Load("MIGRATIONS", "crevafactos", "local_dev_only_change_me", false);
+    public static PersistenceOptions LoadRuntime() => Load("PERSISTENCE", "crevafactos_runtime", DefaultRuntimePassword, true);
+
+    public static PersistenceOptions LoadMigrations() => Load("MIGRATIONS", "crevafactos", DefaultMigrationPassword, false);
 
     private static PersistenceOptions Load(
         string section,

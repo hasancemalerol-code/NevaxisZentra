@@ -1,7 +1,7 @@
 import "./dashboard-showcase-server-boundary";
 
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import {
   getProductionCycleAnalytics,
   getProductionReportingOverview,
@@ -53,7 +53,7 @@ export async function readDashboardShowcaseWorkspace(): Promise<DashboardShowcas
     };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return {
       status: "failure",

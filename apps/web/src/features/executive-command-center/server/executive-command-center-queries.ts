@@ -13,7 +13,7 @@ import {
 import { readFactoryDecisionCenterWorkspace } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import { readThroughputOptimizerExecutiveSummary } from "@/features/throughput-optimizer/server/throughput-optimizer-api-client";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { buildExecutiveCommandCenterWorkspace } from "../application/executive-command-center-builder";
 import type { ExecutiveCommandCenterFilters } from "../types/executive-command-center-types";
@@ -37,7 +37,7 @@ async function resolveRequestContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

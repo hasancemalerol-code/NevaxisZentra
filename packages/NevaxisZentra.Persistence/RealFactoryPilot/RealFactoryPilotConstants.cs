@@ -7,6 +7,22 @@ public static class RealFactoryPilotPermissionKeys
     public const string Run = "real-factory-pilot.run";
 }
 
+/// <summary>Audit taxonomy of the explicit synthetic-pilot initialization (added to audit_records by migration).</summary>
+public static class RealFactoryPilotAuditTaxonomy
+{
+    public const string EventType = "integration.pilot.initialized";
+    public const string Action = "integration.pilot.initialize";
+    public const string ResourceType = "integration.pilot";
+}
+
+/// <summary>Who explicitly initialized the synthetic pilot (recorded in audit_records).</summary>
+public sealed record RealFactoryPilotInitializationAudit(
+    Guid IdentitySubjectId,
+    Guid MembershipId,
+    string PermissionKey,
+    Guid CorrelationId,
+    string? RequestId);
+
 public static class RealFactoryPilotFailureCodes
 {
     public const string NotFound = "real-factory-pilot.not-found";

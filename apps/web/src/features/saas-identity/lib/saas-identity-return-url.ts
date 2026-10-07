@@ -11,6 +11,12 @@ export function isSafeAppReturnUrl(
     return false;
   }
 
+  // URL parsers strip tab/CR/LF, so "/\t/host" would resolve to "//host" and
+  // redirect off-site. Reject every control character.
+  if (/[\u0000-\u001f\u007f]/.test(value)) {
+    return false;
+  }
+
   return value.startsWith("/") && !value.startsWith("//") && !value.includes("\\");
 }
 

@@ -8,7 +8,7 @@ import {
 } from "./maintenance-predictive-risk-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
 } from "../../production-execution/server/production-order-request-context";
 import type {
   MaintenancePredictiveRiskAssessment,
@@ -33,7 +33,7 @@ export async function readMaintenancePredictiveRiskWorkspace(
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

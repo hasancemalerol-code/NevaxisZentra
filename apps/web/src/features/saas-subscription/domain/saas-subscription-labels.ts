@@ -87,9 +87,18 @@ const ROUTE_ENTITLEMENT_MAPPINGS: readonly Readonly<{ prefix: string; code: stri
   { prefix: "/yonetici-komuta-merkezi", code: "module.production" },
   { prefix: "/riskler", code: "module.operational-risk" },
   { prefix: "/ai-gorevleri", code: "module.ai-task-center" },
+  { prefix: "/dijital-is-gucu", code: "module.ai-task-center" },
+  { prefix: "/fabrika-zekasi", code: "module.production" },
+  { prefix: "/fabrika-agi", code: "module.planning" },
+  { prefix: "/sunum-modu", code: "module.dashboard" },
+  { prefix: "/golden-demo", code: "module.dashboard" },
+  { prefix: "/intelligence-runtime", code: "module.production" },
+  { prefix: "/operational-value", code: "module.production" },
+  { prefix: "/surekli-optimizasyon", code: "module.production" },
+  { prefix: "/senaryo-kurtarma", code: "module.production" },
 ];
 
-export const SUBSCRIPTION_RECOVERY_ROUTES = ["/ayarlar", "/abonelik-erisimi", "/uygulamalar"] as const;
+export const SUBSCRIPTION_RECOVERY_ROUTES = ["/ayarlar", "/abonelik-erisimi", "/uygulamalar", "/internal"] as const;
 
 function humanizeToken(value: string): string {
   return value

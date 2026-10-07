@@ -8,7 +8,7 @@ import {
 } from "./erp-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
   type ProductionOrderRequestContext,
 } from "../../production-execution/server/production-order-request-context";
 
@@ -26,9 +26,9 @@ const PREVIEW_BLOCKED: ErpWritebackActionResult = {
   message: "Yazma işlemleri geliştirme önizleme modunda devre dışı bırakılmıştır.",
 };
 
-function resolveWriteContext():
+async function resolveWriteContext(): Promise<
   | { context: ProductionOrderRequestContext }
-  | { error: ErpWritebackActionResult } {
+  | { error: ErpWritebackActionResult }> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
     return {
@@ -44,7 +44,7 @@ function resolveWriteContext():
     return { error: PREVIEW_BLOCKED };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return {
       error: {
@@ -70,7 +70,7 @@ export async function writeSubmitErpWriteback(
   writebackId: string,
   expectedVersion: number,
 ): Promise<ErpWritebackActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if ("error" in resolved) {
     return resolved.error;
   }
@@ -88,7 +88,7 @@ export async function writeApproveErpWriteback(
   expectedVersion: number,
   comment?: string,
 ): Promise<ErpWritebackActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if ("error" in resolved) {
     return resolved.error;
   }
@@ -111,7 +111,7 @@ export async function writeRejectErpWriteback(
   expectedVersion: number,
   comment?: string,
 ): Promise<ErpWritebackActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if ("error" in resolved) {
     return resolved.error;
   }
@@ -133,7 +133,7 @@ export async function writeExecuteErpWriteback(
   writebackId: string,
   expectedVersion: number,
 ): Promise<ErpWritebackActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if ("error" in resolved) {
     return resolved.error;
   }

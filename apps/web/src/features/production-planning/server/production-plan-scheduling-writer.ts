@@ -3,7 +3,10 @@ import "./production-plan-server-boundary";
 import { scheduleProductionPlan } from "./production-plan-scheduling-api-client";
 import type { ProductionPlanScheduleResult } from "./production-plan-scheduling-api-contracts";
 import { parseProductionPlanRuntimeConfig } from "./production-plan-runtime-config";
-import { resolveProductionPlanRequestContext } from "./production-plan-request-context";
+import {
+  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
+} from "./production-plan-request-context";
 import { resolveProductionPlanningServerScope } from "./production-plan-scope";
 
 const PREVIEW_WRITE_BLOCKED_RESULT: ProductionPlanScheduleResult = {
@@ -18,9 +21,9 @@ const CONFIGURATION_ERROR_RESULT: ProductionPlanScheduleResult = {
   message: "Üretim planlama servisi yapılandırılamadı.",
 };
 
-function resolveSchedulingContext():
+async function resolveSchedulingContext(): Promise<
   | { context: (ReturnType<typeof resolveProductionPlanRequestContext> & { status: "success" })["context"] }
-  | { error: ProductionPlanScheduleResult } {
+  | { error: ProductionPlanScheduleResult }> {
   const configResult = parseProductionPlanRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -45,7 +48,7 @@ function resolveSchedulingContext():
     };
   }
 
-  const contextResult = resolveProductionPlanRequestContext(
+  const contextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     config,
     scopeResult.scope,
   );
@@ -71,7 +74,7 @@ export async function writeScheduleProductionPlan(
   shiftName?: string,
   schedulingComment?: string,
 ): Promise<ProductionPlanScheduleResult> {
-  const resolved = resolveSchedulingContext();
+  const resolved = await resolveSchedulingContext();
 
   if ("error" in resolved) {
     return resolved.error;

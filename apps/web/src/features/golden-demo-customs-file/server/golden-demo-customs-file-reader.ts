@@ -3,7 +3,7 @@ import "./golden-demo-customs-file-server-boundary";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { denyUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { getGoldenDemoCustomsFileWorkspace } from "./golden-demo-customs-file-api-client";
 
@@ -15,7 +15,7 @@ export async function readGoldenDemoCustomsFileWorkspace() {
 
   const auth = await denyUnlessGranted("golden-demo-customs-file.read");
   if (auth.status === "failure") {
-    return { status: "failure" as const, message: "Gümrük dosyası altın demo erişimi reddedildi." };
+    return { status: "failure" as const, message: auth.code === "authorization-denied" ? "Gümrük dosyası altın demo erişimi reddedildi." : auth.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -23,7 +23,7 @@ export async function readGoldenDemoCustomsFileWorkspace() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

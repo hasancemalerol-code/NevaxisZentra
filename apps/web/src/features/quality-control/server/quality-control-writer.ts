@@ -21,7 +21,7 @@ import {
   startQualityInspection,
 } from "./quality-control-api-client";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
 } from "../../production-execution/server/production-order-request-context";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 
@@ -33,9 +33,9 @@ export type QualityActionResult = Readonly<{
   version?: number;
 }>;
 
-function resolveWriteContext():
+async function resolveWriteContext(): Promise<
   | Readonly<{ kind: "context"; context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
-  | Readonly<{ kind: "failure"; failure: QualityActionResult }> {
+  | Readonly<{ kind: "failure"; failure: QualityActionResult }>> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status === "failure") {
     return {
@@ -44,7 +44,7 @@ function resolveWriteContext():
     };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return {
       kind: "failure",
@@ -87,7 +87,7 @@ export async function createQualityControlPlanAction(input: {
     critical: boolean;
   }>;
 }): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -101,7 +101,7 @@ export async function createQualityInspectionAction(input: {
   qualityControlPlanId: string;
   notes?: string;
 }): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -114,7 +114,7 @@ export async function startQualityInspectionAction(
   inspectionId: string,
   expectedVersion: number,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -132,7 +132,7 @@ export async function recordQualityResultAction(
   booleanResult?: boolean,
   comment?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -152,7 +152,7 @@ export async function completeQualityInspectionAction(
   inspectionId: string,
   expectedVersion: number,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -166,7 +166,7 @@ export async function releaseQualityInspectionAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -183,7 +183,7 @@ export async function rejectQualityInspectionAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -207,7 +207,7 @@ export async function createQualityNcrAction(input: {
   severity: string;
   ownerSubjectId?: string;
 }): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -222,7 +222,7 @@ export async function placeQualityHoldAction(
   scope: string,
   reason: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -240,7 +240,7 @@ export async function releaseQualityHoldAction(
   expectedVersion: number,
   releaseReason: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -258,7 +258,7 @@ export async function decideQualityDispositionAction(
   dispositionType: string,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -278,7 +278,7 @@ export async function createQualityCorrectiveActionAction(
   ownerSubjectId?: string,
   dueAtUtc?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -297,7 +297,7 @@ export async function startQualityCorrectiveActionAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -314,7 +314,7 @@ export async function completeQualityCorrectiveActionAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -331,7 +331,7 @@ export async function resolveQualityNcrAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }
@@ -348,7 +348,7 @@ export async function closeQualityNcrAction(
   expectedVersion: number,
   note?: string,
 ): Promise<QualityActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") {
     return resolved.failure;
   }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using NevaxisZentra.Configuration;
 using NevaxisZentra.Persistence;
+using NevaxisZentra.Persistence.Bootstrap;
 using NevaxisZentra.Persistence.Tenancy;
 using NevaxisZentra.Api.Tenancy;
 using NevaxisZentra.Api.Authentication;
@@ -84,6 +85,7 @@ builder.Services.AddHealthChecks()
     .AddCheck<DevelopmentPilotBootstrapHealthCheck>("development-pilot-bootstrap");
 builder.Services.AddInfrastructureOptions(builder.Configuration);
 builder.Services.AddNevaxisZentraPersistence(builder.Configuration, builder.Environment);
+builder.Services.AddFirstAccountEnrollment();
 builder.Services.AddNevaxisZentraAuthentication(
     builder.Configuration,
     builder.Environment);

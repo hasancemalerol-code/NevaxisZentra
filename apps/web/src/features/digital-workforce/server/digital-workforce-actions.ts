@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import type { DigitalAutonomyMode } from "../domain/digital-workforce-types";
 import {
@@ -33,7 +33,7 @@ async function resolveContext() {
   if (configResult.status !== "success") {
     return { status: "failure" as const, message: configResult.message };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }
@@ -52,7 +52,7 @@ export async function digitalWorkforceUpdateAutonomyAction(
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.autonomy.manage");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Otonomi değiştirme yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Otonomi değiştirme yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -72,7 +72,7 @@ export async function digitalWorkforcePauseWorkerAction(
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Yönetim yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -92,7 +92,7 @@ export async function digitalWorkforceResumeWorkerAction(
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Yönetim yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -108,7 +108,7 @@ export async function digitalWorkforceResumeWorkerAction(
 
 export async function digitalWorkforceGlobalPauseAction(): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -122,7 +122,7 @@ export async function digitalWorkforceGlobalPauseAction(): Promise<ActionResult>
 
 export async function digitalWorkforceGlobalResumeAction(): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -136,7 +136,7 @@ export async function digitalWorkforceGlobalResumeAction(): Promise<ActionResult
 
 export async function digitalWorkforceGlobalKillAction(): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.kill");
-  if (auth.status === "failure") return { status: "failure", message: "Acil durdur yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Acil durdur yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -150,7 +150,7 @@ export async function digitalWorkforceGlobalKillAction(): Promise<ActionResult> 
 
 export async function digitalWorkforceGlobalSuggestModeAction(): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.autonomy.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Otonomi yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Otonomi yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -164,7 +164,7 @@ export async function digitalWorkforceGlobalSuggestModeAction(): Promise<ActionR
 
 export async function digitalWorkforceApplyPoliciesAction(): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.policy.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Politika yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Politika yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -178,7 +178,7 @@ export async function digitalWorkforceApplyPoliciesAction(): Promise<ActionResul
 
 export async function digitalWorkforceTakeoverCaseAction(caseApiId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -192,7 +192,7 @@ export async function digitalWorkforceTakeoverCaseAction(caseApiId: string): Pro
 
 export async function digitalWorkforceResumeHumanControlAction(caseApiId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -210,7 +210,7 @@ export async function digitalWorkforceDecideApprovalAction(
   concurrencyToken: number,
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.approval.decide");
-  if (auth.status === "failure") return { status: "failure", message: "Onay kararı yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Onay kararı yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -227,7 +227,7 @@ export async function digitalWorkforceUpdatePolicyAction(
   payload: UpdatePolicyPayload,
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("digital-workforce.policy.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Politika yönetim yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Politika yönetim yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   try {
@@ -242,7 +242,7 @@ export async function digitalWorkforceUpdatePolicyAction(
 export async function digitalWorkforceReadWorkerDetailAction(workerApiId: string) {
   const auth = await denyUnlessGranted("digital-workforce.read");
   if (auth.status === "failure") {
-    return { status: "failure" as const, message: "Görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: auth.code === "authorization-denied" ? "Görüntüleme yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;

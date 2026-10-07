@@ -2,7 +2,7 @@ import "server-only";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   readFactoryDecisionCaseDetail,
@@ -16,7 +16,7 @@ async function resolveAuthorizedContext(permission = "factory-case.read") {
   if (authorization.status === "failure") {
     return {
       status: "failure" as const,
-      message: "Fabrika Karar Merkezi görüntüleme yetkiniz yok.",
+      message: authorization.code === "authorization-denied" ? "Fabrika Karar Merkezi görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 
@@ -25,7 +25,7 @@ async function resolveAuthorizedContext(permission = "factory-case.read") {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

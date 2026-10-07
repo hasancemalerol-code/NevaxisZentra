@@ -6,6 +6,13 @@ namespace NevaxisZentra.Persistence.Development;
 
 internal static class DevelopmentPilotBootstrapDbContextFactory
 {
+#if ZENTRA_PRODUCTION_BUILD
+    // The development pilot bootstrap is unreachable in customer builds; it carries no default credential.
+    private const string FallbackMigrationPassword = "";
+#else
+    private const string FallbackMigrationPassword = "local_dev_only_change_me";
+#endif
+
     internal sealed record BootstrapDbContext(
         NevaxisZentraDbContext DbContext,
         TenantContextAccessor TenantContextAccessor);
@@ -23,7 +30,7 @@ internal static class DevelopmentPilotBootstrapDbContextFactory
             Port = GetMigrationInt32("PORT", runtimeOptions.Port),
             Database = GetMigrationValue("DATABASE", runtimeOptions.Database),
             Username = GetMigrationValue("USERNAME", "crevafactos"),
-            Password = GetMigrationValue("PASSWORD", "local_dev_only_change_me"),
+            Password = GetMigrationValue("PASSWORD", FallbackMigrationPassword),
             SslMode = GetMigrationValue("SSL_MODE", runtimeOptions.SslMode),
             ConnectionTimeoutSeconds = runtimeOptions.ConnectionTimeoutSeconds,
             CommandTimeoutSeconds = runtimeOptions.CommandTimeoutSeconds,

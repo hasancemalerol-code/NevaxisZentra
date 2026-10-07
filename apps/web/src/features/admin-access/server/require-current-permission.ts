@@ -1,43 +1,68 @@
 import { forbidden } from "next/navigation";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchCurrentEffectiveAccessResult,
   hasGrantedPermission,
+  type AdminAccessEffectiveAccessResult,
 } from "./admin-access-effective-access";
+
+export const AUTHORIZATION_DENIED_MESSAGE = "Authorization denied.";
+export const AUTHENTICATION_REQUIRED_MESSAGE = "Authentication required.";
+export const AUTHORIZATION_UNAVAILABLE_MESSAGE =
+  "Authorization could not be verified: the access service is unavailable.";
+
+export type PermissionCheckResult =
+  | Readonly<{ status: "granted" }>
+  | Readonly<{
+      status: "failure";
+      /** "authorization-denied" is the only code that means the caller lacks the permission. */
+      code: "authorization-denied" | "unauthenticated" | "authorization-unavailable";
+      message: string;
+    }>;
+
+function evaluate(
+  result: AdminAccessEffectiveAccessResult,
+  permissionKeys: readonly string[],
+): PermissionCheckResult {
+  if (result.status === "unauthenticated") {
+    return { status: "failure", code: "unauthenticated", message: AUTHENTICATION_REQUIRED_MESSAGE };
+  }
+
+  if (result.status === "unavailable") {
+    return { status: "failure", code: "authorization-unavailable", message: AUTHORIZATION_UNAVAILABLE_MESSAGE };
+  }
+
+  if (!permissionKeys.some((key) => hasGrantedPermission(result.access, key))) {
+    return { status: "failure", code: "authorization-denied", message: AUTHORIZATION_DENIED_MESSAGE };
+  }
+
+  return { status: "granted" };
+}
 
 export async function forbidUnlessGranted(
   permissionKey: string,
 ): Promise<void> {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, permissionKey)) {
-    forbidden();
+  const check = evaluate(await fetchCurrentEffectiveAccessResult(), [permissionKey]);
+  if (check.status === "granted") {
+    return;
   }
+
+  if (check.code === "authorization-unavailable") {
+    // A runtime failure is not a 403: surface it as a server error instead of claiming the caller lacks access.
+    throw new Error(check.message);
+  }
+
+  forbidden();
 }
 
 export async function denyUnlessGranted(
   permissionKey: string,
-): Promise<
-  | Readonly<{ status: "granted" }>
-  | Readonly<{ status: "failure"; message: string }>
-> {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, permissionKey)) {
-    return { status: "failure", message: "Authorization denied." };
-  }
-
-  return { status: "granted" };
+): Promise<PermissionCheckResult> {
+  return evaluate(await fetchCurrentEffectiveAccessResult(), [permissionKey]);
 }
 
 export async function denyUnlessAnyGranted(
   permissionKeys: readonly string[],
-): Promise<
-  | Readonly<{ status: "granted" }>
-  | Readonly<{ status: "failure"; message: string }>
-> {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!permissionKeys.some((key) => hasGrantedPermission(access, key))) {
-    return { status: "failure", message: "Authorization denied." };
-  }
-
-  return { status: "granted" };
+): Promise<PermissionCheckResult> {
+  return evaluate(await fetchCurrentEffectiveAccessResult(), permissionKeys);
 }

@@ -88,7 +88,7 @@ export async function createEnergyTargetAction(input: {
 }): Promise<ActionSuccess | ActionFailure> {
   const authorization = await denyUnlessGranted("energy.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Hedef oluşturmak için energy.manage yetkisi gerekir." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Hedef oluşturmak için energy.manage yetkisi gerekir." : authorization.message };
   }
 
   const resolved = await resolveEnergyRequestContext();
@@ -127,7 +127,7 @@ export async function updateEnergyTargetAction(input: {
 }): Promise<ActionSuccess | ActionFailure> {
   const authorization = await denyUnlessGranted("energy.manage");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Hedef güncellemek için energy.manage yetkisi gerekir." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Hedef güncellemek için energy.manage yetkisi gerekir." : authorization.message };
   }
 
   const resolved = await resolveEnergyRequestContext();
@@ -175,7 +175,7 @@ export async function evaluateEnergyAssessmentAction(input: {
   if (authorization.status === "failure") {
     return {
       status: "failure",
-      message: "Değerlendirme çalıştırmak için energy.manage yetkisi gerekir.",
+      message: authorization.code === "authorization-denied" ? "Değerlendirme çalıştırmak için energy.manage yetkisi gerekir." : authorization.message,
     };
   }
 

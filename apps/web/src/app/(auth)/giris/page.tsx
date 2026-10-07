@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AuthShell } from "@/features/saas-identity/components/auth-shell";
+import { FirstRunSetupLink } from "@/features/saas-identity/components/first-run-setup-link";
 import { SignInForm } from "@/features/saas-identity/components/sign-in-form";
 import {
   buildCleanSignInPath,
@@ -55,6 +56,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         }
         returnUrl={isSafeAppReturnUrl(returnUrl) ? returnUrl : null}
       />
+      <FirstRunSetupLink />
     </AuthShell>
   );
 }

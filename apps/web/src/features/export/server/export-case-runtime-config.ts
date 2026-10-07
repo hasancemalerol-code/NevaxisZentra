@@ -38,11 +38,17 @@ function normalizeEnvValue(value: string | undefined): string {
   return value?.trim() ?? "";
 }
 
-function fail(message: string): ExportRuntimeConfigResult {
+const CUSTOMER_SAFE_CONFIGURATION_ERROR_MESSAGE =
+  "Bu modül şu anda yapılandırma nedeniyle kullanılamıyor. Lütfen sistem yöneticinizle iletişime geçin.";
+
+function fail(technicalMessage: string): ExportRuntimeConfigResult {
+  // Technical detail (env var names) is logged server-side only.
+  console.error("[export-runtime-config] " + technicalMessage);
+
   return {
     status: "failure",
     code: "configuration-error",
-    message,
+    message: CUSTOMER_SAFE_CONFIGURATION_ERROR_MESSAGE,
     retryable: false,
   };
 }

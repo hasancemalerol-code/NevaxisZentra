@@ -8,6 +8,7 @@ export type AiTaskApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -319,9 +320,20 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number, payload: unknown): AiTaskApiFailure["code"] {
+function isSubscriptionEntitlementFailure(payload: unknown): boolean {
+  if (typeof payload !== "object" || payload === null || !("failureCode" in payload)) {
+    return false;
+  }
+
+  return String((payload as { failureCode?: unknown }).failureCode ?? "").startsWith("saas-subscription.");
+}
+
+export function mapFailureStatus(status: number, payload: unknown): AiTaskApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) {
+    // A subscription/entitlement refusal is not a missing permission: keep it distinguishable.
+    return isSubscriptionEntitlementFailure(payload) ? "subscription-required" : "permission-denied";
+  }
   if (status === 404) return "not-found";
   if (status === 409) {
     const code = typeof payload === "object" && payload && "failureCode" in payload

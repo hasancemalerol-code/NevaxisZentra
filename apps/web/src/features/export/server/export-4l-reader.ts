@@ -15,7 +15,7 @@ import {
   listResearchAiRuns,
 } from "./export-4l-api-contracts";
 import {
-  resolveExportCaseRequestContext,
+  resolveExportCaseRequestContextForIncomingRequest,
   type ExportCaseRequestContext,
 } from "./export-case-request-context";
 import { parseExportRuntimeConfig } from "./export-case-runtime-config";
@@ -49,7 +49,7 @@ export type AiUsageSummaryResult =
   | Readonly<{ status: "success"; usage: AiUsageSummary }>
   | ExportAiReadFailure;
 
-function resolveReadContext(): ResolvedContext {
+async function resolveReadContext(): Promise< ResolvedContext> {
   const configResult = parseExportRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -76,7 +76,7 @@ function resolveReadContext(): ResolvedContext {
     };
   }
 
-  const contextResult = resolveExportCaseRequestContext(configResult.config);
+  const contextResult = await resolveExportCaseRequestContextForIncomingRequest(configResult.config);
 
   if (contextResult.status === "failure") {
     return {
@@ -107,7 +107,7 @@ export async function readExportAiRuns(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await listExportAiRuns(resolved.context, normalizedId);
@@ -132,7 +132,7 @@ export async function readExportAiRunDetail(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await getExportAiRunDetail(
@@ -159,7 +159,7 @@ export async function readExportAiRecommendations(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await listExportAiRecommendations(resolved.context, normalizedId);
@@ -199,7 +199,7 @@ export async function readResearchAiRuns(
     };
   }
 
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await listResearchAiRuns(resolved.context, normalizedId);
@@ -209,7 +209,7 @@ export async function readResearchAiRuns(
 }
 
 export async function readCurrentAiUsage(): Promise<AiUsageSummaryResult> {
-  const resolved = resolveReadContext();
+  const resolved = await resolveReadContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   const result = await getCurrentAiUsage(resolved.context);

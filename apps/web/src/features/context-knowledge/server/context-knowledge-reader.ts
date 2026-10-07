@@ -2,14 +2,14 @@ import "server-only";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { buildWorkerContext, type WorkerContextPackageApi } from "./context-knowledge-api-client";
 
 async function resolveContext() {
   const authorization = await denyUnlessGranted("context-knowledge.read");
   if (authorization.status === "failure") {
-    return { status: "failure" as const, message: "Bağlam görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: authorization.code === "authorization-denied" ? "Bağlam görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -17,7 +17,7 @@ async function resolveContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

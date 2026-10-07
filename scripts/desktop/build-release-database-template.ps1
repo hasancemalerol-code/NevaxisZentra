@@ -15,8 +15,12 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 }
 
 $migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.Migrations\Migrations"
-$registeredMigrations = Get-ChildItem $migrationsDir -Filter "*.Designer.cs" |
-    ForEach-Object { $_.BaseName -replace '\.Designer$','' }
+# A migration is registered when a [Migration("<id>")] attribute exists in its
+# Designer file or, for hand-written migrations, inline in the migration file.
+$registeredMigrations = Get-ChildItem $migrationsDir -Filter "*.cs" |
+    Where-Object { $_.Name -notmatch 'Snapshot' -and (Select-String -LiteralPath $_.FullName -Pattern '\[Migration\("' -Quiet) } |
+    ForEach-Object { $_.BaseName -replace '\.Designer$','' } |
+    Select-Object -Unique
 $expectedMigrationId = Get-ChildItem $migrationsDir -Filter "*.cs" |
     Where-Object { $_.Name -notmatch 'Designer|Snapshot' -and $registeredMigrations -contains $_.BaseName } |
     Sort-Object Name -Descending |
@@ -81,12 +85,8 @@ function Resolve-SourceCredential() {
     throw "Source database is unreachable. Start local PostgreSQL and apply migrations before building the release template."
 }
 
-Import-EnvFile $secretsFile
-$runtimePassword = $env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD
-$packagedMigrationPassword = $env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD
-if ([string]::IsNullOrWhiteSpace($runtimePassword) -or [string]::IsNullOrWhiteSpace($packagedMigrationPassword)) {
-    throw "Release packaged secrets must define persistence and migration passwords (release-demo-secrets.env)."
-}
+# No credential is baked into the template: roles are created without a password (NULL verifier)
+# and the installed machine sets unique passwords on first run via PostgreSQL single-user mode.
 
 Write-Host "Verifying source schema at ${sourceHost}:${sourcePort}/${sourceDatabase}..."
 $sourceCredential = Resolve-SourceCredential
@@ -215,8 +215,8 @@ function Invoke-PsqlScalar([string]$User, [string]$Database, [string]$Query) {
 try {
     $bootstrapSql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-bootstrap-" + [Guid]::NewGuid().ToString("N") + ".sql")
     @"
-CREATE ROLE nevaxiszentra LOGIN SUPERUSER PASSWORD '$packagedMigrationPassword';
-CREATE ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';
+CREATE ROLE nevaxiszentra LOGIN SUPERUSER;
+CREATE ROLE crevafactos_runtime LOGIN;
 CREATE DATABASE crevafactos_local OWNER nevaxiszentra;
 "@ | Set-Content -Path $bootstrapSql -Encoding UTF8
     Invoke-PsqlFile -User "postgres" -Database "postgres" -FilePath $bootstrapSql
@@ -235,12 +235,36 @@ CREATE DATABASE crevafactos_local OWNER nevaxiszentra;
 
     $hardenRolesSql = Join-Path ([System.IO.Path]::GetTempPath()) ("NevaxisZentra-harden-roles-" + [Guid]::NewGuid().ToString("N") + ".sql")
     @"
-ALTER ROLE nevaxiszentra LOGIN SUPERUSER PASSWORD '$packagedMigrationPassword';
-ALTER ROLE crevafactos_runtime LOGIN PASSWORD '$runtimePassword';
+ALTER ROLE nevaxiszentra LOGIN SUPERUSER;
+ALTER ROLE crevafactos_runtime LOGIN;
 ALTER ROLE crevafactos_runtime NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+-- Read-only access to migration metadata lets startup verify the schema head without superuser credentials.
+GRANT SELECT ON public."__EFMigrationsHistory" TO crevafactos_runtime;
+-- MFA enrollment (and re-enrollment) creates and replaces these rows at runtime; migrations only grant read/update.
+GRANT INSERT, DELETE ON public.saas_identity_mfa_methods TO crevafactos_runtime;
+GRANT INSERT, DELETE ON public.saas_identity_recovery_codes TO crevafactos_runtime;
 "@ | Set-Content -Path $hardenRolesSql -Encoding UTF8
     Invoke-PsqlFile -User "nevaxiszentra" -Database "crevafactos_local" -FilePath $hardenRolesSql
     Remove-Item -Force $hardenRolesSql
+
+    $passwordBearingRoles = [int](Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query "SELECT COUNT(*) FROM pg_authid WHERE rolpassword IS NOT NULL;")
+    if ($passwordBearingRoles -ne 0) {
+        throw "Template must not contain any role password verifier (found $passwordBearingRoles)."
+    }
+    $runtimePrivilegeGaps = Invoke-PsqlScalar -User "nevaxiszentra" -Database "crevafactos_local" -Query @"
+SELECT string_agg(item, ', ') FROM (VALUES
+  ('mfa_methods:INSERT', has_table_privilege('crevafactos_runtime','public.saas_identity_mfa_methods','INSERT')),
+  ('mfa_methods:DELETE', has_table_privilege('crevafactos_runtime','public.saas_identity_mfa_methods','DELETE')),
+  ('recovery_codes:INSERT', has_table_privilege('crevafactos_runtime','public.saas_identity_recovery_codes','INSERT')),
+  ('recovery_codes:DELETE', has_table_privilege('crevafactos_runtime','public.saas_identity_recovery_codes','DELETE')),
+  ('migration_history:SELECT', has_table_privilege('crevafactos_runtime','public."__EFMigrationsHistory"','SELECT'))
+) AS checks(item, granted) WHERE NOT granted;
+"@
+    if (-not [string]::IsNullOrWhiteSpace($runtimePrivilegeGaps)) {
+        throw "Template runtime role is missing required privileges: $runtimePrivilegeGaps"
+    }
+    Write-Host "Template runtime-privilege contract PASS (MFA enrollment + schema-head read)."
+    Write-Host "Template credential contract PASS: no role password verifier is baked into the template."
 
     $contractPath = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence\Authorization\acceptance-role-contract.json"
     if (-not (Test-Path $contractPath)) {

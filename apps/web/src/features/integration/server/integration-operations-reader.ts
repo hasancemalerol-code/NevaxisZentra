@@ -2,7 +2,7 @@ import "./integration-server-boundary";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   getConnectorOperations,
@@ -25,7 +25,7 @@ export type IntegrationOperationsCenterResult =
 export async function readIntegrationOperationsCenter(): Promise<IntegrationOperationsCenterResult> {
   const authorization = await denyUnlessGranted("integration.read");
   if (authorization.status === "failure") {
-    return { status: "failure", message: "Entegrasyon merkezini görüntüleme yetkiniz yok." };
+    return { status: "failure", message: authorization.code === "authorization-denied" ? "Entegrasyon merkezini görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -33,7 +33,7 @@ export async function readIntegrationOperationsCenter(): Promise<IntegrationOper
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

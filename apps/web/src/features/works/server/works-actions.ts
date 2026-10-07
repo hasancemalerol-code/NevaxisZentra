@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { decideApproval } from "@/features/digital-workforce/server/digital-workforce-api-client";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { readWorksCaseDetail } from "./works-queries";
 
@@ -22,7 +22,7 @@ async function resolveContext(): Promise<
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -42,7 +42,7 @@ export async function decideWorkApprovalAction(
 ): Promise<Readonly<{ status: "success" } | ActionFailure>> {
   const auth = await denyUnlessGranted("digital-workforce.approval.decide");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Onay kararı yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Onay kararı yetkiniz yok." : auth.message };
   }
 
   const ctx = await resolveContext();
@@ -65,7 +65,7 @@ export async function decideWorkApprovalAction(
 export async function loadCaseDetailAction(caseId: string) {
   const auth = await denyUnlessGranted("digital-workforce.read");
   if (auth.status === "failure") {
-    return { status: "failure" as const, message: "Görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: auth.code === "authorization-denied" ? "Görüntüleme yetkiniz yok." : auth.message };
   }
 
   const result = await readWorksCaseDetail(caseId);

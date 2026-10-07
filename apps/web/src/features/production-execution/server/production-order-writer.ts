@@ -30,7 +30,7 @@ import {
   type ProductionOrderWriteResult,
 } from "./production-order-api-client";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
   type ProductionOrderRequestContext,
 } from "./production-order-request-context";
 import {
@@ -51,7 +51,7 @@ type ResolvedWriteContext =
   | Readonly<{ kind: "context"; context: ProductionOrderRequestContext }>
   | Readonly<{ kind: "failure"; failure: ProductionOrderActionResult }>;
 
-function resolveWriteContext(): ResolvedWriteContext {
+async function resolveWriteContext(): Promise< ResolvedWriteContext> {
   const configResult = parseProductionExecutionRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -76,7 +76,7 @@ function resolveWriteContext(): ResolvedWriteContext {
     };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(
     configResult.config,
   );
 
@@ -110,7 +110,7 @@ export async function startProductionOrderAction(
   productionOrderId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -130,7 +130,7 @@ export async function pauseProductionOrderAction(
   expectedVersion: number,
   reason: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -158,7 +158,7 @@ export async function resumeProductionOrderAction(
   productionOrderId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -178,7 +178,7 @@ export async function completeProductionOrderAction(
   expectedVersion: number,
   options?: { allowShortCompletion?: boolean; completionReason?: string },
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -200,7 +200,7 @@ export async function recordGoodProductionAction(
   quantity: number,
   comment?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -228,7 +228,7 @@ export async function recordScrapAction(
   reasonCode: string,
   comment?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -260,7 +260,7 @@ export async function reverseEntryAction(
   expectedVersion: number,
   reason: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -287,7 +287,7 @@ export async function startDowntimeAction(
   reasonCode: string,
   comment?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!reasonCode.trim()) {
     return { status: "failure", code: "invalid-request", message: "Duruş nedeni zorunludur." };
@@ -301,7 +301,7 @@ export async function endDowntimeAction(
   downtimeId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await endDowntime(resolved.context, productionOrderId, downtimeId, expectedVersion);
   return mapWriteResult(result);
@@ -313,7 +313,7 @@ export async function startSetupSessionAction(
   setupType: string,
   comment?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!setupType.trim()) {
     return { status: "failure", code: "invalid-request", message: "Setup türü zorunludur." };
@@ -327,7 +327,7 @@ export async function completeSetupSessionAction(
   setupId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await completeSetupSession(resolved.context, productionOrderId, setupId, expectedVersion);
   return mapWriteResult(result);
@@ -340,7 +340,7 @@ export async function recordManualCycleAction(
   quantityProduced?: number,
   comment?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (cycleDurationMilliseconds <= 0) {
     return { status: "failure", code: "invalid-request", message: "Çevrim süresi sıfırdan büyük olmalıdır." };
@@ -364,7 +364,7 @@ export async function raiseExceptionAction(
   severity: string,
   message: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!exceptionType.trim()) {
     return { status: "failure", code: "invalid-request", message: "İstisna türü zorunludur." };
@@ -384,7 +384,7 @@ export async function acknowledgeExceptionAction(
   exceptionId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!exceptionId.trim()) {
     return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
@@ -399,7 +399,7 @@ export async function resolveExceptionAction(
   expectedVersion: number,
   resolutionNote: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!exceptionId.trim()) {
     return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
@@ -420,7 +420,7 @@ export async function recoverDowntimeAction(
   resolution: string,
   resumeProduction: boolean,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!downtimeId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Duruş ID zorunludur." };
@@ -438,7 +438,7 @@ export async function recoverSetupSessionAction(
   expectedVersion: number,
   resolution: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!setupId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Setup ID zorunludur." };
@@ -458,7 +458,7 @@ export async function assignShiftAction(
   productionShiftId: string,
   shiftDate: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!productionShiftId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Vardiya ID zorunludur." };
@@ -477,7 +477,7 @@ export async function reassignShiftAction(
   shiftDate: string,
   reason: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!productionShiftId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Vardiya ID zorunludur." };
@@ -500,7 +500,7 @@ export async function assignOperatorAction(
   subjectId: string,
   assignmentRole: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!subjectId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Operatör ID zorunludur." };
@@ -518,7 +518,7 @@ export async function releaseOperatorAction(
   expectedVersion: number,
   reason: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!assignmentId.trim()) {
     return { status: "failure", code: "invalid-request", message: "Atama ID zorunludur." };
@@ -538,7 +538,7 @@ export async function createHandoverAction(
   note: string,
   openIssuesSummary?: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!note.trim()) {
     return { status: "failure", code: "invalid-request", message: "Devir notu zorunludur." };
@@ -555,7 +555,7 @@ export async function assignExceptionAction(
   expectedVersion: number,
   subjectId: string,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!exceptionId.trim()) {
     return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };
@@ -572,7 +572,7 @@ export async function unassignExceptionAction(
   exceptionId: string,
   expectedVersion: number,
 ): Promise<ProductionOrderActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
   if (!exceptionId.trim()) {
     return { status: "failure", code: "invalid-request", message: "İstisna ID zorunludur." };

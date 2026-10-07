@@ -74,7 +74,7 @@ import {
 } from "./export-case-api-client";
 import type { ExportDocumentWriteSuccess } from "./export-case-api-contracts";
 import {
-  resolveExportCaseRequestContext,
+  resolveExportCaseRequestContextForIncomingRequest,
   type ExportCaseRequestContext,
 } from "./export-case-request-context";
 import { parseExportRuntimeConfig } from "./export-case-runtime-config";
@@ -125,7 +125,7 @@ type ResolvedWriteContext =
       }>;
     }>;
 
-function resolveWriteContext(): ResolvedWriteContext {
+async function resolveWriteContext(): Promise< ResolvedWriteContext> {
   const configResult = parseExportRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -150,7 +150,7 @@ function resolveWriteContext(): ResolvedWriteContext {
     };
   }
 
-  const contextResult = resolveExportCaseRequestContext(configResult.config);
+  const contextResult = await resolveExportCaseRequestContextForIncomingRequest(configResult.config);
 
   if (contextResult.status === "failure") {
     return {
@@ -200,7 +200,7 @@ function mapDocumentResult(
 export async function ensureExportCaseFromOrder(
   input: EnsureExportCaseFromOrderInput,
 ): Promise<ExportCaseActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -257,7 +257,7 @@ export async function registerExportDocumentAction(
   exportCaseId: string,
   input: RegisterExportDocumentInput,
 ): Promise<ExportDocumentActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -311,7 +311,7 @@ export async function verifyExportDocumentAction(
   documentId: string,
   expectedVersion: number,
 ): Promise<ExportDocumentActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -350,7 +350,7 @@ export async function rejectExportDocumentAction(
   expectedVersion: number,
   reason: string,
 ): Promise<ExportDocumentActionResult> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
 
   if (resolved.kind === "failure") {
     return resolved.failure;
@@ -417,7 +417,7 @@ export async function createPackingUnitAction(
   exportCaseId: string,
   input: CreatePackingUnitInput,
 ): Promise<Export2LActionResult<PackingUnitWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -449,7 +449,7 @@ export async function updatePackingUnitAction(
   packingUnitId: string,
   input: UpdatePackingUnitInput,
 ): Promise<Export2LActionResult<PackingUnitWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !packingUnitId.trim()) {
@@ -474,7 +474,7 @@ export async function addPackingItemAction(
   packingUnitId: string,
   input: AddPackingItemInput,
 ): Promise<Export2LActionResult<PackingItemWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !packingUnitId.trim()) {
@@ -512,7 +512,7 @@ export async function completePackingAction(
   exportCaseId: string,
   expectedCaseVersion: number,
 ): Promise<Export2LActionResult<PackingStatusWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -535,7 +535,7 @@ export async function verifyPackingAction(
   exportCaseId: string,
   expectedCaseVersion: number,
 ): Promise<Export2LActionResult<PackingStatusWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -560,7 +560,7 @@ export async function createShipmentAction(
   exportCaseId: string,
   input: CreateShipmentInput,
 ): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -601,7 +601,7 @@ export async function updateShipmentAction(
   shipmentId: string,
   input: UpdateShipmentInput,
 ): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !shipmentId.trim()) {
@@ -633,7 +633,7 @@ export async function transitionShipmentAction(
   shipmentId: string,
   input: TransitionShipmentInput,
 ): Promise<Export2LActionResult<ShipmentWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !shipmentId.trim()) {
@@ -666,7 +666,7 @@ export async function createBrokerWorkspaceAction(
   exportCaseId: string,
   input: CreateBrokerWorkspaceInput,
 ): Promise<Export2LActionResult<BrokerWorkspaceWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -697,7 +697,7 @@ export async function prepareBrokerPackageAction(
   workspaceId: string,
   input: PrepareBrokerPackageInput,
 ): Promise<Export2LActionResult<BrokerPackageWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !workspaceId.trim()) {
@@ -726,7 +726,7 @@ export async function sendBrokerPackageAction(
   workspaceId: string,
   expectedWorkspaceVersion: number,
 ): Promise<Export2LActionResult<BrokerPackageWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !workspaceId.trim()) {
@@ -752,7 +752,7 @@ export async function acknowledgeBrokerAction(
   expectedWorkspaceVersion: number,
   brokerReference?: string,
 ): Promise<Export2LActionResult<BrokerWorkspaceWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !workspaceId.trim()) {
@@ -778,7 +778,7 @@ export async function createBrokerCorrectionAction(
   workspaceId: string,
   input: CreateBrokerCorrectionInput,
 ): Promise<Export2LActionResult<BrokerCorrectionWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !workspaceId.trim()) {
@@ -815,7 +815,7 @@ export async function resolveBrokerCorrectionAction(
   correctionId: string,
   input: ResolveBrokerCorrectionInput,
 ): Promise<Export2LActionResult<BrokerCorrectionWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !workspaceId.trim() || !correctionId.trim()) {
@@ -849,7 +849,7 @@ export async function evaluateComplianceAction(
   exportCaseId: string,
   input: EvaluateComplianceInput,
 ): Promise<Export2LActionResult<ComplianceWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -872,7 +872,7 @@ export async function revalidateComplianceAction(
   exportCaseId: string,
   expectedCaseVersion: number,
 ): Promise<Export2LActionResult<ComplianceWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -896,7 +896,7 @@ export async function satisfyComplianceRequirementAction(
   requirementId: string,
   input: SatisfyComplianceRequirementInput,
 ): Promise<Export2LActionResult<ComplianceRequirementWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !requirementId.trim()) {
@@ -928,7 +928,7 @@ export async function satisfyComplianceRequirementAction(
 export async function createResearchCaseAction(
   input: CreateResearchCaseInput,
 ): Promise<Export2LActionResult<ResearchWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!input.countryCode.trim()) {
@@ -952,7 +952,7 @@ export async function addResearchFindingAction(
   researchCaseId: string,
   input: AddResearchFindingInput,
 ): Promise<Export2LActionResult<ResearchFindingWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!researchCaseId.trim()) {
@@ -981,7 +981,7 @@ export async function reviewResearchCaseAction(
   researchCaseId: string,
   expectedVersion: number,
 ): Promise<Export2LActionResult<ResearchWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!researchCaseId.trim()) {
@@ -1001,7 +1001,7 @@ export async function completeResearchCaseAction(
   researchCaseId: string,
   expectedVersion: number,
 ): Promise<Export2LActionResult<ResearchWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!researchCaseId.trim()) {
@@ -1022,7 +1022,7 @@ export async function completeResearchCaseAction(
 export async function createKnowledgeEntryAction(
   input: CreateKnowledgeEntryInput,
 ): Promise<Export2LActionResult<KnowledgeWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (
@@ -1061,7 +1061,7 @@ export async function verifyKnowledgeEntryAction(
   knowledgeEntryId: string,
   expectedVersion: number,
 ): Promise<Export2LActionResult<KnowledgeWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!knowledgeEntryId.trim()) {

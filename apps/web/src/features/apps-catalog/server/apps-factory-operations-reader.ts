@@ -1,7 +1,7 @@
 import "server-only";
 
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import {
   getProductionCycleAnalytics,
   getProductionReportingOverview,
@@ -36,7 +36,7 @@ export async function readAppsFactoryOperationsDashboard(): Promise<DashboardSho
     return null;
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return null;
   }

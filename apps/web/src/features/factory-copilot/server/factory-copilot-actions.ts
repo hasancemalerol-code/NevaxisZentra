@@ -5,7 +5,7 @@ import "./factory-copilot-server-boundary";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { requiredRoutePermission, requiredRouteQueryPermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import type {
   FactoryCopilotContextInput,
@@ -29,7 +29,7 @@ async function resolveContext(): Promise<
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

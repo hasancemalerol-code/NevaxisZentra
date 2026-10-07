@@ -9,15 +9,18 @@ import type {
   ProductionPlanTransferRequestResult,
 } from "./production-plan-transfer-api-contracts";
 import { parseProductionPlanRuntimeConfig } from "./production-plan-runtime-config";
-import { resolveProductionPlanRequestContext } from "./production-plan-request-context";
+import {
+  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
+} from "./production-plan-request-context";
 import { resolveProductionPlanningServerScope } from "./production-plan-scope";
 
 
 type TransferContext = (ReturnType<typeof resolveProductionPlanRequestContext> & { status: "success" })["context"];
 
-function resolveTransferContext():
+async function resolveTransferContext(): Promise<
   | { context: TransferContext }
-  | { error: { status: "failure"; code: string; message: string } } {
+  | { error: { status: "failure"; code: string; message: string } }> {
   const configResult = parseProductionPlanRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -54,7 +57,7 @@ function resolveTransferContext():
     };
   }
 
-  const contextResult = resolveProductionPlanRequestContext(
+  const contextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     config,
     scopeResult.scope,
   );
@@ -77,7 +80,7 @@ export async function writeCreateTransferRequest(
   expectedVersion: number,
   targetSystem: string,
 ): Promise<ProductionPlanTransferRequestResult> {
-  const resolved = resolveTransferContext();
+  const resolved = await resolveTransferContext();
 
   if ("error" in resolved) {
     return resolved.error;
@@ -94,7 +97,7 @@ export async function writeExecuteTransfer(
   transferRequestId: string,
   expectedPlanVersion: number,
 ): Promise<ProductionPlanTransferExecuteResult> {
-  const resolved = resolveTransferContext();
+  const resolved = await resolveTransferContext();
 
   if ("error" in resolved) {
     return resolved.error;

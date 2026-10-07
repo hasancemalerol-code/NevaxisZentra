@@ -39,7 +39,16 @@ function Import-EnvFile([string]$Path) {
 }
 
 Import-EnvFile $runtimeEnv
-Import-EnvFile $secretsFile
+
+# The template carries no credentials: generate throwaway ones and apply them with PostgreSQL
+# single-user mode, exactly as the installed machine does on first run.
+function New-RandomSecret {
+    $bytes = New-Object byte[] 32
+    [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    return ([Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_'))
+}
+$env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD = New-RandomSecret
+$env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD = New-RandomSecret
 
 $env:NEVAXIS_FACTOS__MIGRATIONS__USERNAME = "nevaxiszentra"
 $env:NEVAXIS_FACTOS__PERSISTENCE__USERNAME = "crevafactos_runtime"
@@ -49,6 +58,30 @@ $dataDir = Join-Path $tempRoot "data"
 $logDir = Join-Path $tempRoot "logs"
 New-Item -ItemType Directory -Force -Path $dataDir, $logDir | Out-Null
 Copy-Item -Path (Join-Path $templateRoot "*") -Destination $dataDir -Recurse -Force
+
+foreach ($requiredDir in 'pg_commit_ts','pg_dynshmem','pg_notify','pg_replslot','pg_serial','pg_snapshots','pg_stat_tmp','pg_tblspc','pg_twophase','pg_logical\mappings','pg_logical\snapshots','pg_wal\archive_status','pg_wal\summaries') {
+    New-Item -ItemType Directory -Force -Path (Join-Path $dataDir $requiredDir) | Out-Null
+}
+$syncSql = @(
+    "ALTER ROLE `"nevaxiszentra`" WITH LOGIN PASSWORD '$($env:NEVAXIS_FACTOS__MIGRATIONS__PASSWORD)'",
+    "ALTER ROLE `"crevafactos_runtime`" WITH LOGIN PASSWORD '$($env:NEVAXIS_FACTOS__PERSISTENCE__PASSWORD)'"
+) -join "`n"
+$previousErrorAction = $ErrorActionPreference
+$ErrorActionPreference = "Continue"   # postgres writes normal LOG lines to stderr
+# PS 5.1 prefixes a BOM to text piped into native executables, which breaks the first statement:
+# hand the SQL over through a BOM-less file and cmd redirection instead of a pipe.
+$syncSqlFile = Join-Path $tempRoot "credential-sync.sql"
+[System.IO.File]::WriteAllText($syncSqlFile, $syncSql + "`n", (New-Object System.Text.UTF8Encoding $false))
+$syncOutputFile = Join-Path $tempRoot "credential-sync.out"
+try {
+    $postgresExe = Join-Path $postgresBin "postgres.exe"
+    cmd /c "`"$postgresExe`" --single -D `"$dataDir`" -c password_encryption=scram-sha-256 postgres < `"$syncSqlFile`" > `"$syncOutputFile`" 2>&1"
+    $syncExit = $LASTEXITCODE
+    $syncOutput = Get-Content $syncOutputFile -Raw
+}
+finally { $ErrorActionPreference = $previousErrorAction; Remove-Item $syncSqlFile -Force -ErrorAction SilentlyContinue }
+if ($syncExit -ne 0 -or ($syncOutput | Out-String) -match 'ERROR:') { throw "Single-user credential sync failed (exit $syncExit)." }
+Write-Host "Credential sync via single-user mode: OK"
 
 $pgCtl = Join-Path $postgresBin "pg_ctl.exe"
 $psql = Join-Path $postgresBin "psql.exe"

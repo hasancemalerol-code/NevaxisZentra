@@ -56,7 +56,7 @@ import {
   parseProductionExecutionRuntimeConfig,
 } from "../../production-execution/server/production-order-runtime-config";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
   type ProductionOrderRequestContext,
 } from "../../production-execution/server/production-order-request-context";
 import { getQualityNcrFollowUpWorkspace } from "../../quality-control/server/quality-ncr-follow-up-api-client";
@@ -163,9 +163,9 @@ function toSourceAvailability(
   return "available";
 }
 
-function resolvePrimaryContext():
+async function resolvePrimaryContext(): Promise<
   | Readonly<{ status: "success"; context: ProductionOrderRequestContext }>
-  | Readonly<{ status: "failure"; message: string; code?: string }> {
+  | Readonly<{ status: "failure"; message: string; code?: string }>> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status === "failure") {
     return { status: "failure", message: configResult.message, code: "configuration-error" };
@@ -177,7 +177,7 @@ function resolvePrimaryContext():
       code: "configuration-error",
     };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
@@ -732,7 +732,7 @@ export async function readOperationsCommandCenterWorkspace(
   const subscriptionResult = await fetchCurrentTenantSubscription();
   const subscription = subscriptionResult.status === "success" ? subscriptionResult.value : null;
 
-  const primaryContextResult = resolvePrimaryContext();
+  const primaryContextResult = await resolvePrimaryContext();
   if (primaryContextResult.status === "failure") {
     return {
       status: "failure",

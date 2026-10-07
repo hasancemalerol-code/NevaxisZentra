@@ -12,7 +12,7 @@ import {
   parseProductionExecutionRuntimeConfig,
 } from "./production-order-runtime-config";
 import {
-  resolveProductionOrderRequestContext,
+  resolveProductionOrderRequestContextForIncomingRequest,
   type ProductionOrderRequestContext,
 } from "./production-order-request-context";
 
@@ -25,9 +25,9 @@ export type ProductionFollowUpWorkspaceResult =
     }>
   | Readonly<{ status: "failure"; message: string }>;
 
-function resolveReadContext():
+async function resolveReadContext(): Promise<
   | Readonly<{ status: "success"; context: ProductionOrderRequestContext }>
-  | Readonly<{ status: "failure"; message: string }> {
+  | Readonly<{ status: "failure"; message: string }>> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status === "failure") {
     return { status: "failure", message: configResult.message };
@@ -38,7 +38,7 @@ function resolveReadContext():
       message: "Development preview mode is not configured for production follow-up.",
     };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }
@@ -48,7 +48,7 @@ function resolveReadContext():
 export async function readProductionFollowUpWorkspace(
   exceptionId?: string,
 ): Promise<ProductionFollowUpWorkspaceResult> {
-  const contextResult = resolveReadContext();
+  const contextResult = await resolveReadContext();
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

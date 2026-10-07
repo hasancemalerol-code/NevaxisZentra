@@ -3,7 +3,7 @@ import "server-only";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   readMixedProductionLineDetail,
@@ -17,7 +17,7 @@ import {
 async function resolveContext() {
   const authorization = await denyUnlessGranted(requiredRoutePermission("hatlar"));
   if (authorization.status === "failure") {
-    return { status: "failure" as const, message: "Karma üretim hatları görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: authorization.code === "authorization-denied" ? "Karma üretim hatları görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -25,7 +25,7 @@ async function resolveContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

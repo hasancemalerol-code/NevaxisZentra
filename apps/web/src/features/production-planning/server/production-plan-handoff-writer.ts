@@ -3,16 +3,19 @@ import "./production-plan-server-boundary";
 import { prepareHandoff } from "./production-plan-handoff-api-client";
 import type { ProductionPlanHandoffResult } from "./production-plan-handoff-api-contracts";
 import { parseProductionPlanRuntimeConfig } from "./production-plan-runtime-config";
-import { resolveProductionPlanRequestContext } from "./production-plan-request-context";
+import {
+  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
+} from "./production-plan-request-context";
 import { resolveProductionPlanningServerScope } from "./production-plan-scope";
 
 type HandoffContext = (ReturnType<typeof resolveProductionPlanRequestContext> & {
   status: "success";
 })["context"];
 
-function resolveHandoffContext():
+async function resolveHandoffContext(): Promise<
   | { context: HandoffContext }
-  | { error: { status: "failure"; code: string; message: string } } {
+  | { error: { status: "failure"; code: string; message: string } }> {
   const configResult = parseProductionPlanRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -49,7 +52,7 @@ function resolveHandoffContext():
     };
   }
 
-  const contextResult = resolveProductionPlanRequestContext(
+  const contextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     config,
     scopeResult.scope,
   );
@@ -71,7 +74,7 @@ export async function writePrepareHandoff(
   productionPlanId: string,
   expectedVersion: number,
 ): Promise<ProductionPlanHandoffResult> {
-  const resolved = resolveHandoffContext();
+  const resolved = await resolveHandoffContext();
 
   if ("error" in resolved) {
     return resolved.error;

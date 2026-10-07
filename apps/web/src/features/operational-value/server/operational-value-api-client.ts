@@ -2,6 +2,14 @@ import "./operational-value-server-boundary";
 
 import type { ProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
 
+import {
+  mapCaseDetail,
+  mapControlCenter,
+  type RawOperationalValueCaseDetail,
+  type RawOperationalValueControlCenter,
+  type RawOperationalValueReportPreview,
+} from "../domain/operational-value-mapping";
+
 export type OperationalValueSummaryMetricsApi = Readonly<{
   verifiedOutcomes: number;
   goodOutputGainedUnits: number;
@@ -16,7 +24,7 @@ export type OperationalValueSummaryMetricsApi = Readonly<{
 
 export type OperationalValueTrendPointApi = Readonly<{
   periodLabel: string;
-  periodStartUtc: string;
+  periodStartUtc?: string;
   verifiedOutcomes: number;
   goodOutputGainedUnits: number;
   downtimeAvoidedMinutes: number;
@@ -29,12 +37,12 @@ export type OperationalValueBreakdownItemApi = Readonly<{
   dimensionType: string;
   dimensionId: string;
   label: string;
-  valueCategory: string;
+  valueCategory?: string;
   operationalValue: number;
   unit: string;
   caseCount: number;
   economicValue?: number;
-  attributionClass: string;
+  attributionClass?: string;
 }>;
 
 export type OperationalValueEvidenceItemApi = Readonly<{
@@ -89,29 +97,33 @@ export type OperationalValueEconomicInputSnapshotApi = Readonly<{
   updatedAtUtc: string;
 }>;
 
+/**
+ * Only the totals are reported by the operational-value API. Route/model call statistics belong to the
+ * Intelligence Runtime surface and are optional here: the view shows "—" instead of inventing them.
+ */
 export type OperationalValueIntelligenceCostLinkApi = Readonly<{
   totalIntelligenceCost: number;
   costPerVerifiedOutcome?: number;
-  modelCallCount: number;
-  deterministicRouteCount: number;
-  deterministicRouteRate: number;
-  frontierModelCallRate: number;
+  modelCallCount?: number;
+  deterministicRouteCount?: number;
+  deterministicRouteRate?: number;
+  frontierModelCallRate?: number;
   frontierCostPerVerifiedOutcome?: number;
-  hasValidCounterfactual: boolean;
-  message: string;
+  hasValidCounterfactual?: boolean;
+  message?: string;
 }>;
 
 export type OperationalValueReportPreviewApi = Readonly<{
   periodLabel: string;
-  periodStartUtc: string;
-  periodEndUtc: string;
+  periodStartUtc?: string;
+  periodEndUtc?: string;
   verifiedOutcomes: number;
   operationalImprovements: readonly string[];
   verifiedEconomicValue?: number;
   intelligenceCost: number;
   netValue?: number;
   roiPercent?: number;
-  paybackStatus: string;
+  paybackStatus?: string;
   methodologySummary: string;
   currency?: string;
   economicConversionStatus: string;
@@ -166,14 +178,48 @@ async function operationalValueFetch<T>(
 
 export async function readOperationalValueControlCenter(
   context: ProductionOrderRequestContext,
+  capabilities: Readonly<{ canManageEconomicInputs: boolean; canExport: boolean }> = {
+    canManageEconomicInputs: false,
+    canExport: false,
+  },
 ): Promise<
   { status: "success"; value: OperationalValueControlCenterApi }
   | { status: "failure"; code: string; message: string }
 > {
-  return operationalValueFetch<OperationalValueControlCenterApi>(
-    context,
-    "/api/operational-value/control-center",
-  );
+  const [centerResult, reportResult] = await Promise.all([
+    operationalValueFetch<RawOperationalValueControlCenter>(context, "/api/operational-value/control-center"),
+    operationalValueFetch<RawOperationalValueReportPreview>(context, "/api/operational-value/report-preview"),
+  ]);
+  if (centerResult.status === "failure") {
+    return centerResult;
+  }
+
+  if (reportResult.status === "failure") {
+    return reportResult;
+  }
+
+  // The newest verified record is featured; its detail is a separate read. A failed detail read degrades to
+  // "no featured case" rather than failing the whole workspace.
+  let featuredCase: OperationalValueCaseDetailApi | undefined;
+  const newest = centerResult.value.recentValues[0];
+  if (newest) {
+    const detailResult = await operationalValueFetch<RawOperationalValueCaseDetail>(
+      context,
+      `/api/operational-value/cases/${encodeURIComponent(newest.valueRecordId)}`,
+    );
+    if (detailResult.status === "success") {
+      featuredCase = mapCaseDetail(detailResult.value, {
+        valueCategory: newest.valueCategory,
+        workflowType: newest.workflowType,
+        lineCode: newest.lineCode ?? undefined,
+      });
+    }
+  }
+
+  return {
+    status: "success",
+    value: mapControlCenter(centerResult.value, reportResult.value, featuredCase, capabilities),
+  };
 }
 
 export async function readOperationalValueCaseDetail(

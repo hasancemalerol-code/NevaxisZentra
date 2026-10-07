@@ -49,13 +49,22 @@ function normalizeEnvValue(
   return value?.trim() ?? "";
 }
 
+const CUSTOMER_SAFE_CONFIGURATION_ERROR_MESSAGE =
+  "Bu modül şu anda yapılandırma nedeniyle kullanılamıyor. Lütfen sistem yöneticinizle iletişime geçin.";
+
 function createConfigurationFailure(
-  message: string,
+  technicalMessage: string,
 ): ProductionPlanRuntimeConfigFailure {
+  // Log the technical detail (env var names, etc.) server-side only. The
+  // customer-facing message must never leak internal configuration keys.
+  console.error(
+    "[production-plan-runtime-config] " + technicalMessage,
+  );
+
   return {
     status: "failure",
     code: "configuration-error",
-    message,
+    message: CUSTOMER_SAFE_CONFIGURATION_ERROR_MESSAGE,
     retryable: false,
   };
 }

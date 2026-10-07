@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   approveAdaptiveReplan,
@@ -23,7 +23,7 @@ async function resolveActionContext(permission: string) {
     return {
       status: "failure" as const,
       code: "permission-denied",
-      message: "Bu işlem için yetkiniz yok.",
+      message: authorization.code === "authorization-denied" ? "Bu işlem için yetkiniz yok." : authorization.message,
     };
   }
 
@@ -32,7 +32,7 @@ async function resolveActionContext(permission: string) {
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

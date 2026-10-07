@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { GOLDEN_DEMO_CUSTOMS_FILE_ROUTE } from "../domain/golden-demo-customs-file-labels";
 import {
@@ -33,7 +33,7 @@ async function resolveContext() {
   if (configResult.status !== "success") {
     return { status: "failure" as const, message: configResult.message };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }
@@ -42,7 +42,7 @@ async function resolveContext() {
 
 export async function goldenDemoCustomsAssignAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.manage");
-  if (auth.status === "failure") return { status: "failure", message: "Yetki yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yetki yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await assignGoldenDemoCustomsOutcome(ctx.context, outcomeId);
@@ -53,7 +53,7 @@ export async function goldenDemoCustomsAssignAction(outcomeId: string): Promise<
 
 export async function goldenDemoCustomsEvaluateAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.execute");
-  if (auth.status === "failure") return { status: "failure", message: "Yetki yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yetki yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await evaluateGoldenDemoCustomsWorker(ctx.context, outcomeId);
@@ -67,7 +67,7 @@ export async function goldenDemoCustomsCompleteWorkAction(
   workId: string,
 ): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.execute");
-  if (auth.status === "failure") return { status: "failure", message: "Yetki yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yetki yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await completeGoldenDemoCustomsCorrectiveWork(ctx.context, outcomeId, workId);
@@ -78,7 +78,7 @@ export async function goldenDemoCustomsCompleteWorkAction(
 
 export async function goldenDemoCustomsRecheckAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.execute");
-  if (auth.status === "failure") return { status: "failure", message: "Yetki yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yetki yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await recheckGoldenDemoCustomsEvidence(ctx.context, outcomeId);
@@ -89,7 +89,7 @@ export async function goldenDemoCustomsRecheckAction(outcomeId: string): Promise
 
 export async function goldenDemoCustomsApproveAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.approve");
-  if (auth.status === "failure") return { status: "failure", message: "Onay yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Onay yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await approveGoldenDemoCustomsPackage(ctx.context, outcomeId);
@@ -100,7 +100,7 @@ export async function goldenDemoCustomsApproveAction(outcomeId: string): Promise
 
 export async function goldenDemoCustomsAssembleAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.execute");
-  if (auth.status === "failure") return { status: "failure", message: "Yetki yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Yetki yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await assembleGoldenDemoCustomsPackage(ctx.context, outcomeId);
@@ -111,7 +111,7 @@ export async function goldenDemoCustomsAssembleAction(outcomeId: string): Promis
 
 export async function goldenDemoCustomsVerifyAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.verify");
-  if (auth.status === "failure") return { status: "failure", message: "Doğrulama yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Doğrulama yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await verifyGoldenDemoCustomsOutcome(ctx.context, outcomeId);
@@ -122,7 +122,7 @@ export async function goldenDemoCustomsVerifyAction(outcomeId: string): Promise<
 
 export async function goldenDemoCustomsResetAction(outcomeId: string): Promise<ActionResult> {
   const auth = await denyUnlessGranted("golden-demo-customs-file.reset");
-  if (auth.status === "failure") return { status: "failure", message: "Sıfırlama yetkiniz yok." };
+  if (auth.status === "failure") return { status: "failure", message: auth.code === "authorization-denied" ? "Sıfırlama yetkiniz yok." : auth.message };
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
   const result = await resetGoldenDemoCustomsOutcome(ctx.context, outcomeId);

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "./production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "./production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "./production-order-request-context";
 
 function revalidateProductionFollowUpRoutes() {
   revalidatePath("/uretim/istisnalar-ve-gorevler");
@@ -15,7 +15,7 @@ async function resolveContext() {
   if (configResult.status === "failure") {
     return { status: "failure" as const, message: configResult.message };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

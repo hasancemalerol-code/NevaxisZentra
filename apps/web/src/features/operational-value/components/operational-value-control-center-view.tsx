@@ -74,8 +74,8 @@ function BreakdownList({
     <div key={`${item.dimensionType}:${item.dimensionId}:${item.valueCategory}`} className="operational-value-item">
       <div className="operational-value-item__row">
         <div className="operational-value-item__title">{item.label}</div>
-        <span className="operational-value-badge">{item.valueCategory}</span>
-        <span className="operational-value-badge">{item.attributionClass}</span>
+        {item.valueCategory ? <span className="operational-value-badge">{item.valueCategory}</span> : null}
+        {item.attributionClass ? <span className="operational-value-badge">{item.attributionClass}</span> : null}
       </div>
       <div className="operational-value-item__meta">
         {formatNumber(item.operationalValue, 1)} {item.unit} · {item.caseCount} vaka
@@ -309,7 +309,7 @@ export function OperationalValueControlCenterView({
           ) : (
             <div className="operational-value-trend-grid">
               {controlCenter.trend.map((point) => (
-                <div key={point.periodStartUtc} className="operational-value-trend-point">
+                <div key={point.periodStartUtc ?? point.periodLabel} className="operational-value-trend-point">
                   <div className="operational-value-trend-point__label">{point.periodLabel}</div>
                   <div className="operational-value-trend-point__value">
                     +{formatNumber(point.goodOutputGainedUnits, 0)} adet
@@ -410,17 +410,23 @@ export function OperationalValueControlCenterView({
               <div className="operational-value-detail-cell">
                 <div className="operational-value-detail-cell__label">Deterministik oran</div>
                 <div className="operational-value-detail-cell__value">
-                  {(intelligenceCost.deterministicRouteRate * 100).toFixed(1)}%
+                  {intelligenceCost.deterministicRouteRate != null
+                    ? `${(intelligenceCost.deterministicRouteRate * 100).toFixed(1)}%`
+                    : "—"}
                 </div>
               </div>
               <div className="operational-value-detail-cell">
                 <div className="operational-value-detail-cell__label">Frontier model oranı</div>
                 <div className="operational-value-detail-cell__value">
-                  {(intelligenceCost.frontierModelCallRate * 100).toFixed(1)}%
+                  {intelligenceCost.frontierModelCallRate != null
+                    ? `${(intelligenceCost.frontierModelCallRate * 100).toFixed(1)}%`
+                    : "—"}
                 </div>
               </div>
             </div>
-            <p className="operational-value-item__meta">{intelligenceCost.message}</p>
+            {intelligenceCost.message ? (
+              <p className="operational-value-item__meta">{intelligenceCost.message}</p>
+            ) : null}
           </div>
         </div>
       </section>

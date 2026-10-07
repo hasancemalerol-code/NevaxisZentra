@@ -84,6 +84,10 @@ export type EnergyAssessmentDetailResult =
   | Readonly<{ status: "success"; detail: EnergyAssessmentDetail }>
   | ReadFailure;
 
+function hasEnergyValue(value: number | null | undefined): value is number {
+  return value !== null && value !== undefined;
+}
+
 function sortWindows(windows: readonly RawEnergyConsumptionWindow[]): RawEnergyConsumptionWindow[] {
   return [...windows].sort(
     (a, b) => new Date(a.windowStartUtc).getTime() - new Date(b.windowStartUtc).getTime(),
@@ -790,7 +794,7 @@ function buildKpis(params: {
         : "Payda veya onaylı yoğunluk hedefi yok",
       evidenceLabel: getEnergyEvidenceLabel(intensityAssessment?.evidenceStatus ?? "insufficient-data"),
       state:
-        approvedIntensityTarget && intensityAssessment?.actualConsumedKwh !== null
+        approvedIntensityTarget && hasEnergyValue(intensityAssessment?.actualConsumedKwh)
           ? "available"
           : "insufficient-data",
       unavailableReason: "Üretim paydası veya yoğunluk hedefi eksik",
@@ -799,7 +803,7 @@ function buildKpis(params: {
       id: "target-variance",
       label: "Hedef sapması",
       value:
-        primaryAssessment?.varianceConsumedKwh !== null
+        primaryAssessment && hasEnergyValue(primaryAssessment.varianceConsumedKwh)
           ? formatEnergyVariance(
               primaryAssessment.varianceConsumedKwh,
               primaryAssessment.variancePercent,
@@ -811,7 +815,7 @@ function buildKpis(params: {
         : "Onaylı tüketim hedefi yok",
       evidenceLabel: getEnergyEvidenceLabel(primaryAssessment?.evidenceStatus ?? "insufficient-data"),
       state:
-        approvedConsumptionTarget && primaryAssessment?.varianceConsumedKwh !== null
+        approvedConsumptionTarget && hasEnergyValue(primaryAssessment?.varianceConsumedKwh)
           ? "available"
           : "unavailable",
       unavailableReason: "Onaylı hedef olmadan sapma gösterilmez",
@@ -830,7 +834,7 @@ function buildKpis(params: {
         : "Üretim durumu veya boşta hedef kanıtı yok",
       evidenceLabel: getEnergyEvidenceLabel(idleAssessment?.evidenceStatus ?? "insufficient-data"),
       state:
-        idleAssessment?.actualConsumedKwh !== null
+        hasEnergyValue(idleAssessment?.actualConsumedKwh)
           ? "available"
           : "insufficient-data",
       unavailableReason: "Üretim durumu kanıtı olmadan boşta tüketim hesaplanmaz",

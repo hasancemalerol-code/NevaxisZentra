@@ -2,7 +2,7 @@ import "server-only";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   readScenarioComparison,
@@ -14,7 +14,7 @@ import {
 async function resolveContext() {
   const authorization = await denyUnlessGranted("throughput-intelligence.read");
   if (authorization.status === "failure") {
-    return { status: "failure" as const, message: "Verim analizi görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, message: authorization.code === "authorization-denied" ? "Verim analizi görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -22,7 +22,7 @@ async function resolveContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

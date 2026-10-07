@@ -22,6 +22,7 @@ public static class SaasIdentityEndpointRouteBuilderExtensions
         group.MapPost("/invitations/accept", AcceptInvitationAsync).AllowAnonymous();
         group.MapPost("/mfa/enroll", EnrollMfaAsync).RequireAuthorization();
         group.MapPost("/mfa/recovery/consume", ConsumeRecoveryCodeAsync).AllowAnonymous();
+        BootstrapEnrollmentEndpoints.Map(group);
 
         return endpoints;
     }

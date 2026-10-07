@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   approveProductionManagerDecision,
@@ -26,7 +26,7 @@ async function resolveContext() {
   if (configResult.status !== "success") {
     return { status: "failure" as const, message: configResult.message };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }
@@ -56,7 +56,7 @@ export async function productionManagerSimulateAction(
 ): Promise<ActionResult<ProductionManagerSimulationApi>> {
   const auth = await denyUnlessGranted("production-manager.simulate");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Simülasyon yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Simülasyon yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -76,7 +76,7 @@ export async function productionManagerApproveAction(
 ): Promise<ActionResult<ProductionManagerDecisionApi>> {
   const auth = await denyUnlessGranted("production-manager.approve");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Onay yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Onay yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -100,7 +100,7 @@ export async function productionManagerExecuteAction(
 ): Promise<ActionResult<ProductionManagerDecisionApi>> {
   const auth = await denyUnlessGranted("production-manager.decide");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Karar uygulama yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Karar uygulama yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;
@@ -124,7 +124,7 @@ export async function productionManagerVerifyAction(
 ): Promise<ActionResult<ProductionManagerDecisionApi>> {
   const auth = await denyUnlessGranted("production-manager.decide");
   if (auth.status === "failure") {
-    return { status: "failure", message: "Doğrulama yetkiniz yok." };
+    return { status: "failure", message: auth.code === "authorization-denied" ? "Doğrulama yetkiniz yok." : auth.message };
   }
   const ctx = await resolveContext();
   if (ctx.status === "failure") return ctx;

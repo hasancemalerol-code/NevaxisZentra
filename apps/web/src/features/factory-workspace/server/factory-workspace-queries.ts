@@ -10,7 +10,7 @@ import { loadFactoryIntelligenceWorkspace } from "@/features/factory-intelligenc
 import { loadMixedProductionLineWorkspace, loadMixedProductionLinesWorkspace } from "@/features/mixed-production/server/mixed-production-reader";
 import { ACTIVE_PRODUCTION_ORDER_STATUSES } from "@/features/production-execution/domain/production-order";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import { readProductionOrders } from "@/features/production-execution/server/production-order-reader";
 import { readProductionResourceWorkspace } from "@/features/production-resources/server/production-resources-api-client";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
@@ -35,7 +35,7 @@ async function resolveContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

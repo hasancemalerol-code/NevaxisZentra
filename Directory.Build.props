@@ -16,4 +16,12 @@
 
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <!--
+    Customer PRODUCTION builds (publisher passes /p:ZentraProductionBuild=true) compile out every demo
+    credential literal. Development, demo and test builds are unaffected.
+  -->
+  <PropertyGroup Condition="'$(ZentraProductionBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);ZENTRA_PRODUCTION_BUILD</DefineConstants>
+  </PropertyGroup>
 </Project>

@@ -108,46 +108,38 @@ export function SignInForm({
           return;
         }
 
-        if (result.value === "mfa_required") {
-          // Client sign-in uses credentials:"omit" so HttpOnly session cookies
-          // are not stored. Re-post via the server route to set cookies and redirect.
-          const fallbackForm = document.createElement("form");
-          fallbackForm.method = "post";
-          fallbackForm.action = "/giris/oturum";
-          const fields: Record<string, string> = {
-            organizationContext: credentials.organizationContext,
-            email: credentials.email,
-            password: credentials.password,
-          };
-          const requestedReturnUrl =
-            typeof window !== "undefined"
-              ? new URLSearchParams(window.location.search).get("returnUrl")
-              : returnUrl;
-          if (isSafeAppReturnUrl(requestedReturnUrl)) {
-            fields.returnUrl = requestedReturnUrl;
-          }
-          for (const [name, value] of Object.entries(fields)) {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = name;
-            input.value = value;
-            fallbackForm.appendChild(input);
-          }
-          document.body.appendChild(fallbackForm);
-          fallbackForm.submit();
-          return;
-        }
-
+        // Client sign-in uses credentials:"omit" so HttpOnly session cookies
+        // are not stored by this fetch. For both "authenticated" and
+        // "mfa_required" outcomes, re-post via the server route so it can set
+        // the session cookies and redirect server-side. (Previously only the
+        // mfa_required branch did this, so a direct non-MFA sign-in never
+        // received a session cookie and the client redirect looped back to
+        // /giris, leaving the form stuck on "Oturum aciliyor...".)
+        const fallbackForm = document.createElement("form");
+        fallbackForm.method = "post";
+        fallbackForm.action = "/giris/oturum";
+        const fields: Record<string, string> = {
+          organizationContext: credentials.organizationContext,
+          email: credentials.email,
+          password: credentials.password,
+        };
         const requestedReturnUrl =
           typeof window !== "undefined"
             ? new URLSearchParams(window.location.search).get("returnUrl")
             : returnUrl;
-        router.push(
-          isSafeAppReturnUrl(requestedReturnUrl)
-            ? requestedReturnUrl
-            : "/",
-        );
-        router.refresh();
+        if (isSafeAppReturnUrl(requestedReturnUrl)) {
+          fields.returnUrl = requestedReturnUrl;
+        }
+        for (const [name, value] of Object.entries(fields)) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          fallbackForm.appendChild(input);
+        }
+        document.body.appendChild(fallbackForm);
+        fallbackForm.submit();
+        return;
       } catch {
         setError(SAAS_IDENTITY_MESSAGES.unexpectedError);
         submittingRef.current = false;

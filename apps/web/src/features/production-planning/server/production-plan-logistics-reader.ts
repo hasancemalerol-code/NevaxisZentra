@@ -8,7 +8,7 @@ import {
 } from "../presentation/production-plan-logistics-formatters";
 import type { PlanningLogisticsEvaluationApiDto } from "./production-plan-logistics-api-contracts";
 import {
-  resolveProductionPlanRequestContext,
+  resolveProductionPlanRequestContextForIncomingRequest,
   type ProductionPlanRequestContext,
 } from "./production-plan-request-context";
 import {
@@ -60,7 +60,7 @@ async function resolveDependencies(): Promise<
     return scope;
   }
 
-  const requestContextResult = resolveProductionPlanRequestContext(
+  const requestContextResult = await resolveProductionPlanRequestContextForIncomingRequest(
     runtimeConfig.config,
     scope.scope,
   );

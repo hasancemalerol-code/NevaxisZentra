@@ -451,7 +451,10 @@ public sealed class FactoryEventSpineService(
             return null;
         }
 
-        var today = DateTimeOffset.UtcNow.Date;
+        // DateTimeOffset.UtcNow.Date is a DateTime of Unspecified kind: comparing it with a DateTimeOffset column
+        // converts it with the machine's local offset, and Npgsql rejects any non-zero offset (HTTP 500 on every
+        // machine outside UTC, i.e. every Turkish installation).
+        var today = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
         var processedToday = await dbContext.IntegrationCanonicalFactoryEvents.CountAsync(
             e => e.TenantId == context.TenantId &&
                  e.ConnectorId == connectorId &&

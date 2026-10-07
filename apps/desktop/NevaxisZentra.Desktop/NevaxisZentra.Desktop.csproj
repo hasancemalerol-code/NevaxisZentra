@@ -30,6 +30,11 @@
     <InternalsVisibleTo Include="NevaxisZentra.Desktop.Tests" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Shared with the API (single implementation of the first-account enrollment state). -->
+    <Compile Include="..\..\..\packages\NevaxisZentra.Configuration\Bootstrap\BootstrapEnrollmentStore.cs"
+             Link="Runtime\Bootstrap\BootstrapEnrollmentStore.cs" />
+  </ItemGroup>
   <Target Name="GenerateDesktopBuildConfiguration" BeforeTargets="BeforeCompile">
     <PropertyGroup>
       <_GeneratedConfigPath>$(IntermediateOutputPath)DesktopBuildConfiguration.g.cs</_GeneratedConfigPath>

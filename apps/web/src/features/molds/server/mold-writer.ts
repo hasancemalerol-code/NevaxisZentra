@@ -12,7 +12,7 @@ import {
 } from "./mold-api-client";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 
 type ActionResult =
   | Readonly<{ status: "success"; id: string; version: number }>
@@ -24,7 +24,7 @@ async function resolveContext() {
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }

@@ -1,12 +1,16 @@
 import "server-only";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchCurrentEffectiveAccessResult,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
+import {
+  AUTHENTICATION_REQUIRED_MESSAGE,
+  AUTHORIZATION_UNAVAILABLE_MESSAGE,
+} from "@/features/admin-access/server/require-current-permission";
 import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   readOperationalValueControlCenter,
@@ -18,7 +22,16 @@ export type OperationalValueWorkspaceResult =
   | Readonly<{ status: "failure"; message: string }>;
 
 async function resolveContext(permission = requiredRoutePermission("operational-value")) {
-  const access = await fetchCurrentEffectiveAccess();
+  const accessResult = await fetchCurrentEffectiveAccessResult();
+  if (accessResult.status === "unauthenticated") {
+    return { status: "failure" as const, message: AUTHENTICATION_REQUIRED_MESSAGE };
+  }
+
+  if (accessResult.status === "unavailable") {
+    return { status: "failure" as const, message: AUTHORIZATION_UNAVAILABLE_MESSAGE };
+  }
+
+  const access = accessResult.access;
   if (!hasGrantedPermission(access, permission)) {
     return { status: "failure" as const, message: "Operasyonel değer görüntüleme yetkiniz yok." };
   }
@@ -28,12 +41,19 @@ async function resolveContext(permission = requiredRoutePermission("operational-
     return { status: "failure" as const, message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, message: contextResult.message };
   }
 
-  return { status: "success" as const, context: contextResult.context };
+  return {
+    status: "success" as const,
+    context: contextResult.context,
+    capabilities: {
+      canManageEconomicInputs: hasGrantedPermission(access, "operational-value.manage-economic-inputs"),
+      canExport: hasGrantedPermission(access, "operational-value.export"),
+    },
+  };
 }
 
 export async function loadOperationalValueControlCenter(): Promise<OperationalValueWorkspaceResult> {
@@ -42,7 +62,7 @@ export async function loadOperationalValueControlCenter(): Promise<OperationalVa
     return resolved;
   }
 
-  const result = await readOperationalValueControlCenter(resolved.context);
+  const result = await readOperationalValueControlCenter(resolved.context, resolved.capabilities);
   if (result.status === "failure") {
     return { status: "failure", message: result.message };
   }

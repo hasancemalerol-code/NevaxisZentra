@@ -19208,60 +19208,74 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
             modelBuilder.Entity("NevaxisZentra.Persistence.FactoryIntelligence.FactoryOperationalBaseline", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("BaselineSource")
+                        .HasColumnName("baseline_source")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<decimal?>("CurrentValue")
+                        .HasColumnName("current_value")
                         .HasColumnType("numeric");
 
                     b.Property<string>("DataQuality")
+                        .HasColumnName("data_quality")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<decimal?>("DeviationPercent")
+                        .HasColumnName("deviation_percent")
                         .HasColumnType("numeric");
 
                     b.Property<string>("EngineVersion")
+                        .HasColumnName("engine_version")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<Guid>("FacilityId")
+                        .HasColumnName("facility_id")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("ReferenceValue")
+                        .HasColumnName("reference_value")
                         .HasColumnType("numeric");
 
                     b.Property<string>("ResourceId")
+                        .HasColumnName("resource_id")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("ResourceType")
+                        .HasColumnName("resource_type")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("SignalType")
+                        .HasColumnName("signal_type")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<Guid>("TenantId")
+                        .HasColumnName("tenant_id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Trend")
+                        .HasColumnName("trend")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnName("updated_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -19275,114 +19289,141 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
             modelBuilder.Entity("NevaxisZentra.Persistence.FactoryIntelligence.FactoryPredictedRisk", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("AffectedOutcome")
+                        .HasColumnName("affected_outcome")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("AssumptionsJson")
+                        .HasColumnName("assumptions_json")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ConfidenceBand")
+                        .HasColumnName("confidence_band")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("ContributingSignalsJson")
+                        .HasColumnName("contributing_signals_json")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CorrelationKey")
+                        .HasColumnName("correlation_key")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("DataClassification")
+                        .HasColumnName("data_classification")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("DataQuality")
+                        .HasColumnName("data_quality")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("EngineVersion")
+                        .HasColumnName("engine_version")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("ExplanationJson")
+                        .HasColumnName("explanation_json")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("FacilityId")
+                        .HasColumnName("facility_id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("GeneratedAtUtc")
+                        .HasColumnName("generated_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Horizon")
+                        .HasColumnName("horizon")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("IdempotencyKey")
+                        .HasColumnName("idempotency_key")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnName("is_active")
                         .HasColumnType("boolean");
 
                     b.Property<Guid?>("LinkedCaseId")
+                        .HasColumnName("linked_case_id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("MachineCode")
+                        .HasColumnName("machine_code")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("MaterialCode")
+                        .HasColumnName("material_code")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("OrderReference")
+                        .HasColumnName("order_reference")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<int?>("ProjectedGapQuantity")
+                        .HasColumnName("projected_gap_quantity")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("ResolvedAtUtc")
+                        .HasColumnName("resolved_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RiskState")
+                        .HasColumnName("risk_state")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("RiskType")
+                        .HasColumnName("risk_type")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("Severity")
+                        .HasColumnName("severity")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<Guid>("TenantId")
+                        .HasColumnName("tenant_id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("TimeToImpactLabel")
+                        .HasColumnName("time_to_impact_label")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnName("updated_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -19398,47 +19439,59 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
             modelBuilder.Entity("NevaxisZentra.Persistence.FactoryIntelligence.FactoryPredictionEvaluation", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("ActualOutcome")
+                        .HasColumnName("actual_outcome")
                         .HasColumnType("text");
 
                     b.Property<string>("ConfidenceBand")
+                        .HasColumnName("confidence_band")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("EvaluatedAtUtc")
+                        .HasColumnName("evaluated_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EvaluationOutcome")
+                        .HasColumnName("evaluation_outcome")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<Guid>("FacilityId")
+                        .HasColumnName("facility_id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Horizon")
+                        .HasColumnName("horizon")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<bool>("InterventionOccurred")
+                        .HasColumnName("intervention_occurred")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Notes")
+                        .HasColumnName("notes")
                         .HasColumnType("text");
 
                     b.Property<string>("PredictedOutcome")
+                        .HasColumnName("predicted_outcome")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("PredictedRiskId")
+                        .HasColumnName("predicted_risk_id")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TenantId")
+                        .HasColumnName("tenant_id")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -19451,65 +19504,81 @@ namespace NevaxisZentra.Persistence.Migrations.Migrations
             modelBuilder.Entity("NevaxisZentra.Persistence.FactoryIntelligence.FactoryPredictiveSignal", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<decimal?>("BaselineValue")
+                        .HasColumnName("baseline_value")
                         .HasColumnType("numeric");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnName("created_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DataQuality")
+                        .HasColumnName("data_quality")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<decimal?>("DeviationPercent")
+                        .HasColumnName("deviation_percent")
                         .HasColumnType("numeric");
 
                     b.Property<string>("EngineVersion")
+                        .HasColumnName("engine_version")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<Guid>("FacilityId")
+                        .HasColumnName("facility_id")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("MeasuredValue")
+                        .HasColumnName("measured_value")
                         .HasColumnType("numeric");
 
                     b.Property<string>("ObservationWindow")
+                        .HasColumnName("observation_window")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("ObservedAtUtc")
+                        .HasColumnName("observed_at_utc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ResourceId")
+                        .HasColumnName("resource_id")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("ResourceType")
+                        .HasColumnName("resource_type")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("SignalType")
+                        .HasColumnName("signal_type")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("SourceReferencesJson")
+                        .HasColumnName("source_references_json")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("TenantId")
+                        .HasColumnName("tenant_id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Trend")
+                        .HasColumnName("trend")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");

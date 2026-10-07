@@ -1,6 +1,6 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   evaluateNetworkAllocation,
@@ -15,7 +15,7 @@ async function resolveAuthorizedContext(permission = "factory-network.read") {
     return {
       status: "failure" as const,
       code: "permission-denied",
-      message: "Fabrika ağı görüntüleme yetkiniz yok.",
+      message: authorization.code === "authorization-denied" ? "Fabrika ağı görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 
@@ -24,7 +24,7 @@ async function resolveAuthorizedContext(permission = "factory-network.read") {
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

@@ -1,13 +1,13 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import { getFactoryCaseDetail, listFactoryCases } from "./factory-orchestration-api-client";
 
 async function resolveAuthorizedContext(permission = "factory-case.read") {
   const authorization = await denyUnlessGranted(permission);
   if (authorization.status === "failure") {
-    return { status: "failure" as const, code: "permission-denied", message: "Fabrika vakası görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, code: "permission-denied", message: authorization.code === "authorization-denied" ? "Fabrika vakası görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -15,7 +15,7 @@ async function resolveAuthorizedContext(permission = "factory-case.read") {
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

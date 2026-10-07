@@ -18,7 +18,7 @@ import {
 } from "./export-4l-api-contracts";
 import type { ExportCaseApiResult } from "./export-case-api-client";
 import {
-  resolveExportCaseRequestContext,
+  resolveExportCaseRequestContextForIncomingRequest,
   type ExportCaseRequestContext,
 } from "./export-case-request-context";
 import { parseExportRuntimeConfig } from "./export-case-runtime-config";
@@ -45,7 +45,7 @@ type ResolvedWriteContext =
       }>;
     }>;
 
-function resolveWriteContext(): ResolvedWriteContext {
+async function resolveWriteContext(): Promise< ResolvedWriteContext> {
   const configResult = parseExportRuntimeConfig();
 
   if (configResult.status === "failure") {
@@ -70,7 +70,7 @@ function resolveWriteContext(): ResolvedWriteContext {
     };
   }
 
-  const contextResult = resolveExportCaseRequestContext(configResult.config);
+  const contextResult = await resolveExportCaseRequestContextForIncomingRequest(configResult.config);
 
   if (contextResult.status === "failure") {
     return {
@@ -108,7 +108,7 @@ function mapResult<T>(
 export async function analyzeExportCaseAction(
   exportCaseId: string,
 ): Promise<ExportAiActionResult<ExportAiAnalysisWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -125,7 +125,7 @@ export async function analyzeExportCaseAction(
 export async function explainExportReadinessAction(
   exportCaseId: string,
 ): Promise<ExportAiActionResult<ExportAiAnalysisWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -139,7 +139,7 @@ export async function explainExportReadinessAction(
 export async function suggestExportNextActionsAction(
   exportCaseId: string,
 ): Promise<ExportAiActionResult<ExportAiAnalysisWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim()) {
@@ -155,7 +155,7 @@ export async function acceptExportAiRecommendationAction(
   recommendationId: string,
   input: ReviewExportAiRecommendationInput,
 ): Promise<ExportAiActionResult<ExportAiRecommendationWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !recommendationId.trim()) {
@@ -181,7 +181,7 @@ export async function rejectExportAiRecommendationAction(
   recommendationId: string,
   input: ReviewExportAiRecommendationInput,
 ): Promise<ExportAiActionResult<ExportAiRecommendationWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !recommendationId.trim()) {
@@ -207,7 +207,7 @@ export async function dismissExportAiRecommendationAction(
   recommendationId: string,
   input: ReviewExportAiRecommendationInput,
 ): Promise<ExportAiActionResult<ExportAiRecommendationWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!exportCaseId.trim() || !recommendationId.trim()) {
@@ -231,7 +231,7 @@ export async function dismissExportAiRecommendationAction(
 export async function summarizeResearchAction(
   researchCaseId: string,
 ): Promise<ExportAiActionResult<ExportAiAnalysisWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!researchCaseId.trim()) {
@@ -250,7 +250,7 @@ export async function summarizeResearchAction(
 export async function findResearchMissingSourcesAction(
   researchCaseId: string,
 ): Promise<ExportAiActionResult<ExportAiAnalysisWriteSuccess>> {
-  const resolved = resolveWriteContext();
+  const resolved = await resolveWriteContext();
   if (resolved.kind === "failure") return resolved.failure;
 
   if (!researchCaseId.trim()) {

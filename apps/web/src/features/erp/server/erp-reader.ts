@@ -8,7 +8,7 @@ import {
   listErpSyncRuns,
 } from "./erp-api-client";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import type {
   CanonicalErpCustomer,
   CanonicalErpProduct,
@@ -39,7 +39,7 @@ export async function readErpWorkspace(): Promise<ErpWorkspaceResult> {
     return { status: "failure", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure", message: contextResult.message };
   }

@@ -64,7 +64,8 @@ public sealed class RuntimeProcess : IDisposable
         IReadOnlyDictionary<string, string>? environment,
         string stdoutLogFilePath,
         string? stderrLogFilePath = null,
-        string? processName = null)
+        string? processName = null,
+        IReadOnlyCollection<string>? removeEnvironmentKeys = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(stdoutLogFilePath)!);
         var stdoutWriter = CreateLogWriter(stdoutLogFilePath);
@@ -105,6 +106,15 @@ public sealed class RuntimeProcess : IDisposable
             foreach (var pair in environment)
             {
                 startInfo.Environment[pair.Key] = pair.Value;
+            }
+        }
+
+        // Variables the child must NOT inherit from this process (e.g. the one-time bootstrap credential).
+        if (removeEnvironmentKeys is not null)
+        {
+            foreach (var key in removeEnvironmentKeys)
+            {
+                startInfo.Environment.Remove(key);
             }
         }
 

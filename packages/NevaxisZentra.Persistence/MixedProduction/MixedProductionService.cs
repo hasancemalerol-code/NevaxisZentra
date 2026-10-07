@@ -56,7 +56,7 @@ public sealed class MixedProductionService : IMixedProductionService
                 .Take(50)
                 .ToListAsync(cancellationToken);
 
-            var today = DateTimeOffset.UtcNow.Date;
+            var today = DateTime.UtcNow.Date;
             summaries.Add(new MixedProductionLineSummary(
                 line.Id,
                 line.Code,
@@ -140,7 +140,7 @@ public sealed class MixedProductionService : IMixedProductionService
                 stationEvents.Count(e => e.EventType == MixedProductionEventTypes.Reject));
         }).ToList();
 
-        var today = DateTimeOffset.UtcNow.Date;
+        var today = DateTime.UtcNow.Date;
         var summary = new MixedProductionLineSummary(
             line.Id,
             line.Code,

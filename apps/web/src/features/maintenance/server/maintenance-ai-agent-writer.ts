@@ -8,18 +8,18 @@ import {
   rejectMaintenanceAiDraft,
   updateMaintenanceAiDraft,
 } from "./maintenance-ai-agent-api-client";
-import { resolveProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import type { MaintenanceActionResult } from "./maintenance-writer";
 
-function resolveContext():
+async function resolveContext(): Promise<
   | Readonly<{ kind: "context"; context: import("../../production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
-  | Readonly<{ kind: "failure"; failure: MaintenanceActionResult }> {
+  | Readonly<{ kind: "failure"; failure: MaintenanceActionResult }>> {
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status === "failure") {
     return { kind: "failure", failure: { status: "failure", code: "configuration-error", message: configResult.message } };
   }
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { kind: "failure", failure: { status: "failure", code: contextResult.code, message: contextResult.message } };
   }
@@ -27,7 +27,7 @@ function resolveContext():
 }
 
 export async function generateMaintenanceAiDraftAction(assetReference: string): Promise<MaintenanceActionResult> {
-  const resolved = resolveContext();
+  const resolved = await resolveContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await generateMaintenanceAiDraft(resolved.context, assetReference);
   if (result.status === "failure") return { status: "failure", code: result.code, message: result.message };
@@ -42,7 +42,7 @@ export async function updateMaintenanceAiDraftAction(input: {
   priority?: string;
   requestType?: string;
 }): Promise<MaintenanceActionResult> {
-  const resolved = resolveContext();
+  const resolved = await resolveContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await updateMaintenanceAiDraft(resolved.context, input.draftId, input);
   if (result.status === "failure") return { status: "failure", code: result.code, message: result.message };
@@ -53,7 +53,7 @@ export async function approveMaintenanceAiDraftAction(input: {
   draftId: string;
   expectedVersion: number;
 }): Promise<MaintenanceActionResult> {
-  const resolved = resolveContext();
+  const resolved = await resolveContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await approveMaintenanceAiDraft(resolved.context, input.draftId, input.expectedVersion);
   if (result.status === "failure") return { status: "failure", code: result.code, message: result.message };
@@ -70,7 +70,7 @@ export async function rejectMaintenanceAiDraftAction(input: {
   expectedVersion: number;
   rejectionReason: string;
 }): Promise<MaintenanceActionResult> {
-  const resolved = resolveContext();
+  const resolved = await resolveContext();
   if (resolved.kind === "failure") return resolved.failure;
   const result = await rejectMaintenanceAiDraft(
     resolved.context,

@@ -75,10 +75,16 @@ export function resolveSaasIdentityRuntimeConfig(): SaasIdentityRuntimeConfigRes
     || (process.env.NODE_ENV === "development" ? CANONICAL_DEV_API_BASE_URL : "");
 
   if (!apiBaseUrl) {
+    // Technical detail (env var name) is logged server-side only.
+    console.error(
+      "[saas-identity-runtime-config] NEVAXIS_FACTOS_API_BASE_URL is required.",
+    );
+
     return {
       status: "failure",
       code: "configuration-error",
-      message: "NEVAXIS_FACTOS_API_BASE_URL is required.",
+      message:
+        "Bu modül şu anda yapılandırma nedeniyle kullanılamıyor. Lütfen sistem yöneticinizle iletişime geçin.",
       retryable: false,
     };
   }

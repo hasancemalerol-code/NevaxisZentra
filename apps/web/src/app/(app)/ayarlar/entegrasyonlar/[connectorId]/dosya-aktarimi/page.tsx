@@ -1,7 +1,7 @@
 import { IntegrationFileImportWorkbench } from "@/features/integration/components/integration-file-import-workbench";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 import { listIntegrationConnectors } from "@/features/integration/server/integration-api-client";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export default async function DosyaAktarimiPage({ params }: FileImportPageProps)
     return <main><p>{configResult.message}</p></main>;
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return <main><p>{contextResult.message}</p></main>;
   }

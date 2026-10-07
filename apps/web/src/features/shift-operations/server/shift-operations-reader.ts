@@ -1,6 +1,6 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   fetchCurrentShift,
@@ -13,7 +13,7 @@ import {
 async function resolveAuthorizedContext() {
   const authorization = await denyUnlessGranted("shift-workforce.read");
   if (authorization.status === "failure") {
-    return { status: "failure" as const, code: "permission-denied", message: "Vardiya görüntüleme yetkiniz yok." };
+    return { status: "failure" as const, code: "permission-denied", message: authorization.code === "authorization-denied" ? "Vardiya görüntüleme yetkiniz yok." : authorization.message };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
@@ -21,7 +21,7 @@ async function resolveAuthorizedContext() {
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

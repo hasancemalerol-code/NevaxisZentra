@@ -1,6 +1,6 @@
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
-import { resolveProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
   getSystemStatusWorkspace,
@@ -13,7 +13,7 @@ async function resolveAuthorizedContext(permission = "operability.read") {
     return {
       status: "failure" as const,
       code: "permission-denied",
-      message: "Sistem durumu görüntüleme yetkiniz yok.",
+      message: authorization.code === "authorization-denied" ? "Sistem durumu görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 
@@ -22,7 +22,7 @@ async function resolveAuthorizedContext(permission = "operability.read") {
     return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
-  const contextResult = resolveProductionOrderRequestContext(configResult.config);
+  const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
     return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }

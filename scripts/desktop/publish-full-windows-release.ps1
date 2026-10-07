@@ -47,6 +47,8 @@ $migrationsDir = Join-Path $RepositoryRoot "packages\NevaxisZentra.Persistence.M
 $nodeVersion = "22.18.0"
 $postgresVersion = "17.4-1"
 $postgresPort = 55432
+$packagedApiPort = 5000
+$packagedApiBaseUrl = "http://127.0.0.1:$packagedApiPort"
 
 function Write-Step([string]$Message) {
     Write-Host ""
@@ -54,8 +56,11 @@ function Write-Step([string]$Message) {
 }
 
 function Get-LatestMigrationId {
-    $registered = Get-ChildItem $migrationsDir -Filter "*.Designer.cs" |
-        ForEach-Object { $_.BaseName -replace '\.Designer$','' }
+    # Registered = a [Migration("<id>")] attribute exists in the Designer file or inline.
+    $registered = Get-ChildItem $migrationsDir -Filter "*.cs" |
+        Where-Object { $_.Name -notmatch 'Snapshot' -and (Select-String -LiteralPath $_.FullName -Pattern '\[Migration\("' -Quiet) } |
+        ForEach-Object { $_.BaseName -replace '\.Designer$','' } |
+        Select-Object -Unique
     Get-ChildItem $migrationsDir -Filter "*.cs" |
         Where-Object { $_.Name -notmatch 'Designer|Snapshot' -and $registered -contains $_.BaseName } |
         Sort-Object Name -Descending |
@@ -111,14 +116,26 @@ foreach ($dir in $dirs) { New-Item -ItemType Directory -Force -Path $dir | Out-N
 if (-not $SkipWebBuild) {
     Write-Step "Web production build"
     Push-Location $RepositoryRoot
+    # next.config.ts bakes the /api/* rewrites at build time from this variable. Supply it
+    # explicitly (never rely on a developer shell) so the packaged web server proxies to the API.
+    $previousApiBaseUrl = $env:NEVAXIS_FACTOS_API_BASE_URL
+    $env:NEVAXIS_FACTOS_API_BASE_URL = $packagedApiBaseUrl
     try {
         & pnpm --filter @nevaxiszentra/web typecheck
         if ($LASTEXITCODE -ne 0) { throw "Web typecheck failed." }
         & pnpm --filter @nevaxiszentra/web build
         if ($LASTEXITCODE -ne 0) { throw "Web build failed." }
     }
-    finally { Pop-Location }
+    finally {
+        $env:NEVAXIS_FACTOS_API_BASE_URL = $previousApiBaseUrl
+        Pop-Location
+    }
 }
+
+# Gate: fail early (before the heavy packaging steps) when the build has no API rewrites.
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "scripts\release\validate-web-api-rewrites.ps1") `
+    -WebAppRoot $webDir -ApiBaseUrl $packagedApiBaseUrl
+if ($LASTEXITCODE -ne 0) { throw "Web API rewrite validation failed for the web build." }
 
 Write-Step "Copy Next.js standalone web"
 $standaloneSrc = Join-Path $webDir ".next\standalone"
@@ -139,16 +156,33 @@ if (Test-Path $publicSrc) {
     Invoke-RobocopyDirectory -Source $publicSrc -Destination (Join-Path $webAppDest "public")
 }
 
+# PRODUCTION builds compile out demo credential literals (see Directory.Build.props).
+$productionBuildProperty = if ($DeploymentChannel -eq "PRODUCTION") { "/p:ZentraProductionBuild=true" } else { "/p:ZentraProductionBuild=false" }
+
 Write-Step "Publish API (self-contained Release)"
-& dotnet publish $apiProject -c Release -r win-x64 --self-contained true /p:PublishTrimmed=false -o (Join-Path $stagingRoot "api")
+& dotnet publish $apiProject -c Release -r win-x64 --self-contained true /p:PublishTrimmed=false $productionBuildProperty -o (Join-Path $stagingRoot "api")
 if ($LASTEXITCODE -ne 0) { throw "API publish failed." }
+# Development settings carry a development database credential and must never ship as-is.
+# PRODUCTION: removed. Other channels keep only the non-secret sections (pilot seed switches);
+# the Persistence section (host/port/credential) is stripped and supplied by machine config.
+$packagedDevSettings = Join-Path $stagingRoot "api\appsettings.Development.json"
+if (Test-Path -LiteralPath $packagedDevSettings) {
+    if ($DeploymentChannel -eq "PRODUCTION") {
+        Remove-Item -LiteralPath $packagedDevSettings -Force
+    }
+    else {
+        $devSettings = Get-Content -LiteralPath $packagedDevSettings -Raw | ConvertFrom-Json
+        $devSettings.PSObject.Properties.Remove("Persistence")
+        $devSettings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $packagedDevSettings -Encoding UTF8
+    }
+}
 
 Write-Step "Publish Desktop (self-contained Release)"
-& dotnet publish $desktopProject -c Release -r win-x64 --self-contained true /p:DesktopDevelopmentDistribution=true /p:DesktopIncludeDebugSymbolsInPublish=false -o (Join-Path $stagingRoot "desktop")
+& dotnet publish $desktopProject -c Release -r win-x64 --self-contained true /p:DesktopDevelopmentDistribution=true /p:DesktopIncludeDebugSymbolsInPublish=false $productionBuildProperty -o (Join-Path $stagingRoot "desktop")
 if ($LASTEXITCODE -ne 0) { throw "Desktop publish failed." }
 
 Write-Step "Publish DatabaseTool (self-contained Release)"
-& dotnet publish $databaseToolProject -c Release -r win-x64 --self-contained true -o (Join-Path $stagingRoot "tools")
+& dotnet publish $databaseToolProject -c Release -r win-x64 --self-contained true $productionBuildProperty -o (Join-Path $stagingRoot "tools")
 if ($LASTEXITCODE -ne 0) { throw "DatabaseTool publish failed." }
 
 Write-Step "Bundle Node.js runtime"
@@ -178,7 +212,19 @@ if (-not $pgRootSrc) { throw "PostgreSQL pgsql root directory not found in archi
 Invoke-RobocopyDirectory -Source $pgRootSrc.FullName -Destination (Join-Path $stagingRoot "postgres")
 
 Write-Step "Copy runtime config"
-Copy-Item -Path (Join-Path $packagingConfig "*") -Destination (Join-Path $stagingRoot "config") -Force
+Get-ChildItem -LiteralPath $packagingConfig -File |
+    Where-Object { $_.Name -ne "release-demo-secrets.env" -and $_.Name -notlike "*.example.env" } |
+    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $stagingRoot "config") -Force }
+if ($DeploymentChannel -ne "PRODUCTION") {
+    # Non-production channels may seed the application-level demo identity only. Database
+    # credentials are generated per machine and are never taken from (or shipped in) this file.
+    $demoSecretsSource = Join-Path $packagingConfig "release-demo-secrets.env"
+    if (Test-Path -LiteralPath $demoSecretsSource) {
+        Get-Content -LiteralPath $demoSecretsSource |
+            Where-Object { $_ -match '^\s*(#|DevelopmentSaasIdentity__)' } |
+            Set-Content -LiteralPath (Join-Path $stagingRoot "config\release-demo-secrets.env") -Encoding ASCII
+    }
+}
 Set-Content -Path (Join-Path $stagingRoot "migrations\expected-schema-version.txt") -Value $latestMigration -Encoding UTF8
 
 $customerTemplateSrc = Join-Path $RepositoryRoot "release\customer-import-templates"
@@ -203,7 +249,7 @@ if (-not $SkipDatabaseTemplate) {
     if ($LASTEXITCODE -ne 0) { throw "Database template build failed." }
 
     $stagingValidator = Join-Path $RepositoryRoot "scripts\release\validate-release-staging.ps1"
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $stagingValidator -StagingRoot $stagingRoot -RepositoryRoot $RepositoryRoot
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $stagingValidator -StagingRoot $stagingRoot -RepositoryRoot $RepositoryRoot -DeploymentChannel $DeploymentChannel -ApiBaseUrl $packagedApiBaseUrl
     if ($LASTEXITCODE -ne 0) { throw "Release staging validation failed." }
 }
 elseif (-not $SkipInstaller) {
