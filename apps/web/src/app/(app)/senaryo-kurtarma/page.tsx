@@ -1,5 +1,6 @@
 import { ShieldAlert } from "lucide-react";
 
+import { ScenarioRecoveryCreatePanel } from "@/features/scenario-recovery/components/scenario-recovery-create-panel";
 import { ScenarioRecoveryWorkspaceView } from "@/features/scenario-recovery/components/scenario-recovery-workspace-view";
 import { readScenarioRecoveryPage } from "@/features/scenario-recovery/server/scenario-recovery-reader";
 import "@/features/scenario-recovery/scenario-recovery-workspace.css";
@@ -46,6 +47,21 @@ export default async function ScenarioRecoveryPage({ searchParams }: ScenarioRec
             <p>{result.message}</p>
           </div>
         </div>
+      </main>
+    );
+  }
+
+  if (result.status === "ready") {
+    return (
+      <main className="commint-page">
+        <ScenarioRecoveryCreatePanel
+          lineId={result.lineId}
+          entryPoint={result.entryPoint}
+          orderReference={result.orderReference}
+          constraintStationCode={result.constraintStationCode}
+          canSimulate={result.canSimulate}
+          history={result.history}
+        />
       </main>
     );
   }

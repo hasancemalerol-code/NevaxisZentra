@@ -1,3 +1,4 @@
+import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./teams-server-boundary";
 
 import { fetchTrustedApi } from "@/features/saas-identity/server/authenticated-server-fetch";
@@ -12,6 +13,7 @@ export type TeamsApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "invalid-request"
     | "not-found"
     | "idempotency-conflict";
@@ -235,9 +237,9 @@ function buildSessionPath(
   return `${path}?${params.toString()}`;
 }
 
-function mapFailureStatus(status: number, _payload: unknown): TeamsApiFailure["code"] {
+function mapFailureStatus(status: number, payload: unknown): TeamsApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (status === 404) return "not-found";
   if (status === 409) return "idempotency-conflict";
   return "source-unavailable";

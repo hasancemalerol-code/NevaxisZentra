@@ -62,7 +62,7 @@ import {
 } from "./energy-api-client";
 import { resolveEnergyRequestContext } from "./energy-request-context";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -1055,7 +1055,7 @@ export async function readEnergyWorkspace(): Promise<EnergyWorkspaceResult> {
   const mappedTargets = targets.map(mapTarget);
   const mappedAssessments = rawAssessments.map(mapAssessment);
 
-  const effectiveAccess = await fetchCurrentEffectiveAccess();
+  const effectiveAccess = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(effectiveAccess, "energy.manage");
 
   const latestFreshnessUtc =

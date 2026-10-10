@@ -239,7 +239,18 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
         Guid facilityId, Guid tenantId, Guid lineId, string subjectId, CancellationToken cancellationToken,
         string? correlationKeyOverride = null)
     {
-        var overview = await throughputIntelligence.GetLineOverviewAsync(facilityId, lineId, "recent", null, null, cancellationToken);
+        ThroughputIntelligenceOverview overview;
+        try
+        {
+            overview = await throughputIntelligence.GetLineOverviewAsync(facilityId, lineId, "recent", null, null, cancellationToken);
+        }
+        catch (ThroughputIntelligenceException ex) when (ex.FailureCode == ThroughputIntelligenceFailureCodes.NotFound)
+        {
+            // Record absence is proven (the line lookup returned nothing): classified not-found, not an unhandled 500.
+            // Any other failure keeps propagating so real runtime errors are never disguised as 404.
+            throw new ThroughputOptimizerException(ThroughputOptimizerFailureCodes.NotFound, "Line not found.");
+        }
+
         var observation = ThroughputObserveEngine.Observe(overview)
             ?? throw new ThroughputOptimizerException(ThroughputOptimizerFailureCodes.GapNotDetected, "No meaningful throughput gap detected.");
 

@@ -1,14 +1,10 @@
-import { forbidden } from "next/navigation";
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { readEdgeWorkspace } from "@/features/edge/server/edge-reader";
 import { EdgeWorkspaceView } from "@/features/edge/components/edge-workspace-view";
 
 export default async function MakinelerPage() {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "edge.read")) {
-    forbidden();
-  }
+  await forbidUnlessGranted("edge.read");
 
   const data = await readEdgeWorkspace();
   return <EdgeWorkspaceView {...data} />;

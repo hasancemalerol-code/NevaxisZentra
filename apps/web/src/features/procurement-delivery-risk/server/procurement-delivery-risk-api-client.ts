@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "../../erp/server/erp-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -53,7 +54,8 @@ async function getJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "forbidden", message: "Bu işlem için yetkiniz yok.", retryable: false };
+      const refusal = failureForRefusal(await classifyFailedResponse(response), "Bu işlem için yetkiniz yok.");
+      return { ...refusal, code: refusal.code === "permission-denied" ? "forbidden" : refusal.code };
     }
     if (!response.ok) {
       return { status: "failure", message: `API isteği başarısız (${response.status}).`, retryable: response.status >= 500 };
@@ -113,7 +115,8 @@ export async function evaluateProcurementDeliveryRisk(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "forbidden", message: "Değerlendirme yetkisi yok.", retryable: false };
+      const refusal = failureForRefusal(await classifyFailedResponse(response), "Değerlendirme yetkisi yok.");
+      return { ...refusal, code: refusal.code === "permission-denied" ? "forbidden" : refusal.code };
     }
     if (response.status === 409) {
       return { status: "failure", code: "conflict", message: "Idempotency anahtarı uyumsuz.", retryable: false };
@@ -172,7 +175,8 @@ export async function createProcurementDeliveryRiskTaskDraft(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "forbidden", message: "Görev taslağı oluşturma yetkisi yok.", retryable: false };
+      const refusal = failureForRefusal(await classifyFailedResponse(response), "Görev taslağı oluşturma yetkisi yok.");
+      return { ...refusal, code: refusal.code === "permission-denied" ? "forbidden" : refusal.code };
     }
     if (!response.ok) {
       return { status: "failure", message: `Görev taslağı oluşturma başarısız (${response.status}).`, retryable: response.status >= 500 };
@@ -208,7 +212,8 @@ export async function transitionProcurementDeliveryRiskFollowUp(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "forbidden", message: "Takip güncelleme yetkisi yok.", retryable: false };
+      const refusal = failureForRefusal(await classifyFailedResponse(response), "Takip güncelleme yetkisi yok.");
+      return { ...refusal, code: refusal.code === "permission-denied" ? "forbidden" : refusal.code };
     }
     if (response.status === 409) {
       return { status: "failure", code: "conflict", message: "Takip durumu geçişi uyumsuz.", retryable: false };

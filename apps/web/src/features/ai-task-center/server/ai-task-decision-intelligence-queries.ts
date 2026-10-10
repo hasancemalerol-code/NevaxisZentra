@@ -13,7 +13,7 @@ import {
 } from "../presentation/ai-task-decision-intelligence-presentation";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -28,7 +28,7 @@ export type AiTaskDecisionWorkspaceResult =
   | ReadFailure;
 
 async function resolveCapabilities(): Promise<AiTaskDecisionCapabilities> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   return {
     canRead: hasGrantedPermission(access, "ai-task.ai.read") || hasGrantedPermission(access, "ai-task.read"),
     canAnalyze: hasGrantedPermission(access, "ai-task.ai.analyze"),

@@ -1,7 +1,7 @@
 import { CalendarClock } from "lucide-react";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -16,7 +16,7 @@ import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maint
 
 export default async function MaintenancePlanningPage() {
   await forbidUnlessGranted("maintenance.read");
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
 
   const result = await readMaintenancePlanning();
 

@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 
 import {
   PageContent,
@@ -6,11 +5,7 @@ import {
   Section,
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
-import {
-  fetchCurrentEffectiveAccess,
-  hasGrantedPermission,
-} from "@/features/admin-access/server/admin-access-effective-access";
-import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { forbidUnlessGranted, notFoundUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
 import { TeamsHandoverForm } from "@/features/teams/components/teams-handover-form";
 import { isHandoverChannelType } from "@/features/teams/domain/teams-constants";
@@ -31,10 +26,7 @@ export default async function TeamsHandoverCreatePage({
   await forbidUnlessGranted("teams.handover.create");
   await forbidUnlessGranted("teams.handover.read");
 
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "teams.handover.create")) {
-    notFound();
-  }
+  await notFoundUnlessGranted("teams.handover.create");
 
   const params = await searchParams;
   const workspace = await readTeamsWorkspace(params.channel ?? null);

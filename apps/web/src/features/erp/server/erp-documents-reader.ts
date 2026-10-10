@@ -9,10 +9,7 @@ import type {
   ErpDocumentsWorkspaceSnapshot,
 } from "../domain/erp";
 
-type ReadFailure = Readonly<{
-  status: "failure";
-  message: string;
-}>;
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export type ErpDocumentsResult =
   | Readonly<{
@@ -54,7 +51,7 @@ export async function readErpDocuments(): Promise<ErpDocumentsResult> {
 
   const documentsResult = await listErpDocuments(contextResult.context);
   if (documentsResult.status === "failure") {
-    return { status: "failure", message: documentsResult.message };
+    return { status: "failure", message: documentsResult.message, code: documentsResult.code };
   }
 
   return {
@@ -77,7 +74,7 @@ export async function readErpDocumentDetail(documentId: string): Promise<ErpDocu
 
   const documentResult = await getErpDocument(contextResult.context, documentId);
   if (documentResult.status === "failure") {
-    return { status: "failure", message: documentResult.message };
+    return { status: "failure", message: documentResult.message, code: documentResult.code };
   }
 
   return { status: "success", document: documentResult.value };

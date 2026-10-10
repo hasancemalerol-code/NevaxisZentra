@@ -40,8 +40,8 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
         <div role="alert" className="quality-error-panel">
           <ShieldCheck aria-hidden="true" />
           <div>
-            <h3>Özet yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "Özet yüklenemedi"}</h3>
+            <p>{result.code === "not-found" ? "İstenen kontrol özeti bulunamadı." : result.message}</p>
           </div>
         </div>
       </QualityPageShell>

@@ -1,3 +1,4 @@
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
 import { ShieldAlert } from "lucide-react";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -17,7 +18,7 @@ export default async function FactoryDecisionDetailPage({
         <div role="alert" className="commint-error-banner" data-testid="factory-decision-forbidden">
           <ShieldAlert aria-hidden="true" />
           <div>
-            <h3>Bu karara erişim yetkiniz yok</h3>
+            <h3>{authorization.code === "authorization-denied" ? "Bu karara erişim yetkiniz yok" : "Yetki doğrulanamadı"}</h3>
             <p>{authorization.message}</p>
           </div>
         </div>
@@ -33,8 +34,8 @@ export default async function FactoryDecisionDetailPage({
         <div role="alert" className="commint-error-banner">
           <ShieldAlert aria-hidden="true" />
           <div>
-            <h3>Karar yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Kayıt bulunamadı" : "Karar yüklenemedi"}</h3>
+            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "İstenen karar kaydı bulunamadı." : result.message}</p>
           </div>
         </div>
       </main>

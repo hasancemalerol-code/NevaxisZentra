@@ -1,10 +1,13 @@
 import "./production-plan-server-boundary";
 
+import { refusalCode, SUBSCRIPTION_REQUIRED_MESSAGE } from "@/lib/api/api-failure-classifier";
+
 export type ProductionPlanApiFailureCode =
   | "configuration-error"
   | "unauthenticated"
   | "invalid-request"
   | "permission-denied"
+  | "subscription-required"
   | "not-found"
   | "source-unavailable"
   | "invalid-response"
@@ -103,17 +106,31 @@ export function mapHttpStatusToProductionPlanApiFailure(
         false,
       );
 
-    case 403:
+    case 403: {
+      // The backend failure code is authoritative: a licence or session cause is not "permission denied".
+      const refusal = refusalCode(statusCode, { failureCode });
+      if (refusal === "subscription-required") {
+        return createFailure(
+          refusal,
+          SUBSCRIPTION_REQUIRED_MESSAGE,
+          false,
+        );
+      }
+
+      if (refusal === "unauthenticated") {
+        return createFailure(
+          refusal,
+          "Authentication is required.",
+          false,
+        );
+      }
+
       return createFailure(
-        failureCode ===
-          "permission-denied" ||
-          failureCode ===
-            "facility-access-denied"
-          ? "permission-denied"
-          : "permission-denied",
+        "permission-denied",
         "Production planning access is denied.",
         false,
       );
+    }
 
     case 404:
       return createFailure(

@@ -1,3 +1,4 @@
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Factory, Wrench } from "lucide-react";
@@ -56,8 +57,8 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
         <div role="alert" className="maintenance-error-panel">
           <Wrench aria-hidden="true" />
           <div>
-            <h3>Varlık geçmişi yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Kayıt bulunamadı" : "Varlık geçmişi yüklenemedi"}</h3>
+            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "İstenen varlık kaydı bulunamadı." : result.message}</p>
           </div>
         </div>
       </main>

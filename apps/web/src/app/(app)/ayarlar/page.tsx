@@ -14,8 +14,8 @@ export default async function AyarlarPage() {
   if (access.status === "failure") {
     return (
       <main className="saas-admin-page">
-        <h1>Erişim reddedildi</h1>
-        <p>Bu sayfayı görüntüleme yetkiniz yok.</p>
+        <h1>{access.code === "authorization-denied" ? "Erişim reddedildi" : "Yetki doğrulanamadı"}</h1>
+        <p>{access.code === "authorization-denied" ? "Bu sayfayı görüntüleme yetkiniz yok." : "Yetki doğrulaması şu anda yapılamıyor."}</p>
       </main>
     );
   }

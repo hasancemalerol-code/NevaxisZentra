@@ -1,3 +1,4 @@
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
 import { MixedProductionLineDetailView } from "@/features/mixed-production/components/mixed-production-line-detail-view";
 import { loadMixedProductionLineWorkspace } from "@/features/mixed-production/server/mixed-production-reader";
 import { loadWorkerContextForLine } from "@/features/context-knowledge/server/context-knowledge-reader";
@@ -19,8 +20,8 @@ export default async function MixedProductionLineDetailPage({ params }: MixedPro
     return (
       <main className="production-execution-page">
         <div role="alert" className="state-panel error-state">
-          <h3>Hat detayı yüklenemedi</h3>
-          <p>{result.message}</p>
+          <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Kayıt bulunamadı" : "Hat detayı yüklenemedi"}</h3>
+          <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "İstenen üretim hattı bulunamadı." : result.message}</p>
         </div>
       </main>
     );

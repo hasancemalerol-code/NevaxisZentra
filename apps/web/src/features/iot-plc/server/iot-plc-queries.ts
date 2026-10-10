@@ -60,7 +60,7 @@ import {
 } from "./iot-plc-api-client";
 import { resolveIotPlcRequestContext } from "./iot-plc-request-context";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -558,7 +558,7 @@ export async function readIotPlcWorkspace(): Promise<IotPlcWorkspaceResult> {
   }
 
   const context = contextResult.context;
-  const effectiveAccess = await fetchCurrentEffectiveAccess();
+  const effectiveAccess = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(effectiveAccess, "iot-plc.manage");
   const evaluationTimeMs = Date.now();
   const partialErrors: string[] = [];

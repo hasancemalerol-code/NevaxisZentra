@@ -9,10 +9,7 @@ import type {
   ErpProductionWorkspaceSnapshot,
 } from "../domain/erp";
 
-type ReadFailure = Readonly<{
-  status: "failure";
-  message: string;
-}>;
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export type ErpProductionOrdersResult =
   | Readonly<{
@@ -60,7 +57,7 @@ export async function readErpProductionOrders(): Promise<ErpProductionOrdersResu
 
   const productionOrdersResult = await listErpProductionOrders(contextResult.context);
   if (productionOrdersResult.status === "failure") {
-    return { status: "failure", message: productionOrdersResult.message };
+    return { status: "failure", message: productionOrdersResult.message, code: productionOrdersResult.code };
   }
 
   return {
@@ -88,7 +85,7 @@ export async function readErpProductionOrderDetail(
     productionOrderId,
   );
   if (productionOrderResult.status === "failure") {
-    return { status: "failure", message: productionOrderResult.message };
+    return { status: "failure", message: productionOrderResult.message, code: productionOrderResult.code };
   }
 
   return { status: "success", productionOrder: productionOrderResult.value };

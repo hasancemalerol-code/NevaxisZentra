@@ -1300,110 +1300,119 @@ public sealed class ProductionOperationsRepository(
 
         try
         {
-            var order = await dbContext.ProductionOrders
-                .AsNoTracking()
-                .SingleOrDefaultAsync(
-                    o => o.TenantId == context.TenantId
-                        && o.FacilityId == context.FacilityId
-                        && o.Id == productionOrderId,
-                    cancellationToken);
+            // Reads must run inside the tenant database session (RLS tenant context); without it PostgreSQL rejects the
+            // tenant-scoped query and every order, existing or not, answered 503.
+            return await tenantDatabaseSession.ExecuteReadAsync(
+                async ct =>
+                {
+                    var order = await dbContext.ProductionOrders
+                        .AsNoTracking()
+                        .SingleOrDefaultAsync(
+                            o => o.TenantId == context.TenantId
+                                && o.FacilityId == context.FacilityId
+                                && o.Id == productionOrderId,
+                            ct);
 
-            if (order is null)
-            {
-                return ProductionHealthSummaryResult.Fail(
-                    ProductionOrderFailureCodes.NotFound,
-                    "Production order was not found.");
-            }
+                    if (order is null)
+                    {
+                        return ProductionHealthSummaryResult.Fail(
+                            ProductionOrderFailureCodes.NotFound,
+                            "Production order was not found.");
+                    }
 
-            var now = DateTimeOffset.UtcNow;
+                    var now = DateTimeOffset.UtcNow;
 
-            // Active sessions
-            var activeDowntime = await dbContext.ProductionDowntimes
-                .AsNoTracking()
-                .Where(d => d.TenantId == context.TenantId
-                    && d.ProductionOrderId == productionOrderId
-                    && d.EndedAtUtc == null)
-                .Select(d => new { d.Id, d.StartedAtUtc })
-                .FirstOrDefaultAsync(cancellationToken);
+                    // Active sessions
+                    var activeDowntime = await dbContext.ProductionDowntimes
+                        .AsNoTracking()
+                        .Where(d => d.TenantId == context.TenantId
+                            && d.ProductionOrderId == productionOrderId
+                            && d.EndedAtUtc == null)
+                        .Select(d => new { d.Id, d.StartedAtUtc })
+                        .FirstOrDefaultAsync(ct);
 
-            var activeSetup = await dbContext.ProductionSetupSessions
-                .AsNoTracking()
-                .Where(s => s.TenantId == context.TenantId
-                    && s.ProductionOrderId == productionOrderId
-                    && s.CompletedAtUtc == null)
-                .Select(s => new { s.Id, s.StartedAtUtc })
-                .FirstOrDefaultAsync(cancellationToken);
+                    var activeSetup = await dbContext.ProductionSetupSessions
+                        .AsNoTracking()
+                        .Where(s => s.TenantId == context.TenantId
+                            && s.ProductionOrderId == productionOrderId
+                            && s.CompletedAtUtc == null)
+                        .Select(s => new { s.Id, s.StartedAtUtc })
+                        .FirstOrDefaultAsync(ct);
 
-            // Exceptions
-            var exceptionCounts = await dbContext.ProductionExecutionExceptions
-                .Where(e => e.TenantId == context.TenantId
-                    && e.ProductionOrderId == productionOrderId
-                    && ProductionExceptionStatuses.Unresolved.Contains(e.Status))
-                .GroupBy(e => e.Severity)
-                .Select(g => new { Severity = g.Key, Count = g.Count() })
-                .ToListAsync(cancellationToken);
+                    // Exceptions
+                    // EF cannot translate Contains over an IReadOnlySet; a plain array parameter is translated to IN/ANY.
+                    var unresolvedStatuses = ProductionExceptionStatuses.Unresolved.ToArray();
+                    var exceptionCounts = await dbContext.ProductionExecutionExceptions
+                        .Where(e => e.TenantId == context.TenantId
+                            && e.ProductionOrderId == productionOrderId
+                            && unresolvedStatuses.Contains(e.Status))
+                        .GroupBy(e => e.Severity)
+                        .Select(g => new { Severity = g.Key, Count = g.Count() })
+                        .ToListAsync(ct);
 
-            var openExceptionCount = exceptionCounts.Sum(g => g.Count);
-            var criticalExceptionCount = exceptionCounts
-                .Where(g => g.Severity == ProductionExceptionSeverities.Critical)
-                .Sum(g => g.Count);
+                    var openExceptionCount = exceptionCounts.Sum(g => g.Count);
+                    var criticalExceptionCount = exceptionCounts
+                        .Where(g => g.Severity == ProductionExceptionSeverities.Critical)
+                        .Sum(g => g.Count);
 
-            // Stale detection (read-time deterministic)
-            var downtimeIsStale = activeDowntime is not null
-                && (now - activeDowntime.StartedAtUtc).TotalMinutes > options.StaleDowntimeThresholdMinutes;
+                    // Stale detection (read-time deterministic)
+                    var downtimeIsStale = activeDowntime is not null
+                        && (now - activeDowntime.StartedAtUtc).TotalMinutes > options.StaleDowntimeThresholdMinutes;
 
-            var setupIsStale = activeSetup is not null
-                && (now - activeSetup.StartedAtUtc).TotalMinutes > options.StaleSetupThresholdMinutes;
+                    var setupIsStale = activeSetup is not null
+                        && (now - activeSetup.StartedAtUtc).TotalMinutes > options.StaleSetupThresholdMinutes;
 
-            // Schedule overrun
-            var scheduleOverrun = order.PlannedEndAtUtc < now
-                && order.Status != ProductionOrderStatus.Completed;
+                    // Schedule overrun
+                    var scheduleOverrun = order.PlannedEndAtUtc < now
+                        && order.Status != ProductionOrderStatus.Completed;
 
-            // Quantity progress
-            decimal? quantityProgress = order.PlannedQuantity.HasValue && order.PlannedQuantity.Value > 0
-                ? Math.Min(order.GoodQuantity / order.PlannedQuantity.Value * 100m, 100m)
-                : null;
+                    // Quantity progress
+                    decimal? quantityProgress = order.PlannedQuantity.HasValue && order.PlannedQuantity.Value > 0
+                        ? Math.Min(order.GoodQuantity / order.PlannedQuantity.Value * 100m, 100m)
+                        : null;
 
-            // Last operational activity
-            var lastActivity = new[] {
-                order.LastProductionEntryAtUtc,
-                order.LastCycleAtUtc,
-                order.ActualStartAtUtc,
-            }
-            .Where(t => t.HasValue)
-            .Select(t => t!.Value)
-            .DefaultIfEmpty()
-            .Max();
+                    // Last operational activity
+                    var lastActivity = new[] {
+                        order.LastProductionEntryAtUtc,
+                        order.LastCycleAtUtc,
+                        order.ActualStartAtUtc,
+                    }
+                    .Where(t => t.HasValue)
+                    .Select(t => t!.Value)
+                    .DefaultIfEmpty()
+                    .Max();
 
-            DateTimeOffset? lastActivityUtc = lastActivity == default ? null : lastActivity;
+                    DateTimeOffset? lastActivityUtc = lastActivity == default ? null : lastActivity;
 
-            // Attention signals
-            var requiresAttention = openExceptionCount > 0
-                || criticalExceptionCount > 0
-                || downtimeIsStale
-                || setupIsStale
-                || scheduleOverrun;
+                    // Attention signals
+                    var requiresAttention = openExceptionCount > 0
+                        || criticalExceptionCount > 0
+                        || downtimeIsStale
+                        || setupIsStale
+                        || scheduleOverrun;
 
-            var healthStatus = criticalExceptionCount > 0
-                ? "critical"
-                : requiresAttention
-                    ? "attention"
-                    : "normal";
+                    var healthStatus = criticalExceptionCount > 0
+                        ? "critical"
+                        : requiresAttention
+                            ? "attention"
+                            : "normal";
 
-            var summary = new ProductionExecutionHealthSummary(
-                Status: healthStatus,
-                OpenExceptionCount: openExceptionCount,
-                CriticalExceptionCount: criticalExceptionCount,
-                HasActiveDowntime: activeDowntime is not null,
-                DowntimeIsStale: downtimeIsStale,
-                HasActiveSetup: activeSetup is not null,
-                SetupIsStale: setupIsStale,
-                QuantityProgress: quantityProgress,
-                ScheduleOverrun: scheduleOverrun,
-                LastOperationalActivityAtUtc: lastActivityUtc,
-                RequiresAttention: requiresAttention);
+                    var summary = new ProductionExecutionHealthSummary(
+                        Status: healthStatus,
+                        OpenExceptionCount: openExceptionCount,
+                        CriticalExceptionCount: criticalExceptionCount,
+                        HasActiveDowntime: activeDowntime is not null,
+                        DowntimeIsStale: downtimeIsStale,
+                        HasActiveSetup: activeSetup is not null,
+                        SetupIsStale: setupIsStale,
+                        QuantityProgress: quantityProgress,
+                        ScheduleOverrun: scheduleOverrun,
+                        LastOperationalActivityAtUtc: lastActivityUtc,
+                        RequiresAttention: requiresAttention);
 
-            return ProductionHealthSummaryResult.Success(summary);
+                    return ProductionHealthSummaryResult.Success(summary);
+                },
+                cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

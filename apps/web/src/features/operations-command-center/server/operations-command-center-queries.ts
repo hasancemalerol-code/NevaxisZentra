@@ -21,7 +21,7 @@ import type {
   OperationsCommandCenterWorkspacePayload,
 } from "../types/operations-command-center-types";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
   type AdminAccessEffectiveAccess,
 } from "../../admin-access/server/admin-access-effective-access";
@@ -728,7 +728,7 @@ export async function readOperationsCommandCenterWorkspace(
     state: "",
   },
 ): Promise<OperationsCommandCenterResult> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const subscriptionResult = await fetchCurrentTenantSubscription();
   const subscription = subscriptionResult.status === "success" ? subscriptionResult.value : null;
 

@@ -1,3 +1,4 @@
+import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./commercial-intelligence-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -87,7 +88,7 @@ function buildUrl(
 
 function mapFailureStatus(status: number, payload: unknown): CommercialIntelligenceApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (status === 404) return "not-found";
   if (status === 409) {
     const code = typeof payload === "object" && payload && "failureCode" in payload

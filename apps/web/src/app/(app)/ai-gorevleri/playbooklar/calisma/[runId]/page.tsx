@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/states";
 import { AiTaskPlaybookRunDetailClient } from "@/features/ai-task-center/components/ai-task-playbook-run-detail-client";
 import { buildAiTaskPlaybookLibraryHref } from "@/features/ai-task-center/presentation/ai-task-playbook-library-navigation";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { readAiTaskPlaybookRunDetail } from "@/features/ai-task-center/server/ai-task-playbook-queries";
@@ -42,7 +42,7 @@ export default async function AiTaskPlaybookRunPage({
     );
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const capabilities = {
     canRead: access ? hasGrantedPermission(access, "ai-task.playbook.read") : false,
     canManage: access ? hasGrantedPermission(access, "ai-task.playbook.manage") : false,

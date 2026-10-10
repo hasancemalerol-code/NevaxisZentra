@@ -139,7 +139,13 @@ export async function fetchCurrentEffectiveAccessResult(): Promise<AdminAccessEf
   }
 }
 
-export async function fetchCurrentEffectiveAccess(): Promise<AdminAccessEffectiveAccess | null> {
+/**
+ * UI capability probe: resolves to the effective access, or null when it cannot be established (denied, no session or
+ * service unavailable are NOT distinguished). Null therefore only means "unknown, hide or disable the control" and must
+ * never be turned into a customer-facing "permission denied"; gates use denyUnlessGranted / forbidUnlessGranted /
+ * notFoundUnlessGranted / gateAccess, which classify the failure.
+ */
+export async function fetchEffectiveAccessCapabilities(): Promise<AdminAccessEffectiveAccess | null> {
   const result = await fetchCurrentEffectiveAccessResult();
   return result.status === "ok" ? result.access : null;
 }

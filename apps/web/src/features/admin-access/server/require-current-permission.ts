@@ -1,8 +1,9 @@
-import { forbidden } from "next/navigation";
+import { forbidden, notFound } from "next/navigation";
 
 import {
   fetchCurrentEffectiveAccessResult,
   hasGrantedPermission,
+  type AdminAccessEffectiveAccess,
   type AdminAccessEffectiveAccessResult,
 } from "./admin-access-effective-access";
 
@@ -65,4 +66,44 @@ export async function denyUnlessAnyGranted(
   permissionKeys: readonly string[],
 ): Promise<PermissionCheckResult> {
   return evaluate(await fetchCurrentEffectiveAccessResult(), permissionKeys);
+}
+
+export type AccessGateResult =
+  | Readonly<{ status: "granted"; access: AdminAccessEffectiveAccess }>
+  | Extract<PermissionCheckResult, { status: "failure" }>;
+
+/**
+ * Gate for a loader that needs the effective-access object afterwards (to derive capability flags). Grants when ANY of
+ * the keys is held; otherwise reports why: a real denial, a missing session, or an unavailable access service.
+ */
+export async function gateAccess(permissionKeys: readonly string[]): Promise<AccessGateResult> {
+  const result = await fetchCurrentEffectiveAccessResult();
+  const check = evaluate(result, permissionKeys);
+  if (check.status === "failure") {
+    return check;
+  }
+
+  return { status: "granted", access: (result as Extract<AdminAccessEffectiveAccessResult, { status: "ok" }>).access };
+}
+
+/** The customer-facing message for a failed gate: the caller's denial wording only for a real denial. */
+export function accessFailureMessage(
+  failure: Extract<PermissionCheckResult, { status: "failure" }>,
+  deniedMessage: string,
+): string {
+  return failure.code === "authorization-denied" ? deniedMessage : failure.message;
+}
+
+/** For pages that answer 404 (not 403) to callers without the permission; runtime failures still surface as errors. */
+export async function notFoundUnlessGranted(permissionKey: string): Promise<void> {
+  const check = evaluate(await fetchCurrentEffectiveAccessResult(), [permissionKey]);
+  if (check.status === "granted") {
+    return;
+  }
+
+  if (check.code === "authorization-unavailable") {
+    throw new Error(check.message);
+  }
+
+  notFound();
 }

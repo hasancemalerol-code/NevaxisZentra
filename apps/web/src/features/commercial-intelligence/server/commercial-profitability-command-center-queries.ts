@@ -31,7 +31,7 @@ import { isAiTaskFinalStatus } from "../../ai-task-center/domain/ai-task";
 import type { AiTask } from "../../ai-task-center/domain/ai-task";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 import {
@@ -418,7 +418,7 @@ export async function readCommercialProfitabilityCommandCenterWorkspace(
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canReadAiTasks = hasGrantedPermission(access, "ai-task.read");
   const comparisonWindow = toCommercialProfitabilityCommandCenterComparisonFilters(filters);
   const timeWindowLabel = buildCommercialProfitabilityCommandCenterTimeWindowLabel(filters);

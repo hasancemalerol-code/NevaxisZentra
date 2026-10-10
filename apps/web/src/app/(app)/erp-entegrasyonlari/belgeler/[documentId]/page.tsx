@@ -21,8 +21,8 @@ export default async function ErpDocumentDetailPage({ params }: ErpDocumentDetai
         <div role="alert" className="state-panel error-state">
           <FileText aria-hidden="true" />
           <div>
-            <h3>ERP belgesi yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "ERP belgesi yüklenemedi"}</h3>
+            <p>{result.code === "not-found" ? "İstenen ERP kaydı bulunamadı." : result.message}</p>
           </div>
         </div>
       </main>

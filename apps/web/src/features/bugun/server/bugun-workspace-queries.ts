@@ -1,7 +1,7 @@
 import "server-only";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-task-center-queries";
@@ -64,7 +64,7 @@ async function resolveProductionContext() {
 }
 
 export async function readBugunWorkspace(): Promise<BugunWorkspaceResult> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const profile = resolveRoleLandingProfile(access);
   const profileLabel = resolveRoleLandingLabel(profile);
   const showExecutiveStrip =

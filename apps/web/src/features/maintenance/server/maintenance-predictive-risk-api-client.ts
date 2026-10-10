@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import type {
   MaintenancePredictiveRiskAssessment,
   MaintenancePredictiveRiskWorkspace,
@@ -28,7 +29,8 @@ async function getJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Authentication required.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Authorization denied.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
     if (!response.ok) {
       return {
@@ -97,7 +99,8 @@ async function postJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Authentication required.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Authorization denied.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
     if (!response.ok) {
       const payload = await response.json().catch(() => null) as { message?: string } | null;

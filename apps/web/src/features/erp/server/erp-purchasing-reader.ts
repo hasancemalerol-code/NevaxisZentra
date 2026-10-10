@@ -8,10 +8,7 @@ import type {
   CanonicalErpPurchaseOrderSummary,
 } from "../domain/erp";
 
-type ReadFailure = Readonly<{
-  status: "failure";
-  message: string;
-}>;
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export type ErpPurchaseOrdersResult =
   | Readonly<{ status: "success"; purchaseOrders: readonly CanonicalErpPurchaseOrderSummary[] }>
@@ -34,7 +31,7 @@ export async function readErpPurchaseOrders(): Promise<ErpPurchaseOrdersResult> 
 
   const purchaseOrdersResult = await listErpPurchaseOrders(contextResult.context);
   if (purchaseOrdersResult.status === "failure") {
-    return { status: "failure", message: purchaseOrdersResult.message };
+    return { status: "failure", message: purchaseOrdersResult.message, code: purchaseOrdersResult.code };
   }
 
   return { status: "success", purchaseOrders: purchaseOrdersResult.value };
@@ -55,7 +52,7 @@ export async function readErpPurchaseOrderDetail(
 
   const purchaseOrderResult = await getErpPurchaseOrder(contextResult.context, purchaseOrderId);
   if (purchaseOrderResult.status === "failure") {
-    return { status: "failure", message: purchaseOrderResult.message };
+    return { status: "failure", message: purchaseOrderResult.message, code: purchaseOrderResult.code };
   }
 
   return { status: "success", purchaseOrder: purchaseOrderResult.value };

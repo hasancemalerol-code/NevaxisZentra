@@ -3,7 +3,7 @@ import { MessagesSquare } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { readTeamsTaskContextLink } from "@/features/teams/server/teams-queries";
@@ -18,7 +18,7 @@ export async function AiTaskTeamsContextSection({ taskId }: AiTaskTeamsContextSe
     return null;
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canCreateApproval = hasGrantedPermission(access, "teams.approvals.create");
 
   return (

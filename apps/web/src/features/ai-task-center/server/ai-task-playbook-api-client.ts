@@ -1,3 +1,4 @@
+import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./ai-task-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -17,6 +18,7 @@ export type AiTaskPlaybookApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -50,9 +52,9 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number): AiTaskPlaybookApiFailure["code"] {
+function mapFailureStatus(status: number, payload: unknown): AiTaskPlaybookApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (status === 404) return "not-found";
   if (status === 409) return "concurrency-conflict";
   return "source-unavailable";
@@ -91,7 +93,7 @@ async function getJson<T>(
     if (!response.ok) {
       return {
         status: "failure",
-        code: mapFailureStatus(response.status),
+        code: mapFailureStatus(response.status, payload),
         message: failureMessage(response.status, payload),
         retryable: response.status >= 500,
       };
@@ -137,7 +139,7 @@ async function writeJson<T>(
     if (!response.ok) {
       return {
         status: "failure",
-        code: mapFailureStatus(response.status),
+        code: mapFailureStatus(response.status, payload),
         message: failureMessage(response.status, payload),
         retryable: response.status >= 500,
       };

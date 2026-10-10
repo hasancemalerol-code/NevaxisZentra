@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -45,7 +45,7 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
     );
   }
 
-  const effectiveAccess = await fetchCurrentEffectiveAccess();
+  const effectiveAccess = await fetchEffectiveAccessCapabilities();
   const canWrite =
     result.canWrite && hasGrantedPermission(effectiveAccess, "teams.write");
   const canCreateTask = hasGrantedPermission(effectiveAccess, "ai-task.create");

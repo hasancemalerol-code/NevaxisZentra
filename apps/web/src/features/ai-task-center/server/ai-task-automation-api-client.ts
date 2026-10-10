@@ -1,3 +1,4 @@
+import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./ai-task-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -17,6 +18,7 @@ export type AiTaskAutomationApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -49,9 +51,9 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number, _payload: unknown): AiTaskAutomationApiFailure["code"] {
+function mapFailureStatus(status: number, payload: unknown): AiTaskAutomationApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (status === 404) return "not-found";
   if (status === 409) return "concurrency-conflict";
   return "source-unavailable";

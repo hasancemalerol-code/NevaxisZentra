@@ -30,7 +30,7 @@ export async function readGoldenDemoCustomsFileWorkspace() {
 
   const result = await getGoldenDemoCustomsFileWorkspace(contextResult.context);
   if (result.status === "failure") {
-    return { status: "failure" as const, message: result.message };
+    return { status: "failure" as const, message: result.message, code: result.code };
   }
 
   return { status: "success" as const, workspace: result.value };

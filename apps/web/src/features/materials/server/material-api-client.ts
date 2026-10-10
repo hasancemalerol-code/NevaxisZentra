@@ -1,3 +1,9 @@
+import {
+  classifyFailedResponse,
+  SESSION_REQUIRED_MESSAGE,
+  SUBSCRIPTION_REQUIRED_MESSAGE,
+  type ClassifiedApiFailure,
+} from "@/lib/api/api-failure-classifier";
 import "./material-server-boundary";
 
 import type {
@@ -44,6 +50,7 @@ export type MaterialApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -112,7 +119,9 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number): MaterialApiFailure["code"] {
+function mapFailureStatus(status: number, failure?: ClassifiedApiFailure): MaterialApiFailure["code"] {
+  if (failure?.kind === "subscription-required") return "subscription-required";
+  if (failure?.kind === "unauthenticated") return "unauthenticated";
   if (status === 401) return "unauthenticated";
   if (status === 403) return "permission-denied";
   if (status === 404) return "not-found";
@@ -133,10 +142,11 @@ async function getJson<T>(
     });
 
     if (!response.ok) {
+      const failure = await classifyFailedResponse(response);
       return {
         status: "failure",
-        code: mapFailureStatus(response.status),
-        message: `Malzeme isteği başarısız (${response.status}).`,
+        code: mapFailureStatus(response.status, failure),
+        message: failure.kind === "subscription-required" ? SUBSCRIPTION_REQUIRED_MESSAGE : failure.kind === "unauthenticated" && response.status === 403 ? SESSION_REQUIRED_MESSAGE : `Malzeme isteği başarısız (${response.status}).`,
         retryable: response.status >= 500,
       };
     }
@@ -172,6 +182,7 @@ async function mutateJson<T>(
     });
 
     if (!response.ok) {
+      const failure = await classifyFailedResponse(response);
       let message = `Malzeme işlemi başarısız (${response.status}).`;
       try {
         const problem = (await response.json()) as { title?: string };
@@ -184,7 +195,7 @@ async function mutateJson<T>(
 
       return {
         status: "failure",
-        code: mapFailureStatus(response.status),
+        code: mapFailureStatus(response.status, failure),
         message,
         retryable: response.status >= 500,
       };

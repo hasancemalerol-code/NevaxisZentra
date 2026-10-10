@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using NevaxisZentra.Persistence.Audit;
 using NevaxisZentra.Persistence.ContextKnowledge;
 using NevaxisZentra.Persistence.DigitalWorkforce;
 using NevaxisZentra.Persistence.MixedProduction;
@@ -17,6 +18,7 @@ public interface IScenarioRecoveryService
         Guid tenantId,
         CreateScenarioRecoveryRunRequest request,
         string subjectId,
+        ScenarioRecoveryRunAudit? audit = null,
         CancellationToken cancellationToken = default);
 
     Task<ScenarioRecoveryWorkspace> GetWorkspaceAsync(
@@ -93,9 +95,9 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
     public Task<ScenarioRecoveryWorkspace> CreateRunAsync(
         Guid facilityId, Guid tenantId, CreateScenarioRecoveryRunRequest request, string subjectId,
-        CancellationToken cancellationToken = default) =>
+        ScenarioRecoveryRunAudit? audit = null, CancellationToken cancellationToken = default) =>
         tenantDatabaseSession.ExecuteWriteAsync(
-            ct => CreateRunCoreAsync(facilityId, tenantId, request, subjectId, ct),
+            ct => CreateRunCoreAsync(facilityId, tenantId, request, subjectId, ct, audit),
             cancellationToken);
 
     public Task<ScenarioRecoveryWorkspace> GetWorkspaceAsync(
@@ -146,7 +148,7 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
 
     private async Task<ScenarioRecoveryWorkspace> CreateRunCoreAsync(
         Guid facilityId, Guid tenantId, CreateScenarioRecoveryRunRequest request, string subjectId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ScenarioRecoveryRunAudit? audit = null)
     {
         if (request.Objectives.Count == 0)
         {
@@ -203,6 +205,36 @@ public sealed class ScenarioRecoveryService : IScenarioRecoveryService
         };
 
         db.ScenarioRecoveryRunRecords.Add(run);
+        if (audit is not null)
+        {
+            // The explicit creation is audited in the same transaction as the run it creates.
+            db.AuditRecords.Add(new AuditRecord
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                IdentitySubjectId = audit.IdentitySubjectId,
+                TenantMembershipId = audit.MembershipId,
+                EventType = ScenarioRecoveryAuditTaxonomy.EventType,
+                Action = ScenarioRecoveryAuditTaxonomy.Action,
+                ResourceType = ScenarioRecoveryAuditTaxonomy.ResourceType,
+                ResourceId = run.Id.ToString(),
+                Outcome = AuditOutcome.Success,
+                PermissionKey = audit.PermissionKey,
+                CorrelationId = audit.CorrelationId,
+                RequestId = audit.RequestId,
+                Source = AuditSource.Api,
+                OccurredAtUtc = now,
+                RecordedAtUtc = now,
+                MetadataJson = JsonSerializer.Serialize(new
+                {
+                    facilityId,
+                    lineId = request.LineId,
+                    category = request.Category,
+                    entryPoint = request.EntryPoint,
+                }),
+            });
+        }
+
         await db.SaveChangesAsync(cancellationToken);
 
         return await CaptureSnapshotAndAdvanceAsync(run, overview, tenantId, facilityId, subjectId, cancellationToken);

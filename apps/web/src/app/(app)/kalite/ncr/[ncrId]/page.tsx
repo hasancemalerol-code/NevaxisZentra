@@ -47,8 +47,8 @@ export default async function QualityNcrDetailPage({ params }: PageProps) {
         <div role="alert" className="quality-error-panel">
           <ShieldCheck aria-hidden="true" />
           <div>
-            <h3>NCR yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "NCR yüklenemedi"}</h3>
+            <p>{result.code === "not-found" ? "İstenen uygunsuzluk kaydı bulunamadı." : result.message}</p>
           </div>
         </div>
       </QualityPageShell>

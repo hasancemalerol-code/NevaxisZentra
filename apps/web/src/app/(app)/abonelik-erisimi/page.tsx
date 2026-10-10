@@ -1,5 +1,5 @@
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { SubscriptionAccessDeniedView } from "@/features/saas-subscription/components/subscription-access-denied-view";
@@ -26,7 +26,7 @@ export default async function AbonelikErisimiPage({
   const [{ reason }, subscriptionResult, access] = await Promise.all([
     searchParams,
     fetchCurrentTenantSubscription(),
-    fetchCurrentEffectiveAccess(),
+    fetchEffectiveAccessCapabilities(),
   ]);
 
   return (

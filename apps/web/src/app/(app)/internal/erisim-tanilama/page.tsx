@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { fetchCurrentEffectiveAccess } from "@/features/admin-access/server/admin-access-effective-access";
+import { fetchEffectiveAccessCapabilities } from "@/features/admin-access/server/admin-access-effective-access";
 import { fetchCurrentTenantSubscription } from "@/features/saas-subscription/server/saas-subscription-queries";
 import {
   acceptanceRoleContract,
@@ -17,7 +17,7 @@ export default async function AcceptanceRoleDiagnosticsPage() {
   }
 
   const [access, subscription, navigation] = await Promise.all([
-    fetchCurrentEffectiveAccess(),
+    fetchEffectiveAccessCapabilities(),
     fetchCurrentTenantSubscription(),
     resolvePermissionAwareNavigation("/fabrika"),
   ]);

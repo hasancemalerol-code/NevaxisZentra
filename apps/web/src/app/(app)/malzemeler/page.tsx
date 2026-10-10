@@ -1,16 +1,12 @@
+import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { Package } from "lucide-react";
-import { forbidden } from "next/navigation";
 
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { MaterialRegistryView } from "@/features/materials/components/material-registry-view";
 import "@/features/materials/components/material-registry.css";
 import { readMaterialRegistry } from "@/features/materials/server/material-reader";
 
 export default async function MaterialRegistryPage() {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "material.read")) {
-    forbidden();
-  }
+  await forbidUnlessGranted("material.read");
 
   const result = await readMaterialRegistry();
 

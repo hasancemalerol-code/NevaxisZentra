@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NevaxisZentra.Api.Facilities;
+using NevaxisZentra.Persistence.Audit;
 using NevaxisZentra.Persistence.ScenarioRecovery;
 
 namespace NevaxisZentra.Api.ScenarioRecovery;
@@ -33,6 +34,7 @@ public static class ScenarioRecoveryEndpointRouteBuilderExtensions
         [FromQuery] Guid? facilityId,
         IFacilityAccessResolver facilityAccessResolver,
         IScenarioRecoveryService service,
+        CorrelationContext correlationContext,
         CancellationToken cancellationToken)
     {
         var (access, failure) = await ResolveAccessAsync(
@@ -42,7 +44,14 @@ public static class ScenarioRecoveryEndpointRouteBuilderExtensions
         try
         {
             var workspace = await service.CreateRunAsync(
-                access.FacilityId, access.TenantId, request, access.IdentitySubjectId.ToString(), cancellationToken);
+                access.FacilityId, access.TenantId, request, access.IdentitySubjectId.ToString(),
+                new ScenarioRecoveryRunAudit(
+                    access.IdentitySubjectId,
+                    access.MembershipId,
+                    ScenarioRecoveryPermissionKeys.Simulate,
+                    correlationContext.IsAvailable ? correlationContext.CorrelationId : Guid.NewGuid(),
+                    correlationContext.RequestId),
+                cancellationToken);
             return TypedResults.Ok(workspace);
         }
         catch (ScenarioRecoveryException ex)

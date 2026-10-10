@@ -16,7 +16,7 @@ import { parseMembershipIdFromMemberReference } from "./ai-task-membership";
 import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 import { getTeamsChannelDetail, listTeamsChannels } from "../../teams/server/teams-api-client";
@@ -140,7 +140,7 @@ export async function readAiTaskWorkspace(
 }
 
 async function resolveOperationCapabilities(): Promise<AiTaskOperationCapabilities> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canAssign = hasGrantedPermission(access, "ai-task.assign");
   const canAcknowledge = hasGrantedPermission(access, "ai-task.acknowledge");
   const canEscalate = hasGrantedPermission(access, "ai-task.escalate");

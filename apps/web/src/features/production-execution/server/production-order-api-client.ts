@@ -1,3 +1,4 @@
+import { classifyApiFailure, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./production-order-server-boundary";
 
 import type { ProductionOrder, ProductionOrderSummary } from "../domain/production-order";
@@ -47,6 +48,7 @@ export type ProductionOrderApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "not-found"
     | "configuration-error"
     | "invalid-request"
@@ -112,7 +114,8 @@ function mapHttpStatus(
   }
 
   if (status === 403) {
-    return fail("permission-denied", "Authorization denied.", false);
+    const refusal = failureForRefusal(classifyApiFailure(status, body), "Authorization denied.");
+    return fail(refusal.code, refusal.message, false);
   }
 
   if (status === 404) {

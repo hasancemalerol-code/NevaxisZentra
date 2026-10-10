@@ -1,7 +1,7 @@
 import "server-only";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-task-center-queries";
@@ -35,7 +35,7 @@ async function resolveProductionContext() {
 }
 
 export async function readIslerHubWorkspace(): Promise<IslerHubWorkspace> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const entries: IslerHubEntry[] = [];
 
   const taskResult = await readAiTaskCenterUnified();

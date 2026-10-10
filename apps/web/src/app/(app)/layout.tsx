@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AppShellFrame } from "@/components/app-shell/app-shell-frame";
 import { NotificationsControlServer } from "@/components/app-shell/notifications-control-server";
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { fetchEffectiveAccessCapabilities, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { resolveFactoryCopilotAccess } from "@/features/factory-copilot/server/resolve-factory-copilot-access";
 import { FactoryShowcaseShell } from "@/features/dashboard-showcase/components/factory-showcase-shell";
 import { resolveSaasIdentitySession } from "@/features/saas-identity/server/saas-identity-session";
@@ -78,7 +78,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
         : null;
 
   if (normalizeSubscriptionRoute(pathname) === "/abonelik-erisimi") {
-    const access = await fetchCurrentEffectiveAccess();
+    const access = await fetchEffectiveAccessCapabilities();
     return (
       <SubscriptionRecoveryShell
         accountDisplayName={accountDisplayName}

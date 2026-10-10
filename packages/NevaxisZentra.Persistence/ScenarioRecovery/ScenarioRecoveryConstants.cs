@@ -8,6 +8,22 @@ public static class ScenarioRecoveryPermissionKeys
     public const string Execute = "scenario-recovery.execute";
 }
 
+/// <summary>Audit taxonomy of the explicit scenario-run creation (added to audit_records by migration).</summary>
+public static class ScenarioRecoveryAuditTaxonomy
+{
+    public const string EventType = "scenariorecovery.run.created";
+    public const string Action = "scenariorecovery.run.create";
+    public const string ResourceType = "scenariorecovery.run";
+}
+
+/// <summary>Who explicitly created a scenario run (recorded in audit_records together with the run).</summary>
+public sealed record ScenarioRecoveryRunAudit(
+    Guid IdentitySubjectId,
+    Guid MembershipId,
+    string PermissionKey,
+    Guid CorrelationId,
+    string? RequestId);
+
 public static class ScenarioRecoveryFailureCodes
 {
     public const string NotFound = "scenario-recovery.not-found";

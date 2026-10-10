@@ -6,10 +6,7 @@ import { parseProductionExecutionRuntimeConfig } from "../../production-executio
 import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import type { ErpWritebackDetail, ErpWritebackPermissions, ErpWritebackSummary } from "../domain/erp";
 
-type ReadFailure = Readonly<{
-  status: "failure";
-  message: string;
-}>;
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export type ErpWritebacksResult =
   | Readonly<{
@@ -40,7 +37,7 @@ export async function readErpWritebacks(): Promise<ErpWritebacksResult> {
 
   const writebacksResult = await listErpWritebacks(contextResult.context);
   if (writebacksResult.status === "failure") {
-    return { status: "failure", message: writebacksResult.message };
+    return { status: "failure", message: writebacksResult.message, code: writebacksResult.code };
   }
 
   return {
@@ -63,7 +60,7 @@ export async function readErpWritebackDetail(writebackId: string): Promise<ErpWr
 
   const writebackResult = await getErpWriteback(contextResult.context, writebackId);
   if (writebackResult.status === "failure") {
-    return { status: "failure", message: writebackResult.message };
+    return { status: "failure", message: writebackResult.message, code: writebackResult.code };
   }
 
   return {

@@ -1,7 +1,7 @@
+import { gateAccess, accessFailureMessage } from "@/features/admin-access/server/require-current-permission";
 import "./executive-command-center-server-boundary";
 
 import {
-  fetchCurrentEffectiveAccess,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { listAiTasks } from "@/features/ai-task-center/server/ai-task-api-client";
@@ -48,18 +48,16 @@ async function resolveRequestContext() {
 export async function readExecutiveCommandCenterWorkspace(
   filters: ExecutiveCommandCenterFilters,
 ): Promise<ExecutiveCommandCenterResult> {
-  const access = await fetchCurrentEffectiveAccess();
-  const hasAnyPermission = EXECUTIVE_READ_PERMISSIONS.some((permission) =>
-    hasGrantedPermission(access, permission),
-  );
-
-  if (!hasAnyPermission) {
+  const gate = await gateAccess(EXECUTIVE_READ_PERMISSIONS);
+  if (gate.status === "failure") {
     return {
       status: "failure",
-      code: "forbidden",
-      message: "Yönetici Komuta Merkezi görüntüleme yetkiniz yok.",
+      code: gate.code === "authorization-denied" ? "forbidden" : gate.code,
+      message: accessFailureMessage(gate, "Yönetici Komuta Merkezi görüntüleme yetkiniz yok."),
     };
   }
+
+  const access = gate.access;
 
   const contextResult = await resolveRequestContext();
   if (contextResult.status === "failure") {

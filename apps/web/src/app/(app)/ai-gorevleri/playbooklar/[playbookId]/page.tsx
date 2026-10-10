@@ -1,3 +1,4 @@
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -35,8 +36,8 @@ export default async function AiTaskPlaybookBuilderPage({
         />
         <EmptyState
           data-testid="ai-task-playbook-builder-error"
-          description={result.message}
-          title="Playbook yüklenemedi"
+          description={isNotFoundFailureCode(result.code) ? "İstenen playbook kaydı bulunamadı." : result.message}
+          title={isNotFoundFailureCode(result.code) ? "Playbook bulunamadı" : "Playbook yüklenemedi"}
         />
       </PageContent>
     );

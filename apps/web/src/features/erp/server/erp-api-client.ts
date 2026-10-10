@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./erp-server-boundary";
 
 import type {
@@ -58,6 +59,8 @@ export type ErpApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
+    | "not-found"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -109,12 +112,12 @@ async function getJson<T>(
     }
 
     if (response.status === 403) {
-      return {
-        status: "failure",
-        code: "permission-denied",
-        message: "Authorization denied.",
-        retryable: false,
-      };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
+    }
+
+    if (response.status === 404) {
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false };
     }
 
     if (!response.ok) {
@@ -166,12 +169,8 @@ async function postJson<T>(
     }
 
     if (response.status === 403) {
-      return {
-        status: "failure",
-        code: "permission-denied",
-        message: "Authorization denied.",
-        retryable: false,
-      };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
 
     if (response.status === 409) {

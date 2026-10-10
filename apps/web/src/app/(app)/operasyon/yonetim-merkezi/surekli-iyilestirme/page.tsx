@@ -24,7 +24,7 @@ export default async function ContinuousImprovementPage() {
         >
           <ShieldAlert aria-hidden="true" />
           <div>
-            <h3>Bu merkeze erişim yetkiniz yok</h3>
+            <h3>{authorization.code === "authorization-denied" ? "Bu merkeze erişim yetkiniz yok" : "Yetki doğrulanamadı"}</h3>
             <p>{authorization.message}</p>
           </div>
         </div>

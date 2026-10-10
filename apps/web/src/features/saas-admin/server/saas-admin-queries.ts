@@ -1,7 +1,7 @@
 import "./saas-admin-server-boundary";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 
@@ -19,7 +19,7 @@ import {
 } from "./saas-admin-api-client";
 
 export async function resolveSaasAdminCapabilities(): Promise<SaasAdminCapabilities> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   return {
     canRead: hasGrantedPermission(access, "admin-access.read"),
     canManage: hasGrantedPermission(access, "admin-access.manage"),

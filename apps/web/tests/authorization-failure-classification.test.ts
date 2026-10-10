@@ -213,15 +213,67 @@ test("no loader or action reports a runtime failure of the permission check as a
   assert.deepEqual(offenders, []);
 });
 
-// Known debt, bounded: callers of the null-returning fetchCurrentEffectiveAccess() cannot tell "denied" from
-// "unavailable". New code must use fetchCurrentEffectiveAccessResult()/denyUnlessGranted(); the count may only fall.
-const NULL_RETURNING_ACCESS_CALL_SITES = 44;
+// The old null-returning fetchCurrentEffectiveAccess() could not tell "denied" from "no session" or "service unavailable".
+// It no longer exists. The remaining callers use fetchEffectiveAccessCapabilities(), a UI capability probe whose null
+// only means "unknown: hide or disable the control". Gates use gateAccess / denyUnlessGranted / forbidUnlessGranted /
+// notFoundUnlessGranted, which classify the failure. The probe count may only fall.
+const CAPABILITY_PROBE_CALL_SITES = 38;
 
-test("no new caller adopts the null-returning effective-access fetch (use the classified result)", () => {
+test("the ambiguous null-returning access helper is gone and the capability probe count can only fall", () => {
   const sourceRoot = path.resolve(__dirname, "..", "src");
-  let sites = 0;
+  let probes = 0;
+  const oldName: string[] = [];
   for (const file of collectSources(sourceRoot)) {
-    sites += (readFileSync(file, "utf8").match(/= await fetchCurrentEffectiveAccess\(\)/g) ?? []).length;
+    const source = readFileSync(file, "utf8");
+    if (/\bfetchCurrentEffectiveAccess\b/.test(source)) oldName.push(path.relative(sourceRoot, file));
+    if (file.endsWith(path.join("admin-access", "server", "admin-access-effective-access.ts"))) continue;
+    probes += (source.match(/fetchEffectiveAccessCapabilities\(\)/g) ?? []).length;
   }
-  assert.ok(sites <= NULL_RETURNING_ACCESS_CALL_SITES, `${sites} call sites (baseline ${NULL_RETURNING_ACCESS_CALL_SITES})`);
+  assert.deepEqual(oldName, [], "the ambiguous helper must not come back");
+  assert.ok(probes <= CAPABILITY_PROBE_CALL_SITES, `${probes} probe call sites (baseline ${CAPABILITY_PROBE_CALL_SITES})`);
+});
+
+test("a capability probe is never used as a permission gate that renders a denial", () => {
+  const sourceRoot = path.resolve(__dirname, "..", "src");
+  const offenders: string[] = [];
+  for (const file of collectSources(sourceRoot)) {
+    const source = readFileSync(file, "utf8");
+    if (!source.includes("fetchEffectiveAccessCapabilities()")) continue;
+    const lines = source.split("\n");
+    lines.forEach((line, index) => {
+      if (!/if \(!hasGrantedPermission\(/.test(line)) return;
+      const branch = lines.slice(index, index + 5).join("\n");
+      if (/forbidden\(\)|notFound\(\)|status: "failure"|status: "forbidden"|message:/.test(branch)) {
+        offenders.push(`${path.relative(sourceRoot, file).split(path.sep).join("/")}:${index + 1}`);
+      }
+    });
+  }
+  assert.deepEqual(offenders, [], "use gateAccess / denyUnlessGranted / forbidUnlessGranted / notFoundUnlessGranted for gates");
+});
+
+test("gateAccess grants, denies and reports runtime failures distinctly", async () => {
+  installRuntime();
+  try {
+    const { gateAccess, accessFailureMessage, AUTHORIZATION_DENIED_MESSAGE } = await loadPermissionModule();
+
+    stubEffectiveAccess(() => new Response(JSON.stringify({ grantedPermissionKeys: ["a.read"] }), { status: 200 }));
+    const granted = await gateAccess(["a.read", "b.read"]);
+    assert.equal(granted.status, "granted");
+
+    const denied = await gateAccess(["z.read"]);
+    assert.equal(denied.status === "failure" ? denied.code : "", "authorization-denied");
+    assert.equal(denied.status === "failure" ? accessFailureMessage(denied, "custom denial") : "", "custom denial");
+
+    stubEffectiveAccess(() => new Response("{}", { status: 503 }));
+    const unavailable = await gateAccess(["a.read"]);
+    assert.equal(unavailable.status === "failure" ? unavailable.code : "", "authorization-unavailable");
+    assert.notEqual(unavailable.status === "failure" ? accessFailureMessage(unavailable, "custom denial") : "", "custom denial");
+    assert.notEqual(unavailable.status === "failure" ? unavailable.message : "", AUTHORIZATION_DENIED_MESSAGE);
+
+    stubEffectiveAccess(() => new Response("{}", { status: 401 }));
+    const anonymous = await gateAccess(["a.read"]);
+    assert.equal(anonymous.status === "failure" ? anonymous.code : "", "unauthenticated");
+  } finally {
+    restore();
+  }
 });

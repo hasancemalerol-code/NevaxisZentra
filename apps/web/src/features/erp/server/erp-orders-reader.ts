@@ -9,10 +9,7 @@ import type {
   ErpOrderMaterialAvailability,
 } from "../domain/erp";
 
-type ReadFailure = Readonly<{
-  status: "failure";
-  message: string;
-}>;
+type ReadFailure = Readonly<{ status: "failure"; message: string; code?: string }>;
 
 export type ErpOrdersResult =
   | Readonly<{ status: "success"; orders: readonly CanonicalErpOrderSummary[] }>
@@ -39,7 +36,7 @@ export async function readErpOrders(): Promise<ErpOrdersResult> {
 
   const ordersResult = await listErpOrders(contextResult.context);
   if (ordersResult.status === "failure") {
-    return { status: "failure", message: ordersResult.message };
+    return { status: "failure", message: ordersResult.message, code: ordersResult.code };
   }
 
   return { status: "success", orders: ordersResult.value };
@@ -62,7 +59,7 @@ export async function readErpOrderDetail(orderId: string): Promise<ErpOrderDetai
   ]);
 
   if (orderResult.status === "failure") {
-    return { status: "failure", message: orderResult.message };
+    return { status: "failure", message: orderResult.message, code: orderResult.code };
   }
 
   const materialAvailability =

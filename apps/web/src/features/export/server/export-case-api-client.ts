@@ -1,3 +1,4 @@
+import { classifyApiFailure, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./export-case-server-boundary";
 
 import type {
@@ -79,6 +80,7 @@ export type ExportCaseApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "not-found"
     | "configuration-error"
     | "invalid-request"
@@ -161,12 +163,8 @@ function mapHttpStatus(status: number, body: unknown): ExportCaseApiFailure {
   }
 
   if (status === 403) {
-    return fail(
-      "permission-denied",
-      title ?? "Authorization denied.",
-      false,
-      failureCode,
-    );
+    const refusal = failureForRefusal(classifyApiFailure(status, body), title ?? "Authorization denied.");
+    return fail(refusal.code, refusal.message, false, failureCode);
   }
 
   if (status === 404) {

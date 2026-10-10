@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Boxes, Cpu } from "lucide-react";
 
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { fetchEffectiveAccessCapabilities, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 
 const KAYNAKLAR_LINKS = [
@@ -22,7 +22,7 @@ const KAYNAKLAR_LINKS = [
 ];
 
 export async function AppsKaynaklarCatalogSection() {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const visible = KAYNAKLAR_LINKS.filter((item) => hasGrantedPermission(access, item.permissionKey));
 
   if (visible.length === 0) {

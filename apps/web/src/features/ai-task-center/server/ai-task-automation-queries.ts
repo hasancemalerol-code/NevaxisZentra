@@ -24,7 +24,7 @@ import { mapRawAiTaskSummary } from "./ai-task-mapper";
 import { resolveAiTaskRequestContextFromIncomingRequest } from "./ai-task-request-context";
 import { denyUnlessGranted } from "../../admin-access/server/require-current-permission";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -74,7 +74,7 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
 }
 
 async function resolveCapabilities(): Promise<AiTaskAutomationCapabilities> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   if (!access) {
     return { canRead: false, canManage: false, canSimulate: false };
   }

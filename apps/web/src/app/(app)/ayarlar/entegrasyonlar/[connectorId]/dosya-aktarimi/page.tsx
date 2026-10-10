@@ -17,7 +17,7 @@ export default async function DosyaAktarimiPage({ params }: FileImportPageProps)
     return (
       <main className="production-execution-page">
         <h1>Dosya aktarımı</h1>
-        <p>Dosya aktarımı için yetkiniz yok.</p>
+        <p>{authorization.code === "authorization-denied" ? "Dosya aktarımı için yetkiniz yok." : "Yetki doğrulaması şu anda yapılamıyor."}</p>
       </main>
     );
   }

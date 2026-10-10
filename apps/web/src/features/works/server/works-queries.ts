@@ -1,7 +1,7 @@
+import { gateAccess, accessFailureMessage } from "@/features/admin-access/server/require-current-permission";
 import "./works-server-boundary";
 
 import {
-  fetchCurrentEffectiveAccess,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
@@ -35,14 +35,16 @@ export async function readWorksWorkspacePage(input?: Readonly<{
   selectedCaseId?: string | null;
   search?: string | null;
 }>): Promise<WorksWorkspacePageResult> {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, requiredRoutePermission("isler"))) {
+  const gate = await gateAccess([requiredRoutePermission("isler")]);
+  if (gate.status === "failure") {
     return {
       status: "failure",
-      message: "Bu modüle erişim yetkiniz yok.",
-      code: "permission-denied",
+      message: accessFailureMessage(gate, "Bu modüle erişim yetkiniz yok."),
+      code: gate.code === "authorization-denied" ? "permission-denied" : gate.code,
     };
   }
+
+  const access = gate.access;
 
   const contextResult = await resolveProductionContext();
   if (contextResult.status === "failure") {
@@ -99,12 +101,12 @@ export async function readWorksWorkspacePage(input?: Readonly<{
 }
 
 export async function readWorksCaseDetail(caseId: string) {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, requiredRoutePermission("isler"))) {
+  const gate = await gateAccess([requiredRoutePermission("isler")]);
+  if (gate.status === "failure") {
     return {
       status: "failure" as const,
-      message: "Bu modüle erişim yetkiniz yok.",
-      code: "permission-denied" as const,
+      message: accessFailureMessage(gate, "Bu modüle erişim yetkiniz yok."),
+      code: gate.code === "authorization-denied" ? ("permission-denied" as const) : gate.code,
     };
   }
 

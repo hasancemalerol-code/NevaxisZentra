@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import type { MaintenanceConditionProfile, MaintenanceConditionWorkspace } from "../domain/maintenance-condition";
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
 import type { MaintenanceApiResult } from "./maintenance-api-client";
@@ -24,7 +25,8 @@ async function getJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Authentication required.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Authorization denied.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
     if (!response.ok) {
       return {

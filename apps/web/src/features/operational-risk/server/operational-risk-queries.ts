@@ -59,7 +59,7 @@ import {
 } from "./operational-risk-api-client";
 import { resolveOperationalRiskRequestContext } from "./operational-risk-request-context";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -449,7 +449,7 @@ export async function readOperationalRiskWorkspace(): Promise<OperationalRiskWor
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(access, "operational-risk.manage");
 
   const [casesResult, profilesResult, runsResult] = await Promise.all([

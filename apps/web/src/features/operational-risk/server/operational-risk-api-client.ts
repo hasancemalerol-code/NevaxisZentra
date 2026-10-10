@@ -1,3 +1,4 @@
+import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./operational-risk-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -8,6 +9,7 @@ export type OperationalRiskApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -173,7 +175,7 @@ function buildUrl(
 
 function mapFailureStatus(status: number, payload: unknown): OperationalRiskApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (status === 404) return "not-found";
   if (status === 409) {
     const code = typeof payload === "object" && payload && "failureCode" in payload

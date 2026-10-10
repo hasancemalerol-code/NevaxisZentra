@@ -57,7 +57,7 @@ import {
 } from "./commercial-sales-price-api-client";
 import { resolveCommercialIntelligenceRequestContext } from "./commercial-intelligence-request-context";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -380,7 +380,7 @@ export async function readCommercialSalesPriceWorkspace(
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(access, "commercial-intelligence.manage");
 
   const [workspaceResult, profilesResult, assessmentsResult, comparisonsResult] = await Promise.all([

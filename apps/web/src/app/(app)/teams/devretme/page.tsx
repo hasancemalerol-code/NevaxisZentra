@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -33,7 +33,7 @@ function shiftLabel(shiftType: string): string {
 export default async function TeamsHandoversPage() {
   await forbidUnlessGranted("teams.handover.read");
   const result = await readTeamsHandovers();
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canCreate = hasGrantedPermission(access, "teams.handover.create");
 
   if (result.status === "failure") {

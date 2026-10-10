@@ -1,3 +1,9 @@
+import {
+  classifyFailedResponse,
+  SESSION_REQUIRED_MESSAGE,
+  SUBSCRIPTION_REQUIRED_MESSAGE,
+  type ClassifiedApiFailure,
+} from "@/lib/api/api-failure-classifier";
 import "./shift-risk-server-boundary";
 
 import {
@@ -29,6 +35,7 @@ export type ShiftContinuityApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -272,7 +279,9 @@ function buildUrl(
   return url.toString();
 }
 
-function mapFailureStatus(status: number): ShiftContinuityApiFailure["code"] {
+function mapFailureStatus(status: number, failure?: ClassifiedApiFailure): ShiftContinuityApiFailure["code"] {
+  if (failure?.kind === "subscription-required") return "subscription-required";
+  if (failure?.kind === "unauthenticated") return "unauthenticated";
   if (status === 401) return "unauthenticated";
   if (status === 403) return "permission-denied";
   if (status === 404) return "not-found";
@@ -301,10 +310,11 @@ async function getJson<T>(
     });
 
     if (!response.ok) {
+      const failure = await classifyFailedResponse(response);
       return {
         status: "failure",
-        code: mapFailureStatus(response.status),
-        message: `Personel sürekliliği isteği başarısız (${response.status}).`,
+        code: mapFailureStatus(response.status, failure),
+        message: failure.kind === "subscription-required" ? SUBSCRIPTION_REQUIRED_MESSAGE : failure.kind === "unauthenticated" && response.status === 403 ? SESSION_REQUIRED_MESSAGE : `Personel sürekliliği isteği başarısız (${response.status}).`,
         retryable: response.status >= 500,
       };
     }
@@ -340,8 +350,9 @@ async function mutateJson<T>(
     });
 
     if (!response.ok) {
+      const failure = await classifyFailedResponse(response);
       let message = `Personel sürekliliği işlemi başarısız (${response.status}).`;
-      let code = mapFailureStatus(response.status);
+      let code = mapFailureStatus(response.status, failure);
       try {
         const problem = (await response.json()) as Record<string, unknown>;
         if (typeof problem.title === "string") message = problem.title;

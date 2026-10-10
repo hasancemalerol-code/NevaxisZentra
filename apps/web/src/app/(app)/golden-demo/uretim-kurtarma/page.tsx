@@ -1,3 +1,4 @@
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 
@@ -34,8 +35,8 @@ export default async function GoldenDemoP1Page() {
         <div role="alert" className="commint-error-banner" data-testid="golden-demo-p1-forbidden">
           <TriangleAlert aria-hidden="true" />
           <div>
-            <h3>Veri yüklenemedi</h3>
-            <p>{result.message}</p>
+            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Demo verisi bulunamadı" : "Veri yüklenemedi"}</h3>
+            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Bu tesis için henüz altın demo verisi oluşturulmadı; gösterilecek bir sonuç yok." : result.message}</p>
             <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
           </div>
         </div>

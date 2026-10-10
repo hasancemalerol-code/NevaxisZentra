@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 
 import {
   PageContent,
@@ -6,11 +5,7 @@ import {
   Section,
 } from "@/components/ui/page";
 import { EmptyState } from "@/components/ui/states";
-import {
-  fetchCurrentEffectiveAccess,
-  hasGrantedPermission,
-} from "@/features/admin-access/server/admin-access-effective-access";
-import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
+import { forbidUnlessGranted, notFoundUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { readAiTaskDetail } from "@/features/ai-task-center/server/ai-task-queries";
 import { TeamsApprovalRequestForm } from "@/features/teams/components/teams-approval-request-form";
 import { readTeamsWorkspace } from "@/features/teams/server/teams-queries";
@@ -30,10 +25,7 @@ export default async function TeamsApprovalCreatePage({
   await forbidUnlessGranted("teams.approvals.create");
   await forbidUnlessGranted("teams.read");
 
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, "teams.approvals.create")) {
-    notFound();
-  }
+  await notFoundUnlessGranted("teams.approvals.create");
 
   const params = await searchParams;
   if (!params.channel || ((!params.message) === (!params.task))) {

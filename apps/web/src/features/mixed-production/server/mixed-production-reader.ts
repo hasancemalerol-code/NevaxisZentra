@@ -56,7 +56,7 @@ export async function loadMixedProductionLineWorkspace(lineId: string): Promise<
       detail: MixedProductionLineDetailApi;
       playback: MixedProductionPlaybackApi | null;
     }
-  | { status: "failure"; message: string }
+  | { status: "failure"; message: string; code?: string }
 > {
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
@@ -65,7 +65,7 @@ export async function loadMixedProductionLineWorkspace(lineId: string): Promise<
 
   const detailResult = await readMixedProductionLineDetail(resolved.context, lineId);
   if (detailResult.status === "failure") {
-    return { status: "failure", message: detailResult.message };
+    return { status: "failure", message: detailResult.message, code: detailResult.code };
   }
 
   const timeline = detailResult.value.timeline;

@@ -23,3 +23,33 @@ export function buildWorksCaseHref(caseId: string, queue?: string): string {
   }
   return `/isler?${params.toString()}`;
 }
+
+export type ScenarioRecoveryCreateInput = Readonly<{
+  lineId: string;
+  entryPoint?: string;
+  orderReference?: string;
+  constraintStationCode?: string;
+}>;
+
+/** The explicit "create scenario" command body. Built only for the user-triggered action, never while viewing the page. */
+export function buildCreateScenarioRunRequest(input: ScenarioRecoveryCreateInput) {
+  return {
+    lineId: input.lineId,
+    category: "PRODUCTION_RECOVERY",
+    entryPoint: input.entryPoint ?? "DIRECT",
+    problem: {
+      summary: input.orderReference
+        ? `Order ${input.orderReference} delivery risk with operational constraint`
+        : "Operational recovery scenario",
+      orderReference: input.orderReference,
+      constraintStationCode: input.constraintStationCode,
+      contributingFactors: ["throughput-gap", "constraint-detected"],
+    },
+    objectives: [
+      { objectiveType: "PROTECT_OTIF", label: "Protect delivery commitment", priority: 3, isHardConstraint: true },
+      { objectiveType: "MAXIMIZE_VERIFIED_GOOD_THROUGHPUT", label: "Increase good throughput", priority: 2, isHardConstraint: false },
+    ],
+    sourceEntityType: input.entryPoint?.toLowerCase() ?? "direct",
+    sourceEntityId: input.lineId,
+  };
+}

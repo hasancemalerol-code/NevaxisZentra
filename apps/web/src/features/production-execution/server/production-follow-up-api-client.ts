@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import type {
   ProductionFollowUpDetail,
   ProductionFollowUpWorkspacePayload,
@@ -27,7 +28,8 @@ async function getJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Yetki reddedildi.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Yetki reddedildi.");
     }
     if (!response.ok) {
       return {
@@ -73,7 +75,8 @@ async function postJson<T>(
       return { status: "failure", code: "unauthenticated", message: "Kimlik doğrulama gerekli.", retryable: false };
     }
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Yetki reddedildi.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Yetki reddedildi.");
     }
     if (!response.ok) {
       const payload = await response.json().catch(() => null) as { message?: string; title?: string } | null;

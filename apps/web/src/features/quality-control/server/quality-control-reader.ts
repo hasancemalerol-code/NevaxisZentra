@@ -45,6 +45,7 @@ import type {
 type ReadFailure = Readonly<{
   status: "failure";
   message: string;
+  code?: string;
 }>;
 
 export type QualityWorkspaceResult =
@@ -236,7 +237,7 @@ export async function readQualityInspectionById(
 
   const result = await getQualityInspection(contextResult.context, inspectionId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", inspection: result.value };
@@ -261,7 +262,7 @@ export async function readQualityControlPlanById(
 
   const result = await getQualityControlPlan(contextResult.context, planId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", plan: result.value };
@@ -286,7 +287,7 @@ export async function readQualityNcrList(
 
   const result = await listQualityNcrs(contextResult.context, filters);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", ncrs: result.value };
@@ -309,7 +310,7 @@ export async function readQualityNcrById(ncrId: string): Promise<QualityNcrDetai
 
   const result = await getQualityNcr(contextResult.context, ncrId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", ncr: result.value };
@@ -343,7 +344,7 @@ export async function readQualityReportingOverview(
 
   const result = await getQualityReportingOverview(contextResult.context, filters);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", overview: result.value };
@@ -473,7 +474,7 @@ export async function readProductionOrderTraceability(
 
   const result = await getProductionOrderTraceability(contextResult.context, productionOrderId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", traceability: result.value };
@@ -493,7 +494,7 @@ export async function readReleaseIntelligence(
 
   const result = await getQualityReleaseIntelligence(contextResult.context, inspectionId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", releaseIntelligence: result.value };

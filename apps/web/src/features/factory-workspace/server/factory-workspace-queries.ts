@@ -1,7 +1,7 @@
 import "server-only";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { listEdgeMachines } from "@/features/edge/server/edge-api-client";
@@ -46,7 +46,7 @@ async function resolveContext() {
 export async function readFactoryWorkspace(
   searchParams?: Readonly<Record<string, string | string[] | undefined>>,
 ): Promise<FactoryWorkspaceResult> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const factoryPermission = requiredRoutePermission("fabrika");
   const canReadMixedProduction = hasGrantedPermission(access, factoryPermission);
   const canReadEdge = hasGrantedPermission(access, "edge.read");

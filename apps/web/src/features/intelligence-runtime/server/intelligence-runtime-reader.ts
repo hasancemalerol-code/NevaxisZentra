@@ -1,9 +1,6 @@
+import { accessFailureMessage, gateAccess } from "@/features/admin-access/server/require-current-permission";
 import "server-only";
 
-import {
-  fetchCurrentEffectiveAccess,
-  hasGrantedPermission,
-} from "@/features/admin-access/server/admin-access-effective-access";
 import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
@@ -18,9 +15,9 @@ export type IntelligenceRuntimeWorkspaceResult =
   | Readonly<{ status: "failure"; message: string }>;
 
 async function resolveContext(permission = requiredRoutePermission("intelligence-runtime")) {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, permission)) {
-    return { status: "failure" as const, message: "Intelligence runtime görüntüleme yetkiniz yok." };
+  const gate = await gateAccess([permission]);
+  if (gate.status === "failure") {
+    return { status: "failure" as const, message: accessFailureMessage(gate, "Intelligence runtime görüntüleme yetkiniz yok.") };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();

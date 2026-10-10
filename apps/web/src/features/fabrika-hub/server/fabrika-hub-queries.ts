@@ -1,7 +1,7 @@
 import "server-only";
 
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { loadMixedProductionLinesWorkspace } from "@/features/mixed-production/server/mixed-production-reader";
@@ -20,7 +20,7 @@ export type FabrikaHubWorkspace = Readonly<{
 }>;
 
 export async function readFabrikaHubWorkspace(): Promise<FabrikaHubWorkspace> {
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const entries: FabrikaHubEntry[] = [];
 
   if (hasGrantedPermission(access, "production.execution.read")) {

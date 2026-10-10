@@ -1,4 +1,4 @@
-import { fetchCurrentEffectiveAccess } from "@/features/admin-access/server/admin-access-effective-access";
+import { fetchEffectiveAccessCapabilities } from "@/features/admin-access/server/admin-access-effective-access";
 import { isSubscriptionExemptCustomerWorkflowPath } from "@/lib/authorization/acceptance-role-contract";
 import {
   isModuleEntitled,
@@ -69,7 +69,7 @@ export function isNavigationItemVisible(
 
 function filterNavigationItems(
   items: readonly SerializableNavigationItem[],
-  access: Awaited<ReturnType<typeof fetchCurrentEffectiveAccess>>,
+  access: Awaited<ReturnType<typeof fetchEffectiveAccessCapabilities>>,
   subscription: Awaited<ReturnType<typeof fetchCurrentTenantSubscription>>,
 ): readonly SerializableNavigationItem[] {
   const grantedPermissionKeys = access?.grantedPermissionKeys ?? [];
@@ -82,7 +82,7 @@ export async function resolvePermissionAwareNavigation(
   pathname: string,
 ): Promise<readonly SerializableNavigationGroup[]> {
   const [access, subscription] = await Promise.all([
-    fetchCurrentEffectiveAccess(),
+    fetchEffectiveAccessCapabilities(),
     fetchCurrentTenantSubscription(),
   ]);
 
@@ -115,7 +115,7 @@ export async function resolvePermissionAwareNavigation(
 
 export async function resolvePermissionAwareAppsCatalog(): Promise<readonly SerializableNavigationGroup[]> {
   const [access, subscription] = await Promise.all([
-    fetchCurrentEffectiveAccess(),
+    fetchEffectiveAccessCapabilities(),
     fetchCurrentTenantSubscription(),
   ]);
 

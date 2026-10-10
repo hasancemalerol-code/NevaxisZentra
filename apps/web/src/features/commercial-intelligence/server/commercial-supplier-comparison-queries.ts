@@ -42,7 +42,7 @@ import {
 } from "./commercial-intelligence-api-client";
 import { resolveCommercialIntelligenceRequestContext } from "./commercial-intelligence-request-context";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "../../admin-access/server/admin-access-effective-access";
 
@@ -166,7 +166,7 @@ export async function readCommercialSupplierComparisonWorkspace(
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
 
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(access, "commercial-intelligence.manage");
 
   const [workspaceResult, profilesResult, comparisonsResult] = await Promise.all([

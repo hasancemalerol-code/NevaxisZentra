@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./maintenance-server-boundary";
 
 import type {
@@ -47,6 +48,7 @@ export type MaintenanceApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -99,12 +101,8 @@ async function getJsonWithQuery<T>(
     }
 
     if (response.status === 403) {
-      return {
-        status: "failure",
-        code: "permission-denied",
-        message: "Authorization denied.",
-        retryable: false,
-      };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
 
     if (response.status === 404) {
@@ -169,12 +167,8 @@ async function postJson<T>(
     }
 
     if (response.status === 403) {
-      return {
-        status: "failure",
-        code: "permission-denied",
-        message: "Authorization denied.",
-        retryable: false,
-      };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Authorization denied.");
     }
 
     if (response.status === 409) {

@@ -1,13 +1,12 @@
+import { gateAccess } from "@/features/admin-access/server/require-current-permission";
 import "server-only";
 
-import { fetchCurrentEffectiveAccess, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
+import { hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { acceptanceRoleRoute, requiredRoutePermission } from "@/lib/authorization/acceptance-role-contract";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
 
 import {
-  createScenarioRecoveryRun,
-  generateScenarioRecoveryOptions,
   readScenarioRecoveryHistory,
   readScenarioRecoveryWorkspace,
   type ScenarioRecoveryHistoryItemApi,
@@ -27,16 +26,30 @@ export type ScenarioRecoveryPageParams = Readonly<{
 
 export type ScenarioRecoveryPageResult =
   | Readonly<{ status: "success"; workspace: ScenarioRecoveryWorkspaceApi; history: readonly ScenarioRecoveryHistoryItemApi[] }>
+  | Readonly<{
+      status: "ready";
+      lineId: string;
+      entryPoint?: string;
+      orderReference?: string;
+      constraintStationCode?: string;
+      canSimulate: boolean;
+      history: readonly ScenarioRecoveryHistoryItemApi[];
+    }>
   | Readonly<{ status: "forbidden"; message: string }>
   | Readonly<{ status: "failure"; message: string }>;
 
 export async function readScenarioRecoveryPage(
   params: ScenarioRecoveryPageParams,
 ): Promise<ScenarioRecoveryPageResult> {
-  const access = await fetchCurrentEffectiveAccess();
-  if (!hasGrantedPermission(access, requiredRoutePermission("senaryo"))) {
-    return { status: "forbidden", message: "Senaryo kurtarma okuma izni gerekli." };
+  const gate = await gateAccess([requiredRoutePermission("senaryo")]);
+  if (gate.status === "failure") {
+    // Only a real denial is "forbidden"; a missing session or an unavailable access service is a load failure.
+    return gate.code === "authorization-denied"
+      ? { status: "forbidden", message: "Senaryo kurtarma okuma izni gerekli." }
+      : { status: "failure", message: gate.message };
   }
+
+  const access = gate.access;
 
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
@@ -65,46 +78,19 @@ export async function readScenarioRecoveryPage(
   }
 
   if (!params.lineId) {
-    return { status: "failure", message: "Hat veya senaryo tanımlayıcısı gerekli." };
+    return { status: "failure", message: "Senaryo kurtarma bir üretim hattı bağlamı gerektirir: bir hat veya mevcut bir senaryo çalıştırması seçilmeden başlatılamaz." };
   }
 
-  if (!hasGrantedPermission(access, acceptanceRoleRoute("senaryo").simulatePermissionKey ?? "")) {
-    return { status: "forbidden", message: "Senaryo simülasyon izni gerekli." };
-  }
-
-  const createResult = await createScenarioRecoveryRun(context, {
-    lineId: params.lineId,
-    category: "PRODUCTION_RECOVERY",
-    entryPoint: params.entryPoint ?? "DIRECT",
-    problem: {
-      summary: params.orderReference
-        ? `Order ${params.orderReference} delivery risk with operational constraint`
-        : "Operational recovery scenario",
-      orderReference: params.orderReference,
-      constraintStationCode: params.constraintStationCode,
-      contributingFactors: ["throughput-gap", "constraint-detected"],
-    },
-    objectives: [
-      { objectiveType: "PROTECT_OTIF", label: "Protect delivery commitment", priority: 3, isHardConstraint: true },
-      { objectiveType: "MAXIMIZE_VERIFIED_GOOD_THROUGHPUT", label: "Increase good throughput", priority: 2, isHardConstraint: false },
-    ],
-    sourceEntityType: params.entryPoint?.toLowerCase() ?? "direct",
-    sourceEntityId: params.lineId,
-  });
-
-  if (createResult.status === "failure") {
-    return { status: "failure", message: createResult.message };
-  }
-
-  const optionsResult = await generateScenarioRecoveryOptions(context, createResult.value.runId);
-  if (optionsResult.status === "failure") {
-    return { status: "failure", message: optionsResult.message };
-  }
-
+  // A line without a run: viewing is read-only. Creating a scenario is an explicit action (scenario-recovery-actions.ts),
+  // never a side effect of loading this page.
   const historyResult = await readScenarioRecoveryHistory(context, params.lineId);
   return {
-    status: "success",
-    workspace: optionsResult.value,
+    status: "ready",
+    lineId: params.lineId,
+    entryPoint: params.entryPoint,
+    orderReference: params.orderReference,
+    constraintStationCode: params.constraintStationCode,
+    canSimulate: hasGrantedPermission(access, acceptanceRoleRoute("senaryo").simulatePermissionKey ?? ""),
     history: historyResult.status === "success" ? historyResult.value : [],
   };
 }

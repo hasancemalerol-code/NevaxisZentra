@@ -1,3 +1,4 @@
+import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./ai-task-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -12,6 +13,7 @@ export type AiTaskDecisionApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "configuration-error"
     | "invalid-request"
     | "invalid-response"
@@ -69,7 +71,8 @@ async function requestJson<T>(
     }
 
     if (response.status === 403) {
-      return { status: "failure", code: "permission-denied", message: "Yetki bulunmuyor.", retryable: false };
+      const refusal = await classifyFailedResponse(response);
+      return failureForRefusal(refusal, "Yetki bulunmuyor.");
     }
 
     if (response.status === 404) {

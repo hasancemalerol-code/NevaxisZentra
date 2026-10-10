@@ -1,3 +1,4 @@
+import { refusalCode, SESSION_REQUIRED_MESSAGE, SUBSCRIPTION_REQUIRED_MESSAGE } from "@/lib/api/api-failure-classifier";
 import "./dashboard-server-boundary";
 
 import { fetchTrustedApi } from "@/features/saas-identity/server/authenticated-server-fetch";
@@ -11,6 +12,7 @@ export type MarketRatesApiFailure = Readonly<{
     | "source-unavailable"
     | "unauthenticated"
     | "permission-denied"
+    | "subscription-required"
     | "invalid-request";
   message: string;
   retryable: boolean;
@@ -73,13 +75,18 @@ function failureMessage(status: number, payload: unknown): string {
   }
 
   if (status === 401) return "Kimlik doğrulama gerekli.";
-  if (status === 403) return "Piyasa kuru özeti için yetkiniz yok.";
+  if (status === 403) {
+    const cause = refusalCode(status, payload);
+    if (cause === "subscription-required") return SUBSCRIPTION_REQUIRED_MESSAGE;
+    if (cause === "unauthenticated") return SESSION_REQUIRED_MESSAGE;
+    return "Piyasa kuru özeti için yetkiniz yok.";
+  }
   return "Piyasa kuru özeti alınamadı.";
 }
 
 function mapFailureStatus(status: number, payload: unknown): MarketRatesApiFailure["code"] {
   if (status === 401) return "unauthenticated";
-  if (status === 403) return "permission-denied";
+  if (status === 403) return refusalCode(status, payload);
   if (payload && typeof payload === "object" && "failureCode" in payload) {
     return "invalid-request";
   }

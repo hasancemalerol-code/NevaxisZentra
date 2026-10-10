@@ -4,7 +4,7 @@ import { ArrowLeft, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
-  fetchCurrentEffectiveAccess,
+  fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
@@ -97,7 +97,7 @@ export default async function MaintenanceRequestDetailPage({
   }
 
   const request = result.request;
-  const access = await fetchCurrentEffectiveAccess();
+  const access = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(access, "maintenance.manage");
   const canConvert =
     canManage && (request.status === "open" || request.status === "triaged");
