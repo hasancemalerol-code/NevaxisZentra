@@ -11,6 +11,11 @@ public static class FactoryCopilotToolRegistry
     private static readonly IReadOnlyDictionary<string, FactoryCopilotToolDefinition> Tools =
         new Dictionary<string, FactoryCopilotToolDefinition>(StringComparer.OrdinalIgnoreCase)
         {
+            [FactoryCopilotToolIds.GetMachinePerformance] = new(
+                FactoryCopilotToolIds.GetMachinePerformance,
+                FactoryCopilotToolAccessClasses.Analytic,
+                "Per-machine produced units, stops and top stop reasons over the available period (read-only aggregate)",
+                [FactoryCopilotIntents.GeneralQuestion]),
             [FactoryCopilotToolIds.GetLineState] = new(
                 FactoryCopilotToolIds.GetLineState,
                 FactoryCopilotToolAccessClasses.Read,
@@ -106,7 +111,11 @@ public static class FactoryCopilotToolRegistry
                 $"Unknown copilot tool: {toolId}");
         }
 
-        if (!definition.AllowedIntents.Contains(intent, StringComparer.OrdinalIgnoreCase))
+        // Free-form factory questions may use any read-only or analytic tool, never a simulation tool.
+        var generalQuestionAllowed = intent == FactoryCopilotIntents.GeneralQuestion
+            && definition.AccessClass != FactoryCopilotToolAccessClasses.Simulation;
+        if (!generalQuestionAllowed
+            && !definition.AllowedIntents.Contains(intent, StringComparer.OrdinalIgnoreCase))
         {
             throw new FactoryCopilotException(
                 FactoryCopilotFailureCodes.ToolUnauthorized,

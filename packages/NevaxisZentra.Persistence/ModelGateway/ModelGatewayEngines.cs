@@ -23,7 +23,8 @@ public sealed record ModelProviderInvokeResult(
     int InputTokens,
     int OutputTokens,
     decimal EstimatedCost,
-    string ResponseClassification);
+    string ResponseClassification,
+    string? ActualModelName = null);
 
 public static class ModelRouterEngine
 {
@@ -114,7 +115,8 @@ public static class ModelRouterEngine
         classification is ModelGatewayRequestClassifications.OperationalExplanation
             or ModelGatewayRequestClassifications.HypothesisGeneration
             or ModelGatewayRequestClassifications.RecoveryPlanReasoning
-            or ModelGatewayRequestClassifications.CrossModuleDiagnosis;
+            or ModelGatewayRequestClassifications.CrossModuleDiagnosis
+            or ModelGatewayRequestClassifications.GroundedFactorySynthesis;
 
     private static ModelGatewayRoutingDecision DeterministicRoute(string reason) =>
         new(
@@ -292,13 +294,16 @@ public sealed class LocalModelProvider : IModelProvider
 
 public sealed class FrontierModelProvider(OpenAiFrontierModelClient? openAiClient = null) : IModelProvider
 {
-    private readonly DeterministicEngineProvider deterministicFallback = new();
     private readonly OpenAiFrontierModelClient? openAiClient = openAiClient;
 
     public string ProviderId => ModelGatewayProviderIds.FrontierModel;
     public string IntelligencePath => ModelGatewayIntelligencePaths.FrontierModel;
     public bool IsAvailable => true;
 
+    /// <summary>
+    /// Calls the real model or reports exactly why it could not. It never fabricates a model answer, token counts or
+    /// cost: a missing key, a rejected key, a rate limit, a timeout or a malformed reply is returned as a failure.
+    /// </summary>
     public async Task<ModelProviderInvokeResult> InvokeAsync(
         ModelProviderInvokeRequest request,
         CancellationToken cancellationToken)
@@ -317,34 +322,18 @@ public sealed class FrontierModelProvider(OpenAiFrontierModelClient? openAiClien
                 "insufficient-context");
         }
 
-        if (openAiClient?.IsConfigured == true)
+        if (openAiClient is null)
         {
-            var openAiResult = await openAiClient.InvokeStructuredAsync(request, cancellationToken);
-            if (openAiResult.Succeeded)
-            {
-                return openAiResult;
-            }
+            return new ModelProviderInvokeResult(
+                false,
+                ModelGatewayFailureStates.ProviderUnavailable,
+                null,
+                0,
+                0,
+                0m,
+                "openai-not-configured");
         }
 
-        var deterministic = await deterministicFallback.InvokeAsync(request, cancellationToken);
-        if (!deterministic.Succeeded || deterministic.Proposal is null)
-        {
-            return deterministic;
-        }
-
-        var enriched = deterministic.Proposal with
-        {
-            Hypothesis = $"Frontier-assisted reasoning: {deterministic.Proposal.Hypothesis}",
-            Confidence = Math.Min(0.85m, deterministic.Proposal.Confidence),
-        };
-
-        return new ModelProviderInvokeResult(
-            true,
-            null,
-            enriched,
-            120,
-            80,
-            0.04m,
-            "frontier-structured-proposal");
+        return await openAiClient.InvokeStructuredAsync(request, cancellationToken);
     }
 }

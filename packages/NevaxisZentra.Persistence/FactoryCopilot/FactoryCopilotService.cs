@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NevaxisZentra.Persistence.Audit;
 using NevaxisZentra.Persistence.ContextKnowledge;
 using NevaxisZentra.Persistence.ContinuousOptimization;
@@ -39,7 +40,8 @@ public sealed class FactoryCopilotService(
     IDigitalWorkforceWorksService worksService,
     IContinuousOptimizationService continuousOptimization,
     IModelGatewayService modelGateway,
-    IAuditWriter auditWriter) : IFactoryCopilotService
+    IAuditWriter auditWriter,
+    ILogger<FactoryCopilotService> logger) : IFactoryCopilotService
 {
     private readonly FactoryCopilotToolExecutor toolExecutor = new(
         dbContext,
@@ -55,7 +57,9 @@ public sealed class FactoryCopilotService(
         string subjectId,
         FactoryCopilotQueryRequest request,
         CancellationToken cancellationToken = default) =>
-        tenantDatabaseSession.ExecuteReadAsync(
+        // A write session: the model gateway's usage/cost/audit rows and the context snapshot are written during a query,
+        // and a read session rolls them back.
+        tenantDatabaseSession.ExecuteWriteAsync(
             ct => QueryCoreAsync(facilityId, tenantId, subjectId, request, ct),
             cancellationToken);
 
@@ -89,6 +93,13 @@ public sealed class FactoryCopilotService(
             throw new FactoryCopilotException(
                 FactoryCopilotFailureCodes.ValidationFailed,
                 "Query text is required.");
+        }
+
+        if (request.QueryText.Length > FactoryCopilotGrounding.MaxQueryCharacters)
+        {
+            throw new FactoryCopilotException(
+                FactoryCopilotFailureCodes.ValidationFailed,
+                $"Query text exceeds {FactoryCopilotGrounding.MaxQueryCharacters} characters.");
         }
 
         var classification = FactoryCopilotIntentClassifier.Classify(request.QueryText, request.Context);
@@ -133,47 +144,94 @@ public sealed class FactoryCopilotService(
             cancellationToken);
 
         string? modelAnswer = null;
+        IReadOnlyList<string>? modelInference = null;
+        IReadOnlyList<string>? citedFacts = null;
         string? providerId = null;
         string? modelName = null;
         var modelInvoked = false;
         string? failureState = null;
 
-        if (classification.RequiresModel &&
-            contextQuality == FactoryCopilotContextQualityStates.Sufficient)
+        if (classification.RequiresModel)
         {
-            try
+            if (FactoryCopilotHallucinationGuard.IsInjection(request.QueryText))
             {
-                var primaryConstraintCode = ResolvePrimaryConstraintCode(bundle.ThroughputOverview);
-                var modelResponse = await modelGateway.InvokeAsync(
-                    facilityId,
-                    tenantId,
-                    new ModelGatewayRequest(
-                        tenantId,
-                        facilityId,
-                        null,
-                        request.Context.DigitalWorkCaseId,
-                        "factory-copilot-synthesis",
-                        classification.Intent,
-                        new ModelGatewayContextReference(
-                            null,
-                            $"{resolved.LineCode} throughput and bounded operational context",
-                            request.Context.DigitalWorkCaseId,
-                            primaryConstraintCode,
-                            bundle.SimulationSnapshot?.PredictedGoodThroughputPerHour.ToString("0.#", CultureInfo.InvariantCulture),
-                            contextQuality),
-                        1,
-                        true),
-                    cancellationToken);
-
-                modelInvoked = modelResponse.Succeeded;
-                providerId = modelResponse.Routing.ProviderId;
-                modelName = modelResponse.Routing.ModelName;
-                modelAnswer = modelResponse.Proposal?.Hypothesis;
-                failureState = modelResponse.FailureState;
+                // Never forward an instruction-override attempt to the provider.
+                failureState = FactoryCopilotAiStates.InjectionBlocked;
             }
-            catch (ModelGatewayException ex)
+            else if (!IsModelEligible(classification.Intent, contextQuality, bundle))
             {
-                failureState = ex.FailureCode;
+                failureState = FactoryCopilotAiStates.InsufficientData;
+            }
+            else
+            {
+                var facts = FactoryCopilotGrounding.BuildFacts(bundle, resolved, contextQuality);
+                var question = FactoryCopilotGrounding.SanitizeQuestion(request.QueryText);
+                var primaryConstraintCode = ResolvePrimaryConstraintCode(bundle.ThroughputOverview);
+                try
+                {
+                    var modelResponse = await modelGateway.InvokeAsync(
+                        facilityId,
+                        tenantId,
+                        new ModelGatewayRequest(
+                            tenantId,
+                            facilityId,
+                            null,
+                            request.Context.DigitalWorkCaseId,
+                            ModelGatewayRequestClassifications.GroundedFactorySynthesis,
+                            classification.Intent,
+                            new ModelGatewayContextReference(
+                                null,
+                                $"{resolved.LineCode} throughput and bounded operational context",
+                                request.Context.DigitalWorkCaseId,
+                                primaryConstraintCode,
+                                bundle.SimulationSnapshot?.PredictedGoodThroughputPerHour.ToString("0.#", CultureInfo.InvariantCulture),
+                                contextQuality),
+                            1,
+                            true,
+                            Grounded: new ModelGroundedInput(question, facts)),
+                        cancellationToken);
+
+                    var aiState = FactoryCopilotGrounding.MapAiState(modelResponse);
+                    if (aiState is not null)
+                    {
+                        // The real model did not answer: report why. A fallback or synthetic proposal is never an answer.
+                        failureState = aiState;
+                    }
+                    else if (modelResponse.Proposal is { } proposal)
+                    {
+                        providerId = modelResponse.Routing.ProviderId;
+                        modelName = modelResponse.Routing.ModelName;
+                        if (proposal.EvidenceRefs.Contains(OpenAiInsufficientDataMarker, StringComparer.Ordinal))
+                        {
+                            modelInvoked = true;
+                            failureState = FactoryCopilotAiStates.InsufficientData;
+                            modelAnswer = proposal.Hypothesis;
+                        }
+                        else if (FactoryCopilotGrounding.FindUngroundedClaim(proposal.Hypothesis, facts, question) is not null)
+                        {
+                            modelInvoked = true;
+                            failureState = FactoryCopilotAiStates.UngroundedResponse;
+                        }
+                        else
+                        {
+                            modelInvoked = true;
+                            modelAnswer = proposal.Hypothesis;
+                            modelInference = proposal.Assumptions;
+                            citedFacts = facts
+                                .Where(f => proposal.EvidenceRefs.Contains(f.Id, StringComparer.OrdinalIgnoreCase))
+                                .Select(f => f.Text)
+                                .ToList();
+                        }
+                    }
+                    else
+                    {
+                        failureState = FactoryCopilotAiStates.InvalidOutput;
+                    }
+                }
+                catch (ModelGatewayException)
+                {
+                    failureState = FactoryCopilotAiStates.ProviderUnavailable;
+                }
             }
         }
 
@@ -182,7 +240,11 @@ public sealed class FactoryCopilotService(
             bundle,
             resolved,
             contextQuality,
-            modelAnswer);
+            modelAnswer,
+            modelInference,
+            modelName,
+            failureState,
+            citedFacts);
 
         var (accepted, rejectionReason, guarded) = FactoryCopilotHallucinationGuard.Validate(
             composed,
@@ -212,7 +274,13 @@ public sealed class FactoryCopilotService(
             modelName,
             stopwatch.ElapsedMilliseconds);
 
-        await WriteAuditAsync(facilityId, tenantId, subjectId, result, cancellationToken);
+        var audit = await WriteAuditAsync(facilityId, tenantId, subjectId, result, cancellationToken);
+        if (!audit.Succeeded)
+        {
+            // The answer is still returned, but a missing audit record must be visible to operators.
+            AuditNotWritten(logger, audit.FailureCode ?? "unknown", null);
+        }
+
         return result;
     }
 
@@ -291,6 +359,12 @@ public sealed class FactoryCopilotService(
                     request.Context.DigitalWorkCaseId),
                 cancellationToken);
 
+            if (package.FailureState == ContextKnowledgeFailureStates.InsufficientContext)
+            {
+                // No recent trusted state for the line: "insufficient", which is not the same as an unavailable source.
+                return FactoryCopilotContextQualityStates.Insufficient;
+            }
+
             if (!string.IsNullOrWhiteSpace(package.FailureState))
             {
                 return FactoryCopilotContextQualityStates.SourceUnavailable;
@@ -325,9 +399,12 @@ public sealed class FactoryCopilotService(
 
             return FactoryCopilotContextQualityStates.Sufficient;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return FactoryCopilotContextQualityStates.Insufficient;
+            // A failed assessment is an unavailable source, not "no data": the user must not be told the data is missing.
+            // Never log the message (it can carry data); the type and the failing step are enough to diagnose.
+            ContextAssessmentFailed(logger, ex.GetType().Name, null);
+            return FactoryCopilotContextQualityStates.SourceUnavailable;
         }
     }
 
@@ -397,6 +474,30 @@ public sealed class FactoryCopilotService(
         return null;
     }
 
+    /// <summary>
+    /// The model is asked only with trusted context. A free-form question about the available period may also be
+    /// answered when there is no live (recent) context but the machine aggregate has recorded events; conflicted or
+    /// unavailable sources never reach the model.
+    /// </summary>
+    private static bool IsModelEligible(string intent, string contextQuality, FactoryCopilotToolBundle bundle) =>
+        contextQuality == FactoryCopilotContextQualityStates.Sufficient
+            ? bundle.ThroughputOverview is not null || bundle.MachinePerformance is not null
+            : intent == FactoryCopilotIntents.GeneralQuestion
+              && contextQuality == FactoryCopilotContextQualityStates.Insufficient
+              && bundle.MachinePerformance is { Machines.Count: > 0 };
+
+    private static readonly Action<ILogger, string, Exception?> AuditNotWritten = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4102, nameof(AuditNotWritten)),
+        "Factory Copilot query audit record was not written: {FailureCode}");
+
+    private static readonly Action<ILogger, string, Exception?> ContextAssessmentFailed = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4101, nameof(ContextAssessmentFailed)),
+        "Factory Copilot context assessment failed: {ExceptionType}");
+
+    private const string OpenAiInsufficientDataMarker = "insufficient-data";
+
     private Task<AuditWriteResult> WriteAuditAsync(
         Guid facilityId,
         Guid tenantId,
@@ -405,9 +506,9 @@ public sealed class FactoryCopilotService(
         CancellationToken cancellationToken) =>
         auditWriter.WriteAsync(
             new AuditWriteRequest(
-                "factory-copilot.query",
-                result.Intent,
-                "factory-copilot",
+                AuditEventTypes.FactoryCopilotQueryAnswered,
+                AuditActions.FactoryCopilotQuery,
+                "factorycopilot",
                 AuditOutcome.Success,
                 result.QueryId.ToString(),
                 FactoryCopilotPermissionKeys.Query,
@@ -420,14 +521,19 @@ public sealed class FactoryCopilotService(
                     ["latencyMs"] = result.Provenance.TotalLatencyMs,
                     ["evidenceCount"] = result.Response.Evidence.Count,
                     ["failureState"] = result.FailureState,
-                    ["summary"] = JsonSerializer.Serialize(new
-                    {
-                        result.Intent,
-                        result.Response.Answer,
-                        tools = result.Provenance.Tools.Select(t => t.ToolId),
-                    }),
+                    ["providerId"] = result.Provenance.ProviderId,
+                    ["modelName"] = result.Provenance.ModelName,
+                    // Which tools ran and how long the answer is: never the question or the answer text.
+                    ["toolIds"] = string.Join(',', result.Provenance.Tools.Select(t => t.ToolId)).Truncate256(),
+                    ["answerLength"] = result.Response.Answer.Length,
                 }),
             cancellationToken);
+}
+
+internal static class FactoryCopilotAuditStringExtensions
+{
+    /// <summary>audit metadata strings are capped at 256 characters.</summary>
+    public static string Truncate256(this string value) => value.Length <= 256 ? value : value[..256];
 }
 
 public static class FactoryCopilotServiceCollectionExtensions

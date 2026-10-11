@@ -1,6 +1,7 @@
 import "./factory-copilot-server-boundary";
 
 import type { ProductionOrderRequestContext } from "@/features/production-execution/server/production-order-request-context";
+import { classifyFailedResponse, type ClassifiedApiFailure } from "@/lib/api/api-failure-classifier";
 
 import type {
   FactoryCopilotContextInput,
@@ -8,6 +9,16 @@ import type {
   FactoryCopilotQueryResult,
   FactoryCopilotSuggestedQuestionsResult,
 } from "../domain/factory-copilot-types";
+
+/** A failed Copilot HTTP call, carrying the classified cause instead of a bare message. */
+export class FactoryCopilotRequestError extends Error {
+  constructor(
+    readonly failure: ClassifiedApiFailure,
+    readonly backendMessage: string | null,
+  ) {
+    super("Copilot request failed");
+  }
+}
 
 function buildUrl(
   context: ProductionOrderRequestContext,
@@ -34,15 +45,16 @@ async function postJson<T>(
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    let message = `Copilot isteği başarısız (${response.status})`;
+    const failure = await classifyFailedResponse(response);
+    let backendMessage: string | null = null;
     try {
-      const parsed = JSON.parse(text) as { message?: string };
-      message = parsed.message ?? message;
+      const parsed = JSON.parse(await response.text()) as { message?: unknown };
+      backendMessage = typeof parsed.message === "string" ? parsed.message : null;
     } catch {
-      // ignore
+      backendMessage = null;
     }
-    throw new Error(message);
+
+    throw new FactoryCopilotRequestError(failure, backendMessage);
   }
 
   return (await response.json()) as T;

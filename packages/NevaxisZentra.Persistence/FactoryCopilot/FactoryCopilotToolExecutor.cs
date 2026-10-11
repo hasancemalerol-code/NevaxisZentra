@@ -185,6 +185,21 @@ internal sealed class FactoryCopilotToolExecutor(
                         TrackThroughputTokens(knownTokens, overview);
                         invocations.Add(Success(toolId, stopwatch, "Executive signals compiled"));
                         break;
+                    case FactoryCopilotToolIds.GetMachinePerformance:
+                    {
+                        var performance = await GetMachinePerformanceAsync(facilityId, resolved, cancellationToken);
+                        bundle = bundle with { MachinePerformance = performance };
+                        if (performance is not null)
+                        {
+                            TrackKnownTokens(knownTokens, performance.Machines.SelectMany(m => new[] { m.ResourceCode, m.ResourceName }).ToArray());
+                        }
+
+                        invocations.Add(Success(
+                            toolId,
+                            stopwatch,
+                            performance is null ? "No machine events in the available period" : $"{performance.Machines.Count} machines aggregated"));
+                        break;
+                    }
                     case FactoryCopilotToolIds.GetOptimizationRun:
                     {
                         ContinuousOptimizationRunSummary? optimizationRun = null;
@@ -353,6 +368,75 @@ internal sealed class FactoryCopilotToolExecutor(
         }
 
         return signals;
+    }
+
+    /// <summary>
+    /// Aggregates the line's canonical events per machine: produced units (GOOD quantity) and stops (STOP minutes by
+    /// reason). Aggregation happens in SQL and the result is bounded to the 10 most relevant machines.
+    /// </summary>
+    private async Task<FactoryCopilotMachinePerformance?> GetMachinePerformanceAsync(
+        Guid facilityId,
+        FactoryCopilotResolvedContext resolved,
+        CancellationToken cancellationToken)
+    {
+        var events = dbContext.CanonicalProductionEvents.AsNoTracking()
+            .Where(e => e.FacilityId == facilityId && e.LineId == resolved.LineId && e.ResourceId != null);
+
+        var bounds = await events
+            .GroupBy(_ => 1)
+            .Select(g => new { From = g.Min(e => e.OccurredAtUtc), To = g.Max(e => e.OccurredAtUtc), Count = g.Count() })
+            .FirstOrDefaultAsync(cancellationToken);
+        if (bounds is null || bounds.Count == 0)
+        {
+            return null;
+        }
+
+        var produced = await events
+            .Where(e => e.EventType == MixedProductionEventTypes.Good)
+            .GroupBy(e => new { ResourceId = e.ResourceId!.Value, e.OperationCode })
+            .Select(g => new { g.Key.ResourceId, g.Key.OperationCode, Units = g.Sum(e => e.Quantity ?? 0m) })
+            .ToListAsync(cancellationToken);
+
+        var stops = await events
+            .Where(e => e.EventType == MixedProductionEventTypes.Stop)
+            .GroupBy(e => new { ResourceId = e.ResourceId!.Value, e.OperationCode, Reason = e.ReasonCode ?? "unspecified" })
+            .Select(g => new
+            {
+                g.Key.ResourceId,
+                g.Key.OperationCode,
+                g.Key.Reason,
+                Count = g.Count(),
+                Minutes = g.Sum(e => e.Quantity ?? 0m),
+            })
+            .ToListAsync(cancellationToken);
+
+        // Working days: distinct calendar days with production inside a scheduled window (weekends and days without
+        // scheduled production are not scheduled time).
+        var scheduledStamps = await events
+            .Where(e => e.EventType == MixedProductionEventTypes.Good && e.OperationCode == FactoryCalendarWindows.Scheduled)
+            .Select(e => e.OccurredAtUtc)
+            .Distinct()
+            .Take(50_000)
+            .ToListAsync(cancellationToken);
+        var workingDays = scheduledStamps.Select(t => DateOnly.FromDateTime(t.UtcDateTime)).Distinct().Count();
+
+        var resourceIds = produced.Select(p => p.ResourceId)
+            .Concat(stops.Select(s => s.ResourceId))
+            .Distinct()
+            .ToList();
+        var resources = await dbContext.ManufacturingResources.AsNoTracking()
+            .Where(r => resourceIds.Contains(r.Id))
+            .Select(r => new FactoryCopilotMachineIdentity(r.Id, r.Code, r.Name))
+            .ToListAsync(cancellationToken);
+
+        return FactoryCopilotMachineMetrics.Build(
+            bounds.From,
+            bounds.To,
+            bounds.Count,
+            workingDays,
+            resources,
+            produced.Select(p => new FactoryCopilotProducedRow(p.ResourceId, p.OperationCode, p.Units)).ToList(),
+            stops.Select(s => new FactoryCopilotStopRow(s.ResourceId, s.OperationCode, s.Reason, s.Count, s.Minutes)).ToList());
     }
 
     private static FactoryCopilotToolInvocation Success(string toolId, Stopwatch stopwatch, string summary)

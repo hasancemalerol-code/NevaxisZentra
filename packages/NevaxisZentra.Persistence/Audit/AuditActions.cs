@@ -8,6 +8,7 @@ public static class AuditActions
     public const string WriteAudit = "write.audit";
     public const string ValidateConfiguration = "validate.configuration";
     public const string AppendAiDecision = "ai.decision.append";
+    public const string FactoryCopilotQuery = "factorycopilot.query";
     public const string ProductionPlanDraftCreate = "production.plan.draft.create";
     public const string ProductionPlanDraftUpdate = "production.plan.draft.update";
     public const string ProductionPlanSubmitForReview = "production.plan.workflow.submit.for.review";
@@ -118,6 +119,7 @@ public static class AuditActions
         WriteAudit,
         ValidateConfiguration,
         AppendAiDecision,
+        FactoryCopilotQuery,
         ProductionPlanDraftCreate,
         ProductionPlanDraftUpdate,
         ProductionPlanSubmitForReview,

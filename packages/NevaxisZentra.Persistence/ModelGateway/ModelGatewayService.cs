@@ -92,11 +92,27 @@ public sealed class ModelGatewayService : IModelGatewayService
         var invokeResult = await provider.InvokeAsync(new ModelProviderInvokeRequest(request, routing), cancellationToken);
         if (!invokeResult.Succeeded)
         {
+            var primaryRouting = routing;
+            var primaryResult = invokeResult;
             routing = ModelRouterEngine.Fallback(routing, invokeResult.FailureState ?? "provider-failure");
             if (providers.TryGetValue(routing.IntelligencePath, out var fallbackProvider))
             {
                 invokeResult = await fallbackProvider.InvokeAsync(new ModelProviderInvokeRequest(request, routing), cancellationToken);
             }
+
+            if (!invokeResult.Succeeded)
+            {
+                // The fallback did not help: report the primary provider's real failure (rate limit, rejected key,
+                // timeout, ...) instead of the fallback's generic "unavailable".
+                routing = primaryRouting;
+                invokeResult = primaryResult;
+            }
+        }
+
+        if (invokeResult.Succeeded && !string.IsNullOrWhiteSpace(invokeResult.ActualModelName))
+        {
+            // Record the model that really answered, not the router's logical name.
+            routing = routing with { ProviderId = "openai", ModelName = invokeResult.ActualModelName };
         }
 
         var validation = OperationalProposalValidator.Validate(invokeResult.Proposal);
@@ -185,7 +201,8 @@ public sealed class ModelGatewayService : IModelGatewayService
             validation,
             stopwatch.ElapsedMilliseconds,
             invokeResult.EstimatedCost,
-            auditId.ToString());
+            auditId.ToString(),
+            invokeResult.ResponseClassification);
     }
 
     private async Task<decimal> SumCostAsync(Guid facilityId, DateTimeOffset since, CancellationToken cancellationToken) =>

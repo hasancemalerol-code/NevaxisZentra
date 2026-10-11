@@ -27,6 +27,7 @@ public static class ModelGatewayRequestClassifications
     public const string HypothesisGeneration = "hypothesis-generation";
     public const string RecoveryPlanReasoning = "recovery-plan-reasoning";
     public const string CrossModuleDiagnosis = "cross-module-diagnosis";
+    public const string GroundedFactorySynthesis = "factory-copilot-synthesis";
 }
 
 public static class ModelGatewayFailureStates
@@ -34,6 +35,7 @@ public static class ModelGatewayFailureStates
     public const string ProviderUnavailable = "PROVIDER_UNAVAILABLE";
     public const string Timeout = "TIMEOUT";
     public const string RateLimit = "RATE_LIMIT";
+    public const string AuthenticationFailed = "AUTHENTICATION_FAILED";
     public const string InvalidOutput = "INVALID_OUTPUT";
     public const string SchemaFailure = "SCHEMA_FAILURE";
     public const string PolicyRejected = "POLICY_REJECTED";

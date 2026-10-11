@@ -131,7 +131,7 @@ builder.Services.AddNevaxisZentraFactoryIntelligence();
 builder.Services.AddNevaxisZentraMixedProduction();
 builder.Services.AddNevaxisZentraThroughputIntelligence();
 builder.Services.AddNevaxisZentraContextKnowledge();
-builder.Services.AddNevaxisZentraModelGateway();
+builder.Services.AddNevaxisZentraModelGateway(allowSyntheticProviders: builder.Environment.IsDevelopment());
 builder.Services.AddNevaxisZentraThroughputOptimizer();
 builder.Services.AddNevaxisZentraScenarioRecovery();
 builder.Services.AddNevaxisZentraFactoryCopilot();

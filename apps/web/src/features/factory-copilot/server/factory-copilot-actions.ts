@@ -13,12 +13,23 @@ import type {
   FactoryCopilotQueryResult,
   FactoryCopilotSuggestedQuestionsResult,
 } from "../domain/factory-copilot-types";
+import { describeFactoryCopilotRequestFailure } from "../domain/factory-copilot-failures";
 import {
+  FactoryCopilotRequestError,
   fetchFactoryCopilotQuery,
   fetchFactoryCopilotSuggestedQuestions,
 } from "./factory-copilot-api-client";
 
 type ActionFailure = Readonly<{ status: "failure"; message: string }>;
+
+function describeCopilotError(error: unknown): string {
+  if (error instanceof FactoryCopilotRequestError) {
+    return describeFactoryCopilotRequestFailure(error.failure, error.backendMessage).message;
+  }
+
+  // A network failure or an unreadable response: the service could not be reached, not a "Copilot failure".
+  return "Copilot servisine şu an ulaşılamıyor. Biraz sonra tekrar deneyin.";
+}
 
 async function resolveContext(): Promise<
   | Readonly<{ status: "success"; context: import("@/features/production-execution/server/production-order-request-context").ProductionOrderRequestContext }>
@@ -55,7 +66,7 @@ export async function queryFactoryCopilotAction(
   } catch (error) {
     return {
       status: "failure",
-      message: error instanceof Error ? error.message : "Copilot sorgusu başarısız.",
+      message: describeCopilotError(error),
     };
   }
 }
@@ -78,7 +89,7 @@ export async function loadFactoryCopilotSuggestedQuestionsAction(
   } catch (error) {
     return {
       status: "failure",
-      message: error instanceof Error ? error.message : "Önerilen sorular yüklenemedi.",
+      message: describeCopilotError(error),
     };
   }
 }

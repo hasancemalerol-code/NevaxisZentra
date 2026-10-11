@@ -716,6 +716,7 @@ public sealed class NevaxisModelTrainingJobStatusTests
     }
 }
 
+[Collection(OpenAiEnvironmentSerial.Name)]
 public sealed class OpenAiFrontierModelProviderTests
 {
     private static readonly string[] OpenAiTestEvidenceRefs = ["openai-response"];
@@ -756,7 +757,8 @@ public sealed class OpenAiFrontierModelProviderTests
     [Fact]
     public async Task ValidateLiveSucceedsWithMockOpenAiClient()
     {
-        var handler = new StubOpenAiHandler(HttpStatusCode.OK, BuildOpenAiSuccessPayload());
+        // Live validation exercises the grounded path Factory Copilot uses, so the stub answers in that format.
+        var handler = new StubOpenAiHandler(HttpStatusCode.OK, BuildOpenAiGroundedPayload());
         var client = CreateClient(enabled: true, apiKey: "test-key", handler);
         var result = await client.ValidateLiveAsync(CancellationToken.None);
 
@@ -804,6 +806,26 @@ public sealed class OpenAiFrontierModelProviderTests
                 "1.0",
                 "test",
                 false));
+
+    private static readonly string[] OpenAiGroundedFactIds = ["F2"];
+
+    private static string BuildOpenAiGroundedPayload()
+    {
+        var answer = JsonSerializer.Serialize(new
+        {
+            answer = "Machine B has more stop minutes.",
+            usedFactIds = OpenAiGroundedFactIds,
+            inference = Array.Empty<string>(),
+            insufficientData = false,
+            confidence = 0.9m,
+        });
+
+        return JsonSerializer.Serialize(new
+        {
+            choices = new[] { new { message = new { content = answer } } },
+            usage = new { prompt_tokens = 42, completion_tokens = 18 },
+        });
+    }
 
     private static string BuildOpenAiSuccessPayload()
     {

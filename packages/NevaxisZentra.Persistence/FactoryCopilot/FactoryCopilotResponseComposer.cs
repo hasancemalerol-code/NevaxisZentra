@@ -11,8 +11,35 @@ internal static class FactoryCopilotResponseComposer
         FactoryCopilotToolBundle bundle,
         FactoryCopilotResolvedContext resolved,
         string contextQuality,
-        string? modelAnswer = null)
+        string? modelAnswer = null,
+        IReadOnlyList<string>? modelInference = null,
+        string? modelName = null,
+        string? aiState = null,
+        IReadOnlyList<string>? citedFacts = null)
     {
+        if (!string.IsNullOrWhiteSpace(modelAnswer))
+        {
+            var inference = modelInference is { Count: > 0 }
+                ? " Çıkarımlar (gözlenen veri değil): " + string.Join(" | ", modelInference)
+                : string.Empty;
+            return new FactoryCopilotStructuredResponse(
+                Answer: modelAnswer,
+                WhatUsed: $"Doğrulanmış araç verileri + {modelName ?? "AI modeli"} (yalnızca listelenen verilerden)",
+                KeyFacts: citedFacts is { Count: > 0 } ? citedFacts.ToList() : CollectKeyFacts(bundle, resolved),
+                Causes: CollectCauses(bundle),
+                Impact: DescribeImpact(bundle),
+                RecommendedNextStep: "Önerilen müdahaleyi senaryo çalışma alanında doğrulayın.",
+                Uncertainty: "AI destekli sentez; sayısal iddialar alınan verilerle eşleştirilerek doğrulandı." + inference,
+                Evidence: CollectEvidence(bundle, resolved),
+                RelatedActions: BuildActions(intent, resolved, bundle));
+        }
+
+        if (intent == FactoryCopilotIntents.GeneralQuestion)
+        {
+            // A free-form question without a model answer says exactly why (configuration, provider, data, policy).
+            return ComposeAiUnavailable(bundle, resolved, aiState);
+        }
+
         if (contextQuality is FactoryCopilotContextQualityStates.Insufficient
             or FactoryCopilotContextQualityStates.SourceUnavailable)
         {
@@ -42,20 +69,6 @@ internal static class FactoryCopilotResponseComposer
                 RelatedActions: []);
         }
 
-        if (!string.IsNullOrWhiteSpace(modelAnswer))
-        {
-            return new FactoryCopilotStructuredResponse(
-                Answer: modelAnswer,
-                WhatUsed: "Deterministic tools + Model Gateway structured synthesis",
-                KeyFacts: CollectKeyFacts(bundle, resolved),
-                Causes: CollectCauses(bundle),
-                Impact: DescribeImpact(bundle),
-                RecommendedNextStep: "Önerilen müdahaleyi senaryo çalışma alanında doğrulayın.",
-                Uncertainty: "Model-assisted synthesis; iddialar kanıt referanslarıyla sınırlandırıldı.",
-                Evidence: CollectEvidence(bundle, resolved),
-                RelatedActions: BuildActions(intent, resolved, bundle));
-        }
-
         return intent switch
         {
             FactoryCopilotIntents.CurrentState => ComposeCurrentState(bundle, resolved),
@@ -76,6 +89,54 @@ internal static class FactoryCopilotResponseComposer
             FactoryCopilotIntents.OptimizationExplanation => ComposeOptimizationExplanation(bundle, resolved),
             _ => ComposeCauseAnalysis(bundle, resolved),
         };
+    }
+
+    private static FactoryCopilotStructuredResponse ComposeAiUnavailable(
+        FactoryCopilotToolBundle bundle,
+        FactoryCopilotResolvedContext resolved,
+        string? aiState)
+    {
+        var (answer, next) = aiState switch
+        {
+            FactoryCopilotAiStates.NotConfigured => (
+                "AI yanıt servisi bu kurulumda yapılandırılmamış; soru yanıtlanamadı.",
+                "Sistem yöneticisinin AI sağlayıcı yapılandırmasını tamamlaması gerekir."),
+            FactoryCopilotAiStates.AuthenticationFailed => (
+                "AI sağlayıcı kimlik doğrulaması reddedildi; soru yanıtlanamadı.",
+                "Sistem yöneticisinin AI sağlayıcı anahtarını kontrol etmesi gerekir."),
+            FactoryCopilotAiStates.RateLimited => (
+                "AI sağlayıcı istek sınırına ulaşıldı; soru şu an yanıtlanamadı.",
+                "Kısa bir süre sonra tekrar deneyin."),
+            FactoryCopilotAiStates.Timeout => (
+                "AI sağlayıcı zamanında yanıt vermedi; soru yanıtlanamadı.",
+                "Tekrar deneyin."),
+            FactoryCopilotAiStates.InvalidOutput or FactoryCopilotAiStates.UngroundedResponse => (
+                "AI yanıtı doğrulanamadığı için gösterilmedi.",
+                "Soruyu daha somut bir hat veya istasyon bağlamıyla tekrar deneyin."),
+            FactoryCopilotAiStates.InsufficientData => (
+                "Bu soruyu yanıtlamak için yeterli üretim verisi yok; tahmin yürütülmedi.",
+                "İlgili hat veya dönem için veri geldikten sonra tekrar deneyin."),
+            FactoryCopilotAiStates.BudgetLimited or FactoryCopilotAiStates.PolicyRejected => (
+                "AI kullanımı politika veya bütçe sınırı nedeniyle bu istek için kapalı.",
+                "Sistem yöneticisiyle iletişime geçin."),
+            FactoryCopilotAiStates.InjectionBlocked => (
+                "Güvenlik politikası gereği bu istek işlenmedi.",
+                "Soruyu yeniden ifade edin."),
+            _ => (
+                "AI sağlayıcısına şu an ulaşılamıyor; soru yanıtlanamadı.",
+                "Birkaç dakika sonra tekrar deneyin."),
+        };
+
+        return new FactoryCopilotStructuredResponse(
+            Answer: answer,
+            WhatUsed: "Doğrulanmış araç verileri (AI sentezi üretilemedi)",
+            KeyFacts: CollectKeyFacts(bundle, resolved),
+            Causes: [],
+            Impact: null,
+            RecommendedNextStep: next,
+            Uncertainty: $"Yanıt üretilmedi ({aiState ?? "AI_NOT_USED"}); aşağıdaki veriler araçlardan alınmıştır.",
+            Evidence: CollectEvidence(bundle, resolved),
+            RelatedActions: BuildActions(FactoryCopilotIntents.GeneralQuestion, resolved, bundle));
     }
 
     private static FactoryCopilotStructuredResponse ComposeOptimizationExplanation(
@@ -484,15 +545,28 @@ internal static class FactoryCopilotHallucinationGuard
         "override tenant",
         "execute now",
         "bypass approval",
+        "system prompt",
+        "reveal your instructions",
+        "reveal your rules",
+        "talimatları yok say",
+        "önceki talimat",
+        "other tenant",
+        "başka kiracı",
+        "başka tenant",
     ];
+
+    public static bool IsInjection(string queryText)
+    {
+        var normalized = queryText.ToLowerInvariant();
+        return InjectionPatterns.Any(pattern => normalized.Contains(pattern, StringComparison.Ordinal));
+    }
 
     public static (bool Accepted, string? RejectionReason, FactoryCopilotStructuredResponse Response) Validate(
         FactoryCopilotStructuredResponse response,
         FactoryCopilotToolBundle bundle,
         string queryText)
     {
-        var normalizedQuery = queryText.ToLowerInvariant();
-        if (InjectionPatterns.Any(pattern => normalizedQuery.Contains(pattern, StringComparison.Ordinal)))
+        if (IsInjection(queryText))
         {
             return (false, "prompt-injection-detected", response with
             {

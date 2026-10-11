@@ -1,4 +1,15 @@
+using System.Text.Json.Serialization;
+
 namespace NevaxisZentra.Persistence.ModelGateway;
+
+/// <summary>One retrieved fact the model may use. The model must cite facts by <see cref="Id"/>.</summary>
+public sealed record ModelGroundedFact(string Id, string Text);
+
+/// <summary>
+/// The user's question plus the bounded, tool-derived facts it must be answered from. Server-side only: it is never
+/// bound from an API request body.
+/// </summary>
+public sealed record ModelGroundedInput(string Question, IReadOnlyList<ModelGroundedFact> Facts);
 
 public sealed record ModelGatewayContextReference(
     Guid? ContextSnapshotId,
@@ -19,7 +30,8 @@ public sealed record ModelGatewayRequest(
     int ActionRiskLevel,
     bool RequiresStructuredOutput,
     string? PreferredPath = null,
-    decimal? CostBudgetRemaining = null);
+    decimal? CostBudgetRemaining = null,
+    [property: JsonIgnore] ModelGroundedInput? Grounded = null);
 
 public sealed record ModelGatewayRoutingDecision(
     string IntelligencePath,
@@ -61,7 +73,8 @@ public sealed record ModelGatewayResponse(
     ModelGatewayProposalValidationResult? Validation,
     long LatencyMs,
     decimal? EstimatedCost,
-    string? AuditRecordId);
+    string? AuditRecordId,
+    string? ProviderOutcome = null);
 
 public sealed record ModelCostBudgetState(
     decimal DailyRemaining,

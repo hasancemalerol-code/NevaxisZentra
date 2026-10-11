@@ -17,12 +17,26 @@ public static class ModelGatewayEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisZentraModelGateway(this IServiceCollection services)
+    /// <param name="allowSyntheticProviders">
+    /// True only in Development: registers the mock candidate model as the local provider. Everywhere else the local
+    /// path is an honest, unavailable provider, so no synthetic model answer can reach a customer.
+    /// </param>
+    public static IServiceCollection AddNevaxisZentraModelGateway(
+        this IServiceCollection services,
+        bool allowSyntheticProviders = false)
     {
         services.AddHttpClient(nameof(OpenAiFrontierModelClient));
         services.AddScoped<OpenAiFrontierModelClient>();
         services.AddScoped<IModelProvider, DeterministicEngineProvider>();
-        services.AddScoped<IModelProvider, MockNevaxisCandidateModelProvider>();
+        if (allowSyntheticProviders)
+        {
+            services.AddScoped<IModelProvider, MockNevaxisCandidateModelProvider>();
+        }
+        else
+        {
+            services.AddScoped<IModelProvider, LocalModelProvider>();
+        }
+
         services.AddScoped<IModelProvider, FrontierModelProvider>();
         services.AddScoped<IModelGatewayService, ModelGatewayService>();
         return services;

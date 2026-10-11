@@ -12,6 +12,14 @@ public static class FactoryCopilotIntentClassifier
     {
         var normalized = queryText.Trim().ToLowerInvariant();
 
+        // Calendar-aware machine KPI questions (availability, unplanned downtime, per scheduled hour, ...) are answered
+        // from the machine aggregate. They must not be captured by the single-keyword rules below ("scheduled" is not
+        // a schedule-explanation request, "caused by" is not a cause-analysis request).
+        if (MatchesAny(normalized, MachineKpiTerms))
+        {
+            return ClassifyMachineKpiQuestion();
+        }
+
         if (MatchesAny(normalized,
                 "ne durumda", "şu an", "current state", "durumu nedir", "çalışıyor mu"))
         {
@@ -158,6 +166,12 @@ public static class FactoryCopilotIntentClassifier
             return ClassifyIntent(FactoryCopilotIntents.Unsupported, FactoryCopilotRoutingClasses.Unsupported, []);
         }
 
+        // A factory question that matches no registered pattern is answered by the model from the retrieved facts only.
+        if (MatchesAny(normalized, FactoryDomainTerms))
+        {
+            return ClassifyMachineKpiQuestion();
+        }
+
         return ClassifyIntent(FactoryCopilotIntents.Unsupported, FactoryCopilotRoutingClasses.Unsupported, []);
     }
 
@@ -218,6 +232,35 @@ public static class FactoryCopilotIntentClassifier
 
         return new IntentClassification(intent, routingClass, requiresModel, tools);
     }
+
+    private static readonly string[] MachineKpiTerms =
+    [
+        "availability", "kullanılabilirlik", "unplanned", "planlanmamış", "scheduled production", "per scheduled hour",
+        "planned break", "planlı mola", "working day", "iş günü", "outside-shift", "outside shift", "overtime",
+        "fazla mesai", "stop minutes", "stop time", "downtime", "duruş", "machine failure", "makine arızası",
+    ];
+
+    private static IntentClassification ClassifyMachineKpiQuestion() =>
+        ClassifyIntent(
+            FactoryCopilotIntents.GeneralQuestion,
+            FactoryCopilotRoutingClasses.ModelRequired,
+            [
+                FactoryCopilotToolIds.GetLineState,
+                FactoryCopilotToolIds.GetThroughputOverview,
+                FactoryCopilotToolIds.GetCurrentConstraint,
+                FactoryCopilotToolIds.GetLossTree,
+                FactoryCopilotToolIds.GetShiftContext,
+                FactoryCopilotToolIds.GetExecutiveSignals,
+                FactoryCopilotToolIds.GetMachinePerformance,
+            ],
+            requiresModel: true);
+
+    private static readonly string[] FactoryDomainTerms =
+    [
+        "performans", "performance", "makine", "machine", "duruş", "downtime", "arıza", "breakdown",
+        "verim", "efficiency", "oee", "üretim", "production", "hattı", "hatlar", "hattın", "line", "fire", "scrap",
+        "stop", "durdu", "cycle", "çevrim", "hurda", "istasyon", "station", "operator", "operatör",
+    ];
 
     private static bool MatchesAny(string text, params string[] patterns) =>
         patterns.Any(pattern => text.Contains(pattern, StringComparison.Ordinal));

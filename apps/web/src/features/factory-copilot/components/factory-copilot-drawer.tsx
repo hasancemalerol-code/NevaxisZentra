@@ -1,5 +1,6 @@
 "use client";
 
+import { describeFactoryCopilotAiState, describeFactoryCopilotTransportFailure } from "../domain/factory-copilot-failures";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
 import { Bot, LoaderCircle, X } from "lucide-react";
@@ -102,7 +103,13 @@ export function FactoryCopilotDrawer({
   useEffect(() => {
     if (!open) return;
     startTransition(async () => {
-      const loaded = await loadFactoryCopilotSuggestedQuestionsAction(copilotContext);
+      let loaded: Awaited<ReturnType<typeof loadFactoryCopilotSuggestedQuestionsAction>>;
+      try {
+        loaded = await loadFactoryCopilotSuggestedQuestionsAction(copilotContext);
+      } catch {
+        setSuggestions(["Neden hedefin altındayız?", "Darboğaz nerede?", "Son vardiyada ne değişti?"]);
+        return;
+      }
       if ("status" in loaded && loaded.status === "failure") {
         setSuggestions([
           "Neden hedefin altındayız?",
@@ -125,10 +132,19 @@ export function FactoryCopilotDrawer({
       if (!trimmed) return;
       setError(null);
       startTransition(async () => {
-        const response = await queryFactoryCopilotAction({
-          queryText: trimmed,
-          context: copilotContext,
-        });
+        let response: Awaited<ReturnType<typeof queryFactoryCopilotAction>>;
+        try {
+          response = await queryFactoryCopilotAction({
+            queryText: trimmed,
+            context: copilotContext,
+          });
+        } catch {
+          // The action call itself failed (for example the session cookie is gone and the sign-in redirect came back
+          // instead of an action response): classify it instead of letting it crash the page.
+          const failure = await describeFactoryCopilotTransportFailure(window.location.href);
+          setError(failure.message);
+          return;
+        }
         if ("status" in response && response.status === "failure") {
           setError(response.message);
           return;
@@ -213,6 +229,11 @@ export function FactoryCopilotDrawer({
 
           {result ? (
             <article className="factory-copilot-drawer__answer">
+              {describeFactoryCopilotAiState(result.failureState) ? (
+                <p className="factory-copilot-drawer__feedback" role="status" data-testid="factory-copilot-ai-state">
+                  {describeFactoryCopilotAiState(result.failureState)}
+                </p>
+              ) : null}
               <p>{result.response.answer}</p>
               {result.response.keyFacts.length > 0 ? (
                 <>

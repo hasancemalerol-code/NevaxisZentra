@@ -11,6 +11,7 @@ public static class AuditEventTypes
     public const string AuditWriteFailed = "audit.write.failed";
     public const string InfrastructureConfigurationRejected = "infrastructure.configuration.rejected";
     public const string AiDecisionRecorded = "ai.decision.recorded";
+    public const string FactoryCopilotQueryAnswered = "factorycopilot.query.answered";
     public const string ProductionPlanDraftCreated = "production.plan.draft.created";
     public const string ProductionPlanDraftUpdated = "production.plan.draft.updated";
     public const string ProductionPlanSubmittedForReview = "production.plan.submitted.for.review";
@@ -124,6 +125,7 @@ public static class AuditEventTypes
         AuditWriteFailed,
         InfrastructureConfigurationRejected,
         AiDecisionRecorded,
+        FactoryCopilotQueryAnswered,
         ProductionPlanDraftCreated,
         ProductionPlanDraftUpdated,
         ProductionPlanSubmittedForReview,

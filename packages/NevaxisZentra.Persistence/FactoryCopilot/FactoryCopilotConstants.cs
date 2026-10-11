@@ -38,6 +38,7 @@ public static class FactoryCopilotIntents
     public const string RecoveryOptions = "RECOVERY_OPTIONS";
     public const string ExecutiveSummary = "EXECUTIVE_SUMMARY";
     public const string OptimizationExplanation = "OPTIMIZATION_EXPLANATION";
+    public const string GeneralQuestion = "GENERAL_QUESTION";
     public const string Unsupported = "UNSUPPORTED";
 }
 
@@ -93,4 +94,5 @@ public static class FactoryCopilotToolIds
     public const string GetShiftContext = "GetShiftContext";
     public const string GetExecutiveSignals = "GetExecutiveSignals";
     public const string GetOptimizationRun = "GetOptimizationRun";
+    public const string GetMachinePerformance = "GetMachinePerformance";
 }

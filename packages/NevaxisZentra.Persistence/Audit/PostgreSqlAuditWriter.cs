@@ -121,7 +121,7 @@ internal sealed partial class PostgreSqlAuditWriter(
             return "audit.field.invalid";
         }
 
-        if (request.PermissionKey is not null && !StableKeyPattern().IsMatch(request.PermissionKey))
+        if (request.PermissionKey is not null && !PermissionKeyPattern().IsMatch(request.PermissionKey))
         {
             return "audit.permission_key.invalid";
         }
@@ -141,6 +141,10 @@ internal sealed partial class PostgreSqlAuditWriter(
 
     [GeneratedRegex("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$", RegexOptions.CultureInvariant)]
     private static partial Regex StableKeyPattern();
+
+    // Permission keys legitimately contain hyphens (for example factory-copilot.query); resource types and actions do not.
+    [GeneratedRegex("^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$", RegexOptions.CultureInvariant)]
+    private static partial Regex PermissionKeyPattern();
 }
 
 internal static class AuditWriteRequestValidationExtensions
