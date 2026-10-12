@@ -25,9 +25,22 @@ public static class DigitalWorkforceExecutionEndpointRouteBuilderExtensions
 
     public static IServiceCollection AddNevaxisZentraDigitalWorkforceExecutionRuntime(this IServiceCollection services)
     {
-        services.AddScoped<IDigitalWorkforceExecutionRuntimeService, DigitalWorkforceExecutionRuntimeService>();
+        // Digital Workforce execution is not a V1-shipping capability: its tools are stubs. It is available only in
+        // Development, or when an operator sets DigitalWorkforce:ExecutionEnabled explicitly. Otherwise it fails closed.
+        services.AddScoped<DigitalWorkforceExecutionRuntimeService>();
+        services.AddScoped<IDigitalWorkforceExecutionRuntimeService>(serviceProvider =>
+            DigitalWorkforceExecutionSettings.IsEnabled(
+                serviceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment(),
+                serviceProvider.GetService<IConfiguration>()?.GetValue<bool?>(DigitalWorkforceExecutionSettings.ConfigurationKey))
+                ? serviceProvider.GetRequiredService<DigitalWorkforceExecutionRuntimeService>()
+                : new DigitalWorkforceExecutionDisabledService(
+                    serviceProvider.GetRequiredService<DigitalWorkforceExecutionRuntimeService>()));
         services.AddScoped<IDigitalWorkforceCoordinatorRuntime, DigitalWorkforceCoordinatorRuntime>();
-        services.Configure<DigitalWorkforceExecutionOptions>(options => options.WorkerEnabled = true);
+        services.AddOptions<DigitalWorkforceExecutionOptions>()
+            .Configure<IConfiguration, IHostEnvironment>((options, configuration, environment) =>
+                options.WorkerEnabled = DigitalWorkforceExecutionSettings.IsEnabled(
+                    environment.IsDevelopment(),
+                    configuration.GetValue<bool?>(DigitalWorkforceExecutionSettings.ConfigurationKey)));
         services.AddHostedService<DigitalWorkforceExecutionBackgroundService>();
         return services;
     }
@@ -53,7 +66,11 @@ public static class DigitalWorkforceExecutionEndpointRouteBuilderExtensions
                 request,
                 authorizationContext.Current!.IdentitySubjectId.ToString(),
                 cancellationToken);
-            return TypedResults.Ok(result);
+            return result.ErrorCode == DigitalWorkforceExecutionSettings.DisabledErrorCode
+                ? TypedResults.Json(
+                    new { code = result.ErrorCode, message = result.SafeMessage },
+                    statusCode: StatusCodes.Status503ServiceUnavailable)
+                : TypedResults.Ok(result);
         }
         catch (DigitalWorkforceException ex)
         {
@@ -177,7 +194,7 @@ public static class DigitalWorkforceExecutionEndpointRouteBuilderExtensions
 
 public sealed class DigitalWorkforceExecutionOptions
 {
-    public bool WorkerEnabled { get; set; } = true;
+    public bool WorkerEnabled { get; set; }
     public int BatchSize { get; set; } = 25;
 }
 

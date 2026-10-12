@@ -267,7 +267,11 @@ public sealed class FactoryEventSpineService(
                         e.FacilityId == context.FacilityId &&
                         (e.ProcessingState == FactoryCanonicalEventStates.DispatchPending ||
                          (e.ProcessingState == FactoryCanonicalEventStates.Failed &&
-                          e.NextRetryAtUtc <= now)))
+                          e.NextRetryAtUtc <= now) ||
+                         // A runner that stopped mid-event leaves it Processing; the consumer receipt below keeps the
+                         // re-run from routing the same event twice.
+                         (e.ProcessingState == FactoryCanonicalEventStates.Processing &&
+                          e.UpdatedAtUtc <= now.AddMinutes(-5))))
             .OrderBy(e => e.ReceivedAtUtc)
             .Take(Math.Min(batchSize, DefaultBatchSize))
             .ToListAsync(cancellationToken);
@@ -348,20 +352,49 @@ public sealed class FactoryEventSpineService(
                 canonical.LastError = ex.Message;
                 processed++;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                // Whatever the failed event half-wrote (a case, a receipt) must not be saved with its failure marker.
+                DiscardPendingChangesExcept(canonical);
                 canonical.ProcessingState = canonical.AttemptCount >= canonical.MaxAttempts
                     ? FactoryCanonicalEventStates.DeadLetter
                     : FactoryCanonicalEventStates.Failed;
-                canonical.LastError = ex.Message;
+                canonical.LastError = ex.GetType().Name;
                 canonical.ErrorClassification = FactoryEventErrorClassifications.Transient;
                 canonical.NextRetryAtUtc = now.AddMinutes(Math.Min(30, canonical.AttemptCount * 2));
                 failed++;
             }
+
+            // Each event is its own unit of work inside the batch transaction, so one event's fault cannot carry
+            // another event's pending changes with it.
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return new FactoryEventSpineProcessingResult(processed, failed, 0, 0);
+    }
+
+    private void DiscardPendingChangesExcept(object keep)
+    {
+        foreach (var entry in dbContext.ChangeTracker.Entries().ToList())
+        {
+            if (ReferenceEquals(entry.Entity, keep))
+            {
+                continue;
+            }
+
+            switch (entry.State)
+            {
+                case Microsoft.EntityFrameworkCore.EntityState.Added:
+                    entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                    break;
+                case Microsoft.EntityFrameworkCore.EntityState.Modified:
+                case Microsoft.EntityFrameworkCore.EntityState.Deleted:
+                    entry.CurrentValues.SetValues(entry.OriginalValues);
+                    entry.State = Microsoft.EntityFrameworkCore.EntityState.Unchanged;
+                    break;
+            }
+        }
     }
 
     private async Task<FactoryEventIngestionResult> ReprocessQuarantinedInboundCoreAsync(

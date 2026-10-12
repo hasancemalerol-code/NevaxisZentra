@@ -139,3 +139,10 @@ export type AiTaskDecisionCapabilities = Readonly<{
   canAnalyze: boolean;
   canFeedback: boolean;
 }>;
+
+/** The task assistant is rule based; the provider id is shown as what it is, never as an AI model. */
+export function getAiTaskProviderLabel(providerName: string): string {
+  return providerName === "deterministic-development"
+    ? "Kural tabanlı (yapay zekâ modeli değil)"
+    : providerName;
+}

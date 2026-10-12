@@ -60,11 +60,18 @@ public static class FactoryCopilotEndpointRouteBuilderExtensions
             return failure!;
         }
 
-        var result = await service.GetSuggestedQuestionsAsync(
-            access.FacilityId,
-            request.Context,
-            cancellationToken);
-        return TypedResults.Ok(result);
+        try
+        {
+            var result = await service.GetSuggestedQuestionsAsync(
+                access.FacilityId,
+                request.Context,
+                cancellationToken);
+            return TypedResults.Ok(result);
+        }
+        catch (FactoryCopilotException ex)
+        {
+            return MapException(ex);
+        }
     }
 
     private static async Task<(FacilityAccessContext? Access, IResult? Failure)> ResolveAccessAsync(

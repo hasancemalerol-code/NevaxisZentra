@@ -22,7 +22,10 @@ public sealed class MaintenanceAiDraftRepository(
                     && d.AssetReference == assetReference
                     && d.Status != MaintenanceAiDraftStatuses.Stale
                     && d.Status != MaintenanceAiDraftStatuses.Rejected
-                    && d.Status != MaintenanceAiDraftStatuses.Executed)
+                    && d.Status != MaintenanceAiDraftStatuses.Executed
+                    // A draft that failed to generate has no content to review or approve. Treating it as "current" hid
+                    // the generate action and left the asset stuck after a provider failure.
+                    && d.Status != MaintenanceAiDraftStatuses.ExecutionFailed)
                 .OrderByDescending(d => d.GeneratedAtUtc)
                 .FirstOrDefaultAsync(ct);
 
@@ -596,18 +599,41 @@ public sealed class MaintenanceAiDraftRepository(
             draft.CreatedMaintenanceRequestId,
             draft.ProviderIdentifier == MaintenanceAiAgentProviders.DeterministicDevelopment);
 
+    /// <summary>
+    /// A draft that failed has an empty "{}" output; deserialising it leaves null strings and lists. Every consumer gets
+    /// complete, empty values instead of a null-reference failure.
+    /// </summary>
+    internal static MaintenanceAiStructuredOutput NormalizeOutput(MaintenanceAiStructuredOutput? output) =>
+        output is null
+            ? new MaintenanceAiStructuredOutput(
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                [], [], string.Empty, MaintenanceAiQualitativeConfidenceLevels.Low, [], false)
+            : output with
+            {
+                Summary = output.Summary ?? string.Empty,
+                ObservedCondition = output.ObservedCondition ?? string.Empty,
+                SuggestedTitle = output.SuggestedTitle ?? string.Empty,
+                SuggestedDescription = output.SuggestedDescription ?? string.Empty,
+                SuggestedPriority = output.SuggestedPriority ?? string.Empty,
+                SuggestedRequestType = output.SuggestedRequestType ?? string.Empty,
+                RecommendedReviewType = output.RecommendedReviewType ?? string.Empty,
+                EvidenceReferences = output.EvidenceReferences ?? [],
+                MissingInformation = output.MissingInformation ?? [],
+                UncertaintyExplanation = output.UncertaintyExplanation ?? string.Empty,
+                QualitativeConfidence = output.QualitativeConfidence ?? MaintenanceAiQualitativeConfidenceLevels.Low,
+                SafetyNotes = output.SafetyNotes ?? [],
+            };
+
     private static async Task<MaintenanceAiDraftDetailReadModel> MapDetailAsync(
         NevaxisZentraDbContext dbContext,
         MaintenanceOperationContext context,
         MaintenanceAiActionDraft draft,
         CancellationToken cancellationToken)
     {
-        var validated = JsonSerializer.Deserialize<MaintenanceAiStructuredOutput>(draft.ValidatedOutputJson, JsonOptions)
-            ?? new MaintenanceAiStructuredOutput(
-                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
-                [], [], string.Empty, MaintenanceAiQualitativeConfidenceLevels.Low, [], false);
-        var original = JsonSerializer.Deserialize<MaintenanceAiStructuredOutput>(draft.AiOriginalOutputJson, JsonOptions)
-            ?? validated;
+        var validated = NormalizeOutput(JsonSerializer.Deserialize<MaintenanceAiStructuredOutput>(draft.ValidatedOutputJson, JsonOptions));
+        var original = JsonSerializer.Deserialize<MaintenanceAiStructuredOutput>(draft.AiOriginalOutputJson, JsonOptions) is { } parsedOriginal
+            ? NormalizeOutput(parsedOriginal)
+            : validated;
 
         var snapshot = JsonSerializer.Deserialize<MaintenanceAiInputSnapshot>(draft.InputSnapshotJson, JsonOptions);
         var audit = await dbContext.MaintenanceAiDraftAuditEvents.AsNoTracking()

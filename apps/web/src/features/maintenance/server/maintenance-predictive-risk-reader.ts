@@ -1,7 +1,6 @@
 import "./maintenance-server-boundary";
 
 import {
-  evaluateMaintenancePredictiveRisk,
   getMaintenancePredictiveRiskAssessment,
   getMaintenancePredictiveRiskAssessmentById,
   getMaintenancePredictiveRiskWorkspace,
@@ -38,8 +37,8 @@ export async function readMaintenancePredictiveRiskWorkspace(
     return { status: "failure", message: contextResult.message };
   }
 
+  // A page render only reads. Recomputing the assessments is an explicit action (evaluateMaintenanceConditionAction).
   const context = contextResult.context;
-  await evaluateMaintenancePredictiveRisk(context);
 
   const workspaceResult = await getMaintenancePredictiveRiskWorkspace(context);
   if (workspaceResult.status === "failure") {

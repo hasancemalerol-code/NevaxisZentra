@@ -14,6 +14,7 @@ import {
   getMaintenanceAiPriorityLabel,
   getMaintenanceAiRequestTypeLabel,
   MAINTENANCE_AI_LOCAL_PROVIDER_DISCLAIMER,
+  MAINTENANCE_AI_RULES_BASED_LABEL,
   MAINTENANCE_AI_SAFETY_COPY,
 } from "../presentation/maintenance-ai-agent-labels";
 import {
@@ -89,7 +90,9 @@ export function MaintenanceAiAssistantSection({
           <div className="maintenance-ai-meta">
             <Badge tone="neutral">{getMaintenanceAiDraftStatusLabel(draft.status)}</Badge>
             <Badge tone="neutral">Kanıt Güveni: {getMaintenanceAiConfidenceLabel(draft.qualitativeConfidence)}</Badge>
-            <span className="maintenance-ai-meta-line">Sağlayıcı: {draft.providerIdentifier}</span>
+            <span className="maintenance-ai-meta-line">
+              Sağlayıcı: {draft.isDevelopmentProvider ? MAINTENANCE_AI_RULES_BASED_LABEL : draft.providerIdentifier}
+            </span>
             <span className="maintenance-ai-meta-line">Şablon: {draft.promptVersion}</span>
           </div>
 

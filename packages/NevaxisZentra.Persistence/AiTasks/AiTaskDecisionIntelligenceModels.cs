@@ -192,7 +192,8 @@ public sealed record AcceptAiTaskRecommendationCommand(
     Guid RecommendationId,
     uint ExpectedTaskVersion,
     string? Reason,
-    string? EditedPayloadJson);
+    string? EditedPayloadJson,
+    Func<string, CancellationToken, Task<bool>>? HasPermissionAsync = null);
 
 public sealed record RejectAiTaskRecommendationCommand(
     Guid TaskId,

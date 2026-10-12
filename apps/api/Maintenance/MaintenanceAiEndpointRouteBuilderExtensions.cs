@@ -1,3 +1,4 @@
+using NevaxisZentra.Persistence.AiUsage;
 using NevaxisZentra.Api.Facilities;
 using NevaxisZentra.Persistence;
 using NevaxisZentra.Persistence.Audit;
@@ -214,6 +215,8 @@ public static class MaintenanceAiEndpointRouteBuilderExtensions
                 MaintenanceAiFailureCodes.ConcurrencyConflict => StatusCodes.Status409Conflict,
                 MaintenanceAiFailureCodes.StaleDraft => StatusCodes.Status409Conflict,
                 MaintenanceAiFailureCodes.ValidationFailed or MaintenanceAiFailureCodes.InvalidOutput => StatusCodes.Status422UnprocessableEntity,
+                // The assistant is off (or its provider failed): a service condition, not a bad request.
+                MaintenanceAiFailureCodes.ProviderFailed => StatusCodes.Status503ServiceUnavailable,
                 _ => StatusCodes.Status400BadRequest,
             };
 
@@ -234,7 +237,12 @@ public static class MaintenanceAiEndpointRouteBuilderExtensions
 
     public static IServiceCollection AddNevaxisZentraMaintenanceAi(this IServiceCollection services)
     {
-        services.AddScoped<IMaintenanceAiProvider, DeterministicMaintenanceAiProvider>();
+        services.AddScoped<IMaintenanceAiProvider>(serviceProvider =>
+            RulesBasedAiSettings.IsEnabled(
+                serviceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment(),
+                serviceProvider.GetService<IConfiguration>()?.GetValue<bool?>(RulesBasedAiSettings.ConfigurationKey))
+                ? new DeterministicMaintenanceAiProvider()
+                : new UnavailableMaintenanceAiProvider());
         services.AddScoped<IMaintenanceAiDraftRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();

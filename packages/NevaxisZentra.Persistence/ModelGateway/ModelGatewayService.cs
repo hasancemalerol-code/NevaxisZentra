@@ -61,6 +61,7 @@ public sealed class ModelGatewayService : IModelGatewayService
         CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
+        await EnsureReferencesBelongToScopeAsync(facilityId, tenantId, request, cancellationToken);
         var policy = await db.ModelGatewayBudgetPolicyRecords.AsNoTracking()
             .FirstOrDefaultAsync(p => p.FacilityId == facilityId && p.IsActive, cancellationToken);
 
@@ -89,13 +90,19 @@ public sealed class ModelGatewayService : IModelGatewayService
             provider = providers[routing.IntelligencePath];
         }
 
-        var invokeResult = await provider.InvokeAsync(new ModelProviderInvokeRequest(request, routing), cancellationToken);
+        var invokeResult = ModelGatewayDegradationGuard.TryFailClosed(request, routing, out var guarded)
+            ? guarded
+            : await provider.InvokeAsync(new ModelProviderInvokeRequest(request, routing), cancellationToken);
         if (!invokeResult.Succeeded)
         {
             var primaryRouting = routing;
             var primaryResult = invokeResult;
             routing = ModelRouterEngine.Fallback(routing, invokeResult.FailureState ?? "provider-failure");
-            if (providers.TryGetValue(routing.IntelligencePath, out var fallbackProvider))
+            if (ModelGatewayDegradationGuard.TryFailClosed(request, routing, out var fallbackGuarded))
+            {
+                invokeResult = fallbackGuarded;
+            }
+            else if (providers.TryGetValue(routing.IntelligencePath, out var fallbackProvider))
             {
                 invokeResult = await fallbackProvider.InvokeAsync(new ModelProviderInvokeRequest(request, routing), cancellationToken);
             }
@@ -203,6 +210,44 @@ public sealed class ModelGatewayService : IModelGatewayService
             invokeResult.EstimatedCost,
             auditId.ToString(),
             invokeResult.ResponseClassification);
+    }
+
+    /// <summary>
+    /// Caller-supplied ids are references only. A case or snapshot of another tenant or facility fails closed, so a
+    /// foreign id can neither be audited under this tenant nor pull foreign context into a prompt.
+    /// </summary>
+    private async Task EnsureReferencesBelongToScopeAsync(
+        Guid facilityId,
+        Guid tenantId,
+        ModelGatewayRequest request,
+        CancellationToken cancellationToken)
+    {
+        var caseIds = new[] { request.DigitalWorkCaseId, request.Context.DigitalWorkCaseId }
+            .Where(id => id.HasValue && id.Value != Guid.Empty)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+        foreach (var caseId in caseIds)
+        {
+            var exists = await db.DigitalWorkCases.AsNoTracking().AnyAsync(
+                c => c.Id == caseId && c.TenantId == tenantId && (c.FacilityId == null || c.FacilityId == facilityId),
+                cancellationToken);
+            if (!exists)
+            {
+                throw new ModelGatewayException(ModelGatewayFailureCodes.NotFound, "Referenced work case was not found.");
+            }
+        }
+
+        if (request.Context.ContextSnapshotId is { } snapshotId && snapshotId != Guid.Empty)
+        {
+            var exists = await db.ContextSnapshotRecords.AsNoTracking().AnyAsync(
+                s => s.Id == snapshotId && s.TenantId == tenantId && s.FacilityId == facilityId,
+                cancellationToken);
+            if (!exists)
+            {
+                throw new ModelGatewayException(ModelGatewayFailureCodes.NotFound, "Referenced context snapshot was not found.");
+            }
+        }
     }
 
     private async Task<decimal> SumCostAsync(Guid facilityId, DateTimeOffset since, CancellationToken cancellationToken) =>

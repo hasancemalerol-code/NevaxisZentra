@@ -111,6 +111,9 @@ public static class ModelRouterEngine
             or ModelGatewayRequestClassifications.SafetyGuard
             or ModelGatewayRequestClassifications.VerificationMath;
 
+    /// <summary>True when the request needs a real model answer; a canned deterministic proposal is never one.</summary>
+    public static bool RequiresModelAnswer(string classification) => IsComplexReasoning(classification);
+
     private static bool IsComplexReasoning(string classification) =>
         classification is ModelGatewayRequestClassifications.OperationalExplanation
             or ModelGatewayRequestClassifications.HypothesisGeneration
@@ -126,6 +129,39 @@ public static class ModelRouterEngine
             "1.0",
             reason,
             false);
+}
+
+/// <summary>
+/// The deterministic engine returns a fixed, canned proposal. It is a legitimate result only for requests that are
+/// deterministic by design. When a request needs a model answer and routing degraded to it (budget, untrusted context,
+/// unavailable provider, high-risk action), the call must fail closed instead of returning a fabricated success.
+/// </summary>
+public static class ModelGatewayDegradationGuard
+{
+    public static bool TryFailClosed(
+        ModelGatewayRequest request,
+        ModelGatewayRoutingDecision routing,
+        out ModelProviderInvokeResult result)
+    {
+        result = default!;
+        var explicitDeterministic = string.Equals(
+            request.PreferredPath, ModelGatewayIntelligencePaths.DeterministicEngine, StringComparison.OrdinalIgnoreCase);
+        if (routing.IntelligencePath != ModelGatewayIntelligencePaths.DeterministicEngine
+            || explicitDeterministic
+            || !ModelRouterEngine.RequiresModelAnswer(request.RequestClassification))
+        {
+            return false;
+        }
+
+        var reason = routing.RoutingReason ?? string.Empty;
+        var state = reason.StartsWith("cost-budget", StringComparison.OrdinalIgnoreCase)
+            ? ModelGatewayFailureStates.PolicyRejected
+            : reason.StartsWith("insufficient-trusted-context", StringComparison.OrdinalIgnoreCase)
+                ? ModelGatewayFailureStates.InsufficientContext
+                : ModelGatewayFailureStates.ProviderUnavailable;
+        result = new ModelProviderInvokeResult(false, state, null, 0, 0, 0m, "no-model-answer");
+        return true;
+    }
 }
 
 public static class OperationalProposalValidator

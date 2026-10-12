@@ -93,7 +93,13 @@ public static class AiTaskDecisionIntelligenceEndpointRouteBuilderExtensions
                 recommendationId,
                 request.ExpectedVersion,
                 request.Reason,
-                request.EditedPayloadJson),
+                request.EditedPayloadJson,
+                async (permissionKey, ct) =>
+                {
+                    var check = await facilityAccessResolver.ResolveAsync(
+                        new FacilityAccessRequest(facilityId!.Value, permissionKey), ct);
+                    return check.Succeeded && check.Access is not null;
+                }),
             cancellationToken);
 
         return result.Succeeded

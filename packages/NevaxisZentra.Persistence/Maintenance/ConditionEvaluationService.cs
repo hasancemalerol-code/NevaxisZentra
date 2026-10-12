@@ -39,7 +39,8 @@ public sealed class ConditionEvaluationService : IConditionEvaluationService
         var activeAnomalies = allAnomalies.Where(a => a.Severity != MaintenanceAnomalySeverities.Info).ToList();
         var conditionStatus = ResolveConditionStatus(dataFreshness, dataSufficiency, activeAnomalies);
         var overallScore = ComputeOverallScore(conditionStatus, activeAnomalies);
-        var evaluationIdentity = BuildEvaluationIdentity(input, allAnomalies);
+        var evaluationIdentity = BuildEvaluationIdentity(
+            input, allAnomalies, conditionStatus, dataFreshness, dataSufficiency, trendState, highestSeverity);
 
         return new ConditionAssetEvaluationResult(
             input.AssetReference,
@@ -605,16 +606,34 @@ public sealed class ConditionEvaluationService : IConditionEvaluationService
             $"Son {recentSampleCount} örneğin medyan {metric.DisplayName.ToLowerInvariant()} değeri {FormatNumber(observed)}{unit}; referans medyan {FormatNumber(baseline)}{unit}; sapma {FormatSignedPercent(deviationPercent)}.";
     }
 
-    private static string BuildEvaluationIdentity(
+    /// <summary>
+    /// The identity of an evaluation is what it concluded, not when it ran. It used to include the evaluation time, so
+    /// every re-evaluation (including one on each page view) produced a new identity, a new risk assessment and
+    /// invalidated every AI draft built on the previous one. The same conclusion now keeps the same identity.
+    /// </summary>
+    internal static string BuildEvaluationIdentity(
         ConditionAssetEvaluationInput input,
-        IReadOnlyList<ConditionAnomalyCandidate> anomalies)
+        IReadOnlyList<ConditionAnomalyCandidate> anomalies,
+        string conditionStatus,
+        string dataFreshness,
+        string dataSufficiency,
+        string? trendState,
+        string? highestSeverity)
     {
         var builder = new StringBuilder();
         builder.Append(input.AssetReference);
         builder.Append('|');
         builder.Append(input.MachineId);
         builder.Append('|');
-        builder.Append(input.EvaluatedAtUtc.ToUnixTimeSeconds());
+        builder.Append(conditionStatus);
+        builder.Append('|');
+        builder.Append(dataFreshness);
+        builder.Append('|');
+        builder.Append(dataSufficiency);
+        builder.Append('|');
+        builder.Append(trendState);
+        builder.Append('|');
+        builder.Append(highestSeverity);
         foreach (var anomaly in anomalies.OrderBy(a => a.MetricKey))
         {
             builder.Append('|');
@@ -624,14 +643,23 @@ public sealed class ConditionEvaluationService : IConditionEvaluationService
         return HashIdentity(builder.ToString());
     }
 
+    /// <summary>
+    /// An anomaly is identified by what it found (metric, observed value, baseline, direction), not by when the window
+    /// ended. The window end is the evaluation time, so including it made every re-evaluation produce a new anomaly row
+    /// and a new condition identity even though nothing had changed. The window stays on the stored anomaly as evidence.
+    /// </summary>
     internal static string BuildMetricEvaluationIdentity(
         string metricKey,
         DateTimeOffset windowStartUtc,
         DateTimeOffset windowEndUtc,
         decimal observed,
         decimal baseline,
-        string direction) =>
-        HashIdentity($"{metricKey}|{windowStartUtc.ToUnixTimeSeconds()}|{windowEndUtc.ToUnixTimeSeconds()}|{Math.Round(observed, 2)}|{Math.Round(baseline, 2)}|{direction}");
+        string direction)
+    {
+        _ = windowStartUtc;
+        _ = windowEndUtc;
+        return HashIdentity($"{metricKey}|{Math.Round(observed, 2).ToString(CultureInfo.InvariantCulture)}|{Math.Round(baseline, 2).ToString(CultureInfo.InvariantCulture)}|{direction}");
+    }
 
     private static string HashIdentity(string input)
     {

@@ -29,6 +29,7 @@ import type {
 } from "../domain/maintenance-predictive-risk";
 import type { MaintenanceAiDraftDetail } from "../domain/maintenance-ai-agent";
 import { MaintenanceAiAssistantSection } from "./maintenance-ai-assistant-section";
+import { MaintenanceEvaluateControl } from "./maintenance-evaluate-control";
 import {
   formatMaintenancePredictiveDriverLabel,
   formatMaintenancePredictiveEvidenceTypeLabel,
@@ -139,6 +140,11 @@ export function MaintenanceConditionView({
       </header>
 
       <MaintenanceWorkspaceNav active="condition" />
+
+      <MaintenanceEvaluateControl
+        lastEvaluatedAtUtc={overview.lastEvaluatedAtUtc}
+        canManage={canManageMaintenance}
+      />
 
       <section
         className="production-execution-kpis maintenance-dashboard-kpis maintenance-condition-kpis"

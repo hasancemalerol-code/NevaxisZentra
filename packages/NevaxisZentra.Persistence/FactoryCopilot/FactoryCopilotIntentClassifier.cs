@@ -10,7 +10,7 @@ public static class FactoryCopilotIntentClassifier
 
     public static IntentClassification Classify(string queryText, FactoryCopilotContextInput context)
     {
-        var normalized = queryText.Trim().ToLowerInvariant();
+        var normalized = Fold(queryText);
 
         // Calendar-aware machine KPI questions (availability, unplanned downtime, per scheduled hour, ...) are answered
         // from the machine aggregate. They must not be captured by the single-keyword rules below ("scheduled" is not
@@ -68,7 +68,7 @@ public static class FactoryCopilotIntentClassifier
                 [FactoryCopilotToolIds.GetRecoveryOptions]);
         }
 
-        if (MatchesAny(normalized, "order 418", "order 421", "sipariş", "order risk", "teslimat risk"))
+        if (MatchesAny(normalized, "sipariş", "order risk", "teslimat risk") || OrderNumberReference.IsMatch(normalized))
         {
             return ClassifyIntent(FactoryCopilotIntents.OrderRisk, FactoryCopilotRoutingClasses.Analytic,
                 [FactoryCopilotToolIds.GetThroughputOverview, FactoryCopilotToolIds.GetRecoveryOptions]);
@@ -262,6 +262,38 @@ public static class FactoryCopilotIntentClassifier
         "stop", "durdu", "cycle", "çevrim", "hurda", "istasyon", "station", "operator", "operatör",
     ];
 
-    private static bool MatchesAny(string text, params string[] patterns) =>
-        patterns.Any(pattern => text.Contains(pattern, StringComparison.Ordinal));
+    private static readonly System.Text.RegularExpressions.Regex OrderNumberReference = new(
+        @"\border\s*#?\d+",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>
+    /// Lower-cases for matching. Turkish dotted and dotless i fold to one letter, so "İŞ NEDEN" and "ÇALIŞIYOR MU" in
+    /// capitals match the same patterns as their lower-case forms.
+    /// </summary>
+    internal static string Fold(string value) =>
+        value.Trim().ToLowerInvariant().Replace("\u0307", string.Empty, StringComparison.Ordinal).Replace('ı', 'i');
+
+    /// <summary>
+    /// A pattern matches at the start of a word, so Turkish suffixes still match ("sipariş" in "siparişler") while a
+    /// pattern inside another word does not ("ncr" in "increase", "hold" in "threshold", "cause" in "because").
+    /// </summary>
+    internal static bool MatchesAny(string text, params string[] patterns)
+    {
+        foreach (var raw in patterns)
+        {
+            var pattern = Fold(raw);
+            var index = 0;
+            while ((index = text.IndexOf(pattern, index, StringComparison.Ordinal)) >= 0)
+            {
+                if (index == 0 || !char.IsLetterOrDigit(text[index - 1]))
+                {
+                    return true;
+                }
+
+                index++;
+            }
+        }
+
+        return false;
+    }
 }

@@ -315,7 +315,11 @@ export function getExportAiRecommendationStatusLabel(
 
 export function getExportAiProviderLabel(provider: string): string {
   if (provider === EXPORT_AI_DEVELOPMENT_PROVIDER) {
-    return "Geliştirme (deterministik)";
+    return "Kural tabanlı (yapay zekâ modeli değil)";
+  }
+
+  if (provider === "unavailable") {
+    return "Etkin değil";
   }
 
   return provider;

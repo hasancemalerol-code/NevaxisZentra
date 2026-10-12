@@ -1,15 +1,14 @@
 import "./maintenance-server-boundary";
 
 import {
-  evaluateMaintenanceCondition,
   getMaintenanceConditionOverview,
   getMaintenanceConditionProfile,
 } from "./maintenance-condition-api-client";
 import {
-  evaluateMaintenancePredictiveRisk,
   getMaintenancePredictiveRiskAssessment,
   getMaintenancePredictiveRiskOverview,
 } from "./maintenance-predictive-risk-api-client";
+import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "../../production-execution/server/production-order-runtime-config";
 import {
   resolveProductionOrderRequestContextForIncomingRequest,
@@ -91,9 +90,8 @@ export async function readMaintenanceConditionWorkspace(
     return contextResult;
   }
 
+  // A page render only reads. Recomputing the assessments is an explicit action (evaluateMaintenanceConditionAction).
   const context = contextResult.context;
-  await evaluateMaintenanceCondition(context);
-  await evaluateMaintenancePredictiveRisk(context);
 
   const overviewResult = await getMaintenanceConditionOverview(context);
   if (overviewResult.status === "failure") {
@@ -140,11 +138,9 @@ export async function readMaintenanceConditionWorkspace(
     }
   }
 
-  const configResult = parseProductionExecutionRuntimeConfig();
-  const canManageMaintenance =
-    configResult.status === "success" &&
-    configResult.config.mode === "development-api" &&
-    configResult.config.developmentAuth?.subject === "production-pilot-operator";
+  // The management controls (generate, approve, reject) follow the user's real permission. They used to be tied to a
+  // development-auth subject, so no customer session ever saw them. The API still enforces the permission itself.
+  const canManageMaintenance = (await denyUnlessGranted("maintenance.manage")).status === "granted";
 
   return {
     status: "success",

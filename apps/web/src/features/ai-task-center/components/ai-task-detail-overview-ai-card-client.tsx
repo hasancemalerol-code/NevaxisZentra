@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import type { AiTask } from "../domain/ai-task";
-import type { AiTaskDecisionAnalysis } from "../domain/ai-task-decision-intelligence";
+import {
+  getAiTaskProviderLabel,
+  type AiTaskDecisionAnalysis,
+} from "../domain/ai-task-decision-intelligence";
 import { formatAiTaskShortDateTime } from "../presentation/ai-task-formatters";
 import {
   getAiTaskActionTypeLabel,
@@ -118,7 +121,7 @@ export function AiTaskDetailOverviewAiCardClient({
           <dl className="ai-task-detail-overview__facts ai-task-detail-overview__facts--meta">
             <div>
               <dt>Sağlayıcı</dt>
-              <dd>{latestAnalysis.providerName}</dd>
+              <dd>{getAiTaskProviderLabel(latestAnalysis.providerName)}</dd>
             </div>
             <div>
               <dt>Model</dt>

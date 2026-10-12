@@ -1,3 +1,4 @@
+using NevaxisZentra.Persistence.AiUsage;
 using NevaxisZentra.Api.Facilities;
 using NevaxisZentra.Persistence;
 using NevaxisZentra.Persistence.AiTasks;
@@ -646,7 +647,12 @@ public static class AiTaskServiceCollectionExtensions
                 serviceProvider.GetRequiredService<ITeamsNotificationRepository>());
         });
 
-        services.AddScoped<IAiTaskDecisionProvider, DeterministicAiTaskDecisionProvider>();
+        services.AddScoped<IAiTaskDecisionProvider>(serviceProvider =>
+            RulesBasedAiSettings.IsEnabled(
+                serviceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment(),
+                serviceProvider.GetService<IConfiguration>()?.GetValue<bool?>(RulesBasedAiSettings.ConfigurationKey))
+                ? new DeterministicAiTaskDecisionProvider()
+                : new UnavailableAiTaskDecisionProvider());
         services.AddScoped<IAiTaskDecisionIntelligenceRepository>(serviceProvider =>
         {
             var dbContext = serviceProvider.GetService<NevaxisZentraDbContext>();

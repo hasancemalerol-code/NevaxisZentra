@@ -430,27 +430,43 @@ public sealed class ThroughputOptimizerService : IThroughputOptimizerService
 
         run.ContextSnapshotId = snapshot.Id;
 
-        var modelResponse = await modelGateway.InvokeAsync(
-            facilityId, tenantId,
-            new ModelGatewayRequest(
-                tenantId, facilityId,
-                DevelopmentPilotDigitalWorkforceIds.WorkerThroughputOptimizer,
-                workCase.Id,
-                ModelGatewayRequestClassifications.CrossModuleDiagnosis,
-                "throughput-diagnosis",
-                new ModelGatewayContextReference(
-                    snapshot.Id,
-                    contextPackage.CanonicalState?.ResolvedStateValue,
+        // The diagnosis itself is rule-based; the model is consulted for corroboration only. The recorded path states what
+        // really answered: a failed, fallback or canned reply is recorded as the deterministic engine, never as a model.
+        var intelligencePath = ModelGatewayIntelligencePaths.DeterministicEngine;
+        try
+        {
+            var modelResponse = await modelGateway.InvokeAsync(
+                facilityId, tenantId,
+                new ModelGatewayRequest(
+                    tenantId, facilityId,
+                    DevelopmentPilotDigitalWorkforceIds.WorkerThroughputOptimizer,
                     workCase.Id,
-                    observation.CurrentConstraintStationCode,
-                    null,
-                    observation.DataQuality),
-                2,
-                true),
-            cancellationToken);
+                    ModelGatewayRequestClassifications.CrossModuleDiagnosis,
+                    "throughput-diagnosis",
+                    new ModelGatewayContextReference(
+                        snapshot.Id,
+                        contextPackage.CanonicalState?.ResolvedStateValue,
+                        workCase.Id,
+                        observation.CurrentConstraintStationCode,
+                        null,
+                        observation.DataQuality),
+                    2,
+                    true),
+                cancellationToken);
 
-        run.ModelIntelligencePath = modelResponse.Routing.IntelligencePath;
-        return ThroughputDiagnoseEngine.Diagnose(observation, overview, modelResponse.Routing.IntelligencePath);
+            if (modelResponse.Succeeded && !modelResponse.Routing.UsedFallback
+                && modelResponse.Routing.IntelligencePath == ModelGatewayIntelligencePaths.FrontierModel)
+            {
+                intelligencePath = modelResponse.Routing.IntelligencePath;
+            }
+        }
+        catch (ModelGatewayException)
+        {
+            // Provider refusal never blocks the rule-based diagnosis and is never presented as a model answer.
+        }
+
+        run.ModelIntelligencePath = intelligencePath;
+        return ThroughputDiagnoseEngine.Diagnose(observation, overview, intelligencePath);
     }
 
     private async Task<List<ThroughputInterventionCandidate>> SimulateAsync(

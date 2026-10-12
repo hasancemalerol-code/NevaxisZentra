@@ -90,7 +90,7 @@ public sealed class TenantSubscriptionAccessMiddleware(RequestDelegate next)
         RecoveryApiPrefixes.Any(prefix =>
             path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
-    private static string? MapApiPathToModuleRoute(string path)
+    public static string? MapApiPathToModuleRoute(string path)
     {
         if (path.StartsWith("/api/shift-workforce", StringComparison.OrdinalIgnoreCase)
             || path.StartsWith("/api/shift-assignment", StringComparison.OrdinalIgnoreCase)
@@ -132,6 +132,27 @@ public sealed class TenantSubscriptionAccessMiddleware(RequestDelegate next)
         if (path.StartsWith("/api/erp", StringComparison.OrdinalIgnoreCase))
         {
             return "/erp-entegrasyonlari";
+        }
+
+        // Shipping AI routes. The web route map already gates these pages; the API must not be reachable around it.
+        if (path.StartsWith("/api/ai-task", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/ai-gorevleri";
+        }
+
+        if (path.StartsWith("/api/export", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/api/ai/usage", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/ihracat";
+        }
+
+        if (path.StartsWith("/api/factory-copilot", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/api/model-gateway", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/api/intelligence-runtime", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/api/throughput-optimizer", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/api/throughput-intelligence", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/fabrika";
         }
 
         if (path.StartsWith("/api/production", StringComparison.OrdinalIgnoreCase)

@@ -31,6 +31,7 @@ public static class FactoryEventSpineEndpointRouteBuilderExtensions
     public static IServiceCollection AddNevaxisZentraFactoryEventSpine(this IServiceCollection services)
     {
         services.AddScoped<IFactoryEventSpineService, FactoryEventSpineService>();
+        services.AddScoped<IFactoryEventSpineWorkTenantDiscoverer, PostgreSqlFactoryEventSpineWorkTenantDiscoverer>();
         services.Configure<FactoryEventSpineOptions>(options =>
         {
             options.WorkerEnabled = true;
@@ -280,8 +281,19 @@ public sealed class FactoryEventSpineOptions
 
 internal sealed class FactoryEventSpineBackgroundService(
     IServiceProvider serviceProvider,
-    IOptions<FactoryEventSpineOptions> options) : BackgroundService
+    IOptions<FactoryEventSpineOptions> options,
+    ILogger<FactoryEventSpineBackgroundService> logger) : BackgroundService
 {
+    private static readonly Action<ILogger, string, Exception?> PassFailed = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4311, nameof(PassFailed)),
+        "Factory event spine worker pass failed: {ExceptionType}");
+
+    private static readonly Action<ILogger, string, Exception?> FacilityBatchFailed = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4312, nameof(FacilityBatchFailed)),
+        "Factory event spine worker facility batch failed: {ExceptionType}");
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!options.Value.WorkerEnabled)
@@ -301,48 +313,74 @@ internal sealed class FactoryEventSpineBackgroundService(
                     continue;
                 }
 
-                var discoverer = scope.ServiceProvider.GetRequiredService<IAiTaskDeliveryWorkTenantDiscoverer>();
+                var discoverer = scope.ServiceProvider.GetRequiredService<IFactoryEventSpineWorkTenantDiscoverer>();
                 var tenantAccessor = scope.ServiceProvider.GetRequiredService<TenantContextAccessor>();
                 var spineService = scope.ServiceProvider.GetRequiredService<IFactoryEventSpineService>();
+                var tenantSession = scope.ServiceProvider.GetRequiredService<TenantDatabaseSession>();
                 var contexts = await discoverer.DiscoverWorkerContextsAsync(stoppingToken);
 
                 foreach (var tenantContext in contexts)
                 {
-                    tenantAccessor.Set(tenantContext);
-                    var facilityIds = await db.IntegrationInboundFactoryEvents
-                        .Where(e => e.ProcessingStatus == FactoryInboundEventStatuses.Received ||
-                                    e.ProcessingStatus == FactoryInboundEventStatuses.Failed)
-                        .Select(e => e.FacilityId)
-                        .Distinct()
-                        .Take(5)
-                        .ToListAsync(stoppingToken);
-
-                    var dispatchFacilityIds = await db.IntegrationCanonicalFactoryEvents
-                        .Where(e => e.ProcessingState == FactoryCanonicalEventStates.DispatchPending ||
-                                    e.ProcessingState == FactoryCanonicalEventStates.Failed)
-                        .Select(e => e.FacilityId)
-                        .Distinct()
-                        .Take(5)
-                        .ToListAsync(stoppingToken);
-
-                    foreach (var facilityId in facilityIds.Concat(dispatchFacilityIds).Distinct())
+                    try
                     {
-                        var operationContext = new IntegrationOperationContext(
-                            tenantContext.TenantId,
-                            facilityId,
-                            tenantContext.MembershipId,
-                            tenantContext.MembershipId,
-                            IntegrationPermissionKeys.Run);
+                        tenantAccessor.Set(tenantContext);
+                        // Row level security only shows a tenant's rows inside its tenant session; outside one the
+                        // runtime role sees no rows and the worker would never find any work.
+                        var staleProcessingBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
+                        var (facilityIds, dispatchFacilityIds) = await tenantSession.ExecuteReadAsync(
+                            async ct =>
+                            {
+                                var inbound = await db.IntegrationInboundFactoryEvents
+                                    .Where(e => e.ProcessingStatus == FactoryInboundEventStatuses.Received ||
+                                                e.ProcessingStatus == FactoryInboundEventStatuses.Failed)
+                                    .Select(e => e.FacilityId)
+                                    .Distinct()
+                                    .OrderBy(id => id)
+                                    .Take(5)
+                                    .ToListAsync(ct);
 
-                        await spineService.ProcessPendingIngestionAsync(
-                            operationContext,
-                            options.Value.BatchSize,
+                                var canonical = await db.IntegrationCanonicalFactoryEvents
+                                    .Where(e => e.ProcessingState == FactoryCanonicalEventStates.DispatchPending ||
+                                                e.ProcessingState == FactoryCanonicalEventStates.Failed ||
+                                                (e.ProcessingState == FactoryCanonicalEventStates.Processing &&
+                                                 e.UpdatedAtUtc < staleProcessingBefore))
+                                    .Select(e => e.FacilityId)
+                                    .Distinct()
+                                    .OrderBy(id => id)
+                                    .Take(5)
+                                    .ToListAsync(ct);
+                                return (inbound, canonical);
+                            },
                             stoppingToken);
-                        await spineService.DispatchPendingEventsAsync(
-                            operationContext,
-                            options.Value.BatchSize,
-                            "factory-event-spine-worker",
-                            stoppingToken);
+
+                        foreach (var facilityId in facilityIds.Concat(dispatchFacilityIds).Distinct())
+                        {
+                            var operationContext = new IntegrationOperationContext(
+                                tenantContext.TenantId,
+                                facilityId,
+                                tenantContext.MembershipId,
+                                tenantContext.MembershipId,
+                                IntegrationPermissionKeys.Run);
+
+                            await spineService.ProcessPendingIngestionAsync(
+                                operationContext,
+                                options.Value.BatchSize,
+                                stoppingToken);
+                            await spineService.DispatchPendingEventsAsync(
+                                operationContext,
+                                options.Value.BatchSize,
+                                "factory-event-spine-worker",
+                                stoppingToken);
+                        }
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        // One tenant's failure must not starve the tenants after it. Never log the message (data).
+                        FacilityBatchFailed(logger, ex.GetType().Name, null);
                     }
                 }
             }
@@ -350,9 +388,9 @@ internal sealed class FactoryEventSpineBackgroundService(
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Worker failures are surfaced via connector health and event records.
+                PassFailed(logger, ex.GetType().Name, null);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);

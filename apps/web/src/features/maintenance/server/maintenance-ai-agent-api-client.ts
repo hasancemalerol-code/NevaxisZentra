@@ -82,6 +82,15 @@ async function requestJson<T>(
       const refusal = await classifyFailedResponse(response);
       return failureForRefusal(refusal, "Authorization denied.");
     }
+    if (response.status === 503) {
+      // The rules-based assistant is off unless the customer enables it, or its provider failed.
+      return {
+        status: "failure",
+        code: "source-unavailable",
+        message: "Bakım AI asistanı bu kurulumda etkin değil veya şu anda kullanılamıyor.",
+        retryable: false,
+      };
+    }
     if (!response.ok) {
       return {
         status: "failure",

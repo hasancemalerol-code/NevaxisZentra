@@ -1710,7 +1710,12 @@ public static class ExportServiceCollectionExtensions
             return new ExportAiContextBuilder(dbContext);
         });
 
-        services.AddScoped<IExportAiProvider, DeterministicExportAiProvider>();
+        services.AddScoped<IExportAiProvider>(serviceProvider =>
+            RulesBasedAiSettings.IsEnabled(
+                serviceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment(),
+                serviceProvider.GetService<IConfiguration>()?.GetValue<bool?>(RulesBasedAiSettings.ConfigurationKey))
+                ? new DeterministicExportAiProvider()
+                : new UnavailableExportAiProvider());
 
         services.AddScoped<IAiUsageMeteringService>(serviceProvider =>
         {

@@ -70,10 +70,29 @@ public sealed class FactoryCopilotService(
         tenantDatabaseSession.ExecuteReadAsync(
             async ct =>
             {
-                var resolved = await ResolveContextAsync(facilityId, context, ct);
+                FactoryCopilotResolvedContext? resolved = null;
+                try
+                {
+                    resolved = await ResolveContextAsync(facilityId, context, ct);
+                }
+                catch (FactoryCopilotException ex) when (ex.FailureCode == FactoryCopilotFailureCodes.InsufficientContext)
+                {
+                    // A facility without a resolvable line still gets the suggestions and an honest, empty header;
+                    // the query itself reports the missing context.
+                }
+
                 return new FactoryCopilotSuggestedQuestionsResult(
                     FactoryCopilotIntentClassifier.SuggestQuestions(context),
-                    BuildContextHeader(context, resolved));
+                    resolved is null
+                        ? new FactoryCopilotContextHeader(
+                            context.EntryPoint,
+                            FactoryLabel: "Pilot tesis",
+                            LineLabel: null,
+                            ResourceLabel: null,
+                            OrderLabel: null,
+                            WorkLabel: context.DigitalWorkCaseId?.ToString(),
+                            ScenarioLabel: context.ScenarioRunId?.ToString())
+                        : BuildContextHeader(context, resolved));
             },
             cancellationToken);
 
@@ -116,7 +135,7 @@ public sealed class FactoryCopilotService(
                 resolved,
                 contextQuality);
             stopwatch.Stop();
-            return BuildResult(
+            var unsupportedResult = BuildResult(
                 queryId,
                 createdAt,
                 classification,
@@ -130,6 +149,13 @@ public sealed class FactoryCopilotService(
                 null,
                 null,
                 stopwatch.ElapsedMilliseconds);
+            var unsupportedAudit = await WriteAuditAsync(facilityId, tenantId, subjectId, unsupportedResult, cancellationToken);
+            if (!unsupportedAudit.Succeeded)
+            {
+                AuditNotWritten(logger, unsupportedAudit.FailureCode ?? "unknown", null);
+            }
+
+            return unsupportedResult;
         }
 
         var (bundle, toolInvocations) = await toolExecutor.ExecuteAsync(
@@ -498,6 +524,15 @@ public sealed class FactoryCopilotService(
 
     private const string OpenAiInsufficientDataMarker = "insufficient-data";
 
+    /// <summary>
+    /// A blocked, unavailable, ungrounded or otherwise unanswered query is a failure of the assistant, not a success. The
+    /// reason is in the failureState metadata.
+    /// </summary>
+    internal static AuditOutcome ResolveAuditOutcome(string? failureState) =>
+        string.IsNullOrEmpty(failureState) || failureState == FactoryCopilotAiStates.InsufficientData
+            ? AuditOutcome.Success
+            : AuditOutcome.Failure;
+
     private Task<AuditWriteResult> WriteAuditAsync(
         Guid facilityId,
         Guid tenantId,
@@ -509,7 +544,7 @@ public sealed class FactoryCopilotService(
                 AuditEventTypes.FactoryCopilotQueryAnswered,
                 AuditActions.FactoryCopilotQuery,
                 "factorycopilot",
-                AuditOutcome.Success,
+                ResolveAuditOutcome(result.FailureState),
                 result.QueryId.ToString(),
                 FactoryCopilotPermissionKeys.Query,
                 Metadata: new Dictionary<string, object?>

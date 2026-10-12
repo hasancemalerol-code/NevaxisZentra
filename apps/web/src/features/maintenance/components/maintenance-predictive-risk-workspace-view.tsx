@@ -35,6 +35,7 @@ import {
   MAINTENANCE_PREDICTIVE_RISK_TASK_DISCLAIMER,
 } from "../presentation/maintenance-predictive-risk-labels";
 import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
+import { MaintenanceEvaluateControl } from "./maintenance-evaluate-control";
 import { MaintenanceSectionHeader } from "./maintenance-table-primitives";
 import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 
@@ -163,6 +164,11 @@ export function MaintenancePredictiveRiskWorkspaceView({
         <MaintenanceDashboardKpi label="Görev bağlantısı" value={workspace.kpis.taskLinkedCount} description="AI görev taslağı bağlı" tone="ready" icon={<ClipboardList />} />
         <MaintenanceDashboardKpi label="İnsan incelemesi" value={workspace.kpis.humanReviewedCount} description="İnceleme kaydı" tone="paused" icon={<ShieldAlert />} />
       </div>
+
+      <MaintenanceEvaluateControl
+        lastEvaluatedAtUtc={workspace.overview.lastAssessedAtUtc}
+        canManage={workspace.capabilities.canManage}
+      />
 
       <div className="maintenance-workspace-toolbar">
         <button type="button" onClick={handleRefresh} disabled={isPending} data-testid="maintenance-predictive-risk-refresh-button">

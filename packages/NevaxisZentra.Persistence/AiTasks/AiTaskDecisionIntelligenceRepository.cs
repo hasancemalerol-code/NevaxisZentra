@@ -240,6 +240,14 @@ public sealed class AiTaskDecisionIntelligenceRepository(
         {
             foreach (var action in triage.NextActions)
             {
+                // The rules provider names a team channel by a fixed id. A recommendation must point at a channel of this
+                // tenant and facility; one that does not exist here is dropped instead of offered for acceptance.
+                if (action.ActionType == AiTaskDecisionRecommendationActionTypes.AssignTeam
+                    && !await TeamChannelInScopeAsync(context, action.PayloadJson, ct))
+                {
+                    continue;
+                }
+
                 dbContext.AiTaskAiRecommendations.Add(new AiTaskAiRecommendation
                 {
                     Id = Guid.NewGuid(),
@@ -274,6 +282,22 @@ public sealed class AiTaskDecisionIntelligenceRepository(
         await dbContext.SaveChangesAsync(ct);
         var readModel = await MapAnalysisReadModelAsync(analysis, ct);
         return AiTaskDecisionWriteResult.Success(analysisId, task.Version, analysis: readModel);
+    }
+
+    private async Task<bool> TeamChannelInScopeAsync(
+        AiTaskOperationContext context,
+        string payloadJson,
+        CancellationToken ct)
+    {
+        var payload = DeserializePayload(payloadJson);
+        if (!payload.TryGetValue("teamChannelId", out var raw) || !Guid.TryParse(raw?.ToString(), out var teamId))
+        {
+            return false;
+        }
+
+        return await dbContext.TeamsChannels.AsNoTracking().AnyAsync(
+            c => c.Id == teamId && c.TenantId == context.TenantId && c.FacilityId == context.FacilityId,
+            ct);
     }
 
     private async Task<AiTaskDecisionWriteResult> AcceptRecommendationInternalAsync(
@@ -319,6 +343,25 @@ public sealed class AiTaskDecisionIntelligenceRepository(
                 "Görev sürümü güncel değil.");
         }
 
+        // The acceptor needs the permission of the mutation this recommendation would perform, and an edited payload
+        // can never retarget it. Both are checked before anything is applied.
+        var requiredPermission = AiTaskRecommendationAcceptanceGuard.RequiredPermission(recommendation.ActionType);
+        if (requiredPermission is not null
+            && (command.HasPermissionAsync is null || !await command.HasPermissionAsync(requiredPermission, ct)))
+        {
+            return AiTaskDecisionWriteResult.Fail(
+                AiTaskFailureCodes.FacilityScopeDenied,
+                "Bu öneriyi uygulamak için gerekli yetki yok.");
+        }
+
+        if (!AiTaskRecommendationAcceptanceGuard.IsEditedPayloadWithinRecommendation(
+                recommendation.PayloadJson, command.EditedPayloadJson))
+        {
+            return AiTaskDecisionWriteResult.Fail(
+                AiTaskFailureCodes.ValidationFailed,
+                "Düzenlenen içerik önerilen hedefi değiştiremez.");
+        }
+
         var now = DateTimeOffset.UtcNow;
         AiTaskWriteResult? applyResult = null;
         string? customAppliedResultJson = null;
@@ -333,6 +376,14 @@ public sealed class AiTaskDecisionIntelligenceRepository(
                     && Guid.TryParse(teamRaw?.ToString(), out var teamId)
                     && !task.AssignedTeamChannelId.HasValue)
                 {
+                    var teamInScope = await dbContext.TeamsChannels.AsNoTracking().AnyAsync(
+                        c => c.Id == teamId && c.TenantId == context.TenantId && c.FacilityId == context.FacilityId,
+                        ct);
+                    if (!teamInScope)
+                    {
+                        return AiTaskDecisionWriteResult.Fail(AiTaskFailureCodes.NotFound, "Ekip kanalı bulunamadı.");
+                    }
+
                     applyResult = await operationsRepository.AssignTaskAsync(
                         context,
                         new AssignAiTaskCommand(
@@ -341,7 +392,7 @@ public sealed class AiTaskDecisionIntelligenceRepository(
                             null,
                             teamId,
                             command.Reason ?? recommendation.Rationale,
-                            "ai-recommendation"),
+                            AiTaskAssignmentSources.Manual),
                         ct);
                 }
 
@@ -407,6 +458,17 @@ public sealed class AiTaskDecisionIntelligenceRepository(
 
                 if (playbookId.HasValue)
                 {
+                    var playbookInScope = await dbContext.AiTaskPlaybooks.AsNoTracking().AnyAsync(
+                        p => p.Id == playbookId.Value
+                             && p.TenantId == context.TenantId
+                             && (p.FacilityId == null || p.FacilityId == context.FacilityId)
+                             && p.Enabled,
+                        ct);
+                    if (!playbookInScope)
+                    {
+                        return AiTaskDecisionWriteResult.Fail(AiTaskFailureCodes.NotFound, "Playbook bulunamadı.");
+                    }
+
                     var playbookRepository = serviceProvider.GetRequiredService<IAiTaskPlaybookRepository>();
                     var runResult = await playbookRepository.StartRunAsync(
                         context,
@@ -430,6 +492,14 @@ public sealed class AiTaskDecisionIntelligenceRepository(
 
                 break;
             }
+        }
+
+        if (applyResult is { Succeeded: false })
+        {
+            // The mutation did not happen, so the recommendation stays pending and nothing is recorded as applied.
+            return AiTaskDecisionWriteResult.Fail(
+                applyResult.FailureCode ?? AiTaskFailureCodes.ValidationFailed,
+                applyResult.FailureReason ?? "Öneri uygulanamadı.");
         }
 
         recommendation.Status = AiTaskDecisionRecommendationStatuses.Accepted;

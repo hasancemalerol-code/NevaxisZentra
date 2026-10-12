@@ -38,7 +38,11 @@ public sealed class AiTaskDeliveryWorker(
                     var delivery = await dbContext.AiTaskDeliveries
                         .FirstOrDefaultAsync(d => d.TenantId == tenantId && d.Id == deliveryId, ct);
 
-                    if (delivery is null)
+                    // Fencing: only the runner that holds the claim may dispatch. The claim row lock is held for this
+                    // transaction; the explicit check also refuses a row that was cancelled or taken since.
+                    if (delivery is null
+                        || delivery.Status != AiTaskDeliveryStatuses.Processing
+                        || !string.Equals(delivery.LeaseOwner, workerId, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -151,7 +155,23 @@ public sealed class AiTaskDeliveryWorker(
         }
         else
         {
-            result = await adapter.DispatchAsync(request, cancellationToken);
+            try
+            {
+                result = await adapter.DispatchAsync(request, cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // An adapter fault is one failed attempt of this delivery, not a reason to roll back the sends already
+                // recorded for the rest of the batch (which would send them again).
+                result = new AiTaskDeliveryDispatchResult(
+                    false,
+                    AiTaskDeliveryAttemptOutcomes.TransientFailure,
+                    AiTaskDeliveryErrorCategories.Transient,
+                    "adapter-exception",
+                    null,
+                    null,
+                    null);
+            }
         }
 
         var completedAt = DateTimeOffset.UtcNow;

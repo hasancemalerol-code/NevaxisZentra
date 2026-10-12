@@ -215,7 +215,7 @@ public sealed class DeterministicExportAiProvider : IExportAiProvider
         }
 
         findings.AddRange(BuildCrossModuleFindings(context));
-        return Wrap("İhracat dosyası genel bakış analizi (deterministik geliştirme sağlayıcı).", findings, []);
+        return Wrap("İhracat dosyası genel bakış analizi (kural tabanlı; yapay zekâ modeli değil).", findings, []);
     }
 
     private static ExportAiProviderOutput BuildReadinessOutput(ExportAiContextSnapshotModel context)

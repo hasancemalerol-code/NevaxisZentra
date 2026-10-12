@@ -588,8 +588,19 @@ public sealed record ResolveSecureAccessRequest(string AccessToken);
 
 internal sealed class AiTaskDeliveryBackgroundService(
     IServiceProvider serviceProvider,
-    IOptions<AiTaskDeliveryOptions> deliveryOptions) : BackgroundService
+    IOptions<AiTaskDeliveryOptions> deliveryOptions,
+    ILogger<AiTaskDeliveryBackgroundService> logger) : BackgroundService
 {
+    private static readonly Action<ILogger, string, Exception?> PassFailed = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4301, nameof(PassFailed)),
+        "AI task delivery worker pass failed: {ExceptionType}");
+
+    private static readonly Action<ILogger, string, Exception?> TenantBatchFailed = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        new EventId(4302, nameof(TenantBatchFailed)),
+        "AI task delivery worker tenant batch failed: {ExceptionType}");
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!deliveryOptions.Value.WorkerEnabled)
@@ -616,17 +627,29 @@ internal sealed class AiTaskDeliveryBackgroundService(
 
                 foreach (var context in contexts)
                 {
-                    tenantAccessor.Set(context);
-                    await worker.ProcessBatchAsync(Environment.MachineName, 10, stoppingToken);
+                    try
+                    {
+                        tenantAccessor.Set(context);
+                        await worker.ProcessBatchAsync(Environment.MachineName, 10, stoppingToken);
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        // One tenant's failure must not starve the tenants after it. Never log the message (data).
+                        TenantBatchFailed(logger, ex.GetType().Name, null);
+                    }
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Worker batch failures are surfaced via delivery records and health endpoint.
+                PassFailed(logger, ex.GetType().Name, null);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);

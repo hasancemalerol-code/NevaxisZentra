@@ -163,6 +163,14 @@ public sealed class MaintenancePredictiveRiskRepository(
 
                 if (existing is not null)
                 {
+                    if (!existing.IsCurrent)
+                    {
+                        // The condition returned to a conclusion that already has an assessment (the identity is unique per
+                        // asset). Skipping it left the newer, now-wrong assessment current, so it becomes current again.
+                        await ReactivateAssessmentAsync(context, existing.Id, profile.AssetReference, assessedAtUtc, ct);
+                        evaluatedAny = true;
+                    }
+
                     continue;
                 }
 
@@ -219,6 +227,50 @@ public sealed class MaintenancePredictiveRiskRepository(
             await dbContext.SaveChangesAsync(ct);
             return evaluatedAny;
         }, cancellationToken);
+
+    private async Task ReactivateAssessmentAsync(
+        MaintenanceOperationContext context,
+        Guid assessmentId,
+        string assetReference,
+        DateTimeOffset assessedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        var currentOnes = await dbContext.MaintenancePredictiveRiskAssessments
+            .Where(a => a.FacilityId == context.FacilityId && a.AssetReference == assetReference && a.IsCurrent)
+            .ToListAsync(cancellationToken);
+        foreach (var current in currentOnes)
+        {
+            current.IsCurrent = false;
+        }
+
+        var currentRecommendations = await dbContext.MaintenancePredictiveRecommendations
+            .Where(r => r.FacilityId == context.FacilityId
+                && r.AssetReference == assetReference
+                && r.Status == MaintenancePredictiveRecommendationStatuses.Current)
+            .ToListAsync(cancellationToken);
+        foreach (var recommendation in currentRecommendations)
+        {
+            recommendation.Status = MaintenancePredictiveRecommendationStatuses.Superseded;
+        }
+
+        // Only one assessment per asset may be current (unique index): release the old one before taking the new one.
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var target = await dbContext.MaintenancePredictiveRiskAssessments
+            .SingleAsync(a => a.FacilityId == context.FacilityId && a.Id == assessmentId, cancellationToken);
+        target.IsCurrent = true;
+        target.AssessedAtUtc = assessedAtUtc;
+        target.UpdatedAtUtc = assessedAtUtc;
+        target.UpdatedBy = context.IdentitySubjectId.ToString();
+
+        var targetRecommendations = await dbContext.MaintenancePredictiveRecommendations
+            .Where(r => r.FacilityId == context.FacilityId && r.AssessmentId == assessmentId)
+            .ToListAsync(cancellationToken);
+        foreach (var recommendation in targetRecommendations)
+        {
+            recommendation.Status = MaintenancePredictiveRecommendationStatuses.Current;
+        }
+    }
 
     private async Task PersistAssessmentAsync(
         MaintenanceOperationContext context,

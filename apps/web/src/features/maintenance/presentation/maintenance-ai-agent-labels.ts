@@ -10,8 +10,11 @@ export const MAINTENANCE_AI_SAFETY_COPY = [
   "Güncelliğini yitiren taslak yeniden hazırlanmalıdır.",
 ] as const;
 
+/** The maintenance assistant is rules over structured evidence, never a language model. */
+export const MAINTENANCE_AI_RULES_BASED_LABEL = "Kural tabanlı (yapay zekâ modeli değil)";
+
 export const MAINTENANCE_AI_LOCAL_PROVIDER_DISCLAIMER =
-  "Yerel deterministic provider gerçek model doğrulaması değildir.";
+  "Bu taslak kural tabanlıdır; bir yapay zekâ modeli tarafından üretilmemiştir.";
 
 const STATUS_LABELS: Record<MaintenanceAiDraftStatus, string> = {
   draft: "Taslak",

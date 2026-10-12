@@ -195,6 +195,16 @@ function mapHttpStatus(status: number, body: unknown): ExportCaseApiFailure {
   }
 
   if (status >= 500) {
+    if (failureCode === "export.ai.provider.unavailable") {
+      // The rules-based export assistant is off unless the customer enables it; say so instead of a generic outage.
+      return fail(
+        "source-unavailable",
+        "İhracat AI asistanı bu kurulumda etkin değil.",
+        false,
+        failureCode,
+      );
+    }
+
     return fail(
       "source-unavailable",
       "Export service is unavailable.",
