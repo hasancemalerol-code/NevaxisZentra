@@ -871,12 +871,51 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         const string query = "SELECT count(*) FROM tenants;";
         var port = ResolvePostgresPort();
         var host = ResolvePostgresHost();
-        var answer = _embeddedPostgres is not null
-            ? await _embeddedPostgres.QueryScalarAsync(port, database, username, password, query, cancellationToken)
+        var answer = await QueryScalarRoutedAsync(
+            options, host, port, database, username, password, query, cancellationToken).ConfigureAwait(false);
+        return int.TryParse(answer, NumberStyles.Integer, CultureInfo.InvariantCulture, out var count) ? count : null;
+    }
+
+    /// <summary>
+    /// Runs a readiness query through the route chosen by <see cref="PostgresQueryRoutePolicy"/>: the bundled
+    /// psql.exe on customer machines, the Docker container only in repository development mode.
+    /// </summary>
+    private async Task<string?> QueryScalarRoutedAsync(
+        Configuration.DesktopRuntimeOptions options,
+        string host,
+        int port,
+        string database,
+        string username,
+        string password,
+        string query,
+        CancellationToken cancellationToken)
+    {
+        var bundledClient = ResolveBundledQueryClient();
+        return PostgresQueryRoutePolicy.Select(options.Mode, bundledClient is not null) == PostgresQueryRoute.BundledClient
+            ? await bundledClient!.QueryScalarAsync(port, database, username, password, query, cancellationToken)
                 .ConfigureAwait(false)
             : await QueryPostgresScalarAsync(host, port, database, username, password, query, cancellationToken)
                 .ConfigureAwait(false);
-        return int.TryParse(answer, NumberStyles.Integer, CultureInfo.InvariantCulture, out var count) ? count : null;
+    }
+
+    private EmbeddedPostgreSqlRuntime? ResolveBundledQueryClient()
+    {
+        if (_embeddedPostgres is not null)
+        {
+            return _embeddedPostgres;
+        }
+
+        if (_packagedBundle is not null &&
+            UsesEmbeddedPostgres(_packagedBundle) &&
+            File.Exists(Path.Combine(_packagedBundle.PostgresBinDirectory, "psql.exe")))
+        {
+            // The bundled server is already listening (for example left running by an earlier launch), so
+            // this instance is a client only: it never starts or stops the server (no owned process).
+            _embeddedPostgres = new EmbeddedPostgreSqlRuntime(_packagedBundle, _diagnostics);
+            _diagnostics.Add("postgres=attached-existing-bundled-client");
+        }
+
+        return _embeddedPostgres;
     }
 
     private static bool UsesEmbeddedPostgres(PackagedRuntimeBundle bundle)
@@ -947,18 +986,8 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
 
         async Task<string?> QueryHeadAsync(string username, string password)
         {
-            if (_embeddedPostgres is not null)
-            {
-                return await _embeddedPostgres.QueryScalarAsync(
-                    postgresPort,
-                    database,
-                    username,
-                    password,
-                    query,
-                    cancellationToken).ConfigureAwait(false);
-            }
-
-            return await QueryPostgresScalarAsync(
+            return await QueryScalarRoutedAsync(
+                options,
                 postgresHost,
                 postgresPort,
                 database,

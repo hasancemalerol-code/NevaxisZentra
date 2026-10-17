@@ -19,7 +19,7 @@ public static class FactOsDiagnosticsBundleService
         var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
         var bundlePath = Path.Combine(
             PackagedRuntimePaths.DiagnosticsDirectory,
-            $"Nevaxis-FactOS-Diagnostics-{timestamp}.zip");
+            $"Nevaxis-Zentra-Diagnostics-{timestamp}.zip");
 
         var summary = new
         {
